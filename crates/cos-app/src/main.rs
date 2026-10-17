@@ -144,6 +144,59 @@ impl Runtime {
                     required(&args, 2)?,
                 ),
                 "git" => cos_tools::project::git(&self.kernel.roots()?, required(&args, 1)?),
+                "review" | "diff" => {
+                    let action = required(&args, 0)?.clone();
+                    let base = take_option(&mut args, "--base-ref")?;
+                    let revision = take_option(&mut args, "--revision")?;
+                    if args.len() != if action == "review" { 2 } else { 3 } {
+                        return Err(invalid(
+                            "Use projects review <project-id> [--base-ref ref] or diff <project-id> <path> [--base-ref ref] [--revision sha256]",
+                        ));
+                    }
+                    let project = self
+                        .kernel
+                        .projects
+                        .list()?
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|p| p["id"] == required(&args, 1).unwrap().as_str())
+                        .cloned()
+                        .ok_or_else(|| invalid("Project not found"))?;
+                    if project.get("remote").is_some() {
+                        return Err(invalid(
+                            "Git changes of a project on a server are not shown in the app yet.",
+                        ));
+                    }
+                    let roots = self.kernel.roots()?;
+                    let id = project["id"].as_str().unwrap();
+                    let workspace = self.kernel.projects.workspace(&roots, id)?;
+                    let path = &workspace.virtual_path;
+                    let result = if action == "review" {
+                        cos_tools::git::snapshot(&roots, path, id, base.as_deref())?
+                    } else {
+                        cos_tools::git::diff(
+                            &roots,
+                            path,
+                            id,
+                            required(&args, 2)?,
+                            base.as_deref(),
+                            revision.as_deref(),
+                        )?
+                    };
+                    if self.kernel.roots()? != roots
+                        || !self
+                            .kernel
+                            .projects
+                            .list()?
+                            .as_array()
+                            .unwrap()
+                            .contains(&project)
+                    {
+                        return Err(invalid("Workspace changed during Git review"));
+                    }
+                    Ok(result)
+                }
                 "bind" => {
                     let id = required(&args, 1)?;
                     let project = required(&args, 2)?;
@@ -161,7 +214,9 @@ impl Runtime {
                     self.store
                         .update_metadata(id, |v| v["projectId"] = json!(project))
                 }
-                _ => Err(invalid("Use projects list/add/add-ssh/git/bind")),
+                _ => Err(invalid(
+                    "Use projects list/add/add-ssh/git/review/diff/bind",
+                )),
             },
             "files" => {
                 let action = required(&args, 0)?.as_str();

@@ -90,5 +90,9 @@ dependencies stay explicit; a missing backend cannot be replaced by fabricated s
 - Ruling: qualify the existing baseline on Linux while porting independent Git services; they share
   no new producer dependency. Cost if wrong: Linux evidence applies only to `68f7954`, until the new
   source is separately synchronized and tested. Final integrated qualification must name its commit.
+- Task 3a / shared workspace repair: integrated Windows suite **126 PASS, 0 failed/ignored**;
+  strict Clippy PASS. The first unrestricted parallel link exhausted Windows paging (1455); its
+  failure log is retained and the same suite passed with `-j 2`, without changing Windows settings.
+  Git watcher/file-panel/project-lifecycle work and the remaining tasks are still open.
 
 Task details, commits, RED/GREEN evidence and outstanding acceptance are appended during implementation.

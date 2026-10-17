@@ -1,6 +1,6 @@
 //! Renderer-owned terminal factory. Model calls never receive this owner or these IDs.
 use crate::kernel::Kernel;
-use cos_core::{config, persistence::invalid, sandbox};
+use cos_core::{config, persistence::invalid};
 use cos_exec::{
     shell, ssh,
     terminal::{self, Launch, Terminals},
@@ -82,14 +82,7 @@ impl Kernel {
                 Some(remote.clone()),
             ))
         } else {
-            let location = sandbox::resolve(
-                &roots,
-                project["path"]
-                    .as_str()
-                    .ok_or_else(|| invalid("Invalid project workspace"))?,
-                None,
-                false,
-            )?;
+            let location = self.projects.workspace(&roots, id)?;
             if !location.real.is_dir() {
                 return Err(invalid("Project folder is unavailable"));
             }

@@ -9,6 +9,74 @@ fn run(directory: &std::path::Path, args: &[&str]) -> std::process::Output {
         .unwrap()
 }
 #[test]
+fn project_git_review_and_revision_fenced_diff_are_runnable() {
+    let profile = tempfile::tempdir().unwrap();
+    let project = tempfile::tempdir().unwrap();
+    assert!(
+        Command::new("git")
+            .args(["init", "--quiet", "-b", "main"])
+            .arg(project.path())
+            .status()
+            .unwrap()
+            .success()
+    );
+    fs::write(project.path().join("a.txt"), "public lines\n").unwrap();
+    assert!(run(profile.path(), &["info"]).status.success());
+    let roots = json!([{"name":"p","path":project.path()}]).to_string();
+    assert!(
+        run(profile.path(), &["config", "set", "roots", &roots])
+            .status
+            .success()
+    );
+    let p: Value =
+        serde_json::from_slice(&run(profile.path(), &["projects", "add", "/p"]).stdout).unwrap();
+    let id = p["id"].as_str().unwrap();
+    let result = run(profile.path(), &["projects", "review", id]);
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let snapshot: Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(snapshot["state"], "ready", "{snapshot}");
+    let diff = run(
+        profile.path(),
+        &[
+            "projects",
+            "diff",
+            id,
+            "a.txt",
+            "--revision",
+            snapshot["revision"].as_str().unwrap(),
+        ],
+    );
+    assert!(
+        diff.status.success(),
+        "{}",
+        String::from_utf8_lossy(&diff.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<Value>(&diff.stdout).unwrap()["currentText"],
+        "public lines\n"
+    );
+    fs::write(project.path().join("b.txt"), "changed\n").unwrap();
+    assert!(
+        !run(
+            profile.path(),
+            &[
+                "projects",
+                "diff",
+                id,
+                "a.txt",
+                "--revision",
+                snapshot["revision"].as_str().unwrap()
+            ]
+        )
+        .status
+        .success()
+    );
+}
+#[test]
 fn explicit_profile_and_restart_are_required_and_supported() {
     assert!(
         !Command::new(env!("CARGO_BIN_EXE_cos-rust"))

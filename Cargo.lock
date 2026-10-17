@@ -388,6 +388,7 @@ dependencies = [
  "libc",
  "notify",
  "regex",
+ "same-file",
  "serde",
  "serde_json",
  "sha2",

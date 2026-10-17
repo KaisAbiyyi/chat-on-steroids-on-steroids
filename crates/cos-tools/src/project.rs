@@ -53,6 +53,47 @@ impl Projects {
         }
         Ok(value)
     }
+    /// Catalog paths are canonical OS paths (including Windows extended prefixes),
+    /// not untrusted tool path syntax. Re-project through a currently approved root.
+    pub fn workspace(&self, roots: &[Root], id: &str) -> io::Result<sandbox::Resolved> {
+        let projects = self.list()?;
+        let project = projects
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["id"] == id)
+            .ok_or_else(|| invalid("Project not found"))?;
+        if project.get("remote").is_some() {
+            return Err(invalid(
+                "This project is in a folder on a server; this works only for projects on this computer.",
+            ));
+        }
+        let real = std::fs::canonicalize(project["path"].as_str().unwrap())?;
+        for root in roots.iter().filter(|r| r.remote.is_none()) {
+            let approved = sandbox::resolve(roots, &format!("/{}", root.name), None, false)?;
+            if sandbox::contained(&approved.real, &real) {
+                let tail = real
+                    .components()
+                    .skip(approved.real.components().count())
+                    .map(|p| p.as_os_str().to_string_lossy())
+                    .collect::<Vec<_>>()
+                    .join("/");
+                let candidate = if tail.is_empty() {
+                    format!("/{}", root.name)
+                } else {
+                    format!("/{}/{tail}", root.name)
+                };
+                let resolved = sandbox::resolve(roots, &candidate, None, false)?;
+                if sandbox::native_identity(&resolved.real) == sandbox::native_identity(&real) {
+                    return Ok(resolved);
+                }
+                return Err(invalid(
+                    "Project folder changed during workspace resolution",
+                ));
+            }
+        }
+        Err(invalid("Project folder is no longer approved"))
+    }
     pub fn add(&self, roots: &[Root], path: &str) -> io::Result<Value> {
         let _guard = lock(&self.mutation)?;
         let resolved = sandbox::resolve(roots, path, None, false)?;
@@ -213,8 +254,26 @@ impl Projects {
 }
 /// Read-only Git commands use the host Git but discard inherited repository overrides,
 /// external diff commands, pagers and fsmonitor hooks before launch.
-pub fn git_command(cwd: &std::path::Path, args: &[&str]) -> io::Result<Vec<u8>> {
-    let mut command = Command::new("git");
+pub(crate) struct GitOutput {
+    pub code: i32,
+    pub stdout: Vec<u8>,
+    pub stderr: String,
+}
+pub(crate) fn git_output(
+    cwd: &std::path::Path,
+    args: &[&str],
+    limit: usize,
+) -> io::Result<GitOutput> {
+    let executable = if cfg!(windows) {
+        std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default())
+            .filter(|p| p.is_absolute())
+            .flat_map(|p| [p.join("git.exe"), p.join("git.com")])
+            .find(|p| p.is_file())
+            .ok_or_else(|| invalid("Git was not found on PATH"))?
+    } else {
+        std::path::PathBuf::from("git")
+    };
+    let mut command = Command::new(executable);
     command
         .args([
             "--no-optional-locks",
@@ -239,7 +298,9 @@ pub fn git_command(cwd: &std::path::Path, args: &[&str]) -> io::Result<Vec<u8>> 
             command.env_remove(key);
         }
     }
-    command.env("GIT_OPTIONAL_LOCKS", "0");
+    command
+        .env("GIT_OPTIONAL_LOCKS", "0")
+        .env("GIT_TERMINAL_PROMPT", "0");
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
@@ -255,87 +316,73 @@ pub fn git_command(cwd: &std::path::Path, args: &[&str]) -> io::Result<Vec<u8>> 
         Ok(t) => t,
         Err(e) => {
             let _ = child.kill();
+            let _ = child.wait();
             return Err(e);
         }
     };
     use std::io::Read;
     let stdout = child.stdout.take().unwrap();
     let stderr = child.stderr.take().unwrap();
-    let (tx, rx) = mpsc::channel();
+    let (out_tx, out_rx) = mpsc::channel();
+    let (err_tx, err_rx) = mpsc::channel();
+    let max = limit.min(4 * 1024 * 1024);
     std::thread::spawn(move || {
-        let mut bytes = vec![];
-        let r = stdout.take(4 * 1024 * 1024 + 1).read_to_end(&mut bytes);
-        let _ = tx.send((r, bytes));
+        let mut b = vec![];
+        let r = stdout.take(max as u64 + 1).read_to_end(&mut b);
+        let _ = out_tx.send((r, b));
     });
     std::thread::spawn(move || {
-        let mut bytes = vec![];
-        let _ = stderr.take(8192).read_to_end(&mut bytes);
+        let mut b = vec![];
+        let r = stderr.take(4 * 1024 * 1024 + 1).read_to_end(&mut b);
+        let _ = err_tx.send((r, b));
     });
     let started = Instant::now();
-    loop {
-        if let Some(status) = if tree.ready_to_reap()? {
-            child.try_wait()?
-        } else {
-            None
-        } {
-            if !status.success() {
-                return Err(invalid("Git read failed or folder is not a repository"));
-            }
-            break;
+    let status = loop {
+        if tree.ready_to_reap()?
+            && let Some(status) = child.try_wait()?
+        {
+            break status;
         }
         if started.elapsed() > Duration::from_secs(15) {
             tree.terminate();
-            let _ = child.kill();
             let _ = child.wait();
             return Err(invalid("Git read timed out"));
         }
         std::thread::sleep(Duration::from_millis(10));
-    }
-    let (r, bytes) = rx
+    };
+    let (r, stdout) = out_rx
         .recv_timeout(Duration::from_secs(1))
         .map_err(|_| invalid("Git output did not settle"))?;
     r?;
-    if bytes.len() > 4 * 1024 * 1024 {
+    let (r, stderr) = err_rx
+        .recv_timeout(Duration::from_secs(1))
+        .map_err(|_| invalid("Git error output did not settle"))?;
+    r?;
+    if stdout.len() > max || stderr.len() > 4 * 1024 * 1024 {
         return Err(invalid("Git output exceeds limit"));
     }
-    Ok(bytes)
+    Ok(GitOutput {
+        code: status.code().unwrap_or(-1),
+        stdout,
+        stderr: String::from_utf8_lossy(&stderr).trim().into(),
+    })
 }
-pub fn git(roots: &[Root], path: &str) -> io::Result<Value> {
-    let resolved = sandbox::resolve(roots, path, None, false)?;
-    let bytes = git_command(
-        &resolved.real,
-        &["status", "--porcelain=v1", "-z", "--untracked-files=all"],
-    )?;
-    let mut records = bytes.split(|b| *b == 0).filter(|p| !p.is_empty());
-    let mut files = vec![];
-    while let Some(row) = records.next() {
-        if row.len() < 3 {
-            continue;
-        }
-        let status = String::from_utf8_lossy(&row[..2]);
-        let path = String::from_utf8_lossy(&row[3..]);
-        let mut item = json!({"path":path,"status":status,"staged":row[0]!=b' '&&row[0]!=b'?',"untracked":status=="??"});
-        if matches!(row[0], b'R' | b'C') || matches!(row[1], b'R' | b'C') {
-            item["originalPath"] = json!(records.next().map(String::from_utf8_lossy));
-        }
-        files.push(item);
-        if files.len() >= 2000 {
-            break;
-        }
+pub fn git_command(cwd: &std::path::Path, args: &[&str]) -> io::Result<Vec<u8>> {
+    let out = git_output(cwd, args, 4 * 1024 * 1024)?;
+    if out.code != 0 {
+        return Err(invalid(if out.stderr.is_empty() {
+            "Git read failed or folder is not a repository"
+        } else {
+            &out.stderr
+        }));
     }
-    let branch = git_command(
-        &resolved.real,
-        &["symbolic-ref", "--quiet", "--short", "HEAD"],
-    )
-    .ok()
-    .map(|s| String::from_utf8_lossy(&s).trim().to_string());
-    let revision = git_command(&resolved.real, &["rev-parse", "--verify", "HEAD"])
-        .ok()
-        .map(|s| String::from_utf8_lossy(&s).trim().to_string());
-    Ok(
-        json!({"status":"ready","branch":branch,"revision":revision,"truncated":files.len()>=2000,"files":files}),
-    )
+    Ok(out.stdout)
 }
+
+pub fn git(roots: &[Root], path: &str) -> io::Result<Value> {
+    crate::git::legacy_snapshot(roots, path)
+}
+
 pub struct Watch {
     _watcher: RecommendedWatcher,
     receiver: Mutex<mpsc::Receiver<notify::Result<notify::Event>>>,

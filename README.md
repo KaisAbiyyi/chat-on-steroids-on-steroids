@@ -6,6 +6,11 @@ The original **16-phase** roadmap remains the scope reference. **Phases 1–6 re
 full exact parity**. Windows service implementation and evidence are recorded separately from GUI,
 browser, external SSH/tunnel, packaging and native macOS/Linux acceptance.
 
+Current work is [closing phase 1–6 gaps](docs/implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md).
+Windows is active; macOS/other platforms are on hold by request. The committed baseline has now also
+passed 112 native Linux tests in a disposable WSL2 container. Contributions are welcome; see
+[CONTRIBUTING](CONTRIBUTING.md) for reproducible checks and scope/evidence rules.
+
 - `cos-core`: config/migrations, capabilities, path boundaries, durable writes, protected Windows secrets, diagnostics and shutdown.
 - `cos-store`: session epochs, journal/shards/legacy reads, terminal replay, correlation/access/recording, assets/plans/traces/handoffs, search/export and usage.
 - `cos-exec`: literal shell policy, owner-bound processes, pipes/ConPTY, batches, publication/unread output and separate human terminal owners.
@@ -47,6 +52,11 @@ retaining snapshots; split larger edits into separate transactions.
 `tools list/call`, `projects list/add/add-ssh/git/bind` and `files read/save/patch` expose the service
 owners. A one-shot CLI process ends its process sessions on exit; use persistent `serve` for command
 continuation. JavaScript code mode uses statically linked QuickJS C in an isolated Rust worker.
+
+`projects review <project-id> [--base-ref refs/heads/name]` returns the project Git snapshot, branches
+and diff statistics. `projects diff <project-id> <path> [--base-ref ref] [--revision sha256]` reads a
+bounded text/binary diff and refuses a changed comparison. Git metadata must remain inside approved
+folders; server-project Git review retains the original unavailable behavior.
 
 Existing unmarked profiles are refused. `--data-dir <new absolute directory> import --source <original>`
 copies config, secrets plus Local State, durable state and complete sessions/assets, verifies hashes

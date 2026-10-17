@@ -1,0 +1,8 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "src/main/project-git.ts": "65bdac3c7e8de27f96f7c0c94ad3468783e3155617be1e4aed8b784135b79ed1"
+  },
+  "gitCases": 35,
+  "execution": "Declaration-only VM; no handlers, app/profile imports or network calls"
+}

@@ -22,6 +22,11 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
+First integrated closure checkpoint: **126 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
+metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
+the unchanged suite passed with two build jobs. Logs are retained separately; this is not a test removal.
+
 ## Documents
 
 - [Implementation plan and live ledger](../implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md)

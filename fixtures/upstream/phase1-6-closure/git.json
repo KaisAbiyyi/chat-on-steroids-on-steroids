@@ -1,0 +1,393 @@
+[
+  {
+    "kind": "status",
+    "prefix": "",
+    "raw": "?? a\u0000 M sub/a\u0000",
+    "expected": [
+      {
+        "status": "U",
+        "path": "a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      },
+      {
+        "status": "M",
+        "path": "sub/a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "status",
+    "prefix": "",
+    "raw": "R  new\u0000old\u0000",
+    "expected": [
+      {
+        "status": "R",
+        "path": "new",
+        "previousPath": "old",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "status",
+    "prefix": "",
+    "raw": "!! ignored\u0000 M ../escape\u0000",
+    "expected": []
+  },
+  {
+    "kind": "status",
+    "prefix": "",
+    "raw": " M sub/a\u0000?? sub/nested/a\u0000",
+    "expected": [
+      {
+        "status": "M",
+        "path": "sub/a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      },
+      {
+        "status": "U",
+        "path": "sub/nested/a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "status",
+    "prefix": "",
+    "raw": " M sub/space name\u0000",
+    "expected": [
+      {
+        "status": "M",
+        "path": "sub/space name",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "status",
+    "prefix": "sub",
+    "raw": "?? a\u0000 M sub/a\u0000",
+    "expected": [
+      {
+        "status": "M",
+        "path": "a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "status",
+    "prefix": "sub",
+    "raw": "R  new\u0000old\u0000",
+    "expected": []
+  },
+  {
+    "kind": "status",
+    "prefix": "sub",
+    "raw": "!! ignored\u0000 M ../escape\u0000",
+    "expected": []
+  },
+  {
+    "kind": "status",
+    "prefix": "sub",
+    "raw": " M sub/a\u0000?? sub/nested/a\u0000",
+    "expected": [
+      {
+        "status": "M",
+        "path": "a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      },
+      {
+        "status": "U",
+        "path": "nested/a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "status",
+    "prefix": "sub",
+    "raw": " M sub/space name\u0000",
+    "expected": [
+      {
+        "status": "M",
+        "path": "space name",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "",
+    "raw": "M\u0000a\u0000A\u0000sub/new\u0000",
+    "expected": [
+      {
+        "status": "M",
+        "path": "a",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      },
+      {
+        "status": "A",
+        "path": "sub/new",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "",
+    "raw": "R100\u0000sub/old\u0000new\u0000",
+    "expected": [
+      {
+        "status": "R",
+        "path": "new",
+        "previousPath": "sub/old",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "",
+    "raw": "R100\u0000old\u0000sub/new\u0000",
+    "expected": [
+      {
+        "status": "R",
+        "path": "sub/new",
+        "previousPath": "old",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "",
+    "raw": "D\u0000sub/deleted\u0000",
+    "expected": [
+      {
+        "status": "D",
+        "path": "sub/deleted",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "sub",
+    "raw": "M\u0000a\u0000A\u0000sub/new\u0000",
+    "expected": [
+      {
+        "status": "A",
+        "path": "new",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "sub",
+    "raw": "R100\u0000sub/old\u0000new\u0000",
+    "expected": [
+      {
+        "status": "D",
+        "path": "old",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "sub",
+    "raw": "R100\u0000old\u0000sub/new\u0000",
+    "expected": [
+      {
+        "status": "A",
+        "path": "new",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "committed",
+    "prefix": "sub",
+    "raw": "D\u0000sub/deleted\u0000",
+    "expected": [
+      {
+        "status": "D",
+        "path": "deleted",
+        "additions": null,
+        "deletions": null,
+        "binary": false
+      }
+    ]
+  },
+  {
+    "kind": "numstat",
+    "prefix": "",
+    "raw": "1\t2\ta\u0000-\t-\tsub/binary\u0000",
+    "expected": {
+      "a": {
+        "additions": 1,
+        "deletions": 2,
+        "binary": false
+      },
+      "sub/binary": {
+        "additions": null,
+        "deletions": null,
+        "binary": true
+      }
+    }
+  },
+  {
+    "kind": "numstat",
+    "prefix": "",
+    "raw": "0\t0\t\u0000sub/old\u0000sub/new\u0000",
+    "expected": {
+      "sub/new": {
+        "additions": 0,
+        "deletions": 0,
+        "binary": false
+      }
+    }
+  },
+  {
+    "kind": "numstat",
+    "prefix": "",
+    "raw": "3\t0\tsub/space\tname\u0000",
+    "expected": {
+      "sub/space\tname": {
+        "additions": 3,
+        "deletions": 0,
+        "binary": false
+      }
+    }
+  },
+  {
+    "kind": "numstat",
+    "prefix": "sub",
+    "raw": "1\t2\ta\u0000-\t-\tsub/binary\u0000",
+    "expected": {
+      "binary": {
+        "additions": null,
+        "deletions": null,
+        "binary": true
+      }
+    }
+  },
+  {
+    "kind": "numstat",
+    "prefix": "sub",
+    "raw": "0\t0\t\u0000sub/old\u0000sub/new\u0000",
+    "expected": {
+      "new": {
+        "additions": 0,
+        "deletions": 0,
+        "binary": false
+      }
+    }
+  },
+  {
+    "kind": "numstat",
+    "prefix": "sub",
+    "raw": "3\t0\tsub/space\tname\u0000",
+    "expected": {
+      "space\tname": {
+        "additions": 3,
+        "deletions": 0,
+        "binary": false
+      }
+    }
+  },
+  {
+    "kind": "relative",
+    "value": "",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "a",
+    "expected": "a"
+  },
+  {
+    "kind": "relative",
+    "value": "a/b",
+    "expected": "a/b"
+  },
+  {
+    "kind": "relative",
+    "value": "a\\b",
+    "expected": "a/b"
+  },
+  {
+    "kind": "relative",
+    "value": "../x",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "a/../x",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "./a",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "a//b",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "C:/x",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "/absolute",
+    "expected": null
+  },
+  {
+    "kind": "relative",
+    "value": "é/😀",
+    "expected": "é/😀"
+  }
+]

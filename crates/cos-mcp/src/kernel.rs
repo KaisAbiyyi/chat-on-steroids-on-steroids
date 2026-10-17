@@ -432,7 +432,7 @@ impl Kernel {
                         .map(|r| format!("/{}", r.name))
                         .ok_or_else(|| invalid("Remote project root is no longer approved"));
                 }
-                return Ok(project["path"].as_str().unwrap().into());
+                return Ok(self.projects.workspace(roots, id)?.virtual_path);
             }
         }
         roots
