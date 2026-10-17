@@ -2,6 +2,25 @@ use cos_exec::shell;
 use cos_mcp::tunnel::Supervisor;
 use std::time::{Duration, Instant};
 #[test]
+fn pending_output_publication_cannot_prevent_an_explicit_sidecar_stop() {
+    let d = tempfile::tempdir().unwrap();
+    let scope = cos_exec::process::PublicationScope::begin();
+    let (program, args) = if cfg!(windows) {
+        (
+            "cmd.exe",
+            vec!["/d".into(), "/c".into(), "ping -n 30 127.0.0.1 >nul".into()],
+        )
+    } else {
+        ("sh", vec!["-c".into(), "sleep 30".into()])
+    };
+    let tunnel = Supervisor::default();
+    let generation = tunnel.start(program, &args, d.path()).unwrap();
+    tunnel.stop().unwrap();
+    assert_eq!(tunnel.status()["state"], "stopped");
+    assert!(tunnel.status()["generation"].as_u64().unwrap() > generation);
+    drop(scope);
+}
+#[test]
 fn adapters_match_actual_sidecar_flags_and_reject_invalid_ids() {
     assert_eq!(
         Supervisor::cloudflared_args(42),
@@ -99,7 +118,9 @@ fn stopped_sidecars_do_not_exhaust_process_capacity() {
         tunnel
             .start(program, &args, d.path())
             .unwrap_or_else(|e| panic!("restart {cycle}: {e}"));
-        tunnel.stop().unwrap();
+        tunnel
+            .stop()
+            .unwrap_or_else(|e| panic!("stop {cycle}: {e}"));
     }
     assert_eq!(tunnel.status()["state"], "stopped");
 }

@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **136 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **142 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -41,6 +41,18 @@ notifications. Restored armed attempts expire on the app clock without a browser
 regressions passed RED→GREEN; five source-derived scenarios match 27 committed upstream steps.
 CLI `projects color <id> <color|->` and `projects remove <id>` are executable. Browser creation
 delivery remains a phase-7 dependency; no signed-in browser or remote creation was exercised.
+
+Git watches now include nested worktree writes and linked-worktree common metadata. Four native
+regressions passed RED→GREEN for invalidation, project switching and root revocation. The project
+lifecycle commit `c3db4af` also passed **132 Linux tests**:
+[receipt](../../audit/2026-10-17/linux-project-links-receipt.json).
+
+An earlier integrated run hit the existing two-second tunnel-drain deadline once. Isolated and
+concurrent retries passed before repair; that timing cause was not uniquely reproduced. Investigation
+did reproduce a separate stop defect under pending output publication (RED→GREEN). Explicit sidecar
+retirement now waits on actual child/pipe state, retains custody on failure and prevents observer
+generation rollback. The repaired suite passed with the original deadline and 70 restart cycles.
+The failed run remains in `audit/2026-10-17-closure-git-watch-windows.log` as separate local evidence.
 
 ## Documents
 

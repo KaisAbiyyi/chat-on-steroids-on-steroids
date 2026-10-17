@@ -692,6 +692,41 @@ impl Manager {
         p.tree.terminate();
         Ok(())
     }
+    /// Explicit host retirement discards only this owned process's settled results.
+    /// It waits on child/pipe state, independently of any response publication lock.
+    /// Admission and ordinary model polling never use this destructive retirement path.
+    pub fn retire(&self, id: i32, owner: &str, wait: Duration) -> io::Result<()> {
+        let p = self.owned(id, owner)?;
+        p.tree.terminate();
+        let deadline = Instant::now() + wait.min(Duration::from_secs(30));
+        let mut state = lock(&p.state)?;
+        while state.exit.is_none() || state.readers > 0 {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                return Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    format!(
+                        "Owned process {id} did not settle: exit={:?}, open_readers={}",
+                        state.exit, state.readers
+                    ),
+                ));
+            }
+            state = p
+                .changed
+                .wait_timeout(state, remaining)
+                .map_err(|_| io::Error::other("Process wait poisoned"))?
+                .0;
+        }
+        drop(state);
+        let mut sessions = lock(&self.0.sessions)?;
+        if sessions
+            .get(&id)
+            .is_some_and(|current| Arc::ptr_eq(current, &p))
+        {
+            sessions.remove(&id);
+        }
+        Ok(())
+    }
     pub fn snapshot(&self, owner: &str) -> io::Result<Value> {
         let mut result = vec![];
         for (id, p) in lock(&self.0.sessions)?.iter() {
@@ -733,4 +768,60 @@ pub fn truncate(text: &str, budget: usize) -> String {
         (text.len() - budget).div_ceil(4),
         &text[right..]
     )
+}
+
+#[cfg(test)]
+mod retirement_tests {
+    use super::*;
+    #[test]
+    fn retirement_timeout_preserves_owned_custody_until_a_successful_retry() {
+        let d = tempfile::tempdir().unwrap();
+        let (program, args) = if cfg!(windows) {
+            (
+                "cmd.exe",
+                vec!["/d".into(), "/c".into(), "ping -n 30 127.0.0.1 >nul".into()],
+            )
+        } else {
+            ("sh", vec!["-c".into(), "sleep 30".into()])
+        };
+        let manager = Manager::default();
+        let result = manager
+            .launch(
+                Launch {
+                    owner: "sidecar",
+                    program,
+                    args: &args,
+                    cwd: d.path(),
+                    tty: false,
+                    raw_cmd: false,
+                },
+                Duration::ZERO,
+            )
+            .unwrap();
+        let id = result["session_id"].as_i64().unwrap() as i32;
+        let process = manager.owned(id, "sidecar").unwrap();
+        // Hold the real reaper's child lock to exercise a delayed native exit,
+        // without replacing the process or the production custody state.
+        let child = process.child.lock().unwrap();
+        assert_eq!(
+            manager
+                .retire(id, "foreign", Duration::ZERO)
+                .unwrap_err()
+                .kind(),
+            io::ErrorKind::PermissionDenied
+        );
+        assert_eq!(
+            manager
+                .retire(id, "sidecar", Duration::from_millis(20))
+                .unwrap_err()
+                .kind(),
+            io::ErrorKind::TimedOut
+        );
+        assert!(manager.owned(id, "sidecar").is_ok());
+        drop(child);
+        manager
+            .retire(id, "sidecar", Duration::from_secs(2))
+            .unwrap();
+        assert_eq!(manager.snapshot("sidecar").unwrap(), json!([]));
+    }
 }

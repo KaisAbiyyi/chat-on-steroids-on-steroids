@@ -117,3 +117,18 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   CLI color/remove integration reproduced the unknown-command failure and passed after integration.
   Integrated Windows suite **136 PASS, 0 failed/ignored**; strict Clippy and formatting PASS.
   Browser delivery/creation remains a phase-7 integration dependency; this backend never clicks ChatGPT.
+- Linux checkpoint `c3db4af`: **132 PASS, 0 failed/ignored**, including the native-project lifecycle.
+- Task 3c: native Git watchers cover nested worktree writes and linked-worktree common refs, coalesce
+  invalidation signals, discard prior project generations and refuse publication after root revocation.
+  All four new functional regressions were demonstrated RED→GREEN; strict Clippy PASS.
+- Integrated watcher qualification exposed one intermittent pre-existing two-second tunnel-drain
+  timeout. Both isolated and concurrent retries passed before repair; its specific scheduling cause
+  was not reproduced. Keep the failed run as evidence rather than substituting the retry.
+  Investigation separately reproduced a deterministic defect: a pending output publication prevented
+  explicit sidecar stop. That regression passed RED→GREEN after host retirement began waiting on
+  child/pipe state without consuming a response page. Failure paths retain custody/work directories
+  and monotonically advance observer generations. The two-second deadline and 70-cycle test remain.
+  A real-child delayed-reaper test also checks timeout custody and successful retry. The repaired
+  integrated checkpoint is **142 Windows tests PASS, 0 failed/ignored**, strict Clippy/formatting PASS,
+  including the unchanged 70-cycle stress test. Preserve the earlier failed run separately; the
+  original intermittent scheduling cause is not claimed to be uniquely identified by this repair.

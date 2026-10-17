@@ -13,6 +13,8 @@ use std::{
 };
 const MAX: usize = 2000;
 const SIDE: usize = 512 * 1024;
+mod watch;
+pub use watch::GitWatchSet;
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct Change {

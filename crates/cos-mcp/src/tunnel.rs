@@ -11,7 +11,7 @@ use std::{
 struct State {
     generation: u64,
     phase: String,
-    process: Option<i32>,
+    process: Option<(i32, u64)>,
     url: Option<String>,
     exit: Option<i64>,
     health: Value,
@@ -161,7 +161,7 @@ impl Supervisor {
         let process = result["session_id"].as_i64().map(|id| id as i32);
         {
             let mut state = lock(&self.0.state)?;
-            state.process = process;
+            state.process = process.map(|id| (id, generation));
             observe(&mut state, &result);
         }
         if let Some(process) = process {
@@ -223,36 +223,22 @@ impl Supervisor {
         json!({"generation":s.generation,"state":s.phase,"url":s.url,"exitCode":s.exit,"health":s.health})
     }
     fn stop_inner(&self) -> io::Result<()> {
-        let (old, process, work) = {
+        let (process, work) = {
             let mut state = lock(&self.0.state)?;
-            let old = state.generation;
             state.generation += 1;
             state.phase = "stopping".into();
-            (old, state.process.take(), state.work.take())
+            (state.process.take(), state.work.take())
         };
-        if let Some(process) = process {
-            let owner = format!("tunnel:{old}");
-            self.0.processes.terminate(process, &owner)?;
-            let deadline = std::time::Instant::now() + Duration::from_secs(2);
-            loop {
-                let result =
-                    self.0
-                        .processes
-                        .poll(process, &owner, "", Duration::from_millis(100))?;
-                if result["exit_code"].is_number() {
-                    break;
-                }
-                if std::time::Instant::now() >= deadline {
-                    let mut state = lock(&self.0.state)?;
-                    state.generation = old;
-                    state.process = Some(process);
-                    state.work = work;
-                    state.phase = "failed".into();
-                    return Err(io::Error::new(
-                        io::ErrorKind::TimedOut,
-                        "Tunnel process did not drain",
-                    ));
-                }
+        if let Some((id, owner_generation)) = process {
+            let owner = format!("tunnel:{owner_generation}");
+            if let Err(error) = self.0.processes.retire(id, &owner, Duration::from_secs(2)) {
+                let mut state = lock(&self.0.state)?;
+                // Keep custody on every failure. A generation never goes backwards,
+                // so a delayed old observer cannot become current again.
+                state.process = process;
+                state.work = work;
+                state.phase = "failed".into();
+                return Err(error);
             }
         }
         // Retain the sidecar's health directory until its child and readers have exited.

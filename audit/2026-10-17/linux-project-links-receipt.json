@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-17",
+  "status": "PASS",
+  "sourceCommit": "c3db4af47e8d5d76a478f641c1e237f0ab1d037b",
+  "scope": "Actual native Linux execution including project metadata and creation leases",
+  "rustImage": "rust@sha256:8514999d4786ef12efe89239e86b3d0a021b94b9d35108c8efe6c79ca7dc1a65",
+  "rustc": "1.91.1 (ed61e7d7e 2025-11-07)",
+  "kernel": "Linux 6.6.87.1-microsoft-standard-WSL2 x86_64",
+  "tests": {
+    "passed": 132,
+    "failed": 0,
+    "ignored": 0
+  },
+  "nativeUnixDescendantPipeRegression": "PASS",
+  "sshAuthentication": "NOT RUN; installed subsystem tests are separate",
+  "log": "audit/2026-10-17-linux-project-links-tests.log",
+  "logSha256": "05a1d92933afe34c4c56ce7ef22011088e233cfb069c2d6f6814f8bf7a060a8a",
+  "personalProfilesUsed": false,
+  "macOS": "HOLD by user request"
+}
