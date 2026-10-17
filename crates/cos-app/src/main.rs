@@ -23,7 +23,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
+const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
 fn platform() -> &'static str {
     if cfg!(windows) {
         "win32"
@@ -134,6 +134,62 @@ impl Runtime {
             },
             "projects" => match required(&args, 0)?.as_str() {
                 "list" => self.kernel.projects.list(),
+                "files" | "preview" | "create-entry" | "rename-entry" | "save-file" => {
+                    let action = required(&args, 0)?.as_str();
+                    let id = required(&args, 1)?;
+                    let roots = self.kernel.roots()?;
+                    let files = &self.kernel.project_files;
+                    let projects = &self.kernel.projects;
+                    match action {
+                        "files" if (2..=3).contains(&args.len()) => self
+                            .kernel
+                            .project_directory(id, args.get(2).map_or("", String::as_str)),
+                        "preview" if args.len() == 3 => {
+                            self.kernel.project_preview(id, required(&args, 2)?)
+                        }
+                        "create-entry" if args.len() == 5 => files.create(
+                            projects,
+                            &roots,
+                            id,
+                            required(&args, 2)?,
+                            required(&args, 3)?,
+                            required(&args, 4)?,
+                        ),
+                        "rename-entry" if args.len() == 4 => files.rename(
+                            projects,
+                            &roots,
+                            id,
+                            required(&args, 2)?,
+                            required(&args, 3)?,
+                        ),
+                        "save-file" if args.len() == 4 => {
+                            let edit = json_file(Path::new(required(&args, 3)?))?;
+                            files.save(
+                                projects,
+                                &roots,
+                                id,
+                                required(&args, 2)?,
+                                &cos_tools::project_files::Edit {
+                                    text: edit["text"]
+                                        .as_str()
+                                        .ok_or_else(|| invalid("Edited text is required"))?,
+                                    modified_at: edit["expectedModifiedAt"].as_str().ok_or_else(
+                                        || invalid("Expected modifiedAt is required"),
+                                    )?,
+                                    bytes: edit["expectedBytes"].as_u64().ok_or_else(|| {
+                                        invalid("Expected byte count is required")
+                                    })?,
+                                    revision: edit["expectedRevision"]
+                                        .as_str()
+                                        .ok_or_else(|| invalid("Expected revision is required"))?,
+                                },
+                            )
+                        }
+                        _ => Err(invalid(
+                            "Use projects files <id> [directory], preview <id> <path>, create-entry <id> <directory> <name> <file|directory>, rename-entry <id> <path> <name>, or save-file <id> <path> <edit-json>",
+                        )),
+                    }
+                }
                 "color" => self.kernel.projects.set_color(
                     required(&args, 1)?,
                     match required(&args, 2)?.as_str() {
@@ -223,7 +279,7 @@ impl Runtime {
                         .update_metadata(id, |v| v["projectId"] = json!(project))
                 }
                 _ => Err(invalid(
-                    "Use projects list/add/add-ssh/color/remove/git/review/diff/bind",
+                    "Use projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind",
                 )),
             },
             "files" => {

@@ -18,6 +18,7 @@ use cos_store::{
 use cos_tools::{
     files::{self, Files},
     project::{Projects, Watch},
+    project_files::ProjectFiles,
     remote::RemoteFiles,
 };
 use serde_json::{Value, json};
@@ -54,6 +55,8 @@ pub struct Kernel {
     pub processes: Manager,
     pub files: Files,
     pub projects: Projects,
+    /// Human file-panel actions; these do not add model-facing tool grants.
+    pub project_files: ProjectFiles,
     pub tunnel: crate::tunnel::Supervisor,
     pub cancel: cos_core::runtime::Cancellation,
     exposed: Mutex<BTreeSet<String>>,
@@ -110,6 +113,7 @@ impl Kernel {
         Arc::new(Self {
             config,
             projects: Projects::open(durable.clone()),
+            project_files: ProjectFiles::default(),
             tunnel: crate::tunnel::Supervisor::default(),
             durable,
             sessions,
@@ -140,6 +144,91 @@ impl Kernel {
     }
     pub fn roots(&self) -> io::Result<Vec<Root>> {
         serde_json::from_value(self.config.get()["roots"].clone()).map_err(io::Error::other)
+    }
+    pub fn project_directory(&self, id: &str, path: &str) -> io::Result<Value> {
+        self.project_file_read(id, path, false)
+    }
+    pub fn project_preview(&self, id: &str, path: &str) -> io::Result<Value> {
+        self.project_file_read(id, path, true)
+    }
+    pub fn project_file_snapshot(
+        &self,
+        id: &str,
+        path: &str,
+    ) -> io::Result<Option<cos_tools::project_files::ServerSnapshot>> {
+        self.with_project_files(id, |project, roots, check| {
+            let Some(remote) = project.get("remote") else {
+                return Ok(None);
+            };
+            let root = roots
+                .iter()
+                .find(|root| {
+                    root.remote
+                        .as_ref()
+                        .is_some_and(|value| ssh::identity(value) == ssh::identity(remote))
+                })
+                .ok_or_else(|| invalid("Remote project root is no longer approved"))?;
+            self.with_remote(root, |client| {
+                ProjectFiles::server_snapshot(client, path, check).map(Some)
+            })
+        })
+    }
+    fn project_file_read(&self, id: &str, path: &str, preview: bool) -> io::Result<Value> {
+        self.with_project_files(id, |project, roots, check| {
+            if let Some(remote) = project.get("remote") {
+                let root = roots
+                    .iter()
+                    .find(|root| {
+                        root.remote
+                            .as_ref()
+                            .is_some_and(|value| ssh::identity(value) == ssh::identity(remote))
+                    })
+                    .ok_or_else(|| invalid("Remote project root is no longer approved"))?;
+                self.with_remote(root, |client| {
+                    ProjectFiles::server_read(
+                        client,
+                        id,
+                        project["name"].as_str().unwrap(),
+                        path,
+                        preview,
+                        check,
+                    )
+                })
+            } else if preview {
+                self.project_files.preview(&self.projects, roots, id, path)
+            } else {
+                self.project_files.list(&self.projects, roots, id, path)
+            }
+        })
+    }
+    fn with_project_files<T>(
+        &self,
+        id: &str,
+        work: impl FnOnce(&Value, &[Root], &dyn Fn() -> io::Result<()>) -> io::Result<T>,
+    ) -> io::Result<T> {
+        let roots = self.roots()?;
+        let project = self
+            .projects
+            .list()?
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["id"] == id)
+            .cloned()
+            .ok_or_else(|| invalid("Project not found"))?;
+        let check = || {
+            self.cancel.check()?;
+            if self.roots()? != roots
+                || !self.projects.list()?.as_array().unwrap().contains(&project)
+            {
+                return Err(invalid("Project folder is no longer approved"));
+            }
+            Ok(())
+        };
+        check()?;
+        let result = work(&project, &roots, &check)?;
+        check()?;
+        Ok(result)
     }
     pub fn tools(&self, surface: Surface) -> Vec<Value> {
         if surface != Surface::Core {
@@ -901,6 +990,149 @@ fn exec_result(output: Value) -> Value {
 #[cfg(test)]
 mod remote_trust_tests {
     use super::*;
+    #[test]
+    fn server_project_file_panel_uses_native_sftp_and_runtime_path_trust() {
+        let folder = tempfile::tempdir().unwrap();
+        let profile = tempfile::tempdir().unwrap();
+        std::fs::write(folder.path().join("public.txt"), "public line\r\n").unwrap();
+        std::fs::write(
+            folder.path().join("public.png"),
+            "not a local image preview",
+        )
+        .unwrap();
+        std::fs::create_dir(folder.path().join("nested")).unwrap();
+        std::fs::create_dir(folder.path().join(".git")).unwrap();
+        let program = if cfg!(windows) {
+            "C:/Program Files/Git/usr/lib/ssh/sftp-server.exe"
+        } else if std::path::Path::new("/usr/lib/openssh/sftp-server").is_file() {
+            "/usr/lib/openssh/sftp-server"
+        } else {
+            "/usr/libexec/sftp-server"
+        };
+        assert!(
+            std::path::Path::new(program).is_file(),
+            "Native SFTP subsystem required"
+        );
+        let environment = if cfg!(windows) {
+            BTreeMap::from([(
+                "PATH".into(),
+                format!(
+                    "C:/Program Files/Git/usr/bin;C:/Program Files/Git/mingw64/bin;{}",
+                    std::env::var("PATH").unwrap_or_default()
+                ),
+            )])
+        } else {
+            BTreeMap::new()
+        };
+        let mut client = cos_tools::remote::Sftp::spawn_environment(
+            program,
+            &[],
+            Some(folder.path()),
+            &environment,
+        )
+        .unwrap();
+        let config = Arc::new(ConfigStore::open(profile.path(), platform()).unwrap());
+        let kernel = Kernel::new(config.clone()).unwrap();
+        let project = kernel
+            .projects
+            .add_remote_with(&config, "public-fixture", "~", &mut client)
+            .unwrap();
+        let id = project["id"].as_str().unwrap();
+        kernel.remote.lock().unwrap().insert(
+            project["remote"].to_string(),
+            Arc::new(Mutex::new(RemoteFiles {
+                sftp: client,
+                root: project["remote"]["path"].as_str().unwrap().into(),
+            })),
+        );
+        assert!(
+            kernel
+                .project_directory(id, "")
+                .unwrap_err()
+                .to_string()
+                .contains("SSH_PATH_TRUST_REQUIRED")
+        );
+        assert!(kernel.project_file_snapshot(id, "public.txt").is_err());
+        kernel.trust_ssh_server_paths_for_lifetime();
+        let listing = kernel.project_directory(id, "").unwrap();
+        assert_eq!(listing["entries"][0]["name"], "nested");
+        assert_eq!(listing["entries"].as_array().unwrap().len(), 3);
+        let preview = kernel.project_preview(id, "public.txt").unwrap();
+        assert_eq!(preview["binary"], false);
+        assert_eq!(preview["text"], "public line");
+        assert!(preview.get("revision").is_none());
+        let preview = kernel.project_preview(id, "public.png").unwrap();
+        assert_eq!(preview["binary"], true);
+        assert!(preview.get("imageDataUrl").is_none());
+        assert_eq!(
+            preview["note"],
+            "Previews of images and PDFs in a server folder are not available yet."
+        );
+        assert!(kernel.project_preview(id, "../outside.txt").is_err());
+        std::fs::write(folder.path().join("attachment.bin"), vec![42u8; 600_000]).unwrap();
+        let snapshot = kernel
+            .project_file_snapshot(id, "attachment.bin")
+            .unwrap()
+            .expect("A server attachment needs a private streamed snapshot");
+        assert_eq!(std::fs::read(&snapshot.file).unwrap(), vec![42u8; 600_000]);
+        let temporary = snapshot.file.parent().unwrap().to_path_buf();
+        drop(snapshot);
+        assert!(!temporary.exists());
+        std::fs::File::create(folder.path().join("too-large.bin"))
+            .unwrap()
+            .set_len(512 * 1024 * 1024 + 1)
+            .unwrap();
+        assert!(
+            kernel
+                .project_file_snapshot(id, "too-large.bin")
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("512 MB")
+        );
+        let original_roots = kernel.roots().unwrap();
+        let checks = std::cell::Cell::new(0usize);
+        let interrupted = kernel.with_project_files(id, |_, roots, check| {
+            kernel.with_remote(&roots[0], |client| {
+                ProjectFiles::server_snapshot(client, "attachment.bin", &|| {
+                    checks.set(checks.get() + 1);
+                    if checks.get() == 3 {
+                        config.update(|value| value["roots"] = json!([]))?;
+                    }
+                    check()
+                })
+            })
+        });
+        assert!(
+            interrupted.is_err(),
+            "Root revocation during a multi-chunk attachment was ignored"
+        );
+        config
+            .update(|value| value["roots"] = json!(original_roots))
+            .unwrap();
+        assert!(
+            kernel.project_preview(id, "public.txt").is_ok(),
+            "A failed copy leaked its SFTP file handle or desynchronized the transport"
+        );
+        let error = kernel
+            .project_files
+            .create(
+                &kernel.projects,
+                &kernel.roots().unwrap(),
+                id,
+                "",
+                "denied.txt",
+                "file",
+            )
+            .unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Files in a server folder cannot be changed from the app yet; ChatGPT can still change them with its tools."
+        );
+        assert!(!folder.path().join("denied.txt").exists());
+        config.update(|v| v["roots"] = json!([])).unwrap();
+        assert!(kernel.project_preview(id, "public.txt").is_err());
+    }
     #[test]
     fn remote_operations_require_human_lifetime_path_trust_before_transport_use() {
         let profile = tempfile::tempdir().unwrap();

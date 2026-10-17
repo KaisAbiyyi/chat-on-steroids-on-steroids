@@ -14,7 +14,7 @@ included in Git for Windows at `C:/Program Files/Git/usr/lib/ssh/sftp-server.exe
 cargo test --workspace --locked -j 2
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -j 2 -- -D warnings
-cargo build --release --locked
+cargo build --release --locked -j 2
 ```
 
 Tests use temporary public fixtures and fresh profiles. The service always requires an explicit
@@ -56,3 +56,18 @@ host OpenSSH client against a disposable loopback sshd. The container must carry
 to public fixtures. The script generates temporary keys/config/known_hosts, uses a Docker stdio proxy
 without publishing a host port, and stops its own daemon. It never selects personal SSH configuration.
 This explicit check is separate from the normal installed-subsystem tests and external-server proof.
+
+`python tools/qualify-linux.py --output audit/<date>/<receipt>.json` executes an exact Git commit
+in that task-owned pinned Rust container. It creates a separate source checkout, shares only its
+container build cache and records the commit, image, kernel, test counts and log hash. It does not
+include uncommitted host changes, start Docker or install system dependencies.
+
+`node tools/qualify-project-files.mjs [binary]` compares public native files against selected pinned
+source declarations. It requires the upstream development dependencies, including Babel's parser,
+esbuild and Sharp; ordinary Rust tests need none of these JavaScript packages. It records exact
+snapshot/save and preview projection comparisons, with raster/locale/race limits stated separately.
+
+The file-panel sorter uses ICU4X's Rust collator (`icu_collator` 2.1.1, Unicode-3.0 license) to retain
+locale ordering instead of byte ordering. Its compiled Unicode data is a deliberate size cost;
+record release size and qualify locale/version differences. `ryu-js` 1.0.3 (Apache-2.0 OR BSL-1.0)
+retains JavaScript Number spelling for revision hashes, including native identities above 2^53.

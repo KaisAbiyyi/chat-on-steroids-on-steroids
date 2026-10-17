@@ -2,9 +2,14 @@
   "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
   "sources": {
     "src/main/project-git.ts": "65bdac3c7e8de27f96f7c0c94ad3468783e3155617be1e4aed8b784135b79ed1",
-    "src/main/projects.ts": "1b693bf3c81b99708c435783ebe67ba95aad5ee1840be793c8b107833644e634"
+    "src/main/projects.ts": "1b693bf3c81b99708c435783ebe67ba95aad5ee1840be793c8b107833644e634",
+    "src/main/project-files.ts": "53d96cca9fa68788f667c3d4352bdd86d862dbe43fbd2e7c313fb254f8fdf075",
+    "src/main/codex/read-backend.ts": "f9e28d430184f24bf29ac9ff181aecd303311dd100b1a5054c15c1392f125cbc",
+    "src/main/fsops.ts": "cdf22e0bc58da0eb8e363590c3312ee11c682c5a2d7a49af3e87527e24132846"
   },
   "gitCases": 35,
   "projectLinkSteps": 27,
-  "execution": "Declaration-only VM; synthetic in-memory durable owner and clock for project leases; no app/profile imports, handlers or network calls"
+  "projectFileCases": 33,
+  "directoryCases": 2,
+  "execution": "Declaration-only VM; synthetic durable/clock/directory providers; no app/profile imports, handlers or network calls"
 }

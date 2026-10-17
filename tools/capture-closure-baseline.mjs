@@ -59,5 +59,33 @@ for(const operations of [
   scenarios.push({initial:[initial],steps});
 }
 await fs.writeFile(path.join(out,'project-links.json'),JSON.stringify(scenarios,null,2)+'\n');
-await fs.writeFile(path.join(out,'manifest.json'),JSON.stringify({upstreamCommit:commit,sources:{[relative]:createHash('sha256').update(source).digest('hex'),[projectsRelative]:createHash('sha256').update(projectsSource).digest('hex')},gitCases:cases.length,projectLinkSteps:scenarios.reduce((n,s)=>n+s.steps.length,0),execution:'Declaration-only VM; synthetic in-memory durable owner and clock for project leases; no app/profile imports, handlers or network calls'},null,2)+'\n');
-console.log(JSON.stringify({gitCases:cases.length,projectLinkScenarios:scenarios.length,upstreamCommit:commit}));
+const parser=require('@babel/parser');
+function helpers(source,names){
+  const parsed=parser.parse(source,{sourceType:'module',plugins:['typescript']});
+  const selected=parsed.program.body.map(s=>s.type==='ExportNamedDeclaration'?s.declaration:s)
+    .filter(s=>s?.type==='FunctionDeclaration'&&names.includes(s.id?.name));
+  if(selected.length!==names.length) throw Error(`Missing or duplicate helper: ${names.join(', ')}`);
+  return selected.map(s=>source.slice(s.start,s.end)).join('\n');
+}
+const filesRelative='src/main/project-files.ts',filesSource=await fs.readFile(path.join(upstream,filesRelative),'utf8');
+const readRelative='src/main/codex/read-backend.ts',readSource=await fs.readFile(path.join(upstream,readRelative),'utf8');
+const fsopsRelative='src/main/fsops.ts',fsopsSource=await fs.readFile(path.join(upstream,fsopsRelative),'utf8');
+let rawEntries=[];
+const filesContext=vm.createContext({module:{exports:{}},exports:{},Buffer,MAX_DIRECTORY_ENTRIES:500,HIDDEN_ENTRIES:new Set(['.git','.DS_Store']),serverTarget:async()=>null,projectFileTarget:async()=>({projectName:'project',path:'',real:'/public/project',kind:'directory'}),localFs:{readDirectory:async()=>structuredClone(rawEntries)}});
+const filesJs=await esbuild.transform(helpers(filesSource,['normaliseRelative','leafName','childPath','listProjectDirectory'])+'\n'+helpers(readSource,['listDirectoryLevel'])+'\n'+helpers(fsopsSource,['sniffBinaryBytes'])+'\nglobalThis.fixture={normaliseRelative,leafName,sniffBinaryBytes,listProjectDirectory};',{loader:'ts',format:'cjs'});
+vm.runInContext(filesJs.code,filesContext);
+const filesApi=filesContext.fixture,fileCases=[];
+for(const [kind,values] of [['relative',['','a/b','a\\b','/x','\\x','C:/x','1:/x','a/../b','a/','./a','x//b','é/😀','a'.repeat(4097)]],['leaf',['file','name.txt','.','..','','a/b','a\\b','a\0b','😀'.repeat(128)]]])for(const value of values){try{fileCases.push({kind,value,expected:filesApi[kind==='relative'?'normaliseRelative':'leafName'](value)})}catch(error){fileCases.push({kind,value,error:error.message})}}
+for(const bytes of [[],[0],[1,2,3],[9,10,13],[65,1,66],[65,1,2],[255,254,65,0],[254,255,0,65],[239,187,191,0],[65,66,67],[0xC0,0xAF]])fileCases.push({kind:'sniff',bytes,expected:filesApi.sniffBinaryBytes(Buffer.from(bytes))});
+const directoryCases=[];
+for(const names of [
+  [['z.txt','file'],['alpha-lower.txt','file'],['Alpha-upper.txt','file'],['ä.txt','file'],['a-b.txt','file'],['_a.txt','file'],['é.txt','file'],['e.txt','file'],['file10','file'],['file2','file'],['zDir','directory'],['aDir','directory'],['.git','directory'],['.DS_Store','file']],
+  Array.from({length:505},(_,i)=>[`public-${String(504-i).padStart(4,'0')}.txt`,'file'])
+]){
+  rawEntries=names.map(([name,kind])=>({fileName:name,isDirectory:kind==='directory',isFile:kind==='file'}));
+  const expected=await filesApi.listProjectDirectory('public-project');
+  directoryCases.push({names,expected:{entries:expected.entries,truncated:expected.truncated}});
+}
+await fs.writeFile(path.join(out,'project-files.json'),JSON.stringify({cases:fileCases,directories:directoryCases,locale:new Intl.Collator().resolvedOptions().locale,node:process.version,icu:process.versions.icu},null,2)+'\n');
+await fs.writeFile(path.join(out,'manifest.json'),JSON.stringify({upstreamCommit:commit,sources:Object.fromEntries([[relative,source],[projectsRelative,projectsSource],[filesRelative,filesSource],[readRelative,readSource],[fsopsRelative,fsopsSource]].map(([name,body])=>[name,createHash('sha256').update(body).digest('hex')])),gitCases:cases.length,projectLinkSteps:scenarios.reduce((n,s)=>n+s.steps.length,0),projectFileCases:fileCases.length,directoryCases:directoryCases.length,execution:'Declaration-only VM; synthetic durable/clock/directory providers; no app/profile imports, handlers or network calls'},null,2)+'\n');
+console.log(JSON.stringify({gitCases:cases.length,projectLinkScenarios:scenarios.length,projectFileCases:fileCases.length,directoryCases:directoryCases.length,upstreamCommit:commit}));

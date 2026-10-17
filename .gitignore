@@ -13,3 +13,4 @@
 /.superpowers/
 /.worktrees/
 /.cache/
+__pycache__/

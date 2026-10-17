@@ -10,6 +10,7 @@ cos-core = { path = "../cos-core" }
 cos-exec = { path = "../cos-exec" }
 serde.workspace = true
 serde_json.workspace = true
+chrono.workspace = true
 sha2.workspace = true
 regex.workspace = true
 tempfile.workspace = true
@@ -18,13 +19,16 @@ base64 = "0.22.1"
 notify = "8.2.0"
 cap-std = "3.4.5"
 same-file = "1.0.6"
-image = { version = "0.25.8", default-features = false, features = ["png", "jpeg", "gif", "webp"] }
+image = { version = "0.25.8", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "ico"] }
+icu_collator = "=2.1.1"
+icu_locale_core = "=2.1.1"
+ryu-js = "=1.0.3"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Storage_FileSystem"] }
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Storage_FileSystem", "Win32_System_IO", "Win32_System_Threading", "Wdk_Storage_FileSystem"] }
 
 [dev-dependencies]
 tempfile.workspace = true

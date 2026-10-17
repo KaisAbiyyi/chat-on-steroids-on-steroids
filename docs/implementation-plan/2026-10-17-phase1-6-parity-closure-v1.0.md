@@ -132,3 +132,25 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   integrated checkpoint is **142 Windows tests PASS, 0 failed/ignored**, strict Clippy/formatting PASS,
   including the unchanged 70-cycle stress test. Preserve the earlier failed run separately; the
   original intermittent scheduling cause is not claimed to be uniquely identified by this repair.
+- Task 3d (continued on 2026-10-18): native human file-panel list/preview/create/rename/save now
+  has selected-project link refusal, held-directory/file identity checks, bounded text/image/PDF
+  reads, source-style optimistic revisions and atomic replacement. Source directory sorting and
+  truncation match two actual upstream scenarios; 33 path/name/binary helper vectors are checked in.
+  Native Windows relocation tests exercise the real OS sharing restriction and replaced-source
+  refusal. CLI routing was demonstrated RED (unknown command) then GREEN, including stale save
+  and root revocation. The local checkpoint passed 157 Windows tests before the subsequent SFTP work.
+- Task 3d source differential repairs: exact native `textSnapshot` and `previewProjectFile` comparisons
+  exposed rounded-versus-truncated timestamp branches, text disguised with an oversized image extension,
+  and JS Number serialization of an inode above 2^53. Each functional failure was observed before repair.
+  Three native text snapshots/save inputs and ten complete preview projections now match the pinned
+  source, including BOM/CRLF, invalid UTF-8, controls, large text, image rejection and PDF headers.
+- Task 3d server paths: host file-panel reads route through the existing explicit lifetime trust gate.
+  Native SFTP proves listing/text preview, unavailable image/PDF projection, refused edits, a streamed
+  600,000-byte attachment, automatic snapshot cleanup, 512 MiB admission and mid-stream root revocation.
+  A failed copy closes its SFTP handle and leaves the transport usable. No new model tool is advertised.
+  The server trust restriction remains; adversarial opened-handle containment is still unqualified.
+- File-panel acceptance still open: AVIF decode and full Sharp raster/pixel/encoder comparisons,
+  all-locale/ICU-version ordering, remaining OS mutation races and later UI/attach/trash wiring.
+  Local directory scan and existing SFTP directory budgets remain explicit resource differences.
+  Integrated Windows checkpoint: **160 PASS, 0 failed/ignored; strict Clippy and formatting PASS**.
+  Current-commit Linux execution and release size are being qualified.

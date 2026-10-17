@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **142 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **160 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -53,6 +53,27 @@ did reproduce a separate stop defect under pending output publication (RED→GRE
 retirement now waits on actual child/pipe state, retains custody on failure and prevents observer
 generation rollback. The repaired suite passed with the original deadline and 70 restart cycles.
 The failed run remains in `audit/2026-10-17-closure-git-watch-windows.log` as separate local evidence.
+
+## File-panel continuation — 2026-10-18
+
+The human project file panel now lists and previews files, creates/renames entries and saves exact
+UTF-8 text using source-compatible revision guards and atomic replacement. CLI commands are
+`projects files`, `preview`, `create-entry`, `rename-entry` and `save-file`. These are host actions;
+the model tool registry has not gained file-panel permissions.
+
+Two source directory scenarios and 33 path/name/binary vectors are captured. Native source-versus-CLI
+qualification matches three snapshot/save cases and ten complete preview projections. It reproduced
+and repaired timestamp rounding branches and a large Windows file ID producing a different JS hash.
+Selected-project junction refusal, stale edits and replaced-source custody have native regression proof.
+
+Server project listing/text previews and private attachment snapshots use the existing explicit runtime
+trust gate. Native SFTP exercises a streamed 600,000-byte copy, cleanup, 512 MiB admission, revocation
+during copying and transport reuse after failure. Server edits are refused as in the original source.
+
+The integrated checkpoint passed **160 Windows tests, 0 failed/ignored**, strict Clippy and formatting.
+Current-commit Linux proof and release size are being refreshed. Full raster
+parity (including AVIF), every locale/ICU version and later UI/attachment/trash integration remain open.
+This is further implementation progress; the whole phase 1–6 exactness gate remains **IN PROGRESS**.
 
 ## Documents
 

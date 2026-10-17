@@ -9,6 +9,89 @@ fn run(directory: &std::path::Path, args: &[&str]) -> std::process::Output {
         .unwrap()
 }
 #[test]
+fn project_file_panel_is_runnable_with_stale_edit_and_root_revocation_guards() {
+    let profile = tempfile::tempdir().unwrap();
+    let root = tempfile::tempdir().unwrap();
+    assert!(run(profile.path(), &["info"]).status.success());
+    let roots = json!([{"name":"p","path":root.path()}]).to_string();
+    assert!(
+        run(profile.path(), &["config", "set", "roots", &roots])
+            .status
+            .success()
+    );
+    let p: Value =
+        serde_json::from_slice(&run(profile.path(), &["projects", "add", "/p"]).stdout).unwrap();
+    let id = p["id"].as_str().unwrap();
+    let result = run(
+        profile.path(),
+        &["projects", "create-entry", id, "", "public.txt", "file"],
+    );
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    fs::write(root.path().join("public.txt"), "public\r\n").unwrap();
+    let preview = run(profile.path(), &["projects", "preview", id, "public.txt"]);
+    assert!(
+        preview.status.success(),
+        "{}",
+        String::from_utf8_lossy(&preview.stderr)
+    );
+    let preview: Value = serde_json::from_slice(&preview.stdout).unwrap();
+    let edit = profile.path().join("public-edit.json");
+    fs::write(&edit, json!({"text":"edited\r\n","expectedModifiedAt":preview["modifiedAt"],"expectedBytes":preview["bytes"],"expectedRevision":preview["revision"]}).to_string()).unwrap();
+    let args = [
+        "projects",
+        "save-file",
+        id,
+        "public.txt",
+        edit.to_str().unwrap(),
+    ];
+    let saved = run(profile.path(), &args);
+    assert!(
+        saved.status.success(),
+        "{}",
+        String::from_utf8_lossy(&saved.stderr)
+    );
+    assert_eq!(
+        fs::read(root.path().join("public.txt")).unwrap(),
+        b"edited\r\n"
+    );
+    assert!(!run(profile.path(), &args).status.success());
+    assert!(
+        run(
+            profile.path(),
+            &["projects", "rename-entry", id, "public.txt", "renamed.txt"]
+        )
+        .status
+        .success()
+    );
+    let listing = run(profile.path(), &["projects", "files", id]);
+    assert!(listing.status.success());
+    let listing: Value = serde_json::from_slice(&listing.stdout).unwrap();
+    assert_eq!(listing["entries"][0]["name"], "renamed.txt");
+    assert!(
+        run(profile.path(), &["config", "set", "roots", "[]"])
+            .status
+            .success()
+    );
+    assert!(
+        !run(profile.path(), &["projects", "preview", id, "renamed.txt"])
+            .status
+            .success()
+    );
+    assert!(
+        !run(
+            profile.path(),
+            &["projects", "create-entry", id, "", "revoked.txt", "file"]
+        )
+        .status
+        .success()
+    );
+    assert!(!root.path().join("revoked.txt").exists());
+}
+#[test]
 fn project_color_and_soft_removal_are_runnable_without_losing_catalog_identity() {
     let profile = tempfile::tempdir().unwrap();
     let folder = tempfile::tempdir().unwrap();

@@ -450,6 +450,33 @@ impl Sftp {
         let close = self.close_handle(&handle);
         result.and_then(|v| close.map(|_| v))
     }
+    /// A bounded caller may inspect regular-file metadata and consume one opened stream.
+    /// This retains the trusted-server restriction; FSTAT cannot prove handle containment.
+    pub(crate) fn read_stream<T>(
+        &mut self,
+        path: &str,
+        work: impl FnOnce(&mut dyn Read, &Value) -> io::Result<T>,
+    ) -> io::Result<T> {
+        let handle = self.open(path, 1)?;
+        let result = (|| {
+            let mut payload = vec![];
+            put(&mut payload, &handle);
+            let metadata = self.checked(8, &payload, 105)?.attrs()?;
+            if metadata["isFile"] != true {
+                return Err(invalid("Choose a regular file"));
+            }
+            work(
+                &mut RemoteReader {
+                    client: self,
+                    handle: handle.clone(),
+                    offset: 0,
+                },
+                &metadata,
+            )
+        })();
+        let closed = self.close_handle(&handle);
+        result.and_then(|value| closed.map(|_| value))
+    }
     pub fn write_new(&mut self, path: &str, bytes: &[u8]) -> io::Result<()> {
         let handle = self.open(path, 2 | 8 | 32)?;
         let result = (|| {
@@ -501,6 +528,11 @@ impl Sftp {
         self.checked(9, &payload, 101).map(|_| ())
     }
     pub fn list(&mut self, path: &str) -> io::Result<Vec<Value>> {
+        let mut entries = self.list_native(path)?;
+        entries.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
+        Ok(entries)
+    }
+    pub(crate) fn list_native(&mut self, path: &str) -> io::Result<Vec<Value>> {
         let mut payload = vec![];
         put(&mut payload, path.as_bytes());
         let handle = self.checked(11, &payload, 102)?.data()?;
@@ -528,7 +560,6 @@ impl Sftp {
                     }
                 }
             }
-            entries.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
             Ok(entries)
         })();
         let close = self.close_handle(&handle);

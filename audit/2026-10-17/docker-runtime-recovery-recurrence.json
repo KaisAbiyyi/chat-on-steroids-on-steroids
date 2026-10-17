@@ -1,0 +1,11 @@
+{
+  "status": "runtime-directory-preserved",
+  "previousRuntime": "%LOCALAPPDATA%/Docker/run.cos-rust-recovery-20261017T233604",
+  "freshRuntime": "%LOCALAPPDATA%/Docker/run",
+  "entries": [
+    "dockerInference",
+    "userAnalyticsOtlpHttp.sock"
+  ],
+  "engineReady": "PASS: docker info returned Linux Engine 28.3.2; owned phase1-6-closure container started",
+  "scope": "Recurrence of inaccessible stale AF_UNIX runtime endpoints; no Docker data disk or settings changes"
+}

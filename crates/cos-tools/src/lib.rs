@@ -5,6 +5,7 @@ pub mod image;
 pub mod patch;
 mod patch_budget;
 pub mod project;
+pub mod project_files;
 pub mod remote;
 pub mod search;
 pub mod text;
