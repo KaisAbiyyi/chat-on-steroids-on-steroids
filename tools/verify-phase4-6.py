@@ -1,5 +1,5 @@
 """Real executable + loopback proof with public fixtures and a disposable marked profile."""
-import argparse, base64, hashlib, json, os, pathlib, subprocess, tempfile, time, urllib.request, urllib.error
+import argparse, base64, datetime, hashlib, json, os, pathlib, subprocess, tempfile, time, urllib.request, urllib.error
 p=argparse.ArgumentParser();p.add_argument('--binary',default='target/debug/cos-rust.exe');p.add_argument('--output',default='audit/2026-10-17/phase4-6-runtime.json');a=p.parse_args()
 binary=pathlib.Path(a.binary).resolve();checks=[]
 def check(name,condition,detail=None):
@@ -57,4 +57,4 @@ with tempfile.TemporaryDirectory(prefix='cos-rust-phase4-6-public-') as temp:
         if proc.poll() is None:proc.terminate()
         try:proc.wait(timeout=5)
         except subprocess.TimeoutExpired:proc.kill();proc.wait()
-out=pathlib.Path(a.output);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps({'binary':str(binary),'date':'2026-10-17','checks':checks,'externalSsh':'NOT RUN','publicTunnel':'NOT RUN','macOSLinuxNative':'NOT RUN'},indent=2)+'\n',encoding='utf8');print(json.dumps({'status':'PASS','checks':len(checks),'receipt':str(out.resolve())}))
+out=pathlib.Path(a.output);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps({'binary':str(binary),'date':datetime.date.today().isoformat(),'binarySha256':hashlib.sha256(binary.read_bytes()).hexdigest(),'checks':checks,'externalSsh':'NOT RUN','publicTunnel':'NOT RUN','macOSLinuxNative':'NOT RUN'},indent=2)+'\n',encoding='utf8');print(json.dumps({'status':'PASS','checks':len(checks),'receipt':str(out.resolve())}))

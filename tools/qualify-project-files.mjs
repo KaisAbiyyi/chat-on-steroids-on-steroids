@@ -64,7 +64,11 @@ try {
   }
   const oracleSources=Object.fromEntries(await Promise.all(inputs.map(async([file])=>[file,createHash('sha256').update(await fs.readFile(path.join(upstream,file))).digest('hex')])));
   const receipt={status:'PASS',upstreamCommit:commit,sourceSha256:createHash('sha256').update(source).digest('hex'),oracleSources,binarySha256:createHash('sha256').update(await fs.readFile(binary)).digest('hex'),platform:process.platform,node:process.version,checks,scope:'Pinned declaration-only textSnapshot and previewProjectFile on actual public files versus the Rust host CLI. Native metadata and stream providers; no app bootstrap/profile imports. Raster encoders, all locales and filesystem races are separate gates.'};
-  await fs.writeFile(path.join(repo,'audit/2026-10-17/project-file-snapshot-qualification.json'),JSON.stringify(receipt,null,2)+'\n');
+  const timestamp=new Date().toISOString().replaceAll(':','-');
+  const output=path.resolve(process.argv[3]??path.join(repo,'audit/qualifications',`project-file-snapshot-${timestamp}.json`));
+  assert.ok(output.startsWith(path.join(repo,'audit')+path.sep),'Receipts must stay inside the workspace audit directory');
+  await fs.mkdir(path.dirname(output),{recursive:true});
+  await fs.writeFile(output,JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify(receipt,null,2));
 } finally {
   assert.equal(path.dirname(folder),os.tmpdir());

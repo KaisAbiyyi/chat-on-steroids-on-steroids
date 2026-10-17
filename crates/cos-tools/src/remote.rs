@@ -601,6 +601,20 @@ impl RemoteFiles {
         fail_after: Option<usize>,
         authorize: &dyn Fn(&str) -> io::Result<()>,
     ) -> io::Result<Value> {
+        self.apply_hunks_checked_mode(
+            hunks,
+            fail_after,
+            crate::patch::FileUpdateMode::PreserveLineEndings,
+            authorize,
+        )
+    }
+    pub fn apply_hunks_checked_mode(
+        &mut self,
+        hunks: Vec<crate::patch::Hunk>,
+        fail_after: Option<usize>,
+        mode: crate::patch::FileUpdateMode,
+        authorize: &dyn Fn(&str) -> io::Result<()>,
+    ) -> io::Result<Value> {
         authorize("")?;
         use crate::patch::Hunk;
         use std::collections::BTreeMap;
@@ -674,11 +688,17 @@ impl RemoteFiles {
                     let text = std::str::from_utf8(old)
                         .map_err(|_| invalid("stream did not contain valid UTF-8 (EILSEQ)"))?;
                     budget.update(&key, old, &chunks)?;
-                    let new = crate::patch::update(text, &path, &chunks)
-                        .map_err(invalid)?
+                    let new = crate::patch::update_with_mode(text, &path, &chunks, mode)
+                        .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?
                         .into_bytes();
+                    if &new != old {
+                        authorize("edit")?;
+                    }
                     if let Some(destination) = move_path {
                         let dest = at(self, &mut changes, &destination, &mut budget)?;
+                        if dest != key && changes[&dest].new.is_some() {
+                            authorize("edit")?;
+                        }
                         budget.bytes(&dest, &new)?;
                         changes.get_mut(&key).unwrap().new = None;
                         changes.get_mut(&dest).unwrap().new = Some(new);

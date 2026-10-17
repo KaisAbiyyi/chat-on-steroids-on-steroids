@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "sourceCommit": "10d4c8135d479a02ef115703be3ec3beb58b99ea",
+  "scope": "Windows x64 headless service checkpoint; complete desktop/installer/startup/RAM comparison NOT RUN",
+  "bytes": 10767872,
+  "mib": 10.269,
+  "sha256": "838e1c03b0f67c6d2268fafe331c3ddcf2a5919f6288709181e409d01d53feaa",
+  "previousServiceBytes": 8887808,
+  "sizeDeltaBytes": 1880064,
+  "windowsTests": {
+    "passed": 160,
+    "failed": 0,
+    "ignored": 0
+  },
+  "linuxTests": {
+    "passed": 156,
+    "failed": 0,
+    "ignored": 0
+  },
+  "runtimeChecks": 17,
+  "formatAndStrictClippy": "PASS",
+  "fullApplicationReady": false,
+  "artifact": "audit/2026-10-18/release-artifact/cos-rust-10d4c81.exe",
+  "personalProfilesUsed": false
+}

@@ -433,6 +433,24 @@ impl Files {
         fail_after: Option<usize>,
         authorize: &dyn Fn(&str) -> io::Result<()>,
     ) -> io::Result<Value> {
+        self.apply_checked_mode(
+            roots,
+            base,
+            source,
+            fail_after,
+            patch::FileUpdateMode::PreserveLineEndings,
+            authorize,
+        )
+    }
+    pub fn apply_checked_mode(
+        &self,
+        roots: &[Root],
+        base: &str,
+        source: &str,
+        fail_after: Option<usize>,
+        mode: patch::FileUpdateMode,
+        authorize: &dyn Fn(&str) -> io::Result<()>,
+    ) -> io::Result<Value> {
         let _guard = lock(&self.transaction)?;
         authorize("")?;
         crate::patch_budget::check_source(source)?;
@@ -499,12 +517,25 @@ impl Files {
                     let contents = std::str::from_utf8(raw)
                         .map_err(|_| invalid("stream did not contain valid UTF-8 (EILSEQ)"))?;
                     budget.update(&c.location.virtual_path, raw, &chunks)?;
-                    let new = patch::update(contents, &path, &chunks)
-                        .map_err(invalid)?
+                    let new = patch::update_with_mode(contents, &path, &chunks, mode)
+                        .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?
                         .into_bytes();
+                    if &new != raw {
+                        authorize("edit")?;
+                    }
                     if let Some(destination) = move_path {
+                        let source_path = c.location.virtual_path.clone();
                         c.new = None;
                         let target = get(&mut changes, roots, &destination, base, &mut budget)?;
+                        let same_path = if cfg!(windows) {
+                            target.location.virtual_path.to_lowercase()
+                                == source_path.to_lowercase()
+                        } else {
+                            target.location.virtual_path == source_path
+                        };
+                        if target.new.is_some() && !same_path {
+                            authorize("edit")?;
+                        }
                         budget.bytes(&target.location.virtual_path, &new)?;
                         target.new = Some(new);
                     } else {

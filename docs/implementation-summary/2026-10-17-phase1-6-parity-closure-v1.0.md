@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **160 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **166 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -71,9 +71,29 @@ trust gate. Native SFTP exercises a streamed 600,000-byte copy, cleanup, 512 MiB
 during copying and transport reuse after failure. Server edits are refused as in the original source.
 
 The integrated checkpoint passed **160 Windows tests, 0 failed/ignored**, strict Clippy and formatting.
-Current-commit Linux proof and release size are being refreshed. Full raster
+The same commit `10d4c81` passed **156 Linux tests, 0 failed/ignored**, including native Unix
+parent/source replacement and SFTP regressions: [Linux receipt](../../audit/2026-10-18/linux-file-panel-receipt.json).
+The Windows service at `10d4c81` builds to **10.269 MiB** (+1.793 MiB against the previous service),
+passes 17 executable checks and 13 source comparisons: [release receipt](../../audit/2026-10-18/file-panel-release-receipt.json).
+This is a headless service measurement; installer, full desktop startup and RAM comparisons are not run.
+Full raster
 parity (including AVIF), every locale/ICU version and later UI/attachment/trash integration remain open.
 This is further implementation progress; the whole phase 1–6 exactness gate remains **IN PROGRESS**.
+
+## Patch continuation — 2026-10-18
+
+The model-facing patch adapter now selects the source's normal update mode and preserves line
+endings for permitted moves when Edit is unavailable. Add-overwrite requires both Create and Edit.
+Typed mismatch diagnostics retain bounded, reliable source anchors; the model receives the excerpt
+only with current Read permission and unchanged caller/root authority. Five MCP regressions and a
+differential corpus of 36 updates/14 searches pass. Native SFTP also verifies both update modes,
+move-only byte preservation and typed diagnostics. Integrated Windows qualification: **166 PASS,
+0 failed/ignored**; strict Clippy and formatting PASS. Linux qualification for this patch commit follows.
+
+The existing Edit guard remains when a nominal move would rewrite bytes, including an unterminated
+file gaining a newline. This conservative edge differs from the upstream applier; it remains explicit
+in the plan's ruling. Streaming/invocation parsing, full search/toolchain behavior and the later tasks
+are still open. The 10.269 MiB release receipt above applies to `10d4c81`, before these patch changes.
 
 ## Documents
 

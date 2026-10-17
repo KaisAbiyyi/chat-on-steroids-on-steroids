@@ -1,0 +1,985 @@
+{
+  "updates": [
+    {
+      "contents": "one\r\ntwo\r\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "one",
+            "two"
+          ],
+          "newLines": [
+            "one",
+            "TWO"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [
+            [
+              0,
+              0
+            ]
+          ],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "one\nTWO\n"
+    },
+    {
+      "contents": "﻿one\r\ntwo\nthree",
+      "chunks": [
+        {
+          "oldLines": [
+            "one",
+            "two",
+            "three"
+          ],
+          "newLines": [
+            "one",
+            "TWO",
+            "three"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "﻿one\nTWO\nthree\n"
+    },
+    {
+      "contents": "one\rtwo\r",
+      "chunks": [
+        {
+          "oldLines": [
+            "one"
+          ],
+          "newLines": [
+            "ONE"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\none",
+      "sourceContext": null
+    },
+    {
+      "contents": "",
+      "chunks": [
+        {
+          "oldLines": [],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "new\n"
+    },
+    {
+      "contents": "one",
+      "chunks": [
+        {
+          "oldLines": [],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "one\nnew\n"
+    },
+    {
+      "contents": "one\n\n",
+      "chunks": [
+        {
+          "oldLines": [],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "one\nnew\n"
+    },
+    {
+      "contents": "one",
+      "chunks": [
+        {
+          "oldLines": [
+            "one"
+          ],
+          "newLines": [
+            "one"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [
+            [
+              0,
+              0
+            ]
+          ],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "one\n"
+    },
+    {
+      "contents": "a\nb\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "b"
+          ],
+          "newLines": [
+            "B"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        },
+        {
+          "oldLines": [
+            "a"
+          ],
+          "newLines": [
+            "A"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": true
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nMatching text exists at line 1, before the current search position at line 3. Put edits in file order and avoid overlapping hunks.\nExpected text:\na",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\ta\n2\tb"
+    },
+    {
+      "contents": "repeated\nrepeated\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "repeated"
+          ],
+          "newLines": [
+            "first"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        },
+        {
+          "oldLines": [
+            "repeated"
+          ],
+          "newLines": [
+            "last"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "first\nlast\n"
+    },
+    {
+      "contents": "prefix\nunique public anchor\nactual line\nsuffix\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "unique public anchor",
+            "wrong line"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nunique public anchor\nwrong line",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tprefix\n2\tunique public anchor\n3\tactual line\n4\tsuffix"
+    },
+    {
+      "contents": "early unique block\nlate unique block\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "late unique block"
+          ],
+          "newLines": [
+            "LATE"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        },
+        {
+          "oldLines": [
+            "early unique block"
+          ],
+          "newLines": [
+            "EARLY"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nMatching text exists at line 1, before the current search position at line 3. Put edits in file order and avoid overlapping hunks.\nExpected text:\nearly unique block",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tearly unique block\n2\tlate unique block"
+    },
+    {
+      "contents": "anchor\nactual\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "missing"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": "anchor",
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nmissing",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tanchor\n2\tactual"
+    },
+    {
+      "contents": "public\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "missing"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": "missing context",
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find context in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nmissing context",
+      "sourceContext": null
+    },
+    {
+      "contents": "﻿public line\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "﻿public line"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "﻿new\n"
+    },
+    {
+      "contents": "public line\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "﻿public line"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "expected": "new\n"
+    },
+    {
+      "contents": "public\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "public"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\npublic",
+      "sourceContext": null
+    },
+    {
+      "contents": "public source 0\npublic source 1\npublic source 2\npublic source 3\npublic source 4\npublic source 5\npublic source 6\npublic source 7\npublic source 8\npublic source 9\npublic source 10\npublic source 11\npublic source 12\npublic source 13",
+      "chunks": [
+        {
+          "oldLines": [
+            "public source 0",
+            "public source 1",
+            "public source 2",
+            "wrong line",
+            "public source 4",
+            "public source 5",
+            "public source 6",
+            "public source 7",
+            "public source 8",
+            "public source 9",
+            "public source 10",
+            "public source 11",
+            "public source 12"
+          ],
+          "newLines": [
+            "replacement"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\npublic source 0\npublic source 1\npublic source 2\nwrong line\npublic source 4\npublic source 5\npublic source 6\npublic source 7\n… (expected text truncated)",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tpublic source 0\n2\tpublic source 1\n3\tpublic source 2\n4\tpublic source 3\n5\tpublic source 4\n6\tpublic source 5\n7\tpublic source 6\n8\tpublic source 7"
+    },
+    {
+      "contents": "long public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nactual\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "long public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "wrong"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "normalize_to_lf",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nlong public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…\nwrong",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tlong public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…\n2\tactual"
+    },
+    {
+      "contents": "one\r\ntwo\r\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "one",
+            "two"
+          ],
+          "newLines": [
+            "one",
+            "TWO"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [
+            [
+              0,
+              0
+            ]
+          ],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "one\r\nTWO\r\n"
+    },
+    {
+      "contents": "﻿one\r\ntwo\nthree",
+      "chunks": [
+        {
+          "oldLines": [
+            "one",
+            "two",
+            "three"
+          ],
+          "newLines": [
+            "one",
+            "TWO",
+            "three"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "﻿one\r\nTWO\r\nthree\r\n"
+    },
+    {
+      "contents": "one\rtwo\r",
+      "chunks": [
+        {
+          "oldLines": [
+            "one"
+          ],
+          "newLines": [
+            "ONE"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "ONE\rtwo\r"
+    },
+    {
+      "contents": "",
+      "chunks": [
+        {
+          "oldLines": [],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "new\n"
+    },
+    {
+      "contents": "one",
+      "chunks": [
+        {
+          "oldLines": [],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "one\nnew\n"
+    },
+    {
+      "contents": "one\n\n",
+      "chunks": [
+        {
+          "oldLines": [],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "one\n\nnew\n"
+    },
+    {
+      "contents": "one",
+      "chunks": [
+        {
+          "oldLines": [
+            "one"
+          ],
+          "newLines": [
+            "one"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [
+            [
+              0,
+              0
+            ]
+          ],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "one\n"
+    },
+    {
+      "contents": "a\nb\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "b"
+          ],
+          "newLines": [
+            "B"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        },
+        {
+          "oldLines": [
+            "a"
+          ],
+          "newLines": [
+            "A"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": true
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nMatching text exists at line 1, before the current search position at line 3. Put edits in file order and avoid overlapping hunks.\nExpected text:\na",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\ta\n2\tb"
+    },
+    {
+      "contents": "repeated\nrepeated\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "repeated"
+          ],
+          "newLines": [
+            "first"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        },
+        {
+          "oldLines": [
+            "repeated"
+          ],
+          "newLines": [
+            "last"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "first\nlast\n"
+    },
+    {
+      "contents": "prefix\nunique public anchor\nactual line\nsuffix\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "unique public anchor",
+            "wrong line"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nunique public anchor\nwrong line",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tprefix\n2\tunique public anchor\n3\tactual line\n4\tsuffix"
+    },
+    {
+      "contents": "early unique block\nlate unique block\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "late unique block"
+          ],
+          "newLines": [
+            "LATE"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        },
+        {
+          "oldLines": [
+            "early unique block"
+          ],
+          "newLines": [
+            "EARLY"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nMatching text exists at line 1, before the current search position at line 3. Put edits in file order and avoid overlapping hunks.\nExpected text:\nearly unique block",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tearly unique block\n2\tlate unique block"
+    },
+    {
+      "contents": "anchor\nactual\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "missing"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": "anchor",
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nmissing",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tanchor\n2\tactual"
+    },
+    {
+      "contents": "public\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "missing"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": "missing context",
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find context in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nmissing context",
+      "sourceContext": null
+    },
+    {
+      "contents": "﻿public line\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "﻿public line"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "﻿new\n"
+    },
+    {
+      "contents": "public line\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "﻿public line"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "expected": "new\n"
+    },
+    {
+      "contents": "public\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "public"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\npublic",
+      "sourceContext": null
+    },
+    {
+      "contents": "public source 0\npublic source 1\npublic source 2\npublic source 3\npublic source 4\npublic source 5\npublic source 6\npublic source 7\npublic source 8\npublic source 9\npublic source 10\npublic source 11\npublic source 12\npublic source 13",
+      "chunks": [
+        {
+          "oldLines": [
+            "public source 0",
+            "public source 1",
+            "public source 2",
+            "wrong line",
+            "public source 4",
+            "public source 5",
+            "public source 6",
+            "public source 7",
+            "public source 8",
+            "public source 9",
+            "public source 10",
+            "public source 11",
+            "public source 12"
+          ],
+          "newLines": [
+            "replacement"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\npublic source 0\npublic source 1\npublic source 2\nwrong line\npublic source 4\npublic source 5\npublic source 6\npublic source 7\n… (expected text truncated)",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tpublic source 0\n2\tpublic source 1\n3\tpublic source 2\n4\tpublic source 3\n5\tpublic source 4\n6\tpublic source 5\n7\tpublic source 6\n8\tpublic source 7"
+    },
+    {
+      "contents": "long public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nactual\n",
+      "chunks": [
+        {
+          "oldLines": [
+            "long public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "wrong"
+          ],
+          "newLines": [
+            "new"
+          ],
+          "changeContext": null,
+          "contextLineIndices": [],
+          "isEndOfFile": false
+        }
+      ],
+      "mode": "preserve_line_endings",
+      "error": "Failed to find expected lines in public.txt:\nUse the current file text as patch context; do not reconstruct or reformat the old lines.\nExpected text:\nlong public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…\nwrong",
+      "sourceContext": "Source excerpt from the patch verification snapshot (line numbers are not file content):\n1\tlong public anchor xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…\n2\tactual"
+    }
+  ],
+  "seeks": [
+    {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "pattern": [
+        "a"
+      ],
+      "start": 2,
+      "eof": true,
+      "mode": "normalize_to_lf",
+      "expected": null
+    },
+    {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "pattern": [
+        "b"
+      ],
+      "start": 5,
+      "eof": true,
+      "mode": "normalize_to_lf",
+      "expected": 1
+    },
+    {
+      "lines": [
+        "public﻿"
+      ],
+      "pattern": [
+        "public"
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "normalize_to_lf",
+      "expected": 0
+    },
+    {
+      "lines": [
+        "public"
+      ],
+      "pattern": [
+        "public"
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "normalize_to_lf",
+      "expected": null
+    },
+    {
+      "lines": [
+        "“public”— "
+      ],
+      "pattern": [
+        "\"public\"- "
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "normalize_to_lf",
+      "expected": 0
+    },
+    {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "pattern": [],
+      "start": 5,
+      "eof": false,
+      "mode": "normalize_to_lf",
+      "expected": 5
+    },
+    {
+      "lines": [
+        "a"
+      ],
+      "pattern": [
+        "a",
+        "b"
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "normalize_to_lf",
+      "expected": null
+    },
+    {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "pattern": [
+        "a"
+      ],
+      "start": 2,
+      "eof": true,
+      "mode": "preserve_line_endings",
+      "expected": null
+    },
+    {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "pattern": [
+        "b"
+      ],
+      "start": 5,
+      "eof": true,
+      "mode": "preserve_line_endings",
+      "expected": null
+    },
+    {
+      "lines": [
+        "public﻿"
+      ],
+      "pattern": [
+        "public"
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "preserve_line_endings",
+      "expected": 0
+    },
+    {
+      "lines": [
+        "public"
+      ],
+      "pattern": [
+        "public"
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "preserve_line_endings",
+      "expected": null
+    },
+    {
+      "lines": [
+        "“public”— "
+      ],
+      "pattern": [
+        "\"public\"- "
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "preserve_line_endings",
+      "expected": 0
+    },
+    {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "pattern": [],
+      "start": 5,
+      "eof": false,
+      "mode": "preserve_line_endings",
+      "expected": 5
+    },
+    {
+      "lines": [
+        "a"
+      ],
+      "pattern": [
+        "a",
+        "b"
+      ],
+      "start": 0,
+      "eof": false,
+      "mode": "preserve_line_endings",
+      "expected": null
+    }
+  ],
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "errors.ts": "e3a4ec6c634ffc43ed86219c78045a103654b6df1f996d84ba8dcaa4964e2f6c",
+    "seek-sequence.ts": "7ba5adc4688a0d81d805f6b6f0c7cfc85f3fbe85d8eff6718ebe45194d1f9cbd",
+    "text-file.ts": "e63ace580b390e5ae0367103a7d4b96cbbd6a06557ba44ed7ac0827206d72614",
+    "file-update.ts": "a28ad436c62f118831b17766719ef61329806d4654efb51e23609769fc191f24",
+    "hunk.ts": "65df32a990b7b4406f04279a23a7da69cdac77eb7fba8de287620f95e6f9f9b0",
+    "streaming-parser.ts": "ad8e6c93d7ead28e05501b26548129e18a1f7e0fe982d8f8b1315fd816fafb9e",
+    "parser.ts": "43a8f4e7d4e47cc4dd7f0d3a38fd762fcb1cd2435bd25918961742523b5cda8e"
+  }
+}

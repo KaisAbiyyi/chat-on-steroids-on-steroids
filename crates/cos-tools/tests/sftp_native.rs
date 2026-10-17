@@ -110,4 +110,61 @@ fn native_openssh_subsystem_round_trip() {
         std::fs::read(d.path().join("nested/new.txt")).unwrap(),
         b"new public file\n"
     );
+    use cos_tools::patch::{self, FileUpdateMode, UpdateError};
+    std::fs::write(d.path().join("mode.txt"), b"one\r\ntwo\nthree").unwrap();
+    let hunks = patch::parse_typed(
+        "*** Begin Patch\n*** Update File: mode.txt\n@@\n one\n-two\n+TWO\n three\n*** End Patch",
+    )
+    .unwrap()
+    .hunks;
+    remote
+        .apply_hunks_checked_mode(hunks, None, FileUpdateMode::NormalizeToLf, &|_| Ok(()))
+        .unwrap();
+    assert_eq!(
+        std::fs::read(d.path().join("mode.txt")).unwrap(),
+        b"one\nTWO\nthree\n"
+    );
+    std::fs::write(d.path().join("mode.txt"), b"one\r\n").unwrap();
+    let hunks=patch::parse_typed("*** Begin Patch\n*** Update File: mode.txt\n*** Move to: moved-mode.txt\n@@\n one\n*** End Patch").unwrap().hunks;
+    remote
+        .apply_hunks_checked_mode(
+            hunks,
+            None,
+            FileUpdateMode::PreserveLineEndings,
+            &|permission| {
+                if permission == "edit" {
+                    Err(std::io::Error::other("Edit disabled"))
+                } else {
+                    Ok(())
+                }
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        std::fs::read(d.path().join("moved-mode.txt")).unwrap(),
+        b"one\r\n"
+    );
+    std::fs::write(
+        d.path().join("diagnostic.txt"),
+        b"public unique anchor\noriginal\n",
+    )
+    .unwrap();
+    let hunks=patch::parse_typed("*** Begin Patch\n*** Update File: diagnostic.txt\n@@\n public unique anchor\n-wrong\n+new\n*** End Patch").unwrap().hunks;
+    let error = remote
+        .apply_hunks_checked_mode(hunks, None, FileUpdateMode::NormalizeToLf, &|_| Ok(()))
+        .unwrap_err();
+    assert!(
+        error
+            .get_ref()
+            .and_then(|error| error.downcast_ref::<UpdateError>())
+            .unwrap()
+            .source_context
+            .as_ref()
+            .unwrap()
+            .contains("2\toriginal")
+    );
+    assert_eq!(
+        std::fs::read(d.path().join("diagnostic.txt")).unwrap(),
+        b"public unique anchor\noriginal\n"
+    );
 }

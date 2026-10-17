@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "sourceCommit": "10d4c8135d479a02ef115703be3ec3beb58b99ea",
+  "scope": "Actual native Linux execution of an isolated Git archive; host working-tree changes excluded",
+  "rustImage": "rust@sha256:8514999d4786ef12efe89239e86b3d0a021b94b9d35108c8efe6c79ca7dc1a65",
+  "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+  "kernel": "Linux 6.6.87.1-microsoft-standard-WSL2 x86_64 GNU/Linux",
+  "tests": {
+    "passed": 156,
+    "failed": 0,
+    "ignored": 0
+  },
+  "log": "audit/2026-10-18/linux-file-panel-receipt.log",
+  "logSha256": "16859d151d8119dd7d3c72788e3b68c46e63b19805ad1e1439a02b51eaff9c75",
+  "personalProfilesUsed": false,
+  "macOS": "HOLD by user request"
+}

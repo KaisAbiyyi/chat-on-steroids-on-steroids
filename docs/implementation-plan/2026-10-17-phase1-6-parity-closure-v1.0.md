@@ -153,4 +153,19 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   all-locale/ICU-version ordering, remaining OS mutation races and later UI/attach/trash wiring.
   Local directory scan and existing SFTP directory budgets remain explicit resource differences.
   Integrated Windows checkpoint: **160 PASS, 0 failed/ignored; strict Clippy and formatting PASS**.
-  Current-commit Linux execution and release size are being qualified.
+  Exact commit `10d4c81` passed **156 Linux tests, 0 failed/ignored**, including native Unix
+  parent/source relocation, Git watches, sidecar retirement and SFTP. The release is 10.269 MiB
+  (+1.793 MiB versus the previous headless service), with 17 runtime and 13 source checks PASS.
+- Task 4a: actual patch update/seek functions now provide 36 update and 14 seek vectors across both
+  update modes, EOF behavior, JS whitespace, out-of-order diagnostics and bounded anchored excerpts.
+  Functional RED reproduced the generic out-of-order error, wrong model-facing newline mode, missing
+  move-only support, missing readable excerpt and Add overwrite bypassing its Create permission.
+  Focused tests are GREEN after both modes, typed diagnostics, current Read checks and separate
+  syntax/effect authorization were integrated. Native SFTP verifies both modes, move-only preservation
+  and typed diagnostics. Full Windows suite: **166 PASS, 0 failed/ignored**; strict Clippy and formatting
+  PASS. Current patch-commit Linux qualification follows this checkpoint.
+- Ruling: retain the existing Edit requirement whenever a context-only move would change actual
+  bytes, including appending a newline to an unterminated file — upstream's preserve mode still
+  appends that newline, while the frozen contract keeps Move separate from content editing.
+  Cost: that upstream edge case remains a conservative compatibility deviation; the caller needs
+  Edit or a byte-preserving rename. Exact CRLF/context-only moves now work with Move alone.

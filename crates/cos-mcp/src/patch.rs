@@ -66,6 +66,19 @@ impl Kernel {
                 backend = Some(kind);
             }
         }
+        let platform = if cfg!(windows) {
+            "win32"
+        } else if cfg!(target_os = "macos") {
+            "darwin"
+        } else {
+            "linux"
+        };
+        let capabilities = || config::effective_capabilities(&self.config.get(), platform);
+        let mode = if capabilities()["edit"] == true {
+            patch::FileUpdateMode::NormalizeToLf
+        } else {
+            patch::FileUpdateMode::PreserveLineEndings
+        };
         let needed = std::cell::RefCell::new(Vec::<&str>::new());
         let authorize = |kind: &str| -> io::Result<()> {
             self.cancel.check()?;
@@ -80,20 +93,21 @@ impl Kernel {
                     "Workspace or caller authority changed during patch",
                 ));
             }
-            let caps = config::effective_capabilities(
-                &self.config.get(),
-                if cfg!(windows) {
-                    "win32"
-                } else if cfg!(target_os = "macos") {
-                    "darwin"
-                } else {
-                    "linux"
-                },
-            );
+            let caps = capabilities();
             if (!kind.is_empty() && caps[kind] != true)
                 || needed.borrow().iter().any(|key| caps[*key] != true)
             {
                 return Err(invalid("TOOL_DISABLED: apply_patch permission changed"));
+            }
+            if let Some(kind) = match kind {
+                "create" => Some("create"),
+                "edit" => Some("edit"),
+                "move" => Some("move"),
+                "deleteFile" => Some("deleteFile"),
+                _ => None,
+            } && !needed.borrow().contains(&kind)
+            {
+                needed.borrow_mut().push(kind);
             }
             Ok(())
         };
@@ -112,13 +126,22 @@ impl Kernel {
                     } else {
                         sandbox::resolve(roots, path, None, false).is_ok()
                     };
-                    needed
-                        .borrow_mut()
-                        .push(if exists { "edit" } else { "create" });
+                    needed.borrow_mut().push("create");
+                    if exists {
+                        needed.borrow_mut().push("edit");
+                    }
                 }
                 Hunk::DeleteFile { .. } => needed.borrow_mut().push("deleteFile"),
-                Hunk::UpdateFile { move_path, .. } => {
-                    needed.borrow_mut().push("edit");
+                Hunk::UpdateFile {
+                    move_path, chunks, ..
+                } => {
+                    if move_path.is_none()
+                        || chunks
+                            .iter()
+                            .any(|chunk| chunk.old_lines != chunk.new_lines)
+                    {
+                        needed.borrow_mut().push("edit");
+                    }
                     if move_path.is_some() {
                         needed.borrow_mut().push("move");
                     }
@@ -146,11 +169,36 @@ impl Kernel {
                 }
             }
             self.with_remote(root, |r| {
-                r.apply_hunks_checked(parsed.hunks, None, &authorize)
-            })?
+                r.apply_hunks_checked_mode(parsed.hunks, None, mode, &authorize)
+            })
         } else {
             self.files
-                .apply_checked(roots, &base, source, None, &authorize)?
+                .apply_checked_mode(roots, &base, source, None, mode, &authorize)
+        };
+        let report = match report {
+            Ok(report) => report,
+            Err(error) => {
+                if let Some(detail) = error
+                    .get_ref()
+                    .and_then(|error| error.downcast_ref::<patch::UpdateError>())
+                {
+                    authorize("")?;
+                    let context = if capabilities()["read"] == true {
+                        detail
+                            .source_context
+                            .as_deref()
+                            .map(|context| format!("\n\n{context}"))
+                            .unwrap_or_default()
+                    } else {
+                        String::new()
+                    };
+                    return Err(invalid(format!(
+                        "apply_patch verification failed: {}{context}",
+                        detail.message
+                    )));
+                }
+                return Err(error);
+            }
         };
         Ok(
             json!({"content":[{"type":"text","text":format!("Success. Updated the following files:\n{}",report["changes"].as_array().unwrap().iter().map(|v|format!("{} {}",match v["kind"].as_str().unwrap_or(""){"add"=>"A","delete"=>"D",_=>"M"},v["path"].as_str().unwrap_or(""))).collect::<Vec<_>>().join("\n"))}],"structuredContent":report}),
