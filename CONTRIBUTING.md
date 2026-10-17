@@ -11,9 +11,9 @@ need an installed `sftp-server` (`openssh-server` on Debian/Ubuntu). Windows use
 included in Git for Windows at `C:/Program Files/Git/usr/lib/ssh/sftp-server.exe`.
 
 ```sh
-cargo test --workspace --locked
+cargo test --workspace --locked -j 2
 cargo fmt --all --check
-cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo clippy --workspace --all-targets --locked -j 2 -- -D warnings
 cargo build --release --locked
 ```
 
@@ -47,3 +47,12 @@ Use only synthetic data in issues and pull requests. Report potential credential
 without publishing private profiles, live secret URLs or exploit details containing personal data.
 Large runtime dependencies need an explicit size/feature rationale and license attribution. The
 current JavaScript engine includes QuickJS C; describe it accurately when changing that boundary.
+
+## Isolated SSH qualification
+
+`tools/qualify-ssh.py --container <owned-linux-container> --output <receipt-path>` exercises the actual
+host OpenSSH client against a disposable loopback sshd. The container must carry the label
+`com.cos-rust.task=phase1-6-closure`, contain `openssh-server` and `netcat-openbsd`, and be dedicated
+to public fixtures. The script generates temporary keys/config/known_hosts, uses a Docker stdio proxy
+without publishing a host port, and stops its own daemon. It never selects personal SSH configuration.
+This explicit check is separate from the normal installed-subsystem tests and external-server proof.

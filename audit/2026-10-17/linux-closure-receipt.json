@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-17",
+  "status": "PASS",
+  "sourceCommit": "979f680",
+  "scope": "Actual native Linux execution of the Git and workspace checkpoint",
+  "rustImage": "rust@sha256:8514999d4786ef12efe89239e86b3d0a021b94b9d35108c8efe6c79ca7dc1a65",
+  "rustc": "1.91.1 (ed61e7d7e 2025-11-07)",
+  "kernel": "Linux 6.6.87.1-microsoft-standard-WSL2 x86_64",
+  "tests": {
+    "passed": 122,
+    "failed": 0,
+    "ignored": 0
+  },
+  "nativeUnixDescendantPipeRegression": "PASS",
+  "sshAuthentication": "NOT RUN; installed subsystem tests are separate",
+  "log": "audit/2026-10-17-linux-closure-tests.log",
+  "logSha256": "745878668c5cd874c868dfd5a9fd3a07c22a91b6680d4e2288a3c66a58f2a9b8",
+  "personalProfilesUsed": false,
+  "macOS": "HOLD by user request"
+}

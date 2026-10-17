@@ -434,6 +434,7 @@ impl Kernel {
                 }
                 return Ok(self.projects.workspace(roots, id)?.virtual_path);
             }
+            return Err(invalid("The session project is unavailable"));
         }
         roots
             .first()

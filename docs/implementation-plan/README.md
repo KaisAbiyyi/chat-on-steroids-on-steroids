@@ -1,5 +1,6 @@
 # Implementation plans
 
+- [Phase 1–6 parity closure v1.0: current Windows scope and live ledger](2026-10-17-phase1-6-parity-closure-v1.0.md)
 - [Phase 4–6 v1.0: executable scope, review focus and execution ledger](2026-10-17-phase4-6-implementation-v1.0.md)
 - [Original 16-phase Rust migration roadmap v1.0](2026-10-16-rust-migration-phases-v1.0.md)
 

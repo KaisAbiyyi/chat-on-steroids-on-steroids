@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "checks": [
+    "real public-key SSH authentication and Host alias",
+    "known-host key change refused",
+    "unauthorized identity refused",
+    "SFTP read and patch over SSH",
+    "remote symlink escape refused",
+    "remote command cwd/output/nonzero exit"
+  ],
+  "server": "disposable loopback sshd via private Docker stdio proxy",
+  "personalProfilesUsed": false,
+  "date": "2026-10-17",
+  "clientPlatform": "nt",
+  "cargoCommand": "cargo run --locked -j 2 -p cos-tools --example qualify_ssh",
+  "externalServer": "NOT RUN; this is an actual isolated loopback SSH server",
+  "containerImage": "sha256:1a3ca9cb5668e73d5b66e69e8c87403173dfa5c4e689189714b801b0fb8c59a2"
+}

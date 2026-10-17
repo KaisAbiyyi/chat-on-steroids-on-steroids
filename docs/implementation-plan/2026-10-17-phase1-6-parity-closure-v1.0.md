@@ -96,3 +96,15 @@ dependencies stay explicit; a missing backend cannot be replaced by fabricated s
   Git watcher/file-panel/project-lifecycle work and the remaining tasks are still open.
 
 Task details, commits, RED/GREEN evidence and outstanding acceptance are appended during implementation.
+
+- Shared workspace regression: a proven session bound to a missing project previously fell back
+  to another approved folder. `missing_bound_project_cannot_fallback_to_another_approved_folder`
+  reproduced the unwanted write (RED), then refused the missing binding with no file created (GREEN).
+  Integrated Windows suite: **127 PASS, 0 failed/ignored; strict Clippy PASS**.
+- Task 2: real Windows OpenSSH client authenticated to an isolated Linux sshd using only generated
+  public-fixture keys, private Host config and private known_hosts. Six checks PASS: authentication/
+  alias, changed host key refusal, unauthorized identity refusal, SFTP read/patch, symlink escape
+  refusal, command cwd/output/nonzero exit. The harness aggregates unread process chunks as
+  required by the existing process contract. External/public SSH and adversarial SFTP remain separate.
+- Linux checkpoint `979f680`: **122 PASS, 0 failed/ignored** on the pinned x64 Rust image, now
+  including the Git implementation. The subsequent missing-project fix is not covered by this receipt.

@@ -22,10 +22,18 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-First integrated closure checkpoint: **126 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **127 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
 the unchanged suite passed with two build jobs. Logs are retained separately; this is not a test removal.
+
+The Git checkpoint `979f680` passed **122 Linux tests**, 0 failed/ignored:
+[Linux receipt](../../audit/2026-10-17/linux-closure-receipt.json).
+Real Windows-to-Linux SSH qualification passed six checks using generated fixture identities and
+private config/known_hosts: [SSH receipt](../../audit/2026-10-17/ssh-qualification.json).
+No personal SSH profile, credentials or public port was used. This proves an actual isolated SSH
+transport, not an external production server or adversarial-server filesystem containment.
 
 ## Documents
 
