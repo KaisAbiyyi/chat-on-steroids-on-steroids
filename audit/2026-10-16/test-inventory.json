@@ -1,0 +1,1912 @@
+[
+  {
+    "path": "test/active-tabs.test.ts",
+    "lines": 158,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/agent-communication.test.ts",
+    "lines": 52,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/agent-health.test.ts",
+    "lines": 79,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/agent-plan.test.ts",
+    "lines": 169,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/agents.test.ts",
+    "lines": 5547,
+    "lexical_test_declarations": 243
+  },
+  {
+    "path": "test/app-proxy.test.ts",
+    "lines": 90,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/appearance.test.ts",
+    "lines": 50,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/approval-wait.test.ts",
+    "lines": 183,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/attribution-repair.test.ts",
+    "lines": 142,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/auto-skill-routing.test.ts",
+    "lines": 205,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/backend-recording.test.ts",
+    "lines": 181,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/background-window.test.ts",
+    "lines": 499,
+    "lexical_test_declarations": 41
+  },
+  {
+    "path": "test/blocked-chats.test.ts",
+    "lines": 107,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/bridge-done-repair-silence.test.ts",
+    "lines": 222,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/bridge-port-lifecycle.test.ts",
+    "lines": 169,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/bridge-ports.test.ts",
+    "lines": 33,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/bridge-turn-rotation.test.ts",
+    "lines": 190,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/bridge.test.ts",
+    "lines": 16443,
+    "lexical_test_declarations": 528
+  },
+  {
+    "path": "test/browser-control-extension.test.ts",
+    "lines": 128,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/browser-control-navigation.test.ts",
+    "lines": 133,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/browser-control-page.test.ts",
+    "lines": 174,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/browser-control.test.ts",
+    "lines": 97,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/browser-preferences-renderer.test.ts",
+    "lines": 67,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/browser-preferences.test.ts",
+    "lines": 23,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/browser-proof.test.ts",
+    "lines": 74,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/browser-selection.test.ts",
+    "lines": 63,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/browser-startup.test.ts",
+    "lines": 142,
+    "lexical_test_declarations": 13
+  },
+  {
+    "path": "test/browser-wake.test.ts",
+    "lines": 67,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/browser-window-layout.test.ts",
+    "lines": 20,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/browser.test.ts",
+    "lines": 341,
+    "lexical_test_declarations": 25
+  },
+  {
+    "path": "test/call-context.test.ts",
+    "lines": 139,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/chat-error-presentation.test.ts",
+    "lines": 152,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/chat-model-policy.test.ts",
+    "lines": 24,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/chat-models.test.ts",
+    "lines": 199,
+    "lexical_test_declarations": 19
+  },
+  {
+    "path": "test/chatgpt-dom-input.test.ts",
+    "lines": 1640,
+    "lexical_test_declarations": 110
+  },
+  {
+    "path": "test/chronology.test.ts",
+    "lines": 403,
+    "lexical_test_declarations": 22
+  },
+  {
+    "path": "test/code-mode-mcp.test.ts",
+    "lines": 519,
+    "lexical_test_declarations": 17
+  },
+  {
+    "path": "test/code-mode-runtime.test.ts",
+    "lines": 202,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/code-mode-unknown-tools.test.ts",
+    "lines": 35,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/codex-apply-patch-bom.test.ts",
+    "lines": 72,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/codex-apply-patch-invocation-parity.test.ts",
+    "lines": 77,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/codex-apply-patch-move-rollback.test.ts",
+    "lines": 93,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/codex-apply-patch-parity.test.ts",
+    "lines": 449,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/codex-apply-patch-streaming.test.ts",
+    "lines": 81,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/codex-patch-diagnostics.test.ts",
+    "lines": 91,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/codex-plugin-runtime-process.test.ts",
+    "lines": 152,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/codex-plugin-runtime.test.ts",
+    "lines": 37,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/codex-plugin-snapshot.test.ts",
+    "lines": 182,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/codex-runtime-parity.test.ts",
+    "lines": 580,
+    "lexical_test_declarations": 16
+  },
+  {
+    "path": "test/codex-view-image-parity.test.ts",
+    "lines": 349,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/command-allowlist.test.ts",
+    "lines": 130,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/command-batch-display.test.ts",
+    "lines": 65,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/completion-input-integration.test.ts",
+    "lines": 165,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/composer-motion.test.ts",
+    "lines": 217,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/computer-browser-chords.test.ts",
+    "lines": 66,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/computer-browser-uia.test.ts",
+    "lines": 92,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/computer-focus.test.ts",
+    "lines": 109,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/computer-frame-bounds.test.ts",
+    "lines": 28,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/computer-generation.test.ts",
+    "lines": 354,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/computer-helper-protocol.test.ts",
+    "lines": 92,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/computer-helper-retirement.test.ts",
+    "lines": 209,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/computer-local-actions.test.ts",
+    "lines": 52,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/computer-overhaul-contract.test.ts",
+    "lines": 29,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/computer-own-windows.test.ts",
+    "lines": 104,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/computer-partial-batch.test.ts",
+    "lines": 124,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/computer-stale-ref.test.ts",
+    "lines": 171,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/computer-swapped-buttons.test.ts",
+    "lines": 80,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/computer-windows-accessibility.test.ts",
+    "lines": 242,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/computer-windows-input.test.ts",
+    "lines": 137,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/computer.test.ts",
+    "lines": 371,
+    "lexical_test_declarations": 21
+  },
+  {
+    "path": "test/config.test.ts",
+    "lines": 1143,
+    "lexical_test_declarations": 76
+  },
+  {
+    "path": "test/connection-notice.test.ts",
+    "lines": 48,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/connection.test.ts",
+    "lines": 1043,
+    "lexical_test_declarations": 47
+  },
+  {
+    "path": "test/connector-identity.test.ts",
+    "lines": 83,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/connector-name-line.test.ts",
+    "lines": 15,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/connector-names.test.ts",
+    "lines": 82,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/connector-proof.test.ts",
+    "lines": 107,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/content-reference.test.ts",
+    "lines": 61,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/content-script.test.ts",
+    "lines": 23698,
+    "lexical_test_declarations": 694
+  },
+  {
+    "path": "test/context-meter.test.ts",
+    "lines": 82,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/continuation-marker.test.ts",
+    "lines": 74,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/continuation.test.ts",
+    "lines": 2020,
+    "lexical_test_declarations": 82
+  },
+  {
+    "path": "test/control-api-actions.test.ts",
+    "lines": 1185,
+    "lexical_test_declarations": 50
+  },
+  {
+    "path": "test/control-api-reads.test.ts",
+    "lines": 1026,
+    "lexical_test_declarations": 54
+  },
+  {
+    "path": "test/control-api-stream.test.ts",
+    "lines": 236,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/control-api-workers.test.ts",
+    "lines": 319,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/control-api.test.ts",
+    "lines": 256,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/conversation-load-failure.test.ts",
+    "lines": 41,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/correlation.test.ts",
+    "lines": 528,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/cos-browser-chrome-api.test.ts",
+    "lines": 136,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/cos-browser-extension-worker.test.ts",
+    "lines": 134,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/cos-browser-opt-in.test.ts",
+    "lines": 142,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/cos-browser-sign-in-host.test.ts",
+    "lines": 315,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/cos-browser-sign-in.test.ts",
+    "lines": 72,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/cos-browser-tab-model.test.ts",
+    "lines": 177,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/cos-browser-worker-preload.test.ts",
+    "lines": 144,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/credentials-notice.test.ts",
+    "lines": 61,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/desktop-input-maintenance.test.ts",
+    "lines": 1761,
+    "lexical_test_declarations": 103
+  },
+  {
+    "path": "test/diagnostics-facts.test.ts",
+    "lines": 162,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/diagnostics-report-remote.test.ts",
+    "lines": 28,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/diagnostics-report.test.ts",
+    "lines": 131,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/diagnostics-save.test.ts",
+    "lines": 17,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/dictation-lifecycle.test.ts",
+    "lines": 132,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/dictation.test.ts",
+    "lines": 47,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/draft-release-notes.test.ts",
+    "lines": 28,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/durable.test.ts",
+    "lines": 214,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/edit-context-menu.test.ts",
+    "lines": 52,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/env.test.ts",
+    "lines": 382,
+    "lexical_test_declarations": 28
+  },
+  {
+    "path": "test/exec-completed-results.test.ts",
+    "lines": 108,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/exec-hints.test.ts",
+    "lines": 1336,
+    "lexical_test_declarations": 117
+  },
+  {
+    "path": "test/exec-notices.test.ts",
+    "lines": 84,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/exec-output-budget-mcp.test.ts",
+    "lines": 141,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/exec-output-budget.test.ts",
+    "lines": 158,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/exec-result-delivery.test.ts",
+    "lines": 82,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/exec-shell-regressions.test.ts",
+    "lines": 117,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/exec.test.ts",
+    "lines": 411,
+    "lexical_test_declarations": 36
+  },
+  {
+    "path": "test/extension-app-language.test.ts",
+    "lines": 98,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/extension-auto-reload.test.ts",
+    "lines": 100,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/extension-environment.test.ts",
+    "lines": 71,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/extension-i18n.test.ts",
+    "lines": 112,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/extension-path.test.ts",
+    "lines": 223,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/extension-popup.test.ts",
+    "lines": 166,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/extension.test.ts",
+    "lines": 6086,
+    "lexical_test_declarations": 213
+  },
+  {
+    "path": "test/feature-parity.test.ts",
+    "lines": 100,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/fetch-retry.test.ts",
+    "lines": 94,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/fiber.test.ts",
+    "lines": 1824,
+    "lexical_test_declarations": 83
+  },
+  {
+    "path": "test/file-code-editor.test.ts",
+    "lines": 91,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/file-pdf-viewer.test.ts",
+    "lines": 225,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/final-answer-residency.test.ts",
+    "lines": 65,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/finish-active-input.test.ts",
+    "lines": 147,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/finish-input-integration.test.ts",
+    "lines": 72,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/firefox-extension-package.test.ts",
+    "lines": 121,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/firefox-update-manifest.test.ts",
+    "lines": 51,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/flaky-reporter.test.ts",
+    "lines": 38,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/fsops.test.ts",
+    "lines": 444,
+    "lexical_test_declarations": 40
+  },
+  {
+    "path": "test/goal-backends.test.ts",
+    "lines": 636,
+    "lexical_test_declarations": 33
+  },
+  {
+    "path": "test/goal-control-race.test.ts",
+    "lines": 439,
+    "lexical_test_declarations": 23
+  },
+  {
+    "path": "test/goal-errors.test.ts",
+    "lines": 117,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/goal-helper-model.test.ts",
+    "lines": 110,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/goal-reasoning.test.ts",
+    "lines": 52,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/goal-resume-handoff.test.ts",
+    "lines": 412,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/goal.test.ts",
+    "lines": 2925,
+    "lexical_test_declarations": 125
+  },
+  {
+    "path": "test/icon-font.test.ts",
+    "lines": 81,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/image-export.test.ts",
+    "lines": 91,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/image-recording.test.ts",
+    "lines": 84,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/image-request-holdout.test.ts",
+    "lines": 105,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/image-request-languages.test.ts",
+    "lines": 132,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/image-request.test.ts",
+    "lines": 123,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/image-storage-ui.test.ts",
+    "lines": 107,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/image-storage.test.ts",
+    "lines": 227,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/input-delivery-integration.test.ts",
+    "lines": 3141,
+    "lexical_test_declarations": 107
+  },
+  {
+    "path": "test/input-startup.test.ts",
+    "lines": 156,
+    "lexical_test_declarations": 13
+  },
+  {
+    "path": "test/instructions-remote.test.ts",
+    "lines": 16,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/ipc.test.ts",
+    "lines": 2412,
+    "lexical_test_declarations": 111
+  },
+  {
+    "path": "test/issue-version.test.ts",
+    "lines": 123,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/keep-awake.test.ts",
+    "lines": 75,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/kernel-desktop-identity.test.ts",
+    "lines": 43,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/kernel-identity-recovery.test.ts",
+    "lines": 127,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/kernel-project-workspace.test.ts",
+    "lines": 161,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/kernel-run-inbox.test.ts",
+    "lines": 98,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/kernel-tool-disabled-message.test.ts",
+    "lines": 39,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/keychain-notice.test.ts",
+    "lines": 156,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/language-order.test.ts",
+    "lines": 15,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/local-url.test.ts",
+    "lines": 12,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/logger.test.ts",
+    "lines": 132,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/macos-adhoc-seal.test.ts",
+    "lines": 95,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/macos-computer-live.test.ts",
+    "lines": 80,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/macos-desktop-hardening.test.ts",
+    "lines": 211,
+    "lexical_test_declarations": 22
+  },
+  {
+    "path": "test/macos-grants.test.ts",
+    "lines": 69,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/macos-window-matching.test.ts",
+    "lines": 12,
+    "lexical_test_declarations": 0
+  },
+  {
+    "path": "test/main-texts.test.ts",
+    "lines": 104,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/markdown-export.test.ts",
+    "lines": 74,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/mcp-inbound.test.ts",
+    "lines": 34,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/mcp-inflight.test.ts",
+    "lines": 157,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/mcp-input-images.test.ts",
+    "lines": 108,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/mcp-latency-benchmark.test.ts",
+    "lines": 102,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/mcp-persistent-paths.test.ts",
+    "lines": 59,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/mcp-shutdown.test.ts",
+    "lines": 166,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/mcp-timing.test.ts",
+    "lines": 50,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/mcp-tool-declarations.test.ts",
+    "lines": 102,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/mcp-user-instructions.test.ts",
+    "lines": 202,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/mcp-worktree-spawn.test.ts",
+    "lines": 265,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/mcp.test.ts",
+    "lines": 4494,
+    "lexical_test_declarations": 186
+  },
+  {
+    "path": "test/message-reaction.test.ts",
+    "lines": 16,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/model-catalog-workflow.test.ts",
+    "lines": 128,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/model-picker-state.test.ts",
+    "lines": 596,
+    "lexical_test_declarations": 44
+  },
+  {
+    "path": "test/model-startup-wake.test.ts",
+    "lines": 49,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/opening-input.test.ts",
+    "lines": 433,
+    "lexical_test_declarations": 24
+  },
+  {
+    "path": "test/packaging.test.ts",
+    "lines": 918,
+    "lexical_test_declarations": 36
+  },
+  {
+    "path": "test/panel-motion.test.ts",
+    "lines": 91,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/pet-activity.test.ts",
+    "lines": 59,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/pet-atlas.test.ts",
+    "lines": 32,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/pet-bundled.test.ts",
+    "lines": 46,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/pet-choreography.test.ts",
+    "lines": 22,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/pet-controller.test.ts",
+    "lines": 84,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/pet-library.test.ts",
+    "lines": 110,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/pet-overlay-host.test.ts",
+    "lines": 197,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/pet-overlay-renderer.test.ts",
+    "lines": 276,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/pet-window-focus.test.ts",
+    "lines": 100,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/pet.test.ts",
+    "lines": 136,
+    "lexical_test_declarations": 19
+  },
+  {
+    "path": "test/pets-renderer.test.ts",
+    "lines": 146,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/platform.test.ts",
+    "lines": 136,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/plugin-refresh-browser-creation.test.ts",
+    "lines": 121,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/plugin-refresh-dom.test.ts",
+    "lines": 397,
+    "lexical_test_declarations": 37
+  },
+  {
+    "path": "test/plugin-refresh-evidence.test.ts",
+    "lines": 419,
+    "lexical_test_declarations": 24
+  },
+  {
+    "path": "test/plugin-refresh-offer.test.ts",
+    "lines": 55,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/plugin-refresh-reminder.test.ts",
+    "lines": 80,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/plugin-refresh-workflow.test.ts",
+    "lines": 519,
+    "lexical_test_declarations": 31
+  },
+  {
+    "path": "test/plugin-refresh.test.ts",
+    "lines": 860,
+    "lexical_test_declarations": 53
+  },
+  {
+    "path": "test/plugins-catalog-live.test.ts",
+    "lines": 58,
+    "lexical_test_declarations": 0
+  },
+  {
+    "path": "test/plugins-catalog.test.ts",
+    "lines": 59,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/plugins-environment.test.ts",
+    "lines": 37,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/plugins-exposure.test.ts",
+    "lines": 81,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/plugins-installer-lifetime.test.ts",
+    "lines": 48,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/plugins-installer.test.ts",
+    "lines": 101,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/plugins-ipc-refresh.test.ts",
+    "lines": 68,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/plugins-live-proxy.test.ts",
+    "lines": 51,
+    "lexical_test_declarations": 0
+  },
+  {
+    "path": "test/plugins-manager.test.ts",
+    "lines": 1188,
+    "lexical_test_declarations": 61
+  },
+  {
+    "path": "test/plugins-oauth.test.ts",
+    "lines": 127,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/plugins-python-live.test.ts",
+    "lines": 52,
+    "lexical_test_declarations": 0
+  },
+  {
+    "path": "test/plugins-surface.test.ts",
+    "lines": 245,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/plugins-ui.test.ts",
+    "lines": 369,
+    "lexical_test_declarations": 23
+  },
+  {
+    "path": "test/pr-check.test.ts",
+    "lines": 136,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/pr-fail-first.test.ts",
+    "lines": 56,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/pr-not-ready.test.ts",
+    "lines": 99,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/pr-triage.test.ts",
+    "lines": 40,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/preload-images.test.ts",
+    "lines": 37,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/preload-session-change.test.ts",
+    "lines": 23,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/process-history.test.ts",
+    "lines": 218,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/progress-context.test.ts",
+    "lines": 18,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/project-files.test.ts",
+    "lines": 448,
+    "lexical_test_declarations": 21
+  },
+  {
+    "path": "test/project-git.test.ts",
+    "lines": 275,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/project-successor.test.ts",
+    "lines": 330,
+    "lexical_test_declarations": 18
+  },
+  {
+    "path": "test/projects.test.ts",
+    "lines": 238,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/provider-usage-parse.test.ts",
+    "lines": 98,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/provider-usage.test.ts",
+    "lines": 97,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/public-history-privacy.test.ts",
+    "lines": 256,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/read-backend.test.ts",
+    "lines": 220,
+    "lexical_test_declarations": 20
+  },
+  {
+    "path": "test/recommended-skills.test.ts",
+    "lines": 40,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/recorder-final-identity.test.ts",
+    "lines": 403,
+    "lexical_test_declarations": 20
+  },
+  {
+    "path": "test/recording-storage-cleanup.test.ts",
+    "lines": 166,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/recording-storage-notice.test.ts",
+    "lines": 67,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/recovery-message.test.ts",
+    "lines": 17,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/remote-exec.test.ts",
+    "lines": 167,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/remote-project-fs.test.ts",
+    "lines": 133,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/remote-projects.test.ts",
+    "lines": 180,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/remote-sandbox.test.ts",
+    "lines": 96,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/remote-sftp.test.ts",
+    "lines": 124,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/remote-ssh.test.ts",
+    "lines": 130,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/remote-tools.test.ts",
+    "lines": 213,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/renderer-agent-panel.test.ts",
+    "lines": 422,
+    "lexical_test_declarations": 18
+  },
+  {
+    "path": "test/renderer-agent-plan.test.ts",
+    "lines": 76,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/renderer-chat-models.test.ts",
+    "lines": 749,
+    "lexical_test_declarations": 31
+  },
+  {
+    "path": "test/renderer-desktop-access-notice.test.ts",
+    "lines": 75,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/renderer-dictation.test.ts",
+    "lines": 144,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/renderer-dil-table.test.ts",
+    "lines": 61,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/renderer-file-panel.test.ts",
+    "lines": 1187,
+    "lexical_test_declarations": 44
+  },
+  {
+    "path": "test/renderer-font-assets.test.ts",
+    "lines": 13,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/renderer-html.test.ts",
+    "lines": 574,
+    "lexical_test_declarations": 36
+  },
+  {
+    "path": "test/renderer-i18n-source.test.ts",
+    "lines": 92,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/renderer-i18n.test.ts",
+    "lines": 379,
+    "lexical_test_declarations": 31
+  },
+  {
+    "path": "test/renderer-keychain-notice.test.ts",
+    "lines": 41,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/renderer-layout.test.ts",
+    "lines": 689,
+    "lexical_test_declarations": 50
+  },
+  {
+    "path": "test/renderer-prompt-visual.test.ts",
+    "lines": 53,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/renderer-recovery.test.ts",
+    "lines": 184,
+    "lexical_test_declarations": 16
+  },
+  {
+    "path": "test/renderer-shortcuts.test.ts",
+    "lines": 20,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/renderer-skills.test.ts",
+    "lines": 335,
+    "lexical_test_declarations": 23
+  },
+  {
+    "path": "test/renderer-ssh-project-dialog.test.ts",
+    "lines": 72,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/renderer-state.test.ts",
+    "lines": 3640,
+    "lexical_test_declarations": 118
+  },
+  {
+    "path": "test/renderer-timeline.test.ts",
+    "lines": 5849,
+    "lexical_test_declarations": 252
+  },
+  {
+    "path": "test/renderer-usage.test.ts",
+    "lines": 337,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/renderer-view-menu.test.ts",
+    "lines": 109,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/renderer-workspace-docks.test.ts",
+    "lines": 220,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/renderer-worktree-cleanup.test.ts",
+    "lines": 122,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/report-scrub.test.ts",
+    "lines": 54,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/request-agent-ownership.test.ts",
+    "lines": 419,
+    "lexical_test_declarations": 16
+  },
+  {
+    "path": "test/resume.test.ts",
+    "lines": 798,
+    "lexical_test_declarations": 25
+  },
+  {
+    "path": "test/runtime-enable-and-extension.test.ts",
+    "lines": 48,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/runtime-gc.test.ts",
+    "lines": 346,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/sandbox.test.ts",
+    "lines": 532,
+    "lexical_test_declarations": 66
+  },
+  {
+    "path": "test/search.test.ts",
+    "lines": 382,
+    "lexical_test_declarations": 45
+  },
+  {
+    "path": "test/secrets.test.ts",
+    "lines": 448,
+    "lexical_test_declarations": 19
+  },
+  {
+    "path": "test/session-completion-order.test.ts",
+    "lines": 235,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/session-finish.test.ts",
+    "lines": 605,
+    "lexical_test_declarations": 36
+  },
+  {
+    "path": "test/session-input-attachments-audit.test.ts",
+    "lines": 38,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/session-input-attachments.test.ts",
+    "lines": 77,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/session-input-history.test.ts",
+    "lines": 280,
+    "lexical_test_declarations": 13
+  },
+  {
+    "path": "test/session-input-images.test.ts",
+    "lines": 56,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/session-input-retention.test.ts",
+    "lines": 110,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/session-input.test.ts",
+    "lines": 2162,
+    "lexical_test_declarations": 155
+  },
+  {
+    "path": "test/session-journal-scan.test.ts",
+    "lines": 94,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/session-list-refresh.test.ts",
+    "lines": 493,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/session-markdown-export.test.ts",
+    "lines": 79,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/session-prompt.test.ts",
+    "lines": 199,
+    "lexical_test_declarations": 9
+  },
+  {
+    "path": "test/session-response-identity.test.ts",
+    "lines": 229,
+    "lexical_test_declarations": 13
+  },
+  {
+    "path": "test/session-retention.test.ts",
+    "lines": 10,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/session-search.test.ts",
+    "lines": 203,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/session-usage.test.ts",
+    "lines": 499,
+    "lexical_test_declarations": 42
+  },
+  {
+    "path": "test/session.test.ts",
+    "lines": 4232,
+    "lexical_test_declarations": 173
+  },
+  {
+    "path": "test/shell-agent-roundtrip.test.ts",
+    "lines": 217,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/shell-compat.test.ts",
+    "lines": 1658,
+    "lexical_test_declarations": 76
+  },
+  {
+    "path": "test/shutdown.test.ts",
+    "lines": 351,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/sidebar-completion.test.ts",
+    "lines": 88,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/sidebar-order.test.ts",
+    "lines": 94,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/sidebar-pins.test.ts",
+    "lines": 44,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/sidebar-resize.test.ts",
+    "lines": 48,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/similar-issues.test.ts",
+    "lines": 31,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/skill-github.test.ts",
+    "lines": 249,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/skill-library.test.ts",
+    "lines": 278,
+    "lexical_test_declarations": 12
+  },
+  {
+    "path": "test/skill-metadata.test.ts",
+    "lines": 20,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/skill-routing.test.ts",
+    "lines": 161,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/skills-integration.test.ts",
+    "lines": 213,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/skills-library-renderer.test.ts",
+    "lines": 236,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/skills.test.ts",
+    "lines": 320,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/stop-notice.test.ts",
+    "lines": 55,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/swarm.test.ts",
+    "lines": 283,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/tab-reorder.test.ts",
+    "lines": 76,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/task-progress.test.ts",
+    "lines": 53,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/task-request.test.ts",
+    "lines": 74,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/temporary-mode.test.ts",
+    "lines": 58,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/text-match.test.ts",
+    "lines": 126,
+    "lexical_test_declarations": 14
+  },
+  {
+    "path": "test/third-party-notices.test.ts",
+    "lines": 73,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/timeline-rounds.test.ts",
+    "lines": 220,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/timeline-scroll.test.ts",
+    "lines": 151,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/tool-approval-notice.test.ts",
+    "lines": 46,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/tool-artifacts.test.ts",
+    "lines": 101,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/tool-result.test.ts",
+    "lines": 16,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/tools-browser.test.ts",
+    "lines": 112,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/tools-desktop-permissions.test.ts",
+    "lines": 158,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/tools-desktop-runtime.test.ts",
+    "lines": 202,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/tools-desktop-windows.test.ts",
+    "lines": 207,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/transcript-window.test.ts",
+    "lines": 178,
+    "lexical_test_declarations": 10
+  },
+  {
+    "path": "test/tray-image.test.ts",
+    "lines": 54,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/trusted-chats.test.ts",
+    "lines": 104,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/tunnel-ids.test.ts",
+    "lines": 44,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/tunnel-lifecycle.test.ts",
+    "lines": 496,
+    "lexical_test_declarations": 11
+  },
+  {
+    "path": "test/tunnel-locate.test.ts",
+    "lines": 117,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/tunnel-proxy.test.ts",
+    "lines": 64,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/tunnel-route-settle.test.ts",
+    "lines": 46,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/tunnel.test.ts",
+    "lines": 380,
+    "lexical_test_declarations": 35
+  },
+  {
+    "path": "test/turn-notifications.test.ts",
+    "lines": 59,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/turn-rotation.test.ts",
+    "lines": 83,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/ui-plain-words.test.ts",
+    "lines": 29,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/unified-diff.test.ts",
+    "lines": 22,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/unified-exec-exit-code.test.ts",
+    "lines": 15,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/unified-exec-mutex.test.ts",
+    "lines": 108,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/unified-exec-output-stream.test.ts",
+    "lines": 54,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/update-all.test.ts",
+    "lines": 190,
+    "lexical_test_declarations": 15
+  },
+  {
+    "path": "test/update-error.test.ts",
+    "lines": 71,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/update-progress.test.ts",
+    "lines": 97,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/update-readiness-state.test.ts",
+    "lines": 155,
+    "lexical_test_declarations": 6
+  },
+  {
+    "path": "test/update-readiness.test.ts",
+    "lines": 141,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/update-texts-actions.test.ts",
+    "lines": 31,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/update-texts-components.test.ts",
+    "lines": 36,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/update-texts-recovery.test.ts",
+    "lines": 41,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/update.test.ts",
+    "lines": 842,
+    "lexical_test_declarations": 46
+  },
+  {
+    "path": "test/usage-observer.test.ts",
+    "lines": 856,
+    "lexical_test_declarations": 58
+  },
+  {
+    "path": "test/usage-tool.test.ts",
+    "lines": 42,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/usage-week.test.ts",
+    "lines": 43,
+    "lexical_test_declarations": 4
+  },
+  {
+    "path": "test/user-prompt.test.ts",
+    "lines": 157,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/user-skills.test.ts",
+    "lines": 64,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/uv-runtime.test.ts",
+    "lines": 50,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/verify-release-assets.test.ts",
+    "lines": 84,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/waiting-prs.test.ts",
+    "lines": 49,
+    "lexical_test_declarations": 5
+  },
+  {
+    "path": "test/weekly-digest.test.ts",
+    "lines": 24,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/whats-new.test.ts",
+    "lines": 50,
+    "lexical_test_declarations": 7
+  },
+  {
+    "path": "test/window-icon.test.ts",
+    "lines": 19,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/window-layout.test.ts",
+    "lines": 144,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/window-lifecycle.test.ts",
+    "lines": 266,
+    "lexical_test_declarations": 13
+  },
+  {
+    "path": "test/windows-api.test.ts",
+    "lines": 200,
+    "lexical_test_declarations": 17
+  },
+  {
+    "path": "test/windows-apps.test.ts",
+    "lines": 111,
+    "lexical_test_declarations": 3
+  },
+  {
+    "path": "test/windows-capture.test.ts",
+    "lines": 82,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/windows-desktop-recording.test.ts",
+    "lines": 64,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/windows-keys.test.ts",
+    "lines": 53,
+    "lexical_test_declarations": 1
+  },
+  {
+    "path": "test/worker-archive.test.ts",
+    "lines": 104,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/worker-brief.test.ts",
+    "lines": 16,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/workspace-terminal.test.ts",
+    "lines": 109,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/workspace.test.ts",
+    "lines": 472,
+    "lexical_test_declarations": 38
+  },
+  {
+    "path": "test/worktrees-git-serial.test.ts",
+    "lines": 58,
+    "lexical_test_declarations": 2
+  },
+  {
+    "path": "test/worktrees-manager.test.ts",
+    "lines": 802,
+    "lexical_test_declarations": 37
+  },
+  {
+    "path": "test/wsl-roots.test.ts",
+    "lines": 181,
+    "lexical_test_declarations": 8
+  },
+  {
+    "path": "test/wsl-sandbox-portable.test.ts",
+    "lines": 68,
+    "lexical_test_declarations": 4
+  }
+]

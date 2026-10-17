@@ -1,0 +1,1208 @@
+{
+  "sdk": "@modelcontextprotocol/server@2.1.0",
+  "scope": "Actual SDK handler protocol oracle with a public fixture echo tool; not a product tool invocation",
+  "cases": [
+    {
+      "request": {
+        "method": "GET"
+      },
+      "status": 405,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32000,
+          "message": "Method not allowed."
+        },
+        "id": null
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE"
+      },
+      "status": 405,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32000,
+          "message": "Method not allowed."
+        },
+        "id": null
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{\"listChanged\":true}},\"serverInfo\":{\"name\":\"fixture\",\"version\":\"1\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "2025-03-26",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-03-26\",\"capabilities\":{\"tools\":{\"listChanged\":true}},\"serverInfo\":{\"name\":\"fixture\",\"version\":\"1\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "2025-06-18",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{\"tools\":{\"listChanged\":true}},\"serverInfo\":{\"name\":\"fixture\",\"version\":\"1\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "2025-11-25",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{\"tools\":{\"listChanged\":true}},\"serverInfo\":{\"name\":\"fixture\",\"version\":\"1\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "2026-07-28",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{\"tools\":{\"listChanged\":true}},\"serverInfo\":{\"name\":\"fixture\",\"version\":\"1\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "1900-01-01",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{\"tools\":{\"listChanged\":true}},\"serverInfo\":{\"name\":\"fixture\",\"version\":\"1\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "ping",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/list",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "server/discover",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "unknown",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "echo",
+            "arguments": {
+              "text": "public fixture"
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "echo",
+            "arguments": {
+              "text": 123
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "computer",
+            "arguments": {},
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body envelope names protocol version 2026-07-28 but the required MCP-Protocol-Version header is absent"
+            }
+          }
+        },
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "raw": "invalid JSON"
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32700,
+          "message": "Parse error: Invalid JSON"
+        },
+        "id": null
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": [
+          {
+            "jsonrpc": "2.0",
+            "id": 5,
+            "method": "ping"
+          }
+        ]
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{},\"jsonrpc\":\"2.0\",\"id\":5}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "method": "notifications/initialized"
+        }
+      },
+      "status": 202,
+      "contentType": null,
+      "result": ""
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "ping",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method ping but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method ping but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/list",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method tools/list but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method tools/list but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "server/discover",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method server/discover but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method server/discover but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "unknown",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method unknown but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method unknown but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "echo",
+            "arguments": {
+              "text": "public fixture"
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method tools/call but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method tools/call but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "echo",
+            "arguments": {
+              "text": 123
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method tools/call but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method tools/call but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "computer",
+            "arguments": {},
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28"
+        }
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32020,
+          "message": "Bad Request: the request headers and body disagree: the body names method tools/call but the required Mcp-Method header is absent",
+          "data": {
+            "mismatch": {
+              "header": "(missing)",
+              "body": "the body names method tools/call but the required Mcp-Method header is absent"
+            }
+          }
+        },
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "headers": {
+          "mcp-protocol-version": "2025-11-25"
+        },
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 4,
+          "method": "tools/list",
+          "params": {}
+        }
+      },
+      "status": 200,
+      "contentType": "text/event-stream",
+      "result": "event: message\ndata: {\"result\":{\"tools\":[{\"name\":\"echo\",\"inputSchema\":{\"type\":\"object\",\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"additionalProperties\":false}}]},\"jsonrpc\":\"2.0\",\"id\":4}\n\n"
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "ping",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "ping"
+        }
+      },
+      "status": 404,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "error": {
+          "code": -32601,
+          "message": "Method not found"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/list",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tools/list"
+        }
+      },
+      "status": 200,
+      "contentType": "application/json",
+      "result": {
+        "result": {
+          "tools": [
+            {
+              "name": "echo",
+              "inputSchema": {
+                "type": "object",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ],
+          "resultType": "complete",
+          "ttlMs": 0,
+          "cacheScope": "private",
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "server/discover",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "server/discover"
+        }
+      },
+      "status": 200,
+      "contentType": "application/json",
+      "result": {
+        "result": {
+          "supportedVersions": [
+            "2026-07-28"
+          ],
+          "capabilities": {
+            "tools": {
+              "listChanged": true
+            }
+          },
+          "resultType": "complete",
+          "ttlMs": 0,
+          "cacheScope": "private",
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 2
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "unknown",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "unknown"
+        }
+      },
+      "status": 404,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "error": {
+          "code": -32601,
+          "message": "Method not found"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "echo",
+            "arguments": {
+              "text": "public fixture"
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tools/call",
+          "mcp-name": "echo"
+        }
+      },
+      "status": 200,
+      "contentType": "application/json",
+      "result": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "public fixture"
+            }
+          ],
+          "resultType": "complete",
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "echo",
+            "arguments": {
+              "text": 123
+            },
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tools/call",
+          "mcp-name": "echo"
+        }
+      },
+      "status": 200,
+      "contentType": "application/json",
+      "result": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Input validation error: Invalid arguments for tool echo: text: Invalid input: expected string, received number"
+            }
+          ],
+          "isError": true,
+          "resultType": "complete",
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 3
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "name": "computer",
+            "arguments": {},
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        },
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tools/call",
+          "mcp-name": "computer"
+        }
+      },
+      "status": 200,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "error": {
+          "code": -32602,
+          "message": "Tool computer not found"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "headers": {
+          "accept": "application/json"
+        },
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 9,
+          "method": "initialize",
+          "params": {
+            "protocolVersion": "2025-11-25",
+            "capabilities": {},
+            "clientInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        }
+      },
+      "status": 406,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32000,
+          "message": "Not Acceptable: Client must accept both application/json and text/event-stream"
+        },
+        "id": null
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "headers": {
+          "accept": "application/json",
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tools/list"
+        },
+        "body": {
+          "jsonrpc": "2.0",
+          "id": 10,
+          "method": "tools/list",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientInfo": {
+                "name": "fixture",
+                "version": "1"
+              },
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      "status": 200,
+      "contentType": "application/json",
+      "result": {
+        "result": {
+          "tools": [
+            {
+              "name": "echo",
+              "inputSchema": {
+                "type": "object",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ],
+          "resultType": "complete",
+          "ttlMs": 0,
+          "cacheScope": "private",
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "fixture",
+              "version": "1"
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 10
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "headers": {
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "tools/list"
+        },
+        "body": [
+          {
+            "jsonrpc": "2.0",
+            "id": 10,
+            "method": "tools/list",
+            "params": {
+              "_meta": {
+                "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                "io.modelcontextprotocol/clientInfo": {
+                  "name": "fixture",
+                  "version": "1"
+                },
+                "io.modelcontextprotocol/clientCapabilities": {}
+              }
+            }
+          }
+        ]
+      },
+      "status": 400,
+      "contentType": "application/json",
+      "result": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32600,
+          "message": "Bad Request: JSON-RPC batches may not contain requests for protocol revision 2026-07-28 or later"
+        },
+        "id": null
+      }
+    }
+  ]
+}

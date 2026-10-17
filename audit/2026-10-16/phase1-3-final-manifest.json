@@ -1,0 +1,266 @@
+[
+  {
+    "path": ".gitignore",
+    "sha256": "4071e47fff54dce527e6b89824af5c7d197ff4b92718e105b6a3da61ef42c84a"
+  },
+  {
+    "path": "Cargo.lock",
+    "sha256": "85e5c8b7f8e63528d729cba19a1444897ff61349e85b9f5b6c9b8e157eb0d3ce"
+  },
+  {
+    "path": "Cargo.toml",
+    "sha256": "163e9e0a7fc7fe2ff41bd7c1ff01bd699d3dc531b67df520ee67e08b867a4ac1"
+  },
+  {
+    "path": "crates\\cos-app\\Cargo.toml",
+    "sha256": "bb0968d1427ef0a63d76b500ead0f7361622f67ca65985457067e069ad64ce90"
+  },
+  {
+    "path": "crates\\cos-app\\src\\main.rs",
+    "sha256": "df443572141f67e2f67704483d2f01af66d6d3043ec9702c0a3f472b73918e1d"
+  },
+  {
+    "path": "crates\\cos-app\\src\\profile.rs",
+    "sha256": "d974e60b7a7d38760d720e689a7fa1f5f9cfe686ab669e99d5cd006a1c76aea5"
+  },
+  {
+    "path": "crates\\cos-app\\tests\\cli.rs",
+    "sha256": "8460f8ac0c07f61111d6df01f749cdc90b443b49af58bcb26f2884d1a20f9610"
+  },
+  {
+    "path": "crates\\cos-core\\Cargo.toml",
+    "sha256": "45d9f7e62cf829f326a207354a5b9c094e5578c8454779c57de1f6e84c40e678"
+  },
+  {
+    "path": "crates\\cos-core\\examples\\crypto_probe.rs",
+    "sha256": "118e297d6fa08846437c44c0a163449e09d8c8fd90c7ea221898ffb240dec7db"
+  },
+  {
+    "path": "crates\\cos-core\\src\\config.rs",
+    "sha256": "2da632ab7b7606f9821ccd5531b62b83739e3cb16cbd50c466039ad8e20af7ab"
+  },
+  {
+    "path": "crates\\cos-core\\src\\lib.rs",
+    "sha256": "be71e84dee46921b20667f66ca7c632fe119413a041d4919175fa5d339a8c0dc"
+  },
+  {
+    "path": "crates\\cos-core\\src\\logging.rs",
+    "sha256": "03008325cafa2bf98146fcf2d5df18d648b158372eae4e617ee09d6609918a15"
+  },
+  {
+    "path": "crates\\cos-core\\src\\persistence.rs",
+    "sha256": "279673514b54cc4a6139932156ccde4b6b7e3e2b319ce5b5cd91b93dbc1db170"
+  },
+  {
+    "path": "crates\\cos-core\\src\\runtime.rs",
+    "sha256": "c66f0d90b65ee8d0090f3006ab85c6bcb3002dd3114c52b38bc25fc91f2812fe"
+  },
+  {
+    "path": "crates\\cos-core\\src\\sandbox.rs",
+    "sha256": "a8cc7989cbfb2e761dd8d601f6d4d05a217efc6504009946c0de896c13be7556"
+  },
+  {
+    "path": "crates\\cos-core\\src\\secrets.rs",
+    "sha256": "a04adc1b9c3956af8fa1ba1dd6ebf0b79bcb6496af327ef91a03ca471162bc4b"
+  },
+  {
+    "path": "crates\\cos-core\\tests\\config_parity.rs",
+    "sha256": "004fe50e22f3049f85a43e431da32968cb78d1f0d80271987c648ded6a4c99a7"
+  },
+  {
+    "path": "crates\\cos-core\\tests\\foundation.rs",
+    "sha256": "3e06af16f788aed87207560e0c1891c88594daf620bc64c46c2fbce4bb6ac57d"
+  },
+  {
+    "path": "crates\\cos-core\\tests\\review_regressions.rs",
+    "sha256": "bd9dbf309690fc4655fbaaaf9021fe40a045b1cff9e1735076adb41c0dbda808"
+  },
+  {
+    "path": "crates\\cos-core\\tests\\runtime.rs",
+    "sha256": "ada24d9310e8dc1ce3cd2fcc9920150790fb5e18a921b54208a37925f5e5c42a"
+  },
+  {
+    "path": "crates\\cos-store\\Cargo.toml",
+    "sha256": "621f5c06178e76f5736067fc225159097e08c6665ce88012c56427604f52eb20"
+  },
+  {
+    "path": "crates\\cos-store\\src\\access.rs",
+    "sha256": "19b115390038c167822f1a94c9ae93ed6e75175b8cf91361d70ccdef1d94e10a"
+  },
+  {
+    "path": "crates\\cos-store\\src\\chronology.rs",
+    "sha256": "c61bf3c8f6f1020de4abc35854e08a6154657c22331bb7d1c7b77c293f0173d1"
+  },
+  {
+    "path": "crates\\cos-store\\src\\correlation.rs",
+    "sha256": "01f7315bdff17878c30ade2d3923164793b2bb87587352c897d091d6e2e5b8cb"
+  },
+  {
+    "path": "crates\\cos-store\\src\\lib.rs",
+    "sha256": "d2699757bbd8a6216cb6451a3525cf90e9cf35091164c5e3a8b1b508851dc539"
+  },
+  {
+    "path": "crates\\cos-store\\src\\model.rs",
+    "sha256": "71b2fa740069e063c62bf89a3ecf81cf7ca5654da3fdf7e272f71539e9f324c5"
+  },
+  {
+    "path": "crates\\cos-store\\src\\provider_usage.rs",
+    "sha256": "abfd5f9fa6c2e3b6b3e63d889c55515ef5ac0921d25085d60aaa29f93c832958"
+  },
+  {
+    "path": "crates\\cos-store\\src\\recorder.rs",
+    "sha256": "621d475d2b333c3d6c9a251e687c84c37ba7110134949b2cf933e7875c8eb4ec"
+  },
+  {
+    "path": "crates\\cos-store\\src\\store.rs",
+    "sha256": "553c566a045c4d21509d03ba2242440789cf90baefff49da4a27dc1d5ee49388"
+  },
+  {
+    "path": "crates\\cos-store\\src\\usage.rs",
+    "sha256": "992baee44f8b29b1c5535fa43c6d15c39ec09189f4abfb79d3cf42e0e9591e1a"
+  },
+  {
+    "path": "crates\\cos-store\\src\\views.rs",
+    "sha256": "9525979e49678b880a2247dc1e2d9421786550d674773c081b315e8fc68e79fe"
+  },
+  {
+    "path": "crates\\cos-store\\tests\\authority.rs",
+    "sha256": "cc05ffe984cf300e6a66452266d8f79b80802d1adf120e352938f18610b548c9"
+  },
+  {
+    "path": "crates\\cos-store\\tests\\history.rs",
+    "sha256": "caecba11a10eeef2e3aad85173f7f446a0fb4c40fcd777bb10be1a79111187ae"
+  },
+  {
+    "path": "crates\\cos-store\\tests\\projections.rs",
+    "sha256": "a1325eaf9d6c1b1675b733850ab4cecfb6f909e66573688863478b94125498b2"
+  },
+  {
+    "path": "docs\\implementation-plan\\2026-10-16-rust-migration-phases-v1.0.md",
+    "sha256": "987b959e12aa4bc60e458c4ac17f493ae5beff12df82b2e7d352e8f1d7613fa0"
+  },
+  {
+    "path": "docs\\implementation-review\\2026-10-16-phase1-3-review-v1.0.md",
+    "sha256": "7a54897de74380237e93c862ac821512b5fb7f122fc08bc0743ffdbe2f358cd8"
+  },
+  {
+    "path": "docs\\implementation-summary\\2026-10-16-clone-deep-scan-v1.0.md",
+    "sha256": "a844a94040ae33e605974d5b985512d89ef819fdd768d4c15883aff0c45c9af0"
+  },
+  {
+    "path": "docs\\implementation-summary\\2026-10-17-phase1-3-rust-foundation-v1.0.md",
+    "sha256": "2143d70ceb4b1cd6b4c8aee02984a63bae45bde6c7fece46bf08e59fa2cf5e26"
+  },
+  {
+    "path": "docs\\README.md",
+    "sha256": "6254faaa7af52781788c27575f346f351d86b60bfbe731d0381fef60917ad925"
+  },
+  {
+    "path": "docs\\research\\2026-10-16-chat-on-steroids-deep-scan-v1.0.md",
+    "sha256": "8bc0a98b98283996abb719ef9479fa3f56dc9a4835c7c4b59826f4c6a0bf66bd"
+  },
+  {
+    "path": "docs\\research\\2026-10-16-phase1-3-owner-coverage-v1.0.md",
+    "sha256": "3cf9885634e39de14dfcb4623b10a0ebdd294e394b94406e31a7427b27095fd4"
+  },
+  {
+    "path": "docs\\research\\2026-10-16-phase1-3-parity-spec-v1.0.md",
+    "sha256": "b837713fa5aeb6e842a070569549aa2351fd97e6220c50f9a468df98c87002b9"
+  },
+  {
+    "path": "docs\\worklogs\\2026-10-16-phase1-3-ledger.md",
+    "sha256": "17d27d729ca3722ddbae42a61caead13b1cc8dfe9eff656ab4d028e1fb6cf263"
+  },
+  {
+    "path": "fixtures/upstream\\baseline-manifest.json",
+    "sha256": "a6793a04e1c672dcbedce2896e4239e460e396484b4a2829e0d51d07af41c81f"
+  },
+  {
+    "path": "fixtures/upstream\\chronology-cases.json",
+    "sha256": "7678740db39df7d54d5fd807513d07a784abac7eaa0dc4b86e101a9c637c8594"
+  },
+  {
+    "path": "fixtures/upstream\\config-cases.json",
+    "sha256": "80fbbcea31d3a51bc9d9987995878d6fcb576e34040082fb7523d89b5e99e4bf"
+  },
+  {
+    "path": "fixtures/upstream\\config-defaults.json",
+    "sha256": "e0c05a333d395308e06441218c0108d7198d19d32bf8948ffdd39f415bcbda5a"
+  },
+  {
+    "path": "fixtures/upstream\\config-migrations.json",
+    "sha256": "8474f7b71785e0a005e03d8a18dedd06cfdd3853485b44636ad766e76f3b851a"
+  },
+  {
+    "path": "fixtures/upstream\\config-recovery.json",
+    "sha256": "6a4070a8bb3ea9b3af8b1b1cca23b4aca7f6e796c3138b351c7b4a234be46b26"
+  },
+  {
+    "path": "fixtures/upstream\\config-rules.json",
+    "sha256": "a38779b566636af4e5129f8bf7be746182f65c561edd31c884e7e0b2997e9fa9"
+  },
+  {
+    "path": "fixtures/upstream\\config-transforms.json",
+    "sha256": "93d7b8eb6a21c19047ae1819fc1ce13dd5b2a24d8c6b6eb1996a2f1af8ff9bf1"
+  },
+  {
+    "path": "fixtures/upstream\\history-case.json",
+    "sha256": "4325ebc375476cdfda8da9ed6be7966e6da3ff4d1c5266a577551c0127e76f29"
+  },
+  {
+    "path": "fixtures/upstream\\history-manifest.json",
+    "sha256": "7336978db7b8a6bd2af23617fd0f672a89e97cff6b7f37db495357f32033bb1b"
+  },
+  {
+    "path": "fixtures/upstream\\markdown-case.json",
+    "sha256": "76a937f13134ee81ed7aa520db3e4b43abda5581ac0a5596e18ceccc4609b3be"
+  },
+  {
+    "path": "fixtures/upstream\\provider-cases.json",
+    "sha256": "978051c37bb7e4714177b04db5eebbd712d2376718018be1820da38fcaf452e2"
+  },
+  {
+    "path": "fixtures/upstream\\rebind-case.json",
+    "sha256": "8698eb398b1ceda061c616544e1514184fa4088f433948397db9f17ce9ffe0c0"
+  },
+  {
+    "path": "fixtures/upstream\\search-cases.json",
+    "sha256": "665f01535ff76853a88ceda305606a1d346d1141310b8e17ce76f8b36e6207d6"
+  },
+  {
+    "path": "fixtures/upstream\\text-tokens.json",
+    "sha256": "14a886e735273b6e81db396b1455c7ee220dd5dedf827be8ee3f498a9001cdaf"
+  },
+  {
+    "path": "fixtures/upstream\\usage-cases.json",
+    "sha256": "d64b380409329c5be61ec4fc47559435fc3314a31de302623819fa57e4e3d20a"
+  },
+  {
+    "path": "LICENSE",
+    "sha256": "4e179d05b8808d9b19fd6f6f7a22f5912410c13aefb01f19e569afe8cf6d2fbe"
+  },
+  {
+    "path": "README.md",
+    "sha256": "4ebc0038e2463efe337af7f2f9b31ed6814f11bce9239fe3bad01ca387b6be22"
+  },
+  {
+    "path": "tools\\capture-history-baseline.mjs",
+    "sha256": "ebc7c5905f956434942500efdbe75d5680d3e38b9cf410c7c25478cda1034beb"
+  },
+  {
+    "path": "tools\\capture-upstream-baseline.mjs",
+    "sha256": "fef3842ec7e6ceb852587e67d24abe16d0ae3de55a2a573391d943456415e7c2"
+  },
+  {
+    "path": "tools\\measure-foundation.py",
+    "sha256": "3a877a93c80d836e9556f46c01bc38c142128ca2253cd91ca4200faf8e46960a"
+  },
+  {
+    "path": "tools\\probes\\windows-secrets.cjs",
+    "sha256": "3f08ce6631398ddc70afc7515184bfc284e10fa4a7c105dfce21df81bf99abc5"
+  },
+  {
+    "path": "tools\\verify-foundation.py",
+    "sha256": "696490b778343c4be38a1400b60ac8b8795c7c82a46dd3ced15c01cdc0754808"
+  }
+]

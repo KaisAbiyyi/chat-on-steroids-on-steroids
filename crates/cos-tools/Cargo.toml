@@ -1,0 +1,29 @@
+[package]
+name = "cos-tools"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+cos-core = { path = "../cos-core" }
+cos-exec = { path = "../cos-exec" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+regex.workspace = true
+tempfile.workspace = true
+uuid.workspace = true
+base64 = "0.22.1"
+notify = "8.2.0"
+cap-std = "3.4.5"
+image = { version = "0.25.8", default-features = false, features = ["png", "jpeg", "gif", "webp"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Storage_FileSystem"] }
+
+[dev-dependencies]
+tempfile.workspace = true

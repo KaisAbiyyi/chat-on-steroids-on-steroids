@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-17",
+  "scope": "Windows x64 phase 4-6 service/CLI after bounded review repairs; exact whole phases remain PARTIAL",
+  "binary": "D:\\projects\\CoS-Rust\\target\\release\\cos-rust.exe",
+  "bytes": 8887808,
+  "mib": 8.476,
+  "sha256": "b46a07a840daa8c8249687fc64f0aa1ecb7e17f09f938c90e047ff4a347de3ce",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "rustTestsPassed": 116,
+  "rustTestsFailed": 0,
+  "rustTestsIgnored": 0,
+  "runtimeChecksPassed": 17,
+  "fullApplicationReady": false,
+  "installerSize": "NOT RUN",
+  "macOSLinuxNative": "NOT RUN",
+  "linuxCompileOnly": "PASS: cos-exec and cos-tools including test sources",
+  "externalSsh": "NOT RUN",
+  "publicTunnel": "NOT RUN",
+  "preReviewBinary": "D:\\projects\\CoS-Rust\\audit\\2026-10-17\\phase4-6-pre-review-release\\cos-rust.exe",
+  "historicalPhase1_3Binary": "D:\\projects\\CoS-Rust\\audit\\2026-10-16\\phase1-3-release\\cos-rust.exe",
+  "sourceManifest": "phase4-6-repaired-source-manifest.json",
+  "sourceManifestSha256": "46d38db9c99f2ff97aba43bb01b764bf65cac9b4bf7d7ce33bafc27d4d502940"
+}

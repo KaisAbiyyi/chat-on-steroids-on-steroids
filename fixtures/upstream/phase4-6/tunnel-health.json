@@ -1,0 +1,80 @@
+[
+  {
+    "metrics": "",
+    "expected": {
+      "lastSuccessMs": null,
+      "polls": null,
+      "errors": null
+    }
+  },
+  {
+    "metrics": "commands_poll_last_successful_timestamp_seconds 0\ncommands_poll_cycles_total{channel=\"main\"} 3\ncommands_poll_errors_total{kind=\"timeout\"} 2\ncommands_poll_errors_total{kind=\"network\"} 1",
+    "expected": {
+      "lastSuccessMs": null,
+      "polls": 3,
+      "errors": 3
+    }
+  },
+  {
+    "metrics": "commands_poll_last_successful_timestamp_seconds 1729000000.123\ncommands_poll_cycles_total 9\ncommands_poll_errors_total NaN\ncommands_poll_errors_total_extra 500",
+    "expected": {
+      "lastSuccessMs": 1729000000123,
+      "polls": 9,
+      "errors": null
+    }
+  },
+  {
+    "status": {},
+    "expected": {
+      "version": null,
+      "probe": null,
+      "metadataError": null,
+      "uptimeSeconds": null,
+      "route": null
+    }
+  },
+  {
+    "status": {
+      "version": "1",
+      "channels": [
+        {
+          "name": "other",
+          "probe_status": "failed"
+        },
+        {
+          "name": "main",
+          "probe_status": "ready"
+        }
+      ],
+      "uptime_seconds": 12,
+      "control_plane_route": {
+        "target": "api.openai.com:443",
+        "route_mode": "direct",
+        "proxy_source": "none"
+      }
+    },
+    "expected": {
+      "version": "1",
+      "probe": "ready",
+      "metadataError": null,
+      "uptimeSeconds": 12,
+      "route": "api.openai.com:443 · direct"
+    }
+  },
+  {
+    "status": {
+      "tunnel_metadata_error": "public fixture unavailable",
+      "control_plane_route": {
+        "target": "api.openai.com:443",
+        "proxy_source": "environment"
+      }
+    },
+    "expected": {
+      "version": null,
+      "probe": null,
+      "metadataError": "public fixture unavailable",
+      "uptimeSeconds": null,
+      "route": "api.openai.com:443 · via environment"
+    }
+  }
+]

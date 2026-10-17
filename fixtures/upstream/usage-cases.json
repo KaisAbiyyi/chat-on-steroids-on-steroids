@@ -1,0 +1,185 @@
+{
+  "tokens": [
+    {
+      "event": {
+        "time": 1000,
+        "source": "extension",
+        "kind": "turn_start",
+        "turnId": "turn-a",
+        "seq": 1,
+        "turnOrigin": 1
+      },
+      "expected": 0
+    },
+    {
+      "event": {
+        "time": 1001,
+        "source": "extension",
+        "kind": "user_message",
+        "messageId": "user-a",
+        "message": {
+          "text": "Hello 😀",
+          "truncated": false,
+          "chars": 8
+        },
+        "conversationId": "11111111-1111-4111-8111-111111111111",
+        "turnId": "turn-a",
+        "contentSeq": 2,
+        "origin": 2,
+        "seq": 2,
+        "turnOrigin": 1
+      },
+      "expected": 2
+    },
+    {
+      "event": {
+        "time": 1003,
+        "source": "mcp",
+        "kind": "tool_call",
+        "turnId": "turn-a",
+        "call": {
+          "callId": "call-a",
+          "tool": "read",
+          "requestId": "request-a",
+          "conversationId": "11111111-1111-4111-8111-111111111111",
+          "attribution": "request-id",
+          "startedAt": 1003,
+          "durationMs": 4,
+          "args": {
+            "text": "{\"path\":\"/project/a\"}",
+            "truncated": false,
+            "chars": 21
+          },
+          "result": {
+            "text": "public result",
+            "truncated": false,
+            "chars": 13
+          },
+          "outcome": "ok",
+          "summary": {
+            "title": "Read a"
+          }
+        },
+        "seq": 4,
+        "turnOrigin": 1
+      },
+      "expected": 12
+    },
+    {
+      "event": {
+        "time": 1002,
+        "source": "extension",
+        "kind": "assistant_message",
+        "messageId": "assistant-a",
+        "providerMessageId": "provider-a",
+        "message": {
+          "text": "finished",
+          "truncated": false,
+          "chars": 8
+        },
+        "conversationId": "11111111-1111-4111-8111-111111111111",
+        "turnId": "turn-a",
+        "state": "final",
+        "final": true,
+        "contentSeq": 5,
+        "finalContentSeq": 5,
+        "finalObservedAt": 1792108800000,
+        "origin": 3,
+        "seq": 5,
+        "turnOrigin": 1
+      },
+      "expected": 2
+    },
+    {
+      "event": {
+        "time": 1010,
+        "source": "extension",
+        "kind": "turn_end",
+        "turnId": "turn-a",
+        "outcome": "completed",
+        "seq": 6,
+        "turnOrigin": 1
+      },
+      "expected": 0
+    },
+    {
+      "event": {
+        "kind": "user_message",
+        "message": {
+          "text": "clip",
+          "chars": 40000,
+          "truncated": true
+        },
+        "wireTokenEstimate": 14000
+      },
+      "expected": 14000
+    },
+    {
+      "event": {
+        "kind": "tool_call",
+        "call": {
+          "nested": true,
+          "args": {
+            "text": "abc",
+            "truncated": false,
+            "chars": 3
+          },
+          "result": {
+            "text": "abc",
+            "truncated": false,
+            "chars": 3
+          },
+          "summary": {
+            "title": "x"
+          }
+        }
+      },
+      "expected": 0
+    }
+  ],
+  "families": [
+    {
+      "model": "gpt-6",
+      "expected": "gpt-6"
+    },
+    {
+      "model": "gpt-6-thinking",
+      "expected": "gpt-6"
+    },
+    {
+      "model": "gpt-6-sol",
+      "expected": null
+    },
+    {
+      "model": "gpt-5-6-pro",
+      "expected": "gpt-5.6"
+    },
+    {
+      "model": "unknown",
+      "expected": null
+    },
+    {
+      "model": " Astra ",
+      "expected": "gpt-6"
+    },
+    {
+      "model": "sol",
+      "expected": "gpt-5.6"
+    }
+  ],
+  "formula": {
+    "divisor": 2,
+    "multiplier": 1.2,
+    "rates": {
+      "gpt-5.6": 0.4,
+      "gpt-5.6-sol": 0.4,
+      "gpt-5.6-terra": 0.2,
+      "gpt-5.6-luna": 0.02,
+      "gpt-6-astra": 1,
+      "gpt-6-pro": 1,
+      "gpt-6-sol": 0.2,
+      "gpt-6-luna": 0.01,
+      "gpt-5.5": 0.5
+    }
+  }
+}

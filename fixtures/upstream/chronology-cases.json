@@ -1,0 +1,169 @@
+[
+  {
+    "name": "late-tool",
+    "entries": [
+      {
+        "seq": 1,
+        "time": 10,
+        "kind": "turn_start",
+        "turnId": "a"
+      },
+      {
+        "seq": 2,
+        "time": 15,
+        "kind": "assistant_message",
+        "turnId": "a"
+      },
+      {
+        "seq": 3,
+        "time": 20,
+        "kind": "turn_end",
+        "turnId": "a"
+      },
+      {
+        "seq": 4,
+        "time": 12,
+        "kind": "tool_call",
+        "turnId": "a",
+        "call": {
+          "callId": "c"
+        }
+      }
+    ],
+    "expected": [
+      {
+        "seq": 1,
+        "time": 10,
+        "kind": "turn_start",
+        "turnId": "a"
+      },
+      {
+        "seq": 4,
+        "time": 12,
+        "kind": "tool_call",
+        "turnId": "a",
+        "call": {
+          "callId": "c"
+        }
+      },
+      {
+        "seq": 2,
+        "time": 15,
+        "kind": "assistant_message",
+        "turnId": "a"
+      },
+      {
+        "seq": 3,
+        "time": 20,
+        "kind": "turn_end",
+        "turnId": "a"
+      }
+    ]
+  },
+  {
+    "name": "unowned-reload",
+    "entries": [
+      {
+        "seq": 1,
+        "time": 200,
+        "kind": "assistant_message"
+      },
+      {
+        "seq": 2,
+        "time": 50,
+        "kind": "user_message"
+      }
+    ],
+    "expected": [
+      {
+        "seq": 1,
+        "time": 200,
+        "kind": "assistant_message"
+      },
+      {
+        "seq": 2,
+        "time": 50,
+        "kind": "user_message"
+      }
+    ]
+  },
+  {
+    "name": "two-turns",
+    "entries": [
+      {
+        "seq": 1,
+        "time": 100,
+        "kind": "turn_start",
+        "turnId": "a"
+      },
+      {
+        "seq": 2,
+        "time": 90,
+        "kind": "assistant_message",
+        "turnId": "a"
+      },
+      {
+        "seq": 3,
+        "time": 110,
+        "kind": "turn_end",
+        "turnId": "a"
+      },
+      {
+        "seq": 4,
+        "time": 120,
+        "kind": "turn_start",
+        "turnId": "b"
+      },
+      {
+        "seq": 5,
+        "time": 125,
+        "kind": "assistant_message",
+        "turnId": "b"
+      },
+      {
+        "seq": 6,
+        "time": 95,
+        "kind": "tool_call",
+        "turnId": "a"
+      }
+    ],
+    "expected": [
+      {
+        "seq": 1,
+        "time": 100,
+        "kind": "turn_start",
+        "turnId": "a"
+      },
+      {
+        "seq": 2,
+        "time": 90,
+        "kind": "assistant_message",
+        "turnId": "a"
+      },
+      {
+        "seq": 6,
+        "time": 95,
+        "kind": "tool_call",
+        "turnId": "a"
+      },
+      {
+        "seq": 3,
+        "time": 110,
+        "kind": "turn_end",
+        "turnId": "a"
+      },
+      {
+        "seq": 4,
+        "time": 120,
+        "kind": "turn_start",
+        "turnId": "b"
+      },
+      {
+        "seq": 5,
+        "time": 125,
+        "kind": "assistant_message",
+        "turnId": "b"
+      }
+    ]
+  }
+]

@@ -1,0 +1,1605 @@
+{
+  "bridge_protocol": 14,
+  "capabilities": [
+    "browse",
+    "search",
+    "read",
+    "metadata",
+    "create",
+    "edit",
+    "move",
+    "deleteFile",
+    "command",
+    "screen",
+    "control",
+    "clipboardRead",
+    "clipboardWrite"
+  ],
+  "ui_languages": [
+    "en",
+    "de",
+    "es",
+    "fr",
+    "pt-BR",
+    "pt-PT",
+    "ru",
+    "tr",
+    "vi",
+    "ja",
+    "ko",
+    "zh-CN",
+    "zh-TW"
+  ],
+  "core_declared_tool_union": [
+    "read",
+    "view_image",
+    "find",
+    "apply_patch",
+    "save_image",
+    "exec_command",
+    "write_stdin",
+    "update_plan",
+    "agents",
+    "session_finish",
+    "usage",
+    "exec"
+  ],
+  "ipc_handler_declarations": [
+    {
+      "path": "src/main/dictation.ts",
+      "line": 235,
+      "channel": "dictation:start"
+    },
+    {
+      "path": "src/main/dictation.ts",
+      "line": 293,
+      "channel": "dictation:stop"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 654,
+      "channel": "setup:profile"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 670,
+      "channel": "usage:get"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 671,
+      "channel": "usage:providers"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 672,
+      "channel": "plugin-refresh:reset"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 677,
+      "channel": "credentials:start-fresh"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 681,
+      "channel": "state:get"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 690,
+      "channel": "settings:save"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 835,
+      "channel": "roots:add"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 846,
+      "channel": "projects:list"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 847,
+      "channel": "ui:language"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 854,
+      "channel": "pluginRefresh:offer"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 860,
+      "channel": "ui:whatsNewSeen"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 864,
+      "channel": "ui:stopNoticeTexts"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 868,
+      "channel": "ui:mainTexts"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 872,
+      "channel": "pets:list"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 873,
+      "channel": "pets:overlayState"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 874,
+      "channel": "pets:overlayVisible"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 878,
+      "channel": "pets:import"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 887,
+      "channel": "pets:enabled"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 894,
+      "channel": "pets:favorite"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 898,
+      "channel": "pets:delete"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 902,
+      "channel": "pets:asset"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 906,
+      "channel": "skills:list"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 907,
+      "channel": "skills:managed"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 908,
+      "channel": "skills:recommended"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 909,
+      "channel": "skills:installRecommended"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 913,
+      "channel": "skills:import"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 927,
+      "channel": "skills:githubImport"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 931,
+      "channel": "skills:githubLink"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 935,
+      "channel": "skills:githubCheck"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 939,
+      "channel": "skills:githubUpdate"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 943,
+      "channel": "skills:remove"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 948,
+      "channel": "skills:library"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 957,
+      "channel": "projects:remove"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 963,
+      "channel": "projects:add"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 982,
+      "channel": "projects:addRemote"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 990,
+      "channel": "projects:chatgpt-retry"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 997,
+      "channel": "projects:color"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1007,
+      "channel": "roots:addPath"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1012,
+      "channel": "roots:remove"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1027,
+      "channel": "roots:rename"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1048,
+      "channel": "projectFiles:list"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1052,
+      "channel": "projectFiles:watch"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1072,
+      "channel": "projectGit:snapshot"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1077,
+      "channel": "projectGit:diff"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1082,
+      "channel": "sessions:toolEditReview"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1090,
+      "channel": "projectFiles:preview"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1094,
+      "channel": "projectFiles:create"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1099,
+      "channel": "projectFiles:rename"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1103,
+      "channel": "projectFiles:save"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1109,
+      "channel": "projectFiles:delete"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1117,
+      "channel": "projectFiles:reveal"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1123,
+      "channel": "projectFiles:attach"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1145,
+      "channel": "secret:set"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1175,
+      "channel": "goal:models"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1183,
+      "channel": "binary:pick"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1203,
+      "channel": "connection:connect"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1208,
+      "channel": "connection:disconnect"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1213,
+      "channel": "diagnostics:run"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1216,
+      "channel": "diagnostics:saveReport"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1243,
+      "channel": "desktop:requestAccessibility"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1249,
+      "channel": "desktop:repairPermissions"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1261,
+      "channel": "log:get"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1262,
+      "channel": "log:text"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1263,
+      "channel": "log:json"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1264,
+      "channel": "clipboard:write"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1272,
+      "channel": "sessions:exportMarkdown"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1289,
+      "channel": "update:all"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1291,
+      "channel": "update:install"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1303,
+      "channel": "update:refresh"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1308,
+      "channel": "update:download"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1313,
+      "channel": "link:open"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1324,
+      "channel": "chatgpt:open"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1331,
+      "channel": "chatgpt:signOut"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1337,
+      "channel": "browser:setupOpen"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1357,
+      "channel": "cosBrowser:show"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1365,
+      "channel": "sessions:list"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1378,
+      "channel": "sessions:image"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1382,
+      "channel": "sessions:imageStorage"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1383,
+      "channel": "sessions:clearImageStorage"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1390,
+      "channel": "sessions:events"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1409,
+      "channel": "sessions:files"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1415,
+      "channel": "sessions:dropFiles"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1422,
+      "channel": "sessions:attachText"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1426,
+      "channel": "sessions:stopTurn"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1430,
+      "channel": "sessions:releaseFinish"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1436,
+      "channel": "sessions:generateFinishGoal"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1440,
+      "channel": "chatModels:get"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1441,
+      "channel": "browser:preferences"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1442,
+      "channel": "chatModels:request"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1443,
+      "channel": "sessions:controls"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1445,
+      "channel": "sessions:cancelRecovery"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1446,
+      "channel": "sessions:automation"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1450,
+      "channel": "sessions:objective"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1454,
+      "channel": "sessions:compact"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1455,
+      "channel": "sessions:resumeFromHandoff"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1459,
+      "channel": "sessions:cancelCompaction"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1460,
+      "channel": "sessions:plan"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1468,
+      "channel": "sessions:send"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1473,
+      "channel": "sessions:outbox"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1474,
+      "channel": "sessions:reorderInputs"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1478,
+      "channel": "sessions:retryBrowser"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1479,
+      "channel": "sessions:pausedHelpers"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1481,
+      "channel": "sessions:runningTools"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1485,
+      "channel": "sessions:runningProcesses"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1491,
+      "channel": "sessions:stopProcess"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1500,
+      "channel": "keychain:noticeReady"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1502,
+      "channel": "sessions:traces"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1509,
+      "channel": "sessions:retryHelper"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1513,
+      "channel": "sessions:sendQueuedNow"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1519,
+      "channel": "sessions:editInput"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1520,
+      "channel": "sessions:cancelInput"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1521,
+      "channel": "sessions:inputAutomation"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1525,
+      "channel": "window:getZoom"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1526,
+      "channel": "window:zoom"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1532,
+      "channel": "sessions:openChat"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1540,
+      "channel": "sessions:approvalCard"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1545,
+      "channel": "sessions:answerApproval"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1561,
+      "channel": "sessions:followTab"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1578,
+      "channel": "sessions:block"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1613,
+      "channel": "sessions:trust"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1659,
+      "channel": "sessions:search"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1664,
+      "channel": "sessions:find"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1668,
+      "channel": "sessions:locate-match"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1672,
+      "channel": "sessions:rename"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1681,
+      "channel": "sessions:delete"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1722,
+      "channel": "handoff:get"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1736,
+      "channel": "bridge:unpair"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1741,
+      "channel": "bridge:diagnostics"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1743,
+      "channel": "bridge:downloadExtension"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1757,
+      "channel": "bridge:openExtensionFolder"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1769,
+      "channel": "bridge:extensionPath"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1773,
+      "channel": "swarm:get"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1774,
+      "channel": "swarm:reset"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1790,
+      "channel": "swarm:clearAgent"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1811,
+      "channel": "swarm:worktreeCleanupList"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 1833,
+      "channel": "swarm:worktreeCleanupRemove"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 2033,
+      "channel": "tasks:cancel"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "line": 2034,
+      "channel": "sessions:goalOpening"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 28,
+      "channel": "plugins:legalNotices"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 32,
+      "channel": "plugins:snapshot"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 33,
+      "channel": "plugins:install"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 34,
+      "channel": "plugins:configure"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 43,
+      "channel": "plugins:enabled"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 47,
+      "channel": "plugins:tool"
+    },
+    {
+      "path": "src/main/plugins-ipc.ts",
+      "line": 51,
+      "channel": "plugins:importBundle"
+    },
+    {
+      "path": "src/main/workspace-terminal-ipc.ts",
+      "line": 17,
+      "channel": "workspaceTerminal:request"
+    }
+  ],
+  "unique_ipc_handler_channels": [
+    "binary:pick",
+    "bridge:diagnostics",
+    "bridge:downloadExtension",
+    "bridge:extensionPath",
+    "bridge:openExtensionFolder",
+    "bridge:unpair",
+    "browser:preferences",
+    "browser:setupOpen",
+    "chatModels:get",
+    "chatModels:request",
+    "chatgpt:open",
+    "chatgpt:signOut",
+    "clipboard:write",
+    "connection:connect",
+    "connection:disconnect",
+    "cosBrowser:show",
+    "credentials:start-fresh",
+    "desktop:repairPermissions",
+    "desktop:requestAccessibility",
+    "diagnostics:run",
+    "diagnostics:saveReport",
+    "dictation:start",
+    "dictation:stop",
+    "goal:models",
+    "handoff:get",
+    "keychain:noticeReady",
+    "link:open",
+    "log:get",
+    "log:json",
+    "log:text",
+    "pets:asset",
+    "pets:delete",
+    "pets:enabled",
+    "pets:favorite",
+    "pets:import",
+    "pets:list",
+    "pets:overlayState",
+    "pets:overlayVisible",
+    "plugin-refresh:reset",
+    "pluginRefresh:offer",
+    "plugins:configure",
+    "plugins:enabled",
+    "plugins:importBundle",
+    "plugins:install",
+    "plugins:legalNotices",
+    "plugins:snapshot",
+    "plugins:tool",
+    "projectFiles:attach",
+    "projectFiles:create",
+    "projectFiles:delete",
+    "projectFiles:list",
+    "projectFiles:preview",
+    "projectFiles:rename",
+    "projectFiles:reveal",
+    "projectFiles:save",
+    "projectFiles:watch",
+    "projectGit:diff",
+    "projectGit:snapshot",
+    "projects:add",
+    "projects:addRemote",
+    "projects:chatgpt-retry",
+    "projects:color",
+    "projects:list",
+    "projects:remove",
+    "roots:add",
+    "roots:addPath",
+    "roots:remove",
+    "roots:rename",
+    "secret:set",
+    "sessions:answerApproval",
+    "sessions:approvalCard",
+    "sessions:attachText",
+    "sessions:automation",
+    "sessions:block",
+    "sessions:cancelCompaction",
+    "sessions:cancelInput",
+    "sessions:cancelRecovery",
+    "sessions:clearImageStorage",
+    "sessions:compact",
+    "sessions:controls",
+    "sessions:delete",
+    "sessions:dropFiles",
+    "sessions:editInput",
+    "sessions:events",
+    "sessions:exportMarkdown",
+    "sessions:files",
+    "sessions:find",
+    "sessions:followTab",
+    "sessions:generateFinishGoal",
+    "sessions:goalOpening",
+    "sessions:image",
+    "sessions:imageStorage",
+    "sessions:inputAutomation",
+    "sessions:list",
+    "sessions:locate-match",
+    "sessions:objective",
+    "sessions:openChat",
+    "sessions:outbox",
+    "sessions:pausedHelpers",
+    "sessions:plan",
+    "sessions:releaseFinish",
+    "sessions:rename",
+    "sessions:reorderInputs",
+    "sessions:resumeFromHandoff",
+    "sessions:retryBrowser",
+    "sessions:retryHelper",
+    "sessions:runningProcesses",
+    "sessions:runningTools",
+    "sessions:search",
+    "sessions:send",
+    "sessions:sendQueuedNow",
+    "sessions:stopProcess",
+    "sessions:stopTurn",
+    "sessions:toolEditReview",
+    "sessions:traces",
+    "sessions:trust",
+    "settings:save",
+    "setup:profile",
+    "skills:githubCheck",
+    "skills:githubImport",
+    "skills:githubLink",
+    "skills:githubUpdate",
+    "skills:import",
+    "skills:installRecommended",
+    "skills:library",
+    "skills:list",
+    "skills:managed",
+    "skills:recommended",
+    "skills:remove",
+    "state:get",
+    "swarm:clearAgent",
+    "swarm:get",
+    "swarm:reset",
+    "swarm:worktreeCleanupList",
+    "swarm:worktreeCleanupRemove",
+    "tasks:cancel",
+    "ui:language",
+    "ui:mainTexts",
+    "ui:stopNoticeTexts",
+    "ui:whatsNewSeen",
+    "update:all",
+    "update:download",
+    "update:install",
+    "update:refresh",
+    "usage:get",
+    "usage:providers",
+    "window:getZoom",
+    "window:zoom",
+    "workspaceTerminal:request"
+  ],
+  "durable_ledger_calls": [
+    {
+      "path": "src/main/bridge.ts",
+      "line": 5841,
+      "operation": "writeDurableSoon",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "line": 5874,
+      "operation": "writeDurableNow",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "line": 5994,
+      "operation": "writeDurableNow",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "line": 6248,
+      "operation": "writeDurableNow",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "line": 10530,
+      "operation": "writeDurableNow",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "line": 11022,
+      "operation": "readDurable",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "line": 11077,
+      "operation": "writeDurableNow",
+      "ledger": "bridge-commands",
+      "literal_or_constant": "COMMANDS_STATE"
+    },
+    {
+      "path": "src/main/chat-models.ts",
+      "line": 48,
+      "operation": "readDurable",
+      "ledger": "chat-models",
+      "literal_or_constant": "'chat-models'"
+    },
+    {
+      "path": "src/main/chat-models.ts",
+      "line": 170,
+      "operation": "writeDurableSoon",
+      "ledger": "chat-models",
+      "literal_or_constant": "'chat-models'"
+    },
+    {
+      "path": "src/main/connector-identity.ts",
+      "line": 82,
+      "operation": "writeDurableSoon",
+      "ledger": "connector-identity",
+      "literal_or_constant": "STATE"
+    },
+    {
+      "path": "src/main/goal-helper-size.ts",
+      "line": 39,
+      "operation": "writeDurableSoon",
+      "ledger": "goal-helper-size",
+      "literal_or_constant": "GOAL_HELPER_SIZE_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 530,
+      "operation": "writeDurableSoon",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 619,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 647,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 711,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 872,
+      "operation": "writeDurableSnapshotSoon",
+      "ledger": "goal-objectives",
+      "literal_or_constant": "GOAL_OBJECTIVES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1066,
+      "operation": "writeDurableSoon",
+      "ledger": "goal-switches",
+      "literal_or_constant": "GOAL_SWITCHES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1354,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1468,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1476,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1491,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1521,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "line": 1532,
+      "operation": "writeDurableNow",
+      "ledger": "goal-replies",
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 216,
+      "operation": "writeDurableSoon",
+      "ledger": "window-bounds",
+      "literal_or_constant": "WINDOW_BOUNDS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 443,
+      "operation": "readDurable",
+      "ledger": "window-bounds",
+      "literal_or_constant": "WINDOW_BOUNDS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 444,
+      "operation": "readDurable",
+      "ledger": "main-texts",
+      "literal_or_constant": "MAIN_TEXTS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 517,
+      "operation": "readDurable",
+      "ledger": null,
+      "literal_or_constant": "GOAL_OBJECTIVES_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 520,
+      "operation": "readDurable",
+      "ledger": null,
+      "literal_or_constant": "GOAL_SWITCHES_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 523,
+      "operation": "readDurable",
+      "ledger": null,
+      "literal_or_constant": "GOAL_REPLIES_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 526,
+      "operation": "readDurable",
+      "ledger": null,
+      "literal_or_constant": "GOAL_HELPER_SIZE_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 566,
+      "operation": "writeDurableSoon",
+      "ledger": "swarm",
+      "literal_or_constant": "SWARM_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 567,
+      "operation": "writeDurableNow",
+      "ledger": "swarm",
+      "literal_or_constant": "SWARM_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 572,
+      "operation": "writeDurableSoon",
+      "ledger": "retired-workers",
+      "literal_or_constant": "RETIRED_WORKERS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 573,
+      "operation": "writeDurableNow",
+      "ledger": "retired-workers",
+      "literal_or_constant": "RETIRED_WORKERS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 574,
+      "operation": "readDurable",
+      "ledger": "retired-workers",
+      "literal_or_constant": "RETIRED_WORKERS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 577,
+      "operation": "readDurable",
+      "ledger": "swarm",
+      "literal_or_constant": "SWARM_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 605,
+      "operation": "writeDurableNow",
+      "ledger": "swarm",
+      "literal_or_constant": "SWARM_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 614,
+      "operation": "readDurable",
+      "ledger": null,
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/index.ts",
+      "line": 668,
+      "operation": "writeDurableSoon",
+      "ledger": "main-texts",
+      "literal_or_constant": "MAIN_TEXTS_STATE"
+    },
+    {
+      "path": "src/main/pet-library.ts",
+      "line": 57,
+      "operation": "writeDurableSoon",
+      "ledger": "pet-library",
+      "literal_or_constant": "STATE_KEY"
+    },
+    {
+      "path": "src/main/plugin-refresh.ts",
+      "line": 88,
+      "operation": "readDurable",
+      "ledger": "plugin-refresh",
+      "literal_or_constant": "'plugin-refresh'"
+    },
+    {
+      "path": "src/main/plugin-refresh.ts",
+      "line": 127,
+      "operation": "writeDurableNow",
+      "ledger": "plugin-refresh",
+      "literal_or_constant": "'plugin-refresh'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 36,
+      "operation": "readDurable",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 56,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 64,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 105,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 111,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 129,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 145,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/projects.ts",
+      "line": 229,
+      "operation": "writeDurableNow",
+      "ledger": "projects",
+      "literal_or_constant": "'projects'"
+    },
+    {
+      "path": "src/main/computer/macos-grants.ts",
+      "line": 32,
+      "operation": "writeDurableNow",
+      "ledger": "macos-permission-grants",
+      "literal_or_constant": "STORE"
+    },
+    {
+      "path": "src/main/plugins/manager.ts",
+      "line": 127,
+      "operation": "writeDurableNow",
+      "ledger": "plugins",
+      "literal_or_constant": "'plugins'"
+    },
+    {
+      "path": "src/main/plugins/manager.ts",
+      "line": 133,
+      "operation": "readDurable",
+      "ledger": "plugins",
+      "literal_or_constant": "'plugins'"
+    },
+    {
+      "path": "src/main/session/blocked-chats.ts",
+      "line": 88,
+      "operation": "readDurable",
+      "ledger": "blocked-chats",
+      "literal_or_constant": "BLOCKED_STATE"
+    },
+    {
+      "path": "src/main/session/blocked-chats.ts",
+      "line": 145,
+      "operation": "writeDurableSoon",
+      "ledger": "blocked-chats",
+      "literal_or_constant": "BLOCKED_STATE"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "line": 362,
+      "operation": "writeDurableSoon",
+      "ledger": "continuations",
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "line": 366,
+      "operation": "writeDurableNow",
+      "ledger": "continuations",
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "line": 415,
+      "operation": "writeDurableNow",
+      "ledger": "continuations",
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "line": 420,
+      "operation": "writeDurableSoon",
+      "ledger": "continuations",
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "line": 809,
+      "operation": "writeDurableNow",
+      "ledger": "continuations",
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "line": 813,
+      "operation": "writeDurableSoon",
+      "ledger": "continuations",
+      "literal_or_constant": "CONTINUATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/correlation.ts",
+      "line": 108,
+      "operation": "writeDurableSnapshotSoon",
+      "ledger": "request-correlations",
+      "literal_or_constant": "CORRELATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/correlation.ts",
+      "line": 237,
+      "operation": "readDurable",
+      "ledger": "request-correlations",
+      "literal_or_constant": "CORRELATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/correlation.ts",
+      "line": 302,
+      "operation": "writeDurableNow",
+      "ledger": "request-correlations",
+      "literal_or_constant": "CORRELATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/correlation.ts",
+      "line": 313,
+      "operation": "writeDurableNow",
+      "ledger": "request-correlations",
+      "literal_or_constant": "CORRELATIONS_STATE"
+    },
+    {
+      "path": "src/main/session/input.ts",
+      "line": 382,
+      "operation": "readDurable",
+      "ledger": "session-input",
+      "literal_or_constant": "STATE"
+    },
+    {
+      "path": "src/main/session/input.ts",
+      "line": 589,
+      "operation": "writeDurableNow",
+      "ledger": "session-input",
+      "literal_or_constant": "STATE"
+    },
+    {
+      "path": "src/main/session/input.ts",
+      "line": 593,
+      "operation": "writeDurableSoon",
+      "ledger": "session-input",
+      "literal_or_constant": "STATE"
+    },
+    {
+      "path": "src/main/session/request-plans.ts",
+      "line": 59,
+      "operation": "readDurable",
+      "ledger": "request-plans",
+      "literal_or_constant": "STATE_NAME"
+    },
+    {
+      "path": "src/main/session/request-plans.ts",
+      "line": 81,
+      "operation": "writeDurableNow",
+      "ledger": "request-plans",
+      "literal_or_constant": "STATE_NAME"
+    },
+    {
+      "path": "src/main/session/trusted-chats.ts",
+      "line": 35,
+      "operation": "readDurable",
+      "ledger": "trusted-chats",
+      "literal_or_constant": "TRUSTED_STATE"
+    },
+    {
+      "path": "src/main/session/trusted-chats.ts",
+      "line": 68,
+      "operation": "writeDurableNow",
+      "ledger": "trusted-chats",
+      "literal_or_constant": "TRUSTED_STATE"
+    },
+    {
+      "path": "src/main/session/trusted-chats.ts",
+      "line": 73,
+      "operation": "writeDurableSoon",
+      "ledger": "trusted-chats",
+      "literal_or_constant": "TRUSTED_STATE"
+    },
+    {
+      "path": "src/main/session/usage.ts",
+      "line": 69,
+      "operation": "readDurable",
+      "ledger": "usage-cache",
+      "literal_or_constant": "'usage-cache'"
+    },
+    {
+      "path": "src/main/session/usage.ts",
+      "line": 168,
+      "operation": "writeDurableSoon",
+      "ledger": "usage-cache",
+      "literal_or_constant": "'usage-cache'"
+    }
+  ],
+  "unique_literal_durable_ledgers": [
+    "blocked-chats",
+    "bridge-commands",
+    "chat-models",
+    "connector-identity",
+    "continuations",
+    "goal-helper-size",
+    "goal-objectives",
+    "goal-replies",
+    "goal-switches",
+    "macos-permission-grants",
+    "main-texts",
+    "pet-library",
+    "plugin-refresh",
+    "plugins",
+    "projects",
+    "request-correlations",
+    "request-plans",
+    "retired-workers",
+    "session-input",
+    "swarm",
+    "trusted-chats",
+    "usage-cache",
+    "window-bounds"
+  ],
+  "code_mode_limits_source": "codeChars: 64_000, cpuMs: 2_000, wallMs: 60_000, memoryBytes: 32 * 1024 * 1024,\n  calls: 32, concurrentCalls: 8, argumentBytes: 1024 * 1024, resultBytes: 12 * 1024 * 1024,\n  totalResultBytes: 32 * 1024 * 1024, outputBytes: 12 * 1024 * 1024, outputItems: 32,\n  textBytes: 40_000, images: 4, activeRuns: 4",
+  "product_only_internal_import_fan_in": [
+    [
+      "src/shared/session.ts",
+      72
+    ],
+    [
+      "src/shared/types.ts",
+      60
+    ],
+    [
+      "src/main/logger.ts",
+      50
+    ],
+    [
+      "src/renderer/i18n.ts",
+      50
+    ],
+    [
+      "src/main/config.ts",
+      48
+    ],
+    [
+      "src/renderer/dom.ts",
+      32
+    ],
+    [
+      "src/main/session/store.ts",
+      31
+    ],
+    [
+      "src/main/mcp/call-context.ts",
+      20
+    ],
+    [
+      "src/main/agents.ts",
+      19
+    ],
+    [
+      "src/main/rawfs.ts",
+      19
+    ],
+    [
+      "src/main/durable.ts",
+      18
+    ],
+    [
+      "src/main/session/recorder.ts",
+      17
+    ],
+    [
+      "src/main/session/input.ts",
+      17
+    ],
+    [
+      "src/shared/chat-models.ts",
+      16
+    ],
+    [
+      "src/main/bridge.ts",
+      16
+    ],
+    [
+      "src/shared/skills.ts",
+      16
+    ],
+    [
+      "src/main/sandbox.ts",
+      16
+    ],
+    [
+      "src/main/mcp/surfaces.ts",
+      15
+    ],
+    [
+      "src/main/session/correlation.ts",
+      13
+    ],
+    [
+      "src/main/mcp/kernel.ts",
+      12
+    ],
+    [
+      "src/shared/input.ts",
+      12
+    ],
+    [
+      "src/main/projects.ts",
+      11
+    ],
+    [
+      "src/main/goal.ts",
+      11
+    ],
+    [
+      "src/shared/appearance.ts",
+      10
+    ],
+    [
+      "src/shared/chronology.ts",
+      10
+    ]
+  ],
+  "notes": [
+    "Declarations are static regex extractions, not runtime tools/list or network conformance.",
+    "Wrapped handle() calls are included; other registration wrappers and dynamic routes can remain absent.",
+    "State ledger list excludes computed names not resolvable from a local string constant."
+  ]
+}

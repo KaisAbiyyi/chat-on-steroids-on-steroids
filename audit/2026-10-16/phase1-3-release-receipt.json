@@ -1,0 +1,36 @@
+{
+  "scope": "Windows x64 headless phase 1-3 runtime; complete desktop size/startup/RAM parity NOT RUN",
+  "os": "Windows-10-10.0.26300-SP0",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "binary": "D:\\projects\\CoS-Rust\\target\\release\\cos-rust.exe",
+  "bytes": 3782656,
+  "mib": 3.607,
+  "sha256": "53679176a1274edf2586b4c776c09b6a57a7bc72705cf07262abe311ee229210",
+  "bridgeProtocol": 14,
+  "fullApplicationReady": false,
+  "smoke": {
+    "sessionId": "probe-1792170071125723000",
+    "historyRows": 4,
+    "searchHits": 2
+  },
+  "startup": {
+    "scope": "New CLI process, warm filesystem, same synthetic profile; subprocess spawn+exit included",
+    "firstMs": 380.4403999965871,
+    "samplesMs": [
+      21.453000001201872,
+      21.3108000025386,
+      20.257500000298023,
+      22.32190000358969,
+      21.1364000060712,
+      21.06629999616416,
+      20.73930000187829,
+      20.767499998328276,
+      20.965700001397636,
+      21.036300000560004
+    ],
+    "medianMs": 21.051299998362083,
+    "maximumMs": 22.32190000358969
+  },
+  "originalDesktopComparison": "NOT RUN",
+  "peakMemory": "NOT RUN"
+}

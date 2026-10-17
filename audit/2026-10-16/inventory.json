@@ -1,0 +1,1057 @@
+{
+  "identity": {
+    "repository": "https://github.com/totec448-spec/chat-on-steroids.git",
+    "branch": "main",
+    "head": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+    "head_commit": "2026-10-16T16:16:20+02:00 Merge pull request #1567 from Maximapple/fix/codex-limits-labeled",
+    "package_version": "2.1.39",
+    "latest_release_tag": "v2.1.39",
+    "latest_release_commit": "87ae9d631f82d8da2f462d910410031ad8f97ac5",
+    "commits_since_release": 87,
+    "working_tree_status": "",
+    "analysis_date": "2026-10-16",
+    "analysis_timezone": "Asia/Jakarta"
+  },
+  "tracked_files": 1442,
+  "tracked_bytes": 105817959,
+  "code_files": 857,
+  "code_lines_including_tests_scripts": 315389,
+  "directories": [
+    {
+      "top_directory": "docs",
+      "files": 340,
+      "bytes": 65228749,
+      "text_lines": 222502,
+      "code_lines": 0
+    },
+    {
+      "top_directory": "src",
+      "files": 505,
+      "bytes": 12185441,
+      "text_lines": 150908,
+      "code_lines": 113159
+    },
+    {
+      "top_directory": "(root)",
+      "files": 19,
+      "bytes": 11648265,
+      "text_lines": 222441,
+      "code_lines": 86
+    },
+    {
+      "top_directory": "test",
+      "files": 388,
+      "bytes": 8618646,
+      "text_lines": 156434,
+      "code_lines": 156434
+    },
+    {
+      "top_directory": "pets",
+      "files": 6,
+      "bytes": 4208677,
+      "text_lines": 790,
+      "code_lines": 0
+    },
+    {
+      "top_directory": "extension",
+      "files": 31,
+      "bytes": 2226048,
+      "text_lines": 46683,
+      "code_lines": 28938
+    },
+    {
+      "top_directory": "scripts",
+      "files": 120,
+      "bytes": 1071158,
+      "text_lines": 14943,
+      "code_lines": 14872
+    },
+    {
+      "top_directory": "artwork",
+      "files": 2,
+      "bytes": 464270,
+      "text_lines": 28,
+      "code_lines": 0
+    },
+    {
+      "top_directory": "native",
+      "files": 3,
+      "bytes": 86464,
+      "text_lines": 1900,
+      "code_lines": 1900
+    },
+    {
+      "top_directory": ".github",
+      "files": 25,
+      "bytes": 80055,
+      "text_lines": 2013,
+      "code_lines": 0
+    },
+    {
+      "top_directory": ".githooks",
+      "files": 3,
+      "bytes": 186,
+      "text_lines": 0,
+      "code_lines": 0
+    }
+  ],
+  "extensions": [
+    {
+      "extension": ".png",
+      "files": 159,
+      "bytes": 56060908,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".txt",
+      "files": 5,
+      "bytes": 20656002,
+      "text_lines": 399799,
+      "code_lines": 0
+    },
+    {
+      "extension": ".ts",
+      "files": 724,
+      "bytes": 14430548,
+      "text_lines": 269702,
+      "code_lines": 269702
+    },
+    {
+      "extension": ".json",
+      "files": 40,
+      "bytes": 4363677,
+      "text_lines": 67301,
+      "code_lines": 0
+    },
+    {
+      "extension": ".gif",
+      "files": 18,
+      "bytes": 2129466,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".md",
+      "files": 169,
+      "bytes": 1884360,
+      "text_lines": 23843,
+      "code_lines": 0
+    },
+    {
+      "extension": ".webp",
+      "files": 108,
+      "bytes": 1805908,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".js",
+      "files": 12,
+      "bytes": 1589578,
+      "text_lines": 29123,
+      "code_lines": 29123
+    },
+    {
+      "extension": ".mp4",
+      "files": 1,
+      "bytes": 1002687,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".cjs",
+      "files": 65,
+      "bytes": 721677,
+      "text_lines": 9094,
+      "code_lines": 9094
+    },
+    {
+      "extension": ".css",
+      "files": 10,
+      "bytes": 407945,
+      "text_lines": 8260,
+      "code_lines": 0
+    },
+    {
+      "extension": ".mjs",
+      "files": 53,
+      "bytes": 326703,
+      "text_lines": 5521,
+      "code_lines": 5521
+    },
+    {
+      "extension": ".html",
+      "files": 6,
+      "bytes": 153699,
+      "text_lines": 1775,
+      "code_lines": 0
+    },
+    {
+      "extension": ".swift",
+      "files": 2,
+      "bytes": 86075,
+      "text_lines": 1854,
+      "code_lines": 1854
+    },
+    {
+      "extension": ".yml",
+      "files": 23,
+      "bytes": 81567,
+      "text_lines": 2064,
+      "code_lines": 0
+    },
+    {
+      "extension": "[none]",
+      "files": 18,
+      "bytes": 45411,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".svg",
+      "files": 22,
+      "bytes": 36340,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".jpg",
+      "files": 1,
+      "bytes": 14556,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".cs",
+      "files": 1,
+      "bytes": 9462,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".nix",
+      "files": 1,
+      "bytes": 4884,
+      "text_lines": 140,
+      "code_lines": 0
+    },
+    {
+      "extension": ".cc",
+      "files": 1,
+      "bytes": 3068,
+      "text_lines": 95,
+      "code_lines": 95
+    },
+    {
+      "extension": ".nsh",
+      "files": 1,
+      "bytes": 2601,
+      "text_lines": 71,
+      "code_lines": 0
+    },
+    {
+      "extension": ".lock",
+      "files": 1,
+      "bytes": 567,
+      "text_lines": 0,
+      "code_lines": 0
+    },
+    {
+      "extension": ".gyp",
+      "files": 1,
+      "bytes": 270,
+      "text_lines": 0,
+      "code_lines": 0
+    }
+  ],
+  "largest_files_by_bytes": [
+    {
+      "path": "THIRD-PARTY-NOTICES.txt",
+      "bytes": 10549690,
+      "lines": 204155,
+      "extension": ".txt",
+      "top_directory": "(root)",
+      "sha256": "cd6716a1e91d21a259cae09b402d2b44ccb42eb83b169afab910d1227b866827"
+    },
+    {
+      "path": "docs/licenses/native/COMPONENT-NOTICES.txt",
+      "bytes": 10046785,
+      "lines": 194432,
+      "extension": ".txt",
+      "top_directory": "docs",
+      "sha256": "d5ea9806f9313ee957a3e1780bc790ab12a22abbb3b1c9692d982b83e4d383a0"
+    },
+    {
+      "path": "pets/hammy/atlas.png",
+      "bytes": 2244959,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "pets",
+      "sha256": "0ea8d31357898c19d4dbe87dac2093e391a9dd4eb5eded60d1ffed9db4c63c53"
+    },
+    {
+      "path": "pets/capy/atlas.png",
+      "bytes": 1954171,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "pets",
+      "sha256": "0320a65b88242e6516baff6b30ac95c1267973d340cfa2a30c9a87258f028b01"
+    },
+    {
+      "path": "docs/pet/batches/batch-14.png",
+      "bytes": 1628104,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "4016dbe362f08de75cf247a52c2a70e6ff102db6b30b2337d5d07f6a0ce7f67c"
+    },
+    {
+      "path": "docs/pet/batches/batch-07.png",
+      "bytes": 1574860,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "d5b2bbbe675e86b84afb2b38f1bf86f2d2a4bdd2e5d63ebc6d7923b29bc08e5d"
+    },
+    {
+      "path": "docs/pet/batches/batch-11.png",
+      "bytes": 1568878,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "092cdfdd6bb79c28f8dbf9419065010ab8d6fc5fc6729e2a367388baee4c34a4"
+    },
+    {
+      "path": "docs/pet/batches/batch-13.png",
+      "bytes": 1568176,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "f20951e4b84b4d260bbb79187c7d4ffe059def43673d6c612a56e89df48c15d6"
+    },
+    {
+      "path": "docs/pet/batches/batch-08.png",
+      "bytes": 1558371,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "cc30a9936f5aa1881caee1a39e879dca2b918b87df9b0dabafc91c6f4e884603"
+    },
+    {
+      "path": "docs/pet/batches/batch-06.png",
+      "bytes": 1538467,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "95ace6e56ae7484ba945cd84c559e9a7ffa91782e9eeb41710ca00d42ec42f29"
+    },
+    {
+      "path": "docs/pet/batches/batch-12.png",
+      "bytes": 1530040,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "37f9b8d7efe6604d139b784b3fc3ecddce9c6f37d90eaa37fd9268fd578a1131"
+    },
+    {
+      "path": "docs/pet/batches/batch-09.png",
+      "bytes": 1514158,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "09dd851c2ead9b80b5e0470e6e099834205f88d7dab55bd9fedb0e7e62e3a850"
+    },
+    {
+      "path": "docs/pet/batches/batch-15.png",
+      "bytes": 1510052,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "c12fb9d8f66632edc41541c95daa79753a79321256a1a7a7d939767a7e087375"
+    },
+    {
+      "path": "docs/pet/batches/batch-04.png",
+      "bytes": 1496413,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "9d22ab9bb7479dad4cff98b31da2ffde5459a96d22ea6c9b1df1f5d0176e6243"
+    },
+    {
+      "path": "docs/pet/batches/batch-02.png",
+      "bytes": 1489161,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "c2e0d934b3ce5ca8f8a12de9444553ebf67e37101b57e66fba64d1c5fb0a30d2"
+    },
+    {
+      "path": "docs/pet/batches/batch-05.png",
+      "bytes": 1487471,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "698ca288a9597ee71de7afb0298214a0495024a9cfdd43f5861621f0a591f647"
+    },
+    {
+      "path": "docs/pet/batches/batch-10.png",
+      "bytes": 1486629,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "e459c0bffd970d2a3fe874c9eaed3281a187f0f56237f0c4bebc6a44df5d6129"
+    },
+    {
+      "path": "docs/pet/batches/batch-01.png",
+      "bytes": 1449853,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "1291f3ab80b6e41fcecc18a6fca04ee4caa225b8760bf8bc6a68e6187594e98d"
+    },
+    {
+      "path": "docs/pet/batches/batch-00.png",
+      "bytes": 1445381,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "4cab7701c7738fb6949d408ba2f5db7b4f2c2043d926f0a020eb4946d90fbee3"
+    },
+    {
+      "path": "docs/pet/batches/batch-03.png",
+      "bytes": 1444710,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "ef8cba01c13f780a1499464aa82cacc845a61eb52befd008eb0c72c42260c68e"
+    },
+    {
+      "path": "docs/pet/batches/repair-003.png",
+      "bytes": 1418363,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "16e788753affa120362c73d87fc703f25de640878955e13aaeffad5c83a52a2f"
+    },
+    {
+      "path": "docs/pet/approved-base.png",
+      "bytes": 1224111,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "f18909917d6fb13217402dc2cb64bdb94854133dfd4988fd6138adc821efbdb9"
+    },
+    {
+      "path": "docs/pet/props.png",
+      "bytes": 1216623,
+      "lines": null,
+      "extension": ".png",
+      "top_directory": "docs",
+      "sha256": "91be53a95edba69775538a1e0853f60a69661874c25da18db54e04fbc9f02f45"
+    },
+    {
+      "path": "test/content-script.test.ts",
+      "bytes": 1193776,
+      "lines": 23698,
+      "extension": ".ts",
+      "top_directory": "test",
+      "sha256": "6935c92a82839169372dee1aafe689e0bf6a367546140e35302de304d4d02048"
+    },
+    {
+      "path": "docs/images/demo.mp4",
+      "bytes": 1002687,
+      "lines": null,
+      "extension": ".mp4",
+      "top_directory": "docs",
+      "sha256": "41498d48cb03e2ded22b92a02395b4af430e190ed4aceb74909afced5592fb8f"
+    }
+  ],
+  "largest_production_code_by_lines": [
+    {
+      "path": "extension/content.js",
+      "bytes": 761189,
+      "lines": 14106,
+      "extension": ".js",
+      "top_directory": "extension",
+      "sha256": "731c8b7794b3bd2e7b458b2401218556a303770e3b29d9b1d5fbb5f12ee94fe7"
+    },
+    {
+      "path": "src/main/bridge.ts",
+      "bytes": 620615,
+      "lines": 11171,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "98bf6defe53628117c62d0f5182563db8aad83f13faf8a601a8a2b91d86f92cc"
+    },
+    {
+      "path": "src/renderer/chat.ts",
+      "bytes": 407625,
+      "lines": 7450,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "2e6447a8546dedbf83ea0f905cd49edb53b1d9deae6a9942fc985376ef307b5b"
+    },
+    {
+      "path": "extension/background.js",
+      "bytes": 306545,
+      "lines": 5812,
+      "extension": ".js",
+      "top_directory": "extension",
+      "sha256": "5335a8a354aa497d32e3b2e0fe2475a0b07425404258f3bedac231d85fa97736"
+    },
+    {
+      "path": "src/main/agents.ts",
+      "bytes": 271426,
+      "lines": 5630,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "32dcc855397d743c5234575b4c0562ffff6b580f767e7f28ce61244ba8ca415f"
+    },
+    {
+      "path": "src/main/session/store.ts",
+      "bytes": 217502,
+      "lines": 4314,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653"
+    },
+    {
+      "path": "extension/chatgpt-dom.js",
+      "bytes": 200637,
+      "lines": 3632,
+      "extension": ".js",
+      "top_directory": "extension",
+      "sha256": "73ede0d0a93161199fb950581b3bbf79b36aaf386818f0c55611fc4969c0953a"
+    },
+    {
+      "path": "src/main/goal.ts",
+      "bytes": 159003,
+      "lines": 3052,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "718acf86b143551375c823139faff14042a9dc2f40cf8ccb08d3fceb37338b99"
+    },
+    {
+      "path": "extension/fiber.js",
+      "bytes": 170452,
+      "lines": 3011,
+      "extension": ".js",
+      "top_directory": "extension",
+      "sha256": "427003f1574ad03e6aa4681894e0624b078524f298d93ee5ab095279bdd18574"
+    },
+    {
+      "path": "src/renderer/main.ts",
+      "bytes": 142090,
+      "lines": 2851,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "4b8013fe97d3db6a51caa0c71b4cd427f09c687173c84df7c80b6db18e95772f"
+    },
+    {
+      "path": "src/main/session/recorder.ts",
+      "bytes": 135528,
+      "lines": 2815,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "d83965629e8ae430babb91db11fc66aff385ea1bcd8f0243432af571a0375c03"
+    },
+    {
+      "path": "src/main/mcp/tools-core.ts",
+      "bytes": 132199,
+      "lines": 2556,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "4b92d792d122af2049794e6054ca39101b7a30d163e3342aba383320e4f53811"
+    },
+    {
+      "path": "src/main/session/input.ts",
+      "bytes": 151543,
+      "lines": 2125,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "1765eeb88c9c05aa7cc188229fd6c3972490cdcba9f1ee9944a04ae0e695fdee"
+    },
+    {
+      "path": "src/main/ipc.ts",
+      "bytes": 115464,
+      "lines": 2064,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "bfd9339a7557a0050a81b71fc201c22fbcf7ca46e22b51a941b4eab1a1fc4144"
+    },
+    {
+      "path": "src/main/computer/index.ts",
+      "bytes": 86361,
+      "lines": 2042,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "bcea9131c01be8e482c48c190839abfa7f152eaf5458be0ed27a860bf7872706"
+    },
+    {
+      "path": "src/main/session/continuation.ts",
+      "bytes": 90815,
+      "lines": 1900,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "c7df31cf4f32db5598c54e903024c24876b2123851f11290c4b12ff6b5783f80"
+    },
+    {
+      "path": "native/macos-desktop-helper/main.swift",
+      "bytes": 83126,
+      "lines": 1805,
+      "extension": ".swift",
+      "top_directory": "native",
+      "sha256": "e524cb6a774b0d913e12507031978ef0c9e869a13fde6a23a3d4477d262f5c0f"
+    },
+    {
+      "path": "src/renderer/file-panel.ts",
+      "bytes": 79879,
+      "lines": 1724,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "149fbffd555d57d5ea3df56abb8af19e1072ac564ba67ed35b1c9bc3c5ab77d3"
+    },
+    {
+      "path": "src/main/mcp/kernel.ts",
+      "bytes": 89379,
+      "lines": 1634,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "cc5e019607c8073bd9efa3fa2e7ffa3c17e1ce9689285d31e6adf475fe708a34"
+    },
+    {
+      "path": "src/main/exec-hints.ts",
+      "bytes": 78476,
+      "lines": 1613,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "5cf65f1077f6b892a0c674a599524d535afde127b1907c4d4f02d684ae33ae6b"
+    },
+    {
+      "path": "src/main/worktrees/index.ts",
+      "bytes": 70662,
+      "lines": 1347,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "90dd098cb39780bd7fe268c2316d10b35752a0c5f9c84368d033a3d08551fb48"
+    },
+    {
+      "path": "src/main/computer/helper.ts",
+      "bytes": 63865,
+      "lines": 1319,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "f550ef7ba21e2ccf35371a659547eeb091deebdd568d2630838a4f5e6dc1c2d0"
+    },
+    {
+      "path": "src/shared/session.ts",
+      "bytes": 60907,
+      "lines": 1302,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "59fd546021383ba6b75896022d8dd4e876464ccb3dc1ff977c687d16611870e1"
+    },
+    {
+      "path": "src/main/codex/unified-exec.ts",
+      "bytes": 52214,
+      "lines": 1295,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "15f0be492307b50c6a1a113ff4030b48009f91d14bded4fb0908be5fb5aa61bf"
+    },
+    {
+      "path": "src/main/cos-browser/host.ts",
+      "bytes": 50862,
+      "lines": 1061,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "b341be27bfd566a9c6cf2eeff08b2e1bb0d08fe1a3a0b04092daecb18f17237b"
+    },
+    {
+      "path": "src/main/plugins/manager.ts",
+      "bytes": 49829,
+      "lines": 970,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "7232ad9f4a5d6c3b3871672e830d5e051c8574b7d404aec507c893322356202d"
+    },
+    {
+      "path": "src/shared/types.ts",
+      "bytes": 41439,
+      "lines": 956,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "d0ca71973845074ac7d4c660dac2c2fe25cd91d85d71fea2df64e78d756f9445"
+    },
+    {
+      "path": "src/main/config.ts",
+      "bytes": 45457,
+      "lines": 895,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "6ec753fa43b5b6f95083c8b0dfc22a2df99570dce6f8a50801026fb527335d93"
+    },
+    {
+      "path": "src/main/tunnel/index.ts",
+      "bytes": 36759,
+      "lines": 882,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "39ee0bf00734bf22e0cd0c7ce4b6324705f6bb002d86fe34a2148e2803d572b8"
+    },
+    {
+      "path": "src/main/index.ts",
+      "bytes": 42360,
+      "lines": 816,
+      "extension": ".ts",
+      "top_directory": "src",
+      "sha256": "0380ceb2f2dba4f1ea4fcf75675110bab6e84e4f2e640264b0e695a1699453e2"
+    }
+  ],
+  "direct_production_dependencies": 27,
+  "direct_development_dependencies": 13,
+  "lock_package_records": 676,
+  "lock_production_records_including_optional": 211,
+  "lock_optional_production_records": 59,
+  "lexical_test_files": 382,
+  "lexical_test_declarations": 6946,
+  "electron_importing_files": [
+    "scripts/capture-readme-demo.cjs",
+    "scripts/capture-readme-shots.cjs",
+    "scripts/fixtures/browser-bridge-port.ts",
+    "scripts/package.mjs",
+    "scripts/smoke-windows-desktop.mjs",
+    "scripts/verify-accessibility.cjs",
+    "scripts/verify-appearance.cjs",
+    "scripts/verify-background-process-dock.cjs",
+    "scripts/verify-browser-bridge-port.mjs",
+    "scripts/verify-browser-setup.cjs",
+    "scripts/verify-chat-opening-scroll.cjs",
+    "scripts/verify-chat-pin.cjs",
+    "scripts/verify-chat-rename.cjs",
+    "scripts/verify-chat-search.cjs",
+    "scripts/verify-chat-stays-at-end.cjs",
+    "scripts/verify-chat-switch.cjs",
+    "scripts/verify-chat-width.cjs",
+    "scripts/verify-composer-context.cjs",
+    "scripts/verify-composer-invocation.cjs",
+    "scripts/verify-composer-layout.cjs",
+    "scripts/verify-composer-ui.cjs",
+    "scripts/verify-connection-compact.cjs",
+    "scripts/verify-connection-layer.cjs",
+    "scripts/verify-context-dialog.cjs",
+    "scripts/verify-cos-sign-in.cjs",
+    "scripts/verify-disconnect-ui.cjs",
+    "scripts/verify-dropdown-layout.cjs",
+    "scripts/verify-effort-slider.cjs",
+    "scripts/verify-follow-output.cjs",
+    "scripts/verify-goal-progress.cjs",
+    "scripts/verify-goal-status-layout.cjs",
+    "scripts/verify-history-scroll.cjs",
+    "scripts/verify-inline-recorded-diffs.cjs",
+    "scripts/verify-input-queue.cjs",
+    "scripts/verify-markdown-tables.cjs",
+    "scripts/verify-message-reactions.cjs",
+    "scripts/verify-navigation-motion.cjs",
+    "scripts/verify-overwrite-layout.cjs",
+    "scripts/verify-pet-overlay-electron.cjs",
+    "scripts/verify-pet-performance.cjs",
+    "scripts/verify-pet-toggle.cjs",
+    "scripts/verify-plan-collapse.cjs",
+    "scripts/verify-plugin-refresh-recovery.cjs",
+    "scripts/verify-pr-workspace.cjs",
+    "scripts/verify-recovery-layout.cjs",
+    "scripts/verify-renderer-label-memory.cjs",
+    "scripts/verify-round-subagents.cjs",
+    "scripts/verify-settings-focus.cjs",
+    "scripts/verify-settings-layout.cjs",
+    "scripts/verify-settings-search.cjs",
+    "scripts/verify-setup-access.cjs",
+    "scripts/verify-setup-guide.cjs",
+    "scripts/verify-shared-tunnel.cjs",
+    "scripts/verify-sidebar-setup.cjs",
+    "scripts/verify-tool-scroll.cjs",
+    "scripts/verify-update-actions.cjs",
+    "scripts/verify-update-readiness.cjs",
+    "scripts/verify-usage-week.cjs",
+    "scripts/verify-whats-new.cjs",
+    "scripts/verify-workspace-terminal.cjs",
+    "src/main/computer/index.ts",
+    "src/main/cos-browser/host.ts",
+    "src/main/cos-browser/index.ts",
+    "src/main/diagnostics-report.ts",
+    "src/main/dictation.ts",
+    "src/main/edit-context-menu.ts",
+    "src/main/extension-path.ts",
+    "src/main/index.ts",
+    "src/main/ipc.ts",
+    "src/main/keychain-notice.ts",
+    "src/main/pet-library.ts",
+    "src/main/pet-overlay.ts",
+    "src/main/pet-window-focus.ts",
+    "src/main/plugins-ipc.ts",
+    "src/main/plugins/manager.ts",
+    "src/main/secrets.ts",
+    "src/main/session/markdown-export.ts",
+    "src/main/tunnel/locate.ts",
+    "src/main/update-progress.ts",
+    "src/main/update.ts",
+    "src/main/workspace-terminal-ipc.ts",
+    "src/preload/cos-browser-sign-in.ts",
+    "src/preload/cos-browser-worker.ts",
+    "src/preload/cos-browser.ts",
+    "src/preload/index.ts",
+    "src/preload/pet-overlay.ts",
+    "test/bridge.test.ts",
+    "test/codex-plugin-runtime-process.test.ts",
+    "test/fixtures/desktop-capture-window.cjs",
+    "test/ipc.test.ts",
+    "test/keychain-notice.test.ts",
+    "test/packaging.test.ts",
+    "test/pet-window-focus.test.ts",
+    "test/prompt-visual-electron.cjs",
+    "test/secrets.test.ts",
+    "test/tunnel-locate.test.ts"
+  ],
+  "node_api_imports": {
+    "node:fs": 339,
+    "node:path": 304,
+    "node:child_process": 100,
+    "node:crypto": 94,
+    "node:os": 84,
+    "node:assert/strict": 65,
+    "node:fs/promises": 52,
+    "node:url": 36,
+    "node:http": 36,
+    "node:vm": 22,
+    "node:events": 14,
+    "node:module": 10,
+    "node:util": 10,
+    "node:readline": 7,
+    "node:net": 7,
+    "node:stream": 5,
+    "node:zlib": 4,
+    "node:worker_threads": 4,
+    "node:async_hooks": 2,
+    "node:timers/promises": 2,
+    "node:perf_hooks": 1,
+    "node:process": 1,
+    "node:https": 1,
+    "node:string_decoder": 1,
+    "node:stream/promises": 1
+  },
+  "external_imports": {
+    "vitest": 382,
+    "electron": 122,
+    "jsdom": 73,
+    "sharp": 40,
+    "vite": 30,
+    "zod": 29,
+    "esbuild": 18,
+    "ws": 9,
+    "@modelcontextprotocol/client": 8,
+    "@modelcontextprotocol/server": 7,
+    "fflate": 6,
+    "@modelcontextprotocol/client/stdio": 3,
+    "marked": 3,
+    ", ": 2,
+    "node-pty": 2,
+    "add specific loop": 2,
+    "@anthropic-ai/mcpb/browser": 2,
+    "js-yaml": 2,
+    "@codemirror/state": 2,
+    "@codemirror/language": 2,
+    "@codemirror/language-data": 2,
+    "@lezer/highlight": 2,
+    "@codemirror/merge": 2,
+    "fsops.js": 2,
+    "electron-vite": 1,
+    "alive": 1,
+    "Trying to reload…": 1,
+    "Trying to\n   * reload…": 1,
+    "Connection interrupted. Waiting for the complete answer": 1,
+    "react": 1,
+    "react-dom/client": 1,
+    "react-dom": 1,
+    "${renderer}/icons.css": 1,
+    "${renderer}/pet-overlay.css": 1,
+    "${renderer}/pet-overlay.ts": 1,
+    "@codemirror/view": 1,
+    " + source + ": 1,
+    "the chat that has been active lately": 1,
+    " parameter. The sender is derived from the caller": 1,
+    "stopped": 1,
+    "tree-sitter": 1,
+    "tree-sitter-bash": 1,
+    "has not finished starting": 1,
+    "this stage sets it": 1,
+    " and wrong for ": 1,
+    "said it did": 1,
+    "a request arrived": 1,
+    "@modelcontextprotocol/node": 1,
+    " +\n              ": 1,
+    "the only chat that has been active lately": 1,
+    "koffi": 1,
+    "@modelcontextprotocol/core": 1,
+    "not known yet": 1,
+    "smol-toml": 1,
+    "not asked yet": 1,
+    "codemirror": 1,
+    "pdfjs-dist": 1,
+    "pdfjs-dist/build/pdf.worker.min.mjs?url": 1,
+    "katex": 1,
+    "katex/dist/katex.min.css": 1,
+    "@xterm/xterm": 1,
+    "@xterm/addon-fit": 1,
+    "@xterm/xterm/css/xterm.css": 1,
+    "Inspecting": 1,
+    "we know we were connected N seconds ago": 1,
+    ", draft: null })).toMatchObject({\n      stage: ": 1,
+    ",\n      kind: ": 1,
+    "add specific goal": 1,
+    "\\.\\/cos-browser\\/(index|host)\\.js": 1,
+    ",\n              messageId: ": 1,
+    ", async () => {\n    const session = await createSession({ title: ": 1,
+    ", () => {\n  const text = missingComment([": 1,
+    "ChatGPT was allowed to run a tool": 1,
+    ");\n    // It names the Core that answered, so a call sent to another computer": 1,
+    "Show more": 1,
+    ")\n        .toHaveLength(0);\n\n      // A page that is merely slow still wins: nothing is taken back inside the window.\n      await vi.advanceTimersByTimeAsync(50_000);\n      expect(opened).toHaveLength(0);\n\n      await vi.advanceTimersByTimeAsync(10_000);\n      expect(opened, ": 1,
+    "vitest/config": 1
+  },
+  "top_internal_import_fan_in": [
+    [
+      "src/main/session/store.ts",
+      152
+    ],
+    [
+      "src/main/config.ts",
+      140
+    ],
+    [
+      "src/renderer/i18n.ts",
+      107
+    ],
+    [
+      "src/shared/session.ts",
+      104
+    ],
+    [
+      "src/main/bridge.ts",
+      94
+    ],
+    [
+      "test/helpers.ts",
+      92
+    ],
+    [
+      "src/shared/types.ts",
+      90
+    ],
+    [
+      "src/main/durable.ts",
+      87
+    ],
+    [
+      "src/main/logger.ts",
+      72
+    ],
+    [
+      "src/main/session/input.ts",
+      68
+    ],
+    [
+      "src/main/mcp/call-context.ts",
+      60
+    ],
+    [
+      "src/main/connection.ts",
+      60
+    ],
+    [
+      "src/main/session/recorder.ts",
+      58
+    ],
+    [
+      "src/main/goal.ts",
+      53
+    ],
+    [
+      "src/main/agents.ts",
+      45
+    ],
+    [
+      "src/renderer/dom.ts",
+      34
+    ],
+    [
+      "src/main/secrets.ts",
+      32
+    ],
+    [
+      "src/main/mcp/kernel.ts",
+      32
+    ],
+    [
+      "src/renderer/chat-models.ts",
+      32
+    ],
+    [
+      "src/main/sandbox.ts",
+      31
+    ],
+    [
+      "src/main/session/correlation.ts",
+      28
+    ],
+    [
+      "src/main/projects.ts",
+      25
+    ],
+    [
+      "src/main/session/blocked-chats.ts",
+      25
+    ],
+    [
+      "src/shared/user-prompt.ts",
+      23
+    ],
+    [
+      "src/main/version.ts",
+      23
+    ],
+    [
+      "src/shared/skills.ts",
+      23
+    ],
+    [
+      "src/main/rawfs.ts",
+      23
+    ],
+    [
+      "src/main/computer/index.ts",
+      22
+    ],
+    [
+      "src/main/session/trusted-chats.ts",
+      21
+    ],
+    [
+      "scripts/fixtures/app-defaults.cjs",
+      20
+    ]
+  ],
+  "ipc_unique_literal_main_handles": [
+    "dictation:start",
+    "dictation:stop",
+    "workspaceTerminal:request"
+  ],
+  "counting_notes": [
+    "Code lines are physical lines, include blank lines/comments; not SLOC.",
+    "Lock records include target-specific optional packages; not measured packaged modules or disk size.",
+    "Imports and IPC are regex-extracted and can miss wrappers/dynamic cases.",
+    "Test declarations are lexical counts, not executed/expanded cases.",
+    "Tracked bytes exclude .git, downloaded dependencies, runtime data and release binaries."
+  ]
+}

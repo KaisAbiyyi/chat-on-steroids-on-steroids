@@ -1,0 +1,3884 @@
+
+7-Zip (a) 24.09 (x86) : Copyright (c) 1999-2024 Igor Pavlov : 2024-11-29
+
+Scanning the drive for archives:
+1 file, 173637457 bytes (166 MiB)
+
+Listing archive: D:\projects\CoS-Rust\audit\2026-10-16\release-artifact\Chat-On-Steroids-Setup-x64.exe
+
+--
+Path = D:\projects\CoS-Rust\audit\2026-10-16\release-artifact\Chat-On-Steroids-Setup-x64.exe
+Type = 7z
+WARNINGS:
+There are data after the end of archive
+Offset = 184942
+Physical Size = 173052277
+Tail Size = 400238
+Headers Size = 5508
+Method = LZMA2:20 BCJ
+Solid = -
+Blocks = 313
+
+----------
+Path = locales
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@img
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@img\colour
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\lib
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@koromix
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64\win32_x64
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\shared
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\worker
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\tools
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\scripts
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\src
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\src\win
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\sharp
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\sharp\install
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\prebuilds
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\prebuilds\win32-x64
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\include
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\include\tree_sitter
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\portable
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\wasm
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\bindings
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\bindings\node
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\prebuilds
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\prebuilds\win32-x64
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\queries
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\tree_sitter
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\icons
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\de
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\en
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\es
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\fr
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\ja
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\ko
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\pt_BR
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\pt_PT
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\ru
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\tr
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\vi
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\zh_CN
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\extension\_locales\zh_TW
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\pets
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\pets\capy
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\pets\hammy
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\rg
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\rg\complete
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\rg\doc
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\tunnel
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = D
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\nothing.c
+Size = 0
+Packed Size = 0
+Modified = 
+Attributes = A
+CRC = 
+Encrypted = -
+Method = 
+Block = 
+
+Path = resources\elevate.exe
+Size = 107520
+Packed Size = 49588
+Modified = 
+Attributes = A
+CRC = C908A44F
+Encrypted = -
+Method = BCJ LZMA2:17
+Block = 0
+
+Path = Chat On Steroids.exe
+Size = 246070272
+Packed Size = 80505471
+Modified = 
+Attributes = A
+CRC = 67FAFD67
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 1
+
+Path = chrome_100_percent.pak
+Size = 719654
+Packed Size = 694088
+Modified = 
+Attributes = A
+CRC = A932ACDD
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 2
+
+Path = chrome_200_percent.pak
+Size = 1269017
+Packed Size = 1217963
+Modified = 
+Attributes = A
+CRC = 9A2BD516
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 3
+
+Path = d3dcompiler_47.dll
+Size = 4741488
+Packed Size = 1657906
+Modified = 
+Attributes = A
+CRC = 80D20879
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 4
+
+Path = dxcompiler.dll
+Size = 25744896
+Packed Size = 6893786
+Modified = 
+Attributes = A
+CRC = E5986E6A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 5
+
+Path = dxil.dll
+Size = 1509760
+Packed Size = 487255
+Modified = 
+Attributes = A
+CRC = 6CD2B41A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 6
+
+Path = ffmpeg.dll
+Size = 3113472
+Packed Size = 974249
+Modified = 
+Attributes = A
+CRC = 30640EAC
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 7
+
+Path = icudtl.dat
+Size = 10876560
+Packed Size = 3497325
+Modified = 
+Attributes = A
+CRC = 10383CEF
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 8
+
+Path = LICENSE.electron.txt
+Size = 1096
+Packed Size = 690
+Modified = 
+Attributes = A
+CRC = 3958EFAA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 9
+
+Path = LICENSES.chromium.html
+Size = 20472830
+Packed Size = 570332
+Modified = 
+Attributes = A
+CRC = 4EAB28F9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 10
+
+Path = locales\af.pak
+Size = 636155
+Packed Size = 153764
+Modified = 
+Attributes = A
+CRC = 97386AE5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 11
+
+Path = locales\am.pak
+Size = 1029450
+Packed Size = 172349
+Modified = 
+Attributes = A
+CRC = E3BA0AC1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 12
+
+Path = locales\ar.pak
+Size = 1130933
+Packed Size = 177477
+Modified = 
+Attributes = A
+CRC = 8934916D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 13
+
+Path = locales\bg.pak
+Size = 1178203
+Packed Size = 172277
+Modified = 
+Attributes = A
+CRC = 61791DD3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 14
+
+Path = locales\bn.pak
+Size = 1513545
+Packed Size = 179134
+Modified = 
+Attributes = A
+CRC = 1C6E9458
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 15
+
+Path = locales\ca.pak
+Size = 716908
+Packed Size = 156962
+Modified = 
+Attributes = A
+CRC = 7F64A5D8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 16
+
+Path = locales\cs.pak
+Size = 743351
+Packed Size = 170189
+Modified = 
+Attributes = A
+CRC = 572A1854
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 17
+
+Path = locales\da.pak
+Size = 666465
+Packed Size = 153559
+Modified = 
+Attributes = A
+CRC = 3E8260F7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 18
+
+Path = locales\de.pak
+Size = 717834
+Packed Size = 162854
+Modified = 
+Attributes = A
+CRC = 4045821F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 19
+
+Path = locales\el.pak
+Size = 1295538
+Packed Size = 181223
+Modified = 
+Attributes = A
+CRC = 80E1478F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 20
+
+Path = locales\en-GB.pak
+Size = 580030
+Packed Size = 142573
+Modified = 
+Attributes = A
+CRC = 8689B535
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 21
+
+Path = locales\en-US.pak
+Size = 586582
+Packed Size = 143207
+Modified = 
+Attributes = A
+CRC = 84D77208
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 22
+
+Path = locales\es-419.pak
+Size = 707635
+Packed Size = 156641
+Modified = 
+Attributes = A
+CRC = 255E731D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 23
+
+Path = locales\es.pak
+Size = 703926
+Packed Size = 155716
+Modified = 
+Attributes = A
+CRC = 95B31030
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 24
+
+Path = locales\et.pak
+Size = 642216
+Packed Size = 158739
+Modified = 
+Attributes = A
+CRC = 0C4A2281
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 25
+
+Path = locales\fa.pak
+Size = 1063054
+Packed Size = 168995
+Modified = 
+Attributes = A
+CRC = A25CBE18
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 26
+
+Path = locales\fi.pak
+Size = 655113
+Packed Size = 157068
+Modified = 
+Attributes = A
+CRC = D2958332
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 27
+
+Path = locales\fil.pak
+Size = 741385
+Packed Size = 156649
+Modified = 
+Attributes = A
+CRC = 8BA92E3F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 28
+
+Path = locales\fr.pak
+Size = 763453
+Packed Size = 162134
+Modified = 
+Attributes = A
+CRC = D35FA941
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 29
+
+Path = locales\gu.pak
+Size = 1495625
+Packed Size = 177341
+Modified = 
+Attributes = A
+CRC = 191CE020
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 30
+
+Path = locales\he.pak
+Size = 928748
+Packed Size = 164696
+Modified = 
+Attributes = A
+CRC = B828604B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 31
+
+Path = locales\hi.pak
+Size = 1586592
+Packed Size = 184066
+Modified = 
+Attributes = A
+CRC = E19B830C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 32
+
+Path = locales\hr.pak
+Size = 715279
+Packed Size = 163920
+Modified = 
+Attributes = A
+CRC = 51951050
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 33
+
+Path = locales\hu.pak
+Size = 765640
+Packed Size = 171082
+Modified = 
+Attributes = A
+CRC = B61BEF73
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 34
+
+Path = locales\id.pak
+Size = 635080
+Packed Size = 143429
+Modified = 
+Attributes = A
+CRC = 0D0DD44D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 35
+
+Path = locales\it.pak
+Size = 693990
+Packed Size = 154476
+Modified = 
+Attributes = A
+CRC = C438145F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 36
+
+Path = locales\ja.pak
+Size = 842132
+Packed Size = 149506
+Modified = 
+Attributes = A
+CRC = D61C6C11
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 37
+
+Path = locales\kn.pak
+Size = 1720240
+Packed Size = 181253
+Modified = 
+Attributes = A
+CRC = DD9A780E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 38
+
+Path = locales\ko.pak
+Size = 718709
+Packed Size = 145917
+Modified = 
+Attributes = A
+CRC = A15A16DC
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 39
+
+Path = locales\lt.pak
+Size = 777281
+Packed Size = 166886
+Modified = 
+Attributes = A
+CRC = B18FBDCA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 40
+
+Path = locales\lv.pak
+Size = 774751
+Packed Size = 167971
+Modified = 
+Attributes = A
+CRC = 2183EF32
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 41
+
+Path = locales\ml.pak
+Size = 1767850
+Packed Size = 184715
+Modified = 
+Attributes = A
+CRC = C4E31ABA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 42
+
+Path = locales\mr.pak
+Size = 1467313
+Packed Size = 174391
+Modified = 
+Attributes = A
+CRC = 42261A0F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 43
+
+Path = locales\ms.pak
+Size = 668356
+Packed Size = 145827
+Modified = 
+Attributes = A
+CRC = 6CEF3389
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 44
+
+Path = locales\nb.pak
+Size = 638121
+Packed Size = 150539
+Modified = 
+Attributes = A
+CRC = D9CA7A3A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 45
+
+Path = locales\nl.pak
+Size = 664767
+Packed Size = 154271
+Modified = 
+Attributes = A
+CRC = E3AF1048
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 46
+
+Path = locales\pl.pak
+Size = 742064
+Packed Size = 169407
+Modified = 
+Attributes = A
+CRC = A195EBED
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 47
+
+Path = locales\pt-BR.pak
+Size = 697044
+Packed Size = 156374
+Modified = 
+Attributes = A
+CRC = 1D2F932D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 48
+
+Path = locales\pt-PT.pak
+Size = 701056
+Packed Size = 154740
+Modified = 
+Attributes = A
+CRC = AA5A2A9A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 49
+
+Path = locales\ro.pak
+Size = 728144
+Packed Size = 159654
+Modified = 
+Attributes = A
+CRC = D01B5574
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 50
+
+Path = locales\ru.pak
+Size = 1200996
+Packed Size = 180962
+Modified = 
+Attributes = A
+CRC = 80F56527
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 51
+
+Path = locales\sk.pak
+Size = 755475
+Packed Size = 173108
+Modified = 
+Attributes = A
+CRC = 8C8406B1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 52
+
+Path = locales\sl.pak
+Size = 722720
+Packed Size = 164045
+Modified = 
+Attributes = A
+CRC = 43A71A06
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 53
+
+Path = locales\sr.pak
+Size = 1112919
+Packed Size = 172573
+Modified = 
+Attributes = A
+CRC = DD4B90F5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 54
+
+Path = locales\sv.pak
+Size = 646537
+Packed Size = 150554
+Modified = 
+Attributes = A
+CRC = FD84BC0D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 55
+
+Path = locales\sw.pak
+Size = 685130
+Packed Size = 154610
+Modified = 
+Attributes = A
+CRC = 75CAB924
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 56
+
+Path = locales\ta.pak
+Size = 1758067
+Packed Size = 179950
+Modified = 
+Attributes = A
+CRC = 7CB7C8F3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 57
+
+Path = locales\te.pak
+Size = 1629379
+Packed Size = 181086
+Modified = 
+Attributes = A
+CRC = EAB2A84B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 58
+
+Path = locales\th.pak
+Size = 1368866
+Packed Size = 158165
+Modified = 
+Attributes = A
+CRC = B6A24F61
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 59
+
+Path = locales\tr.pak
+Size = 697368
+Packed Size = 156049
+Modified = 
+Attributes = A
+CRC = 8E365B92
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 60
+
+Path = locales\uk.pak
+Size = 1211565
+Packed Size = 178649
+Modified = 
+Attributes = A
+CRC = 81C553CD
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 61
+
+Path = locales\ur.pak
+Size = 1047994
+Packed Size = 168368
+Modified = 
+Attributes = A
+CRC = 2A045BA6
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 62
+
+Path = locales\vi.pak
+Size = 830059
+Packed Size = 155902
+Modified = 
+Attributes = A
+CRC = B871C1FA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 63
+
+Path = locales\zh-CN.pak
+Size = 592116
+Packed Size = 145330
+Modified = 
+Attributes = A
+CRC = 2B4BCE13
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 64
+
+Path = locales\zh-TW.pak
+Size = 583860
+Packed Size = 142969
+Modified = 
+Attributes = A
+CRC = B45184EE
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 65
+
+Path = resources\app-update.yml
+Size = 107
+Packed Size = 93
+Modified = 
+Attributes = A
+CRC = 625B9528
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 66
+
+Path = resources\app.asar
+Size = 68940180
+Packed Size = 13363842
+Modified = 
+Attributes = A
+CRC = AE235AF4
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 67
+
+Path = resources\app.asar.unpacked\node_modules\@img\colour\color.cjs
+Size = 45136
+Packed Size = 10458
+Modified = 
+Attributes = A
+CRC = 4C15F3DA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 68
+
+Path = resources\app.asar.unpacked\node_modules\@img\colour\index.cjs
+Size = 49
+Packed Size = 53
+Modified = 
+Attributes = A
+CRC = C05DBB11
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 69
+
+Path = resources\app.asar.unpacked\node_modules\@img\colour\LICENSE.md
+Size = 4433
+Packed Size = 842
+Modified = 
+Attributes = A
+CRC = 75F0E850
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 70
+
+Path = resources\app.asar.unpacked\node_modules\@img\colour\package.json
+Size = 1050
+Packed Size = 537
+Modified = 
+Attributes = A
+CRC = 8F79BB54
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 71
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\index.cjs
+Size = 62
+Packed Size = 66
+Modified = 
+Attributes = A
+CRC = 2CDDB263
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 72
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\lib\libvips-42.dll
+Size = 18614784
+Packed Size = 6142661
+Modified = 
+Attributes = A
+CRC = CFF8D85A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 73
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\lib\libvips-cpp-8.18.6.dll
+Size = 333312
+Packed Size = 85439
+Modified = 
+Attributes = A
+CRC = 43BBAD23
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 74
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\lib\sharp-win32-x64-0.35.4.node
+Size = 442368
+Packed Size = 153760
+Modified = 
+Attributes = A
+CRC = B2095B68
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 75
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\LICENSE
+Size = 10464
+Packed Size = 3766
+Modified = 
+Attributes = A
+CRC = AE510CB1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 76
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\package.json
+Size = 888
+Packed Size = 457
+Modified = 
+Attributes = A
+CRC = 6BA6C447
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 77
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\README.md
+Size = 4913
+Packed Size = 1140
+Modified = 
+Attributes = A
+CRC = 35A5034A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 78
+
+Path = resources\app.asar.unpacked\node_modules\@img\sharp-win32-x64\versions.json
+Size = 597
+Packed Size = 300
+Modified = 
+Attributes = A
+CRC = 6452F27C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 79
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64\index.js
+Size = 52
+Packed Size = 56
+Modified = 
+Attributes = A
+CRC = 7306287A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 80
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64\package.json
+Size = 644
+Packed Size = 341
+Modified = 
+Attributes = A
+CRC = 6DF4BD5E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 81
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64\README.md
+Size = 271
+Packed Size = 224
+Modified = 
+Attributes = A
+CRC = DB28C59F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 82
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64\win32_x64\koffi.lib
+Size = 1688
+Packed Size = 419
+Modified = 
+Attributes = A
+CRC = E403987F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 83
+
+Path = resources\app.asar.unpacked\node_modules\@koromix\koffi-win32-x64\win32_x64\koffi.node
+Size = 1044992
+Packed Size = 294889
+Modified = 
+Attributes = A
+CRC = E357CD09
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 84
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\conpty_console_list_agent.js
+Size = 932
+Packed Size = 543
+Modified = 
+Attributes = A
+CRC = 417CD41B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 85
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\eventEmitter2.js
+Size = 1600
+Packed Size = 555
+Modified = 
+Attributes = A
+CRC = D0D56E49
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 86
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\index.js
+Size = 1942
+Packed Size = 889
+Modified = 
+Attributes = A
+CRC = 48441677
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 87
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\interfaces.js
+Size = 233
+Packed Size = 193
+Modified = 
+Attributes = A
+CRC = 4DEE8F25
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 88
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\shared\conout.js
+Size = 322
+Packed Size = 245
+Modified = 
+Attributes = A
+CRC = 6D83C9AB
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 89
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\terminal.js
+Size = 7499
+Packed Size = 1928
+Modified = 
+Attributes = A
+CRC = EB4C1E09
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 90
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\types.js
+Size = 228
+Packed Size = 190
+Modified = 
+Attributes = A
+CRC = C3DE27A3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 91
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\unixTerminal.js
+Size = 13921
+Packed Size = 3963
+Modified = 
+Attributes = A
+CRC = 51E7E8D3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 92
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\utils.js
+Size = 1548
+Packed Size = 711
+Modified = 
+Attributes = A
+CRC = 3F17D0C7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 93
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\windowsConoutConnection.js
+Size = 6443
+Packed Size = 2088
+Modified = 
+Attributes = A
+CRC = AC7D5ED1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 94
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\windowsPtyAgent.js
+Size = 13941
+Packed Size = 3622
+Modified = 
+Attributes = A
+CRC = B4D52822
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 95
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\windowsTerminal.js
+Size = 8422
+Packed Size = 2394
+Modified = 
+Attributes = A
+CRC = 8D6CAFE8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 96
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\lib\worker\conoutSocketWorker.js
+Size = 878
+Packed Size = 462
+Modified = 
+Attributes = A
+CRC = 4D421C6D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 97
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\LICENSE
+Size = 3326
+Packed Size = 817
+Modified = 
+Attributes = A
+CRC = 1971C169
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 98
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\common.gypi
+Size = 724
+Packed Size = 363
+Modified = 
+Attributes = A
+CRC = 466F66DD
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 99
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\except.gypi
+Size = 560
+Packed Size = 300
+Modified = 
+Attributes = A
+CRC = BDFB28A8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 100
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\index.js
+Size = 377
+Packed Size = 252
+Modified = 
+Attributes = A
+CRC = 5FA472C9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 101
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\LICENSE.md
+Size = 1150
+Packed Size = 715
+Modified = 
+Attributes = A
+CRC = C6E3341C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 102
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\napi-inl.deprecated.h
+Size = 6323
+Packed Size = 678
+Modified = 
+Attributes = A
+CRC = EF2C32C8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 103
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\napi-inl.h
+Size = 219411
+Packed Size = 22823
+Modified = 
+Attributes = A
+CRC = B5816052
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 104
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\napi.h
+Size = 115423
+Packed Size = 16078
+Modified = 
+Attributes = A
+CRC = ADF006A5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 105
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\node_addon_api.gyp
+Size = 793
+Packed Size = 221
+Modified = 
+Attributes = A
+CRC = E8FC2D1C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 106
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\node_api.gyp
+Size = 132
+Packed Size = 94
+Modified = 
+Attributes = A
+CRC = D018A82B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 107
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\noexcept.gypi
+Size = 639
+Packed Size = 350
+Modified = 
+Attributes = A
+CRC = 8ECA2585
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 108
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\package-support.json
+Size = 467
+Packed Size = 240
+Modified = 
+Attributes = A
+CRC = 9042CF42
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 109
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\package.json
+Size = 928
+Packed Size = 451
+Modified = 
+Attributes = A
+CRC = 0655CE8B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 110
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\tools\check-napi.js
+Size = 3176
+Packed Size = 1307
+Modified = 
+Attributes = A
+CRC = 4E125F5E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 111
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\tools\clang-format.js
+Size = 2002
+Packed Size = 947
+Modified = 
+Attributes = A
+CRC = 3898636B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 112
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\tools\conversion.js
+Size = 15013
+Packed Size = 3949
+Modified = 
+Attributes = A
+CRC = 8871E5E1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 113
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\tools\eslint-format.js
+Size = 2071
+Packed Size = 944
+Modified = 
+Attributes = A
+CRC = F3999026
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 114
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\node_modules\node-addon-api\tools\README.md
+Size = 3217
+Packed Size = 1401
+Modified = 
+Attributes = A
+CRC = C6B378E1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 115
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\package.json
+Size = 1020
+Packed Size = 482
+Modified = 
+Attributes = A
+CRC = 49C96951
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 116
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty\conpty.dll
+Size = 110152
+Packed Size = 46994
+Modified = 
+Attributes = A
+CRC = C9079CE8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 117
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty\OpenConsole.exe
+Size = 1062472
+Packed Size = 421946
+Modified = 
+Attributes = A
+CRC = B7818E5F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 118
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty.node
+Size = 291328
+Packed Size = 114534
+Modified = 
+Attributes = A
+CRC = 78F564E0
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 119
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty.pdb
+Size = 6311936
+Packed Size = 850249
+Modified = 
+Attributes = A
+CRC = D2677B68
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 120
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty_console_list.node
+Size = 134656
+Packed Size = 54229
+Modified = 
+Attributes = A
+CRC = 11D61AF9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 121
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\prebuilds\win32-x64\conpty_console_list.pdb
+Size = 4321280
+Packed Size = 511150
+Modified = 
+Attributes = A
+CRC = C00F2470
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 122
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\scripts\post-install.js
+Size = 2401
+Packed Size = 928
+Modified = 
+Attributes = A
+CRC = 80214EA9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 123
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\scripts\prebuild.js
+Size = 1172
+Packed Size = 571
+Modified = 
+Attributes = A
+CRC = 47FECE20
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 124
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\src\win\conpty.h
+Size = 1727
+Packed Size = 706
+Modified = 
+Attributes = A
+CRC = A5C14B0B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 125
+
+Path = resources\app.asar.unpacked\node_modules\node-pty\src\win\path_util.h
+Size = 695
+Packed Size = 382
+Modified = 
+Attributes = A
+CRC = 8E011603
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 126
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\channel.cjs
+Size = 5383
+Packed Size = 2058
+Modified = 
+Attributes = A
+CRC = 1A9EBB72
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 127
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\channel.mjs
+Size = 5376
+Packed Size = 2057
+Modified = 
+Attributes = A
+CRC = 2307129A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 128
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\colour.cjs
+Size = 5622
+Packed Size = 1794
+Modified = 
+Attributes = A
+CRC = 9BAD5929
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 129
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\colour.mjs
+Size = 5610
+Packed Size = 1791
+Modified = 
+Attributes = A
+CRC = EE09ECD5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 130
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\composite.cjs
+Size = 9332
+Packed Size = 2994
+Modified = 
+Attributes = A
+CRC = 0F38AED7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 131
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\composite.mjs
+Size = 9325
+Packed Size = 2993
+Modified = 
+Attributes = A
+CRC = 6BDFE9E2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 132
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\constructor.cjs
+Size = 20364
+Packed Size = 6492
+Modified = 
+Attributes = A
+CRC = 5B784EDD
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 133
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\constructor.mjs
+Size = 20340
+Packed Size = 6503
+Modified = 
+Attributes = A
+CRC = FA10BA89
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 134
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\index.cjs
+Size = 620
+Packed Size = 264
+Modified = 
+Attributes = A
+CRC = 34ACE454
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 135
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\index.d.cts
+Size = 92867
+Packed Size = 18818
+Modified = 
+Attributes = A
+CRC = 99C10D8E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 136
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\index.d.mts
+Size = 87968
+Packed Size = 18708
+Modified = 
+Attributes = A
+CRC = F3D53211
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 137
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\index.mjs
+Size = 573
+Packed Size = 257
+Modified = 
+Attributes = A
+CRC = F0412CC7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 138
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\input.cjs
+Size = 33741
+Packed Size = 6450
+Modified = 
+Attributes = A
+CRC = 577956B0
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 139
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\input.mjs
+Size = 33729
+Packed Size = 6451
+Modified = 
+Attributes = A
+CRC = 1DD68D01
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 140
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\is.cjs
+Size = 2932
+Packed Size = 993
+Modified = 
+Attributes = A
+CRC = 50B6FAD8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 141
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\is.mjs
+Size = 2930
+Packed Size = 990
+Modified = 
+Attributes = A
+CRC = 7F86707A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 142
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\libvips.cjs
+Size = 5833
+Packed Size = 1873
+Modified = 
+Attributes = A
+CRC = 3CB4E5DB
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 143
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\libvips.mjs
+Size = 5828
+Packed Size = 1888
+Modified = 
+Attributes = A
+CRC = 1D160574
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 144
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\operation.cjs
+Size = 32882
+Packed Size = 7379
+Modified = 
+Attributes = A
+CRC = ADEF2237
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 145
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\operation.mjs
+Size = 32875
+Packed Size = 7372
+Modified = 
+Attributes = A
+CRC = 36260A8B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 146
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\output.cjs
+Size = 65416
+Packed Size = 12361
+Modified = 
+Attributes = A
+CRC = C204D8F4
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 147
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\output.mjs
+Size = 65399
+Packed Size = 12363
+Modified = 
+Attributes = A
+CRC = 2884037D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 148
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\resize.cjs
+Size = 22784
+Packed Size = 5856
+Modified = 
+Attributes = A
+CRC = BC49D04E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 149
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\resize.mjs
+Size = 22777
+Packed Size = 5855
+Modified = 
+Attributes = A
+CRC = 29A30DC4
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 150
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\sharp.cjs
+Size = 6199
+Packed Size = 1973
+Modified = 
+Attributes = A
+CRC = 2A986E78
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 151
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\sharp.mjs
+Size = 6294
+Packed Size = 2026
+Modified = 
+Attributes = A
+CRC = 6618505D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 152
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\utility.cjs
+Size = 9786
+Packed Size = 3316
+Modified = 
+Attributes = A
+CRC = 87F4783E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 153
+
+Path = resources\app.asar.unpacked\node_modules\sharp\dist\utility.mjs
+Size = 9862
+Packed Size = 3356
+Modified = 
+Attributes = A
+CRC = 131B74BA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 154
+
+Path = resources\app.asar.unpacked\node_modules\sharp\install\build.js
+Size = 860
+Packed Size = 449
+Modified = 
+Attributes = A
+CRC = 12A6D46D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 155
+
+Path = resources\app.asar.unpacked\node_modules\sharp\LICENSE
+Size = 10273
+Packed Size = 3724
+Modified = 
+Attributes = A
+CRC = A8F69CEA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 156
+
+Path = resources\app.asar.unpacked\node_modules\sharp\package.json
+Size = 2936
+Packed Size = 906
+Modified = 
+Attributes = A
+CRC = 8965F74D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 157
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src\common.h
+Size = 10988
+Packed Size = 3264
+Modified = 
+Attributes = A
+CRC = 03351A14
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 158
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src\metadata.h
+Size = 1878
+Packed Size = 756
+Modified = 
+Attributes = A
+CRC = 9381D483
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 159
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src\operations.h
+Size = 3625
+Packed Size = 1207
+Modified = 
+Attributes = A
+CRC = 8E244312
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 160
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src\pipeline.h
+Size = 10131
+Packed Size = 2758
+Modified = 
+Attributes = A
+CRC = 81DCEDC0
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 161
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src\stats.h
+Size = 1267
+Packed Size = 594
+Modified = 
+Attributes = A
+CRC = 79AE93F2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 162
+
+Path = resources\app.asar.unpacked\node_modules\sharp\src\utilities.h
+Size = 741
+Packed Size = 291
+Modified = 
+Attributes = A
+CRC = FC30BEAB
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 163
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\index.js
+Size = 27001
+Packed Size = 5391
+Modified = 
+Attributes = A
+CRC = 5EE22001
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 164
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\LICENSE
+Size = 1078
+Packed Size = 687
+Modified = 
+Attributes = A
+CRC = 679B27C5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 165
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\package.json
+Size = 1376
+Packed Size = 573
+Modified = 
+Attributes = A
+CRC = E0724F8E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 166
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\prebuilds\win32-x64\tree-sitter.node
+Size = 510464
+Packed Size = 190927
+Modified = 
+Attributes = A
+CRC = 22457475
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 167
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\addon_data.h
+Size = 1033
+Packed Size = 454
+Modified = 
+Attributes = A
+CRC = 56DA88F6
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 168
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\conversions.h
+Size = 707
+Packed Size = 314
+Modified = 
+Attributes = A
+CRC = AC51DFF2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 169
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\language.h
+Size = 381
+Packed Size = 219
+Modified = 
+Attributes = A
+CRC = 0154DF01
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 170
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\logger.h
+Size = 386
+Packed Size = 239
+Modified = 
+Attributes = A
+CRC = E413D26A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 171
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\lookaheaditerator.h
+Size = 995
+Packed Size = 375
+Modified = 
+Attributes = A
+CRC = 614E3F77
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 172
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\node.h
+Size = 976
+Packed Size = 427
+Modified = 
+Attributes = A
+CRC = EDB7D429
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 173
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\parser.h
+Size = 1051
+Packed Size = 382
+Modified = 
+Attributes = A
+CRC = 4AD43698
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 174
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\query.h
+Size = 1301
+Packed Size = 441
+Modified = 
+Attributes = A
+CRC = F5783081
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 175
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\tree.h
+Size = 1340
+Packed Size = 497
+Modified = 
+Attributes = A
+CRC = 7D037C2E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 176
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\src\tree_cursor.h
+Size = 1969
+Packed Size = 505
+Modified = 
+Attributes = A
+CRC = 94823724
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 177
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\include\tree_sitter\api.h
+Size = 47452
+Packed Size = 10941
+Modified = 
+Attributes = A
+CRC = FA89FD0E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 178
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\alloc.c
+Size = 1542
+Packed Size = 464
+Modified = 
+Attributes = A
+CRC = FAD911CA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 179
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\alloc.h
+Size = 919
+Packed Size = 368
+Modified = 
+Attributes = A
+CRC = CA618085
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 180
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\array.h
+Size = 10445
+Packed Size = 2610
+Modified = 
+Attributes = A
+CRC = 397B7677
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 181
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\atomic.h
+Size = 1384
+Packed Size = 387
+Modified = 
+Attributes = A
+CRC = 556D3F65
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 182
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\clock.h
+Size = 3543
+Packed Size = 953
+Modified = 
+Attributes = A
+CRC = 615CF314
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 183
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\error_costs.h
+Size = 294
+Packed Size = 130
+Modified = 
+Attributes = A
+CRC = 1C237AF2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 184
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\get_changed_ranges.c
+Size = 16548
+Packed Size = 3520
+Modified = 
+Attributes = A
+CRC = D43601FF
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 185
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\get_changed_ranges.h
+Size = 836
+Packed Size = 369
+Modified = 
+Attributes = A
+CRC = D182F9F4
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 186
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\host.h
+Size = 520
+Packed Size = 283
+Modified = 
+Attributes = A
+CRC = 59D2969F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 187
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\language.c
+Size = 8526
+Packed Size = 1857
+Modified = 
+Attributes = A
+CRC = 45C61FA3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 188
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\language.h
+Size = 8339
+Packed Size = 2297
+Modified = 
+Attributes = A
+CRC = 3943D8D6
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 189
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\length.h
+Size = 1275
+Packed Size = 450
+Modified = 
+Attributes = A
+CRC = 5C4CF39E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 190
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\lexer.c
+Size = 15124
+Packed Size = 3634
+Modified = 
+Attributes = A
+CRC = 472F1DDC
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 191
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\lexer.h
+Size = 1263
+Packed Size = 522
+Modified = 
+Attributes = A
+CRC = AA3224B4
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 192
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\lib.c
+Size = 280
+Packed Size = 118
+Modified = 
+Attributes = A
+CRC = FCC7D445
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 193
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\node.c
+Size = 25429
+Packed Size = 4184
+Modified = 
+Attributes = A
+CRC = 7834951D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 194
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\parser.c
+Size = 79051
+Packed Size = 15396
+Modified = 
+Attributes = A
+CRC = C987099E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 195
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\parser.h
+Size = 7624
+Packed Size = 2010
+Modified = 
+Attributes = A
+CRC = 62BAF2DC
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 196
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\point.h
+Size = 1307
+Packed Size = 370
+Modified = 
+Attributes = A
+CRC = 6A9FB126
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 197
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\portable\endian.h
+Size = 6856
+Packed Size = 1418
+Modified = 
+Attributes = A
+CRC = 0C812726
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 198
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\query.c
+Size = 149384
+Packed Size = 26822
+Modified = 
+Attributes = A
+CRC = B96BB94B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 199
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\reduce_action.h
+Size = 772
+Packed Size = 407
+Modified = 
+Attributes = A
+CRC = B9300287
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 200
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\reusable_node.h
+Size = 2747
+Packed Size = 825
+Modified = 
+Attributes = A
+CRC = EBF04031
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 201
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\stack.c
+Size = 28636
+Packed Size = 5729
+Modified = 
+Attributes = A
+CRC = D43DEBD3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 202
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\stack.h
+Size = 4872
+Packed Size = 1397
+Modified = 
+Attributes = A
+CRC = C241F616
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 203
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\subtree.c
+Size = 34540
+Packed Size = 6967
+Modified = 
+Attributes = A
+CRC = 4EA99A3D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 204
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\subtree.h
+Size = 12518
+Packed Size = 2928
+Modified = 
+Attributes = A
+CRC = 7EB3C33B
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 205
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\tree.c
+Size = 5272
+Packed Size = 1392
+Modified = 
+Attributes = A
+CRC = B73AE6A1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 206
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\tree.h
+Size = 663
+Packed Size = 326
+Modified = 
+Attributes = A
+CRC = 43B23F11
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 207
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\tree_cursor.c
+Size = 22965
+Packed Size = 4241
+Modified = 
+Attributes = A
+CRC = FB8D2298
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 208
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\tree_cursor.h
+Size = 1285
+Packed Size = 552
+Modified = 
+Attributes = A
+CRC = 7483ED32
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 209
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\ts_assert.h
+Size = 205
+Packed Size = 126
+Modified = 
+Attributes = A
+CRC = 1900BEFA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 210
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\ICU_SHA
+Size = 41
+Packed Size = 45
+Modified = 
+Attributes = A
+CRC = F7824A2D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 211
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\LICENSE
+Size = 21001
+Packed Size = 5086
+Modified = 
+Attributes = A
+CRC = 7D530C63
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 212
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\ptypes.h
+Size = 72
+Packed Size = 76
+Modified = 
+Attributes = A
+CRC = 313414C7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 213
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\README.md
+Size = 1270
+Packed Size = 595
+Modified = 
+Attributes = A
+CRC = 195D5C25
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 214
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\umachine.h
+Size = 14865
+Packed Size = 4286
+Modified = 
+Attributes = A
+CRC = 6C7F93AD
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 215
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\urename.h
+Size = 72
+Packed Size = 76
+Modified = 
+Attributes = A
+CRC = 313414C7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 216
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\utf.h
+Size = 72
+Packed Size = 76
+Modified = 
+Attributes = A
+CRC = 313414C7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 217
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\utf16.h
+Size = 23878
+Packed Size = 3271
+Modified = 
+Attributes = A
+CRC = 3316A532
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 218
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode\utf8.h
+Size = 31698
+Packed Size = 5185
+Modified = 
+Attributes = A
+CRC = 4C060BB2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 219
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\unicode.h
+Size = 1634
+Packed Size = 518
+Modified = 
+Attributes = A
+CRC = 0D026F6C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 220
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\wasm\stdlib-symbols.txt
+Size = 264
+Packed Size = 126
+Modified = 
+Attributes = A
+CRC = 5E962209
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 221
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\wasm\stdlib.c
+Size = 3524
+Packed Size = 1254
+Modified = 
+Attributes = A
+CRC = E9DE93C3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 222
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\wasm\wasm-stdlib.h
+Size = 96765
+Packed Size = 8379
+Modified = 
+Attributes = A
+CRC = 67F161B3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 223
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\wasm_store.c
+Size = 62327
+Packed Size = 10808
+Modified = 
+Attributes = A
+CRC = F2116DF5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 224
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter\vendor\tree-sitter\lib\src\wasm_store.h
+Size = 1137
+Packed Size = 404
+Modified = 
+Attributes = A
+CRC = ABCA0B9C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 225
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\bindings\node\binding_test.js
+Size = 250
+Packed Size = 166
+Modified = 
+Attributes = A
+CRC = D0306C45
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 226
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\bindings\node\index.js
+Size = 453
+Packed Size = 321
+Modified = 
+Attributes = A
+CRC = 4C0C3AE3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 227
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\grammar.js
+Size = 30142
+Packed Size = 5103
+Modified = 
+Attributes = A
+CRC = 9222139D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 228
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\LICENSE
+Size = 1080
+Packed Size = 690
+Modified = 
+Attributes = A
+CRC = 016FADA1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 229
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\package.json
+Size = 987
+Packed Size = 451
+Modified = 
+Attributes = A
+CRC = C4F3ABA2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 230
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\prebuilds\win32-x64\tree-sitter-bash.node
+Size = 1509888
+Packed Size = 190602
+Modified = 
+Attributes = A
+CRC = 0A0E5814
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 231
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\queries\highlights.scm
+Size = 577
+Packed Size = 314
+Modified = 
+Attributes = A
+CRC = E6A618A0
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 232
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\grammar.json
+Size = 179629
+Packed Size = 7476
+Modified = 
+Attributes = A
+CRC = 8E5970EA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 233
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\node-types.json
+Size = 51167
+Packed Size = 2332
+Modified = 
+Attributes = A
+CRC = ABC4FBF7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 234
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\parser.c
+Size = 9912254
+Packed Size = 220670
+Modified = 
+Attributes = A
+CRC = EEABBA60
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 235
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\scanner.c
+Size = 45602
+Packed Size = 5449
+Modified = 
+Attributes = A
+CRC = BE44E84F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 236
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\tree_sitter\alloc.h
+Size = 985
+Packed Size = 313
+Modified = 
+Attributes = A
+CRC = BB11E676
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 237
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\tree_sitter\array.h
+Size = 10431
+Packed Size = 2605
+Modified = 
+Attributes = A
+CRC = 0B253218
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 238
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\src\tree_sitter\parser.h
+Size = 7624
+Packed Size = 2010
+Modified = 
+Attributes = A
+CRC = 62BAF2DC
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 239
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\tree-sitter-bash.wasm
+Size = 1358224
+Packed Size = 116662
+Modified = 
+Attributes = A
+CRC = E8D4C7A9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 240
+
+Path = resources\app.asar.unpacked\node_modules\tree-sitter-bash\tree-sitter.json
+Size = 916
+Packed Size = 421
+Modified = 
+Attributes = A
+CRC = 188A8CDA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 241
+
+Path = resources\extension\active-tabs.js
+Size = 5840
+Packed Size = 2040
+Modified = 
+Attributes = A
+CRC = F84B0B5D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 242
+
+Path = resources\extension\background.js
+Size = 306414
+Packed Size = 70210
+Modified = 
+Attributes = A
+CRC = 93F27934
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 243
+
+Path = resources\extension\browser-control-page.js
+Size = 18106
+Packed Size = 6115
+Modified = 
+Attributes = A
+CRC = ABE03643
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 244
+
+Path = resources\extension\browser-control.js
+Size = 45612
+Packed Size = 12950
+Modified = 
+Attributes = A
+CRC = B2EAB7AB
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 245
+
+Path = resources\extension\build-stamp.txt
+Size = 13
+Packed Size = 17
+Modified = 
+Attributes = A
+CRC = ADFAEFC7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 246
+
+Path = resources\extension\chatgpt-dom.js
+Size = 199226
+Packed Size = 51461
+Modified = 
+Attributes = A
+CRC = 52E8F858
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 247
+
+Path = resources\extension\content.js
+Size = 759306
+Packed Size = 177501
+Modified = 
+Attributes = A
+CRC = 50096252
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 248
+
+Path = resources\extension\fiber.js
+Size = 169382
+Packed Size = 42552
+Modified = 
+Attributes = A
+CRC = F141CEAE
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 249
+
+Path = resources\extension\i18n.js
+Size = 6192
+Packed Size = 2240
+Modified = 
+Attributes = A
+CRC = C2C81ABF
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 250
+
+Path = resources\extension\icons\icon128.png
+Size = 4008
+Packed Size = 3994
+Modified = 
+Attributes = A
+CRC = 07E3717C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 251
+
+Path = resources\extension\icons\icon16.png
+Size = 547
+Packed Size = 551
+Modified = 
+Attributes = A
+CRC = 62C7B488
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 252
+
+Path = resources\extension\icons\icon32.png
+Size = 984
+Packed Size = 988
+Modified = 
+Attributes = A
+CRC = 8EC114E3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 253
+
+Path = resources\extension\icons\icon48.png
+Size = 1523
+Packed Size = 1527
+Modified = 
+Attributes = A
+CRC = AD91349E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 254
+
+Path = resources\extension\manifest.json
+Size = 2160
+Packed Size = 568
+Modified = 
+Attributes = A
+CRC = E4DB2E5C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 255
+
+Path = resources\extension\overlay.css
+Size = 39608
+Packed Size = 10273
+Modified = 
+Attributes = A
+CRC = AB6D8C0E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 256
+
+Path = resources\extension\popup.css
+Size = 15821
+Packed Size = 4181
+Modified = 
+Attributes = A
+CRC = F53D8F84
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 257
+
+Path = resources\extension\popup.html
+Size = 6758
+Packed Size = 1812
+Modified = 
+Attributes = A
+CRC = 9E0B94FF
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 258
+
+Path = resources\extension\popup.js
+Size = 23116
+Packed Size = 6821
+Modified = 
+Attributes = A
+CRC = 533FCB66
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 259
+
+Path = resources\extension\usage.js
+Size = 37203
+Packed Size = 10150
+Modified = 
+Attributes = A
+CRC = A8CCB0F3
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 260
+
+Path = resources\extension\_locales\de\messages.json
+Size = 44079
+Packed Size = 9378
+Modified = 
+Attributes = A
+CRC = 574754A7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 261
+
+Path = resources\extension\_locales\en\messages.json
+Size = 39911
+Packed Size = 8016
+Modified = 
+Attributes = A
+CRC = DFE4A3BB
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 262
+
+Path = resources\extension\_locales\es\messages.json
+Size = 43932
+Packed Size = 9096
+Modified = 
+Attributes = A
+CRC = E78DEA4C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 263
+
+Path = resources\extension\_locales\fr\messages.json
+Size = 45131
+Packed Size = 9288
+Modified = 
+Attributes = A
+CRC = 04160B67
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 264
+
+Path = resources\extension\_locales\ja\messages.json
+Size = 49697
+Packed Size = 9145
+Modified = 
+Attributes = A
+CRC = 3467D4EE
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 265
+
+Path = resources\extension\_locales\ko\messages.json
+Size = 45583
+Packed Size = 8879
+Modified = 
+Attributes = A
+CRC = D774ACFF
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 266
+
+Path = resources\extension\_locales\pt_BR\messages.json
+Size = 43107
+Packed Size = 8953
+Modified = 
+Attributes = A
+CRC = EE975BC8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 267
+
+Path = resources\extension\_locales\pt_PT\messages.json
+Size = 42993
+Packed Size = 8969
+Modified = 
+Attributes = A
+CRC = E0A40855
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 268
+
+Path = resources\extension\_locales\ru\messages.json
+Size = 55620
+Packed Size = 9754
+Modified = 
+Attributes = A
+CRC = 2DDDF086
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 269
+
+Path = resources\extension\_locales\tr\messages.json
+Size = 42967
+Packed Size = 8965
+Modified = 
+Attributes = A
+CRC = BBB62F7D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 270
+
+Path = resources\extension\_locales\vi\messages.json
+Size = 47093
+Packed Size = 8803
+Modified = 
+Attributes = A
+CRC = 60B3EB5A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 271
+
+Path = resources\extension\_locales\zh_CN\messages.json
+Size = 39386
+Packed Size = 8557
+Modified = 
+Attributes = A
+CRC = 55151430
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 272
+
+Path = resources\extension\_locales\zh_TW\messages.json
+Size = 39919
+Packed Size = 8623
+Modified = 
+Attributes = A
+CRC = F4736983
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 273
+
+Path = resources\LICENSE
+Size = 1086
+Packed Size = 693
+Modified = 
+Attributes = A
+CRC = 09819165
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 274
+
+Path = resources\LICENSE.electron.txt
+Size = 1096
+Packed Size = 690
+Modified = 
+Attributes = A
+CRC = 3958EFAA
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 275
+
+Path = resources\LICENSES.chromium.html
+Size = 20472830
+Packed Size = 570332
+Modified = 
+Attributes = A
+CRC = 4EAB28F9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 276
+
+Path = resources\pets\capy\animations.json
+Size = 4620
+Packed Size = 665
+Modified = 
+Attributes = A
+CRC = 1D3C6729
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 277
+
+Path = resources\pets\capy\atlas.png
+Size = 1954171
+Packed Size = 1951792
+Modified = 
+Attributes = A
+CRC = 05349BAF
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 278
+
+Path = resources\pets\capy\pet.json
+Size = 155
+Packed Size = 129
+Modified = 
+Attributes = A
+CRC = 0011A37C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 279
+
+Path = resources\pets\hammy\animations.json
+Size = 4619
+Packed Size = 666
+Modified = 
+Attributes = A
+CRC = A6E83B7F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 280
+
+Path = resources\pets\hammy\atlas.png
+Size = 2244959
+Packed Size = 2242817
+Modified = 
+Attributes = A
+CRC = 3BA92FD8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 281
+
+Path = resources\pets\hammy\pet.json
+Size = 153
+Packed Size = 129
+Modified = 
+Attributes = A
+CRC = 8E3D148C
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 282
+
+Path = resources\rg\complete\rg.bash
+Size = 21362
+Packed Size = 1996
+Modified = 
+Attributes = A
+CRC = A672E267
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 283
+
+Path = resources\rg\complete\rg.fish
+Size = 15204
+Packed Size = 3963
+Modified = 
+Attributes = A
+CRC = 9262FB2D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 284
+
+Path = resources\rg\complete\_rg
+Size = 31501
+Packed Size = 10048
+Modified = 
+Attributes = A
+CRC = A424D6BC
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 285
+
+Path = resources\rg\complete\_rg.ps1
+Size = 26020
+Packed Size = 3428
+Modified = 
+Attributes = A
+CRC = EBA6FF44
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 286
+
+Path = resources\rg\COPYING
+Size = 129
+Packed Size = 108
+Modified = 
+Attributes = A
+CRC = 6A40EFB9
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 287
+
+Path = resources\rg\doc\CHANGELOG.md
+Size = 91752
+Packed Size = 21483
+Modified = 
+Attributes = A
+CRC = 15E1C1C0
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 288
+
+Path = resources\rg\doc\FAQ.md
+Size = 43306
+Packed Size = 14513
+Modified = 
+Attributes = A
+CRC = 01E53AC1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 289
+
+Path = resources\rg\doc\GUIDE.md
+Size = 41920
+Packed Size = 13373
+Modified = 
+Attributes = A
+CRC = 17318524
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 290
+
+Path = resources\rg\doc\rg.1
+Size = 87183
+Packed Size = 22812
+Modified = 
+Attributes = A
+CRC = 1C50E772
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 291
+
+Path = resources\rg\LICENSE-MIT
+Size = 1102
+Packed Size = 699
+Modified = 
+Attributes = A
+CRC = 80A8B58F
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 292
+
+Path = resources\rg\README.md
+Size = 22156
+Packed Size = 7378
+Modified = 
+Attributes = A
+CRC = 6242D5E5
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 293
+
+Path = resources\rg\rg.exe
+Size = 4218880
+Packed Size = 1269682
+Modified = 
+Attributes = A
+CRC = C5CF8521
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 294
+
+Path = resources\rg\UNLICENSE
+Size = 1235
+Packed Size = 746
+Modified = 
+Attributes = A
+CRC = A728ACE8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 295
+
+Path = resources\rg\VERSION
+Size = 7
+Packed Size = 11
+Modified = 
+Attributes = A
+CRC = EE5CF2CE
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 296
+
+Path = resources\THIRD-PARTY-NOTICES-sharp-win32-x64.md
+Size = 4913
+Packed Size = 1140
+Modified = 
+Attributes = A
+CRC = 35A5034A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 297
+
+Path = resources\THIRD-PARTY-NOTICES.txt
+Size = 10549690
+Packed Size = 322104
+Modified = 
+Attributes = A
+CRC = 748EC6F7
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 298
+
+Path = resources\tunnel\cloudflared-manifest.json
+Size = 1038
+Packed Size = 597
+Modified = 
+Attributes = A
+CRC = DA62C562
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 299
+
+Path = resources\tunnel\cloudflared.exe
+Size = 39751680
+Packed Size = 16839774
+Modified = 
+Attributes = A
+CRC = 9E103D2E
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 300
+
+Path = resources\tunnel\LICENSE
+Size = 10758
+Packed Size = 3684
+Modified = 
+Attributes = A
+CRC = B18A4F08
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 301
+
+Path = resources\tunnel\NOTICE
+Size = 551
+Packed Size = 389
+Modified = 
+Attributes = A
+CRC = DBD3347A
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 302
+
+Path = resources\tunnel\tunnel-client-v0.0.16-windows-amd64-licenses.txt
+Size = 13452
+Packed Size = 2549
+Modified = 
+Attributes = A
+CRC = AC05779D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 303
+
+Path = resources\tunnel\tunnel-client-v0.0.16-windows-amd64.spdx.json
+Size = 234305
+Packed Size = 13795
+Modified = 
+Attributes = A
+CRC = 6B66B3D8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 304
+
+Path = resources\tunnel\tunnel-client.exe
+Size = 22591488
+Packed Size = 6317259
+Modified = 
+Attributes = A
+CRC = 0B260DB1
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 305
+
+Path = resources\tunnel\VERSION
+Size = 8
+Packed Size = 12
+Modified = 
+Attributes = A
+CRC = 3774112D
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 306
+
+Path = resources.pak
+Size = 12435445
+Packed Size = 12319984
+Modified = 
+Attributes = A
+CRC = AB1B6F33
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 307
+
+Path = snapshot_blob.bin
+Size = 368776
+Packed Size = 57533
+Modified = 
+Attributes = A
+CRC = 9A54CEB8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 308
+
+Path = v8_context_snapshot.bin
+Size = 742208
+Packed Size = 121046
+Modified = 
+Attributes = A
+CRC = DDE496F8
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 309
+
+Path = vk_swiftshader.dll
+Size = 5520384
+Packed Size = 1420567
+Modified = 
+Attributes = A
+CRC = 0AB71335
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 310
+
+Path = vk_swiftshader_icd.json
+Size = 106
+Packed Size = 96
+Modified = 
+Attributes = A
+CRC = 596B3D49
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 311
+
+Path = vulkan-1.dll
+Size = 939008
+Packed Size = 261165
+Modified = 
+Attributes = A
+CRC = 74307FD2
+Encrypted = -
+Method = BCJ LZMA2:20
+Block = 312
+
+
+Warnings: 1

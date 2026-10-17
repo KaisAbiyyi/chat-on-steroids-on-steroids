@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-17",
+  "reviewer": "gpt-6-luna / maximum reasoning effort / fresh whole-scope source review",
+  "initialVerdict": "not ready",
+  "initialFindings": {
+    "critical": 0,
+    "important": 7,
+    "minor": 0
+  },
+  "repairPasses": 1,
+  "secondReview": false,
+  "redEvidence": "Functional failures observed in tool transcript; final green run retained in log. I1 uses a platform-neutral model because no native Unix runtime was qualified.",
+  "repairs": [
+    {
+      "id": "I1",
+      "status": "SOURCE REPAIRED; native Unix NOT RUN",
+      "red": "Two platform-neutral custody state regressions failed before their state guard implementation; native OS trigger not executed",
+      "green": "2 custody tests PASS; Linux cross-check including Unix descendant-pipe test source PASS"
+    },
+    {
+      "id": "I2",
+      "status": "REPAIRED",
+      "red": "Real local restart cycle 64 failed with process capacity exhausted",
+      "green": "70-cycle start/stop regression PASS"
+    },
+    {
+      "id": "I3",
+      "status": "REPAIRED",
+      "red": "Injected four-byte prefix failure caused incomplete rollback",
+      "green": "Original contents restored, no staging residue"
+    },
+    {
+      "id": "I4",
+      "status": "REPAIRED",
+      "red": "Revoked traversal returned collected matches",
+      "green": "PermissionDenied with no published search result"
+    },
+    {
+      "id": "I5",
+      "status": "REPAIRED",
+      "red": "Real control-api junction was accepted",
+      "green": "Start refused; external directory empty"
+    },
+    {
+      "id": "I6",
+      "status": "REPAIRED with explicit admission deviation",
+      "red": "Local aggregate 3x12 MiB delete patch and 129-file patch accepted; remote 129-file patch accepted",
+      "green": "Local and installed-subsystem aggregate and count limits refuse before mutation",
+      "limits": "128 paths; 256 MiB conservative estimate, not measured RSS"
+    },
+    {
+      "id": "I7",
+      "status": "MITIGATED by default refusal; adversarial containment UNQUALIFIED",
+      "red": "Cached local transport permitted operation without host trust",
+      "green": "Default refusal, explicit lifetime opt-in, restart reset PASS",
+      "trustFlag": "--trust-ssh-server-paths",
+      "caveat": "SFTP v3 does not attest canonical opened-handle path; opt-in trusts server filesystem"
+    }
+  ],
+  "rustTests": {
+    "passed": 116,
+    "failed": 0,
+    "ignored": 0,
+    "log": "D:\\projects\\CoS-Rust\\audit\\2026-10-17-phase4-6-rust-tests-final.log",
+    "sha256": "a080dd291219eb791c22f2315c4fd6af3b32332f65ce52ee57a57ec0c3a775af"
+  },
+  "runtime": {
+    "checks": 17,
+    "receipt": "phase4-6-runtime-final.json",
+    "binarySha256": "b46a07a840daa8c8249687fc64f0aa1ecb7e17f09f938c90e047ff4a347de3ce"
+  },
+  "format": "PASS",
+  "clippy": "PASS: --workspace --all-targets --locked -- -D warnings",
+  "releaseBuild": "PASS: --release --locked",
+  "linuxCompileCheck": "PASS: -p cos-tools --target x86_64-unknown-linux-gnu --tests; not native execution",
+  "sourceFiles": 93,
+  "changedSourceFiles": 18,
+  "wholePhaseAcceptance": {
+    "4": "PARTIAL",
+    "5": "PARTIAL",
+    "6": "PARTIAL"
+  },
+  "deferredMinors": [],
+  "remaining": "See docs/research/2026-10-17-phase4-6-coverage-v1.0.md and dated review rulings",
+  "upstreamClean": true
+}

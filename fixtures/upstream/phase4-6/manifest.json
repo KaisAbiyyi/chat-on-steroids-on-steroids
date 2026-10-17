@@ -1,0 +1,50 @@
+{
+  "commit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "scope": "Pure upstream function oracles and actual Zod declarations; no handler or provider action",
+  "files": [
+    {
+      "file": "src/main/codex/apply-patch/parser.ts",
+      "sha256": "43a8f4e7d4e47cc4dd7f0d3a38fd762fcb1cd2435bd25918961742523b5cda8e"
+    },
+    {
+      "file": "src/main/codex/apply-patch/text-file.ts",
+      "sha256": "e63ace580b390e5ae0367103a7d4b96cbbd6a06557ba44ed7ac0827206d72614"
+    },
+    {
+      "file": "src/main/codex/command-batch.ts",
+      "sha256": "9f9057126034f6918c1025605a2d919d043d26753e6565bcb85fdc263fb00c44"
+    },
+    {
+      "file": "src/main/codex/tool-specs.ts",
+      "sha256": "f03777fcc5e87955a80250566633b87c9867497e0d841b27ae4e4fe8b3d12833"
+    },
+    {
+      "file": "src/main/codex/truncate.ts",
+      "sha256": "a7cf1ff21e89fd116816ae0f9325a51c74f52c1ba1b92cbc455c707b2fbe0a1a"
+    },
+    {
+      "file": "src/main/mcp/plan-tool.ts",
+      "sha256": "e7dddbe978275cea89d34abf75d1c21e265a09928ccd4a0808c6aa3fb27e7410"
+    },
+    {
+      "file": "src/main/mcp/tools-core.ts",
+      "sha256": "4b92d792d122af2049794e6054ca39101b7a30d163e3342aba383320e4f53811"
+    },
+    {
+      "file": "src/main/remote/ssh.ts",
+      "sha256": "76e992e8b75592c76fbd953c6d91e1f38f002bc83d687827dbc7b9adae602614"
+    },
+    {
+      "file": "src/main/tunnel/health.ts",
+      "sha256": "bb56ad762d7cd7a93c65a692f254169cf7ee3c60cac30bf16361c23f2b56d025"
+    },
+    {
+      "file": "src/shared/agent-plan.ts",
+      "sha256": "434a9d0cf40bf402645ced7fa8959ea9c99ec6167793235580f96655cacf8cb6"
+    },
+    {
+      "file": "src/shared/command-allowlist.ts",
+      "sha256": "5eeb7ca7df65730ac8303fa9f2f08fbef42b20571181dd06d41bc4927ddd01f6"
+    }
+  ]
+}

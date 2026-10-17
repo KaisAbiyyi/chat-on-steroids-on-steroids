@@ -1,0 +1,22 @@
+[
+  {
+    "text": "École café",
+    "expected": "ecole cafe"
+  },
+  {
+    "text": "İSTANBUL",
+    "expected": "istanbul"
+  },
+  {
+    "text": "STRASSE ß ẞ",
+    "expected": "strasse ß ß"
+  },
+  {
+    "text": "😀 Alpha",
+    "expected": "😀 alpha"
+  },
+  {
+    "text": "é A",
+    "expected": "é a"
+  }
+]

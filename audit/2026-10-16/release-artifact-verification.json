@@ -1,0 +1,10 @@
+{
+  "tag": "v2.1.39",
+  "url": "https://github.com/totec448-spec/chat-on-steroids/releases/download/v2.1.39/Chat-On-Steroids-Setup-x64.exe",
+  "file": "D:\\projects\\CoS-Rust\\audit\\2026-10-16\\release-artifact\\Chat-On-Steroids-Setup-x64.exe",
+  "bytes": 173637457,
+  "sha256": "9c12f0e1bc3161c151676be94802c4cee98b7b2181a96169fec0ccd1d1d57bec",
+  "published_digest": "sha256:9c12f0e1bc3161c151676be94802c4cee98b7b2181a96169fec0ccd1d1d57bec",
+  "verification": "PASS: exact published size and SHA256",
+  "executed_or_installed": false
+}

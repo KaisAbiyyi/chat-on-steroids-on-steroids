@@ -1,0 +1,18 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sourceHashes": {
+    "src/main/config.ts": "6ec753fa43b5b6f95083c8b0dfc22a2df99570dce6f8a50801026fb527335d93",
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653",
+    "src/main/session/recorder.ts": "d83965629e8ae430babb91db11fc66aff385ea1bcd8f0243432af571a0375c03",
+    "src/main/session/correlation.ts": "4354aa10054ca78fd8a68e6a013077d84639613699a607d555b1fc5d1e57a8ac",
+    "src/shared/session.ts": "59fd546021383ba6b75896022d8dd4e876464ccb3dc1ff977c687d16611870e1",
+    "src/shared/chronology.ts": "8cd290ec42e1035aeb4110fb077adf15fbe663ee5284f71a8fdcb55755094481",
+    "src/main/secrets.ts": "101b5fddb1703c8735cb38a88dfa54f02fb64da43e4e1b8cfb0e992fb34c1dcc"
+  },
+  "generatedBy": "tools/capture-upstream-baseline.mjs",
+  "scope": "actual pinned source functions in isolated Node; no live provider or Electron UI claim",
+  "configCases": 19,
+  "transformations": 12,
+  "platform": "win32",
+  "node": "v24.21.0"
+}

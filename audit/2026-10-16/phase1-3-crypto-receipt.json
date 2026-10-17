@@ -1,0 +1,20 @@
+{
+  "scope": "Public synthetic isolated Windows profile",
+  "electron": {
+    "electron": "44.3.0",
+    "platform": "win32",
+    "userData": "D:\\projects\\CoS-Rust\\audit\\2026-10-16\\phase1-3-runtime\\crypto\\electron-profile",
+    "sessionData": "D:\\projects\\CoS-Rust\\audit\\2026-10-16\\phase1-3-runtime\\crypto\\electron-profile",
+    "available": true,
+    "prefixHex": "763130415ec715e0dc1dfb8d",
+    "bytes": 124,
+    "electronRoundTrip": true,
+    "rustRead": true
+  },
+  "rust": {
+    "electronRead": true,
+    "authenticatedRoundTrip": true
+  },
+  "runtimeDataIgnored": true,
+  "realCredentialDataUsed": false
+}

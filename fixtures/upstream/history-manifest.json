@@ -1,0 +1,11 @@
+{
+  "commit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "scope": "Actual upstream functions in disposable synthetic profile; config and diagnostic sinks stubbed only",
+  "sources": {
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653",
+    "src/shared/chronology.ts": "8cd290ec42e1035aeb4110fb077adf15fbe663ee5284f71a8fdcb55755094481",
+    "src/shared/session.ts": "59fd546021383ba6b75896022d8dd4e876464ccb3dc1ff977c687d16611870e1",
+    "src/shared/usage.ts": "7a807585f8d86be607184a09d6257a5099733e37feb03cf3092a267ce41d299d"
+  },
+  "operations": 9
+}

@@ -1,0 +1,297 @@
+[
+  {
+    "contents": "a\nb\n",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "new\nb\n"
+  },
+  {
+    "contents": "a\nb\n",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\nextra\nb\n"
+  },
+  {
+    "contents": "a\nb\n",
+    "replacements": [],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\nb\n"
+  },
+  {
+    "contents": "a\r\nb\r\n",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "new\r\nb\r\n"
+  },
+  {
+    "contents": "a\r\nb\r\n",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\r\nextra\r\nb\r\n"
+  },
+  {
+    "contents": "a\r\nb\r\n",
+    "replacements": [],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\r\nb\r\n"
+  },
+  {
+    "contents": "a\rb\r",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "new\rb\r"
+  },
+  {
+    "contents": "a\rb\r",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\rextra\rb\r"
+  },
+  {
+    "contents": "a\rb\r",
+    "replacements": [],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\rb\r"
+  },
+  {
+    "contents": "a\r\nb\nc",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b",
+      "c"
+    ],
+    "expected": "new\r\nb\nc\r\n"
+  },
+  {
+    "contents": "a\r\nb\nc",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b",
+      "c"
+    ],
+    "expected": "a\r\nextra\r\nb\nc\r\n"
+  },
+  {
+    "contents": "a\r\nb\nc",
+    "replacements": [],
+    "lines": [
+      "a",
+      "b",
+      "c"
+    ],
+    "expected": "a\r\nb\nc\r\n"
+  },
+  {
+    "contents": "a\nb",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "new\nb\n"
+  },
+  {
+    "contents": "a\nb",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\nextra\nb\n"
+  },
+  {
+    "contents": "a\nb",
+    "replacements": [],
+    "lines": [
+      "a",
+      "b"
+    ],
+    "expected": "a\nb\n"
+  },
+  {
+    "contents": "😀\r\nz",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [
+      "😀",
+      "z"
+    ],
+    "expected": "new\r\nz\r\n"
+  },
+  {
+    "contents": "😀\r\nz",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [
+      "😀",
+      "z"
+    ],
+    "expected": "😀\r\nextra\r\nz\r\n"
+  },
+  {
+    "contents": "😀\r\nz",
+    "replacements": [],
+    "lines": [
+      "😀",
+      "z"
+    ],
+    "expected": "😀\r\nz\r\n"
+  },
+  {
+    "contents": "",
+    "replacements": [
+      [
+        0,
+        1,
+        [
+          "new"
+        ]
+      ]
+    ],
+    "lines": [],
+    "expected": "new\n"
+  },
+  {
+    "contents": "",
+    "replacements": [
+      [
+        1,
+        0,
+        [
+          "extra"
+        ]
+      ]
+    ],
+    "lines": [],
+    "expected": "extra\n"
+  },
+  {
+    "contents": "",
+    "replacements": [],
+    "lines": [],
+    "expected": ""
+  }
+]

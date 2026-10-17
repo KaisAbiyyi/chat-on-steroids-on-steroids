@@ -1,0 +1,52 @@
+[
+  {
+    "shell": "powershell",
+    "commands": [
+      "echo first",
+      "echo \"two words\"",
+      "echo last"
+    ],
+    "marker": "000000000000000000000000",
+    "expected": "$__cos_batch_commands = @('ZWNobyBmaXJzdA==', 'ZWNobyAidHdvIHdvcmRzIg==', 'ZWNobyBsYXN0')\n$__cos_batch_exit = 0\nfor ($__cos_batch_index = 0; $__cos_batch_index -lt $__cos_batch_commands.Count; $__cos_batch_index++) {\n  [Console]::Out.WriteLine((\"--- command {0}/{1} --- [clf-batch:000000000000000000000000]\" -f ($__cos_batch_index + 1), $__cos_batch_commands.Count))\n  $global:LASTEXITCODE = 0\n  try {\n    $__cos_batch_text = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($__cos_batch_commands[$__cos_batch_index]))\n    . ([ScriptBlock]::Create($__cos_batch_text))\n    $__cos_batch_succeeded = $?\n    $__cos_batch_code = if ($LASTEXITCODE -ne 0) { [int]$LASTEXITCODE } elseif ($__cos_batch_succeeded) { 0 } else { 1 }\n  } catch {\n    [Console]::Error.WriteLine($_.ToString())\n    $__cos_batch_code = 1\n  }\n  [Console]::Out.WriteLine((\"--- exit code {0} --- [clf-batch:000000000000000000000000]\" -f $__cos_batch_code))\n  if ($__cos_batch_code -ne 0 -and $__cos_batch_exit -eq 0) { $__cos_batch_exit = $__cos_batch_code }\n}\nexit $__cos_batch_exit"
+  },
+  {
+    "shell": "cmd",
+    "commands": [
+      "echo first",
+      "echo \"two words\"",
+      "echo last"
+    ],
+    "marker": "000000000000000000000000",
+    "expected": "@echo off\r\nset \"__cos_batch_exit=0\"\r\necho --- command 1/3 --- [clf-batch:000000000000000000000000]\r\ncall echo first\r\nset \"__cos_batch_code=%errorlevel%\"\r\necho --- exit code %__cos_batch_code% --- [clf-batch:000000000000000000000000]\r\nif not \"%__cos_batch_code%\"==\"0\" if \"%__cos_batch_exit%\"==\"0\" set \"__cos_batch_exit=%__cos_batch_code%\"\r\necho --- command 2/3 --- [clf-batch:000000000000000000000000]\r\ncall echo \"two words\"\r\nset \"__cos_batch_code=%errorlevel%\"\r\necho --- exit code %__cos_batch_code% --- [clf-batch:000000000000000000000000]\r\nif not \"%__cos_batch_code%\"==\"0\" if \"%__cos_batch_exit%\"==\"0\" set \"__cos_batch_exit=%__cos_batch_code%\"\r\necho --- command 3/3 --- [clf-batch:000000000000000000000000]\r\ncall echo last\r\nset \"__cos_batch_code=%errorlevel%\"\r\necho --- exit code %__cos_batch_code% --- [clf-batch:000000000000000000000000]\r\nif not \"%__cos_batch_code%\"==\"0\" if \"%__cos_batch_exit%\"==\"0\" set \"__cos_batch_exit=%__cos_batch_code%\"\r\nexit /b %__cos_batch_exit%"
+  },
+  {
+    "shell": "bash",
+    "commands": [
+      "echo first",
+      "echo \"two words\"",
+      "echo last"
+    ],
+    "marker": "000000000000000000000000",
+    "expected": "__cos_batch_exit=0\nprintf '%s\\n' '--- command 1/3 --- [clf-batch:000000000000000000000000]'\neval 'echo first'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nprintf '%s\\n' '--- command 2/3 --- [clf-batch:000000000000000000000000]'\neval 'echo \"two words\"'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nprintf '%s\\n' '--- command 3/3 --- [clf-batch:000000000000000000000000]'\neval 'echo last'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nexit \"$__cos_batch_exit\""
+  },
+  {
+    "shell": "sh",
+    "commands": [
+      "echo first",
+      "echo \"two words\"",
+      "echo last"
+    ],
+    "marker": "000000000000000000000000",
+    "expected": "__cos_batch_exit=0\nprintf '%s\\n' '--- command 1/3 --- [clf-batch:000000000000000000000000]'\neval 'echo first'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nprintf '%s\\n' '--- command 2/3 --- [clf-batch:000000000000000000000000]'\neval 'echo \"two words\"'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nprintf '%s\\n' '--- command 3/3 --- [clf-batch:000000000000000000000000]'\neval 'echo last'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nexit \"$__cos_batch_exit\""
+  },
+  {
+    "shell": "zsh",
+    "commands": [
+      "echo first",
+      "echo \"two words\"",
+      "echo last"
+    ],
+    "marker": "000000000000000000000000",
+    "expected": "__cos_batch_exit=0\nprintf '%s\\n' '--- command 1/3 --- [clf-batch:000000000000000000000000]'\neval 'echo first'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nprintf '%s\\n' '--- command 2/3 --- [clf-batch:000000000000000000000000]'\neval 'echo \"two words\"'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nprintf '%s\\n' '--- command 3/3 --- [clf-batch:000000000000000000000000]'\neval 'echo last'\n__cos_batch_code=$?\nprintf '%s\\n' \"--- exit code $__cos_batch_code --- [clf-batch:000000000000000000000000]\"\nif [ \"$__cos_batch_code\" -ne 0 ] && [ \"$__cos_batch_exit\" -eq 0 ]; then __cos_batch_exit=$__cos_batch_code; fi\nexit \"$__cos_batch_exit\""
+  }
+]

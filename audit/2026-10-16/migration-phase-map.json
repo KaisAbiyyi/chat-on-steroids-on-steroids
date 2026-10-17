@@ -1,0 +1,237 @@
+{
+  "phase_count": 16,
+  "phases": [
+    {
+      "phase": 1,
+      "title": "Freeze baseline and prove architecture",
+      "depends_on": [],
+      "target_owner": "baseline",
+      "status": "PARTIAL: static baseline complete; live baseline and architecture probes not run",
+      "tracked_files_owned": 350,
+      "product_files_owned": 0
+    },
+    {
+      "phase": 2,
+      "title": "Rust foundation, config, permissions and secure storage",
+      "depends_on": [
+        1
+      ],
+      "target_owner": "cos-core",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 18,
+      "product_files_owned": 18
+    },
+    {
+      "phase": 3,
+      "title": "Sessions, recording, identity and usage",
+      "depends_on": [
+        2
+      ],
+      "target_owner": "cos-store",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 25,
+      "product_files_owned": 25
+    },
+    {
+      "phase": 4,
+      "title": "MCP, connections, tunnels, code mode and control API",
+      "depends_on": [
+        2,
+        3
+      ],
+      "target_owner": "cos-mcp",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 38,
+      "product_files_owned": 38
+    },
+    {
+      "phase": 5,
+      "title": "Files, patching, search, projects, Git and SSH files",
+      "depends_on": [
+        2,
+        3,
+        4
+      ],
+      "target_owner": "cos-tools",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 30,
+      "product_files_owned": 30
+    },
+    {
+      "phase": 6,
+      "title": "Commands, PTY terminals, shell policy and SSH execution",
+      "depends_on": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "target_owner": "cos-exec",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 18,
+      "product_files_owned": 18
+    },
+    {
+      "phase": 7,
+      "title": "Browser companion, bridge and direct browser tools",
+      "depends_on": [
+        2,
+        3,
+        4
+      ],
+      "target_owner": "cos-bridge + extension-wasm",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 47,
+      "product_files_owned": 47
+    },
+    {
+      "phase": 8,
+      "title": "Built-in browser and sign-in compatibility",
+      "depends_on": [
+        3,
+        7
+      ],
+      "target_owner": "cos-browser",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 20,
+      "product_files_owned": 20
+    },
+    {
+      "phase": 9,
+      "title": "Outbox, attachments, steering, finish and generated workflows",
+      "depends_on": [
+        3,
+        4,
+        7
+      ],
+      "target_owner": "cos-workflow/outbox",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 16,
+      "product_files_owned": 16
+    },
+    {
+      "phase": 10,
+      "title": "Compact and Resume, recovery and continuation",
+      "depends_on": [
+        3,
+        7,
+        8,
+        9
+      ],
+      "target_owner": "cos-workflow/continuation",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 6,
+      "product_files_owned": 6
+    },
+    {
+      "phase": 11,
+      "title": "Worker families, inboxes, worktrees and worker archive",
+      "depends_on": [
+        3,
+        5,
+        6,
+        7,
+        9,
+        10
+      ],
+      "target_owner": "cos-workflow/agents",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 6,
+      "product_files_owned": 6
+    },
+    {
+      "phase": 12,
+      "title": "Goal, Loop, planning and helper decisions",
+      "depends_on": [
+        9,
+        10,
+        11
+      ],
+      "target_owner": "cos-workflow/goal",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 8,
+      "product_files_owned": 8
+    },
+    {
+      "phase": 13,
+      "title": "Plugins, Skills, OAuth and optional runtimes",
+      "depends_on": [
+        2,
+        4,
+        5,
+        6,
+        9
+      ],
+      "target_owner": "cos-plugins",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 26,
+      "product_files_owned": 26
+    },
+    {
+      "phase": 14,
+      "title": "Native desktop, capture, dictation, image fidelity and pets",
+      "depends_on": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        11
+      ],
+      "target_owner": "cos-desktop",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 43,
+      "product_files_owned": 37
+    },
+    {
+      "phase": 15,
+      "title": "Complete desktop UI, rich editors and localization",
+      "depends_on": [
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "target_owner": "cos-ui",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 237,
+      "product_files_owned": 237
+    },
+    {
+      "phase": 16,
+      "title": "Cross-platform conformance, migration, packaging and size gates",
+      "depends_on": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "target_owner": "cos-app + release",
+      "status": "NOT STARTED",
+      "tracked_files_owned": 554,
+      "product_files_owned": 7
+    }
+  ],
+  "tracked_file_count": 1442,
+  "mapped_file_count": 1442,
+  "product_file_count": 539,
+  "unassigned_files": [],
+  "mapping_policy": "One primary owner per file; integration and secondary ownership remain necessary. Classification is a roadmap aid, not proof that all behavior is understood or ported."
+}

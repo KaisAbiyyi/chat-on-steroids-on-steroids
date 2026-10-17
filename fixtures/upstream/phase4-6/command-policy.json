@@ -1,0 +1,7652 @@
+[
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "powershell",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "cmd",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "bash",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "sh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": false,
+      "mode": "allow",
+      "rules": []
+    },
+    "shell": "zsh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": []
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a\\b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \",\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Single quotes do not quote arguments in cmd.exe."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a\\b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"%\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"\\\\\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Leading environment assignments are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"\\\\\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Leading environment assignments are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unmatched",
+      "detail": "No allowlist rule matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"\\\\\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Leading environment assignments are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git status",
+        "npm test *",
+        "echo *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a\\b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "FOO=bar",
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \",\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Single quotes do not quote arguments in cmd.exe."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a\\b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "FOO=bar",
+          "git",
+          "status"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"%\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"\\\\\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Leading environment assignments are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"\\\\\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Leading environment assignments are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "npm",
+          "test",
+          "--",
+          "--run"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \";\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"$\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "hello world"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"\\\\\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"#\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Leading environment assignments are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"&\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "%PATH%"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": true,
+      "args": [
+        [
+          "echo",
+          "a,b"
+        ]
+      ]
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unsupported shell syntax \"*\"."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Quoted arguments must be wholly quoted."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Newlines are not supported."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "unsupported",
+      "detail": "Unclosed double quote."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "deny",
+      "rules": [
+        "git status *"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "denied",
+      "detail": "Denylist rule 1 matched the executable and complete argument list."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "powershell",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "cmd",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "bash",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "sh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git status --short"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git \"status\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "npm test -- --run"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a; echo b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo $HOME"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"hello world\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo 'hello world'"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\\b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo #hi"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "FOO=bar git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "& git status"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo %PATH%"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a,b"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo *.ts"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "git sta\"tus\""
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo a\nb"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      "echo \"unclosed"
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  },
+  {
+    "policy": {
+      "enabled": true,
+      "mode": "allow",
+      "rules": [
+        "git * status"
+      ]
+    },
+    "shell": "zsh",
+    "commands": [
+      " git  status "
+    ],
+    "expected": {
+      "allowed": false,
+      "commandIndex": 0,
+      "kind": "invalid-policy",
+      "detail": "Saved rule 1 is invalid: The wildcard must be a standalone final argument after an executable."
+    }
+  }
+]

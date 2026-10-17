@@ -1,0 +1,25 @@
+[package]
+name = "cos-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "cos-rust"
+path = "src/main.rs"
+
+[dependencies]
+cos-core = { path = "../cos-core" }
+cos-store = { path = "../cos-store" }
+cos-mcp = { path = "../cos-mcp" }
+cos-tools = { path = "../cos-tools" }
+cos-exec = { path = "../cos-exec" }
+serde_json.workspace = true
+chrono.workspace = true
+tokio.workspace = true
+tempfile.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

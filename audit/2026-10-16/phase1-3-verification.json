@@ -1,0 +1,26 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "upstreamTrackedAndUntrackedClean": true,
+  "sourceOracleHashes": "PASS",
+  "historyShardIdentity": "PASS",
+  "rustTests": {
+    "passed": 54,
+    "failed": 0,
+    "ignored": 0
+  },
+  "strictClippy": "PASS",
+  "releaseBinaryReceipt": "PASS",
+  "windowsSecretsInterop": "PASS",
+  "wholePhaseAcceptance": {
+    "1": "PARTIAL",
+    "2": "PARTIAL",
+    "3": "PARTIAL"
+  },
+  "unqualified": [
+    "GUI/browser/JS/Wasm architecture",
+    "macOS/Linux/native credential providers",
+    "complete original owner branches",
+    "signed-in provider and long workflows",
+    "full desktop size/startup/RAM parity"
+  ]
+}

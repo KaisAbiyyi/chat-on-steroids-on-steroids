@@ -1,0 +1,27 @@
+[workspace]
+members = ["crates/cos-core", "crates/cos-store", "crates/cos-exec", "crates/cos-tools", "crates/cos-mcp", "crates/cos-app"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.91"
+license = "MIT"
+
+[workspace.dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.145", features = ["preserve_order"] }
+thiserror = "2.0.17"
+sha2 = "0.10.9"
+regex = "1.12.2"
+chrono = { version = "0.4.42", default-features = false, features = ["clock", "serde"] }
+uuid = { version = "1.18.1", features = ["v4"] }
+tempfile = "3.23.0"
+fs2 = "0.4.3"
+tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "unwind"

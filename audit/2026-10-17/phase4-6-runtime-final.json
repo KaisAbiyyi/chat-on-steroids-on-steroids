@@ -1,0 +1,186 @@
+{
+  "binary": "D:\\projects\\CoS-Rust\\target\\release\\cos-rust.exe",
+  "date": "2026-10-17",
+  "checks": [
+    {
+      "name": "human file mutation respects read-only permission",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "persistent native MCP listener",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "real available discovery",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "separate desktop and plugins",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "origin refused",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "bare metadata does not disclose token",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "real bounded approved file read",
+      "status": "PASS",
+      "detail": {
+        "content": [
+          {
+            "type": "text",
+            "text": "--- /p/a.txt \u2014 lines 1-2 of 2 ---\nsize: 21 B\n1\tone\n2\tpublic fixture"
+          }
+        ],
+        "resultType": "complete",
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "chat-on-steroids-core",
+            "version": "2.1.39"
+          }
+        }
+      }
+    },
+    {
+      "name": "isolated JavaScript worker + nested tools",
+      "status": "PASS",
+      "detail": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[false,false]"
+          },
+          {
+            "type": "text",
+            "text": "[\"undefined\",\"undefined\",\"undefined\"]"
+          }
+        ],
+        "resultType": "complete",
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "chat-on-steroids-core",
+            "version": "2.1.39"
+          }
+        }
+      }
+    },
+    {
+      "name": "accepted side effect remains after JS timeout",
+      "status": "PASS",
+      "detail": {
+        "content": [
+          {
+            "type": "text",
+            "text": "CODE_MODE_TIME_LIMIT"
+          }
+        ],
+        "isError": true,
+        "resultType": "complete",
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "chat-on-steroids-core",
+            "version": "2.1.39"
+          }
+        }
+      }
+    },
+    {
+      "name": "running native process continuation",
+      "status": "PASS",
+      "detail": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Chunk ID: 5dea06\nWall time: 0.2633 seconds\nProcess running with session ID 545946482\nOutput:\n"
+          }
+        ],
+        "structuredContent": {
+          "chunk_id": "5dea06",
+          "wall_time_seconds": 0.2633114,
+          "output": "",
+          "session_id": 545946482
+        },
+        "resultType": "complete",
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "chat-on-steroids-core",
+            "version": "2.1.39"
+          }
+        }
+      }
+    },
+    {
+      "name": "unread background completion",
+      "status": "PASS",
+      "detail": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Chunk ID: 231cc1\nWall time: 0.0721 seconds\nProcess exited with code 0\nCompleted session ID: 545946482\nOutput:\n"
+          }
+        ],
+        "structuredContent": {
+          "chunk_id": "231cc1",
+          "wall_time_seconds": 0.0721435,
+          "output": "",
+          "exit_code": 0,
+          "completed_session_id": 545946482
+        },
+        "resultType": "complete",
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "chat-on-steroids-core",
+            "version": "2.1.39"
+          }
+        }
+      }
+    },
+    {
+      "name": "control read projection excludes secrets",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "actions separately off",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "public fixture only",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "graceful listener and persistence shutdown",
+      "status": "PASS",
+      "detail": {
+        "drained": true,
+        "listenerSettled": true,
+        "acceptedRemaining": 0
+      }
+    },
+    {
+      "name": "nested native calls retain parent recording provenance",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "control endpoint withdrawn on shutdown",
+      "status": "PASS",
+      "detail": null
+    }
+  ],
+  "externalSsh": "NOT RUN",
+  "publicTunnel": "NOT RUN",
+  "macOSLinuxNative": "NOT RUN"
+}

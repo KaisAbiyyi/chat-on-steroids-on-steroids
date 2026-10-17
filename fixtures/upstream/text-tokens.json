@@ -1,0 +1,30 @@
+[
+  {
+    "text": "",
+    "expected": 0
+  },
+  {
+    "text": "abc",
+    "expected": 1
+  },
+  {
+    "text": "abcd",
+    "expected": 1
+  },
+  {
+    "text": "abcde",
+    "expected": 2
+  },
+  {
+    "text": "😀",
+    "expected": 1
+  },
+  {
+    "text": "😀😀😀",
+    "expected": 2
+  },
+  {
+    "text": "a\n\tb",
+    "expected": 1
+  }
+]

@@ -1,0 +1,87 @@
+024731d 2026-10-16T16:16:20+02:00 Merge pull request #1567 from Maximapple/fix/codex-limits-labeled
+34eaea5 2026-10-16T15:49:26+02:00 Merge remote-tracking branch 'upstream/main' into fix/codex-limits-labeled
+190231b 2026-10-16T15:40:57+02:00 Merge pull request #1566 from Maximapple/fix/remote-any-login-shell
+1bdf607 2026-10-16T15:40:04+02:00 Label Codex's usage limits as Codex, not as ChatGPT chat limits
+ddbaab5 2026-10-16T15:18:05+02:00 Run server commands under any login shell, fish and tcsh included (#1469)
+09b7853 2026-10-16T15:15:12+02:00 Merge pull request #1555 from SomSamantray/feat/1504-flexible-slash-commands
+5e7d297 2026-10-16T14:57:19+02:00 Merge pull request #1297 from lavalava45/fix/plugins-mention-on-managed-sends
+15c8282 2026-10-16T14:33:22+02:00 Merge remote-tracking branch 'upstream/main' into HEAD
+4ae9023 2026-10-16T14:32:34+02:00 Merge pull request #1563 from Maximapple/feat/ssh-projects
+3594aec 2026-10-16T17:54:36+05:30 fix: end selected file references
+065b71c 2026-10-16T14:12:38+02:00 Merge remote-tracking branch 'upstream/main' into feat/ssh-transport
+6d6a888 2026-10-16T14:06:42+02:00 Merge pull request #1564 from Maximapple/fix/fallback-entities
+e75db57 2026-10-16T13:46:57+02:00 Read | and & in GPT-6 answers as the model wrote them
+8b30088 2026-10-16T13:05:55+02:00 A chat outside a project keeps working in the server folder it used (#1469)
+52aa584 2026-10-16T12:56:38+02:00 Keep ssh's reason when its output closes before its error text arrives (#1469)
+b4758e5 2026-10-16T16:23:50+05:30 fix: make composer reference checks linear
+705c2af 2026-10-16T12:40:54+02:00 Test: an unreachable server stops a new chat with ssh's reason (#1469)
+2e63a22 2026-10-16T12:35:21+02:00 Test: a server path is POSIX on Windows too (#1469)
+e8746c3 2026-10-16T12:35:20+02:00 Chats in a server project: send the first message, Attach, and Files without dead buttons (#1469)
+2c2aa6c 2026-10-16T12:09:33+02:00 Hide a server's address and folder in the diagnostics report (#1469)
+bf7803d 2026-10-16T12:01:44+02:00 Merge remote-tracking branch 'upstream/main' into HEAD
+7be05d3 2026-10-16T15:29:43+05:30 fix: avoid regex backtracking in skill completion
+00fea6d 2026-10-16T11:45:37+02:00 Merge remote-tracking branch 'upstream/main' into feat/ssh-transport
+c6ac753 2026-10-16T11:44:13+02:00 SSH projects, part 2: server paths as the server prints them, and no ssh left behind (#1469)
+5421e67 2026-10-16T11:28:16+02:00 SSH projects, part 2: document what server projects do (#1469)
+8c3b961 2026-10-16T11:23:31+02:00 Merge pull request #1562 from Maximapple/fix/signed-exit-code
+461b0e0 2026-10-16T11:06:49+02:00 Report a Windows exit status as the signed number Codex shows
+67675b0 2026-10-16T11:06:25+02:00 Report a Windows exit status as the signed number Codex shows
+dccfb5f 2026-10-16T10:22:59+02:00 Merge pull request #1561 from Maximapple/fix/repair-always
+2de1700 2026-10-16T10:07:40+02:00 Offer Repair permissions whenever a macOS permission is missing
+8f7fc0a 2026-10-16T10:00:11+02:00 Merge pull request #1560 from Maximapple/fix/not-ready-once
+0fa7544 2026-10-16T09:42:47+02:00 Comment once on a red PR, even when CI and the checklist both fail
+a0ca692 2026-10-16T09:30:09+02:00 SSH projects, part 2: add a folder on a server from the sidebar (#1469)
+29b844c 2026-10-16T08:59:20+02:00 SSH projects, part 2: what server projects do and do not do in v1 (#1469)
+6ef8dc1 2026-10-16T08:39:19+02:00 Prefer Plugins on ordinary messages, which carry automation 'off'
+6d9f3e3 2026-10-16T07:56:09+02:00 Merge pull request #1556 from Maximapple/fix/not-ready-comment
+24e0794 2026-10-16T07:46:49+02:00 Merge remote-tracking branch 'upstream/main' into HEAD
+c1d7a66 2026-10-16T07:39:02+02:00 Tell the author how a red PR gets back into review when the bot could not draft it
+2ad8eab 2026-10-16T07:38:20+02:00 Merge main; keep Core when this computer's Plugins app is not found
+6d2b98a 2026-10-16T07:11:19+02:00 Merge pull request #1554 from Maximapple/fix/pr-not-ready-draft
+963bd93 2026-10-16T07:09:34+02:00 Merge pull request #1498 from Ghiath-Najjar/pr/control-api-model-choice
+8819f89 2026-10-16T10:35:50+05:30 Fix flexible composer invocations (#1504)
+8e29f5d 2026-10-16T06:59:52+02:00 Merge pull request #1552 from Maximapple/fix/macos-permission-repair
+d3ae3ad 2026-10-16T06:53:40+02:00 Say a PR became a draft only when it did
+5bce6a4 2026-10-16T06:52:28+02:00 Merge remote-tracking branch 'upstream/main' into HEAD
+dbfdd50 2026-10-16T06:42:37+02:00 Compare the bundle id line as text
+d2136cc 2026-10-16T06:41:38+02:00 SSH projects, part 2: the workspace terminal opens on the server (#1469)
+4a06554 2026-10-16T06:25:01+02:00 Repair macOS Desktop permissions that an update left behind
+72b95ae 2026-10-16T01:55:41+02:00 Merge pull request #1549 from Maximapple/fix/legacy-plugin-refresh
+19e4d1d 2026-10-16T01:39:10+02:00 Refresh a plugin whose receipt from an old build failed
+a13a6d8 2026-10-15T23:03:58+02:00 SSH projects, part 2: commands run in a server folder over ssh (#1469)
+4f63459 2026-10-15T22:56:31+02:00 SSH projects, part 2: find searches server folders too (#1469)
+73e923b 2026-10-15T22:49:37+02:00 SSH projects, part 2: read, view_image and apply_patch in a server folder (#1469)
+1a60ae6 2026-10-15T22:32:33+02:00 Merge pull request #1542 from Maximapple/fix/tunnel-service-down-label
+b20f2e1 2026-10-15T22:32:30+02:00 SSH projects, part 2: one file system interface for local and server folders (#1469)
+df0cb33 2026-10-15T22:25:04+02:00 SSH projects, part 2: paths in a server folder resolve with the same containment rules (#1469)
+32319d7 2026-10-15T22:18:10+02:00 Merge pull request #1547 from Maximapple/fix/stale-browser-takes-no-opening
+cd74571 2026-10-15T22:17:38+02:00 SSH projects, part 2: a server folder as a project and approved root (#1469)
+cbbf8d7 2026-10-15T22:15:31+02:00 Plan: SSH projects (#1469)
+60a837c 2026-10-15T22:14:20+02:00 SSH projects, part 1: system ssh transport and an SFTP v3 client (#1469)
+fd97c9d 2026-10-15T22:12:00+02:00 Merge pull request #1546 from Maximapple/chore/welcome-without-repeats
+7d78d11 2026-10-15T22:07:16+02:00 Merge main into fix/tunnel-service-down-label
+6db5cbb 2026-10-15T22:00:07+02:00 Merge pull request #1545 from Maximapple/fix/rotation-select-keeps-value
+56c07de 2026-10-15T21:59:00+02:00 Do not offer new chats to a companion that would be refused as stale
+422c019 2026-10-15T21:50:39+02:00 Welcome first issues without a second list of what to send
+cd1e8d0 2026-10-15T21:49:02+02:00 Merge pull request #1544 from Maximapple/fix/report-dialog-title
+d8eb667 2026-10-15T21:45:01+02:00 Keep a fresh-turn interval the list does not offer
+7f1dccc 2026-10-15T21:44:54+02:00 Merge pull request #1543 from Maximapple/fix/update-hold-log-per-browser
+f5134c2 2026-10-15T21:39:18+02:00 Merge pull request #1537 from atsu6/codex/fix-plugin-observation-identity
+fbfca33 2026-10-15T21:32:41+02:00 Title the diagnostics report's save dialog in the interface language
+15742ef 2026-10-15T21:26:48+02:00 Log an extension's update hold once per browser
+b622261 2026-10-15T21:20:45+02:00 Merge main into codex/fix-plugin-observation-identity
+55ce60f 2026-10-15T21:14:40+02:00 Merge pull request #1538 from atsu6/codex/fix-plugin-settings-route
+b535d92 2026-10-15T21:12:57+02:00 Say "OpenAI outage" when OpenAI's tunnel service fails, not "No internet"
+e432c96 2026-10-15T21:08:28+02:00 Merge pull request #1541 from Maximapple/fix/failed-rotation-at-its-time
+082b9f6 2026-10-15T20:53:59+02:00 Merge pull request #1539 from Maximapple/fix/firefox-outdated-addon-text
+3d3ea97 2026-10-15T20:47:15+02:00 Keep a failed fresh-turn continue at its own time
+67c2ee2 2026-10-15T20:19:07+02:00 Tell Firefox users how their add-on updates
+64b0a8e 2026-10-16T03:14:11+09:00 Keep enrolled plugin identity during read-only rechecks
+db34756 2026-10-16T03:14:11+09:00 Open plugin refresh helpers on the native settings route
+03aa73e 2026-10-15T14:08:15+03:00 Merge remote-tracking branch 'upstream/main' into fix/plugins-mention-on-managed-sends
+9470645 2026-10-14T22:16:33+02:00 Let the local control API choose the model of a message
+0f475d5 2026-10-14T09:56:21+03:00 Merge remote-tracking branch 'upstream/main' into fix/plugins-mention-on-managed-sends
+9b9287e 2026-10-14T00:35:11+03:00 chore: retain upstream tests unchanged in Plugins PR
+e11f4f4 2026-10-14T00:34:17+03:00 Merge remote-tracking branch 'upstream/main' into fix/plugins-mention-on-managed-sends
+959deb2 2026-10-11T11:16:17+03:00 docs: show before and after Plugins mention setting
+678f838 2026-10-11T11:05:12+03:00 feat: optionally mention Plugins on COS-managed messages

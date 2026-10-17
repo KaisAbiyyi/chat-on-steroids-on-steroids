@@ -1,0 +1,102 @@
+{
+  "identity": {
+    "repository": "https://github.com/totec448-spec/chat-on-steroids.git",
+    "branch": "main",
+    "head": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+    "head_commit": "2026-10-16T16:16:20+02:00 Merge pull request #1567 from Maximapple/fix/codex-limits-labeled",
+    "package_version": "2.1.39",
+    "latest_release_tag": "v2.1.39",
+    "latest_release_commit": "87ae9d631f82d8da2f462d910410031ad8f97ac5",
+    "commits_since_release": 87,
+    "working_tree_status": "",
+    "analysis_date": "2026-10-16",
+    "analysis_timezone": "Asia/Jakarta"
+  },
+  "tracked_files": 1442,
+  "tracked_bytes": 105817959,
+  "code_files": 857,
+  "code_lines_including_tests_scripts": 315389,
+  "direct_production_dependencies": 27,
+  "lock_production_records_including_optional": 211,
+  "lexical_test_files": 382,
+  "lexical_test_declarations": 6946,
+  "directories": [
+    {
+      "top_directory": "docs",
+      "files": 340,
+      "bytes": 65228749,
+      "text_lines": 222502,
+      "code_lines": 0
+    },
+    {
+      "top_directory": "src",
+      "files": 505,
+      "bytes": 12185441,
+      "text_lines": 150908,
+      "code_lines": 113159
+    },
+    {
+      "top_directory": "(root)",
+      "files": 19,
+      "bytes": 11648265,
+      "text_lines": 222441,
+      "code_lines": 86
+    },
+    {
+      "top_directory": "test",
+      "files": 388,
+      "bytes": 8618646,
+      "text_lines": 156434,
+      "code_lines": 156434
+    },
+    {
+      "top_directory": "pets",
+      "files": 6,
+      "bytes": 4208677,
+      "text_lines": 790,
+      "code_lines": 0
+    },
+    {
+      "top_directory": "extension",
+      "files": 31,
+      "bytes": 2226048,
+      "text_lines": 46683,
+      "code_lines": 28938
+    },
+    {
+      "top_directory": "scripts",
+      "files": 120,
+      "bytes": 1071158,
+      "text_lines": 14943,
+      "code_lines": 14872
+    },
+    {
+      "top_directory": "artwork",
+      "files": 2,
+      "bytes": 464270,
+      "text_lines": 28,
+      "code_lines": 0
+    },
+    {
+      "top_directory": "native",
+      "files": 3,
+      "bytes": 86464,
+      "text_lines": 1900,
+      "code_lines": 1900
+    },
+    {
+      "top_directory": ".github",
+      "files": 25,
+      "bytes": 80055,
+      "text_lines": 2013,
+      "code_lines": 0
+    },
+    {
+      "top_directory": ".githooks",
+      "files": 3,
+      "bytes": 186,
+      "text_lines": 0,
+      "code_lines": 0
+    }
+  ]
+}

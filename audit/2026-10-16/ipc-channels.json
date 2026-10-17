@@ -1,0 +1,513 @@
+[
+  {
+    "path": "scripts/verify-cos-sign-in.cjs",
+    "line": 170,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "cos-browser:toolbar"
+  },
+  {
+    "path": "scripts/verify-cos-sign-in.cjs",
+    "line": 171,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "cos-browser:sign-in"
+  },
+  {
+    "path": "scripts/verify-pet-performance.cjs",
+    "line": 62,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "fixture:pointer"
+  },
+  {
+    "path": "scripts/verify-pet-performance.cjs",
+    "line": 63,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "fixture:pointer"
+  },
+  {
+    "path": "scripts/verify-workspace-terminal.cjs",
+    "line": 53,
+    "side": "ipcRenderer",
+    "method": "invoke",
+    "channel": "workspaceTerminal:request"
+  },
+  {
+    "path": "scripts/verify-workspace-terminal.cjs",
+    "line": 59,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "workspaceTerminal:event"
+  },
+  {
+    "path": "scripts/verify-workspace-terminal.cjs",
+    "line": 59,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "workspaceTerminal:event"
+  },
+  {
+    "path": "src/main/cos-browser/index.ts",
+    "line": 58,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "cos-browser:toolbar"
+  },
+  {
+    "path": "src/main/cos-browser/index.ts",
+    "line": 61,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "cos-browser:sign-in"
+  },
+  {
+    "path": "src/main/dictation.ts",
+    "line": 235,
+    "side": "ipcMain",
+    "method": "handle",
+    "channel": "dictation:start"
+  },
+  {
+    "path": "src/main/dictation.ts",
+    "line": 293,
+    "side": "ipcMain",
+    "method": "handle",
+    "channel": "dictation:stop"
+  },
+  {
+    "path": "src/main/pet-overlay.ts",
+    "line": 317,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "pet-overlay:interactive"
+  },
+  {
+    "path": "src/main/pet-overlay.ts",
+    "line": 322,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "pet-overlay:focusOwner"
+  },
+  {
+    "path": "src/main/pet-overlay.ts",
+    "line": 323,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "pet-overlay:releaseFocus"
+  },
+  {
+    "path": "src/main/pet-overlay.ts",
+    "line": 324,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "pet-overlay:openLibrary"
+  },
+  {
+    "path": "src/main/pet-overlay.ts",
+    "line": 325,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "pet-overlay:hidePet"
+  },
+  {
+    "path": "src/main/pet-overlay.ts",
+    "line": 331,
+    "side": "ipcMain",
+    "method": "on",
+    "channel": "pet-overlay:openActivity"
+  },
+  {
+    "path": "src/main/workspace-terminal-ipc.ts",
+    "line": 17,
+    "side": "ipcMain",
+    "method": "handle",
+    "channel": "workspaceTerminal:request"
+  },
+  {
+    "path": "src/preload/cos-browser-sign-in.ts",
+    "line": 8,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "cos-browser:sign-in"
+  },
+  {
+    "path": "src/preload/cos-browser-sign-in.ts",
+    "line": 10,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "cos-browser-sign-in:state"
+  },
+  {
+    "path": "src/preload/cos-browser-sign-in.ts",
+    "line": 12,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "cos-browser-sign-in:leave"
+  },
+  {
+    "path": "src/preload/cos-browser-worker.ts",
+    "line": 24,
+    "side": "ipcRenderer",
+    "method": "invoke",
+    "channel": "cos-browser:api"
+  },
+  {
+    "path": "src/preload/cos-browser-worker.ts",
+    "line": 36,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "cos-browser:event"
+  },
+  {
+    "path": "src/preload/cos-browser.ts",
+    "line": 8,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "cos-browser:toolbar"
+  },
+  {
+    "path": "src/preload/cos-browser.ts",
+    "line": 10,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "cos-browser:state"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 109,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "dictation:event"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 110,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "dictation:event"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 119,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "workspaceTerminal:event"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 120,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "workspaceTerminal:event"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 136,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "plugins:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 137,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "plugins:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 158,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "pet-overlay:stateChanged"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 159,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "pet-overlay:stateChanged"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 164,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "keychain:waiting"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 165,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "keychain:waiting"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 170,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "pet-overlay:openOwner"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 171,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "pet-overlay:openOwner"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 282,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "projectFiles:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 283,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "projectFiles:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 302,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "projectGit:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 303,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "projectGit:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 319,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "setup:toolApprovalNotice"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 320,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "setup:toolApprovalNotice"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 324,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "chatModels:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 325,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "chatModels:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 346,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "sessions:backgroundExecChanged"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 347,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "sessions:backgroundExecChanged"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 400,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "state:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 401,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "state:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 405,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "log:entry"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 406,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "log:entry"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 411,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "session:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 412,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "session:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 416,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "session:write"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 417,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "session:write"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 421,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "task:progress"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 422,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "task:progress"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 429,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "swarm:changed"
+  },
+  {
+    "path": "src/preload/index.ts",
+    "line": 430,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "swarm:changed"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 10,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "pet-overlay:hidePet"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 12,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "pet-overlay:interactive"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 13,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "pet-overlay:focusOwner"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 14,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "pet-overlay:releaseFocus"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 15,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "pet-overlay:openLibrary"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 16,
+    "side": "ipcRenderer",
+    "method": "send",
+    "channel": "pet-overlay:openActivity"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 19,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "pet-overlay:snapshot"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 20,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "pet-overlay:snapshot"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 24,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "pet-overlay:libraryChanged"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 25,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "pet-overlay:libraryChanged"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 29,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "pet-overlay:pointer"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 30,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "pet-overlay:pointer"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 34,
+    "side": "ipcRenderer",
+    "method": "on",
+    "channel": "pet-overlay:bounds"
+  },
+  {
+    "path": "src/preload/pet-overlay.ts",
+    "line": 35,
+    "side": "ipcRenderer",
+    "method": "removeListener",
+    "channel": "pet-overlay:bounds"
+  }
+]

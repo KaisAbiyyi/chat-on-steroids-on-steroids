@@ -1,0 +1,15 @@
+/target/
+/data/
+/upstream/
+/graphify-out/
+/audit/**/release-artifact/
+/audit/**/detector-cache/
+/audit/**/phase1-3-runtime/
+*.log
+*.partial
+*.exe
+*.dll
+*.pdb
+/.superpowers/
+/.worktrees/
+/.cache/

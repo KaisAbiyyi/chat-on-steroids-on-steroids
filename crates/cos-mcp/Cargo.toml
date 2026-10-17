@@ -1,0 +1,31 @@
+[package]
+name = "cos-mcp"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+cos-core = { path = "../cos-core" }
+cos-store = { path = "../cos-store" }
+cos-tools = { path = "../cos-tools" }
+cos-exec = { path = "../cos-exec" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+regex.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tokio = { workspace = true, features = ["net", "io-util", "signal"] }
+axum = "0.8.6"
+base64 = "0.22.1"
+rquickjs = { version = "0.14.0", features = ["parallel"] }
+getrandom = "0.3.4"
+tokio-stream = "0.1.17"
+form_urlencoded = "1.2.2"
+tempfile.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+

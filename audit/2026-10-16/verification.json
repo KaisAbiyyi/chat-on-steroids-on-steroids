@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-16",
+  "timezone": "Asia/Jakarta",
+  "investigation_checks": "PASS",
+  "checks": [
+    {
+      "check": "pinned_source_identity_and_clean_clone",
+      "status": "PASS",
+      "detail": {
+        "head": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+        "working_tree": "clean"
+      }
+    },
+    {
+      "check": "all_tracked_files_hashes_and_phase_coverage",
+      "status": "PASS",
+      "detail": {
+        "tracked_files": 1442,
+        "all_hashes_match": true,
+        "product_files": 539,
+        "phases": 16,
+        "unassigned": 0
+      }
+    },
+    {
+      "check": "published_release_and_payload_accounting",
+      "status": "PASS",
+      "detail": {
+        "installer_bytes": 173637457,
+        "payload_bytes": 607145786,
+        "sha256": "9c12f0e1bc3161c151676be94802c4cee98b7b2181a96169fec0ccd1d1d57bec",
+        "asar_accounting": "consistent"
+      }
+    },
+    {
+      "check": "analysis_and_extension_syntax",
+      "status": "PASS",
+      "detail": {
+        "analysis_python_scripts": 10,
+        "extension_js_files": 10,
+        "scope": "syntax only"
+      }
+    },
+    {
+      "check": "audit_json_and_local_artifact_links",
+      "status": "PASS",
+      "detail": {
+        "parsed_audit_json": 14,
+        "documents": 4,
+        "existing_local_links": 30
+      }
+    },
+    {
+      "check": "semantic_sources_and_graph_disclosures",
+      "status": "PASS",
+      "detail": {
+        "semantic_documents": 20,
+        "semantic_nodes": 41,
+        "graph_nodes": 7038,
+        "graph_integrity": "PARTIAL; disclosed unresolved and collapsed edges"
+      }
+    },
+    {
+      "check": "native_source_pin_inventory",
+      "status": "PASS",
+      "detail": "Validated 730 pinned native source archives and patches."
+    }
+  ],
+  "graph_as_complete_call_graph": "PARTIAL",
+  "original_app_test_suite": "NOT RUN",
+  "original_app_build": "NOT RUN",
+  "live_browser_or_desktop": "NOT RUN",
+  "runtime_memory_and_latency": "NOT RUN",
+  "rust_product_implementation": "NOT STARTED",
+  "rust_parity_acceptance": "NOT RUN"
+}

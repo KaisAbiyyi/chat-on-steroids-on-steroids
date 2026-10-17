@@ -1,0 +1,214 @@
+{
+  "uncompressed_archive_payload_bytes": 607145786,
+  "payload_file_count": 314,
+  "buckets": [
+    {
+      "category": "electron_chromium_runtime",
+      "files": 71,
+      "bytes": 385168581,
+      "packed_bytes": 119643747,
+      "share_percent": 63.439
+    },
+    {
+      "category": "app_asar",
+      "files": 1,
+      "bytes": 68940180,
+      "packed_bytes": 13363842,
+      "share_percent": 11.355
+    },
+    {
+      "category": "tunnel_sidecars",
+      "files": 8,
+      "bytes": 62603280,
+      "packed_bytes": 23178059,
+      "share_percent": 10.311
+    },
+    {
+      "category": "native_node_modules",
+      "files": 175,
+      "bytes": 48264832,
+      "packed_bytes": 9827666,
+      "share_percent": 7.949
+    },
+    {
+      "category": "resource_notices_and_misc",
+      "files": 7,
+      "bytes": 31137242,
+      "packed_bytes": 944640,
+      "share_percent": 5.128
+    },
+    {
+      "category": "ripgrep",
+      "files": 14,
+      "bytes": 4601757,
+      "packed_bytes": 1370240,
+      "share_percent": 0.758
+    },
+    {
+      "category": "pets",
+      "files": 6,
+      "bytes": 4208677,
+      "packed_bytes": 4196198,
+      "share_percent": 0.693
+    },
+    {
+      "category": "extension",
+      "files": 32,
+      "bytes": 2221237,
+      "packed_bytes": 522377,
+      "share_percent": 0.366
+    }
+  ],
+  "largest_files": [
+    {
+      "path": "Chat On Steroids.exe",
+      "bytes": 246070272,
+      "packed_bytes": 80505471,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/app.asar",
+      "bytes": 68940180,
+      "packed_bytes": 13363842,
+      "category": "app_asar"
+    },
+    {
+      "path": "resources/tunnel/cloudflared.exe",
+      "bytes": 39751680,
+      "packed_bytes": 16839774,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "dxcompiler.dll",
+      "bytes": 25744896,
+      "packed_bytes": 6893786,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/tunnel/tunnel-client.exe",
+      "bytes": 22591488,
+      "packed_bytes": 6317259,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "LICENSES.chromium.html",
+      "bytes": 20472830,
+      "packed_bytes": 570332,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/LICENSES.chromium.html",
+      "bytes": 20472830,
+      "packed_bytes": 570332,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll",
+      "bytes": 18614784,
+      "packed_bytes": 6142661,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources.pak",
+      "bytes": 12435445,
+      "packed_bytes": 12319984,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "icudtl.dat",
+      "bytes": 10876560,
+      "packed_bytes": 3497325,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/THIRD-PARTY-NOTICES.txt",
+      "bytes": 10549690,
+      "packed_bytes": 322104,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/parser.c",
+      "bytes": 9912254,
+      "packed_bytes": 220670,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty.pdb",
+      "bytes": 6311936,
+      "packed_bytes": 850249,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "vk_swiftshader.dll",
+      "bytes": 5520384,
+      "packed_bytes": 1420567,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "d3dcompiler_47.dll",
+      "bytes": 4741488,
+      "packed_bytes": 1657906,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty_console_list.pdb",
+      "bytes": 4321280,
+      "packed_bytes": 511150,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/rg/rg.exe",
+      "bytes": 4218880,
+      "packed_bytes": 1269682,
+      "category": "ripgrep"
+    },
+    {
+      "path": "ffmpeg.dll",
+      "bytes": 3113472,
+      "packed_bytes": 974249,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/pets/hammy/atlas.png",
+      "bytes": 2244959,
+      "packed_bytes": 2242817,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/capy/atlas.png",
+      "bytes": 1954171,
+      "packed_bytes": 1951792,
+      "category": "pets"
+    },
+    {
+      "path": "locales/ml.pak",
+      "bytes": 1767850,
+      "packed_bytes": 184715,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ta.pak",
+      "bytes": 1758067,
+      "packed_bytes": 179950,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/kn.pak",
+      "bytes": 1720240,
+      "packed_bytes": 181253,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/te.pak",
+      "bytes": 1629379,
+      "packed_bytes": 181086,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/hi.pak",
+      "bytes": 1586592,
+      "packed_bytes": 184066,
+      "category": "electron_chromium_runtime"
+    }
+  ]
+}

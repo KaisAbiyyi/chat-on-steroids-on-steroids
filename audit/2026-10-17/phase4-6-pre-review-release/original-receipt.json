@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-17",
+  "scope": "Windows x64 service/CLI binary through phases 4-6; not an installer or complete desktop application",
+  "binary": "D:\\projects\\CoS-Rust\\target\\release\\cos-rust.exe",
+  "bytes": 8871424,
+  "mib": 8.46,
+  "sha256": "9cafabb90390fb0de6fec26b075c1a16ae2253457e82aacf188c25da25227e99",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "rustTestsPassed": 107,
+  "rustTestsFailed": 0,
+  "fullApplicationReady": false,
+  "installerSize": "NOT RUN",
+  "macOSLinuxNative": "NOT RUN",
+  "externalSsh": "NOT RUN",
+  "publicTunnel": "NOT RUN",
+  "historicalPhase1_3Binary": "D:\\projects\\CoS-Rust\\audit\\2026-10-16\\phase1-3-release\\cos-rust.exe"
+}

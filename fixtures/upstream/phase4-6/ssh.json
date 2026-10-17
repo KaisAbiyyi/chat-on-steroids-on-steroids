@@ -1,0 +1,271 @@
+[
+  {
+    "address": "dev",
+    "folder": "/srv/app",
+    "remote": {
+      "host": "dev",
+      "path": "/srv/app"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-s",
+      "--",
+      "dev",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "dev",
+    "folder": "~/a b",
+    "remote": {
+      "host": "dev",
+      "path": "~/a b"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-s",
+      "--",
+      "dev",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "dev",
+    "folder": "/a/../b",
+    "error": "Enter the folder on the server as an absolute path, such as /srv/app or ~/app."
+  },
+  {
+    "address": "me@server:2222",
+    "folder": "/srv/app",
+    "remote": {
+      "host": "me@server",
+      "port": 2222,
+      "path": "/srv/app"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-p",
+      "2222",
+      "-s",
+      "--",
+      "me@server",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "me@server:2222",
+    "folder": "~/a b",
+    "remote": {
+      "host": "me@server",
+      "port": 2222,
+      "path": "~/a b"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-p",
+      "2222",
+      "-s",
+      "--",
+      "me@server",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "me@server:2222",
+    "folder": "/a/../b",
+    "error": "Enter the folder on the server as an absolute path, such as /srv/app or ~/app."
+  },
+  {
+    "address": "ssh://me@server",
+    "folder": "/srv/app",
+    "remote": {
+      "host": "me@server",
+      "path": "/srv/app"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-s",
+      "--",
+      "me@server",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "ssh://me@server",
+    "folder": "~/a b",
+    "remote": {
+      "host": "me@server",
+      "path": "~/a b"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-s",
+      "--",
+      "me@server",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "ssh://me@server",
+    "folder": "/a/../b",
+    "error": "Enter the folder on the server as an absolute path, such as /srv/app or ~/app."
+  },
+  {
+    "address": "[::1]:22",
+    "folder": "/srv/app",
+    "remote": {
+      "host": "::1",
+      "port": 22,
+      "path": "/srv/app"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-p",
+      "22",
+      "-s",
+      "--",
+      "::1",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\047/srv/app\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "[::1]:22",
+    "folder": "~/a b",
+    "remote": {
+      "host": "::1",
+      "port": 22,
+      "path": "~/a b"
+    },
+    "args": [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=15",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=3",
+      "-p",
+      "22",
+      "-s",
+      "--",
+      "::1",
+      "sftp"
+    ],
+    "command": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 s=\\044\\173SHELL:\\055/bin/sh\\175 \\046\\046 case \\044\\173s\\043\\043\\052/\\175 in bash\\174zsh\\174sh\\051 \\073\\073 \\052\\051 s=\\044\\050command \\055v bash 2\\076/dev/null \\174\\174 command \\055v zsh 2\\076/dev/null\\051 \\174\\174 s=/bin/sh \\073\\073 esac \\046\\046 exec \\042\\044s\\042 \\055lc \\047printf \\047\\134\\047\\047\\045s\\134n\\047\\134\\047\\047 \\047\\134\\047\\047\\360\\237\\230\\200 a\\047\\134\\047\\047\\047'",
+    "login": "exec /bin/sh -c 'eval \"$(printf \"$0\")\"' 'cd \\055\\055 \\176/\\047a b\\047 \\046\\046 exec \\042\\044\\173SHELL:\\055/bin/sh\\175\\042 \\055l'"
+  },
+  {
+    "address": "[::1]:22",
+    "folder": "/a/../b",
+    "error": "Enter the folder on the server as an absolute path, such as /srv/app or ~/app."
+  },
+  {
+    "address": "bad;host",
+    "folder": "/srv/app",
+    "error": "Enter an SSH address such as dev, me@server or me@server:2222."
+  },
+  {
+    "address": "bad;host",
+    "folder": "~/a b",
+    "error": "Enter an SSH address such as dev, me@server or me@server:2222."
+  },
+  {
+    "address": "bad;host",
+    "folder": "/a/../b",
+    "error": "Enter an SSH address such as dev, me@server or me@server:2222."
+  },
+  {
+    "address": "-x",
+    "folder": "/srv/app",
+    "error": "Enter an SSH address such as dev, me@server or me@server:2222."
+  },
+  {
+    "address": "-x",
+    "folder": "~/a b",
+    "error": "Enter an SSH address such as dev, me@server or me@server:2222."
+  },
+  {
+    "address": "-x",
+    "folder": "/a/../b",
+    "error": "Enter an SSH address such as dev, me@server or me@server:2222."
+  },
+  {
+    "address": "dev:0",
+    "folder": "/srv/app",
+    "error": "The port must be between 1 and 65535."
+  },
+  {
+    "address": "dev:0",
+    "folder": "~/a b",
+    "error": "The port must be between 1 and 65535."
+  },
+  {
+    "address": "dev:0",
+    "folder": "/a/../b",
+    "error": "The port must be between 1 and 65535."
+  }
+]

@@ -1,0 +1,14 @@
+[
+  "function uniqueStoredRoots(roots) {\n  const used = /* @__PURE__ */ new Set();\n  const nextFree = (wanted) => {\n    const reserved = RESERVED_ROOT_NAMES.has(wanted);\n    const base = reserved ? `${wanted}-folder` : wanted;\n    let candidate = base.slice(0, 32);\n    for (let suffix = 2; RESERVED_ROOT_NAMES.has(candidate) || used.has(candidate); suffix++) {\n      const tail = `-${suffix}`;\n      candidate = `${base.slice(0, Math.max(1, 32 - tail.length))}${tail}`;\n    }\n    return candidate;\n  };\n  return roots.map((root) => {\n    const name = nextFree(root.name);\n    used.add(name);\n    return name === root.name ? root : { ...root, name };\n  });\n}",
+  "function migrateCapabilities(value) {\n  if (value === null || typeof value !== \"object\") return value;\n  const caps = { ...value };\n  if (caps[\"powershell\"] === true) caps[\"command\"] = true;\n  delete caps[\"powershell\"];\n  delete caps[\"deleteFolder\"];\n  return caps;\n}",
+  "(caps) => ({ ...DEFAULT_CAPABILITIES, ...caps })",
+  "(size) => size",
+  "(sessions) => ({ ...sessions, record: true, retainDays: 0 })",
+  "(prompt) => prompt.trim() === \"\" ? DEFAULT_COMPACTION.handoffPrompt : prompt.trim()",
+  "(model) => model.trim() === \"\" ? DEFAULT_GOAL.model : model.trim()",
+  "(prompt) => prompt.trim() === \"\" ? DEFAULT_GOAL.prompt : prompt.trim()",
+  "(prompt) => prompt.trim() === \"\" ? DEFAULT_GOAL.objectivePrompt : prompt.trim()",
+  "(prompt) => prompt.trim() === \"\" ? DEFAULT_GOAL.loopPrompt : prompt.trim()",
+  "(value) => value.slice(0, MAX_MCP_INSTRUCTIONS_CHARS).trim()",
+  "(value) => ({ enabled: value.enabled, allowActions: value.enabled && value.allowActions })"
+]

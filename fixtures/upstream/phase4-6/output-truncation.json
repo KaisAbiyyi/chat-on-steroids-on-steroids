@@ -1,0 +1,102 @@
+[
+  {
+    "text": "",
+    "tokens": 0,
+    "expected": ""
+  },
+  {
+    "text": "",
+    "tokens": 1,
+    "expected": ""
+  },
+  {
+    "text": "",
+    "tokens": 2,
+    "expected": ""
+  },
+  {
+    "text": "",
+    "tokens": 5,
+    "expected": ""
+  },
+  {
+    "text": "",
+    "tokens": 100,
+    "expected": ""
+  },
+  {
+    "text": "hello\nworld\n",
+    "tokens": 0,
+    "expected": "Warning: truncated output (original token count: 3)\nTotal output lines: 2\n\n…3 tokens truncated…"
+  },
+  {
+    "text": "hello\nworld\n",
+    "tokens": 1,
+    "expected": "Warning: truncated output (original token count: 3)\nTotal output lines: 2\n\nhe…2 tokens truncated…d\n"
+  },
+  {
+    "text": "hello\nworld\n",
+    "tokens": 2,
+    "expected": "Warning: truncated output (original token count: 3)\nTotal output lines: 2\n\nhell…1 tokens truncated…rld\n"
+  },
+  {
+    "text": "hello\nworld\n",
+    "tokens": 5,
+    "expected": "hello\nworld\n"
+  },
+  {
+    "text": "hello\nworld\n",
+    "tokens": 100,
+    "expected": "hello\nworld\n"
+  },
+  {
+    "text": "😀 Unicode é\nsecond\n",
+    "tokens": 0,
+    "expected": "Warning: truncated output (original token count: 6)\nTotal output lines: 2\n\n…6 tokens truncated…"
+  },
+  {
+    "text": "😀 Unicode é\nsecond\n",
+    "tokens": 1,
+    "expected": "Warning: truncated output (original token count: 6)\nTotal output lines: 2\n\n…5 tokens truncated…d\n"
+  },
+  {
+    "text": "😀 Unicode é\nsecond\n",
+    "tokens": 2,
+    "expected": "Warning: truncated output (original token count: 6)\nTotal output lines: 2\n\n😀…4 tokens truncated…ond\n"
+  },
+  {
+    "text": "😀 Unicode é\nsecond\n",
+    "tokens": 5,
+    "expected": "Warning: truncated output (original token count: 6)\nTotal output lines: 2\n\n😀 Unico…1 tokens truncated…é\nsecond\n"
+  },
+  {
+    "text": "😀 Unicode é\nsecond\n",
+    "tokens": 100,
+    "expected": "😀 Unicode é\nsecond\n"
+  },
+  {
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "tokens": 0,
+    "expected": "Warning: truncated output (original token count: 30)\nTotal output lines: 1\n\n…30 tokens truncated…"
+  },
+  {
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "tokens": 1,
+    "expected": "Warning: truncated output (original token count: 30)\nTotal output lines: 1\n\nxx…29 tokens truncated…xx"
+  },
+  {
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "tokens": 2,
+    "expected": "Warning: truncated output (original token count: 30)\nTotal output lines: 1\n\nxxxx…28 tokens truncated…xxxx"
+  },
+  {
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "tokens": 5,
+    "expected": "Warning: truncated output (original token count: 30)\nTotal output lines: 1\n\nxxxxxxxxxx…25 tokens truncated…xxxxxxxxxx"
+  },
+  {
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "tokens": 100,
+    "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+]

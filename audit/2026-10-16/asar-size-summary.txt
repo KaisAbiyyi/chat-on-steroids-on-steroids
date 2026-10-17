@@ -1,0 +1,272 @@
+{
+  "asar_file_bytes": 68940180,
+  "header_sizes": [
+    4,
+    989648,
+    989644,
+    989640
+  ],
+  "entry_count": 3817,
+  "packed_content_bytes": 67950524,
+  "unpacked_content_bytes_referenced": 48264832,
+  "groups": {
+    "node_modules": {
+      "files": 3519,
+      "packed_file_bytes": 50459777,
+      "unpacked_file_bytes": 48264832
+    },
+    "out/main": {
+      "files": 3,
+      "packed_file_bytes": 2904409,
+      "unpacked_file_bytes": 0
+    },
+    "out/preload": {
+      "files": 5,
+      "packed_file_bytes": 31721,
+      "unpacked_file_bytes": 0
+    },
+    "out/renderer": {
+      "files": 289,
+      "packed_file_bytes": 14553255,
+      "unpacked_file_bytes": 0
+    },
+    "package.json": {
+      "files": 1,
+      "packed_file_bytes": 1362,
+      "unpacked_file_bytes": 0
+    }
+  },
+  "largest_dependency_trees_bytes_including_unpacked": [
+    [
+      "@img/sharp-win32-x64",
+      19407388
+    ],
+    [
+      "tree-sitter-bash",
+      13110209
+    ],
+    [
+      "node-pty",
+      12672480
+    ],
+    [
+      "@modelcontextprotocol/client",
+      6746825
+    ],
+    [
+      "@modelcontextprotocol/server",
+      6433988
+    ],
+    [
+      "@xterm/xterm",
+      5826902
+    ],
+    [
+      "zod",
+      5765484
+    ],
+    [
+      "katex",
+      4153146
+    ],
+    [
+      "@anthropic-ai/mcpb",
+      3501828
+    ],
+    [
+      "@codemirror/legacy-modes",
+      1885441
+    ],
+    [
+      "node-forge",
+      1586435
+    ],
+    [
+      "@modelcontextprotocol/core",
+      1312317
+    ],
+    [
+      "tree-sitter",
+      1311094
+    ],
+    [
+      "@codemirror/view",
+      1077471
+    ],
+    [
+      "@koromix/koffi-win32-x64",
+      1047647
+    ],
+    [
+      "koffi",
+      955088
+    ],
+    [
+      "js-yaml",
+      951248
+    ],
+    [
+      "sharp",
+      665346
+    ],
+    [
+      "fflate",
+      656629
+    ],
+    [
+      "@jitl/quickjs-wasmfile-release-sync",
+      636172
+    ],
+    [
+      "quickjs-emscripten-core",
+      624793
+    ],
+    [
+      "marked",
+      470637
+    ],
+    [
+      "node-addon-api",
+      405098
+    ],
+    [
+      "@codemirror/state",
+      363266
+    ],
+    [
+      "@lezer/cpp",
+      350536
+    ]
+  ],
+  "largest_packed_files": [
+    {
+      "path": "out/renderer/assets/i18n-Bs9ac8MF.js",
+      "bytes": 3091456,
+      "unpacked": false
+    },
+    {
+      "path": "out/main/index.js",
+      "bytes": 2826497,
+      "unpacked": false
+    },
+    {
+      "path": "out/renderer/assets/index-BnCbT-ql.js",
+      "bytes": 2050164,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@xterm/xterm/lib/xterm.js.map",
+      "bytes": 1924267,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@xterm/xterm/lib/xterm.mjs.map",
+      "bytes": 1690930,
+      "unpacked": false
+    },
+    {
+      "path": "out/renderer/assets/pdf.worker.min-Dswkl-cV.mjs",
+      "bytes": 1265413,
+      "unpacked": false
+    },
+    {
+      "path": "out/renderer/assets/file-pdf-viewer-Bx9GKz18.js",
+      "bytes": 862102,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/server/dist/src-CgFsfg3E.cjs.map",
+      "bytes": 722930,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/server/dist/src-D-y6h4N7.mjs.map",
+      "bytes": 720463,
+      "unpacked": false
+    },
+    {
+      "path": "out/renderer/assets/index-C4LVv9wc.js",
+      "bytes": 700527,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/client/dist/src-D0qEN74R.cjs.map",
+      "bytes": 698765,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/client/dist/src-DDAAhLnO.mjs.map",
+      "bytes": 692715,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/katex/dist/katex.js",
+      "bytes": 620433,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/katex/dist/katex.mjs",
+      "bytes": 603019,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/client/dist/index.cjs.map",
+      "bytes": 582085,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/client/dist/index.mjs.map",
+      "bytes": 579831,
+      "unpacked": false
+    },
+    {
+      "path": "out/renderer/assets/atlas-desktop-BUD0bxgh.png",
+      "bytes": 575157,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@jitl/quickjs-wasmfile-release-sync/dist/emscripten-module.wasm",
+      "bytes": 503134,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@codemirror/view/dist/index.cjs",
+      "bytes": 492073,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@codemirror/view/dist/index.js",
+      "bytes": 491133,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@xterm/xterm/lib/xterm.js",
+      "bytes": 488663,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/client/dist/ajvProvider-1b6pVpkg.cjs.map",
+      "bytes": 448950,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/server/dist/ajvProvider-ZaoO9afR.cjs.map",
+      "bytes": 448950,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/client/dist/ajvProvider-97rDpkRx.mjs.map",
+      "bytes": 448931,
+      "unpacked": false
+    },
+    {
+      "path": "node_modules/@modelcontextprotocol/server/dist/ajvProvider-CEoC__sr.mjs.map",
+      "bytes": 448931,
+      "unpacked": false
+    }
+  ],
+  "notes": [
+    "Unpacked entries are references to separately counted app.asar.unpacked; do not add them to the ASAR file size.",
+    "Dependency tree totals are packaged bytes, not npm registry unpackedSize or source size."
+  ]
+}

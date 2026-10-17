@@ -1,0 +1,2109 @@
+{
+  "release": "v2.1.39",
+  "platform": "win32-x64",
+  "installer_bytes": 173637457,
+  "uncompressed_archive_payload_bytes": 607145786,
+  "payload_file_count": 314,
+  "buckets": [
+    {
+      "category": "electron_chromium_runtime",
+      "files": 71,
+      "bytes": 385168581,
+      "packed_bytes": 119643747,
+      "share_percent": 63.439
+    },
+    {
+      "category": "app_asar",
+      "files": 1,
+      "bytes": 68940180,
+      "packed_bytes": 13363842,
+      "share_percent": 11.355
+    },
+    {
+      "category": "tunnel_sidecars",
+      "files": 8,
+      "bytes": 62603280,
+      "packed_bytes": 23178059,
+      "share_percent": 10.311
+    },
+    {
+      "category": "native_node_modules",
+      "files": 175,
+      "bytes": 48264832,
+      "packed_bytes": 9827666,
+      "share_percent": 7.949
+    },
+    {
+      "category": "resource_notices_and_misc",
+      "files": 7,
+      "bytes": 31137242,
+      "packed_bytes": 944640,
+      "share_percent": 5.128
+    },
+    {
+      "category": "ripgrep",
+      "files": 14,
+      "bytes": 4601757,
+      "packed_bytes": 1370240,
+      "share_percent": 0.758
+    },
+    {
+      "category": "pets",
+      "files": 6,
+      "bytes": 4208677,
+      "packed_bytes": 4196198,
+      "share_percent": 0.693
+    },
+    {
+      "category": "extension",
+      "files": 32,
+      "bytes": 2221237,
+      "packed_bytes": 522377,
+      "share_percent": 0.366
+    }
+  ],
+  "largest_files": [
+    {
+      "path": "Chat On Steroids.exe",
+      "bytes": 246070272,
+      "packed_bytes": 80505471,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/app.asar",
+      "bytes": 68940180,
+      "packed_bytes": 13363842,
+      "category": "app_asar"
+    },
+    {
+      "path": "resources/tunnel/cloudflared.exe",
+      "bytes": 39751680,
+      "packed_bytes": 16839774,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "dxcompiler.dll",
+      "bytes": 25744896,
+      "packed_bytes": 6893786,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/tunnel/tunnel-client.exe",
+      "bytes": 22591488,
+      "packed_bytes": 6317259,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "LICENSES.chromium.html",
+      "bytes": 20472830,
+      "packed_bytes": 570332,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/LICENSES.chromium.html",
+      "bytes": 20472830,
+      "packed_bytes": 570332,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll",
+      "bytes": 18614784,
+      "packed_bytes": 6142661,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources.pak",
+      "bytes": 12435445,
+      "packed_bytes": 12319984,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "icudtl.dat",
+      "bytes": 10876560,
+      "packed_bytes": 3497325,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/THIRD-PARTY-NOTICES.txt",
+      "bytes": 10549690,
+      "packed_bytes": 322104,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/parser.c",
+      "bytes": 9912254,
+      "packed_bytes": 220670,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty.pdb",
+      "bytes": 6311936,
+      "packed_bytes": 850249,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "vk_swiftshader.dll",
+      "bytes": 5520384,
+      "packed_bytes": 1420567,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "d3dcompiler_47.dll",
+      "bytes": 4741488,
+      "packed_bytes": 1657906,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty_console_list.pdb",
+      "bytes": 4321280,
+      "packed_bytes": 511150,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/rg/rg.exe",
+      "bytes": 4218880,
+      "packed_bytes": 1269682,
+      "category": "ripgrep"
+    },
+    {
+      "path": "ffmpeg.dll",
+      "bytes": 3113472,
+      "packed_bytes": 974249,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/pets/hammy/atlas.png",
+      "bytes": 2244959,
+      "packed_bytes": 2242817,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/capy/atlas.png",
+      "bytes": 1954171,
+      "packed_bytes": 1951792,
+      "category": "pets"
+    },
+    {
+      "path": "locales/ml.pak",
+      "bytes": 1767850,
+      "packed_bytes": 184715,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ta.pak",
+      "bytes": 1758067,
+      "packed_bytes": 179950,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/kn.pak",
+      "bytes": 1720240,
+      "packed_bytes": 181253,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/te.pak",
+      "bytes": 1629379,
+      "packed_bytes": 181086,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/hi.pak",
+      "bytes": 1586592,
+      "packed_bytes": 184066,
+      "category": "electron_chromium_runtime"
+    }
+  ],
+  "all_entries": [
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/nothing.c",
+      "bytes": 0,
+      "packed_bytes": 0,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/elevate.exe",
+      "bytes": 107520,
+      "packed_bytes": 49588,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "Chat On Steroids.exe",
+      "bytes": 246070272,
+      "packed_bytes": 80505471,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "chrome_100_percent.pak",
+      "bytes": 719654,
+      "packed_bytes": 694088,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "chrome_200_percent.pak",
+      "bytes": 1269017,
+      "packed_bytes": 1217963,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "d3dcompiler_47.dll",
+      "bytes": 4741488,
+      "packed_bytes": 1657906,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "dxcompiler.dll",
+      "bytes": 25744896,
+      "packed_bytes": 6893786,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "dxil.dll",
+      "bytes": 1509760,
+      "packed_bytes": 487255,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "ffmpeg.dll",
+      "bytes": 3113472,
+      "packed_bytes": 974249,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "icudtl.dat",
+      "bytes": 10876560,
+      "packed_bytes": 3497325,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "LICENSE.electron.txt",
+      "bytes": 1096,
+      "packed_bytes": 690,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "LICENSES.chromium.html",
+      "bytes": 20472830,
+      "packed_bytes": 570332,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/af.pak",
+      "bytes": 636155,
+      "packed_bytes": 153764,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/am.pak",
+      "bytes": 1029450,
+      "packed_bytes": 172349,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ar.pak",
+      "bytes": 1130933,
+      "packed_bytes": 177477,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/bg.pak",
+      "bytes": 1178203,
+      "packed_bytes": 172277,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/bn.pak",
+      "bytes": 1513545,
+      "packed_bytes": 179134,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ca.pak",
+      "bytes": 716908,
+      "packed_bytes": 156962,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/cs.pak",
+      "bytes": 743351,
+      "packed_bytes": 170189,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/da.pak",
+      "bytes": 666465,
+      "packed_bytes": 153559,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/de.pak",
+      "bytes": 717834,
+      "packed_bytes": 162854,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/el.pak",
+      "bytes": 1295538,
+      "packed_bytes": 181223,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/en-GB.pak",
+      "bytes": 580030,
+      "packed_bytes": 142573,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/en-US.pak",
+      "bytes": 586582,
+      "packed_bytes": 143207,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/es-419.pak",
+      "bytes": 707635,
+      "packed_bytes": 156641,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/es.pak",
+      "bytes": 703926,
+      "packed_bytes": 155716,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/et.pak",
+      "bytes": 642216,
+      "packed_bytes": 158739,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/fa.pak",
+      "bytes": 1063054,
+      "packed_bytes": 168995,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/fi.pak",
+      "bytes": 655113,
+      "packed_bytes": 157068,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/fil.pak",
+      "bytes": 741385,
+      "packed_bytes": 156649,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/fr.pak",
+      "bytes": 763453,
+      "packed_bytes": 162134,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/gu.pak",
+      "bytes": 1495625,
+      "packed_bytes": 177341,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/he.pak",
+      "bytes": 928748,
+      "packed_bytes": 164696,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/hi.pak",
+      "bytes": 1586592,
+      "packed_bytes": 184066,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/hr.pak",
+      "bytes": 715279,
+      "packed_bytes": 163920,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/hu.pak",
+      "bytes": 765640,
+      "packed_bytes": 171082,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/id.pak",
+      "bytes": 635080,
+      "packed_bytes": 143429,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/it.pak",
+      "bytes": 693990,
+      "packed_bytes": 154476,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ja.pak",
+      "bytes": 842132,
+      "packed_bytes": 149506,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/kn.pak",
+      "bytes": 1720240,
+      "packed_bytes": 181253,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ko.pak",
+      "bytes": 718709,
+      "packed_bytes": 145917,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/lt.pak",
+      "bytes": 777281,
+      "packed_bytes": 166886,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/lv.pak",
+      "bytes": 774751,
+      "packed_bytes": 167971,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ml.pak",
+      "bytes": 1767850,
+      "packed_bytes": 184715,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/mr.pak",
+      "bytes": 1467313,
+      "packed_bytes": 174391,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ms.pak",
+      "bytes": 668356,
+      "packed_bytes": 145827,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/nb.pak",
+      "bytes": 638121,
+      "packed_bytes": 150539,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/nl.pak",
+      "bytes": 664767,
+      "packed_bytes": 154271,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/pl.pak",
+      "bytes": 742064,
+      "packed_bytes": 169407,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/pt-BR.pak",
+      "bytes": 697044,
+      "packed_bytes": 156374,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/pt-PT.pak",
+      "bytes": 701056,
+      "packed_bytes": 154740,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ro.pak",
+      "bytes": 728144,
+      "packed_bytes": 159654,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ru.pak",
+      "bytes": 1200996,
+      "packed_bytes": 180962,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/sk.pak",
+      "bytes": 755475,
+      "packed_bytes": 173108,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/sl.pak",
+      "bytes": 722720,
+      "packed_bytes": 164045,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/sr.pak",
+      "bytes": 1112919,
+      "packed_bytes": 172573,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/sv.pak",
+      "bytes": 646537,
+      "packed_bytes": 150554,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/sw.pak",
+      "bytes": 685130,
+      "packed_bytes": 154610,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ta.pak",
+      "bytes": 1758067,
+      "packed_bytes": 179950,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/te.pak",
+      "bytes": 1629379,
+      "packed_bytes": 181086,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/th.pak",
+      "bytes": 1368866,
+      "packed_bytes": 158165,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/tr.pak",
+      "bytes": 697368,
+      "packed_bytes": 156049,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/uk.pak",
+      "bytes": 1211565,
+      "packed_bytes": 178649,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/ur.pak",
+      "bytes": 1047994,
+      "packed_bytes": 168368,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/vi.pak",
+      "bytes": 830059,
+      "packed_bytes": 155902,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/zh-CN.pak",
+      "bytes": 592116,
+      "packed_bytes": 145330,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "locales/zh-TW.pak",
+      "bytes": 583860,
+      "packed_bytes": 142969,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "resources/app-update.yml",
+      "bytes": 107,
+      "packed_bytes": 93,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/app.asar",
+      "bytes": 68940180,
+      "packed_bytes": 13363842,
+      "category": "app_asar"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/colour/color.cjs",
+      "bytes": 45136,
+      "packed_bytes": 10458,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/colour/index.cjs",
+      "bytes": 49,
+      "packed_bytes": 53,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/colour/LICENSE.md",
+      "bytes": 4433,
+      "packed_bytes": 842,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/colour/package.json",
+      "bytes": 1050,
+      "packed_bytes": 537,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/index.cjs",
+      "bytes": 62,
+      "packed_bytes": 66,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll",
+      "bytes": 18614784,
+      "packed_bytes": 6142661,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/lib/libvips-cpp-8.18.6.dll",
+      "bytes": 333312,
+      "packed_bytes": 85439,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/lib/sharp-win32-x64-0.35.4.node",
+      "bytes": 442368,
+      "packed_bytes": 153760,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/LICENSE",
+      "bytes": 10464,
+      "packed_bytes": 3766,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/package.json",
+      "bytes": 888,
+      "packed_bytes": 457,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/README.md",
+      "bytes": 4913,
+      "packed_bytes": 1140,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@img/sharp-win32-x64/versions.json",
+      "bytes": 597,
+      "packed_bytes": 300,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@koromix/koffi-win32-x64/index.js",
+      "bytes": 52,
+      "packed_bytes": 56,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@koromix/koffi-win32-x64/package.json",
+      "bytes": 644,
+      "packed_bytes": 341,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@koromix/koffi-win32-x64/README.md",
+      "bytes": 271,
+      "packed_bytes": 224,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@koromix/koffi-win32-x64/win32_x64/koffi.lib",
+      "bytes": 1688,
+      "packed_bytes": 419,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@koromix/koffi-win32-x64/win32_x64/koffi.node",
+      "bytes": 1044992,
+      "packed_bytes": 294889,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/conpty_console_list_agent.js",
+      "bytes": 932,
+      "packed_bytes": 543,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/eventEmitter2.js",
+      "bytes": 1600,
+      "packed_bytes": 555,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/index.js",
+      "bytes": 1942,
+      "packed_bytes": 889,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/interfaces.js",
+      "bytes": 233,
+      "packed_bytes": 193,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/shared/conout.js",
+      "bytes": 322,
+      "packed_bytes": 245,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/terminal.js",
+      "bytes": 7499,
+      "packed_bytes": 1928,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/types.js",
+      "bytes": 228,
+      "packed_bytes": 190,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/unixTerminal.js",
+      "bytes": 13921,
+      "packed_bytes": 3963,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/utils.js",
+      "bytes": 1548,
+      "packed_bytes": 711,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/windowsConoutConnection.js",
+      "bytes": 6443,
+      "packed_bytes": 2088,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/windowsPtyAgent.js",
+      "bytes": 13941,
+      "packed_bytes": 3622,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/windowsTerminal.js",
+      "bytes": 8422,
+      "packed_bytes": 2394,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/lib/worker/conoutSocketWorker.js",
+      "bytes": 878,
+      "packed_bytes": 462,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/LICENSE",
+      "bytes": 3326,
+      "packed_bytes": 817,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/common.gypi",
+      "bytes": 724,
+      "packed_bytes": 363,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/except.gypi",
+      "bytes": 560,
+      "packed_bytes": 300,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/index.js",
+      "bytes": 377,
+      "packed_bytes": 252,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/LICENSE.md",
+      "bytes": 1150,
+      "packed_bytes": 715,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/napi-inl.deprecated.h",
+      "bytes": 6323,
+      "packed_bytes": 678,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/napi-inl.h",
+      "bytes": 219411,
+      "packed_bytes": 22823,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/napi.h",
+      "bytes": 115423,
+      "packed_bytes": 16078,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/node_addon_api.gyp",
+      "bytes": 793,
+      "packed_bytes": 221,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/node_api.gyp",
+      "bytes": 132,
+      "packed_bytes": 94,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/noexcept.gypi",
+      "bytes": 639,
+      "packed_bytes": 350,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/package-support.json",
+      "bytes": 467,
+      "packed_bytes": 240,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/package.json",
+      "bytes": 928,
+      "packed_bytes": 451,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/tools/check-napi.js",
+      "bytes": 3176,
+      "packed_bytes": 1307,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/tools/clang-format.js",
+      "bytes": 2002,
+      "packed_bytes": 947,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/tools/conversion.js",
+      "bytes": 15013,
+      "packed_bytes": 3949,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/tools/eslint-format.js",
+      "bytes": 2071,
+      "packed_bytes": 944,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/node_modules/node-addon-api/tools/README.md",
+      "bytes": 3217,
+      "packed_bytes": 1401,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/package.json",
+      "bytes": 1020,
+      "packed_bytes": 482,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty/conpty.dll",
+      "bytes": 110152,
+      "packed_bytes": 46994,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty/OpenConsole.exe",
+      "bytes": 1062472,
+      "packed_bytes": 421946,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty.node",
+      "bytes": 291328,
+      "packed_bytes": 114534,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty.pdb",
+      "bytes": 6311936,
+      "packed_bytes": 850249,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty_console_list.node",
+      "bytes": 134656,
+      "packed_bytes": 54229,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/prebuilds/win32-x64/conpty_console_list.pdb",
+      "bytes": 4321280,
+      "packed_bytes": 511150,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/scripts/post-install.js",
+      "bytes": 2401,
+      "packed_bytes": 928,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/scripts/prebuild.js",
+      "bytes": 1172,
+      "packed_bytes": 571,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/src/win/conpty.h",
+      "bytes": 1727,
+      "packed_bytes": 706,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/src/win/path_util.h",
+      "bytes": 695,
+      "packed_bytes": 382,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/channel.cjs",
+      "bytes": 5383,
+      "packed_bytes": 2058,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/channel.mjs",
+      "bytes": 5376,
+      "packed_bytes": 2057,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/colour.cjs",
+      "bytes": 5622,
+      "packed_bytes": 1794,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/colour.mjs",
+      "bytes": 5610,
+      "packed_bytes": 1791,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/composite.cjs",
+      "bytes": 9332,
+      "packed_bytes": 2994,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/composite.mjs",
+      "bytes": 9325,
+      "packed_bytes": 2993,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/constructor.cjs",
+      "bytes": 20364,
+      "packed_bytes": 6492,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/constructor.mjs",
+      "bytes": 20340,
+      "packed_bytes": 6503,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/index.cjs",
+      "bytes": 620,
+      "packed_bytes": 264,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/index.d.cts",
+      "bytes": 92867,
+      "packed_bytes": 18818,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/index.d.mts",
+      "bytes": 87968,
+      "packed_bytes": 18708,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/index.mjs",
+      "bytes": 573,
+      "packed_bytes": 257,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/input.cjs",
+      "bytes": 33741,
+      "packed_bytes": 6450,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/input.mjs",
+      "bytes": 33729,
+      "packed_bytes": 6451,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/is.cjs",
+      "bytes": 2932,
+      "packed_bytes": 993,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/is.mjs",
+      "bytes": 2930,
+      "packed_bytes": 990,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/libvips.cjs",
+      "bytes": 5833,
+      "packed_bytes": 1873,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/libvips.mjs",
+      "bytes": 5828,
+      "packed_bytes": 1888,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/operation.cjs",
+      "bytes": 32882,
+      "packed_bytes": 7379,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/operation.mjs",
+      "bytes": 32875,
+      "packed_bytes": 7372,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/output.cjs",
+      "bytes": 65416,
+      "packed_bytes": 12361,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/output.mjs",
+      "bytes": 65399,
+      "packed_bytes": 12363,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/resize.cjs",
+      "bytes": 22784,
+      "packed_bytes": 5856,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/resize.mjs",
+      "bytes": 22777,
+      "packed_bytes": 5855,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/sharp.cjs",
+      "bytes": 6199,
+      "packed_bytes": 1973,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/sharp.mjs",
+      "bytes": 6294,
+      "packed_bytes": 2026,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/utility.cjs",
+      "bytes": 9786,
+      "packed_bytes": 3316,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/dist/utility.mjs",
+      "bytes": 9862,
+      "packed_bytes": 3356,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/install/build.js",
+      "bytes": 860,
+      "packed_bytes": 449,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/LICENSE",
+      "bytes": 10273,
+      "packed_bytes": 3724,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/package.json",
+      "bytes": 2936,
+      "packed_bytes": 906,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/src/common.h",
+      "bytes": 10988,
+      "packed_bytes": 3264,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/src/metadata.h",
+      "bytes": 1878,
+      "packed_bytes": 756,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/src/operations.h",
+      "bytes": 3625,
+      "packed_bytes": 1207,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/src/pipeline.h",
+      "bytes": 10131,
+      "packed_bytes": 2758,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/src/stats.h",
+      "bytes": 1267,
+      "packed_bytes": 594,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/sharp/src/utilities.h",
+      "bytes": 741,
+      "packed_bytes": 291,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/index.js",
+      "bytes": 27001,
+      "packed_bytes": 5391,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/LICENSE",
+      "bytes": 1078,
+      "packed_bytes": 687,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/package.json",
+      "bytes": 1376,
+      "packed_bytes": 573,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/prebuilds/win32-x64/tree-sitter.node",
+      "bytes": 510464,
+      "packed_bytes": 190927,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/addon_data.h",
+      "bytes": 1033,
+      "packed_bytes": 454,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/conversions.h",
+      "bytes": 707,
+      "packed_bytes": 314,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/language.h",
+      "bytes": 381,
+      "packed_bytes": 219,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/logger.h",
+      "bytes": 386,
+      "packed_bytes": 239,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/lookaheaditerator.h",
+      "bytes": 995,
+      "packed_bytes": 375,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/node.h",
+      "bytes": 976,
+      "packed_bytes": 427,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/parser.h",
+      "bytes": 1051,
+      "packed_bytes": 382,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/query.h",
+      "bytes": 1301,
+      "packed_bytes": 441,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/tree.h",
+      "bytes": 1340,
+      "packed_bytes": 497,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/src/tree_cursor.h",
+      "bytes": 1969,
+      "packed_bytes": 505,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/include/tree_sitter/api.h",
+      "bytes": 47452,
+      "packed_bytes": 10941,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/alloc.c",
+      "bytes": 1542,
+      "packed_bytes": 464,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/alloc.h",
+      "bytes": 919,
+      "packed_bytes": 368,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/array.h",
+      "bytes": 10445,
+      "packed_bytes": 2610,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/atomic.h",
+      "bytes": 1384,
+      "packed_bytes": 387,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/clock.h",
+      "bytes": 3543,
+      "packed_bytes": 953,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/error_costs.h",
+      "bytes": 294,
+      "packed_bytes": 130,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/get_changed_ranges.c",
+      "bytes": 16548,
+      "packed_bytes": 3520,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/get_changed_ranges.h",
+      "bytes": 836,
+      "packed_bytes": 369,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/host.h",
+      "bytes": 520,
+      "packed_bytes": 283,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/language.c",
+      "bytes": 8526,
+      "packed_bytes": 1857,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/language.h",
+      "bytes": 8339,
+      "packed_bytes": 2297,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/length.h",
+      "bytes": 1275,
+      "packed_bytes": 450,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/lexer.c",
+      "bytes": 15124,
+      "packed_bytes": 3634,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/lexer.h",
+      "bytes": 1263,
+      "packed_bytes": 522,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/lib.c",
+      "bytes": 280,
+      "packed_bytes": 118,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/node.c",
+      "bytes": 25429,
+      "packed_bytes": 4184,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/parser.c",
+      "bytes": 79051,
+      "packed_bytes": 15396,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/parser.h",
+      "bytes": 7624,
+      "packed_bytes": 2010,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/point.h",
+      "bytes": 1307,
+      "packed_bytes": 370,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/portable/endian.h",
+      "bytes": 6856,
+      "packed_bytes": 1418,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/query.c",
+      "bytes": 149384,
+      "packed_bytes": 26822,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/reduce_action.h",
+      "bytes": 772,
+      "packed_bytes": 407,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/reusable_node.h",
+      "bytes": 2747,
+      "packed_bytes": 825,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/stack.c",
+      "bytes": 28636,
+      "packed_bytes": 5729,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/stack.h",
+      "bytes": 4872,
+      "packed_bytes": 1397,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/subtree.c",
+      "bytes": 34540,
+      "packed_bytes": 6967,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/subtree.h",
+      "bytes": 12518,
+      "packed_bytes": 2928,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/tree.c",
+      "bytes": 5272,
+      "packed_bytes": 1392,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/tree.h",
+      "bytes": 663,
+      "packed_bytes": 326,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/tree_cursor.c",
+      "bytes": 22965,
+      "packed_bytes": 4241,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/tree_cursor.h",
+      "bytes": 1285,
+      "packed_bytes": 552,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/ts_assert.h",
+      "bytes": 205,
+      "packed_bytes": 126,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/ICU_SHA",
+      "bytes": 41,
+      "packed_bytes": 45,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/LICENSE",
+      "bytes": 21001,
+      "packed_bytes": 5086,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/ptypes.h",
+      "bytes": 72,
+      "packed_bytes": 76,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/README.md",
+      "bytes": 1270,
+      "packed_bytes": 595,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/umachine.h",
+      "bytes": 14865,
+      "packed_bytes": 4286,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/urename.h",
+      "bytes": 72,
+      "packed_bytes": 76,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/utf.h",
+      "bytes": 72,
+      "packed_bytes": 76,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/utf16.h",
+      "bytes": 23878,
+      "packed_bytes": 3271,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode/utf8.h",
+      "bytes": 31698,
+      "packed_bytes": 5185,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/unicode.h",
+      "bytes": 1634,
+      "packed_bytes": 518,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/wasm/stdlib-symbols.txt",
+      "bytes": 264,
+      "packed_bytes": 126,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/wasm/stdlib.c",
+      "bytes": 3524,
+      "packed_bytes": 1254,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/wasm/wasm-stdlib.h",
+      "bytes": 96765,
+      "packed_bytes": 8379,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/wasm_store.c",
+      "bytes": 62327,
+      "packed_bytes": 10808,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter/vendor/tree-sitter/lib/src/wasm_store.h",
+      "bytes": 1137,
+      "packed_bytes": 404,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/bindings/node/binding_test.js",
+      "bytes": 250,
+      "packed_bytes": 166,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/bindings/node/index.js",
+      "bytes": 453,
+      "packed_bytes": 321,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/grammar.js",
+      "bytes": 30142,
+      "packed_bytes": 5103,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/LICENSE",
+      "bytes": 1080,
+      "packed_bytes": 690,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/package.json",
+      "bytes": 987,
+      "packed_bytes": 451,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/prebuilds/win32-x64/tree-sitter-bash.node",
+      "bytes": 1509888,
+      "packed_bytes": 190602,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/queries/highlights.scm",
+      "bytes": 577,
+      "packed_bytes": 314,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/grammar.json",
+      "bytes": 179629,
+      "packed_bytes": 7476,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/node-types.json",
+      "bytes": 51167,
+      "packed_bytes": 2332,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/parser.c",
+      "bytes": 9912254,
+      "packed_bytes": 220670,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/scanner.c",
+      "bytes": 45602,
+      "packed_bytes": 5449,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/tree_sitter/alloc.h",
+      "bytes": 985,
+      "packed_bytes": 313,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/tree_sitter/array.h",
+      "bytes": 10431,
+      "packed_bytes": 2605,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/src/tree_sitter/parser.h",
+      "bytes": 7624,
+      "packed_bytes": 2010,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/tree-sitter-bash.wasm",
+      "bytes": 1358224,
+      "packed_bytes": 116662,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/tree-sitter-bash/tree-sitter.json",
+      "bytes": 916,
+      "packed_bytes": 421,
+      "category": "native_node_modules"
+    },
+    {
+      "path": "resources/extension/active-tabs.js",
+      "bytes": 5840,
+      "packed_bytes": 2040,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/background.js",
+      "bytes": 306414,
+      "packed_bytes": 70210,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/browser-control-page.js",
+      "bytes": 18106,
+      "packed_bytes": 6115,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/browser-control.js",
+      "bytes": 45612,
+      "packed_bytes": 12950,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/build-stamp.txt",
+      "bytes": 13,
+      "packed_bytes": 17,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/chatgpt-dom.js",
+      "bytes": 199226,
+      "packed_bytes": 51461,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/content.js",
+      "bytes": 759306,
+      "packed_bytes": 177501,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/fiber.js",
+      "bytes": 169382,
+      "packed_bytes": 42552,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/i18n.js",
+      "bytes": 6192,
+      "packed_bytes": 2240,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/icons/icon128.png",
+      "bytes": 4008,
+      "packed_bytes": 3994,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/icons/icon16.png",
+      "bytes": 547,
+      "packed_bytes": 551,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/icons/icon32.png",
+      "bytes": 984,
+      "packed_bytes": 988,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/icons/icon48.png",
+      "bytes": 1523,
+      "packed_bytes": 1527,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/manifest.json",
+      "bytes": 2160,
+      "packed_bytes": 568,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/overlay.css",
+      "bytes": 39608,
+      "packed_bytes": 10273,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/popup.css",
+      "bytes": 15821,
+      "packed_bytes": 4181,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/popup.html",
+      "bytes": 6758,
+      "packed_bytes": 1812,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/popup.js",
+      "bytes": 23116,
+      "packed_bytes": 6821,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/usage.js",
+      "bytes": 37203,
+      "packed_bytes": 10150,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/de/messages.json",
+      "bytes": 44079,
+      "packed_bytes": 9378,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/en/messages.json",
+      "bytes": 39911,
+      "packed_bytes": 8016,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/es/messages.json",
+      "bytes": 43932,
+      "packed_bytes": 9096,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/fr/messages.json",
+      "bytes": 45131,
+      "packed_bytes": 9288,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/ja/messages.json",
+      "bytes": 49697,
+      "packed_bytes": 9145,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/ko/messages.json",
+      "bytes": 45583,
+      "packed_bytes": 8879,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/pt_BR/messages.json",
+      "bytes": 43107,
+      "packed_bytes": 8953,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/pt_PT/messages.json",
+      "bytes": 42993,
+      "packed_bytes": 8969,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/ru/messages.json",
+      "bytes": 55620,
+      "packed_bytes": 9754,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/tr/messages.json",
+      "bytes": 42967,
+      "packed_bytes": 8965,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/vi/messages.json",
+      "bytes": 47093,
+      "packed_bytes": 8803,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/zh_CN/messages.json",
+      "bytes": 39386,
+      "packed_bytes": 8557,
+      "category": "extension"
+    },
+    {
+      "path": "resources/extension/_locales/zh_TW/messages.json",
+      "bytes": 39919,
+      "packed_bytes": 8623,
+      "category": "extension"
+    },
+    {
+      "path": "resources/LICENSE",
+      "bytes": 1086,
+      "packed_bytes": 693,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/LICENSE.electron.txt",
+      "bytes": 1096,
+      "packed_bytes": 690,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/LICENSES.chromium.html",
+      "bytes": 20472830,
+      "packed_bytes": 570332,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/pets/capy/animations.json",
+      "bytes": 4620,
+      "packed_bytes": 665,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/capy/atlas.png",
+      "bytes": 1954171,
+      "packed_bytes": 1951792,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/capy/pet.json",
+      "bytes": 155,
+      "packed_bytes": 129,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/hammy/animations.json",
+      "bytes": 4619,
+      "packed_bytes": 666,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/hammy/atlas.png",
+      "bytes": 2244959,
+      "packed_bytes": 2242817,
+      "category": "pets"
+    },
+    {
+      "path": "resources/pets/hammy/pet.json",
+      "bytes": 153,
+      "packed_bytes": 129,
+      "category": "pets"
+    },
+    {
+      "path": "resources/rg/complete/rg.bash",
+      "bytes": 21362,
+      "packed_bytes": 1996,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/complete/rg.fish",
+      "bytes": 15204,
+      "packed_bytes": 3963,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/complete/_rg",
+      "bytes": 31501,
+      "packed_bytes": 10048,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/complete/_rg.ps1",
+      "bytes": 26020,
+      "packed_bytes": 3428,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/COPYING",
+      "bytes": 129,
+      "packed_bytes": 108,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/doc/CHANGELOG.md",
+      "bytes": 91752,
+      "packed_bytes": 21483,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/doc/FAQ.md",
+      "bytes": 43306,
+      "packed_bytes": 14513,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/doc/GUIDE.md",
+      "bytes": 41920,
+      "packed_bytes": 13373,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/doc/rg.1",
+      "bytes": 87183,
+      "packed_bytes": 22812,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/LICENSE-MIT",
+      "bytes": 1102,
+      "packed_bytes": 699,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/README.md",
+      "bytes": 22156,
+      "packed_bytes": 7378,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/rg.exe",
+      "bytes": 4218880,
+      "packed_bytes": 1269682,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/UNLICENSE",
+      "bytes": 1235,
+      "packed_bytes": 746,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/rg/VERSION",
+      "bytes": 7,
+      "packed_bytes": 11,
+      "category": "ripgrep"
+    },
+    {
+      "path": "resources/THIRD-PARTY-NOTICES-sharp-win32-x64.md",
+      "bytes": 4913,
+      "packed_bytes": 1140,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/THIRD-PARTY-NOTICES.txt",
+      "bytes": 10549690,
+      "packed_bytes": 322104,
+      "category": "resource_notices_and_misc"
+    },
+    {
+      "path": "resources/tunnel/cloudflared-manifest.json",
+      "bytes": 1038,
+      "packed_bytes": 597,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/cloudflared.exe",
+      "bytes": 39751680,
+      "packed_bytes": 16839774,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/LICENSE",
+      "bytes": 10758,
+      "packed_bytes": 3684,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/NOTICE",
+      "bytes": 551,
+      "packed_bytes": 389,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/tunnel-client-v0.0.16-windows-amd64-licenses.txt",
+      "bytes": 13452,
+      "packed_bytes": 2549,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/tunnel-client-v0.0.16-windows-amd64.spdx.json",
+      "bytes": 234305,
+      "packed_bytes": 13795,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/tunnel-client.exe",
+      "bytes": 22591488,
+      "packed_bytes": 6317259,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources/tunnel/VERSION",
+      "bytes": 8,
+      "packed_bytes": 12,
+      "category": "tunnel_sidecars"
+    },
+    {
+      "path": "resources.pak",
+      "bytes": 12435445,
+      "packed_bytes": 12319984,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "snapshot_blob.bin",
+      "bytes": 368776,
+      "packed_bytes": 57533,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "v8_context_snapshot.bin",
+      "bytes": 742208,
+      "packed_bytes": 121046,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "vk_swiftshader.dll",
+      "bytes": 5520384,
+      "packed_bytes": 1420567,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "vk_swiftshader_icd.json",
+      "bytes": 106,
+      "packed_bytes": 96,
+      "category": "electron_chromium_runtime"
+    },
+    {
+      "path": "vulkan-1.dll",
+      "bytes": 939008,
+      "packed_bytes": 261165,
+      "category": "electron_chromium_runtime"
+    }
+  ],
+  "notes": [
+    "Uncompressed archive payload, not allocated installed disk space or runtime RAM.",
+    "7-Zip detects the app's embedded 7z and reports wrapper tail bytes; the complete installer SHA256 matches GitHub.",
+    "Buckets classify packaged files; Electron executable contains Chromium, Node and Electron together.",
+    "Packed totals may differ from installer size because headers, wrapper and compression layout are separate."
+  ]
+}

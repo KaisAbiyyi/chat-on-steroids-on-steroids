@@ -1,0 +1,152 @@
+[
+  {
+    "patch": "",
+    "error": "invalid patch: The last line of the patch must be '*** End Patch'"
+  },
+  {
+    "patch": "*** Begin Patch\n*** End Patch",
+    "expected": {
+      "hunks": [],
+      "patch": "*** Begin Patch\n*** End Patch",
+      "workdir": null,
+      "environmentId": null
+    }
+  },
+  {
+    "patch": "bad",
+    "error": "invalid patch: The first line of the patch must be '*** Begin Patch'"
+  },
+  {
+    "patch": "*** Begin Patch\n*** Add File: a\n+x\n*** End Patch",
+    "expected": {
+      "hunks": [
+        {
+          "kind": "add_file",
+          "path": "a",
+          "contents": "x\n"
+        }
+      ],
+      "patch": "*** Begin Patch\n*** Add File: a\n+x\n*** End Patch",
+      "workdir": null,
+      "environmentId": null
+    }
+  },
+  {
+    "patch": "*** Begin Patch\n*** Delete File: a\n*** End Patch",
+    "expected": {
+      "hunks": [
+        {
+          "kind": "delete_file",
+          "path": "a"
+        }
+      ],
+      "patch": "*** Begin Patch\n*** Delete File: a\n*** End Patch",
+      "workdir": null,
+      "environmentId": null
+    }
+  },
+  {
+    "patch": "*** Begin Patch\n*** Update File: a\n@@\n-old\n+new\n*** End Patch",
+    "expected": {
+      "hunks": [
+        {
+          "kind": "update_file",
+          "path": "a",
+          "movePath": null,
+          "chunks": [
+            {
+              "changeContext": null,
+              "oldLines": [
+                "old"
+              ],
+              "newLines": [
+                "new"
+              ],
+              "contextLineIndices": [],
+              "isEndOfFile": false
+            }
+          ]
+        }
+      ],
+      "patch": "*** Begin Patch\n*** Update File: a\n@@\n-old\n+new\n*** End Patch",
+      "workdir": null,
+      "environmentId": null
+    }
+  },
+  {
+    "patch": "*** Begin Patch\n*** Update File: a\n*** Move to: b\n@@ suffix\n x\n+y\n*** End of File\n*** End Patch",
+    "expected": {
+      "hunks": [
+        {
+          "kind": "update_file",
+          "path": "a",
+          "movePath": "b",
+          "chunks": [
+            {
+              "changeContext": "suffix",
+              "oldLines": [
+                "x"
+              ],
+              "newLines": [
+                "x",
+                "y"
+              ],
+              "contextLineIndices": [
+                [
+                  0,
+                  0
+                ]
+              ],
+              "isEndOfFile": true
+            }
+          ]
+        }
+      ],
+      "patch": "*** Begin Patch\n*** Update File: a\n*** Move to: b\n@@ suffix\n x\n+y\n*** End of File\n*** End Patch",
+      "workdir": null,
+      "environmentId": null
+    }
+  },
+  {
+    "patch": "*** Begin Patch\n*** Environment ID: e\n*** Add File: a\n+x\n*** End Patch",
+    "expected": {
+      "hunks": [
+        {
+          "kind": "add_file",
+          "path": "a",
+          "contents": "x\n"
+        }
+      ],
+      "patch": "*** Begin Patch\n*** Environment ID: e\n*** Add File: a\n+x\n*** End Patch",
+      "workdir": null,
+      "environmentId": "e"
+    }
+  },
+  {
+    "patch": "<<'EOF'\n*** Begin Patch\n*** Add File: a\n+x\n*** End Patch\nEOF",
+    "expected": {
+      "hunks": [
+        {
+          "kind": "add_file",
+          "path": "a",
+          "contents": "x\n"
+        }
+      ],
+      "patch": "*** Begin Patch\n*** Add File: a\n+x\n*** End Patch",
+      "workdir": null,
+      "environmentId": null
+    }
+  },
+  {
+    "patch": "*** Begin Patch\n*** Update File: a\nBAD\n*** End Patch",
+    "error": "invalid hunk at line 3, Unexpected line found in update hunk: 'BAD'. Every line should start with ' ' (context line), '+' (added line), or '-' (removed line)"
+  },
+  {
+    "patch": "*** Begin Patch\n*** Add File: a\nbad\n*** End Patch",
+    "error": "invalid hunk at line 3, 'bad' is not a valid hunk header. Valid hunk headers: '*** Add File: {path}', '*** Delete File: {path}', '*** Update File: {path}'"
+  },
+  {
+    "patch": "*** Begin Patch\n*** Update File: a\n@@\n*** End Patch",
+    "error": "invalid hunk at line 4, Update hunk does not contain any lines"
+  }
+]
