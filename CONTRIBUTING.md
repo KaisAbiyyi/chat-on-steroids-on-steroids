@@ -1,0 +1,49 @@
+# Contributing to CoS-Rust
+
+Contributions are welcome. Windows is the active qualification target. Linux work is welcome with
+native execution evidence; macOS and other platforms are currently on hold. See
+[current implementation work](docs/implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md).
+
+## Build and test
+
+Install Rust 1.91 or newer with `rustfmt` and `clippy`, Git, and host OpenSSH. Linux tests additionally
+need an installed `sftp-server` (`openssh-server` on Debian/Ubuntu). Windows uses the OpenSSH subsystem
+included in Git for Windows at `C:/Program Files/Git/usr/lib/ssh/sftp-server.exe`.
+
+```sh
+cargo test --workspace --locked
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo build --release --locked
+```
+
+Tests use temporary public fixtures and fresh profiles. The service always requires an explicit
+absolute `--data-dir`; never point tests at a personal CoS, browser or provider profile. Optional
+external SSH/tunnel tests must state their host, authorization and isolation. An installed SFTP
+subsystem proves file transport, not SSH authentication. Never commit secrets or profile data.
+
+## Source parity and regression evidence
+
+The comparison baseline is Chat On Steroids commit `024731d8083d92c46e8248d64e7e0b36ab0a470f`.
+Rust tests run from checked-in fixtures without downloading upstream. To regenerate or inspect an
+oracle, clone the original repository into the ignored `upstream/chat-on-steroids` directory using
+the repository URL and exact commit in
+[source identity](audit/2026-10-16/source-identity.json). Keep that clone unchanged. Capture scripts
+require its JavaScript development dependencies and must not import the application bootstrap.
+
+For behavior changes, demonstrate a functional failing regression before implementation, then make
+it pass and run the affected suite plus integrated checks. Preserve raw data, request/epoch authority,
+permission boundaries, source fixtures and historical receipts. Do not replace a real-input test with
+a fixture merely to obtain green output, remove a failing test, or relabel NOT RUN as PASS.
+
+## Changes and review
+
+Keep commits focused. Describe the concrete trigger, resulting behavior, validation and remaining
+limits. Record implementation work in dated/versioned documents under `docs/implementation-plan/`,
+`docs/implementation-review/` and `docs/implementation-summary/`, and update `docs/README.md`.
+Distinguish source implementation, native runtime tests, package proof and complete desktop acceptance.
+
+Use only synthetic data in issues and pull requests. Report potential credential or authority issues
+without publishing private profiles, live secret URLs or exploit details containing personal data.
+Large runtime dependencies need an explicit size/feature rationale and license attribution. The
+current JavaScript engine includes QuickJS C; describe it accurately when changing that boundary.

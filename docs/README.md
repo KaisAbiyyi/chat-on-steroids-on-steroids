@@ -1,6 +1,12 @@
 # CoS-Rust documents
 
-## Current phase 4–6 implementation
+## Current phase 1–6 parity closure
+
+- Plan: [Windows parity closure v1.0](implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md)
+- Review: [closure review v1.0](implementation-review/2026-10-17-phase1-6-parity-closure-v1.0.md)
+- Summary: [closure progress v1.0](implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md)
+
+## Previous phase 4–6 implementation
 
 - Plan: [phase 4–6 v1.0 and execution ledger](implementation-plan/2026-10-17-phase4-6-implementation-v1.0.md)
 - Review: [phase 4–6 v1.0](implementation-review/2026-10-17-phase4-6-review-v1.0.md)

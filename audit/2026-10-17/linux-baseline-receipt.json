@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-17",
+  "status": "PASS",
+  "sourceCommit": "68f7954",
+  "scope": "Actual Linux execution of the committed baseline, not the uncommitted closure work",
+  "rustImage": "rust@sha256:8514999d4786ef12efe89239e86b3d0a021b94b9d35108c8efe6c79ca7dc1a65",
+  "rustc": "1.91.1 (ed61e7d7e 2025-11-07)",
+  "kernel": "Linux 6.6.87.1-microsoft-standard-WSL2 x86_64",
+  "tests": {
+    "passed": 112,
+    "failed": 0,
+    "ignored": 0
+  },
+  "nativeUnixDescendantPipeRegression": "PASS",
+  "sshAuthentication": "NOT RUN; installed subsystem tests are separate",
+  "log": "audit/2026-10-17-linux-baseline-tests.log",
+  "logSha256": "80c8e8637d54431e7d0861fea467784ff7574d20308e0829956b344e26099e4a",
+  "personalProfilesUsed": false,
+  "macOS": "HOLD by user request"
+}

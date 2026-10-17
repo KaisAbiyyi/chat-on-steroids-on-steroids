@@ -1,0 +1,14 @@
+{
+  "RuntimeDirectory": "%LOCALAPPDATA%\\Docker\\run",
+  "PreservedOldDirectory": "%LOCALAPPDATA%\\Docker\\run.cos-rust-recovery-20261017T162815",
+  "PreservedEntries": [
+    "dockerInference",
+    "userAnalyticsOtlpHttp.sock"
+  ],
+  "RemovedFiles": 0,
+  "Status": "RECOVERED",
+  "Engine": "28.3.2 / linux amd64",
+  "ContainerExecution": "PASS: 112 native Linux Rust baseline tests",
+  "ImagesVolumesSettingsChangedByRecovery": false,
+  "Reference": "https://github.com/docker/desktop-feedback/issues/460"
+}
