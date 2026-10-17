@@ -18,16 +18,24 @@ use std::{
     },
     time::{Duration, Instant},
 };
+mod links;
 pub struct Projects {
     durable: DurableStore,
-    mutation: Mutex<()>,
+    mutation: Arc<Mutex<()>>,
+    link_watchers: Arc<Mutex<Vec<mpsc::SyncSender<()>>>>,
+    sweep: Mutex<Option<links::Sweep>>,
 }
 impl Projects {
     pub fn open(durable: DurableStore) -> Self {
-        Self {
+        let projects = Self {
             durable,
-            mutation: Mutex::new(()),
-        }
+            mutation: Arc::new(Mutex::new(())),
+            link_watchers: Arc::new(Mutex::new(vec![])),
+            sweep: Mutex::new(None),
+        };
+        // Restore the app-owned armed-attempt clock even before a browser reconnects.
+        let _ = projects.resume_expiry();
+        projects
     }
     pub fn list(&self) -> io::Result<Value> {
         let value = self.durable.read("projects", true)?.unwrap_or(json!([]));
@@ -47,6 +55,7 @@ impl Projects {
                     .is_none_or(|s| s.is_empty() || cos_core::config::js_len(s) > 160)
                 || p["path"].as_str().is_none_or(str::is_empty)
                 || p["createdAt"].as_f64().is_none_or(|v| v < 0.)
+                || !links::valid_project(p)
             {
                 return Err(invalid("Project catalog is invalid"));
             }

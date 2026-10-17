@@ -108,3 +108,12 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   required by the existing process contract. External/public SSH and adversarial SFTP remain separate.
 - Linux checkpoint `979f680`: **122 PASS, 0 failed/ignored** on the pinned x64 Rust image, now
   including the Git implementation. The subsequent missing-project fix is not covered by this receipt.
+- Task 3b: project colors and soft removal preserve workspace/request identity and survive restart.
+  Native-project creation now has exclusive 60-second claims, armed/linked/failed/uncertain states,
+  explicit retry, gone-link handling, bounded change subscriptions and an app-owned expiry clock.
+  Seven functional regressions were demonstrated RED→GREEN, including a restored armed attempt
+  expiring without browser polling and preservation of unrelated legacy rows. A further differential
+  test matches **27 actual upstream lifecycle steps** (five scenarios), with source hashes retained.
+  CLI color/remove integration reproduced the unknown-command failure and passed after integration.
+  Integrated Windows suite **136 PASS, 0 failed/ignored**; strict Clippy and formatting PASS.
+  Browser delivery/creation remains a phase-7 integration dependency; this backend never clicks ChatGPT.

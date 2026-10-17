@@ -1,0 +1,754 @@
+[
+  {
+    "initial": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Public project",
+        "path": "/public/project",
+        "createdAt": 4000000000000,
+        "chatgpt": {
+          "state": "requested",
+          "requestId": "22222222-2222-4222-8222-222222222222",
+          "updatedAt": 4000000000000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "method": "setProjectColor",
+        "args": [
+          "11111111-1111-4111-8111-111111111111",
+          "teal"
+        ],
+        "at": 4000000000000,
+        "expected": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Public project",
+          "path": "/public/project",
+          "createdAt": 4000000000000,
+          "chatgpt": {
+            "state": "requested",
+            "requestId": "22222222-2222-4222-8222-222222222222",
+            "updatedAt": 4000000000000
+          },
+          "color": "teal"
+        },
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "requested",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "updatedAt": 4000000000000
+            },
+            "color": "teal"
+          }
+        ]
+      },
+      {
+        "method": "setProjectColor",
+        "args": [
+          "11111111-1111-4111-8111-111111111111",
+          null
+        ],
+        "at": 4000000000001,
+        "expected": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Public project",
+          "path": "/public/project",
+          "createdAt": 4000000000000,
+          "chatgpt": {
+            "state": "requested",
+            "requestId": "22222222-2222-4222-8222-222222222222",
+            "updatedAt": 4000000000000
+          }
+        },
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "requested",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "removeProject",
+        "args": [
+          "11111111-1111-4111-8111-111111111111"
+        ],
+        "at": 4000000000002,
+        "expected": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Public project",
+          "path": "/public/project",
+          "createdAt": 4000000000000,
+          "chatgpt": {
+            "state": "requested",
+            "requestId": "22222222-2222-4222-8222-222222222222",
+            "updatedAt": 4000000000000
+          },
+          "ungrouped": true
+        },
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "requested",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "updatedAt": 4000000000000
+            },
+            "ungrouped": true
+          }
+        ]
+      },
+      {
+        "method": "pendingProjectCreates",
+        "args": [],
+        "at": 4000000000003,
+        "expected": [],
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "requested",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "updatedAt": 4000000000000
+            },
+            "ungrouped": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "initial": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Public project",
+        "path": "/public/project",
+        "createdAt": 4000000000000,
+        "chatgpt": {
+          "state": "requested",
+          "requestId": "22222222-2222-4222-8222-222222222222",
+          "updatedAt": 4000000000000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "method": "claimProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000000000,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "claimProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "b"
+        ],
+        "at": 4000000059999,
+        "expected": false,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "armProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000060000,
+        "expected": false,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "pendingProjectCreates",
+        "args": [],
+        "at": 4000000060000,
+        "expected": [
+          {
+            "id": "22222222-2222-4222-8222-222222222222",
+            "projectId": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "state": "requested"
+          }
+        ],
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "claimProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "b"
+        ],
+        "at": 4000000060000,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "b",
+              "updatedAt": 4000000060000
+            }
+          }
+        ]
+      },
+      {
+        "method": "armProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "b"
+        ],
+        "at": 4000000060001,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "creating",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "b",
+              "updatedAt": 4000000060001
+            }
+          }
+        ]
+      },
+      {
+        "method": "completeProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a",
+          "g-p-0123456789abcdef0123456789abcdef"
+        ],
+        "at": 4000000060002,
+        "expected": false,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "creating",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "b",
+              "updatedAt": 4000000060001
+            }
+          }
+        ]
+      },
+      {
+        "method": "pendingProjectCreates",
+        "args": [],
+        "at": 4000000120001,
+        "expected": [],
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "uncertain",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "error": "ChatGPT did not show the new Project in time",
+              "updatedAt": 4000000120001
+            }
+          }
+        ]
+      },
+      {
+        "method": "retryProjectCreate",
+        "args": [
+          "11111111-1111-4111-8111-111111111111"
+        ],
+        "at": 4000000120002,
+        "expected": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Public project",
+          "path": "/public/project",
+          "createdAt": 4000000000000,
+          "chatgpt": {
+            "state": "requested",
+            "requestId": "<new-uuid>",
+            "updatedAt": 4000000120002
+          }
+        },
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "requested",
+              "requestId": "<new-uuid>",
+              "updatedAt": 4000000120002
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "initial": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Public project",
+        "path": "/public/project",
+        "createdAt": 4000000000000,
+        "chatgpt": {
+          "state": "requested",
+          "requestId": "22222222-2222-4222-8222-222222222222",
+          "updatedAt": 4000000000000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "method": "claimProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000000000,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "failProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a",
+          "public failure"
+        ],
+        "at": 4000000000001,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "failed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "error": "public failure",
+              "updatedAt": 4000000000001
+            }
+          }
+        ]
+      },
+      {
+        "method": "retryProjectCreate",
+        "args": [
+          "11111111-1111-4111-8111-111111111111"
+        ],
+        "at": 4000000000002,
+        "expected": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Public project",
+          "path": "/public/project",
+          "createdAt": 4000000000000,
+          "chatgpt": {
+            "state": "requested",
+            "requestId": "<new-uuid>",
+            "updatedAt": 4000000000002
+          }
+        },
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "requested",
+              "requestId": "<new-uuid>",
+              "updatedAt": 4000000000002
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "initial": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Public project",
+        "path": "/public/project",
+        "createdAt": 4000000000000,
+        "chatgpt": {
+          "state": "requested",
+          "requestId": "22222222-2222-4222-8222-222222222222",
+          "updatedAt": 4000000000000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "method": "claimProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000000000,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "armProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000000001,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "creating",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000001
+            }
+          }
+        ]
+      },
+      {
+        "method": "failProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a",
+          "public failure"
+        ],
+        "at": 4000000000002,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "uncertain",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "error": "public failure",
+              "updatedAt": 4000000000002
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "initial": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Public project",
+        "path": "/public/project",
+        "createdAt": 4000000000000,
+        "chatgpt": {
+          "state": "requested",
+          "requestId": "22222222-2222-4222-8222-222222222222",
+          "updatedAt": 4000000000000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "method": "claimProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000000000,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "claimed",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000000
+            }
+          }
+        ]
+      },
+      {
+        "method": "armProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a"
+        ],
+        "at": 4000000000001,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "creating",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000001
+            }
+          }
+        ]
+      },
+      {
+        "method": "completeProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "b",
+          "g-p-0123456789abcdef0123456789abcdef"
+        ],
+        "at": 4000000000002,
+        "expected": false,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "creating",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000001
+            }
+          }
+        ]
+      },
+      {
+        "method": "completeProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a",
+          "invalid-id"
+        ],
+        "at": 4000000000003,
+        "expected": false,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "creating",
+              "requestId": "22222222-2222-4222-8222-222222222222",
+              "owner": "a",
+              "updatedAt": 4000000000001
+            }
+          }
+        ]
+      },
+      {
+        "method": "completeProjectCreate",
+        "args": [
+          "22222222-2222-4222-8222-222222222222",
+          "a",
+          "g-p-0123456789abcdef0123456789abcdef"
+        ],
+        "at": 4000000000004,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "linked",
+              "id": "g-p-0123456789abcdef0123456789abcdef",
+              "updatedAt": 4000000000004
+            }
+          }
+        ]
+      },
+      {
+        "method": "retryProjectCreate",
+        "args": [
+          "11111111-1111-4111-8111-111111111111"
+        ],
+        "at": 4000000000005,
+        "expected": null,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "linked",
+              "id": "g-p-0123456789abcdef0123456789abcdef",
+              "updatedAt": 4000000000004
+            }
+          }
+        ]
+      },
+      {
+        "method": "markProjectGone",
+        "args": [
+          "11111111-1111-4111-8111-111111111111",
+          "g-p-ffffffffffffffffffffffffffffffff"
+        ],
+        "at": 4000000000006,
+        "expected": false,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "linked",
+              "id": "g-p-0123456789abcdef0123456789abcdef",
+              "updatedAt": 4000000000004
+            }
+          }
+        ]
+      },
+      {
+        "method": "markProjectGone",
+        "args": [
+          "11111111-1111-4111-8111-111111111111",
+          "g-p-0123456789abcdef0123456789abcdef"
+        ],
+        "at": 4000000000007,
+        "expected": true,
+        "catalog": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Public project",
+            "path": "/public/project",
+            "createdAt": 4000000000000,
+            "chatgpt": {
+              "state": "failed",
+              "requestId": "<new-uuid>",
+              "error": "ChatGPT no longer opens this Project",
+              "updatedAt": 4000000000007
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

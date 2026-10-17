@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **127 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **136 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -34,6 +34,13 @@ Real Windows-to-Linux SSH qualification passed six checks using generated fixtur
 private config/known_hosts: [SSH receipt](../../audit/2026-10-17/ssh-qualification.json).
 No personal SSH profile, credentials or public port was used. This proves an actual isolated SSH
 transport, not an external production server or adversarial-server filesystem containment.
+
+Project presentation and creation state are now ported: validated colors, soft removal, exclusive
+claims, armed-attempt expiry, linked/gone/failed/uncertain states, explicit retry and bounded change
+notifications. Restored armed attempts expire on the app clock without a browser poll. Seven
+regressions passed RED→GREEN; five source-derived scenarios match 27 committed upstream steps.
+CLI `projects color <id> <color|->` and `projects remove <id>` are executable. Browser creation
+delivery remains a phase-7 dependency; no signed-in browser or remote creation was exercised.
 
 ## Documents
 

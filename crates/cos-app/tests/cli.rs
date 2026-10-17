@@ -9,6 +9,42 @@ fn run(directory: &std::path::Path, args: &[&str]) -> std::process::Output {
         .unwrap()
 }
 #[test]
+fn project_color_and_soft_removal_are_runnable_without_losing_catalog_identity() {
+    let profile = tempfile::tempdir().unwrap();
+    let folder = tempfile::tempdir().unwrap();
+    assert!(run(profile.path(), &["info"]).status.success());
+    let roots = json!([{"name":"p","path":folder.path()}]).to_string();
+    assert!(
+        run(profile.path(), &["config", "set", "roots", &roots])
+            .status
+            .success()
+    );
+    let p: Value =
+        serde_json::from_slice(&run(profile.path(), &["projects", "add", "/p"]).stdout).unwrap();
+    let id = p["id"].as_str().unwrap();
+    let result = run(profile.path(), &["projects", "color", id, "rose"]);
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<Value>(&result.stdout).unwrap()["color"],
+        "rose"
+    );
+    assert!(
+        run(profile.path(), &["projects", "remove", id])
+            .status
+            .success()
+    );
+    let rows: Value =
+        serde_json::from_slice(&run(profile.path(), &["projects", "list"]).stdout).unwrap();
+    assert_eq!(rows[0]["id"], id);
+    assert_eq!(rows[0]["ungrouped"], true);
+    assert_eq!(rows[0]["chatgpt"], p["chatgpt"]);
+    assert!(folder.path().is_dir());
+}
+#[test]
 fn project_git_review_and_revision_fenced_diff_are_runnable() {
     let profile = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
