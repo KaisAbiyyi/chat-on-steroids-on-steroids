@@ -268,10 +268,25 @@ impl Recorder {
             self.store
                 .store_text(&id, &serde_json::to_string(&safe_args)?, 8000)?;
         let recorded_result = self.store.store_text(&id, &safe_result, 8000)?;
-        let mut call = json!({"callId":context.map(|c|c.call_id.clone()).unwrap_or_else(||uuid::Uuid::new_v4().to_string()),"tool":tool,"requestId":if request.is_empty(){None}else{Some(request)},"conversationId":conversation,"attributionMethod":method,"attribution":if method=="request_id"{"request_id"}else{"unattributed"},"startedAt":started_at,"durationMs":context.map(|c|c.duration_ms).unwrap_or(0),"args":recorded_args,"result":recorded_result,"outcome":outcome,"summary":{"kind":"tool","title":tool}});
+        // Build captions from SANITIZED input and trusted, bounded evidence.
+        // Project before append so cold reload, history and activity summary agree.
+        let evidence = context
+            .map(|context| crate::evidence::for_recording(tool, &args, context.evidence.clone()))
+            .unwrap_or(Value::Null);
+        let result_head = serde_json::from_str::<Value>(&safe_result)
+            .ok()
+            .and_then(|response| {
+                response["content"]
+                    .as_array()
+                    .and_then(|content| content.first())
+                    .and_then(|item| item["text"].as_str().map(str::to_owned))
+            })
+            .unwrap_or_else(|| safe_result.clone());
+        let summary = crate::caption::completed(tool, &safe_args, &evidence, outcome, &result_head);
+        let running_summary = crate::caption::running(tool, &safe_args, &evidence);
+        let mut call = json!({"callId":context.map(|c|c.call_id.clone()).unwrap_or_else(||uuid::Uuid::new_v4().to_string()),"tool":tool,"requestId":if request.is_empty(){None}else{Some(request)},"conversationId":conversation,"attributionMethod":method,"attribution":if method=="request_id"{"request_id"}else{"unattributed"},"startedAt":started_at,"durationMs":context.map(|c|c.duration_ms).unwrap_or(0),"args":recorded_args,"result":recorded_result,"outcome":outcome,"summary":summary,"runningSummary":running_summary});
         if let Some(context) = context {
-            call["evidence"] =
-                crate::evidence::for_recording(tool, &args, context.evidence.clone());
+            call["evidence"] = evidence;
         }
         if let Some(parent) = context.and_then(|c| c.parent_call_id.as_deref()) {
             call["nested"] = json!(true);
