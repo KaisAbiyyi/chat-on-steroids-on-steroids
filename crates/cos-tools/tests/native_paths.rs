@@ -4,8 +4,8 @@ use cos_tools::files::Files;
 fn ordinary_windows_path_spelling_is_authorized() {
     let d = tempfile::tempdir().unwrap();
     std::fs::write(d.path().join("a"), "public fixture").unwrap();
-    let path = d
-        .path()
+    let path = std::fs::canonicalize(d.path())
+        .unwrap()
         .to_string_lossy()
         .trim_start_matches("\\\\?\\")
         .to_owned();

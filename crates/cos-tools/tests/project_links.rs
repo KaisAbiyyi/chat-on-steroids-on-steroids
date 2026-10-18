@@ -25,7 +25,10 @@ fn setup() -> (
     let projects = Projects::open(durable.clone());
     let roots = [Root {
         name: "p".into(),
-        path: folder.path().to_string_lossy().into(),
+        path: std::fs::canonicalize(folder.path())
+            .unwrap()
+            .to_string_lossy()
+            .into(),
         remote: None,
     }];
     let p = projects.add(&roots, "/p").unwrap();
@@ -50,7 +53,10 @@ fn color_and_removal_preserve_workspace_and_request_identity() {
     assert_eq!(restored.list().unwrap()[0]["chatgpt"], p["chatgpt"]);
     let roots = [Root {
         name: "p".into(),
-        path: folder.path().to_string_lossy().into(),
+        path: std::fs::canonicalize(folder.path())
+            .unwrap()
+            .to_string_lossy()
+            .into(),
         remote: None,
     }];
     assert_eq!(

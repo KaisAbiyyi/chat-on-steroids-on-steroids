@@ -120,7 +120,10 @@ fn approved_virtual_native_relative_and_missing_paths_share_one_boundary() {
     fs::write(dir.path().join("src/file.txt"), "x").unwrap();
     let roots = vec![Root {
         name: "project".into(),
-        path: dir.path().to_string_lossy().into(),
+        path: fs::canonicalize(dir.path())
+            .unwrap()
+            .to_string_lossy()
+            .into(),
         remote: None,
     }];
     let virtual_path = sandbox::resolve(&roots, "/project/src/file.txt", None, false).unwrap();
@@ -137,7 +140,10 @@ fn approved_virtual_native_relative_and_missing_paths_share_one_boundary() {
     assert_eq!(
         sandbox::resolve(
             &roots,
-            &dir.path().join("src/file.txt").to_string_lossy(),
+            fs::canonicalize(dir.path().join("src/file.txt"))
+                .unwrap()
+                .to_string_lossy()
+                .trim_start_matches("\\\\?\\"),
             None,
             false
         )
@@ -160,7 +166,10 @@ fn windows_devices_ads_and_aliased_segments_are_rejected() {
     let dir = tempfile::tempdir().unwrap();
     let roots = vec![Root {
         name: "project".into(),
-        path: dir.path().to_string_lossy().into(),
+        path: fs::canonicalize(dir.path())
+            .unwrap()
+            .to_string_lossy()
+            .into(),
         remote: None,
     }];
     for path in [
