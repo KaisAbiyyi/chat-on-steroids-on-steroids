@@ -23,7 +23,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
 Latest integrated closure checkpoint: **201 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
-[Windows receipt](../../audit/2026-10-18/search-engine-windows-receipt.json). Latest exact-commit Linux
+[Windows receipt](../../audit/2026-10-18/search-engine-native-order-windows-receipt.json). Latest exact-commit Linux
 proof currently covers matcher commit `531fcac`: **177 PASS**; search-engine Linux qualification follows.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
@@ -203,6 +203,19 @@ Matcher commit `531fcac` passed **177 Linux tests**, formatting and strict Clipp
 [receipt](../../audit/2026-10-18/linux-search-matcher-lean-receipt.json). Its fresh cache measured
 **998 MiB**. Archives/temp files stay on the workspace drive; tests retain all original assertions
 and file-size limits. The final search-engine commit needs its own Linux receipt.
+
+## Native-order qualification correction — 2026-10-18
+
+The first search-engine Linux run at `c1ae547` exposed a fixture input mismatch: native enumeration
+visited the nonmatching file first, while the captured provider supplied the hit first. The complete
+responses therefore differed only in the correct scan count (2 versus 1). The source handler now
+captures both directory inputs, producing 16 projections; each native run selects its actual input
+and compares all response fields exactly. Product traversal and acceptance limits were unchanged.
+The failed run is retained: [Linux receipt](../../audit/2026-10-18/linux-search-engine-lean-receipt.json).
+It completed 63 tests successfully and failed one before Cargo stopped; it is not full qualification.
+The full updated Windows suite passes **201 tests**, formatting and strict Clippy:
+[receipt](../../audit/2026-10-18/search-engine-native-order-windows-receipt.json). A fresh Linux
+exact-commit qualification follows this correction.
 
 ## Documents
 

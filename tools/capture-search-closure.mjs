@@ -97,11 +97,16 @@ const resolve=async(roots,input)=>{const root=roots.find(root=>input==='/'+root.
 const toolContext=vm.createContext({module:{exports:{}},exports:{},reg:{guarded:async(_cap,_name,call)=>call()},ctx:{roots:toolRoots},resolveIn:resolve,resolvePath:resolve,fsForRoot:()=>toolFs,search:api.search,searchOneFile:api.searchOneFile,DEFAULT_EXCLUDES:api.DEFAULT_EXCLUDES,MAX_CONTENT_FILE_BYTES:api.MAX_CONTENT_FILE_BYTES,formatBytes:api.formatBytes,noteCount(){},friendlyError:error=>error.message});
 const toolJs=await require('esbuild').transform(results.map(node=>kernelSource.slice(node.start,node.end)).join('\n')+'\nglobalThis.find='+toolSource.slice(callbacks[0].start,callbacks[0].end)+';',{loader:'ts',format:'cjs'});
 vm.runInContext(toolJs.code,toolContext);
-const toolCases=[];
-for(const args of [{query:'needle'},{query:'needle',path:'/right'},{query:'needle',path:'/right/needle-right.txt',mode:'content'},{query:'absent',path:'/right/needle-right.txt'},{query:'needle',path:'/left/zz-large.txt',mode:'content'},{query:'needle',path:'/left/zz-large.txt',mode:'content',include:'*.rs'},{query:'public',mode:'content',max_results:1},{query:'needle',max_results:1}]){
- const expected=JSON.parse(JSON.stringify(await toolContext.find(args)));
- for(const item of expected.content??[])if(item.type==='text')item.text=item.text.replace(/elapsed_ms: \d+/g,'elapsed_ms: <elapsed>');
- toolCases.push({args,expected});
+const fileOrderVariants=[];
+for(const leftEntries of [['needle-left.txt','zz-large.txt'],['zz-large.txt','needle-left.txt']]){
+ toolDirs['/left']=leftEntries.map(name=>[name,'file']);
+ const toolCases=[];
+ for(const args of [{query:'needle'},{query:'needle',path:'/right'},{query:'needle',path:'/right/needle-right.txt',mode:'content'},{query:'absent',path:'/right/needle-right.txt'},{query:'needle',path:'/left/zz-large.txt',mode:'content'},{query:'needle',path:'/left/zz-large.txt',mode:'content',include:'*.rs'},{query:'public',mode:'content',max_results:1},{query:'needle',max_results:1}]){
+  const expected=JSON.parse(JSON.stringify(await toolContext.find(args)));
+  for(const item of expected.content??[])if(item.type==='text')item.text=item.text.replace(/elapsed_ms: \d+/g,'elapsed_ms: <elapsed>');
+  toolCases.push({args,expected});
+ }
+ fileOrderVariants.push({leftEntries,cases:toolCases});
 }
-await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-tool.json'),JSON.stringify({upstreamCommit:commit,sources:{'tools-core.ts':createHash('sha256').update(toolSource).digest('hex'),'kernel.ts':createHash('sha256').update(kernelSource).digest('hex'),'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},files:toolFiles,cases:toolCases},null,2)+'\n');
+await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-tool.json'),JSON.stringify({upstreamCommit:commit,sources:{'tools-core.ts':createHash('sha256').update(toolSource).digest('hex'),'kernel.ts':createHash('sha256').update(kernelSource).digest('hex'),'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},files:toolFiles,fileOrderVariants},null,2)+'\n');
 console.log(JSON.stringify({globs:globs.length,excludes:excludes.length,scans:scans.length,trees:trees.length}));

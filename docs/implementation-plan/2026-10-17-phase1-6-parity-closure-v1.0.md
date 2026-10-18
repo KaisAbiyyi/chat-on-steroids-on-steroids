@@ -281,3 +281,13 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   Cost: that content result remains a compatibility gap until the whole-workspace lossless JSON
   string owner is implemented. Eleven content projections pass; the twelfth is a refusal test,
   not an exactness pass. Counted reads also retain the existing hard 2 MiB growth ceiling.
+
+- Linux checkpoint `c1ae547` failed one native handler oracle (63 tests completed PASS, 1 FAIL;
+  remaining test binaries NOT RUN because Cargo stopped). Formatting/strict Clippy passed. The
+  exact mismatch was input ordering: Linux enumerated the nonmatching file before the hit, so
+  source semantics correctly require files_scanned 2; the fixture supplied the reverse order
+  and expected 1. Both two-entry permutations are now executed through the actual source handler
+  (16 projections). The native test selects the captured provider input using the filesystem's
+  actual order, and still compares the entire response exactly. Product traversal is unchanged;
+  no counts are normalized, cases removed or thresholds relaxed. The failed Linux receipt is
+  preserved. The updated fixture passed the full Windows suite again: **201 PASS**, strict checks.

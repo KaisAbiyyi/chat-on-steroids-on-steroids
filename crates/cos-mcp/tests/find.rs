@@ -120,7 +120,20 @@ fn native_find_matches_the_actual_registered_source_handler() {
         }
     }
     let elapsed = regex::Regex::new(r"elapsed_ms: \d+").unwrap();
-    for row in corpus["cases"].as_array().unwrap() {
+    // Directory order is an input to the source's scan count. Select the exact
+    // captured provider input, rather than rewriting a count or sorting product results.
+    let order = fs::read_dir(f.left.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name().into_string().unwrap())
+        .collect::<Vec<_>>();
+    let order = json!(order);
+    let variant = corpus["fileOrderVariants"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|variant| variant["leftEntries"] == order)
+        .expect("Both native two-entry permutations are captured from source");
+    for row in variant["cases"].as_array().unwrap() {
         let mut output = f.find(row["args"].clone());
         for item in output["content"].as_array_mut().unwrap() {
             if let Some(text) = item["text"].as_str() {

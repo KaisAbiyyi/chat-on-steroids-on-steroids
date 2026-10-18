@@ -17,123 +17,256 @@
       "zeroBytes": 2097153
     }
   },
-  "cases": [
+  "fileOrderVariants": [
     {
-      "args": {
-        "query": "needle"
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "2 matches\n/left/needle-left.txt\n/right/needle-right.txt\n\nfiles_scanned: 3\nelapsed_ms: <elapsed>\nresults_returned: 2"
+      "leftEntries": [
+        "needle-left.txt",
+        "zz-large.txt"
+      ],
+      "cases": [
+        {
+          "args": {
+            "query": "needle"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "2 matches\n/left/needle-left.txt\n/right/needle-right.txt\n\nfiles_scanned: 3\nelapsed_ms: <elapsed>\nresults_returned: 2"
+              }
+            ]
           }
-        ]
-      }
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/right"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/right/needle-right.txt\n\nfiles_scanned: 1\nelapsed_ms: <elapsed>\nresults_returned: 1"
+              }
+            ]
+          }
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/right/needle-right.txt",
+            "mode": "content"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/right/needle-right.txt:1: public right needle"
+              }
+            ]
+          }
+        },
+        {
+          "args": {
+            "query": "absent",
+            "path": "/right/needle-right.txt"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "No matches"
+              }
+            ]
+          }
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/left/zz-large.txt",
+            "mode": "content"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "File was not searched: content search skips files over 2.0 MB. Narrow it with read start_line/end_line, or use exec_command when command execution is available."
+              }
+            ],
+            "isError": true
+          }
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/left/zz-large.txt",
+            "mode": "content",
+            "include": "*.rs"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "No matches"
+              }
+            ]
+          }
+        },
+        {
+          "args": {
+            "query": "public",
+            "mode": "content",
+            "max_results": 1
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/left/needle-left.txt:1: public left\n\nfiles_scanned: 2\nelapsed_ms: <elapsed>\nresults_returned: 1\ncontent_file_limit: 2.0 MB"
+              }
+            ]
+          }
+        },
+        {
+          "args": {
+            "query": "needle",
+            "max_results": 1
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/left/needle-left.txt\n\nfiles_scanned: 1\nelapsed_ms: <elapsed>\nresults_returned: 1\ntruncated: limit"
+              }
+            ]
+          }
+        }
+      ]
     },
     {
-      "args": {
-        "query": "needle",
-        "path": "/right"
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "1 matches\n/right/needle-right.txt\n\nfiles_scanned: 1\nelapsed_ms: <elapsed>\nresults_returned: 1"
+      "leftEntries": [
+        "zz-large.txt",
+        "needle-left.txt"
+      ],
+      "cases": [
+        {
+          "args": {
+            "query": "needle"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "2 matches\n/left/needle-left.txt\n/right/needle-right.txt\n\nfiles_scanned: 3\nelapsed_ms: <elapsed>\nresults_returned: 2"
+              }
+            ]
           }
-        ]
-      }
-    },
-    {
-      "args": {
-        "query": "needle",
-        "path": "/right/needle-right.txt",
-        "mode": "content"
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "1 matches\n/right/needle-right.txt:1: public right needle"
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/right"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/right/needle-right.txt\n\nfiles_scanned: 1\nelapsed_ms: <elapsed>\nresults_returned: 1"
+              }
+            ]
           }
-        ]
-      }
-    },
-    {
-      "args": {
-        "query": "absent",
-        "path": "/right/needle-right.txt"
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "No matches"
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/right/needle-right.txt",
+            "mode": "content"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/right/needle-right.txt:1: public right needle"
+              }
+            ]
           }
-        ]
-      }
-    },
-    {
-      "args": {
-        "query": "needle",
-        "path": "/left/zz-large.txt",
-        "mode": "content"
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "File was not searched: content search skips files over 2.0 MB. Narrow it with read start_line/end_line, or use exec_command when command execution is available."
+        },
+        {
+          "args": {
+            "query": "absent",
+            "path": "/right/needle-right.txt"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "No matches"
+              }
+            ]
           }
-        ],
-        "isError": true
-      }
-    },
-    {
-      "args": {
-        "query": "needle",
-        "path": "/left/zz-large.txt",
-        "mode": "content",
-        "include": "*.rs"
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "No matches"
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/left/zz-large.txt",
+            "mode": "content"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "File was not searched: content search skips files over 2.0 MB. Narrow it with read start_line/end_line, or use exec_command when command execution is available."
+              }
+            ],
+            "isError": true
           }
-        ]
-      }
-    },
-    {
-      "args": {
-        "query": "public",
-        "mode": "content",
-        "max_results": 1
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "1 matches\n/left/needle-left.txt:1: public left\n\nfiles_scanned: 2\nelapsed_ms: <elapsed>\nresults_returned: 1\ncontent_file_limit: 2.0 MB"
+        },
+        {
+          "args": {
+            "query": "needle",
+            "path": "/left/zz-large.txt",
+            "mode": "content",
+            "include": "*.rs"
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "No matches"
+              }
+            ]
           }
-        ]
-      }
-    },
-    {
-      "args": {
-        "query": "needle",
-        "max_results": 1
-      },
-      "expected": {
-        "content": [
-          {
-            "type": "text",
-            "text": "1 matches\n/left/needle-left.txt\n\nfiles_scanned: 1\nelapsed_ms: <elapsed>\nresults_returned: 1\ntruncated: limit"
+        },
+        {
+          "args": {
+            "query": "public",
+            "mode": "content",
+            "max_results": 1
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/left/needle-left.txt:1: public left\n\nfiles_scanned: 2\nelapsed_ms: <elapsed>\nresults_returned: 1\ncontent_file_limit: 2.0 MB"
+              }
+            ]
           }
-        ]
-      }
+        },
+        {
+          "args": {
+            "query": "needle",
+            "max_results": 1
+          },
+          "expected": {
+            "content": [
+              {
+                "type": "text",
+                "text": "1 matches\n/left/needle-left.txt\n\nfiles_scanned: 2\nelapsed_ms: <elapsed>\nresults_returned: 1\ntruncated: limit"
+              }
+            ]
+          }
+        }
+      ]
     }
   ]
 }
