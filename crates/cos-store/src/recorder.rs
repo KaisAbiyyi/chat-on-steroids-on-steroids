@@ -285,7 +285,7 @@ impl Recorder {
         let summary = crate::caption::completed(tool, &safe_args, &evidence, outcome, &result_head);
         let running_summary = crate::caption::running(tool, &safe_args, &evidence);
         let mut call = json!({"callId":context.map(|c|c.call_id.clone()).unwrap_or_else(||uuid::Uuid::new_v4().to_string()),"tool":tool,"requestId":if request.is_empty(){None}else{Some(request)},"conversationId":conversation,"attributionMethod":method,"attribution":if method=="request_id"{"request_id"}else{"unattributed"},"startedAt":started_at,"durationMs":context.map(|c|c.duration_ms).unwrap_or(0),"args":recorded_args,"result":recorded_result,"outcome":outcome,"summary":summary,"runningSummary":running_summary});
-        if let Some(context) = context {
+        if context.is_some() {
             call["evidence"] = evidence;
         }
         if let Some(parent) = context.and_then(|c| c.parent_call_id.as_deref()) {
