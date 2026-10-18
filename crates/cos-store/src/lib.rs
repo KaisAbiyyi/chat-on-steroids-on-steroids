@@ -8,6 +8,7 @@ pub mod markdown;
 pub mod model;
 pub mod provider_usage;
 pub mod recorder;
+pub mod redaction;
 pub mod store;
 pub mod summary;
 pub mod title;
