@@ -16,9 +16,19 @@ fn normalized(key: &str) -> String {
 fn sensitive_key(key: &str) -> bool {
     let name = normalized(key);
     [
-        "password", "passwd", "passphrase", "secret", "token", "credential",
-        "authorization", "cookie", "apikey", "privatekey", "accesskey",
-        "sshkey", "authheader",
+        "password",
+        "passwd",
+        "passphrase",
+        "secret",
+        "token",
+        "credential",
+        "authorization",
+        "cookie",
+        "apikey",
+        "privatekey",
+        "accesskey",
+        "sshkey",
+        "authheader",
     ]
     .iter()
     .any(|part| name.contains(part))
@@ -27,8 +37,15 @@ fn sensitive_key(key: &str) -> bool {
 fn binary_key(key: &str) -> bool {
     matches!(
         normalized(key).as_str(),
-        "database64" | "base64" | "imagebase64" | "binary" | "filebytes"
-            | "blob" | "imagedata" | "dataurl" | "datauri"
+        "database64"
+            | "base64"
+            | "imagebase64"
+            | "binary"
+            | "filebytes"
+            | "blob"
+            | "imagedata"
+            | "dataurl"
+            | "datauri"
     )
 }
 
@@ -40,14 +57,19 @@ fn clipboard_read(tool: &str, args: &Value) -> bool {
     tool == "read_clipboard"
         || (tool == "computer"
             && args["actions"].as_array().is_some_and(|actions| {
-                actions.iter().any(|action| action["type"] == "read_clipboard")
+                actions
+                    .iter()
+                    .any(|action| action["type"] == "read_clipboard")
             }))
 }
 
 fn preserve_env_keys(value: &Value) -> Value {
     match value {
         Value::Object(fields) => Value::Object(
-            fields.keys().map(|key| (key.clone(), json!(MASK))).collect(),
+            fields
+                .keys()
+                .map(|key| (key.clone(), json!(MASK)))
+                .collect(),
         ),
         Value::Null => Value::Null,
         _ => json!(MASK),
@@ -60,9 +82,10 @@ fn unsafe_field(tool: &str, parent: &Value, key: &str) -> bool {
         || (key == "file" && tool == "download_artifact")
         || (key == "data"
             && (parent["type"] == "image"
-                || parent["mimeType"].as_str().is_some_and(|mime| mime.starts_with("image/"))))
-        || (key == "text"
-            && (tool == "write_clipboard" || clipboard_action(parent)))
+                || parent["mimeType"]
+                    .as_str()
+                    .is_some_and(|mime| mime.starts_with("image/"))))
+        || (key == "text" && (tool == "write_clipboard" || clipboard_action(parent)))
 }
 
 fn sanitise_value(tool: &str, value: &Value) -> Value {
@@ -82,7 +105,10 @@ fn sanitise_value(tool: &str, value: &Value) -> Value {
             Value::Object(output)
         }
         Value::Array(items) => Value::Array(
-            items.iter().map(|item| sanitise_value(tool, item)).collect(),
+            items
+                .iter()
+                .map(|item| sanitise_value(tool, item))
+                .collect(),
         ),
         Value::String(text) => json!(sanitise_text(text)),
         _ => value.clone(),
@@ -120,7 +146,14 @@ fn sanitise_text(text: &str) -> String {
     clean
 }
 
-fn secret_values(tool: &str, value: &Value, parent: Option<&Value>, key: &str, out: &mut Vec<String>, overflow: &mut bool) {
+fn secret_values(
+    tool: &str,
+    value: &Value,
+    parent: Option<&Value>,
+    key: &str,
+    out: &mut Vec<String>,
+    overflow: &mut bool,
+) {
     let protected = sensitive_key(key)
         || matches!(normalized(key).as_str(), "env" | "environment")
         || binary_key(key)
@@ -168,9 +201,7 @@ fn secret_values(tool: &str, value: &Value, parent: Option<&Value>, key: &str, o
 /// The raw result is never persisted if it can contain a clipboard read or
 /// we cannot safely subtract the known sensitive inputs. Call before store_text.
 pub fn result(tool: &str, args: &Value, text: &str) -> String {
-    if clipboard_read(tool, args)
-        || (tool == "computer" && text.contains("Clipboard read "))
-    {
+    if clipboard_read(tool, args) || (tool == "computer" && text.contains("Clipboard read ")) {
         return "<clipboard result not stored>".into();
     }
     let mut values = Vec::new();
@@ -203,11 +234,21 @@ mod tests {
             "cmd": "printf 'token=abc123'"
         });
         let output = arguments("computer", &args).to_string();
-        for needle in ["private-value", "env-value-123", "clipboard-secret", "U0VDUkVU", "token=abc123"] {
+        for needle in [
+            "private-value",
+            "env-value-123",
+            "clipboard-secret",
+            "U0VDUkVU",
+            "token=abc123",
+        ] {
             assert!(!output.contains(needle), "{needle} survived");
         }
         assert!(output.contains("/safe/file.txt"));
-        let result = result("computer", &args, "env-value-123 private-value clipboard-secret public");
+        let result = result(
+            "computer",
+            &args,
+            "env-value-123 private-value clipboard-secret public",
+        );
         assert!(!result.contains("env-value-123"));
         assert!(!result.contains("private-value"));
         assert!(!result.contains("clipboard-secret"));
@@ -216,7 +257,17 @@ mod tests {
 
     #[test]
     fn clipboard_reads_fail_closed() {
-        assert_eq!(result("read_clipboard", &json!({}), "anything"), "<clipboard result not stored>");
-        assert_eq!(result("computer", &json!({"actions":[{"type":"read_clipboard"}]}), "anything"), "<clipboard result not stored>");
+        assert_eq!(
+            result("read_clipboard", &json!({}), "anything"),
+            "<clipboard result not stored>"
+        );
+        assert_eq!(
+            result(
+                "computer",
+                &json!({"actions":[{"type":"read_clipboard"}]}),
+                "anything"
+            ),
+            "<clipboard result not stored>"
+        );
     }
 }
