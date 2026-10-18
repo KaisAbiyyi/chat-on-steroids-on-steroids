@@ -58,6 +58,9 @@ fn unsafe_field(tool: &str, parent: &Value, key: &str) -> bool {
     sensitive_key(key)
         || binary_key(key)
         || (key == "file" && tool == "download_artifact")
+        || (key == "data"
+            && (parent["type"] == "image"
+                || parent["mimeType"].as_str().is_some_and(|mime| mime.starts_with("image/"))))
         || (key == "text"
             && (tool == "write_clipboard" || clipboard_action(parent)))
 }
@@ -121,8 +124,7 @@ fn secret_values(tool: &str, value: &Value, parent: Option<&Value>, key: &str, o
     let protected = sensitive_key(key)
         || matches!(normalized(key).as_str(), "env" | "environment")
         || binary_key(key)
-        || (key == "file" && tool == "download_artifact")
-        || (key == "text" && (tool == "write_clipboard" || parent.is_some_and(clipboard_action)));
+        || parent.is_some_and(|owner| unsafe_field(tool, owner, key));
     if protected {
         match value {
             Value::String(text) => {
