@@ -66,7 +66,9 @@ pub fn from_runtime(tool: &str, response: &Value, private: &Value) -> Value {
             (Value::Null, Value::Null, Value::Null, Value::Null)
         };
     let count = if !failed && tool == "find" {
-        private["count"].as_u64().map_or(Value::Null, |count| json!(count))
+        private["count"]
+            .as_u64()
+            .map_or(Value::Null, |count| json!(count))
     } else {
         Value::Null
     };
@@ -127,7 +129,11 @@ mod tests {
         assert_eq!(completed["running"], false);
         assert_eq!(completed["exitCode"], 17);
         assert_eq!(completed["processSessionId"], 42);
-        let ambiguous = from_runtime("exec_command", &json!({"content":[{"type":"text","text":"Completed successfully"}]}), &Value::Null);
+        let ambiguous = from_runtime(
+            "exec_command",
+            &json!({"content":[{"type":"text","text":"Completed successfully"}]}),
+            &Value::Null,
+        );
         assert_eq!(ambiguous["running"], Value::Null);
         assert_eq!(ambiguous["exitCode"], Value::Null);
     }
@@ -137,14 +143,20 @@ mod tests {
         let good = json!({"content":[{"type":"text","text":"success"}]});
         assert_eq!(from_runtime("find", &good, &json!({"count":3}))["count"], 3);
         assert!(from_runtime("find", &good, &Value::Null)["count"].is_null());
-        assert!(from_runtime("find", &json!({"isError":true}), &json!({"count":3}))["count"].is_null());
-        let patch = from_runtime("apply_patch",
+        assert!(
+            from_runtime("find", &json!({"isError":true}), &json!({"count":3}))["count"].is_null()
+        );
+        let patch = from_runtime(
+            "apply_patch",
             &json!({"structuredContent":{"changes":[{"path":"/p/a.txt","kind":"add","added":2,"removed":0},{"path":"/p/b.txt","kind":"update","added":1,"removed":1}]}}),
-            &Value::Null);
+            &Value::Null,
+        );
         assert_eq!(patch["changes"].as_array().unwrap().len(), 2);
-        let failed = from_runtime("apply_patch",
+        let failed = from_runtime(
+            "apply_patch",
             &json!({"isError":true,"structuredContent":{"changes":[{"path":"/p/a.txt","kind":"add"}]}}),
-            &Value::Null);
+            &Value::Null,
+        );
         assert_eq!(failed["changes"], json!([]));
     }
 }
