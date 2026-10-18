@@ -309,3 +309,6 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   Linux defaults to the same lean settings; an exact committed default-run receipt follows.
 - Next: Task 5 source title/prompt/rename/summary/history contracts. Tasks 2–8 and final review remain
   in progress; this checkpoint is not whole-application or whole-phase exactness acceptance.
+- Exact default-profile checkpoint `628b027` passed **193 native Linux tests**, formatting and strict
+  Clippy with a 1.1 GiB shared cache. No explicit lean switch was supplied; recorded Cargo environment
+  confirms symbols 0/incremental 0. Task 5 implementation starts after this storage checkpoint.

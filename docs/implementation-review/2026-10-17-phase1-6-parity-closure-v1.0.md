@@ -30,3 +30,5 @@ The release passes 41 actual runtime/source checks and measures 11.923 MiB. Stor
 1.464 GiB rebuilt Windows / 1.1 GiB Linux caches have separate receipts. Content fixtures qualify the
 source filesystem fallback; full local ripgrep, partial-read hit retention and stream/chunk semantics
 stay open. These notes remain implementation evidence; independent whole-scope review is **NOT RUN**.
+The default Linux runner at `628b027` also passed all 193 tests and strict checks, retaining the
+1.1 GiB cache. This proves the committed default lean settings, separately from earlier explicit runs.

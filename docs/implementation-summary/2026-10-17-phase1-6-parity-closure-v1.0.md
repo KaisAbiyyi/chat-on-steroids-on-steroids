@@ -7,7 +7,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 ## Current result
 
 - Latest integrated checks: **201 Windows / 193 Linux tests PASS**, 0 failed/ignored, formatting and
-  strict Clippy PASS. Linux executed exact commit `4a40c93`; Windows also cold-built the new lean profiles.
+  strict Clippy PASS. Linux executed exact default-profile commit `628b027`; Windows cold-built the lean profiles.
 - Windows service `4a40c93`: **11.923 MiB**, 41 executable/source checks PASS. Full desktop and installer
   acceptance remain open. [Release receipt](../../audit/2026-10-18/search-release-receipt.json).
 - Storage checkpoint: Cargo removed the verified 25.394 GiB development cache; a complete lean rebuild
@@ -31,8 +31,8 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 Latest integrated closure checkpoint: **201 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
 [Windows receipt](../../audit/2026-10-18/search-engine-native-order-windows-receipt.json). Latest exact-commit Linux
-proof covers search-engine commit `4a40c93`: **193 PASS**:
-[Linux receipt](../../audit/2026-10-18/linux-search-engine-native-order-receipt.json).
+proof covers default-profile commit `628b027`: **193 PASS**:
+[Linux receipt](../../audit/2026-10-18/linux-default-lean-profile-receipt.json).
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -248,6 +248,8 @@ data were retained. [Cleanup receipt](../../audit/2026-10-18/windows-debug-cache
 The rebuilt cache measures 1,571,649,517 bytes. Free space at that receipt was **39.09 GiB on C / 67.01 GiB
 on D**; external free-space changes are not attributed to this cleanup. Host fixture/archive temporary
 files stay on D. Linux uses the same lean cache by default, with explicit opt-in for debugger profiles.
+Exact commit `628b027` also passed the default Linux runner: **193 tests**, formatting and strict Clippy,
+cache still **1.1 GiB**. [Default-profile receipt](../../audit/2026-10-18/linux-default-lean-profile-receipt.json).
 
 ## Documents
 
