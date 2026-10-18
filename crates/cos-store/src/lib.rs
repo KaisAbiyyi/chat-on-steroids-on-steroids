@@ -6,6 +6,8 @@ pub mod model;
 pub mod provider_usage;
 pub mod recorder;
 pub mod store;
+pub mod summary;
+pub mod title;
 pub mod usage;
 pub mod views;
 pub use store::{CreateOptions, ReadOptions, SessionStore, UpsertOptions};

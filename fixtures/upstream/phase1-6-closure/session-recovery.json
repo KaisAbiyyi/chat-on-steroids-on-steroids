@@ -1,0 +1,292 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "src/main/session/title.ts": "6a7428d3ea7b82c608042f062c323e553055db20fed0c85d1bd3dcdbe2fc9336",
+    "src/shared/user-prompt.ts": "bb102c51ad93c493f686fdb7d9a86a0c2a1ce99bfea018b619fd53788e5be8a5",
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653"
+  },
+  "scope": "Actual source durable recovery from stale public checkpoints and canonical shards; metadata-only future fields retained",
+  "recovery": [
+    {
+      "name": "stale-message",
+      "id": "session-recovery-stale-message",
+      "files": {
+        "events.jsonl": "",
+        "messages/7ba6129c82906eff570e89b4b61b875024250c2ce5f1da193d3f87b0aedd7f82.json": "eyJraW5kIjoidXNlcl9tZXNzYWdlIiwic291cmNlIjoiZXh0ZW5zaW9uIiwidGltZSI6MTAwLCJtZXNzYWdlSWQiOiJwdWJsaWMtdXNlciIsIm1lc3NhZ2UiOnsidGV4dCI6IjEyMzQ1Njc4OTAxMjM0NTY3ODkwIiwidHJ1bmNhdGVkIjpmYWxzZSwiY2hhcnMiOjIwfSwiY29udGVudFNlcSI6Miwib3JpZ2luIjoxLCJzZXEiOjJ9",
+        "messages.json": "e30=",
+        "meta.backup.json": "ewogICJpZCI6ICJzZXNzaW9uLXJlY292ZXJ5LXN0YWxlLW1lc3NhZ2UiLAogICJ0aXRsZSI6ICJQZXJzaXN0ZWQgbWFudWFsIHB1YmxpYyIsCiAgImNvbnZlcnNhdGlvbklkIjogImNvbnZlcnNhdGlvbi1wdWJsaWMiLAogICJjaGF0SWRzIjogWwogICAgImNvbnZlcnNhdGlvbi1wdWJsaWMiCiAgXSwKICAic3RhcnRlZEF0IjogMTc5MjEwODgwMDAwMCwKICAidXBkYXRlZEF0IjogMTc5MjEwODgwMDAwMCwKICAiZW5kZWRBdCI6IG51bGwsCiAgImV2ZW50cyI6IDAsCiAgInRpbWVsaW5lVHVybnMiOiB7fSwKICAibmF0aXZlUXVlc3Rpb24iOiBudWxsLAogICJyZXF1ZXN0VHVybnMiOiB7fSwKICAidXNlck1lc3NhZ2VzIjogMCwKICAidG9vbENhbGxzIjogMCwKICAibGFzdFRvb2xDYWxsQXQiOiBudWxsLAogICJsYXN0VG9vbEFjdGl2aXR5IjogbnVsbCwKICAibGFzdEFzc2lzdGFudEZpbmFsQXQiOiBudWxsLAogICJsYXN0VHVybkVuZEF0IjogbnVsbCwKICAibGFzdEZpbmlzaFJlcG9ydEF0IjogbnVsbCwKICAicHJvY2Vzc0V4aXROb256ZXJvIjogMCwKICAidG9vbFJlamVjdGVkIjogMCwKICAidG9vbEludGVybmFsRXJyb3JzIjogMCwKICAiZXJyb3JzIjogMCwKICAiZXN0aW1hdGVkVG9rZW5zIjogMCwKICAiY29udGV4dFRva2VucyI6IDAsCiAgImxhc3RIYW5kb2ZmSWQiOiBudWxsLAogICJsYXN0SGFuZG9mZkF0IjogbnVsbCwKICAibGFzdENvbW1pdHRlZFJlc3VtZUhhbmRvZmZJZCI6IG51bGwsCiAgImxhc3RUdXJuT3V0Y29tZSI6IG51bGwsCiAgImFjdGl2ZVR1cm5JZCI6IG51bGwsCiAgImZpbmlzaFR1cm4iOiBudWxsLAogICJhZ2VudHMiOiBbXSwKICAib3JpZ2luIjogbnVsbCwKICAidGl0bGVTb3VyY2UiOiAibWFudWFsIiwKICAiX19oaXN0b3J5U2VxIjogMCwKICAiX19jYW5vbmljYWxQcm9qZWN0aW9uIjogMSwKICAiX190b2tlbkVzdGltYXRlIjogMQp9",
+        "meta.json": "eyJpZCI6InNlc3Npb24tcmVjb3Zlcnktc3RhbGUtbWVzc2FnZSIsInRpdGxlIjoiUGVyc2lzdGVkIG1hbnVhbCBwdWJsaWMiLCJjb252ZXJzYXRpb25JZCI6ImNvbnZlcnNhdGlvbi1wdWJsaWMiLCJjaGF0SWRzIjpbImNvbnZlcnNhdGlvbi1wdWJsaWMiXSwic3RhcnRlZEF0IjoxNzkyMTA4ODAwMDAwLCJ1cGRhdGVkQXQiOjE3OTIxMDg4MDAwMDAsImVuZGVkQXQiOm51bGwsImV2ZW50cyI6MSwidGltZWxpbmVUdXJucyI6e30sIm5hdGl2ZVF1ZXN0aW9uIjp7Im1lc3NhZ2VJZCI6InB1YmxpYy11c2VyIiwib3JpZ2luIjoxfSwicmVxdWVzdFR1cm5zIjp7fSwidXNlck1lc3NhZ2VzIjoxLCJ0b29sQ2FsbHMiOjAsImxhc3RUb29sQ2FsbEF0IjpudWxsLCJsYXN0VG9vbEFjdGl2aXR5IjpudWxsLCJsYXN0QXNzaXN0YW50RmluYWxBdCI6bnVsbCwibGFzdFR1cm5FbmRBdCI6bnVsbCwibGFzdEZpbmlzaFJlcG9ydEF0IjpudWxsLCJwcm9jZXNzRXhpdE5vbnplcm8iOjAsInRvb2xSZWplY3RlZCI6MCwidG9vbEludGVybmFsRXJyb3JzIjowLCJlcnJvcnMiOjAsImVzdGltYXRlZFRva2VucyI6MiwiY29udGV4dFRva2VucyI6MiwibGFzdEhhbmRvZmZJZCI6bnVsbCwibGFzdEhhbmRvZmZBdCI6bnVsbCwibGFzdENvbW1pdHRlZFJlc3VtZUhhbmRvZmZJZCI6bnVsbCwibGFzdFR1cm5PdXRjb21lIjpudWxsLCJhY3RpdmVUdXJuSWQiOm51bGwsImZpbmlzaFR1cm4iOm51bGwsImFnZW50cyI6W10sIm9yaWdpbiI6bnVsbCwidGl0bGVTb3VyY2UiOiJtYW51YWwiLCJfX2hpc3RvcnlTZXEiOjEsIl9fY2Fub25pY2FsUHJvamVjdGlvbiI6MSwiX190b2tlbkVzdGltYXRlIjoxLCJmdXR1cmVGaWVsZCI6eyJsaXRlcmFsIjoicmV0YWluIHRocm91Z2ggcmVjb3ZlcnkifSwic2VsZWN0ZWRNb2RlbCI6eyJjb252ZXJzYXRpb25JZCI6ImNvbnZlcnNhdGlvbi1wdWJsaWMiLCJtb2RlbCI6ImdwdC02Iiwib2JzZXJ2ZWRBdCI6ODB9fQ=="
+      },
+      "expected": {
+        "id": "session-recovery-stale-message",
+        "title": "Persisted manual public",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 1,
+        "timelineTurns": {},
+        "nativeQuestion": {
+          "messageId": "public-user",
+          "origin": 1
+        },
+        "requestTurns": {},
+        "userMessages": 1,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 5,
+        "contextTokens": 5,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "titleSource": "manual",
+        "futureField": {
+          "literal": "retain through recovery"
+        },
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 80
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "12345678901234567890",
+            "truncated": false,
+            "chars": 20
+          },
+          "contentSeq": 2,
+          "origin": 1,
+          "seq": 2,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "stale-after-rebind",
+      "id": "session-recovery-stale-after-rebind",
+      "files": {
+        "events.jsonl": "",
+        "messages/451a8dd8ce4fd207df9723303f8326d8f58969722910dbd8ab235a3fb31a1e2f.json": "eyJraW5kIjoiYXNzaXN0YW50X21lc3NhZ2UiLCJzb3VyY2UiOiJleHRlbnNpb24iLCJ0aW1lIjoxMjAsIm1lc3NhZ2VJZCI6InB1YmxpYy1hc3Npc3RhbnQiLCJtZXNzYWdlIjp7InRleHQiOiIxMjM0NTY3ODkwMTIzNDU2Nzg5MCIsInRydW5jYXRlZCI6ZmFsc2UsImNoYXJzIjoyMH0sInN0YXRlIjoiZmluYWwiLCJmaW5hbCI6dHJ1ZSwiY29udGVudFNlcSI6MiwiZmluYWxDb250ZW50U2VxIjoyLCJmaW5hbE9ic2VydmVkQXQiOjE3OTIxMDg4MDAwMDAsIm9yaWdpbiI6Miwic2VxIjoyfQ==",
+        "messages/7ba6129c82906eff570e89b4b61b875024250c2ce5f1da193d3f87b0aedd7f82.json": "eyJraW5kIjoidXNlcl9tZXNzYWdlIiwic291cmNlIjoiZXh0ZW5zaW9uIiwidGltZSI6MTAwLCJtZXNzYWdlSWQiOiJwdWJsaWMtdXNlciIsIm1lc3NhZ2UiOnsidGV4dCI6IjEyMzQ1Njc4IiwidHJ1bmNhdGVkIjpmYWxzZSwiY2hhcnMiOjh9LCJjb250ZW50U2VxIjoxLCJvcmlnaW4iOjEsInNlcSI6MX0=",
+        "messages.json": "e30=",
+        "meta.backup.json": "ewogICJpZCI6ICJzZXNzaW9uLXJlY292ZXJ5LXN0YWxlLWFmdGVyLXJlYmluZCIsCiAgInRpdGxlIjogIlBlcnNpc3RlZCBtYW51YWwgcHVibGljIiwKICAiY29udmVyc2F0aW9uSWQiOiAiY29udmVyc2F0aW9uLXB1YmxpYyIsCiAgImNoYXRJZHMiOiBbCiAgICAiY29udmVyc2F0aW9uLXB1YmxpYyIKICBdLAogICJzdGFydGVkQXQiOiAxNzkyMTA4ODAwMDAwLAogICJ1cGRhdGVkQXQiOiAxNzkyMTA4ODAwMDAwLAogICJlbmRlZEF0IjogbnVsbCwKICAiZXZlbnRzIjogMCwKICAidGltZWxpbmVUdXJucyI6IHt9LAogICJuYXRpdmVRdWVzdGlvbiI6IG51bGwsCiAgInJlcXVlc3RUdXJucyI6IHt9LAogICJ1c2VyTWVzc2FnZXMiOiAwLAogICJ0b29sQ2FsbHMiOiAwLAogICJsYXN0VG9vbENhbGxBdCI6IG51bGwsCiAgImxhc3RUb29sQWN0aXZpdHkiOiBudWxsLAogICJsYXN0QXNzaXN0YW50RmluYWxBdCI6IG51bGwsCiAgImxhc3RUdXJuRW5kQXQiOiBudWxsLAogICJsYXN0RmluaXNoUmVwb3J0QXQiOiBudWxsLAogICJwcm9jZXNzRXhpdE5vbnplcm8iOiAwLAogICJ0b29sUmVqZWN0ZWQiOiAwLAogICJ0b29sSW50ZXJuYWxFcnJvcnMiOiAwLAogICJlcnJvcnMiOiAwLAogICJlc3RpbWF0ZWRUb2tlbnMiOiAwLAogICJjb250ZXh0VG9rZW5zIjogMCwKICAibGFzdEhhbmRvZmZJZCI6IG51bGwsCiAgImxhc3RIYW5kb2ZmQXQiOiBudWxsLAogICJsYXN0Q29tbWl0dGVkUmVzdW1lSGFuZG9mZklkIjogbnVsbCwKICAibGFzdFR1cm5PdXRjb21lIjogbnVsbCwKICAiYWN0aXZlVHVybklkIjogbnVsbCwKICAiZmluaXNoVHVybiI6IG51bGwsCiAgImFnZW50cyI6IFtdLAogICJvcmlnaW4iOiBudWxsLAogICJ0aXRsZVNvdXJjZSI6ICJtYW51YWwiLAogICJfX2hpc3RvcnlTZXEiOiAwLAogICJfX2Nhbm9uaWNhbFByb2plY3Rpb24iOiAxLAogICJfX3Rva2VuRXN0aW1hdGUiOiAxCn0=",
+        "meta.json": "eyJpZCI6InNlc3Npb24tcmVjb3Zlcnktc3RhbGUtYWZ0ZXItcmViaW5kIiwidGl0bGUiOiJQZXJzaXN0ZWQgbWFudWFsIHB1YmxpYyIsImNvbnZlcnNhdGlvbklkIjoiY29udmVyc2F0aW9uLW5ldyIsImNoYXRJZHMiOlsiY29udmVyc2F0aW9uLXB1YmxpYyIsImNvbnZlcnNhdGlvbi1uZXciXSwic3RhcnRlZEF0IjoxNzkyMTA4ODAwMDAwLCJ1cGRhdGVkQXQiOjE3OTIxMDg4MDAwMDAsImVuZGVkQXQiOm51bGwsImV2ZW50cyI6MSwidGltZWxpbmVUdXJucyI6e30sIm5hdGl2ZVF1ZXN0aW9uIjp7Im1lc3NhZ2VJZCI6InB1YmxpYy11c2VyIiwib3JpZ2luIjoxfSwicmVxdWVzdFR1cm5zIjp7fSwidXNlck1lc3NhZ2VzIjoxLCJ0b29sQ2FsbHMiOjAsImxhc3RUb29sQ2FsbEF0IjpudWxsLCJsYXN0VG9vbEFjdGl2aXR5IjpudWxsLCJsYXN0QXNzaXN0YW50RmluYWxBdCI6bnVsbCwibGFzdFR1cm5FbmRBdCI6bnVsbCwibGFzdEZpbmlzaFJlcG9ydEF0IjpudWxsLCJwcm9jZXNzRXhpdE5vbnplcm8iOjAsInRvb2xSZWplY3RlZCI6MCwidG9vbEludGVybmFsRXJyb3JzIjowLCJlcnJvcnMiOjAsImVzdGltYXRlZFRva2VucyI6MiwiY29udGV4dFRva2VucyI6MCwibGFzdEhhbmRvZmZJZCI6bnVsbCwibGFzdEhhbmRvZmZBdCI6bnVsbCwibGFzdENvbW1pdHRlZFJlc3VtZUhhbmRvZmZJZCI6bnVsbCwibGFzdFR1cm5PdXRjb21lIjpudWxsLCJhY3RpdmVUdXJuSWQiOm51bGwsImZpbmlzaFR1cm4iOm51bGwsImFnZW50cyI6W10sIm9yaWdpbiI6bnVsbCwidGl0bGVTb3VyY2UiOiJtYW51YWwiLCJyZXRpcmVkQ2hhdEF0Ijp7ImNvbnZlcnNhdGlvbi1wdWJsaWMiOjE3OTIxMDg4MDAwMDB9LCJfX2hpc3RvcnlTZXEiOjEsIl9fY2Fub25pY2FsUHJvamVjdGlvbiI6MSwiX190b2tlbkVzdGltYXRlIjoxLCJmdXR1cmVGaWVsZCI6eyJsaXRlcmFsIjoicmV0YWluIHRocm91Z2ggcmVjb3ZlcnkifSwic2VsZWN0ZWRNb2RlbCI6eyJjb252ZXJzYXRpb25JZCI6ImNvbnZlcnNhdGlvbi1uZXciLCJtb2RlbCI6ImdwdC02Iiwib2JzZXJ2ZWRBdCI6ODB9fQ=="
+      },
+      "expected": {
+        "id": "session-recovery-stale-after-rebind",
+        "title": "Persisted manual public",
+        "conversationId": "conversation-new",
+        "chatIds": [
+          "conversation-public",
+          "conversation-new"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 2,
+        "timelineTurns": {},
+        "nativeQuestion": {
+          "messageId": "public-user",
+          "origin": 1
+        },
+        "requestTurns": {},
+        "userMessages": 1,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": 120,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 7,
+        "contextTokens": 5,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "titleSource": "manual",
+        "retiredChatAt": {
+          "conversation-public": 1792108800000
+        },
+        "futureField": {
+          "literal": "retain through recovery"
+        },
+        "selectedModel": {
+          "conversationId": "conversation-new",
+          "model": "gpt-6",
+          "observedAt": 80
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "12345678",
+            "truncated": false,
+            "chars": 8
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        },
+        {
+          "kind": "assistant_message",
+          "source": "extension",
+          "time": 120,
+          "messageId": "public-assistant",
+          "message": {
+            "text": "12345678901234567890",
+            "truncated": false,
+            "chars": 20
+          },
+          "state": "final",
+          "final": true,
+          "contentSeq": 2,
+          "finalContentSeq": 2,
+          "finalObservedAt": 1792108800000,
+          "origin": 2,
+          "seq": 2,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "missing-outcome-counters",
+      "id": "session-recovery-missing-outcome-counters",
+      "files": {
+        "events.jsonl": "eyJraW5kIjoidG9vbF9jYWxsIiwic291cmNlIjoibWNwIiwidGltZSI6MTEwLCJjYWxsIjp7ImNhbGxJZCI6InB1YmxpYy1jYWxsIiwidG9vbCI6InJlYWQiLCJhcmdzIjp7InRleHQiOiJwdWJsaWMiLCJ0cnVuY2F0ZWQiOmZhbHNlLCJjaGFycyI6Nn0sInJlc3VsdCI6eyJ0ZXh0IjoicHVibGljIiwidHJ1bmNhdGVkIjpmYWxzZSwiY2hhcnMiOjZ9LCJvdXRjb21lIjoidG9vbF9pbnRlcm5hbF9lcnJvciIsInN1bW1hcnkiOnsia2luZCI6InJlYWQiLCJ0aXRsZSI6IlJlYWQgcHVibGljIn19LCJzZXEiOjJ9Cg==",
+        "messages/7ba6129c82906eff570e89b4b61b875024250c2ce5f1da193d3f87b0aedd7f82.json": "eyJraW5kIjoidXNlcl9tZXNzYWdlIiwic291cmNlIjoiZXh0ZW5zaW9uIiwidGltZSI6MTAwLCJtZXNzYWdlSWQiOiJwdWJsaWMtdXNlciIsIm1lc3NhZ2UiOnsidGV4dCI6IjEyMzQ1Njc4IiwidHJ1bmNhdGVkIjpmYWxzZSwiY2hhcnMiOjh9LCJjb250ZW50U2VxIjoxLCJvcmlnaW4iOjEsInNlcSI6MX0=",
+        "messages.json": "e30=",
+        "meta.backup.json": "ewogICJpZCI6ICJzZXNzaW9uLXJlY292ZXJ5LW1pc3Npbmctb3V0Y29tZS1jb3VudGVycyIsCiAgInRpdGxlIjogIlBlcnNpc3RlZCBtYW51YWwgcHVibGljIiwKICAiY29udmVyc2F0aW9uSWQiOiAiY29udmVyc2F0aW9uLXB1YmxpYyIsCiAgImNoYXRJZHMiOiBbCiAgICAiY29udmVyc2F0aW9uLXB1YmxpYyIKICBdLAogICJzdGFydGVkQXQiOiAxNzkyMTA4ODAwMDAwLAogICJ1cGRhdGVkQXQiOiAxNzkyMTA4ODAwMDAwLAogICJlbmRlZEF0IjogbnVsbCwKICAiZXZlbnRzIjogMCwKICAidGltZWxpbmVUdXJucyI6IHt9LAogICJuYXRpdmVRdWVzdGlvbiI6IG51bGwsCiAgInJlcXVlc3RUdXJucyI6IHt9LAogICJ1c2VyTWVzc2FnZXMiOiAwLAogICJ0b29sQ2FsbHMiOiAwLAogICJsYXN0VG9vbENhbGxBdCI6IG51bGwsCiAgImxhc3RUb29sQWN0aXZpdHkiOiBudWxsLAogICJsYXN0QXNzaXN0YW50RmluYWxBdCI6IG51bGwsCiAgImxhc3RUdXJuRW5kQXQiOiBudWxsLAogICJsYXN0RmluaXNoUmVwb3J0QXQiOiBudWxsLAogICJwcm9jZXNzRXhpdE5vbnplcm8iOiAwLAogICJ0b29sUmVqZWN0ZWQiOiAwLAogICJ0b29sSW50ZXJuYWxFcnJvcnMiOiAwLAogICJlcnJvcnMiOiAwLAogICJlc3RpbWF0ZWRUb2tlbnMiOiAwLAogICJjb250ZXh0VG9rZW5zIjogMCwKICAibGFzdEhhbmRvZmZJZCI6IG51bGwsCiAgImxhc3RIYW5kb2ZmQXQiOiBudWxsLAogICJsYXN0Q29tbWl0dGVkUmVzdW1lSGFuZG9mZklkIjogbnVsbCwKICAibGFzdFR1cm5PdXRjb21lIjogbnVsbCwKICAiYWN0aXZlVHVybklkIjogbnVsbCwKICAiZmluaXNoVHVybiI6IG51bGwsCiAgImFnZW50cyI6IFtdLAogICJvcmlnaW4iOiBudWxsLAogICJ0aXRsZVNvdXJjZSI6ICJtYW51YWwiLAogICJfX2hpc3RvcnlTZXEiOiAwLAogICJfX2Nhbm9uaWNhbFByb2plY3Rpb24iOiAxLAogICJfX3Rva2VuRXN0aW1hdGUiOiAxCn0=",
+        "meta.json": "eyJpZCI6InNlc3Npb24tcmVjb3ZlcnktbWlzc2luZy1vdXRjb21lLWNvdW50ZXJzIiwidGl0bGUiOiJQZXJzaXN0ZWQgbWFudWFsIHB1YmxpYyIsImNvbnZlcnNhdGlvbklkIjoiY29udmVyc2F0aW9uLXB1YmxpYyIsImNoYXRJZHMiOlsiY29udmVyc2F0aW9uLXB1YmxpYyJdLCJzdGFydGVkQXQiOjE3OTIxMDg4MDAwMDAsInVwZGF0ZWRBdCI6MTc5MjEwODgwMDAwMCwiZW5kZWRBdCI6bnVsbCwiZXZlbnRzIjoyLCJ0aW1lbGluZVR1cm5zIjp7fSwibmF0aXZlUXVlc3Rpb24iOnsibWVzc2FnZUlkIjoicHVibGljLXVzZXIiLCJvcmlnaW4iOjF9LCJyZXF1ZXN0VHVybnMiOnt9LCJ1c2VyTWVzc2FnZXMiOjEsInRvb2xDYWxscyI6MSwibGFzdFRvb2xDYWxsQXQiOjExMCwibGFzdFRvb2xBY3Rpdml0eSI6eyJraW5kIjoicmVhZCIsInRpdGxlIjoiUmVhZCBwdWJsaWMifSwibGFzdEFzc2lzdGFudEZpbmFsQXQiOm51bGwsImxhc3RUdXJuRW5kQXQiOm51bGwsImxhc3RGaW5pc2hSZXBvcnRBdCI6bnVsbCwiZXJyb3JzIjoxLCJlc3RpbWF0ZWRUb2tlbnMiOjksImNvbnRleHRUb2tlbnMiOjksImxhc3RIYW5kb2ZmSWQiOm51bGwsImxhc3RIYW5kb2ZmQXQiOm51bGwsImxhc3RDb21taXR0ZWRSZXN1bWVIYW5kb2ZmSWQiOm51bGwsImxhc3RUdXJuT3V0Y29tZSI6bnVsbCwiYWN0aXZlVHVybklkIjpudWxsLCJmaW5pc2hUdXJuIjpudWxsLCJhZ2VudHMiOltdLCJvcmlnaW4iOm51bGwsInRpdGxlU291cmNlIjoibWFudWFsIiwiX19oaXN0b3J5U2VxIjoyLCJfX2Nhbm9uaWNhbFByb2plY3Rpb24iOjEsIl9fdG9rZW5Fc3RpbWF0ZSI6MSwiZnV0dXJlRmllbGQiOnsibGl0ZXJhbCI6InJldGFpbiB0aHJvdWdoIHJlY292ZXJ5In0sInNlbGVjdGVkTW9kZWwiOnsiY29udmVyc2F0aW9uSWQiOiJjb252ZXJzYXRpb24tcHVibGljIiwibW9kZWwiOiJncHQtNiIsIm9ic2VydmVkQXQiOjgwfX0="
+      },
+      "expected": {
+        "id": "session-recovery-missing-outcome-counters",
+        "title": "Persisted manual public",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 2,
+        "timelineTurns": {},
+        "nativeQuestion": {
+          "messageId": "public-user",
+          "origin": 1
+        },
+        "requestTurns": {},
+        "userMessages": 1,
+        "toolCalls": 1,
+        "lastToolCallAt": 110,
+        "lastToolActivity": {
+          "kind": "read",
+          "title": "Read public"
+        },
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "errors": 1,
+        "estimatedTokens": 9,
+        "contextTokens": 9,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "titleSource": "manual",
+        "futureField": {
+          "literal": "retain through recovery"
+        },
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 80
+        },
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 1
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "12345678",
+            "truncated": false,
+            "chars": 8
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        },
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "time": 110,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "outcome": "tool_internal_error",
+            "summary": {
+              "kind": "read",
+              "title": "Read public"
+            }
+          },
+          "seq": 2,
+          "turnOrigin": null
+        }
+      ]
+    }
+  ]
+}

@@ -23,7 +23,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
+const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create/rename/clear-name | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
 fn platform() -> &'static str {
     if cfg!(windows) {
         "win32"
@@ -430,6 +430,23 @@ impl Runtime {
                         ..Default::default()
                     })
                 }
+                "rename" => {
+                    let source = take_option(&mut args, "--source")?;
+                    let source = match source.as_deref().unwrap_or("manual") {
+                        "manual" => cos_store::title::TitleSource::Manual,
+                        "provider" => cos_store::title::TitleSource::Provider,
+                        "fallback" => cos_store::title::TitleSource::Fallback,
+                        _ => return Err(invalid("Unknown session title source")),
+                    };
+                    let conversation = take_option(&mut args, "--conversation")?;
+                    self.store.rename(
+                        required(&args, 1)?,
+                        required(&args, 2)?,
+                        source,
+                        conversation.as_deref(),
+                    )
+                }
+                "clear-name" => self.store.clear_name(required(&args, 1)?),
                 _ => Err(invalid("Unknown sessions command")),
             },
             "history" => {

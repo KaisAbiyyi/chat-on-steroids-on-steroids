@@ -32,3 +32,16 @@ source filesystem fallback; full local ripgrep, partial-read hit retention and s
 stay open. These notes remain implementation evidence; independent whole-scope review is **NOT RUN**.
 The default Linux runner at `628b027` also passed all 193 tests and strict checks, retaining the
 1.1 GiB cache. This proves the committed default lean settings, separately from earlier explicit runs.
+
+Task 5 evidence for the eventual whole-scope reviewer: inspect source title precedence and automatic
+title restore, existing mutation-fence reuse, write-before-publish on rename and recovery, explicit
+Windows unreadable-file handling and unknown metadata retention. The source corpus distinguishes
+the private normalizer from a full durable store load. Three crash snapshots check canonical revision,
+original timestamps, current epoch and rebound context deltas. Activity reducer vectors cover typed
+decision state and safe integers; retain two derived lone-surrogate gaps separately from exact passes.
+Combined qualification is in progress. This is implementation evidence, not an independent review.
+The combined session checkpoint passes **219 Windows tests**, formatting and strict Clippy. Its first
+run (123 PASS / 1 FAIL) is retained: a historical restart assertion used a warm source summary. Fresh
+execution of the unchanged source files confirms the cold difference, with identical events/recent.
+The test now compares both complete source states and hashes the exact historical input. Review this
+oracle correction separately from implementation. Whole-scope independent review remains **NOT RUN**.

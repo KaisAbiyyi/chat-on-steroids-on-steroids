@@ -1,0 +1,17 @@
+{
+  "status": "FAIL",
+  "baseCommit": "119aaff433ccd3ab39bd1689f94e0d3b516825a9",
+  "testsBeforeCargoStopped": {
+    "passed": 123,
+    "failed": 1,
+    "ignored": 0
+  },
+  "remainingTestBinaries": "NOT RUN",
+  "format": "PASS",
+  "strictClippy": "NOT RUN in this combined attempt",
+  "reason": "Historical test compared a cold summary to a warm source snapshot; actual source cold load drops lastToolActivity without kind. Separate source cold corpus captured unchanged original files and exact events/recent rows. Warm comparison remains; only cold comparison selects source cold output. No product change for this correction.",
+  "coldCorpus": "fixtures/upstream/phase1-6-closure/session-history-restart.json",
+  "log": "audit/2026-10-18-session-projection-workspace-initial.log",
+  "logSha256": "ce6729d1c9a273a7a5caf54de5ffbbf02115934a9b3343189a07d2924caa117f",
+  "subsequentReceipt": "audit/2026-10-18/session-projection-windows-receipt.json"
+}

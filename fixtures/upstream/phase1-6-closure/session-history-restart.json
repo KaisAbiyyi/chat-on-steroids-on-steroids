@@ -1,0 +1,220 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "src/main/session/title.ts": "6a7428d3ea7b82c608042f062c323e553055db20fed0c85d1bd3dcdbe2fc9336",
+    "src/shared/user-prompt.ts": "bb102c51ad93c493f686fdb7d9a86a0c2a1ce99bfea018b619fd53788e5be8a5",
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653"
+  },
+  "scope": "Actual source cold load of the unchanged historical baseline files; warm output remains in the original fixture",
+  "fixture": "fixtures/upstream/history-case.json",
+  "fixtureSha256": "4325ebc375476cdfda8da9ed6be7966e6da3ff4d1c5266a577551c0127e76f29",
+  "summary": {
+    "id": "2026-10-16-baseline",
+    "title": "Public baseline",
+    "conversationId": "11111111-1111-4111-8111-111111111111",
+    "chatIds": [
+      "11111111-1111-4111-8111-111111111111"
+    ],
+    "startedAt": 1792108800000,
+    "updatedAt": 1792108800000,
+    "endedAt": null,
+    "events": 5,
+    "timelineTurns": {
+      "turn-a": {
+        "origin": 1,
+        "time": 1000,
+        "endTime": 1010,
+        "endOrigin": 6
+      }
+    },
+    "nativeQuestion": {
+      "messageId": "user-a",
+      "origin": 2
+    },
+    "requestTurns": {},
+    "userMessages": 1,
+    "toolCalls": 1,
+    "lastToolCallAt": 1003,
+    "lastAssistantFinalAt": 1008,
+    "lastTurnEndAt": 1010,
+    "lastFinishReportAt": null,
+    "processExitNonzero": 0,
+    "toolRejected": 0,
+    "toolInternalErrors": 0,
+    "errors": 0,
+    "estimatedTokens": 16,
+    "contextTokens": 16,
+    "lastHandoffId": null,
+    "lastHandoffAt": null,
+    "lastCommittedResumeHandoffId": null,
+    "lastTurnOutcome": "completed",
+    "activeTurnId": null,
+    "finishTurn": {
+      "turnId": "turn-a",
+      "conversationId": "11111111-1111-4111-8111-111111111111",
+      "startedAt": 1000,
+      "notified": false,
+      "released": false,
+      "decisionRevision": null,
+      "workSeq": 5,
+      "decisionSeq": 0,
+      "decisionInputRevision": null
+    },
+    "agents": [],
+    "origin": null,
+    "lastToolActivity": null
+  },
+  "events": [
+    {
+      "time": 1000,
+      "source": "extension",
+      "kind": "turn_start",
+      "turnId": "turn-a",
+      "seq": 1,
+      "turnOrigin": 1
+    },
+    {
+      "time": 1001,
+      "source": "extension",
+      "kind": "user_message",
+      "messageId": "user-a",
+      "message": {
+        "text": "Hello 😀",
+        "truncated": false,
+        "chars": 8
+      },
+      "conversationId": "11111111-1111-4111-8111-111111111111",
+      "turnId": "turn-a",
+      "contentSeq": 2,
+      "origin": 2,
+      "seq": 2,
+      "turnOrigin": 1
+    },
+    {
+      "time": 1003,
+      "source": "mcp",
+      "kind": "tool_call",
+      "turnId": "turn-a",
+      "call": {
+        "callId": "call-a",
+        "tool": "read",
+        "requestId": "request-a",
+        "conversationId": "11111111-1111-4111-8111-111111111111",
+        "attribution": "request-id",
+        "startedAt": 1003,
+        "durationMs": 4,
+        "args": {
+          "text": "{\"path\":\"/project/a\"}",
+          "truncated": false,
+          "chars": 21
+        },
+        "result": {
+          "text": "public result",
+          "truncated": false,
+          "chars": 13
+        },
+        "outcome": "ok",
+        "summary": {
+          "title": "Read a"
+        }
+      },
+      "seq": 4,
+      "turnOrigin": 1
+    },
+    {
+      "time": 1002,
+      "source": "extension",
+      "kind": "assistant_message",
+      "messageId": "assistant-a",
+      "providerMessageId": "provider-a",
+      "message": {
+        "text": "finished",
+        "truncated": false,
+        "chars": 8
+      },
+      "conversationId": "11111111-1111-4111-8111-111111111111",
+      "turnId": "turn-a",
+      "state": "final",
+      "final": true,
+      "contentSeq": 5,
+      "finalContentSeq": 5,
+      "finalObservedAt": 1792108800000,
+      "origin": 3,
+      "seq": 5,
+      "turnOrigin": 1
+    },
+    {
+      "time": 1010,
+      "source": "extension",
+      "kind": "turn_end",
+      "turnId": "turn-a",
+      "outcome": "completed",
+      "seq": 6,
+      "turnOrigin": 1
+    }
+  ],
+  "recent": [
+    {
+      "time": 1003,
+      "source": "mcp",
+      "kind": "tool_call",
+      "turnId": "turn-a",
+      "call": {
+        "callId": "call-a",
+        "tool": "read",
+        "requestId": "request-a",
+        "conversationId": "11111111-1111-4111-8111-111111111111",
+        "attribution": "request-id",
+        "startedAt": 1003,
+        "durationMs": 4,
+        "args": {
+          "text": "{\"path\":\"/project/a\"}",
+          "truncated": false,
+          "chars": 21
+        },
+        "result": {
+          "text": "public result",
+          "truncated": false,
+          "chars": 13
+        },
+        "outcome": "ok",
+        "summary": {
+          "title": "Read a"
+        }
+      },
+      "seq": 4,
+      "turnOrigin": 1
+    },
+    {
+      "time": 1002,
+      "source": "extension",
+      "kind": "assistant_message",
+      "messageId": "assistant-a",
+      "providerMessageId": "provider-a",
+      "message": {
+        "text": "finished",
+        "truncated": false,
+        "chars": 8
+      },
+      "conversationId": "11111111-1111-4111-8111-111111111111",
+      "turnId": "turn-a",
+      "state": "final",
+      "final": true,
+      "contentSeq": 5,
+      "finalContentSeq": 5,
+      "finalObservedAt": 1792108800000,
+      "origin": 3,
+      "seq": 5,
+      "turnOrigin": 1
+    },
+    {
+      "time": 1010,
+      "source": "extension",
+      "kind": "turn_end",
+      "turnId": "turn-a",
+      "outcome": "completed",
+      "seq": 6,
+      "turnOrigin": 1
+    }
+  ]
+}

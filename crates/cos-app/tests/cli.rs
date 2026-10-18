@@ -9,6 +9,72 @@ fn run(directory: &std::path::Path, args: &[&str]) -> std::process::Output {
         .unwrap()
 }
 #[test]
+fn session_names_track_provider_authority_and_clear_through_the_real_cli() {
+    let profile = tempfile::tempdir().unwrap();
+    assert!(run(profile.path(), &["info"]).status.success());
+    assert!(
+        run(
+            profile.path(),
+            &[
+                "sessions",
+                "create",
+                "--id",
+                "session-title-cli",
+                "--conversation",
+                "conversation-public"
+            ]
+        )
+        .status
+        .success()
+    );
+    let renamed = run(
+        profile.path(),
+        &["sessions", "rename", "session-title-cli", "Manual public"],
+    );
+    assert!(
+        renamed.status.success(),
+        "{}",
+        String::from_utf8_lossy(&renamed.stderr)
+    );
+    let provider = run(
+        profile.path(),
+        &[
+            "sessions",
+            "rename",
+            "session-title-cli",
+            "Provider public",
+            "--source",
+            "provider",
+            "--conversation",
+            "conversation-public",
+        ],
+    );
+    assert!(
+        provider.status.success(),
+        "{}",
+        String::from_utf8_lossy(&provider.stderr)
+    );
+    let manual: Value = serde_json::from_slice(&provider.stdout).unwrap();
+    assert_eq!(manual["title"], "Manual public");
+    assert_eq!(
+        manual["autoTitle"],
+        json!({"title":"Provider public","source":"provider"})
+    );
+    let cleared = run(
+        profile.path(),
+        &["sessions", "clear-name", "session-title-cli"],
+    );
+    assert!(
+        cleared.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cleared.stderr)
+    );
+    let result: Value = serde_json::from_slice(&cleared.stdout).unwrap();
+    assert_eq!(result["title"], "Provider public");
+    assert_eq!(result["titleSource"], "provider");
+    assert!(result.get("autoTitle").is_none());
+}
+#[test]
 fn project_file_panel_is_runnable_with_stale_edit_and_root_revocation_guards() {
     let profile = tempfile::tempdir().unwrap();
     let root = tempfile::tempdir().unwrap();

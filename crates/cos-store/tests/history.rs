@@ -105,7 +105,19 @@ fn actual_upstream_operations_and_restart_projection_match() {
         restarted.read(id, ReadOptions::default()).unwrap(),
         case["events"].as_array().unwrap().clone()
     );
-    assert_eq!(restarted.summary(id).unwrap().unwrap(), case["summary"]);
+    let cold: Value = serde_json::from_str(include_str!(
+        "../../../fixtures/upstream/phase1-6-closure/session-history-restart.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        model::hash(include_bytes!(
+            "../../../fixtures/upstream/history-case.json"
+        )),
+        cold["fixtureSha256"]
+    );
+    assert_eq!(cold["events"], case["events"]);
+    assert_eq!(cold["recent"], case["recent"]);
+    assert_eq!(restarted.summary(id).unwrap().unwrap(), cold["summary"]);
 }
 #[test]
 fn reads_original_files_and_lazy_legacy_overlay_without_modifying_history() {

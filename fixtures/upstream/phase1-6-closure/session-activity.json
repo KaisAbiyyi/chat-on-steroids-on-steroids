@@ -1,0 +1,3823 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "scope": "Actual private summary reducer with actual shared session/chronology functions; fixed public clock",
+  "sources": {
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653",
+    "src/shared/session.ts": "59fd546021383ba6b75896022d8dd4e876464ccb3dc1ff977c687d16611870e1",
+    "src/shared/chronology.ts": "8cd290ec42e1035aeb4110fb077adf15fbe663ee5284f71a8fdcb55755094481"
+  },
+  "sequences": [
+    {
+      "name": "recent-activity",
+      "events": [
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 1,
+          "time": 120,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Newest"
+            },
+            "outcome": "ok"
+          }
+        },
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 2,
+          "time": 100,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Older"
+            },
+            "outcome": "ok"
+          }
+        },
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 3,
+          "time": 120,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Equal newest"
+            },
+            "outcome": "ok",
+            "endsActivity": true
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 1,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              78,
+              101,
+              119,
+              101,
+              115,
+              116
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 8,
+          "contextTokens": 8,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 2,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              78,
+              101,
+              119,
+              101,
+              115,
+              116
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 16,
+          "contextTokens": 16,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 3,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              69,
+              113,
+              117,
+              97,
+              108,
+              32,
+              110,
+              101,
+              119,
+              101,
+              115,
+              116
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": 120,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 25,
+          "contextTokens": 25,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "fractional-time",
+      "events": [
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 1,
+          "time": 1.5,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Fractional activity"
+            },
+            "outcome": "ok"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 1,
+          "lastToolCallAt": 1.5,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              70,
+              114,
+              97,
+              99,
+              116,
+              105,
+              111,
+              110,
+              97,
+              108,
+              32,
+              97,
+              99,
+              116,
+              105,
+              118,
+              105,
+              116,
+              121
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 11,
+          "contextTokens": 11,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "utf16-activity-0",
+      "events": [
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 1,
+          "time": 120,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "outcome": "ok"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 1,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 58,
+          "contextTokens": 58,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "utf16-activity-1",
+      "events": [
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 1,
+          "time": 120,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+            },
+            "outcome": "ok"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 1,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 57,
+          "contextTokens": 57,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "utf16-activity-2",
+      "events": [
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 1,
+          "time": 120,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀"
+            },
+            "outcome": "ok"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 1,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              97,
+              55357
+            ],
+            "needsLosslessString": true
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 57,
+          "contextTokens": 57,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "finish-work",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "decision",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "inputRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 4,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 8
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "released",
+            "conversationId": "conversation-public"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 6,
+            "decisionInputRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 4,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 4
+          },
+          "requestTurns": {},
+          "userMessages": 2,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 4,
+          "contextTokens": 4,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 8,
+            "decisionSeq": 6,
+            "decisionInputRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 5,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 4
+          },
+          "requestTurns": {},
+          "userMessages": 2,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 4,
+          "contextTokens": 4,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": true,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 8,
+            "decisionSeq": 6,
+            "decisionInputRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "notified-does-not-decide",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "notified",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 90
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": true,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "invalid-decision-sequence",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "decision",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": "90"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 3,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "negative-decision-sequence",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "decision",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": -2
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": -2,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "notified-does-not-advance-decision",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "decision",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6
+          }
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 4,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "finish-goal:turn-public:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "finishControl": {
+            "state": "notified",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 99
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 6,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 4,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": true,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 6,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "repeat-decision-advances",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "decision",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6
+          }
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 4,
+          "time": 120,
+          "turnId": "turn-public",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "progressId": "public-progress",
+          "finishControl": {
+            "state": "decision",
+            "conversationId": "conversation-public",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 8
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 6,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 4,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 8,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "legacy-finish-control",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "turn-public",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6
+        },
+        {
+          "kind": "progress",
+          "source": "app",
+          "seq": 3,
+          "time": 120,
+          "turnId": "turn-public",
+          "progressId": "finish-goal:turn-public:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "workSeq": 6,
+            "decisionSeq": 3,
+            "decisionInputRevision": null,
+            "decisionAt": 120
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "empty-turn-and-agent",
+      "events": [
+        {
+          "kind": "turn_start",
+          "source": "extension",
+          "seq": 1,
+          "time": 100,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "seq": 2,
+          "time": 110,
+          "turnId": "",
+          "messageId": "public-user",
+          "message": {
+            "text": "public",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 6,
+          "agent": ""
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 0,
+          "contextTokens": 0,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 0,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {
+            "turn-public": {
+              "origin": 1,
+              "time": 100
+            }
+          },
+          "nativeQuestion": {
+            "messageId": "public-user",
+            "origin": 2
+          },
+          "requestTurns": {},
+          "userMessages": 1,
+          "toolCalls": 0,
+          "lastToolCallAt": null,
+          "lastToolActivity": null,
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 0,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 2,
+          "contextTokens": 2,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": "turn-public",
+          "finishTurn": {
+            "turnId": "turn-public",
+            "conversationId": "conversation-public",
+            "startedAt": 100,
+            "notified": false,
+            "released": false,
+            "decisionRevision": null,
+            "workSeq": 6,
+            "decisionSeq": 0,
+            "decisionInputRevision": null
+          },
+          "agents": [],
+          "origin": null
+        }
+      ]
+    },
+    {
+      "name": "outcome-taxonomy",
+      "events": [
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 1,
+          "time": 100,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Failure"
+            },
+            "outcome": "process_exit_nonzero"
+          }
+        },
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 2,
+          "time": 110,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Rejected"
+            },
+            "outcome": "tool_rejected"
+          }
+        },
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 3,
+          "time": 120,
+          "call": {
+            "callId": "public-call",
+            "tool": "read",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "read",
+              "title": "Internal"
+            },
+            "outcome": "tool_internal_error"
+          }
+        },
+        {
+          "kind": "tool_call",
+          "source": "mcp",
+          "seq": 4,
+          "time": 130,
+          "call": {
+            "callId": "public-call",
+            "tool": "exec_command",
+            "args": {
+              "text": "public",
+              "truncated": false,
+              "chars": 6
+            },
+            "result": {
+              "text": "public result",
+              "truncated": false,
+              "chars": 13
+            },
+            "summary": {
+              "kind": "run",
+              "title": "Legacy",
+              "metric": "✕ exit -7"
+            },
+            "outcome": "error"
+          }
+        }
+      ],
+      "initial": {
+        "id": "session-activity-public",
+        "title": "Public activity",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null
+      },
+      "expected": [
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 1,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 1,
+          "lastToolCallAt": 100,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              70,
+              97,
+              105,
+              108,
+              117,
+              114,
+              101
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 1,
+          "toolRejected": 0,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 8,
+          "contextTokens": 8,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 2,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 2,
+          "lastToolCallAt": 110,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              82,
+              101,
+              106,
+              101,
+              99,
+              116,
+              101,
+              100
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 1,
+          "toolRejected": 1,
+          "toolInternalErrors": 0,
+          "errors": 0,
+          "estimatedTokens": 16,
+          "contextTokens": 16,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 3,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 3,
+          "lastToolCallAt": 120,
+          "lastToolActivity": {
+            "kind": "read",
+            "titleUnits": [
+              73,
+              110,
+              116,
+              101,
+              114,
+              110,
+              97,
+              108
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 1,
+          "toolRejected": 1,
+          "toolInternalErrors": 1,
+          "errors": 1,
+          "estimatedTokens": 24,
+          "contextTokens": 24,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        },
+        {
+          "id": "session-activity-public",
+          "title": "Public activity",
+          "conversationId": "conversation-public",
+          "chatIds": [
+            "conversation-public"
+          ],
+          "startedAt": 1792108800000,
+          "updatedAt": 1792108800000,
+          "endedAt": null,
+          "events": 4,
+          "timelineTurns": {},
+          "nativeQuestion": null,
+          "requestTurns": {},
+          "userMessages": 0,
+          "toolCalls": 4,
+          "lastToolCallAt": 130,
+          "lastToolActivity": {
+            "kind": "run",
+            "titleUnits": [
+              76,
+              101,
+              103,
+              97,
+              99,
+              121
+            ],
+            "needsLosslessString": false
+          },
+          "lastAssistantFinalAt": null,
+          "lastTurnEndAt": null,
+          "lastFinishReportAt": null,
+          "processExitNonzero": 2,
+          "toolRejected": 1,
+          "toolInternalErrors": 1,
+          "errors": 1,
+          "estimatedTokens": 32,
+          "contextTokens": 32,
+          "lastHandoffId": null,
+          "lastHandoffAt": null,
+          "lastCommittedResumeHandoffId": null,
+          "lastTurnOutcome": null,
+          "activeTurnId": null,
+          "finishTurn": null,
+          "agents": [],
+          "origin": null
+        }
+      ]
+    }
+  ]
+}

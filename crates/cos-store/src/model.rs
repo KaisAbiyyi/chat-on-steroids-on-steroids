@@ -185,15 +185,19 @@ fn increment(summary: &mut Value, key: &str, amount: u64) {
     summary[key] = json!(number(summary, key).saturating_add(amount));
 }
 pub fn max_time(summary: &mut Value, key: &str, time: &Value) {
-    let value = summary[key]
-        .as_i64()
-        .unwrap_or(0)
-        .max(time.as_i64().unwrap_or(0));
-    summary[key] = json!(value);
+    let previous = summary[key].as_f64().unwrap_or(0.0);
+    let next = time.as_f64().unwrap_or(0.0);
+    summary[key] = if next >= previous && next >= 0.0 {
+        javascript_numbers(time.clone())
+    } else if previous >= 0.0 && summary[key].is_number() {
+        javascript_numbers(summary[key].clone())
+    } else {
+        json!(0)
+    };
 }
 pub fn note_finish_work(summary: &mut Value, event: &Value) {
     if !summary["finishTurn"].is_object()
-        || event["turnId"].is_string() && event["turnId"] != summary["finishTurn"]["turnId"]
+        || !string(event, "turnId").is_empty() && event["turnId"] != summary["finishTurn"]["turnId"]
     {
         return;
     }
@@ -222,14 +226,18 @@ pub fn apply_summary(summary: &mut Value, event: &Value) {
         "user_message" => increment(summary, "userMessages", 1),
         "tool_call" => {
             increment(summary, "toolCalls", 1);
-            if event["time"].as_i64().unwrap_or(0)
-                >= summary["lastToolCallAt"].as_i64().unwrap_or(0)
+            if event["time"].as_f64().unwrap_or(0.0)
+                >= summary["lastToolCallAt"].as_f64().unwrap_or(0.0)
             {
-                let mut activity = json!({"title":string(&event["call"]["summary"],"title").chars().take(200).collect::<String>()});
-                if let Some(kind) = event["call"]["summary"].get("kind") {
-                    activity["kind"] = kind.clone();
-                }
-                summary["lastToolActivity"] = activity;
+                summary["lastToolActivity"] =
+                    crate::title::utf16_prefix(string(&event["call"]["summary"], "title"), 200)
+                        .map_or(Value::Null, |title| {
+                            let mut activity = json!({"title":title});
+                            if let Some(kind) = event["call"]["summary"].get("kind") {
+                                activity["kind"] = kind.clone();
+                            }
+                            activity
+                        });
             }
             max_time(summary, "lastToolCallAt", &event["time"]);
             if event["call"]["endsActivity"] == true {
@@ -284,9 +292,15 @@ pub fn apply_summary(summary: &mut Value, event: &Value) {
                 summary["finishTurn"]["released"] = json!(true);
             }
             let prefix = format!("finish-goal:{turn}:");
-            let revision = event["finishControl"]["revision"]
-                .as_str()
-                .or_else(|| string(event, "progressId").strip_prefix(&prefix));
+            let decision = event["finishControl"]["state"] == "decision";
+            let revision = if decision {
+                event["finishControl"]["revision"].as_str()
+            } else {
+                string(event, "progressId").strip_prefix(&prefix)
+            };
+            let work_seq = event["finishControl"]["workSeq"].as_f64().filter(|v| {
+                v.is_finite() && v.fract() == 0.0 && v.abs() <= 9_007_199_254_740_991.0
+            });
             if let Some(revision) = revision.filter(|r| {
                 r.len() == 64
                     && r.bytes()
@@ -296,16 +310,17 @@ pub fn apply_summary(summary: &mut Value, event: &Value) {
                 summary["finishTurn"]["decisionRevision"] = json!(revision);
                 if prior != revision {
                     summary["finishTurn"]["decisionAt"] = event["time"].clone();
-                    summary["finishTurn"]["decisionSeq"] = event["finishControl"]
-                        .get("workSeq")
-                        .cloned()
-                        .unwrap_or_else(|| event["seq"].clone());
+                    summary["finishTurn"]["decisionSeq"] = if work_seq.is_some() {
+                        javascript_numbers(event["finishControl"]["workSeq"].clone())
+                    } else {
+                        event["seq"].clone()
+                    };
                     summary["finishTurn"]["decisionInputRevision"] =
                         event["finishControl"]["inputRevision"].clone();
-                } else {
-                    let next = number(&summary["finishTurn"], "decisionSeq")
-                        .max(number(&event["finishControl"], "workSeq"));
-                    summary["finishTurn"]["decisionSeq"] = json!(next);
+                } else if decision && let Some(next) = work_seq {
+                    let prior = summary["finishTurn"]["decisionSeq"].as_f64().unwrap_or(0.0);
+                    summary["finishTurn"]["decisionSeq"] =
+                        javascript_numbers(json!(prior.max(next)));
                 }
             }
             if let Some(conversation) = event["finishControl"].get("conversationId") {
@@ -316,6 +331,7 @@ pub fn apply_summary(summary: &mut Value, event: &Value) {
     }
     note_finish_work(summary, event);
     if let Some(agent) = event["agent"].as_str()
+        && !agent.is_empty()
         && let Some(agents) = summary["agents"].as_array_mut()
         && !agents.iter().any(|v| v == agent)
     {

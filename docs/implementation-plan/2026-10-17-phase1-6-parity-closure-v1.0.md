@@ -312,3 +312,36 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
 - Exact default-profile checkpoint `628b027` passed **193 native Linux tests**, formatting and strict
   Clippy with a 1.1 GiB shared cache. No explicit lean switch was supplied; recorded Cargo environment
   confirms symbols 0/incremental 0. Task 5 implementation starts after this storage checkpoint.
+- Task 5a: actual prompt/title/store captures now cover 17 framing inputs, 51 title previews (50
+  representable, one unpaired-unit case), 39 legacy/authority projections and 44 persistent-store
+  steps. Framed first-request titles, revisions, manual/provider precedence, worker/desktop rules,
+  planner-helper classification and clear-name restore are ported. Four native defects and the
+  missing CLI route were observed RED then GREEN. Rename/clear stage and durably write metadata
+  before publication under the existing session fence; the CLI exposes both host operations.
+- Task 5a metadata/recovery: 45 actual normalizer cases plus four damaged inputs and actual store
+  reads qualify title/automatic title, model, activity, worker, finish, lineage and legacy defaults.
+  A real Windows exclusive file lock reproduced an unreadable primary being treated as absence;
+  read failures now propagate unless a validated backup answers. Three actual source crash snapshots
+  qualify stale canonical revisions, metadata-only future fields, original timestamps, missing outcome
+  counters and the context-token delta after rebind. Native RED exposed the prior whitelist dropping
+  metadata and changing startedAt; the source merge now retains these fields and persists recovery.
+- Task 5b activity: 38 actual reducer steps qualify recent activity, fractional timestamps, typed
+  finish decisions/safe integer sequences, optional identity and taxonomy. Four independent regressions
+  were observed RED then GREEN. One unpaired activity-title slice remains a refusal gap, separately
+  from the 37 representable source projections. Combined workspace qualification is running.
+- Ruling: reuse the global unpaired-JSON limitation for derived title/activity previews. Canonical raw
+  events/messages survive; a split surrogate does not become U+FFFD or a scalar-truncated exactness
+  claim. Rename refuses before committing an unrepresentable title; automatic message previews retain
+  their prior name, and unrepresentable activity previews are unavailable. Cost: these remain explicit
+  compatibility gaps until the lossless JSON owner is implemented across the workspace.
+- Source qualification distinction: pure normalizeSummary and a complete durable store read have
+  different outputs when normalization removes finishTurn. Both are captured; the full-store check
+  compares the actual full-store output for every case, rather than skipping invalid legacy inputs.
+- Task 5 checkpoint: **219 Windows tests PASS**, 0 failed/ignored, formatting and strict Clippy PASS.
+  The complete store suite has 41 tests. Native backup-under-lock and exact raw activity retention
+  survive restart; failed metadata writes expose no uncommitted label. Cache is 1.684 GiB on D.
+- Historical oracle correction: the first combined run completed 123 PASS / 1 FAIL before stopping.
+  It compared the warm historical summary to a cold load. Actual pinned source execution of the
+  unchanged baseline files confirms the cold activity without kind is null; events/recent are exact.
+  Keep warm and cold assertions separately and the original failed receipt; no product/threshold
+  change was needed. Current-commit Linux qualification follows. Recorder and remaining tasks stay open.

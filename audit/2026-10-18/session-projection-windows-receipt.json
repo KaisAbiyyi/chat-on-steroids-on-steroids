@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "baseCommit": "119aaff433ccd3ab39bd1689f94e0d3b516825a9",
+  "scope": "Native Windows integrated workspace including session title/metadata/recovery/activity and actual CLI",
+  "command": "python tools/check-workspace.py --strict",
+  "checks": {
+    "format": 0,
+    "workspaceTests": 0,
+    "strictClippy": 0
+  },
+  "tests": {
+    "passed": 219,
+    "failed": 0,
+    "ignored": 0
+  },
+  "sourceSha256": {
+    "crates/cos-store/src/store.rs": "7f075f41ad2a7273e8c3994029c8ce98d841b4de932069fce2ceb2a0e9a2608f",
+    "crates/cos-store/src/title.rs": "c337af3ca524bc899b9d7ee2a554e22ba256622dc4c76ef86cd735b62327c18d",
+    "crates/cos-store/src/summary.rs": "3b43873c744793da7abf089cdc2537fd57a51ddf079db4c0c6b4bb129da474b5",
+    "crates/cos-store/src/model.rs": "8fc10410ea3e2b40cf733944f900dbb33a28a97cf5761e546017f6df0cb5a736",
+    "crates/cos-app/src/main.rs": "87f42341f9ec4ceb410add45dd699ed30c59e3a904338b8d3bf523bef76e3c35"
+  },
+  "corpusSha256": {
+    "session-title": "214451a2094673afea145ed3d01b413955bcda9b7204a3e16efc62623573695e",
+    "session-metadata": "51646487d3bbcf9140dd1ed7a2b159dfe1a2b2149d55487657f3332209488840",
+    "session-recovery": "95ca36c03a5d5952bf963008234832b0a9f70bfe4463599da940f624fe93f71a",
+    "session-history-restart": "1d2c7661a18806abf0249133bc3ff8c8641877c1059661e3792ede7a8b30d80e",
+    "session-activity": "deb3d5ce72b0c5d8a328648e26111fbc2e69d81d0b1b74c8b957bd01b180df95"
+  },
+  "sourceComparisons": {
+    "promptInputs": 17,
+    "titlePreviewsExact": 50,
+    "titlePreviewUnpairedGap": 1,
+    "legacyTitleProjections": 39,
+    "persistentTitleSteps": 44,
+    "metadataCases": 45,
+    "damagedMetadataCases": 4,
+    "sourceCrashSnapshots": 3,
+    "activityStepsExact": 37,
+    "activityUnpairedGap": 1,
+    "historicalColdLoad": 1
+  },
+  "storage": {
+    "debugSymbols": 0,
+    "incremental": false,
+    "cacheBytes": 1808675289,
+    "temporaryDirectory": "D:\\projects\\CoS-Rust\\.test-tmp",
+    "workspaceFree": 71576309760,
+    "systemFree": 40465272832
+  },
+  "log": "audit/2026-10-18-session-projection-workspace.log",
+  "logSha256": "a6824b1f59388bbc215591ab6387ba8a667fbe958c5eb5d908dfe3b65246fac6",
+  "remaining": "Recorder/content references/tables/export, other plan tasks and global lossless JSON remain in progress; whole-scope review NOT RUN",
+  "macOS": "HOLD by user request"
+}

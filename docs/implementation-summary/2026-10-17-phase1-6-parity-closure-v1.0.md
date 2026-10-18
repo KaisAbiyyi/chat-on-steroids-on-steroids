@@ -6,7 +6,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 ## Current result
 
-- Latest integrated checks: **201 Windows / 193 Linux tests PASS**, 0 failed/ignored, formatting and
+- Latest integrated checks: **219 Windows / 193 Linux tests PASS**, 0 failed/ignored, formatting and
   strict Clippy PASS. Linux executed exact default-profile commit `628b027`; Windows cold-built the lean profiles.
 - Windows service `4a40c93`: **11.923 MiB**, 41 executable/source checks PASS. Full desktop and installer
   acceptance remain open. [Release receipt](../../audit/2026-10-18/search-release-receipt.json).
@@ -29,8 +29,8 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **201 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
-[Windows receipt](../../audit/2026-10-18/search-engine-native-order-windows-receipt.json). Latest exact-commit Linux
+Latest integrated closure checkpoint: **219 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
+[Windows receipt](../../audit/2026-10-18/session-projection-windows-receipt.json). Latest exact-commit Linux
 proof covers default-profile commit `628b027`: **193 PASS**:
 [Linux receipt](../../audit/2026-10-18/linux-default-lean-profile-receipt.json).
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
@@ -250,6 +250,40 @@ on D**; external free-space changes are not attributed to this cleanup. Host fix
 files stay on D. Linux uses the same lean cache by default, with explicit opt-in for debugger profiles.
 Exact commit `628b027` also passed the default Linux runner: **193 tests**, formatting and strict Clippy,
 cache still **1.1 GiB**. [Default-profile receipt](../../audit/2026-10-18/linux-default-lean-profile-receipt.json).
+
+## Session title, metadata and recovery continuation — 2026-10-18
+
+Session previews now use the first canonical authored request, preserve its spacing and framing rules,
+and follow manual/provider/desktop/worker title authority. `sessions rename` and `sessions clear-name`
+are executable host operations; clearing restores the current automatic name. Planner helper repair
+preserves every recorded message. The source capture contains 17 prompt inputs, 51 previews, 39 legacy
+projections and 44 real-store operations across nine scenarios, including restart. Fifty previews are
+representable; one lone-surrogate result stays a named JSON compatibility gap.
+
+Metadata normalization now matches 45 source inputs plus four damaged JSON inputs, with actual store
+outputs captured separately. It validates automatic titles, selected model, activity, worker/finish
+metadata, lineage and legacy defaults. A Windows exclusive-lock test reproduced the previous false
+absence result; unreadable metadata now refuses when no valid backup can answer. Three source crash
+snapshots exposed lost unknown fields and changed startedAt. Recovery retains metadata-only facts,
+the original clock and the context-token delta after rebind; raw events and first identities remain.
+
+Activity now preserves fractional times, source UTF-16 preview lengths and typed finish-decision
+authority. Four reducer regressions were observed RED then GREEN. The 38 captured source steps include
+37 representable comparisons and one explicit unpaired-title refusal. All **219 Windows tests PASS**,
+formatting and strict Clippy PASS. The complete store suite passes 41 tests, including a valid-backup
+read under a real Windows exclusive lock, staged-write failure and raw activity preservation.
+Provider recorder, content-reference/table/export branches
+and the other plan tasks remain in progress. Fresh whole-scope review remains NOT RUN.
+
+The initial integrated run completed 123 tests PASS and failed the historical restart oracle. It had
+compared a cold Rust summary with a warm source snapshot. A fresh cold load of the unchanged historical
+files through the actual source confirms that activity without `kind` becomes null, while all events
+and recent rows remain identical. The warm assertion remains; the restart assertion now compares the
+complete cold source snapshot with a hash of its exact input fixture. Product behavior was unchanged
+for this correction. [Failed attempt](../../audit/2026-10-18/session-projection-first-run.json).
+The Windows development cache now measures **1.684 GiB**, with **37.69 GiB free on C / 66.66 GiB on D**
+at qualification. Linux proof for this session checkpoint follows; the release artifact above still
+applies to `4a40c93`, before the session changes.
 
 ## Documents
 

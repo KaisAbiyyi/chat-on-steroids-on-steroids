@@ -2,6 +2,7 @@
 use crate::{
     chronology,
     model::{self, event_tokens, hash, message_key, number, position, residence, string, terminal},
+    summary, title,
 };
 use cos_core::persistence::{atomic_write, invalid, is_link, lock, owned_path};
 use serde_json::{Value, json};
@@ -91,6 +92,39 @@ fn read_json(path: &Path, limit: u64) -> io::Result<Value> {
     }
     serde_json::from_slice(&bytes)
         .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Unreadable history JSON"))
+}
+fn read_checkpoint(path: &Path, id: &str) -> io::Result<Option<summary::Checkpoint>> {
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(error)
+            if matches!(
+                error.kind(),
+                io::ErrorKind::NotFound | io::ErrorKind::NotADirectory
+            ) =>
+        {
+            return Ok(None);
+        }
+        Err(error) => return Err(error),
+    };
+    let metadata = file.metadata()?;
+    if !metadata.is_file() {
+        return Err(io::Error::new(
+            io::ErrorKind::IsADirectory,
+            "Session metadata is not a regular file",
+        ));
+    }
+    const LIMIT: u64 = 8 * 1024 * 1024;
+    if metadata.len() > LIMIT {
+        return Ok(None);
+    }
+    let mut bytes = Vec::new();
+    (&mut file).take(LIMIT + 1).read_to_end(&mut bytes)?;
+    if bytes.len() as u64 > LIMIT {
+        return Ok(None);
+    }
+    Ok(serde_json::from_slice(&bytes)
+        .ok()
+        .and_then(|raw| summary::normalize(id, raw)))
 }
 fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
     let file = match File::open(path) {
@@ -182,8 +216,9 @@ impl SessionStore {
             missing,
         )
     }
-    fn canonical(&self, id: &str) -> io::Result<BTreeMap<String, Value>> {
+    fn canonical(&self, id: &str) -> io::Result<(BTreeMap<String, Value>, bool)> {
         let mut messages = BTreeMap::new();
+        let mut aliases_collapsed = false;
         match self
             .path(id, "messages.json", true)
             .and_then(|p| read_json(&p, 256 * 1024 * 1024))
@@ -244,6 +279,7 @@ impl SessionStore {
             }
         }
         for mut group in providers.into_values().filter(|g| g.len() > 1) {
+            aliases_collapsed = true;
             group.sort_by_key(|(_, e)| position(e));
             let (first_key, first) = group[0].clone();
             let mut latest = first.clone();
@@ -271,20 +307,21 @@ impl SessionStore {
             }
             messages.insert(first_key, latest);
         }
-        Ok(messages)
+        Ok((messages, aliases_collapsed))
     }
     fn load(&self, id: &str) -> io::Result<Entry> {
         let meta = self.path(id, "meta.json", true)?;
-        let primary = read_json(&meta, 8 * 1024 * 1024)
-            .ok()
-            .filter(|v| v["id"] == id && v["chatIds"].is_array());
-        let checkpoint = primary.or_else(|| {
-            self.path(id, "meta.backup.json", true)
-                .ok()
-                .and_then(|p| read_json(&p, 8 * 1024 * 1024).ok())
-                .filter(|v| v["id"] == id && v["chatIds"].is_array())
-        });
-        let messages = self.canonical(id)?;
+        let checkpoint = match read_checkpoint(&meta, id) {
+            Ok(Some(checkpoint)) => Some(checkpoint),
+            primary => match read_checkpoint(&self.path(id, "meta.backup.json", true)?, id) {
+                Ok(Some(checkpoint)) => Some(checkpoint),
+                backup => match (primary, backup) {
+                    (Err(error), _) | (_, Err(error)) => return Err(error),
+                    _ => None,
+                },
+            },
+        };
+        let (messages, aliases_collapsed) = self.canonical(id)?;
         let mut max_seq = messages
             .values()
             .map(|v| number(v, "seq"))
@@ -293,10 +330,21 @@ impl SessionStore {
         let mut summary = model::empty_summary(id, "Recovered session", None, now());
         let mut saw = false;
         let mut identities = Vec::new();
+        let mut historical_return_reduction = 0;
         scan(&self.path(id, "events.jsonl", true)?, |event| {
             max_seq = max_seq.max(number(&event, "seq"));
             if message_key(&event).is_some_and(|key| messages.contains_key(&key)) {
                 return;
+            }
+            if checkpoint.as_ref().is_some_and(|c| {
+                !c.token_estimate_current
+                    && !string(&c.summary, "conversationId").is_empty()
+                    && !string(&event["call"], "conversationId").is_empty()
+                    && c.summary["conversationId"] != event["call"]["conversationId"]
+            }) && event["kind"] == "tool_call"
+            {
+                historical_return_reduction +=
+                    model::stored_tokens(&event["call"]["result"]).saturating_sub(10000);
             }
             if !saw {
                 summary["startedAt"] = event["time"].clone();
@@ -323,7 +371,7 @@ impl SessionStore {
             collect_identity(&event, &mut identities);
         })?;
         let mut canonical: Vec<_> = messages.values().collect();
-        canonical.sort_by_key(|e| position(e));
+        canonical.sort_by_key(|e| number(e, "seq"));
         for event in canonical {
             if !saw {
                 summary["startedAt"] = event["time"].clone();
@@ -339,74 +387,7 @@ impl SessionStore {
                 "No recoverable session metadata or history",
             ));
         }
-        if let Some(mut checkpoint) = checkpoint {
-            let current = number(&checkpoint, "__historySeq") == max_seq
-                && checkpoint["__canonicalProjection"] == 1
-                && checkpoint["__tokenEstimate"] == 1;
-            checkpoint.as_object_mut().unwrap().retain(|key, _| {
-                !matches!(
-                    key.as_str(),
-                    "__historySeq" | "__canonicalProjection" | "__tokenEstimate"
-                )
-            });
-            if current {
-                summary = checkpoint;
-            } else {
-                for key in [
-                    "title",
-                    "titleSource",
-                    "conversationId",
-                    "chatIds",
-                    "retiredChatAt",
-                    "projectId",
-                    "origin",
-                    "endedAt",
-                    "lastCommittedResumeHandoffId",
-                    "browserRecoveryDismissedAt",
-                    "model",
-                    "reasoningEffort",
-                    "modelObservedAt",
-                    "autoCompactionRefused",
-                    "workerAssignments",
-                ] {
-                    if let Some(value) = checkpoint.get(key) {
-                        summary[key] = value.clone();
-                    }
-                }
-                if summary["chatIds"].as_array().is_some_and(|v| v.len() > 1) {
-                    let current = string(&summary, "conversationId");
-                    let mut context = 0;
-                    scan(&self.path(id, "events.jsonl", true)?, |e| {
-                        let conv = e["conversationId"]
-                            .as_str()
-                            .or_else(|| e["call"]["conversationId"].as_str());
-                        if conv.is_none_or(|c| c == current)
-                            && !message_key(&e).is_some_and(|k| messages.contains_key(&k))
-                        {
-                            context += event_tokens(&e);
-                        }
-                    })?;
-                    context += messages
-                        .values()
-                        .filter(|e| {
-                            e["conversationId"]
-                                .as_str()
-                                .or_else(|| e["call"]["conversationId"].as_str())
-                                .is_none_or(|c| c == current)
-                        })
-                        .map(event_tokens)
-                        .sum::<u64>();
-                    summary["contextTokens"] = json!(context);
-                    summary["activeTurnId"] = checkpoint["activeTurnId"].clone();
-                    summary["finishTurn"] = checkpoint["finishTurn"].clone();
-                }
-            }
-        }
-        if summary["timelineTurns"]
-            .as_object()
-            .is_none_or(|v| v.is_empty())
-            && saw
-        {
+        if saw {
             identities.sort_by_key(position);
             summary["timelineTurns"] = json!({});
             summary["requestTurns"] = json!({});
@@ -414,6 +395,101 @@ impl SessionStore {
             for event in identities {
                 chronology::apply_identity(&mut summary, &event);
             }
+        }
+        let mut reconciled = false;
+        if let Some(checkpoint) = checkpoint {
+            let same_watermark = checkpoint.history_seq == Some(max_seq);
+            let current = same_watermark
+                && checkpoint.token_estimate_current
+                && (!aliases_collapsed || checkpoint.canonical_projection_current)
+                && !checkpoint.outcome_counters_missing
+                && !checkpoint.activity_boundary_missing
+                && [
+                    "timelineTurns",
+                    "requestTurns",
+                    "nativeQuestion",
+                    "finishTurn",
+                ]
+                .into_iter()
+                .all(|key| checkpoint.summary.get(key).is_some());
+            reconciled = !current || !checkpoint.canonical_projection_current;
+            if current {
+                summary = checkpoint.summary;
+            } else if max_seq == 0 {
+                let missing = checkpoint.outcome_counters_missing;
+                summary = checkpoint.summary;
+                if missing {
+                    summary["errors"] = json!(0);
+                }
+                summary["timelineTurns"] = json!({});
+                summary["requestTurns"] = json!({});
+                for key in [
+                    "nativeQuestion",
+                    "lastToolCallAt",
+                    "lastAssistantFinalAt",
+                    "lastTurnEndAt",
+                    "lastFinishReportAt",
+                    "finishTurn",
+                ] {
+                    summary[key] = Value::Null;
+                }
+            } else {
+                let rebuilt = summary;
+                summary = checkpoint.summary;
+                model::max_time(&mut summary, "updatedAt", &rebuilt["updatedAt"]);
+                let context = number(&summary, "contextTokens") as i128
+                    + number(&rebuilt, "estimatedTokens") as i128
+                    - number(&summary, "estimatedTokens") as i128
+                    + historical_return_reduction as i128;
+                summary["contextTokens"] = json!(context.max(0) as u64);
+                if !same_watermark {
+                    summary["activeTurnId"] = rebuilt["activeTurnId"].clone();
+                }
+                let finish = &rebuilt["finishTurn"];
+                summary["finishTurn"] = if finish["conversationId"] == summary["conversationId"] {
+                    finish.clone()
+                } else {
+                    Value::Null
+                };
+                let mut agents = summary["agents"].as_array().cloned().unwrap_or_default();
+                for agent in rebuilt["agents"].as_array().unwrap() {
+                    if !agents.contains(agent) {
+                        agents.push(agent.clone());
+                    }
+                }
+                summary["agents"] = json!(agents);
+                for key in [
+                    "events",
+                    "timelineTurns",
+                    "requestTurns",
+                    "nativeQuestion",
+                    "userMessages",
+                    "toolCalls",
+                    "lastToolCallAt",
+                    "lastToolActivity",
+                    "lastAssistantFinalAt",
+                    "lastTurnEndAt",
+                    "lastFinishReportAt",
+                    "processExitNonzero",
+                    "toolRejected",
+                    "toolInternalErrors",
+                    "errors",
+                    "estimatedTokens",
+                    "lastHandoffId",
+                    "lastHandoffAt",
+                    "lastTurnOutcome",
+                ] {
+                    summary[key] = rebuilt[key].clone();
+                }
+            }
+        } else if saw {
+            reconciled = true;
+        }
+        // Repair only the derived preview. Unsupported UTF-16 slices keep their canonical
+        // messages and existing label; global lossless JSON remains an explicit open gate.
+        let repaired = title::refresh_user_title(&mut summary, messages.values()).unwrap_or(false);
+        if reconciled || repaired {
+            self.save_summary(id, &summary, max_seq)?;
         }
         Ok(Entry {
             summary,
@@ -773,6 +849,12 @@ impl SessionStore {
         self.write_shard(id, &key, &event)?;
         entry.messages.insert(key, event.clone());
         entry.next += 1;
+        if event["kind"] == "user_message" {
+            let mut preview = entry.summary.clone();
+            if title::refresh_user_title(&mut preview, entry.messages.values()).is_ok() {
+                entry.summary = preview;
+            }
+        }
         if let Some(previous) = previous {
             let delta = event_tokens(&event) as i64 - event_tokens(&previous) as i64;
             for key in ["estimatedTokens", "contextTokens"] {
@@ -785,16 +867,6 @@ impl SessionStore {
             }
         } else {
             model::apply_summary(&mut entry.summary, &event);
-            if event["kind"] == "user_message" && entry.summary["title"] == "ChatGPT session" {
-                let title = string(&event["message"], "text")
-                    .split_whitespace()
-                    .collect::<Vec<_>>()
-                    .join(" ");
-                if !title.is_empty() {
-                    entry.summary["title"] = json!(title.chars().take(120).collect::<String>());
-                    entry.summary["titleSource"] = json!("user");
-                }
-            }
         }
         entry.dirty = true;
         Ok(UpsertResult {
@@ -1014,6 +1086,42 @@ impl SessionStore {
         entry.summary = staged;
         entry.dirty = false;
         Ok(true)
+    }
+    pub fn rename(
+        &self,
+        id: &str,
+        name: &str,
+        source: title::TitleSource,
+        conversation: Option<&str>,
+    ) -> io::Result<Value> {
+        let owner = self.entry(id)?;
+        let mut entry = lock(&owner)?;
+        let mut staged = entry.summary.clone();
+        title::rename(
+            &mut staged,
+            entry.messages.values(),
+            name,
+            source,
+            conversation,
+        )?;
+        if staged != entry.summary {
+            self.save_summary(id, &staged, entry.next - 1)?;
+            entry.summary = staged;
+            entry.dirty = false;
+        }
+        Ok(entry.summary.clone())
+    }
+    pub fn clear_name(&self, id: &str) -> io::Result<Value> {
+        let owner = self.entry(id)?;
+        let mut entry = lock(&owner)?;
+        let mut staged = entry.summary.clone();
+        title::clear(&mut staged, entry.messages.values())?;
+        if staged != entry.summary {
+            self.save_summary(id, &staged, entry.next - 1)?;
+            entry.summary = staged;
+            entry.dirty = false;
+        }
+        Ok(entry.summary.clone())
     }
     pub fn update_metadata(&self, id: &str, edit: impl FnOnce(&mut Value)) -> io::Result<Value> {
         let owner = self.entry(id)?;

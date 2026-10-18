@@ -29,6 +29,10 @@ cargo build --release --locked
 .\target\release\cos-rust.exe --help
 ```
 
+`sessions rename <id> <name>` sets a manual name; `sessions clear-name <id>` restores the automatic
+provider/request title. Automatic updates can specify `--source provider/fallback --conversation <id>`;
+the store enforces title and conversation authority. These are host operations with no new model tool.
+
 `history <id> --from 1 --limit 200`, `search <query>` and `export <id> --format md/json` read the stored
 record. `usage --context-cap 400000` selects an explicit comparison cap; the CLI has no provider catalog.
 `provider-usage` requires explicit `--codex-home` and `--claude-home`, respects opt-out and reports a

@@ -1,0 +1,3599 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "scope": "Actual title/prompt functions and actual persistent store; only config and diagnostics injected; public disposable profile",
+  "sources": {
+    "src/main/session/title.ts": "6a7428d3ea7b82c608042f062c323e553055db20fed0c85d1bd3dcdbe2fc9336",
+    "src/shared/user-prompt.ts": "bb102c51ad93c493f686fdb7d9a86a0c2a1ce99bfea018b619fd53788e5be8a5",
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653"
+  },
+  "promptCases": [
+    {
+      "text": "",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n"
+    },
+    {
+      "text": "plain \\*literal",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\nplain \\*literal"
+    },
+    {
+      "text": "  public\n  request  ",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n  public\n  request  "
+    },
+    {
+      "text": "public",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\npublic"
+    },
+    {
+      "text": "﻿ public ",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n﻿ public "
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "expected": "  public\n  request  ",
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n  public\n  request  "
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\r\ninternal instructions 😀\r\n[[/COS_CONTEXT]]\r\n\r\n  public\r\n  request  ",
+      "expected": "  public\n  request  ",
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n  public\n  request  "
+    },
+    {
+      "text": "\\[\\[COS\\_CONTEXT\\:24\\]\\]\\\ninternal instructions 😀\\\n\\[\\[\\/COS\\_CONTEXT\\]\\]\\\n\\\n  public\\\n  request  ",
+      "expected": "  public\n  request  ",
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n  public\n  request  "
+    },
+    {
+      "text": "[[CLF-RESUME:public_identity_123456789]]\n\n[[COS_CONTEXT:12]]\ninstructions\n[[/COS_CONTEXT]]\n\npublic authored",
+      "expected": "[[CLF-RESUME:public_identity_123456789]]\n\npublic authored",
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[CLF-RESUME:public_identity_123456789]]\n\n[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\npublic authored"
+    },
+    {
+      "text": "[[COS_CONTEXT:4]]\nwrong length\n[[/COS_CONTEXT]]\n\nprivate instruction is not a title",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n[[COS_CONTEXT:4]]\nwrong length\n[[/COS_CONTEXT]]\n\nprivate instruction is not a title"
+    },
+    {
+      "text": " [[COS_CONTEXT:0]]",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n [[COS_CONTEXT:0]]"
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\n&#x20;internal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n[[COS_CONTEXT:24]]\n&#x20;internal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  "
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail"
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail"
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  tail",
+      "expected": null,
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  tail"
+    },
+    {
+      "text": "[[COS_CONTEXT:28]]\nmarker [[/COS_CONTEXT]] text\n[[/COS_CONTEXT]]\n\nliteral\n[[/COS_CONTEXT]]\n\nremains authored",
+      "expected": "literal\n[[/COS_CONTEXT]]\n\nremains authored",
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\nliteral\n[[/COS_CONTEXT]]\n\nremains authored"
+    },
+    {
+      "text": "[[COS_CONTEXT:21]]\n\nleading instructions\n[[/COS_CONTEXT]]\n\n  indent\n&#x20;inside line & safe",
+      "expected": "  indent\n&#x20;inside line & safe",
+      "instructions": "new instructions 😀\r\nline",
+      "prepended": "[[COS_CONTEXT:24]]\nnew instructions 😀\nline\n[[/COS_CONTEXT]]\n\n  indent\n&#x20;inside line & safe"
+    }
+  ],
+  "userCases": [
+    {
+      "text": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "plain \\*literal",
+      "expectedUnits": [
+        112,
+        108,
+        97,
+        105,
+        110,
+        32,
+        92,
+        42,
+        108,
+        105,
+        116,
+        101,
+        114,
+        97,
+        108
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "plain \\*literal",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "plain \\*literal",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "  public\n  request  ",
+      "expectedUnits": [
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        10,
+        32,
+        32,
+        114,
+        101,
+        113,
+        117,
+        101,
+        115,
+        116
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "  public\n  request  ",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "  public\n  request  ",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "public",
+      "expectedUnits": [
+        133,
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        133
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "public",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "public",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "﻿ public ",
+      "expectedUnits": [
+        112,
+        117,
+        98,
+        108,
+        105,
+        99
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "﻿ public ",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "﻿ public ",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "expectedUnits": [
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        10,
+        32,
+        32,
+        114,
+        101,
+        113,
+        117,
+        101,
+        115,
+        116
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\r\ninternal instructions 😀\r\n[[/COS_CONTEXT]]\r\n\r\n  public\r\n  request  ",
+      "expectedUnits": [
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        10,
+        32,
+        32,
+        114,
+        101,
+        113,
+        117,
+        101,
+        115,
+        116
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\r\ninternal instructions 😀\r\n[[/COS_CONTEXT]]\r\n\r\n  public\r\n  request  ",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\r\ninternal instructions 😀\r\n[[/COS_CONTEXT]]\r\n\r\n  public\r\n  request  ",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "\\[\\[COS\\_CONTEXT\\:24\\]\\]\\\ninternal instructions 😀\\\n\\[\\[\\/COS\\_CONTEXT\\]\\]\\\n\\\n  public\\\n  request  ",
+      "expectedUnits": [
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        10,
+        32,
+        32,
+        114,
+        101,
+        113,
+        117,
+        101,
+        115,
+        116
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "\\[\\[COS\\_CONTEXT\\:24\\]\\]\\\ninternal instructions 😀\\\n\\[\\[\\/COS\\_CONTEXT\\]\\]\\\n\\\n  public\\\n  request  ",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "\\[\\[COS\\_CONTEXT\\:24\\]\\]\\\ninternal instructions 😀\\\n\\[\\[\\/COS\\_CONTEXT\\]\\]\\\n\\\n  public\\\n  request  ",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[CLF-RESUME:public_identity_123456789]]\n\n[[COS_CONTEXT:12]]\ninstructions\n[[/COS_CONTEXT]]\n\npublic authored",
+      "expectedUnits": [
+        91,
+        91,
+        67,
+        76,
+        70,
+        45,
+        82,
+        69,
+        83,
+        85,
+        77,
+        69,
+        58,
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        95,
+        105,
+        100,
+        101,
+        110,
+        116,
+        105,
+        116,
+        121,
+        95,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        93,
+        93,
+        10,
+        10,
+        112,
+        117,
+        98,
+        108,
+        105,
+        99,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[CLF-RESUME:public_identity_123456789]]\n\n[[COS_CONTEXT:12]]\ninstructions\n[[/COS_CONTEXT]]\n\npublic authored",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[CLF-RESUME:public_identity_123456789]]\n\n[[COS_CONTEXT:12]]\ninstructions\n[[/COS_CONTEXT]]\n\npublic authored",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:4]]\nwrong length\n[[/COS_CONTEXT]]\n\nprivate instruction is not a title",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:4]]\nwrong length\n[[/COS_CONTEXT]]\n\nprivate instruction is not a title",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:4]]\nwrong length\n[[/COS_CONTEXT]]\n\nprivate instruction is not a title",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": " [[COS_CONTEXT:0]]",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": " [[COS_CONTEXT:0]]",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": " [[COS_CONTEXT:0]]",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\n&#x20;internal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\n&#x20;internal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:24]]\n&#x20;internal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "expectedUnits": [
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        55357,
+        56832
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "expectedUnits": [
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        55357
+      ],
+      "needsLosslessString": true
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  tail",
+      "expectedUnits": [
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97,
+        97
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  tail",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  tail",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:28]]\nmarker [[/COS_CONTEXT]] text\n[[/COS_CONTEXT]]\n\nliteral\n[[/COS_CONTEXT]]\n\nremains authored",
+      "expectedUnits": [
+        108,
+        105,
+        116,
+        101,
+        114,
+        97,
+        108,
+        10,
+        91,
+        91,
+        47,
+        67,
+        79,
+        83,
+        95,
+        67,
+        79,
+        78,
+        84,
+        69,
+        88,
+        84,
+        93,
+        93,
+        10,
+        10,
+        114,
+        101,
+        109,
+        97,
+        105,
+        110,
+        115,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:28]]\nmarker [[/COS_CONTEXT]] text\n[[/COS_CONTEXT]]\n\nliteral\n[[/COS_CONTEXT]]\n\nremains authored",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:28]]\nmarker [[/COS_CONTEXT]] text\n[[/COS_CONTEXT]]\n\nliteral\n[[/COS_CONTEXT]]\n\nremains authored",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:21]]\n\nleading instructions\n[[/COS_CONTEXT]]\n\n  indent\n&#x20;inside line & safe",
+      "expectedUnits": [
+        105,
+        110,
+        100,
+        101,
+        110,
+        116,
+        10,
+        38,
+        35,
+        120,
+        50,
+        48,
+        59,
+        105,
+        110,
+        115,
+        105,
+        100,
+        101,
+        32,
+        108,
+        105,
+        110,
+        101,
+        32,
+        38,
+        32,
+        115,
+        97,
+        102,
+        101
+      ],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:21]]\n\nleading instructions\n[[/COS_CONTEXT]]\n\n  indent\n&#x20;inside line & safe",
+      "authored": "",
+      "expectedUnits": [],
+      "needsLosslessString": false
+    },
+    {
+      "text": "[[COS_CONTEXT:21]]\n\nleading instructions\n[[/COS_CONTEXT]]\n\n  indent\n&#x20;inside line & safe",
+      "authored": "  explicit\n  authored  ",
+      "expectedUnits": [
+        101,
+        120,
+        112,
+        108,
+        105,
+        99,
+        105,
+        116,
+        10,
+        32,
+        32,
+        97,
+        117,
+        116,
+        104,
+        111,
+        114,
+        101,
+        100
+      ],
+      "needsLosslessString": false
+    }
+  ],
+  "refreshCases": [
+    {
+      "summary": {
+        "title": "ChatGPT session"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "ChatGPT session"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT session"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT session"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "ChatGPT session",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "New chat",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": true,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "New chat",
+        "origin": {
+          "kind": "desktop"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "New chat",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": true,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "origin": {
+          "kind": "desktop"
+        },
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "New chat",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": true,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "You are a task planner, not the executor public",
+        "origin": {
+          "kind": "desktop"
+        },
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "provider request",
+        "titleSource": "provider"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "provider request",
+        "titleSource": "provider"
+      }
+    },
+    {
+      "summary": {
+        "title": "provider request",
+        "titleSource": "provider"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "provider request",
+        "titleSource": "provider"
+      }
+    },
+    {
+      "summary": {
+        "title": "provider request",
+        "titleSource": "provider"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "provider request",
+        "titleSource": "provider",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "provider request",
+        "titleSource": "provider",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": true,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "provider request",
+        "titleSource": "provider",
+        "origin": {
+          "kind": "desktop"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "provider request",
+        "titleSource": "provider",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": true,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "titleSource": "fallback",
+        "origin": {
+          "kind": "desktop"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "provider request",
+        "titleSource": "provider",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": true,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "You are a task planner, not the executor public",
+        "titleSource": "fallback",
+        "origin": {
+          "kind": "desktop"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "my name",
+        "titleSource": "manual"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "my name",
+        "titleSource": "manual"
+      }
+    },
+    {
+      "summary": {
+        "title": "my name",
+        "titleSource": "manual"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "my name",
+        "titleSource": "manual"
+      }
+    },
+    {
+      "summary": {
+        "title": "my name",
+        "titleSource": "manual"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "my name",
+        "titleSource": "manual",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker"
+        }
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker"
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker"
+        }
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker"
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT - Project public",
+        "titleSource": "provider"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": true,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "Project public",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT - Project public",
+        "titleSource": "provider"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT - Project public",
+        "titleSource": "provider"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": true,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "ChatGPT - Project public",
+        "titleSource": "provider",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT · Project public"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "Project public",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT · Project public"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": false,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT · Project public"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "ChatGPT · Project public",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT | Project public",
+        "titleSource": "manual"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": false,
+      "expected": {
+        "title": "ChatGPT | Project public",
+        "titleSource": "manual"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT | Project public",
+        "titleSource": "manual"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": false,
+      "expected": {
+        "title": "ChatGPT | Project public",
+        "titleSource": "manual"
+      }
+    },
+    {
+      "summary": {
+        "title": "ChatGPT | Project public",
+        "titleSource": "manual"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": true,
+      "changed": true,
+      "expected": {
+        "title": "ChatGPT | Project public",
+        "titleSource": "manual",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "[[COS_CONTEXT:0]]"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": true,
+      "legacy": true,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "ChatGPT session",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "[[COS_CONTEXT:0]]"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": true,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "[[COS_CONTEXT:0]]"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": true,
+      "legacy": true,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "[[COS_CONTEXT:0]]",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "You are a task planner, not the executor: public fixture"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "You are a task planner, not the executor: public fixture",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "You are a task planner, not the executor: public fixture"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": false,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "You are a task planner, not the executor: public fixture"
+      }
+    },
+    {
+      "summary": {
+        "title": "You are a task planner, not the executor: public fixture"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": true,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "You are a task planner, not the executor: public fixture",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "public\n  request"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "public\n  request"
+      }
+    },
+    {
+      "summary": {
+        "title": "public\n  request"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": true,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "titleSource": "fallback"
+      }
+    },
+    {
+      "summary": {
+        "title": "public\n  request"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public\n  request",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    },
+    {
+      "summary": {
+        "title": "public"
+      },
+      "events": [],
+      "firstMessageId": null,
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "public"
+      }
+    },
+    {
+      "summary": {
+        "title": "public"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "later",
+          "message": {
+            "text": "later text",
+            "truncated": false,
+            "chars": 10
+          },
+          "seq": 1,
+          "origin": 20
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "first",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "seq": 3,
+          "origin": 2
+        },
+        {
+          "kind": "note",
+          "seq": 0
+        }
+      ],
+      "firstMessageId": "first",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": false,
+      "expected": {
+        "title": "public"
+      }
+    },
+    {
+      "summary": {
+        "title": "public"
+      },
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "planner",
+          "message": {
+            "text": "You are a task planner, not the executor public",
+            "truncated": false,
+            "chars": 47
+          },
+          "seq": 1
+        }
+      ],
+      "firstMessageId": "planner",
+      "automatic": false,
+      "legacy": false,
+      "pending": false,
+      "providerIgnored": false,
+      "projectPage": false,
+      "changed": true,
+      "expected": {
+        "title": "public",
+        "origin": {
+          "kind": "helper",
+          "fromSessionId": null,
+          "agentId": null,
+          "task": ""
+        }
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "framed-revisions",
+      "options": {},
+      "id": "session-title-case-0",
+      "initial": {
+        "title": "ChatGPT session",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+                "truncated": false,
+                "chars": 82
+              }
+            }
+          ],
+          "expected": {
+            "title": "public\n  request",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "[[COS_CONTEXT:12]]\ninstructions\n[[/COS_CONTEXT]]\n\nnew authored\n  text",
+                "truncated": false,
+                "chars": 69
+              }
+            }
+          ],
+          "expected": {
+            "title": "new authored\n  text",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "second",
+              "message": {
+                "text": "second request",
+                "truncated": false,
+                "chars": 14
+              }
+            }
+          ],
+          "expected": {
+            "title": "new authored\n  text",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "new authored\n  text",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "[[COS_CONTEXT:12]]\ninstructions\n[[/COS_CONTEXT]]\n\nnew authored\n  text",
+            "truncated": false,
+            "chars": 69
+          },
+          "contentSeq": 2,
+          "origin": 1,
+          "seq": 2,
+          "turnOrigin": null
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "second",
+          "message": {
+            "text": "second request",
+            "truncated": false,
+            "chars": 14
+          },
+          "contentSeq": 3,
+          "origin": 3,
+          "seq": 3,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "manual-provider-tracking",
+      "options": {},
+      "id": "session-title-case-1",
+      "initial": {
+        "title": "ChatGPT session",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "public first",
+                "truncated": false,
+                "chars": 12
+              }
+            }
+          ],
+          "expected": {
+            "title": "public first",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "Personal label",
+              "source": "manual"
+            }
+          ],
+          "expected": {
+            "title": "Personal label",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "public first",
+              "source": "fallback"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "Provider public",
+              "source": "provider",
+              "conversationId": "conversation-public"
+            }
+          ],
+          "expected": {
+            "title": "Personal label",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "Provider public",
+              "source": "provider"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "Wrong conversation",
+              "source": "provider",
+              "conversationId": "conversation-old"
+            }
+          ],
+          "expected": {
+            "title": "Personal label",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "Provider public",
+              "source": "provider"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "cannot downgrade",
+              "source": "fallback"
+            }
+          ],
+          "expected": {
+            "title": "Personal label",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "Provider public",
+              "source": "provider"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "clear"
+          ],
+          "expected": {
+            "title": "Provider public",
+            "titleSource": "provider",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "Provider public",
+            "titleSource": "provider",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "other provider",
+              "source": "provider"
+            }
+          ],
+          "expected": {
+            "title": "other provider",
+            "titleSource": "provider",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "another manual",
+              "source": "manual"
+            }
+          ],
+          "expected": {
+            "title": "another manual",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "other provider",
+              "source": "provider"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "ChatGPT - page",
+              "source": "provider"
+            }
+          ],
+          "expected": {
+            "title": "another manual",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "other provider",
+              "source": "provider"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "clear"
+          ],
+          "expected": {
+            "title": "other provider",
+            "titleSource": "provider",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "other provider",
+            "titleSource": "provider",
+            "origin": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "public first",
+            "truncated": false,
+            "chars": 12
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "desktop-provider-ignored",
+      "options": {
+        "title": "New chat",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "id": "session-title-case-2",
+      "initial": {
+        "title": "New chat",
+        "origin": {
+          "kind": "desktop"
+        }
+      },
+      "steps": [
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+                "truncated": false,
+                "chars": 82
+              }
+            }
+          ],
+          "expected": {
+            "title": "public\n  request",
+            "titleSource": "fallback",
+            "origin": {
+              "kind": "desktop"
+            }
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "Coding instructions",
+              "source": "provider"
+            }
+          ],
+          "expected": {
+            "title": "public\n  request",
+            "titleSource": "fallback",
+            "origin": {
+              "kind": "desktop"
+            }
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "My desktop name",
+              "source": "manual"
+            }
+          ],
+          "expected": {
+            "title": "My desktop name",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "public\n  request",
+              "source": "fallback"
+            },
+            "origin": {
+              "kind": "desktop"
+            }
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "latest provider",
+              "source": "provider"
+            }
+          ],
+          "expected": {
+            "title": "My desktop name",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "public\n  request",
+              "source": "fallback"
+            },
+            "origin": {
+              "kind": "desktop"
+            }
+          }
+        },
+        {
+          "operation": [
+            "clear"
+          ],
+          "expected": {
+            "title": "public\n  request",
+            "titleSource": "fallback",
+            "origin": {
+              "kind": "desktop"
+            }
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "public\n  request",
+            "titleSource": "fallback",
+            "origin": {
+              "kind": "desktop"
+            }
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "worker-authority",
+      "options": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker",
+          "fromSessionId": null,
+          "agentId": "worker-public",
+          "task": "public"
+        }
+      },
+      "id": "session-title-case-3",
+      "initial": {
+        "title": "worker task",
+        "origin": {
+          "kind": "worker",
+          "fromSessionId": null,
+          "agentId": "worker-public",
+          "task": "public"
+        }
+      },
+      "steps": [
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+                "truncated": false,
+                "chars": 82
+              }
+            }
+          ],
+          "expected": {
+            "title": "worker task",
+            "origin": {
+              "kind": "worker",
+              "fromSessionId": null,
+              "agentId": "worker-public",
+              "task": "public"
+            }
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "wrong provider",
+              "source": "provider"
+            }
+          ],
+          "expected": {
+            "title": "worker task",
+            "origin": {
+              "kind": "worker",
+              "fromSessionId": null,
+              "agentId": "worker-public",
+              "task": "public"
+            }
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "manual worker",
+              "source": "manual"
+            }
+          ],
+          "expected": {
+            "title": "manual worker",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "worker task",
+              "source": "fallback"
+            },
+            "origin": {
+              "kind": "worker",
+              "fromSessionId": null,
+              "agentId": "worker-public",
+              "task": "public"
+            }
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "wrong fallback",
+              "source": "fallback"
+            }
+          ],
+          "expected": {
+            "title": "manual worker",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "worker task",
+              "source": "fallback"
+            },
+            "origin": {
+              "kind": "worker",
+              "fromSessionId": null,
+              "agentId": "worker-public",
+              "task": "public"
+            }
+          }
+        },
+        {
+          "operation": [
+            "clear"
+          ],
+          "expected": {
+            "title": "worker task",
+            "titleSource": "fallback",
+            "origin": {
+              "kind": "worker",
+              "fromSessionId": null,
+              "agentId": "worker-public",
+              "task": "public"
+            }
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "worker task",
+            "titleSource": "fallback",
+            "origin": {
+              "kind": "worker",
+              "fromSessionId": null,
+              "agentId": "worker-public",
+              "task": "public"
+            }
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "[[COS_CONTEXT:24]]\ninternal instructions 😀\n[[/COS_CONTEXT]]\n\n  public\n  request  ",
+            "truncated": false,
+            "chars": 82
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "project-page-repair",
+      "options": {
+        "title": "ChatGPT - Public project",
+        "titleSource": "provider"
+      },
+      "id": "session-title-case-4",
+      "initial": {
+        "title": "ChatGPT - Public project",
+        "titleSource": "provider",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "Public project",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "real request",
+                "truncated": false,
+                "chars": 12
+              }
+            }
+          ],
+          "expected": {
+            "title": "real request",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "real request",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "real request",
+            "truncated": false,
+            "chars": 12
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "damaged-context-title",
+      "options": {
+        "title": "[[COS_CONTEXT:0]]"
+      },
+      "id": "session-title-case-5",
+      "initial": {
+        "title": "[[COS_CONTEXT:0]]",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "[[COS_CONTEXT:44]]\ncorrupt",
+                "truncated": false,
+                "chars": 26
+              }
+            }
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "[[COS_CONTEXT:44]]\ncorrupt",
+            "truncated": false,
+            "chars": 26
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "planner-helper",
+      "options": {},
+      "id": "session-title-case-6",
+      "initial": {
+        "title": "ChatGPT session",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "public-user",
+              "message": {
+                "text": "  You are a task planner, not the executor public fixture",
+                "truncated": false,
+                "chars": 57
+              }
+            }
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "origin": {
+              "kind": "helper",
+              "fromSessionId": null,
+              "agentId": null,
+              "task": ""
+            }
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "origin": {
+              "kind": "helper",
+              "fromSessionId": null,
+              "agentId": null,
+              "task": ""
+            }
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "public-user",
+          "message": {
+            "text": "  You are a task planner, not the executor public fixture",
+            "truncated": false,
+            "chars": 57
+          },
+          "contentSeq": 1,
+          "origin": 1,
+          "seq": 1,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "first-message-identity",
+      "options": {},
+      "id": "session-title-case-7",
+      "initial": {
+        "title": "ChatGPT session",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "z-first",
+              "message": {
+                "text": "  first\n request  ",
+                "truncated": false,
+                "chars": 18
+              }
+            }
+          ],
+          "expected": {
+            "title": "first\n request",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "a-later",
+              "message": {
+                "text": "second",
+                "truncated": false,
+                "chars": 6
+              }
+            }
+          ],
+          "expected": {
+            "title": "first\n request",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "upsert",
+            {
+              "kind": "user_message",
+              "source": "extension",
+              "time": 100,
+              "messageId": "z-first",
+              "message": {
+                "text": "revised first",
+                "truncated": false,
+                "chars": 13
+              }
+            }
+          ],
+          "expected": {
+            "title": "revised first",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "revised first",
+            "titleSource": "fallback",
+            "origin": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "z-first",
+          "message": {
+            "text": "revised first",
+            "truncated": false,
+            "chars": 13
+          },
+          "contentSeq": 3,
+          "origin": 1,
+          "seq": 3,
+          "turnOrigin": null
+        },
+        {
+          "kind": "user_message",
+          "source": "extension",
+          "time": 100,
+          "messageId": "a-later",
+          "message": {
+            "text": "second",
+            "truncated": false,
+            "chars": 6
+          },
+          "contentSeq": 2,
+          "origin": 2,
+          "seq": 2,
+          "turnOrigin": null
+        }
+      ]
+    },
+    {
+      "name": "manual-empty-auto",
+      "options": {},
+      "id": "session-title-case-8",
+      "initial": {
+        "title": "ChatGPT session",
+        "origin": null
+      },
+      "steps": [
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "manual label",
+              "source": "manual"
+            }
+          ],
+          "expected": {
+            "title": "manual label",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "ChatGPT session",
+              "source": "fallback"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "rename",
+            {
+              "title": "",
+              "source": "provider"
+            }
+          ],
+          "expected": {
+            "title": "manual label",
+            "titleSource": "manual",
+            "autoTitle": {
+              "title": "",
+              "source": "provider"
+            },
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "clear"
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "titleSource": "provider",
+            "origin": null
+          }
+        },
+        {
+          "operation": [
+            "restart"
+          ],
+          "expected": {
+            "title": "ChatGPT session",
+            "titleSource": "provider",
+            "origin": null
+          }
+        }
+      ],
+      "events": []
+    }
+  ]
+}
