@@ -82,6 +82,7 @@ pub enum ParseMode {
     Strict,
     Lenient,
 }
+pub mod invocation;
 mod streaming;
 pub use streaming::StreamingParser;
 mod updates;

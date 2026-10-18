@@ -23,6 +23,9 @@ image = { version = "0.25.8", default-features = false, features = ["png", "jpeg
 icu_collator = "=2.1.1"
 icu_locale_core = "=2.1.1"
 ryu-js = "=1.0.3"
+tree-sitter = "=0.25.1"
+tree-sitter-bash = "=0.25.1"
+streaming-iterator = "0.1.9"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

@@ -707,6 +707,89 @@ impl Kernel {
                         decision["detail"].as_str().unwrap_or("Invalid policy")
                     )));
                 }
+                if let Some(raw_command) = args["cmd"].as_str() {
+                    // Inspect the original shell payload before our UTF-8 console prefix.
+                    // The source uses Bash's tiny query for every outer shell, including cmd.
+                    let mut invocation = vec![if remote.is_some() {
+                        "sh".into()
+                    } else {
+                        s.path.clone()
+                    }];
+                    let mut shell_args = s.args(
+                        raw_command,
+                        args["login"].as_bool().unwrap_or(!cfg!(windows)),
+                    );
+                    if let Some(payload) = shell_args.last_mut() {
+                        *payload = raw_command.to_owned();
+                    }
+                    invocation.extend(shell_args);
+                    let parse_cwd = if remote.is_some() {
+                        base.clone()
+                    } else {
+                        sandbox::resolve(&roots, &base, None, false)?
+                            .real
+                            .to_string_lossy()
+                            .into_owned()
+                    };
+                    use cos_tools::patch::invocation::{self, Invocation};
+                    match invocation::for_exec(&invocation, &parse_cwd) {
+                        Invocation::CorrectnessError { error }
+                        | Invocation::PatchParseError { error } => {
+                            return Err(invalid(format!(
+                                "apply_patch verification failed: {error}"
+                            )));
+                        }
+                        Invocation::Body { args: parsed } => {
+                            let effective_base = if let Some(workdir) = parsed.workdir.as_deref() {
+                                let candidate = if workdir.starts_with('/') {
+                                    workdir.to_owned()
+                                } else {
+                                    format!("{}/{workdir}", base.trim_end_matches('/'))
+                                };
+                                if let Some((root, tail)) = self.remote_root(&roots, &candidate) {
+                                    self.with_remote(root, |client| {
+                                        let real = client.resolve(&tail, false)?;
+                                        if client.sftp.stat(&real)?["isDirectory"] != true {
+                                            return Err(invalid(
+                                                "apply_patch workdir must be an existing folder",
+                                            ));
+                                        }
+                                        Ok(())
+                                    })?;
+                                    candidate
+                                } else {
+                                    let location =
+                                        files::locate(&roots, workdir, Some(&base), false)?;
+                                    let directory = location.root.open_dir(&location.relative)?;
+                                    if !sandbox::contained(
+                                        &location.approved,
+                                        &files::handle_path(&directory.into_std_file())?,
+                                    ) {
+                                        return Err(invalid(
+                                            "apply_patch workdir escaped its approved folder",
+                                        ));
+                                    }
+                                    location.virtual_path
+                                }
+                            } else {
+                                base.clone()
+                            };
+                            require("command")?;
+                            let result = self.patch_authorized(
+                                &roots,
+                                &effective_base,
+                                &parsed.patch,
+                                request,
+                                owner,
+                                crate::patch::PatchAuthority::Command,
+                            )?;
+                            return Ok(exec_result(
+                                json!({"chunk_id":"","wall_time_seconds":0.0,"output":result["content"][0]["text"],"exit_code":null,"session_id":null,"original_token_count":null}),
+                            ));
+                        }
+                        Invocation::NotApplyPatch => {}
+                    }
+                }
                 let principal = owner
                     .map(|o| format!("session:{}", o.session_id))
                     .unwrap_or_else(|| format!("request:{request}"));

@@ -7,6 +7,11 @@ use cos_tools::{
 };
 use serde_json::{Value, json};
 use std::io;
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum PatchAuthority {
+    FileTool,
+    Command,
+}
 impl Kernel {
     pub(crate) fn patch_tool(
         &self,
@@ -15,6 +20,24 @@ impl Kernel {
         source: &str,
         request: &str,
         owner: Option<&Correlation>,
+    ) -> io::Result<Value> {
+        self.patch_authorized(
+            roots,
+            base,
+            source,
+            request,
+            owner,
+            PatchAuthority::FileTool,
+        )
+    }
+    pub(crate) fn patch_authorized(
+        &self,
+        roots: &[config::Root],
+        base: &str,
+        source: &str,
+        request: &str,
+        owner: Option<&Correlation>,
+        authority: PatchAuthority,
     ) -> io::Result<Value> {
         let mut parsed = patch::parse_typed(source).map_err(invalid)?;
         if parsed.environment_id.is_some() {
@@ -74,7 +97,7 @@ impl Kernel {
             "linux"
         };
         let capabilities = || config::effective_capabilities(&self.config.get(), platform);
-        let mode = if capabilities()["edit"] == true {
+        let mode = if authority == PatchAuthority::Command || capabilities()["edit"] == true {
             patch::FileUpdateMode::NormalizeToLf
         } else {
             patch::FileUpdateMode::PreserveLineEndings
@@ -94,6 +117,15 @@ impl Kernel {
                 ));
             }
             let caps = capabilities();
+            // Command already grants shell-equivalent access. Interception retains that
+            // grant, rather than inventing independent file-tool grants or skipping live checks.
+            if authority == PatchAuthority::Command {
+                return if caps["command"] == true {
+                    Ok(())
+                } else {
+                    Err(invalid("TOOL_DISABLED: command permission changed"))
+                };
+            }
             if (!kind.is_empty() && caps[kind] != true)
                 || needed.borrow().iter().any(|key| caps[*key] != true)
             {
@@ -112,6 +144,9 @@ impl Kernel {
             Ok(())
         };
         for hunk in &parsed.hunks {
+            if authority == PatchAuthority::Command {
+                break;
+            }
             match hunk {
                 Hunk::AddFile { path, .. } => {
                     let exists = if let Some((root, tail)) = self.remote_root(roots, path) {
@@ -183,15 +218,16 @@ impl Kernel {
                     .and_then(|error| error.downcast_ref::<patch::UpdateError>())
                 {
                     authorize("")?;
-                    let context = if capabilities()["read"] == true {
-                        detail
-                            .source_context
-                            .as_deref()
-                            .map(|context| format!("\n\n{context}"))
-                            .unwrap_or_default()
-                    } else {
-                        String::new()
-                    };
+                    let context =
+                        if authority == PatchAuthority::Command || capabilities()["read"] == true {
+                            detail
+                                .source_context
+                                .as_deref()
+                                .map(|context| format!("\n\n{context}"))
+                                .unwrap_or_default()
+                        } else {
+                            String::new()
+                        };
                     return Err(invalid(format!(
                         "apply_patch verification failed: {}{context}",
                         detail.message

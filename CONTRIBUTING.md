@@ -60,7 +60,9 @@ This explicit check is separate from the normal installed-subsystem tests and ex
 `python tools/qualify-linux.py --output audit/<date>/<receipt>.json` executes an exact Git commit
 in that task-owned pinned Rust container. It creates a separate source checkout, shares only its
 container build cache and records the commit, image, kernel, test counts and log hash. It does not
-include uncommitted host changes, start Docker or install system dependencies.
+include uncommitted host changes, start Docker or install system dependencies. Add `--strict` for
+formatting and all-target Clippy; the container then also needs those rustup components. Use a new
+output path for each run so that historical receipts cannot be overwritten.
 
 `node tools/qualify-project-files.mjs [binary]` compares public native files against selected pinned
 source declarations. It requires the upstream development dependencies, including Babel's parser,
@@ -71,3 +73,10 @@ The file-panel sorter uses ICU4X's Rust collator (`icu_collator` 2.1.1, Unicode-
 locale ordering instead of byte ordering. Its compiled Unicode data is a deliberate size cost;
 record release size and qualify locale/version differences. `ryu-js` 1.0.3 (Apache-2.0 OR BSL-1.0)
 retains JavaScript Number spelling for revision hashes, including native identities above 2^53.
+
+Patch shell interception uses `tree-sitter`/`tree-sitter-bash` 0.25.1 (MIT), retaining the source Bash
+query for every outer shell. These Rust bindings include a C parser and external scanner; they are
+an explicit runtime dependency exception, not a pure-Rust parser. The checked-in 504-case corpus and
+`audit/2026-10-18/bash-grammar-provenance.json` record grammar/query evidence. Their generated parser
+parse tables match the npm source, with only package patch-version metadata differing. Record the
+release footprint when changing this dependency, and retain its MIT license attribution in packages.

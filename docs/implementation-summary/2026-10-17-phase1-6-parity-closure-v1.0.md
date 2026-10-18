@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **169 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **176 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -103,12 +103,28 @@ regressions were observed RED then GREEN; 36 source stream scenarios verify inte
 errors and environment IDs, and 10 source cases verify full parsing. Input admission precedes buffering.
 The integrated Windows suite passes **169 tests, 0 failed/ignored**, with strict Clippy. Linux's first
 strict all-target Clippy run exposed Unix-only style/import warnings; the focused repaired checkout
-passes, with a fresh exact-commit combined receipt to follow. This does not close invocation/search.
+passes. Exact streaming commit `67e905a` passes **165 Linux tests**, strict Clippy and formatting:
+[receipt](../../audit/2026-10-18/linux-streaming-strict-receipt.json).
 
 Docker's engine was absent at continuation. The exact two stale runtime sockets were preserved and
 Docker plus the owned test container restarted: [recovery](../../audit/2026-10-18/docker-runtime-recovery.json).
 No Docker data disks, volumes or settings were reset. The earlier service release measurements remain
 applicable only to their named commit. Whole phase 1–6 exactness and final review remain IN PROGRESS.
+
+## Invocation continuation — 2026-10-18
+
+The native invocation adapter matches 504 actual upstream cases and now intercepts explicit patch
+scripts before shell launch. Implicit/malformed patches return correctness errors; `cd` must name an
+existing approved directory. Intercepted execution retains Command authority, including revocation
+and allowlist checks, with no child process or invented process metadata. Three new MCP behavior
+regressions were observed RED then GREEN; five MCP tests and two invocation tests now pass. Full
+Windows qualification is **176 PASS, 0 failed/ignored**, strict Clippy and formatting PASS.
+
+The pinned Tree-sitter/Bash 0.25.1 bindings retain the source grammar/query. Grammar/scanner/type
+hashes match; generated parser tables differ only in package version metadata:
+[provenance](../../audit/2026-10-18/bash-grammar-provenance.json). This adds an MIT C parser dependency,
+so the runtime is not claimed to be pure Rust. Release size and exact-commit Linux qualification follow.
+Search/toolchain, session/runtime/control branches and final whole-scope review remain in progress.
 
 ## Documents
 

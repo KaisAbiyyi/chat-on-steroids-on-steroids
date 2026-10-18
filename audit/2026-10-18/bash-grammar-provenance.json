@@ -1,0 +1,38 @@
+{
+  "grammarPackageVersion": "0.25.1",
+  "rustTreeSitterVersion": "0.25.1",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "interpretation": "Grammar, node types and external scanner are identical. Generated parser differs only in package patch-version metadata, not its parse tables. Native grammar oracle qualification is recorded separately.",
+  "files": {
+    "src/grammar.json": {
+      "rustCrateSha256Lf": "6c14f325170826cbc6c523ff5c2aeaa46f24bbff3a6e5eadb4533d9838fe3d81",
+      "upstreamNpmSha256Lf": "6c14f325170826cbc6c523ff5c2aeaa46f24bbff3a6e5eadb4533d9838fe3d81",
+      "equalExceptListedLines": true,
+      "differences": []
+    },
+    "src/node-types.json": {
+      "rustCrateSha256Lf": "b644629f7f9460cb0af080cb88f3bef898e6c47b6f8a76ed512b67ae16ef5ac5",
+      "upstreamNpmSha256Lf": "b644629f7f9460cb0af080cb88f3bef898e6c47b6f8a76ed512b67ae16ef5ac5",
+      "equalExceptListedLines": true,
+      "differences": []
+    },
+    "src/scanner.c": {
+      "rustCrateSha256Lf": "7cc25d70626f8939b35ecd504bf724e2001b817412aa29bceb4c4955a91558a9",
+      "upstreamNpmSha256Lf": "7cc25d70626f8939b35ecd504bf724e2001b817412aa29bceb4c4955a91558a9",
+      "equalExceptListedLines": true,
+      "differences": []
+    },
+    "src/parser.c": {
+      "rustCrateSha256Lf": "5ad30bb1a260c76df5397490b8bd97e272e62ed9c99be36fa53da959d7667e7f",
+      "upstreamNpmSha256Lf": "0021866dd2a7fccdfc94fafdca7d9863a891b5577b9eacdde1b6030585d3e186",
+      "equalExceptListedLines": true,
+      "differences": [
+        {
+          "line": 350624,
+          "rustCrate": "      .patch_version = 1,",
+          "upstreamNpm": "      .patch_version = 0,"
+        }
+      ]
+    }
+  }
+}

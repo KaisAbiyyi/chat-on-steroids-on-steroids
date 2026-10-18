@@ -182,3 +182,21 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
 - Docker recurrence: no Docker processes/engine were present, and the same two stale socket endpoints
   remained. Their verified runtime directory was preserved again, then the engine and owned container
   restarted. No Docker data disks, volumes or settings were reset. See the dated recovery receipt.
+
+- Exact streaming checkpoint `67e905a`: **165 native Linux tests PASS, 0 failed/ignored**, formatting
+  and strict all-target Clippy PASS. The receipt retains the exact source checkout and command exits.
+- Task 4c: direct/heredoc/implicit patch invocation classification matches **504 actual upstream
+  vectors**, including PowerShell/cmd wrappers, exact shell/path conventions, comments, extra commands,
+  malformed patches and `cd` captures. Input admission precedes tree allocation. Three MCP regressions
+  were observed RED (shell ParserError/no file), then GREEN: native interception without a child,
+  approved existing cwd selection and correctness errors. Command revocation and the allowlist also
+  refuse mutation. Shared patch execution rechecks current Command authority without inventing file-tool
+  grants, as the source's command route already grants shell-equivalent access. Ordinary apply_patch
+  retains its separate file permissions and conservative move ruling. Full Windows suite: **176 PASS,
+  0 failed/ignored**, strict all-target Clippy and formatting PASS.
+- Ruling: use the pinned Tree-sitter/Bash 0.25.1 Rust bindings for the source's exact Bash query.
+  Grammar, external scanner and node types match the npm source; generated parser tables are identical,
+  with only package patch-version metadata differing. Cost: this retains an MIT-licensed C parser
+  dependency alongside the existing QuickJS exception; it is not a pure-Rust parser claim. A release
+  size comparison follows this implementation checkpoint. Replacing it with another grammar would
+  require fresh invocation conformance proof; 504 vectors are bounded evidence, not every Bash script.
