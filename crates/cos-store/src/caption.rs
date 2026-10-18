@@ -24,12 +24,18 @@ fn path(value: &Value) -> String {
     }
 }
 fn quote(value: &Value) -> String {
-    let s = value.as_str().unwrap_or("");
-    let truncated = s.chars().take(60).collect::<String>();
-    format!(
-        "\"{}\"",
-        truncated.replace('\\', "\\\\").replace('"', "\\\"")
-    )
+    let source = value.as_str().unwrap_or("");
+    // JS captions slice by UTF-16 code unit, potentially splitting a surrogate.
+    // Keep that boundary as printable \uXXXX, never replace it with U+FFFD.
+    let truncated = std::char::decode_utf16(source.encode_utf16().take(60))
+        .map(|part| match part {
+            Ok('\\') => "\\\\".to_string(),
+            Ok('"') => "\\\"".to_string(),
+            Ok(ch) => ch.to_string(),
+            Err(err) => format!("\\u{:04x}", err.unpaired_surrogate()),
+        })
+        .collect::<String>();
+    format!("\"{truncated}\"")
 }
 fn plural(n: usize, one: &str, many: &str) -> String {
     format!("{n} {}", if n == 1 { one } else { many })
@@ -316,7 +322,9 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
             } else if exit == Some(0) {
                 p.tone = "good";
             }
-            // Running presentation must not infer status from a completed call.
+            if !running && (cmds.is_some() || timedout || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true) {
+                p.doing = "Running exec_command".into();
+            }
             p
         }
         "write_stdin" => {
@@ -396,7 +404,11 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                 "click" => ("input", "Clicked", "Clicking", "click"),
                 _ => ("clipboard", "Acted", "Acting", "act"),
             };
-            let more = n as i64 - 1;
+            let distinct = acts.map(|actions| {
+                actions.iter().filter_map(|action| action["type"].as_str())
+                    .collect::<std::collections::HashSet<_>>().len()
+            }).unwrap_or(0);
+            let more = distinct as i64 - 1;
             let extra = format!(" and {more} more");
             let mut p = phrase(
                 kind,
@@ -565,31 +577,41 @@ fn extra_error(detail: &mut Option<String>, result_head: &str) {
     }
 }
 fn format_summary(mut p: Phrase, tool: &str, outcome: &str, result_head: &str) -> Value {
+    let known_exit_failure = p.metric.as_deref().is_some_and(|metric| metric.starts_with("✕ "));
+    let command_failed = tool == "exec_command" && p.tone == "bad";
     match outcome {
         "tool_rejected" => {
             p.tone = "warn";
-            p.past = if p.special_error {
-                format!("Refused: {}", p.past)
-            } else {
-                format!("Refused to {}", p.infinitive)
-            };
+            if !command_failed {
+                p.past = if p.special_error {
+                    format!("Refused: {}", p.past)
+                } else {
+                    format!("Refused to {}", p.infinitive)
+                };
+            }
             p.metric = Some("refused".into());
             extra_error(&mut p.detail, result_head);
         }
         "tool_execution_error" => {
             p.tone = "warn";
             p.past = format!("Tool {tool} failed");
-            p.metric = Some("✕ failed".into());
+            if !known_exit_failure {
+                p.metric = Some("✕ failed".into());
+            }
             extra_error(&mut p.detail, result_head);
         }
         "tool_internal_error" => {
             p.tone = "bad";
-            p.past = if p.special_error {
-                format!("Failed: {}", p.past)
-            } else {
-                format!("Could not {}", p.infinitive)
-            };
-            p.metric = Some("✕ failed".into());
+            if !command_failed {
+                p.past = if p.special_error {
+                    format!("Failed: {}", p.past)
+                } else {
+                    format!("Could not {}", p.infinitive)
+                };
+            }
+            if !known_exit_failure {
+                p.metric = Some("✕ failed".into());
+            }
             extra_error(&mut p.detail, result_head);
         }
         _ => {}
