@@ -1,6 +1,6 @@
 # CL-02 — Trusted tool execution evidence (2026-10-19)
 
-**Status:** cloud implementation PR [#4](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/4), pending current-head Windows/Linux CI review and merge. Parent dependency: CL-01 [PR #3](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/3) merged as `1052c6a`.
+**Status:** **MERGED** from [PR #4](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/4), exact main SHA `06328dbeb2c130231d4c36cbbe3f9358261d8654`. [GitHub Actions run #76](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39150371353) PASS at reviewed PR head `1a23b2b` (Windows + Ubuntu: format, strict Clippy, workspace tests, release build). Parent dependency: CL-01 [PR #3](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/3) merged as `1052c6a`.
 
 ## Runtime recording contract
 
