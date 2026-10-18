@@ -20,7 +20,7 @@ fn path(value: &Value) -> String {
     match parts.len() {
         0 => "/".into(),
         1 => parts[0].to_string(),
-        n => parts[n - 2..].join("/"),
+        _ => parts[1..].join("/"),
     }
 }
 fn quote(value: &Value) -> String {
@@ -228,7 +228,7 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
         }
         "apply_patch" => {
             let patch = args["patch"].as_str().unwrap_or("");
-            let (kind, act, past, doing) = if patch.contains("*** Delete File:") {
+            let (kind, act, past, _doing) = if patch.contains("*** Delete File:") {
                 ("delete", "delete", "Deleted", "Deleting")
             } else if patch.contains("*** Move to:") {
                 ("move", "move", "Moved", "Moving")
@@ -340,11 +340,11 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                 format!("{infinitive} session {id}"),
             );
             p.tone = tone;
-            if let Some(exit) = evidence["exitCode"].as_i64() {
-                if exit != 0 && evidence["benignExit"] != true {
+            if let Some(exit) = evidence["exitCode"].as_i64()
+                && exit != 0 && evidence["benignExit"] != true
+            {
                     p.tone = "bad";
                     p.metric = Some(format!("✕ exit {exit}"));
-                }
             }
             p
         }
