@@ -14,6 +14,8 @@ impl Fixture {
         let profile = tempfile::tempdir().unwrap();
         let left = tempfile::tempdir().unwrap();
         let right = tempfile::tempdir().unwrap();
+        let left_path = fs::canonicalize(left.path()).unwrap();
+        let right_path = fs::canonicalize(right.path()).unwrap();
         let config = Arc::new(
             ConfigStore::open(
                 profile.path(),
@@ -22,7 +24,7 @@ impl Fixture {
             .unwrap(),
         );
         config.update(|value| {
-            value["roots"] = json!([{"name":"left","path":left.path()},{"name":"right","path":right.path()}]);
+            value["roots"] = json!([{"name":"left","path":left_path},{"name":"right","path":right_path}]);
             value["multiAgent"]["allowUnattributedCalls"] = json!(true);
             value["capabilities"]["command"] = json!(false);
             value["capabilities"]["read"] = json!(false);

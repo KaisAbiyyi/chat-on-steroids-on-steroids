@@ -6,6 +6,7 @@ use std::sync::Arc;
 fn mixed_read_keeps_successes_and_path_specific_line_ranges() {
     let d = tempfile::tempdir().unwrap();
     let profile = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(d.path()).unwrap();
     std::fs::write(d.path().join("a"), "first\npublic second\nthird\n").unwrap();
     let config = Arc::new(
         ConfigStore::open(
@@ -16,7 +17,7 @@ fn mixed_read_keeps_successes_and_path_specific_line_ranges() {
     );
     config
         .update(|v| {
-            v["roots"] = json!([{"name":"p","path":d.path()}]);
+            v["roots"] = json!([{"name":"p","path":approved}]);
             v["multiAgent"]["allowUnattributedCalls"] = json!(true);
         })
         .unwrap();

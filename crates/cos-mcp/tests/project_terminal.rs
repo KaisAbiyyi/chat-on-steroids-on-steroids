@@ -6,6 +6,7 @@ use std::sync::Arc;
 fn catalog_project_native_path_opens_terminal_and_revoked_root_refuses() {
     let profile = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(project.path()).unwrap();
     let config = Arc::new(
         ConfigStore::open(
             profile.path(),
@@ -14,7 +15,7 @@ fn catalog_project_native_path_opens_terminal_and_revoked_root_refuses() {
         .unwrap(),
     );
     config
-        .update(|v| v["roots"] = json!([{"name":"p","path":project.path()}]))
+        .update(|v| v["roots"] = json!([{"name":"p","path":approved}]))
         .unwrap();
     let kernel = Kernel::new(config.clone()).unwrap();
     let p = kernel.projects.add(&kernel.roots().unwrap(), "/p").unwrap();
@@ -38,6 +39,7 @@ fn catalog_project_native_path_opens_terminal_and_revoked_root_refuses() {
 fn proven_session_project_resolves_default_tool_workspace() {
     let profile = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(project.path()).unwrap();
     let config = Arc::new(
         ConfigStore::open(
             profile.path(),
@@ -46,7 +48,7 @@ fn proven_session_project_resolves_default_tool_workspace() {
         .unwrap(),
     );
     config
-        .update(|v| v["roots"] = json!([{"name":"p","path":project.path()}]))
+        .update(|v| v["roots"] = json!([{"name":"p","path":approved}]))
         .unwrap();
     let kernel = Kernel::new(config).unwrap();
     let p = kernel.projects.add(&kernel.roots().unwrap(), "/p").unwrap();
@@ -86,6 +88,7 @@ fn proven_session_project_resolves_default_tool_workspace() {
 fn missing_bound_project_cannot_fallback_to_another_approved_folder() {
     let profile = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(project.path()).unwrap();
     let config = Arc::new(
         ConfigStore::open(
             profile.path(),
@@ -94,7 +97,7 @@ fn missing_bound_project_cannot_fallback_to_another_approved_folder() {
         .unwrap(),
     );
     config
-        .update(|v| v["roots"] = json!([{"name":"p","path":project.path()}]))
+        .update(|v| v["roots"] = json!([{"name":"p","path":approved}]))
         .unwrap();
     let kernel = Kernel::new(config).unwrap();
     let conversation = "11111111-1111-4111-8111-111111111111";

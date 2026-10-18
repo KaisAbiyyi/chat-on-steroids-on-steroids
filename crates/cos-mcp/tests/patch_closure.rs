@@ -12,6 +12,7 @@ impl Fixture {
     fn new() -> Self {
         let profile = tempfile::tempdir().unwrap();
         let root = tempfile::tempdir().unwrap();
+        let approved = fs::canonicalize(root.path()).unwrap();
         let config = Arc::new(
             ConfigStore::open(
                 profile.path(),
@@ -21,7 +22,7 @@ impl Fixture {
         );
         config
             .update(|value| {
-                value["roots"] = json!([{"name":"p","path":root.path()}]);
+                value["roots"] = json!([{"name":"p","path":approved}]);
                 value["multiAgent"]["allowUnattributedCalls"] = json!(true);
             })
             .unwrap();

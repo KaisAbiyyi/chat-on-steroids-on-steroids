@@ -156,6 +156,7 @@ async fn control_session_cursor_does_not_repeat_the_first_page() {
 async fn disconnect_keeps_accepted_effects_and_restores_unread_completion() {
     let profile = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(project.path()).unwrap();
     let config = Arc::new(
         ConfigStore::open(
             profile.path(),
@@ -165,7 +166,7 @@ async fn disconnect_keeps_accepted_effects_and_restores_unread_completion() {
     );
     config
         .update(|v| {
-            v["roots"] = json!([{"name":"p","path":project.path()}]);
+            v["roots"] = json!([{"name":"p","path":approved}]);
             v["multiAgent"]["allowUnattributedCalls"] = json!(true);
         })
         .unwrap();
