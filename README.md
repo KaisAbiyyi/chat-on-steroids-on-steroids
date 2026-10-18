@@ -9,7 +9,9 @@ Target GitHub: [KaisAbiyyi/chat-on-steroids-on-steroids](https://github.com/Kais
 publication awaits a full history/privacy review. Eight prior local recorder/caption WIP paths
 remain unpublished and feature work remains paused until bootstrap.
 
-Upstream Chat On Steroids is cloned at [`upstream/chat-on-steroids`](upstream/chat-on-steroids).
+The baseline is the open-source [Chat On Steroids upstream repository](https://github.com/totec448-spec/chat-on-steroids),
+pinned to `024731d8083d92c46e8248d64e7e0b36ab0a470f`. An optional local clone is kept under
+`upstream/chat-on-steroids/` and is ignored by Git; it is not included in this repository.
 Rust runtime, sessions, MCP, files/projects/SSH and process/terminal services now run in this workspace.
 The original **16-phase** roadmap remains the scope reference. **Phases 1–6 remain PARTIAL against
 full exact parity**. Windows service implementation and evidence are recorded separately from GUI,
@@ -91,7 +93,8 @@ acceptance remains pending. `data/`, target outputs and probe profiles are ignor
 - [Coverage of all 18 phase-2 and 25 phase-3 source owners](docs/research/2026-10-16-phase1-3-owner-coverage-v1.0.md)
 - [Fresh review and repair disposition](docs/implementation-review/2026-10-16-phase1-3-review-v1.0.md)
 - [All 1,442 tracked files and proposed migration owners](audit/2026-10-16/migration-file-map.csv)
-- [Interactive architecture graph](graphify-out/graph.html) — navigation aid with documented unresolved references.
+- Interactive architecture graph: generate locally at `graphify-out/graph.html` (ignored output;
+  see [the source analysis](docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md) for context).
 
 The source baseline is `024731d8083d92c46e8248d64e7e0b36ab0a470f` on `main`.
 Measured public installer: `v2.1.39`, commit `87ae9d631f82d8da2f462d910410031ad8f97ac5`.
