@@ -533,7 +533,12 @@ impl Files {
                         } else {
                             target.location.virtual_path == source_path
                         };
-                        if target.new.is_some() && !same_path {
+                        if same_path {
+                            return Err(invalid(
+                                "move source and destination resolve to the same file",
+                            ));
+                        }
+                        if target.new.is_some() {
                             authorize("edit")?;
                         }
                         budget.bytes(&target.location.virtual_path, &new)?;

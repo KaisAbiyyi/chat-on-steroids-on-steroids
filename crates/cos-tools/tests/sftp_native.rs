@@ -167,4 +167,22 @@ fn native_openssh_subsystem_round_trip() {
         std::fs::read(d.path().join("diagnostic.txt")).unwrap(),
         b"public unique anchor\noriginal\n"
     );
+    let same_path = "*** Begin Patch\n*** Add File: before-invalid-move\n+must not be written\n*** Update File: a.txt\n*** Move to: a.txt\n@@\n changed\n*** End Patch";
+    let error = remote
+        .apply_patch(same_path, None)
+        .expect_err("A move to the same SFTP path was accepted");
+    assert!(
+        error
+            .to_string()
+            .contains("move source and destination resolve to the same file"),
+        "{error}"
+    );
+    assert!(!d.path().join("before-invalid-move").exists());
+    assert_eq!(std::fs::read(d.path().join("a.txt")).unwrap(), b"changed\n");
+    #[cfg(unix)]
+    {
+        remote.apply_patch("*** Begin Patch\n*** Update File: a.txt\n*** Move to: A.txt\n@@\n changed\n*** End Patch",None).unwrap();
+        assert!(!d.path().join("a.txt").exists());
+        assert_eq!(std::fs::read(d.path().join("A.txt")).unwrap(), b"changed\n");
+    }
 }

@@ -141,3 +141,45 @@ fn mismatch_source_excerpt_requires_live_read_permission() {
         "public unique anchor\nprivate original line\n"
     );
 }
+#[test]
+fn native_move_path_verification_matches_source_and_preserves_atomic_refusal() {
+    let corpus: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../fixtures/upstream/phase1-6-closure/patch-verifier-paths.json"
+    ))
+    .unwrap();
+    let platform = if cfg!(windows) { "win32" } else { "linux" };
+    for case in corpus["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|case| case["local"] == true && case["platform"] == platform)
+    {
+        let destination = case["destination"].as_str().unwrap();
+        let f = Fixture::new();
+        f.config
+            .update(|value| value["capabilities"]["edit"] = json!(false))
+            .unwrap();
+        fs::write(f.root.path().join("a"), b"public\r\n").unwrap();
+        let result=f.patch(&format!("*** Begin Patch\n*** Add File: earlier\n+must not be written\n*** Update File: a\n*** Move to: {destination}\n@@\n public\n*** End Patch"));
+        if case["expected"]["allowed"] == true {
+            assert_ne!(result["isError"], true, "{result}");
+            assert!(!f.root.path().join("a").exists());
+            assert_eq!(
+                fs::read(f.root.path().join(destination)).unwrap(),
+                b"public\r\n"
+            );
+            assert!(f.root.path().join("earlier").exists());
+        } else {
+            assert_eq!(result["isError"], true, "{result}");
+            assert!(
+                result["content"][0]["text"]
+                    .as_str()
+                    .unwrap()
+                    .contains(case["expected"]["error"].as_str().unwrap()),
+                "{result}"
+            );
+            assert_eq!(fs::read(f.root.path().join("a")).unwrap(), b"public\r\n");
+            assert!(!f.root.path().join("earlier").exists());
+        }
+    }
+}

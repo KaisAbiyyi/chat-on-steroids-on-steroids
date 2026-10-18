@@ -1,0 +1,120 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "errors.ts": "e3a4ec6c634ffc43ed86219c78045a103654b6df1f996d84ba8dcaa4964e2f6c",
+    "seek-sequence.ts": "7ba5adc4688a0d81d805f6b6f0c7cfc85f3fbe85d8eff6718ebe45194d1f9cbd",
+    "text-file.ts": "e63ace580b390e5ae0367103a7d4b96cbbd6a06557ba44ed7ac0827206d72614",
+    "file-update.ts": "a28ad436c62f118831b17766719ef61329806d4654efb51e23609769fc191f24",
+    "hunk.ts": "65df32a990b7b4406f04279a23a7da69cdac77eb7fba8de287620f95e6f9f9b0",
+    "index.ts": "513e923a441cd2a533774b81c36db69e577ea1d3836e599dccc8a1c2ec571dba",
+    "filesystem.ts": "8a76563568a907704f12cf5389f89f47caa23b9acabd86c40b8af9ca90398ffa"
+  },
+  "cases": [
+    {
+      "platform": "win32",
+      "local": true,
+      "destination": "a",
+      "expected": {
+        "allowed": false,
+        "error": "move source and destination resolve to the same file",
+        "code": "EINVAL"
+      }
+    },
+    {
+      "platform": "win32",
+      "local": true,
+      "destination": "A",
+      "expected": {
+        "allowed": false,
+        "error": "move source and destination resolve to the same file",
+        "code": "EINVAL"
+      }
+    },
+    {
+      "platform": "win32",
+      "local": true,
+      "destination": "b",
+      "expected": {
+        "allowed": true
+      }
+    },
+    {
+      "platform": "win32",
+      "local": false,
+      "destination": "a",
+      "expected": {
+        "allowed": false,
+        "error": "move source and destination resolve to the same file",
+        "code": "EINVAL"
+      }
+    },
+    {
+      "platform": "win32",
+      "local": false,
+      "destination": "A",
+      "expected": {
+        "allowed": true
+      }
+    },
+    {
+      "platform": "win32",
+      "local": false,
+      "destination": "b",
+      "expected": {
+        "allowed": true
+      }
+    },
+    {
+      "platform": "linux",
+      "local": true,
+      "destination": "a",
+      "expected": {
+        "allowed": false,
+        "error": "move source and destination resolve to the same file",
+        "code": "EINVAL"
+      }
+    },
+    {
+      "platform": "linux",
+      "local": true,
+      "destination": "A",
+      "expected": {
+        "allowed": true
+      }
+    },
+    {
+      "platform": "linux",
+      "local": true,
+      "destination": "b",
+      "expected": {
+        "allowed": true
+      }
+    },
+    {
+      "platform": "linux",
+      "local": false,
+      "destination": "a",
+      "expected": {
+        "allowed": false,
+        "error": "move source and destination resolve to the same file",
+        "code": "EINVAL"
+      }
+    },
+    {
+      "platform": "linux",
+      "local": false,
+      "destination": "A",
+      "expected": {
+        "allowed": true
+      }
+    },
+    {
+      "platform": "linux",
+      "local": false,
+      "destination": "b",
+      "expected": {
+        "allowed": true
+      }
+    }
+  ]
+}

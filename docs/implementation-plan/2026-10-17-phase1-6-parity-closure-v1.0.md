@@ -223,3 +223,12 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
 - Search investigation captured 160 include-glob, 60 exclusion, 12 scan and six ordered-tree source
   scenarios. These are investigation artifacts; native search integration and its source exactness
   proof have not started. The UTF-16 clipping boundary includes the existing global unpaired-string gate.
+
+- Toolchain commit `6839269` passes **172 native Linux tests**, strict Clippy and formatting; its four
+  Windows-only toolchain tests are platform-specific, not ignored Linux tests.
+- Task 4e: a real native patch and native SFTP both reproduced acceptance of a move whose source and
+  destination resolve to the same path. Both now refuse during preflight; earlier hunks remain unapplied.
+  Twelve actual upstream dry-run verifier scenarios capture local Windows case folding and remote/Unix
+  case sensitivity. Native local results consume the applicable three scenarios; Linux SFTP additionally
+  verifies a distinct case-only destination. Windows integrated result: **181 PASS, 0 failed/ignored**,
+  strict Clippy and formatting PASS. Error/permission/resource boundaries from earlier checkpoints remain.

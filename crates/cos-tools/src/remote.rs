@@ -696,7 +696,12 @@ impl RemoteFiles {
                     }
                     if let Some(destination) = move_path {
                         let dest = at(self, &mut changes, &destination, &mut budget)?;
-                        if dest != key && changes[&dest].new.is_some() {
+                        if dest == key {
+                            return Err(invalid(
+                                "move source and destination resolve to the same file",
+                            ));
+                        }
+                        if changes[&dest].new.is_some() {
                             authorize("edit")?;
                         }
                         budget.bytes(&dest, &new)?;

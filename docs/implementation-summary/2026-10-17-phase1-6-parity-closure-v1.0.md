@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **180 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **181 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -141,9 +141,19 @@ preserved; automatic discovery is suppressed if its inputs cannot be represented
 JSON/unpaired-string exactness remains open.
 
 Current integrated Windows result: **180 PASS, 0 failed/ignored**, strict Clippy PASS. Exact Linux
-qualification of this checkpoint follows; the 172-test Linux receipt and 11.731 MiB/17-runtime-check
+qualification of `6839269` passes **172 tests**, strict Clippy and formatting:
+[receipt](../../audit/2026-10-18/linux-toolchain-checkpoint-receipt.json). The 11.731 MiB/17-runtime-check
 release above apply to `23c1f95`, before these toolchain changes. Search source corpora are captured
 (160 globs, 60 excludes, 12 scans, six trees); native search changes have not started.
+
+## Move verification continuation — 2026-10-18
+
+Native and SFTP patches now refuse a move to the same resolved path before applying earlier hunks.
+Both defects were demonstrated RED then GREEN. Twelve actual upstream verifier scenarios capture
+Windows local case folding and Unix/remote case sensitivity. Native local tests consume the applicable
+source scenarios; native Linux SFTP also exercises a distinct case-only destination. Current Windows
+qualification: **181 PASS, 0 failed/ignored**, strict Clippy and formatting PASS. The fresh Linux
+receipt for this move checkpoint follows. Search integration and the remaining plan tasks stay open.
 
 ## Documents
 
