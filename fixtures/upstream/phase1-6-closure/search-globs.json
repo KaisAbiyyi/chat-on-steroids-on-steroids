@@ -1,0 +1,8295 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "search.ts": "2b4ef689d9c19f3bfe58b59764ce50d1867c1c417db30ad25933303c560bb8c1",
+    "fsops.ts": "cdf22e0bc58da0eb8e363590c3312ee11c682c5a2d7a49af3e87527e24132846"
+  },
+  "defaultExcludes": [
+    "node_modules",
+    ".git",
+    ".svn",
+    ".hg",
+    "dist",
+    "build",
+    "out",
+    "target",
+    ".next",
+    ".nuxt",
+    ".gradle",
+    ".gradle-user",
+    ".idea",
+    ".vs",
+    ".vscode",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "coverage",
+    ".cache",
+    ".turbo",
+    ".go-build-cache",
+    ".go-module-cache",
+    ".go-tools",
+    ".gopath",
+    ".tmp",
+    ".tmp-go-cache",
+    ".tmp-go-path",
+    ".android",
+    ".bun",
+    ".claude",
+    ".claude-*",
+    ".codex",
+    ".cursor",
+    ".gemini",
+    ".npm",
+    ".pnpm-store",
+    ".yarn",
+    "release",
+    "release-*",
+    "appdata"
+  ],
+  "globs": [
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "foob",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "foob",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": true
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "linux",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "foob",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "foob",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "**",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "a.ts",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "k.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "s.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "ß.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": true
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "Σ.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": false,
+      "file": "ı.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "src\\a.ts",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts\n",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts\r",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "a.ts ",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "K.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ſ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ẞ.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ς.txt",
+      "expected": false
+    },
+    {
+      "platform": "win32",
+      "pattern": "i.txt",
+      "sensitive": true,
+      "file": "ı.txt",
+      "expected": false
+    }
+  ],
+  "excludes": [
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "build",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "BUILD",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "release-public",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": ".claude-x",
+      "expected": true
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "[cache]",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "a*b",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "Äbuild",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "äbuild"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "ẞ",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "ß"
+      ],
+      "name": "Ας",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "Äbuild",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "ẞ",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "ΑΣ"
+      ],
+      "name": "Ας",
+      "expected": true
+    }
+  ]
+}

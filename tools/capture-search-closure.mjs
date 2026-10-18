@@ -22,8 +22,12 @@ const code=search.replace(/^import[\s\S]*?;\r?$/gm,'')+'\n'+declarations(fsops,[
 const js=await require('esbuild').transform(code,{loader:'ts',format:'cjs'});
 const context=vm.createContext({module:{exports:{}},exports:{},path:path.posix,Buffer,TextDecoder,locateRipgrep:()=>null});vm.runInContext(js.code,context);
 const api=context.fixture,globs=[],excludes=[];
-for(const pattern of ['*.ts','**/*.ts','src/?a.*','[a].txt','foo{bar}','file?.txt','**',''])for(const sensitive of [false,true])for(const file of ['src/a.ts','src/a.TS','a.ts','src/aa.rs','[a].txt','foob','foo{bar}','file😀.txt','filex.txt',''])globs.push({pattern,sensitive,file,expected:api.compileIncludeMatcher(pattern,sensitive)(file)});
-for(const pattern of [['build'],['release-*'],['.claude-*'],['[cache]'],[],['A*B']])for(const name of ['build','BUILD','builder','release-public','release','[cache]','cache','.claude-x','AXXB','a*b'])excludes.push({patterns:pattern,name,expected:api.isExcludedFolderName(name,pattern)});
+for(const platform of ['linux','win32']){
+ context.path=platform==='win32'?path.win32:path.posix;
+ for(const pattern of ['*.ts','**/*.ts','src/?a.*','[a].txt','foo{bar}','file?.txt','**','','a.ts','k.txt','s.txt','ß.txt','Σ.txt','i.txt'])for(const sensitive of [false,true])for(const file of ['src/a.ts','src/a.TS','a.ts','src/aa.rs','[a].txt','foob','foo{bar}','file😀.txt','filex.txt','','src\\a.ts','a.ts\n','a.ts\r','a.ts\u2028','K.txt','ſ.txt','ẞ.txt','ς.txt','ı.txt'])globs.push({platform,pattern,sensitive,file,expected:api.compileIncludeMatcher(pattern,sensitive)(file)});
+}
+context.path=path.posix;
+for(const pattern of [['build'],['release-*'],['.claude-*'],['[cache]'],[],['A*B'],['äbuild'],['ß'],['ΑΣ']])for(const name of ['build','BUILD','builder','release-public','release','[cache]','cache','.claude-x','AXXB','a*b','Äbuild','ẞ','Ας'])excludes.push({patterns:pattern,name,expected:api.isExcludedFolderName(name,pattern)});
 function backend(files,dirs){return {path:path.posix,
  async getMetadata(file){if(!files.has(file))throw Error('ENOENT');return {size:files.get(file).length,isFile:true,isDirectory:false};},
  async readDirectory(dir){if(!(dir in dirs))throw Error('ENOENT');return dirs[dir].map(([name,type])=>({fileName:name,isFile:type==='file',isDirectory:type==='directory'}));},
@@ -54,4 +58,5 @@ for(const options of [{query:'needle'},{query:'deep'},{query:'needle',maxResults
  trees.push({options,expected});
 }
 await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search.json'),JSON.stringify({upstreamCommit:commit,sources:{'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},defaultExcludes:api.DEFAULT_EXCLUDES,globs,excludes,scans,trees,directories,files},null,2)+'\n');
+await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-globs.json'),JSON.stringify({upstreamCommit:commit,sources:{'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},defaultExcludes:api.DEFAULT_EXCLUDES,globs,excludes},null,2)+'\n');
 console.log(JSON.stringify({globs:globs.length,excludes:excludes.length,scans:scans.length,trees:trees.length}));

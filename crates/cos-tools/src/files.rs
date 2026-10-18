@@ -867,14 +867,7 @@ impl Files {
                 let child = path.join(entry.file_name());
                 let virtual_child = format!("{virtual_path}/{name}");
                 if meta.is_dir() {
-                    if !excludes.iter().any(|e| {
-                        if let Some(p) = e.strip_suffix('*') {
-                            name.to_lowercase().starts_with(&p.to_lowercase())
-                        } else {
-                            name.eq_ignore_ascii_case(e)
-                        }
-                    }) && !entry.file_type()?.is_symlink()
-                    {
+                    if !is_excluded_folder(&name, excludes) && !entry.file_type()?.is_symlink() {
                         todo.push((child, virtual_child));
                     }
                 } else if meta.is_file() {
@@ -889,6 +882,17 @@ impl Files {
             truncated,
         })
     }
+}
+pub fn is_excluded_folder(name: &str, patterns: &[String]) -> bool {
+    let lower = name.to_lowercase();
+    patterns.iter().any(|raw| {
+        let pattern = raw.to_lowercase();
+        if let Some(prefix) = pattern.strip_suffix('*') {
+            lower.starts_with(prefix)
+        } else {
+            lower == pattern
+        }
+    })
 }
 pub fn glob_regex(pattern: &str) -> io::Result<regex::Regex> {
     let mut out = String::from("^");

@@ -17,6 +17,11 @@ cargo clippy --workspace --all-targets --locked -j 2 -- -D warnings
 cargo build --release --locked -j 2
 ```
 
+On Windows, prefer `python tools/check-workspace.py --strict`. It uses the workspace's
+ignored `.test-tmp/` for child temporary files and `target/` for Cargo, preserves an explicitly
+configured `CARGO_TARGET_DIR`, and requires 8 GiB free on the workspace drive. Environment changes
+apply only to the check subprocesses. This avoids large fixture files filling the system Temp.
+
 Tests use temporary public fixtures and fresh profiles. The service always requires an explicit
 absolute `--data-dir`; never point tests at a personal CoS, browser or provider profile. Optional
 external SSH/tunnel tests must state their host, authorization and isolation. An installed SFTP
@@ -63,6 +68,11 @@ container build cache and records the commit, image, kernel, test counts and log
 include uncommitted host changes, start Docker or install system dependencies. Add `--strict` for
 formatting and all-target Clippy; the container then also needs those rustup components. Use a new
 output path for each run so that historical receipts cannot be overwritten.
+Add `--lean-build` for the storage-conscious Linux profile: no debug symbols or incremental cache,
+one shared `/work/target`. Assertions and test limits are unchanged. Host source archives live in
+the ignored workspace `.cache/qualification/`; the runner reserves 8 GiB on that drive and 12 GiB
+on the system drive before using Docker. It records the profile and cache usage in the receipt.
+Do not alternate build profiles unnecessarily or prune unrelated Docker data.
 
 `node tools/qualify-project-files.mjs [binary]` compares public native files against selected pinned
 source declarations. It requires the upstream development dependencies, including Babel's parser,

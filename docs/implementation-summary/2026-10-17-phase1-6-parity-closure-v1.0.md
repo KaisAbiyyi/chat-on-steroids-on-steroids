@@ -155,6 +155,25 @@ source scenarios; native Linux SFTP also exercises a distinct case-only destinat
 qualification: **181 PASS, 0 failed/ignored**, strict Clippy and formatting PASS. The fresh Linux
 receipt for this move checkpoint follows. Search integration and the remaining plan tasks stay open.
 
+## Search matching and storage continuation — 2026-10-18
+
+Search include globs now retain source basename fallback, case handling and UTF-16 matching.
+Name queries inspect the filename, and explicit Unicode folder exclusions match source casing.
+Four functional regressions passed after observed RED; 1,064 source glob rows and 117 exclusions
+are retained. Integrated Windows checks: **185 PASS, 0 failed/ignored**, strict Clippy and
+formatting PASS. Search traversal/default roots/content/remote responses still need implementation.
+The earlier same-path move commit `3a446b0` passed **173 Linux tests**, strict Clippy and formatting:
+[receipt](../../audit/2026-10-18/linux-patch-paths-receipt.json).
+
+The first combined Windows run exhausted C Temp during the unchanged 512 MiB fixture test.
+Its failed log is retained; the complete rerun passed with temporary files on D. The new
+`tools/check-workspace.py` keeps those files in the workspace with a free-space preflight.
+Linux qualification supports one lean build cache, disables debug symbols/incremental state and
+places host archives on D. It preserves test assertions and records storage settings in receipts.
+The system drive had already recovered to about 42 GiB free at continuation, and the old Linux
+cache was absent; no claim is made that this work recovered that space. Native Windows build
+cache remains on D. Exact search-commit Linux qualification follows this checkpoint.
+
 ## Documents
 
 - [Implementation plan and live ledger](../implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md)

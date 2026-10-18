@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "sourceCommit": "3a446b07a1039ee9f5b15ae0b1a6d248fcbd3509",
+  "scope": "Actual native Linux execution of an isolated Git archive; host working-tree changes excluded",
+  "rustImage": "rust@sha256:8514999d4786ef12efe89239e86b3d0a021b94b9d35108c8efe6c79ca7dc1a65",
+  "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+  "checks": {
+    "workspaceTests": 0,
+    "format": 0,
+    "clippy": 0
+  },
+  "checkout": "/work/checkouts/3a446b07a103-ff9c9fd61afe4e59a93df34308916e78",
+  "kernel": "Linux 6.6.87.1-microsoft-standard-WSL2 x86_64 GNU/Linux",
+  "tests": {
+    "passed": 173,
+    "failed": 0,
+    "ignored": 0
+  },
+  "log": "audit/2026-10-18/linux-patch-paths-receipt.log",
+  "logSha256": "a929783b82f838870ce6d8ea252bbfc3013db4bc0ee65ca89b390ec6cea2dc1f",
+  "personalProfilesUsed": false,
+  "macOS": "HOLD by user request"
+}

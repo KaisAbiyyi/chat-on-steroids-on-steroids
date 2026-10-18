@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "baseCommit": "3a446b07a1039ee9f5b15ae0b1a6d248fcbd3509",
+  "scope": "Windows working tree containing the search matcher patch and workspace-temp check runner",
+  "command": "python tools/check-workspace.py --strict",
+  "exitCode": 0,
+  "tests": {
+    "passed": 185,
+    "failed": 0,
+    "ignored": 0
+  },
+  "temporaryDirectory": "D:\\projects\\CoS-Rust\\.test-tmp",
+  "targetDirectory": "D:\\projects\\CoS-Rust\\target",
+  "driveFreeAfter": {
+    "C": 45238501376,
+    "D": 43336163328
+  },
+  "log": "audit/2026-10-18-search-matcher-storage-runner.log",
+  "logSha256": "6534e5704a83a0b9bd6df0cc477abae3b365e66430baa0c2bde9f03a10a06aff",
+  "previousStorageFailureLog": "audit/2026-10-18-search-matcher-workspace-green.log",
+  "assertionsOrFixtureSizesReduced": false
+}

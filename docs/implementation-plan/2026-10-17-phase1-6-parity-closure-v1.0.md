@@ -232,3 +232,19 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   case sensitivity. Native local results consume the applicable three scenarios; Linux SFTP additionally
   verifies a distinct case-only destination. Windows integrated result: **181 PASS, 0 failed/ignored**,
   strict Clippy and formatting PASS. Error/permission/resource boundaries from earlier checkpoints remain.
+
+- Same-path move checkpoint `3a446b0`: **173 Linux tests PASS**, 0 failed/ignored, formatting
+  and strict Clippy PASS. The receipt applies to that exact commit.
+- Task 4e: source include globs now match basename fallback, case rules and UTF-16 units;
+  name queries match filenames rather than parent paths, and Unicode folder exclusions use
+  source lowercase semantics. Four functional regressions were demonstrated RED then GREEN.
+  Checked-in corpora retain 1,064 platform-specific glob rows and 117 exclusions; native
+  integrated Windows suite **185 PASS, 0 failed/ignored**, strict Clippy and formatting PASS.
+  BFS traversal, all-root defaults, content/remote search and model response parity remain open.
+- Storage steering: the first combined search run failed with OS 112 (StorageFull) while a
+  512 MiB fixture was allocated in C Temp. Its log is retained. The same tests passed with
+  TEMP/TMP on D; neither assertions nor fixture sizes were reduced. A reusable local runner
+  now puts child temp files in the workspace and reserves free space. Linux qualification
+  gains a lean profile (debug symbols/incremental disabled) and records its storage choices.
+  At continuation C already had about 42 GiB free and the old Linux cache was absent;
+  that intervening free-space change is not attributed to this implementation.

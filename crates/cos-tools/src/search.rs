@@ -1,5 +1,5 @@
 use crate::{
-    files::{Files, glob_regex, locate},
+    files::{Files, locate},
     text,
 };
 use cos_core::{config::Root, persistence::invalid};
@@ -51,6 +51,8 @@ pub const DEFAULT_EXCLUDES: &[&str] = &[
     "release-*",
     "appdata",
 ];
+mod matcher;
+pub use matcher::IncludeMatcher;
 pub struct Options<'a> {
     pub query: &'a str,
     pub content: bool,
@@ -117,7 +119,10 @@ pub fn find_checked(
     } else {
         files.walk_checked(roots, base, &excludes, 40000, deadline, authorize)?
     };
-    let pattern = glob.map(glob_regex).transpose()?;
+    let pattern = glob
+        .filter(|pattern| !pattern.is_empty())
+        .map(|pattern| IncludeMatcher::new(pattern, case_sensitive))
+        .transpose()?;
     let mut matches = vec![];
     let mut skipped = 0;
     let mut scanned = 0;
@@ -156,13 +161,10 @@ pub fn find_checked(
         let relative = path
             .strip_prefix(&format!("{}/", base.trim_end_matches('/')))
             .unwrap_or_else(|| path.rsplit('/').next().unwrap_or(&path));
-        if pattern.as_ref().is_some_and(|g| {
-            !g.is_match(if glob.is_some_and(|s| s.starts_with('/')) {
-                &path
-            } else {
-                relative
-            })
-        }) {
+        if pattern
+            .as_ref()
+            .is_some_and(|matcher| !matcher.matches(relative))
+        {
             continue;
         }
         scanned += 1;
@@ -198,7 +200,7 @@ pub fn find_checked(
                     }
                 }
             }
-        } else if matching(&path) {
+        } else if matching(path.rsplit('/').next().unwrap_or(&path)) {
             matches.push(json!({"path":path}));
         }
     }
