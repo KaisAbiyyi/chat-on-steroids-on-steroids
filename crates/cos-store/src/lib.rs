@@ -1,6 +1,7 @@
 //! Durable local session epochs and projections, independent of browser/UI hosts.
 pub mod access;
 pub mod chronology;
+pub mod caption;
 pub mod content;
 pub mod correlation;
 pub mod dil;
