@@ -1,19 +1,19 @@
 # Current CoS-Rust work state
 
-Captured: **2026-10-18, Asia/Jakarta**. This is the agent-to-agent resume pointer. Check actual `git status` and repository state on every new run; do not rely on this snapshot if files or commits have changed.
+Captured: **2026-10-19, Asia/Jakarta**. This is the agent-to-agent resume pointer. Check actual `git status` and repository state on every new run; do not rely on this snapshot if files or commits have changed.
 
 ## Current directive
 
-- **Work unit:** `CL-02` — cloud trusted execution evidence [PR #4](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/4), branch `feat/cl-02-structured-tool-evidence`. **Cloud CI/review and merge are required before acceptance.**
+- **Work unit:** **NEXT `CL-03` [C]** — source-compatible activity/caption presentation and cross-restart timeline. `CL-02` merged from [PR #4](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/4) into `main` as `06328dbeb2c130231d4c36cbbe3f9358261d8654` after [Windows/Ubuntu CI PASS](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39150371353) on head `1a23b2b`. **No local access is required before CL-L1 after CL-03.**
 - **Predecessor:** `CL-01` merged from [PR #3](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/3) into `main` as `1052c6a93e43bf13eadbe055b10cd66aca06a8be` after Windows/Ubuntu CI passed at PR head.
-- **Feature implementation:** structured native process exit/running, find engine counts and committed patch changes are captured as sanitized `call.evidence` without changing public MCP wire returns. [Cloud implementation scope](implementation-summary/2026-10-19-cl-02-tool-evidence.md). **NEXT:** `CL-03` captions and activity projection after CL-02 acceptance; first native recorder gate remains `CL-L1` after CL-03.
+- **Feature implementation:** structured native process exit/running, find engine counts and committed patch changes are captured as sanitized `call.evidence` without changing public MCP wire returns. [Cloud implementation scope](implementation-summary/2026-10-19-cl-02-tool-evidence.md). **NEXT:** `CL-03` [C] captions and activity projection using the now-persisted trusted evidence; first native recorder gate remains `CL-L1` after CL-03.
 - **Canonical development (after publication):** cloud coding agents using GitHub branches/PRs and Windows/Linux CI. The user's `D:\projects\CoS-Rust` remains the **local device-qualification environment**, with all local artifacts/temp/cache on D:.
 - **Canonical remote:** [GitHub main](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/tree/main), initial published SHA `8637c12ccda8610e5a06534f30af4688034cc9b6`; Windows fixture correction squash-merged as `299caa190aa2049309b9a39896dec28fb7d4e7e6`. The latest SHA may advance through reviewed bootstrap documentation PRs; verify the live SHA and checks before a new cloud unit.
 - **Local history:** old local `main` was `68f7954`; the original advanced feature branch and all its 24 subsequent commits were preserved through an ancestry-safe fast-forward to published main. The last feature implementation checkpoint before governance was `45db209` (2026-10-18 20:15 WIB). Original local dirty WIP is still separate.
 
 ## Verified baseline versus unverified WIP
 
-Cloud CL-01 code and tests are described in [the dated cloud summary](implementation-summary/2026-10-18-cl-01-recorder-privacy.md). The older rows below refer to bootstrap/historical checkouts and must not be mistaken for current PR #3 CI acceptance.
+Cloud CL-01 and CL-02 code/tests are described in [CL-01](implementation-summary/2026-10-18-cl-01-recorder-privacy.md) and [CL-02](implementation-summary/2026-10-19-cl-02-tool-evidence.md). The older rows below refer to bootstrap/historical checkouts; they do not override the merged SHA-specific cloud CI receipts.
 
 | Area | Status | Evidence boundary |
 | --- | --- | --- |
@@ -59,5 +59,5 @@ The local WIP **is not in GitHub**. Publishing committed history alone will not 
 - Cloud-first rules, [BIG roadmap](BIG-IMPLEMENTATION-PLAN.md), [C/L/U matrix](implementation-plan/2026-10-18-cloud-first-units.md), and [superseding ADR](decisions/2026-10-18-cloud-first-supersession.md) are published. A follow-up docs PR records the resulting bootstrap proof.
 - `BOOT-L1` and `BOOT-U1` publication are finished. Initial hosted CI **FAIL** was traced to temporary approved-root aliases in Windows tests. The test-only correction in PR #2 merged as `299caa1` after both PR CI jobs passed. The [post-merge main workflow](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39140089208) must pass before declaring cloud bootstrap accepted; production sandbox authorization is unchanged.
 - The public commit metadata includes Git author/committer email supplied by local Git config. For future commits, use a GitHub noreply identity if the user wants to avoid further disclosure. Do not rewrite published qualified history casually.
-- `CL-01` is merged from [PR #3](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/3) at `1052c6a`, with CI passing for the reviewed PR head. `CL-02` lives in [PR #4](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/4), pending current-head CI/review and merge. **LOCAL REQUIRED:** none now; recorder native gate `CL-L1` follows `CL-03`. **YOU REQUIRED:** NO for CL-02. **NEXT:** `CL-03` after CL-02 acceptance.
+- `CL-01` merged at `1052c6a` and `CL-02` merged at `06328db` after full Windows/Ubuntu CI PASS. **LOCAL REQUIRED:** NONE now; recorder native gate `CL-L1` follows `CL-03`. **YOU REQUIRED:** NO for `CL-03` cloud coding. **NEXT:** `CL-03` [C].
 - At every future C unit response state **LOCAL REQUIRED** and **YOU REQUIRED** (NO/YES + when). Phase-level L and U gates are enumerated in the matrix. The full phase 1–6 independent review is still NOT RUN.
