@@ -15,8 +15,11 @@ impl Fixture {
         let profile = tempfile::tempdir().unwrap();
         let root = tempfile::tempdir().unwrap();
         let config = Arc::new(
-            ConfigStore::open(profile.path(), if cfg!(windows) { "win32" } else { "linux" })
-                .unwrap(),
+            ConfigStore::open(
+                profile.path(),
+                if cfg!(windows) { "win32" } else { "linux" },
+            )
+            .unwrap(),
         );
         config
             .update(|v| {
@@ -38,7 +41,9 @@ impl Fixture {
         }
     }
     fn invoke(&self, tool: &str, args: Value) -> Value {
-        let result = self.kernel.invoke(Surface::Core, "cl-02-fixture", tool, args);
+        let result = self
+            .kernel
+            .invoke(Surface::Core, "cl-02-fixture", tool, args);
         assert!(result.get("_recordingEvidence").is_none(), "{result}");
         result
     }
@@ -58,9 +63,16 @@ impl Fixture {
 fn find_count_is_from_engine_not_inferred_from_output() {
     let f = Fixture::new(false);
     fs::write(f.root.path().join("needle.txt"), "one needle\ntwo needle\n").unwrap();
-    let output = f.invoke("find", json!({"query":"needle","mode":"content","path":"/p/needle.txt"}));
+    let output = f.invoke(
+        "find",
+        json!({"query":"needle","mode":"content","path":"/p/needle.txt"}),
+    );
     assert_eq!(output["isError"], Value::Null, "{output}");
-    assert_eq!(output.get("structuredContent"), None, "MCP wire contract changed");
+    assert_eq!(
+        output.get("structuredContent"),
+        None,
+        "MCP wire contract changed"
+    );
     let event = f.recent("find");
     assert_eq!(event["call"]["evidence"]["count"], 2);
     assert_eq!(event["call"]["evidence"]["failed"], false);
@@ -71,8 +83,15 @@ fn find_count_is_from_engine_not_inferred_from_output() {
     f.kernel.recorder.flush().unwrap();
     drop(f.kernel);
     let reopened = cos_store::SessionStore::open(f.profile.path()).unwrap();
-    assert_eq!(reopened.read("unattributed-activity", ReadOptions::default()).unwrap()
-        .iter().filter(|e| e["call"]["evidence"]["count"] == 2).count(), 1);
+    assert_eq!(
+        reopened
+            .read("unattributed-activity", ReadOptions::default())
+            .unwrap()
+            .iter()
+            .filter(|e| e["call"]["evidence"]["count"] == 2)
+            .count(),
+        1
+    );
 }
 
 #[test]
@@ -90,7 +109,10 @@ fn patch_evidence_uses_committed_report_and_never_a_failed_patch_body() {
     assert!(changes[0]["path"].as_str().unwrap().ends_with("made.txt"));
     let broken = f.invoke("apply_patch", json!({"patch":"garbled patch body"}));
     assert_eq!(broken["isError"], true, "{broken}");
-    assert_eq!(f.recent("apply_patch")["call"]["evidence"]["changes"], json!([]));
+    assert_eq!(
+        f.recent("apply_patch")["call"]["evidence"]["changes"],
+        json!([])
+    );
 }
 
 #[test]
@@ -135,7 +157,10 @@ fn actual_process_exit_and_background_are_recorded_from_structured_status() {
 fn shell_intercepted_patch_has_change_evidence_without_phantom_process() {
     let f = Fixture::new(true);
     let command = "apply_patch <<'PATCH'\n*** Begin Patch\n*** Add File: intercepted.txt\n+public\n*** End Patch\nPATCH";
-    let result = f.invoke("exec_command", json!({"cmd":command,"login":false,"yield_time_ms":1000}));
+    let result = f.invoke(
+        "exec_command",
+        json!({"cmd":command,"login":false,"yield_time_ms":1000}),
+    );
     assert_ne!(result["isError"], true, "{result}");
     assert!(f.root.path().join("intercepted.txt").exists());
     assert!(result.get("_recordingEvidence").is_none());
