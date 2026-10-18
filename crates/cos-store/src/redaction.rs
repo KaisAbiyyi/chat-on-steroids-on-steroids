@@ -128,6 +128,7 @@ fn patterns() -> &'static Vec<Regex> {
         [
             // Key-value leaks in command lines, output or error messages.
             r#"(?i)\b(?:password|passwd|pwd|token|secret|api[_-]?key|client[_-]?secret|access[_-]?token|refresh[_-]?token)["']?\s*[:=]\s*["']?[^\s,;"']+"#,
+            r#"(?i)\b[A-Za-z][A-Za-z0-9_]*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_KEY|ACCESS_KEY|PRIVATE_KEY|CLIENT_SECRET)\s*[:=]\s*["']?[^\s,;"']+"#,
             r"(?i)\b(?:authorization|proxy-authorization)\s*[:=]\s*(?:bearer|basic)?\s*\S+",
             r"(?s)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
             r"(?-u:\b)ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}(?-u:\b)",
@@ -266,6 +267,8 @@ mod tests {
         );
         assert!(!clean.contains("RESULT_SECRET_321"));
         assert!(clean.contains("ok"));
+        let env = result("exec_command", &json!({}), "OPENAI_API_KEY=ENV_RESULT_SECRET");
+        assert!(!env.contains("ENV_RESULT_SECRET"));
     }
 
     #[test]
