@@ -225,7 +225,8 @@ fn recorder_restart_does_not_revive_completed_turn_and_unproved_call_stays_unatt
         .unwrap();
     assert_ne!(call["sessionId"], id);
     assert_eq!(call["call"]["attributionMethod"], "unattributed");
-    assert_eq!(model::event_tokens(&call["event"]), 11);
+    assert_eq!(call["call"]["summary"]["title"], "Read 0 paths");
+    assert_eq!(model::event_tokens(&call["event"]), 13);
 }
 #[test]
 fn search_export_and_estimates_preserve_body_and_model_attribution() {
