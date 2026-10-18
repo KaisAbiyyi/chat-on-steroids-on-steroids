@@ -85,6 +85,13 @@ protocol metadata and exercises find through the isolated code worker. Public fi
 profiles live under workspace `.test-tmp/`. Both directory-order inputs are captured; the actual
 filesystem input selects the oracle without changing result counts or response acceptance.
 
+`python tools/qualify-session.py --binary <service.exe> --output audit/<date>/<receipt>.json`
+checks actual CLI Markdown payloads against the original export function and named model/title
+metadata fields against source steps. It uses new marked profiles under workspace `.test-tmp/`.
+Its receipt lists three store-API-only cases separately: two non-finite times and an explicit owner
+lookup that is a different operation from recorder conversation routing. All 17 store API steps
+remain covered by native tests. Clipboard/dialog and full desktop acceptance are separate.
+
 `node tools/qualify-project-files.mjs [binary]` compares public native files against selected pinned
 source declarations. It requires the upstream development dependencies, including Babel's parser,
 esbuild and Sharp; ordinary Rust tests need none of these JavaScript packages. It records exact

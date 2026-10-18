@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "sourceCommit": "209462da5deeb1dd26a9442f0d7f17b538c15129",
+  "scope": "Actual native Linux execution of an isolated Git archive; host working-tree changes excluded",
+  "rustImage": "rust@sha256:8514999d4786ef12efe89239e86b3d0a021b94b9d35108c8efe6c79ca7dc1a65",
+  "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+  "checks": {
+    "workspaceTests": 0,
+    "format": 0,
+    "clippy": 0
+  },
+  "checkout": "/work/checkouts/209462da5dee-2c0cbd9c04bd420896de367adf41b1b3",
+  "kernel": "Linux 6.6.87.1-microsoft-standard-WSL2 x86_64 GNU/Linux",
+  "tests": {
+    "passed": 227,
+    "failed": 0,
+    "ignored": 0
+  },
+  "log": "audit/2026-10-18/linux-session-content-receipt.log",
+  "logSha256": "2291ff59ef0ef9af308d03080b08714443fcfca851eb577bab68b7ad4d5caa9a",
+  "storage": {
+    "hostTemporaryDirectory": "D:\\projects\\CoS-Rust\\.cache\\qualification",
+    "workspaceFreeBefore": 70939799552,
+    "systemFreeBefore": 40151920640,
+    "buildEnvironment": {
+      "CARGO_TARGET_DIR": "/work/target",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_TEST_DEBUG": "0"
+    },
+    "linuxCacheUsage": "1.4G\t/work/target"
+  },
+  "personalProfilesUsed": false,
+  "macOS": "HOLD by user request"
+}

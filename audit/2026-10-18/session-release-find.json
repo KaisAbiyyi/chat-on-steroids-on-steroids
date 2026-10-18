@@ -1,0 +1,97 @@
+{
+  "status": "PASS",
+  "sourceCommit": "209462da5deeb1dd26a9442f0d7f17b538c15129",
+  "scope": "Actual service executable, loopback MCP and isolated code worker using disposable public fixtures",
+  "binarySha256": "66fde14aa697af8a2f15f0bc934c236898859f5458de9866a0d0015e2b020d3d",
+  "binaryBytes": 12696576,
+  "corpus": "fixtures/upstream/phase1-6-closure/search-tool.json",
+  "corpusSha256": "2925ab33ab28330568aa826cbe4c1fc929828ea915871f5a0a574e3c8618f4fe",
+  "nativeLeftEntryOrder": [
+    "needle-left.txt",
+    "zz-large.txt"
+  ],
+  "checks": [
+    {
+      "name": "discovery retains independent search authority",
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "needle"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "needle",
+        "path": "/right"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "needle",
+        "path": "/right/needle-right.txt",
+        "mode": "content"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "absent",
+        "path": "/right/needle-right.txt"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "needle",
+        "path": "/left/zz-large.txt",
+        "mode": "content"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "needle",
+        "path": "/left/zz-large.txt",
+        "mode": "content",
+        "include": "*.rs"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "public",
+        "mode": "content",
+        "max_results": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "source registered find projection",
+      "args": {
+        "query": "needle",
+        "max_results": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "isolated code worker calls native find",
+      "status": "PASS"
+    },
+    {
+      "name": "service settles and exits normally",
+      "status": "PASS"
+    }
+  ],
+  "personalProfilesUsed": false,
+  "fullApplicationReady": false
+}

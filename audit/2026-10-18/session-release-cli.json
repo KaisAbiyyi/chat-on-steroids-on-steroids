@@ -1,0 +1,172 @@
+{
+  "status": "PASS",
+  "sourceCommit": "209462da5deeb1dd26a9442f0d7f17b538c15129",
+  "scope": "Actual release CLI using new marked public profiles; export text and named metadata fields only",
+  "binarySha256": "66fde14aa697af8a2f15f0bc934c236898859f5458de9866a0d0015e2b020d3d",
+  "binaryBytes": 12696576,
+  "corpora": {
+    "fixtures/upstream/phase1-6-closure/session-content.json": "fb2d55dbf204379ae92937f26497bc76d149011d6c6be0e5e68b478ae17382ce",
+    "fixtures/upstream/phase1-6-closure/session-model-selection.json": "60d03b468cd2e750ae5e83889657fc227166af4973265c859cd0f9a412484a1b"
+  },
+  "checks": [
+    {
+      "name": "source export text projection",
+      "case": "entities",
+      "scope": "session",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "entities",
+      "scope": "answer",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "drawn-table",
+      "scope": "session",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "drawn-table",
+      "scope": "answer",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "overflow",
+      "scope": "session",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "overflow",
+      "scope": "answer",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "incomplete",
+      "scope": "session",
+      "status": "PASS"
+    },
+    {
+      "name": "source export text projection",
+      "case": "incomplete",
+      "scope": "answer",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 0,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 1,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 2,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 4,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 5,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 6,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 7,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 10,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 11,
+      "operation": "restart",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 12,
+      "operation": "rebind",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 13,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 14,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 15,
+      "operation": "observe",
+      "status": "PASS"
+    },
+    {
+      "name": "source selection metadata projection",
+      "step": 16,
+      "operation": "restart",
+      "status": "PASS"
+    }
+  ],
+  "selectionApiOnlyCases": [
+    {
+      "step": 3,
+      "reason": "The store API names a session explicitly; an unknown recorder conversation would name a different session"
+    },
+    {
+      "step": 8,
+      "reason": "Non-finite Numbers are covered by the native API corpus; JSON cannot represent them"
+    },
+    {
+      "step": 9,
+      "reason": "Non-finite Numbers are covered by the native API corpus; JSON cannot represent them"
+    }
+  ],
+  "nativeApiCorpusSteps": 17,
+  "projectionFields": [
+    "title",
+    "titleSource",
+    "autoTitle",
+    "origin",
+    "selectedModel",
+    "conversationId",
+    "chatIds"
+  ],
+  "nativeClipboardDialog": "NOT RUN",
+  "personalProfilesUsed": false,
+  "fullApplicationReady": false
+}

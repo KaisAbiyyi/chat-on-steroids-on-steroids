@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "date": "2026-10-18",
+  "sourceCommit": "209462da5deeb1dd26a9442f0d7f17b538c15129",
+  "artifact": "Windows headless service/CLI",
+  "bytes": 12696576,
+  "mib": 12.1083984375,
+  "binarySha256": "66fde14aa697af8a2f15f0bc934c236898859f5458de9866a0d0015e2b020d3d",
+  "localArchive": "audit/2026-10-18/release-artifact/cos-rust-209462d.exe",
+  "buildCommand": "cargo build -p cos-app --release --locked -j1",
+  "buildReason": "Observed 2.30 GiB free physical memory; one job after Linux completed avoids parallel heavy builds",
+  "buildLog": "audit/2026-10-18-session-release-build.log",
+  "buildLogSha256": "2aaacac85fb44d352c997cf3d890f94030e3a7594d89df271850e8e60cafd70b",
+  "checks": {
+    "windowsRustTests": 237,
+    "linuxRustTests": 227,
+    "format": "PASS",
+    "windowsClippy": "PASS",
+    "linuxClippy": "PASS",
+    "releaseExecutable": {
+      "runtime": 17,
+      "files": 13,
+      "search": 11,
+      "sessions": 22
+    },
+    "releaseExecutableTotal": 63
+  },
+  "receipts": {
+    "runtime": "audit/2026-10-18/session-release-runtime.json",
+    "files": "audit/2026-10-18/session-release-project-files.json",
+    "search": "audit/2026-10-18/session-release-find.json",
+    "sessions": "audit/2026-10-18/session-release-cli.json"
+  },
+  "linuxReceipt": "audit/2026-10-18/linux-session-content-receipt.json",
+  "previousComparableService": {
+    "sourceCommit": "4a40c93703cd14588cbd1ef97585dbbb0e7133eb",
+    "bytes": 12502528
+  },
+  "increaseBytes": 194048,
+  "costScope": "Session title/metadata/recovery/activity, native observations, content/DIL and Markdown work together",
+  "exceptions": [
+    "QuickJS C interpreter",
+    "Tree-sitter C parser/scanner"
+  ],
+  "globalLosslessJson": "OPEN; refused unpaired outputs are not exactness passes",
+  "nativeClipboardDialog": "NOT RUN",
+  "fullApplicationReady": false,
+  "installerStartupRam": "NOT RUN",
+  "macOS": "HOLD by user request"
+}

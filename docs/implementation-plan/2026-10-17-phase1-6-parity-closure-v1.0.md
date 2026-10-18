@@ -393,3 +393,16 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   scientific notation and overflow. The escaped-marker corpus tests 199/200/201-unit boundaries.
   All eight actual source session/answer outcomes are compared, including incomplete-turn refusal.
   Cache 2.241 GiB; Windows assertions/resource limits unchanged. Exact Linux/release proof follows.
+- Exact content checkpoint `209462d`: **227 native Linux tests PASS**, formatting and strict Clippy,
+  shared cache 1.4 GiB. The Windows headless service is 12,696,576 bytes (12.108 MiB), +194,048 bytes
+  against `4a40c93` for the session work together. One build job was used after observing 2.30 GiB
+  free physical memory, after Linux completed. Source-linked executable qualification passes 63
+  runtime/file/search/session checks; native clipboard/dialog, installer and full desktop remain unrun.
+- Release session scope: eight complete export text/error outcomes and fourteen named selection-state
+  projections. The receipt explicitly lists three store-API-only cases (two non-finite times and one
+  explicit session-owner lookup) rather than treating them as the same recorder wire operation.
+  All 17 actual source store steps retain native library proof.
+- Task 5d investigation only: capture 343 actual summarizeToolCall/summarizeRunningCall cases,
+  eight shortPath cases and actual emptyEvidence. Four source results require unpaired strings.
+  No desktop/process/agent tool was executed to capture captions. Product caption/evidence integration
+  is not started; later recorder/provider/history work and the single whole-scope review remain open.

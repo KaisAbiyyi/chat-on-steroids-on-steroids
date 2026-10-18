@@ -69,3 +69,8 @@ includes 199/200/201-unit escaped continuation boundaries and all eight session/
 Keep three unpaired output refusals distinct from 119 exact content values/errors. No threshold or
 resource limit changed. Current-commit Linux/release evidence follows; this remains implementation
 evidence ahead of the single whole-scope review.
+Exact content commit `209462d` passes 227 Linux tests/strict checks and a 12.108 MiB Windows release
+with 63 executable/source checks. Session CLI projection fields and three API-only cases are named
+in the receipt; do not extrapolate them to whole recorder/browser parity. Native clipboard/dialog,
+installer/full desktop and whole-scope review remain unrun. Timeline caption investigation has only
+captured source fixtures (343 cases/eight paths); product integration has not started.

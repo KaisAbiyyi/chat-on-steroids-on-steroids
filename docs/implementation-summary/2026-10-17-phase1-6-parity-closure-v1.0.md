@@ -6,10 +6,10 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 ## Current result
 
-- Latest integrated checks: **237 Windows / 215 Linux tests PASS**, 0 failed/ignored, formatting and
-  strict Clippy PASS. Linux executed exact observation commit `caa234a`; Windows uses the lean profiles.
-- Windows service `4a40c93`: **11.923 MiB**, 41 executable/source checks PASS. Full desktop and installer
-  acceptance remain open. [Release receipt](../../audit/2026-10-18/search-release-receipt.json).
+- Latest integrated checks: **237 Windows / 227 Linux tests PASS**, 0 failed/ignored, formatting and
+  strict Clippy PASS. Linux executed exact content commit `209462d`; Windows uses the lean profiles.
+- Windows service `209462d`: **12.108 MiB**, 63 executable/source checks PASS. Full desktop and installer
+  acceptance remain open. [Release receipt](../../audit/2026-10-18/session-release-receipt.json).
 - Storage checkpoint: Cargo removed the verified 25.394 GiB development cache; a complete lean rebuild
   including Clippy uses **1.464 GiB**. Assertions, overflow checks and fixture limits are unchanged.
   [Cold-build receipt](../../audit/2026-10-18/windows-lean-profile-receipt.json).
@@ -31,8 +31,8 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 Latest integrated closure checkpoint: **237 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
 [Windows receipt](../../audit/2026-10-18/session-content-windows-receipt.json). Latest exact-commit Linux
-proof covers observation commit `caa234a`: **215 PASS**:
-[Linux receipt](../../audit/2026-10-18/linux-session-observation-receipt.json).
+proof covers content commit `209462d`: **227 PASS**:
+[Linux receipt](../../audit/2026-10-18/linux-session-content-receipt.json).
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -336,6 +336,26 @@ The Rust JSON archive is a separate extension. Global lossless JSON, bounded-ass
 broader recorder/provider/history branches and remaining plan tasks stay open. Exact observation
 commit `caa234a` passed **215 Linux tests**, formatting/strict Clippy, using the same **1.1 GiB** cache.
 Whole-scope independent review remains NOT RUN.
+
+## Session release and Linux checkpoint — 2026-10-18
+
+Exact commit `209462d` passed **227 native Linux tests**, formatting and strict Clippy, with a **1.4 GiB**
+shared cache. The Windows service is **12,696,576 bytes (12.108 MiB)**, SHA-256
+`66fde14aa697af8a2f15f0bc934c236898859f5458de9866a0d0015e2b020d3d`, +194,048 bytes versus
+`4a40c93` for all session work together. It was built with one job after observing 2.30 GiB free RAM;
+no heavy Linux build ran in parallel. The original archive and every older receipt remain.
+
+Actual executable qualification passed **63 checks**: 17 runtime, 13 project-file source comparisons,
+11 search/MCP/code-worker checks and 22 session CLI projections. The latter compare eight complete
+source export payloads/errors and fourteen named selection-state projections. Three other selection
+cases remain native API tests, explicitly listed in the receipt because non-finite JSON values and
+an explicit store-owner lookup differ from recorder routing. This is headless service proof;
+clipboard/dialog, installer, full desktop startup and RAM comparisons remain NOT RUN. macOS stays HOLD.
+
+Next Task 5 investigation captured **343 actual timeline/running-caption source cases** and eight
+short-path cases, with four unpaired-string cases recorded as code units. Product caption/evidence
+integration has **not started**; current recorder captions and broader provider/history branches remain
+open. See `fixtures/upstream/phase1-6-closure/session-summaries.json`. Whole-scope review stays NOT RUN.
 
 ## Documents
 
