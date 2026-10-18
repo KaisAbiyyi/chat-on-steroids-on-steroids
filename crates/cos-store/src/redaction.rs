@@ -29,6 +29,7 @@ fn sensitive_key(key: &str) -> bool {
         "accesskey",
         "sshkey",
         "authheader",
+        "bearer",
     ]
     .iter()
     .any(|part| name.contains(part))
@@ -126,9 +127,10 @@ fn patterns() -> &'static Vec<Regex> {
     PATTERNS.get_or_init(|| {
         [
             // Key-value leaks in command lines, output or error messages.
-            r#"(?i)\b(?:password|passwd|pwd|token|secret|api[_-]?key|client[_-]?secret|access[_-]?token|refresh[_-]?token)\s*[:=]\s*["']?[^\s,;"']+"#,
+            r#"(?i)\b(?:password|passwd|pwd|token|secret|api[_-]?key|client[_-]?secret|access[_-]?token|refresh[_-]?token)["']?\s*[:=]\s*["']?[^\s,;"']+"#,
             r"(?i)\b(?:authorization|proxy-authorization)\s*[:=]\s*(?:bearer|basic)?\s*\S+",
             r"(?s)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
+            r"(?-u:\b)ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}(?-u:\b)",
             r"(?i)data:[^\s;,]+;base64,[A-Za-z0-9+/=_-]+",
             r"(?-u:\b)[A-Za-z0-9+/]{96,}={0,2}(?-u:\b)",
         ]
