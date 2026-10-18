@@ -7,7 +7,7 @@ use cos_store::{
 use serde_json::{Value, json};
 use std::{fs, path::Path, sync::Arc};
 
-fn recorder(path: &Path) -> (SessionStore, Recorder) {
+fn open_recorder(path: &Path) -> (SessionStore, Recorder) {
     let store = SessionStore::open(path).unwrap();
     let durable = DurableStore::open(path).unwrap();
     let registry = Arc::new(Correlations::restore(durable, &store).unwrap());
@@ -42,7 +42,7 @@ fn recorder_redacts_before_inline_journal_and_asset_persistence_even_after_resta
         "env-sentinel-unique-001", "clipboard-sentinel-002", "password-sentinel-003",
         "token-sentinel-004", "binary-sentinel-005", "result-secret-sentinel-006",
     ];
-    let (store, recorder) = recorder(temp.path());
+    let (store, recorder) = open_recorder(temp.path());
     let args = json!({
         "path": "/public/a.txt",
         "env": {"HOME":"env-sentinel-unique-001", "PUBLIC_SETTING":"normal"},
@@ -51,7 +51,7 @@ fn recorder_redacts_before_inline_journal_and_asset_persistence_even_after_resta
         "actions":[{"type":"write_clipboard","text":"clipboard-sentinel-002"}]
     });
     let long_result = format!(
-        "{} result-secret-sentinel-006; Authorization: Bearer inline-token",
+        "{} token=result-secret-sentinel-006; Authorization: Bearer inline-token",
         "safe output ".repeat(1000)
     );
     let out = recorder.record_call("unknown", "computer", args, &long_result, 200, "ok").unwrap();
@@ -72,7 +72,7 @@ fn recorder_redacts_before_inline_journal_and_asset_persistence_even_after_resta
 
     // Cold reopen is essential: a clean API projection can still hide a raw
     // JSONL record or an overflow asset containing the original payload.
-    let (reopened, _) = recorder(temp.path());
+    let (reopened, _) = open_recorder(temp.path());
     let events = reopened.read(&id, ReadOptions::default()).unwrap();
     let event = events.iter().find(|event| event["kind"] == "tool_call").unwrap();
     assert_no_secrets(&event.to_string(), &secrets);
@@ -85,7 +85,7 @@ fn recorder_redacts_before_inline_journal_and_asset_persistence_even_after_resta
 #[test]
 fn clipboard_reads_and_binary_payloads_fail_closed_in_recorded_events() {
     let temp = tempfile::tempdir().unwrap();
-    let (_, recorder) = recorder(temp.path());
+    let (_, recorder) = open_recorder(temp.path());
     let clipboard = recorder.record_call(
         "", "read_clipboard", json!({"format":"text"}),
         "SECRET_READ_CLIPBOARD_SENTINEL", 300, "ok"
@@ -119,7 +119,7 @@ fn clipboard_reads_and_binary_payloads_fail_closed_in_recorded_events() {
 #[test]
 fn non_sensitive_execution_evidence_remains_recordable() {
     let temp = tempfile::tempdir().unwrap();
-    let (store, recorder) = recorder(temp.path());
+    let (store, recorder) = open_recorder(temp.path());
     let event = recorder.record_call(
         "request-public", "exec_command",
         json!({"cmd":"printf hello", "workdir":"/project/public"}),
