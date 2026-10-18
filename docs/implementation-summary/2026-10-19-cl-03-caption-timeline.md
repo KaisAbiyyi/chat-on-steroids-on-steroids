@@ -1,6 +1,6 @@
 # CL-03 — Activity captions and durable timeline (2026-10-19)
 
-**Cloud unit:** [PR #6](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/6), based on `main` at `7d5bc0340cf6f6119524c548a9c2a49a3f08dd1d`. Acceptance requires exact PR head Windows/Ubuntu fmt, strict Clippy, full workspace tests and release build; unmerged work is not marked DONE.
+**Status: DONE & MERGED.** [PR #6](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/6), exact merged `main` SHA `0defa22aabe069172cad0ada142bab7d6b8f2a3a`. [CI run #109](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39153332105) PASS on reviewed PR head `eaa42a38761f8ff4eb1fee7cd89d67f0d9c3fd55`: Windows and Ubuntu formatting, strict Clippy, workspace tests and release build.
 
 ## Producer and persistence
 
