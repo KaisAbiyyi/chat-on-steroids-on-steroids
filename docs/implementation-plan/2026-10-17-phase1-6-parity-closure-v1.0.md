@@ -345,3 +345,27 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   unchanged baseline files confirms the cold activity without kind is null; events/recent are exact.
   Keep warm and cold assertions separately and the original failed receipt; no product/threshold
   change was needed. Current-commit Linux qualification follows. Recorder and remaining tasks stay open.
+- Exact session checkpoint `88c0867`: **209 native Linux tests PASS**, formatting and strict Clippy,
+  shared cache 1.1 GiB. The two Windows file-lock cases account for part of the platform-specific count.
+- Task 5 follow-up: source metadata read corpus adds four escaped-string inputs and seven native
+  byte-decoding inputs. Two functional RED failures reproduced a valid source unpaired string being
+  mistaken for damage/answered from an older backup, and Node-compatible UTF-8 decoding being skipped.
+  Both focused regressions are now GREEN. The unpaired primary is explicitly Unsupported before any
+  fallback or replacement, preserving both files; paired/literal escapes and byte decoding match source.
+  This protects data while keeping global unpaired JSON exactness OPEN. Integrated proof follows.
+- Task 5 recorder/model subset: 17 actual observeSessionModel operations qualify current-conversation
+  and observed-time authority, format checks, non-finite/repeated values, rebind and restart. Native
+  recorder tests reproduced unsupported presentation kinds and rejected raw request text, then passed
+  after typed metadata routing and native text/authored-time handling. Provider title promotion runs
+  after canonical writes, preserving desktop/manual/project-page rules. Publication uses the existing
+  fence and durable summary owner; a failed write leaves the committed selection unchanged.
+- A further functional rebind test exposed recursive locking of the recorder binding cache. Its
+  five-second bound demonstrated RED; copying the binding before session lookup/removal passed GREEN.
+  Retired or disabled model observations leave the replacement's selection unchanged. The failed
+  unbounded attempt and bounded failure are retained. Broad source recorder/proof branches are still
+  open; this routing subset does not qualify the later browser producer or inferred ownership.
+- Combined metadata-string/recorder checkpoint: **225 native Windows tests PASS**, 0 failed/ignored,
+  formatting and strict Clippy PASS. Initial full tests passed but strict Clippy rejected a redundant
+  default struct update; removing that syntax and rerunning the entire suite passed. Both receipts
+  are retained. Windows cache 1.728 GiB; no assertions, timeouts or file-size limits were relaxed.
+  Linux exact-commit proof follows; content/DIL/Markdown projection work is next within Task 5.

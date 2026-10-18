@@ -122,7 +122,14 @@ fn read_checkpoint(path: &Path, id: &str) -> io::Result<Option<summary::Checkpoi
     if bytes.len() as u64 > LIMIT {
         return Ok(None);
     }
-    Ok(serde_json::from_slice(&bytes)
+    let text = String::from_utf8_lossy(&bytes);
+    if summary::requires_lossless_strings(&text) {
+        return Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "Session metadata requires lossless unpaired UTF-16 JSON strings; original files retained",
+        ));
+    }
+    Ok(serde_json::from_str(&text)
         .ok()
         .and_then(|raw| summary::normalize(id, raw)))
 }
@@ -313,6 +320,7 @@ impl SessionStore {
         let meta = self.path(id, "meta.json", true)?;
         let checkpoint = match read_checkpoint(&meta, id) {
             Ok(Some(checkpoint)) => Some(checkpoint),
+            Err(error) if error.kind() == io::ErrorKind::Unsupported => return Err(error),
             primary => match read_checkpoint(&self.path(id, "meta.backup.json", true)?, id) {
                 Ok(Some(checkpoint)) => Some(checkpoint),
                 backup => match (primary, backup) {
@@ -1122,6 +1130,49 @@ impl SessionStore {
             entry.dirty = false;
         }
         Ok(entry.summary.clone())
+    }
+    pub fn observe_model(
+        &self,
+        id: &str,
+        conversation: &str,
+        model_name: &str,
+        observed_at: f64,
+        reasoning: Option<&str>,
+    ) -> io::Result<bool> {
+        if !observed_at.is_finite()
+            || model_name.is_empty()
+            || model_name.len() > 80
+            || !model_name
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b" ._-".contains(&b))
+        {
+            return Ok(false);
+        }
+        let owner = self.entry(id)?;
+        let mut entry = lock(&owner)?;
+        if entry.summary["conversationId"] != conversation
+            || observed_at
+                < entry.summary["selectedModel"]["observedAt"]
+                    .as_f64()
+                    .unwrap_or(0.0)
+        {
+            return Ok(false);
+        }
+        let mut selected = model::javascript_numbers(
+            json!({"conversationId":conversation,"model":model_name,"observedAt":observed_at}),
+        );
+        if let Some(reasoning) = reasoning.filter(|r| !r.is_empty()) {
+            selected["reasoningEffort"] = json!(reasoning);
+        }
+        if entry.summary["selectedModel"] == selected {
+            return Ok(false);
+        }
+        let mut staged = entry.summary.clone();
+        staged["selectedModel"] = selected;
+        self.save_summary(id, &staged, entry.next - 1)?;
+        entry.summary = staged;
+        entry.dirty = false;
+        Ok(true)
     }
     pub fn update_metadata(&self, id: &str, edit: impl FnOnce(&mut Value)) -> io::Result<Value> {
         let owner = self.entry(id)?;

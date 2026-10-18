@@ -45,3 +45,15 @@ run (123 PASS / 1 FAIL) is retained: a historical restart assertion used a warm 
 execution of the unchanged source files confirms the cold difference, with identical events/recent.
 The test now compares both complete source states and hashes the exact historical input. Review this
 oracle correction separately from implementation. Whole-scope independent review remains **NOT RUN**.
+Exact commit `88c0867` also passes 209 native Linux tests and strict checks. Subsequent metadata-string
+work must be qualified separately: verify escaped backslashes/paired surrogates are accepted, and an
+unrepresentable primary is refused before fallback or file replacement. Two focused native regressions
+pass after observed RED; the source has four string and seven byte-decoding inputs. Global lossless JSON
+remains OPEN. These notes do not substitute for the final whole-scope review.
+Model/recorder subset: inspect same-conversation/newest-time checks, duplicate/no-write behavior,
+metadata failure staging and the binding guard's lifetime after rebind. Seventeen actual source store
+steps and four native tests cover the implemented routing subset; the five-second deadlock regression
+must remain bounded. Broader recorder activity, proof and superseded-prose semantics remain open.
+The combined metadata/observation checkpoint passes **225 native Windows tests**, formatting and
+strict Clippy. Retain the prior Clippy failure (all tests passed) and complete rerun separately.
+Linux current-commit qualification follows; existing 209-test proof applies only to `88c0867`.

@@ -1,0 +1,899 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "src/main/session/title.ts": "6a7428d3ea7b82c608042f062c323e553055db20fed0c85d1bd3dcdbe2fc9336",
+    "src/shared/user-prompt.ts": "bb102c51ad93c493f686fdb7d9a86a0c2a1ce99bfea018b619fd53788e5be8a5",
+    "src/main/session/store.ts": "a3450d17f79b7a888f0fed7faae19dedaa4dd7ad17cd604a11f4e1452ac00653"
+  },
+  "id": "session-model-selection-public",
+  "scope": "Actual persistent observeSessionModel operations, restart and rebind; non-finite times explicitly described",
+  "selection": [
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-5",
+          "observedAt": 5
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-old",
+          "model": "gpt-5",
+          "observedAt": 100
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "",
+          "observedAt": 20
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "observedAt": 20
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "é",
+          "observedAt": 20
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "nonFinite": "NaN"
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "nonFinite": "Infinity"
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 10,
+          "reasoningEffort": "high"
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6-sol",
+          "observedAt": 15.5,
+          "reasoningEffort": ""
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6-sol",
+          "observedAt": 15.5
+        }
+      }
+    },
+    {
+      "operation": [
+        "restart"
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-public",
+        "chatIds": [
+          "conversation-public"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6-sol",
+          "observedAt": 15.5
+        }
+      }
+    },
+    {
+      "operation": [
+        "rebind",
+        {
+          "from": "conversation-public",
+          "to": "conversation-new"
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-new",
+        "chatIds": [
+          "conversation-public",
+          "conversation-new"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6-sol",
+          "observedAt": 15.5
+        },
+        "retiredChatAt": {
+          "conversation-public": 1792108800000
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-public",
+          "model": "gpt-6",
+          "observedAt": 100
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-new",
+        "chatIds": [
+          "conversation-public",
+          "conversation-new"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6-sol",
+          "observedAt": 15.5
+        },
+        "retiredChatAt": {
+          "conversation-public": 1792108800000
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-new",
+          "model": "gpt-6",
+          "observedAt": 1
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-new",
+        "chatIds": [
+          "conversation-public",
+          "conversation-new"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-public",
+          "model": "gpt-6-sol",
+          "observedAt": 15.5
+        },
+        "retiredChatAt": {
+          "conversation-public": 1792108800000
+        }
+      }
+    },
+    {
+      "operation": [
+        "observe",
+        {
+          "conversationId": "conversation-new",
+          "model": "gpt-6",
+          "observedAt": 20,
+          "reasoningEffort": "low"
+        }
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-new",
+        "chatIds": [
+          "conversation-public",
+          "conversation-new"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-new",
+          "model": "gpt-6",
+          "observedAt": 20,
+          "reasoningEffort": "low"
+        },
+        "retiredChatAt": {
+          "conversation-public": 1792108800000
+        }
+      }
+    },
+    {
+      "operation": [
+        "restart"
+      ],
+      "expected": {
+        "id": "session-model-selection-public",
+        "title": "ChatGPT session",
+        "conversationId": "conversation-new",
+        "chatIds": [
+          "conversation-public",
+          "conversation-new"
+        ],
+        "startedAt": 1792108800000,
+        "updatedAt": 1792108800000,
+        "endedAt": null,
+        "events": 0,
+        "timelineTurns": {},
+        "nativeQuestion": null,
+        "requestTurns": {},
+        "userMessages": 0,
+        "toolCalls": 0,
+        "lastToolCallAt": null,
+        "lastToolActivity": null,
+        "lastAssistantFinalAt": null,
+        "lastTurnEndAt": null,
+        "lastFinishReportAt": null,
+        "processExitNonzero": 0,
+        "toolRejected": 0,
+        "toolInternalErrors": 0,
+        "errors": 0,
+        "estimatedTokens": 0,
+        "contextTokens": 0,
+        "lastHandoffId": null,
+        "lastHandoffAt": null,
+        "lastCommittedResumeHandoffId": null,
+        "lastTurnOutcome": null,
+        "activeTurnId": null,
+        "finishTurn": null,
+        "agents": [],
+        "origin": null,
+        "selectedModel": {
+          "conversationId": "conversation-new",
+          "model": "gpt-6",
+          "observedAt": 20,
+          "reasoningEffort": "low"
+        },
+        "retiredChatAt": {
+          "conversation-public": 1792108800000
+        }
+      }
+    }
+  ]
+}

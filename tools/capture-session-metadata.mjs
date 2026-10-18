@@ -47,6 +47,18 @@ capture('bad-lineage', {retiredChatAt: [], lastCommittedResumeHandoffId: 'bad!'}
 capture('invalid-times', {lastToolCallAt: '3', lastAssistantFinalAt: {}, lastTurnEndAt: false, lastFinishReportAt: null});
 capture('wrong-id', {id: 'other-session'});
 const rawCases = ['{broken', 'null', '[]', '42'].map(raw => ({raw, expected: api.normalizeSummary(id, raw)}));
+const losslessCases = [];
+for (const encodedTitle of ['lone\\ud800', 'lone\\udfff', 'paired\\ud83d\\ude00', 'literal\\\\ud800']) {
+  const raw = JSON.stringify({...base, title: 'public-title-placeholder', titleSource: 'manual'}).replace('public-title-placeholder', encodedTitle);
+  const normalized = api.normalizeSummary(id, raw);
+  const text = normalized.summary.title;
+  losslessCases.push({raw, expectedTitleUnits: Array.from({length: text.length}, (_, i) => text.charCodeAt(i)), needsLosslessString: !text.isWellFormed()});
+}
+const [prefix, suffix] = JSON.stringify({...base, title: 'public-byte-placeholder', titleSource: 'manual'}).split('public-byte-placeholder');
+const encodedCases = [[255], [0xe2, 0x82], [0xed, 0xa0, 0x80], [0xc0, 0xaf], [0xf0, 0x9f], [0xf0, 0x9f, 0x98, 0x80], [0]].map(bytes => {
+  const raw = Buffer.concat([Buffer.from(prefix + 'raw'), Buffer.from(bytes), Buffer.from('value' + suffix)]);
+  return {rawBytes: raw.toString('base64'), expected: api.normalizeSummary(id, raw.toString('utf8'))};
+});
 const cache = path.join(upstream, 'node_modules/.cache/cos-rust-oracle/session-metadata');
 await fs.mkdir(cache, {recursive: true});
 const config = JSON.parse(await fs.readFile(path.join(root, 'fixtures/upstream/config-defaults.json'), 'utf8')).win32;
@@ -62,15 +74,19 @@ const temporaryRoot = path.join(root, '.test-tmp');
 await fs.mkdir(temporaryRoot, {recursive: true});
 const profile = await fs.mkdtemp(path.join(temporaryRoot, 'cos-rust-public-metadata-oracle-'));
 try {
-  for (const [index, row] of [...cases, ...rawCases].entries()) {
+  for (const [index, row] of [...cases, ...rawCases, ...losslessCases, ...encodedCases].entries()) {
     const home = path.join(profile, 'case-' + index);
     const session = path.join(home, 'sessions', id);
     await fs.mkdir(session, {recursive: true});
     await fs.writeFile(path.join(session, 'events.jsonl'), '');
     await fs.writeFile(path.join(session, 'messages.json'), '{}');
-    await fs.writeFile(path.join(session, 'meta.json'), typeof row.raw === 'string' ? row.raw : JSON.stringify(row.raw));
+    await fs.writeFile(path.join(session, 'meta.json'), row.rawBytes === undefined ? (typeof row.raw === 'string' ? row.raw : JSON.stringify(row.raw)) : Buffer.from(row.rawBytes, 'base64'));
     store.initSessionStore(home);
-    row.storeExpected = await store.getSession(id);
+    const result = await store.getSession(id);
+    if ('needsLosslessString' in row) {
+      const text = result.title;
+      row.storeTitleUnits = Array.from({length: text.length}, (_, i) => text.charCodeAt(i));
+    } else row.storeExpected = result;
     store.resetSessionStoreForTests();
   }
 } finally {
@@ -80,5 +96,5 @@ try {
   await fs.rm(resolved, {recursive: true});
 }
 const output = path.join(root, 'fixtures/upstream/phase1-6-closure/session-metadata.json');
-await fs.writeFile(output, JSON.stringify({upstreamCommit: commit, sources: {[relative]: createHash('sha256').update(source).digest('hex')}, id, base, cases, rawCases}, null, 2) + '\n');
+await fs.writeFile(output, JSON.stringify({upstreamCommit: commit, sources: {[relative]: createHash('sha256').update(source).digest('hex')}, id, base, cases, rawCases, losslessCases, encodedCases}, null, 2) + '\n');
 console.log(JSON.stringify({cases: cases.length, damagedCases: rawCases.length, output}));

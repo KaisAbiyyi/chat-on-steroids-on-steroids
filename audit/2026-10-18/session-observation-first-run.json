@@ -1,0 +1,18 @@
+{
+  "status": "FAIL",
+  "baseCommit": "88c0867a1ffa5816b959dd7987ff1895b2668d95",
+  "checks": {
+    "format": 0,
+    "workspaceTests": 0,
+    "strictClippy": 101
+  },
+  "tests": {
+    "passed": 225,
+    "failed": 0,
+    "ignored": 0
+  },
+  "reason": "Strict Clippy rejected a redundant struct update after every UpsertOptions field was explicitly supplied. Removed only the redundant default and reran the complete suite and strict checks.",
+  "log": "audit/2026-10-18-session-observation-workspace.log",
+  "logSha256": "f0961b309a7c6c7537cd99eff5a7c81be6660876755a78ddf7512be39c99b44f",
+  "subsequentReceipt": "audit/2026-10-18/session-observation-windows-receipt.json"
+}

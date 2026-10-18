@@ -87,6 +87,7 @@ const profile = await fs.mkdtemp(path.join(temporaryRoot, 'cos-rust-public-title
 const nativeNow = Date.now;
 const recovery = [];
 let historicalRestart;
+const selection = [];
 Date.now = () => 1792108800000;
 try {
   store.initSessionStore(profile);
@@ -107,6 +108,32 @@ try {
     }
     scenario.events = await store.readEvents(id);
     delete scenario.operations;
+  }
+  const selectionId = 'session-model-selection-public';
+  await store.createSession({reservedId: selectionId, conversationId: 'conversation-public'});
+  for (const operation of [
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6', observedAt: 10}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6', observedAt: 10}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-5', observedAt: 5}],
+    ['observe', {conversationId: 'conversation-old', model: 'gpt-5', observedAt: 100}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6', observedAt: 10, reasoningEffort: 'high'}],
+    ['observe', {conversationId: 'conversation-public', model: '', observedAt: 20}],
+    ['observe', {conversationId: 'conversation-public', model: 'a'.repeat(81), observedAt: 20}],
+    ['observe', {conversationId: 'conversation-public', model: 'é', observedAt: 20}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6', nonFinite: 'NaN'}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6', nonFinite: 'Infinity'}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6-sol', observedAt: 15.5, reasoningEffort: ''}],
+    ['restart'], ['rebind', {from: 'conversation-public', to: 'conversation-new'}],
+    ['observe', {conversationId: 'conversation-public', model: 'gpt-6', observedAt: 100}],
+    ['observe', {conversationId: 'conversation-new', model: 'gpt-6', observedAt: 1}],
+    ['observe', {conversationId: 'conversation-new', model: 'gpt-6', observedAt: 20, reasoningEffort: 'low'}],
+    ['restart'],
+  ]) {
+    const [kind, input] = operation;
+    if (kind === 'observe') await store.observeSessionModel(selectionId, input.conversationId, input.model, input.nonFinite ? Number(input.nonFinite) : input.observedAt, input.reasoningEffort);
+    else if (kind === 'rebind') await store.rebindSession(selectionId, input.from, input.to);
+    else {await store.flushSessions(); store.resetSessionStoreForTests(); store.initSessionStore(profile);}
+    selection.push({operation, expected: await store.getSession(selectionId)});
   }
   for (const mode of ['stale-message', 'stale-after-rebind', 'missing-outcome-counters']) {
     const id = 'session-recovery-' + mode;
@@ -164,4 +191,5 @@ const output = path.join(root, 'fixtures/upstream/phase1-6-closure/session-title
 await fs.writeFile(output, JSON.stringify({upstreamCommit: commit, scope: 'Actual title/prompt functions and actual persistent store; only config and diagnostics injected; public disposable profile', sources: manifest, promptCases, userCases, refreshCases, scenarios}, null, 2) + '\n');
 await fs.writeFile(path.join(root, 'fixtures/upstream/phase1-6-closure/session-recovery.json'), JSON.stringify({upstreamCommit: commit, sources: manifest, scope: 'Actual source durable recovery from stale public checkpoints and canonical shards; metadata-only future fields retained', recovery}, null, 2) + '\n');
 await fs.writeFile(path.join(root, 'fixtures/upstream/phase1-6-closure/session-history-restart.json'), JSON.stringify({upstreamCommit: commit, sources: manifest, scope: 'Actual source cold load of the unchanged historical baseline files; warm output remains in the original fixture', ...historicalRestart}, null, 2) + '\n');
+await fs.writeFile(path.join(root, 'fixtures/upstream/phase1-6-closure/session-model-selection.json'), JSON.stringify({upstreamCommit: commit, sources: manifest, id: 'session-model-selection-public', scope: 'Actual persistent observeSessionModel operations, restart and rebind; non-finite times explicitly described', selection}, null, 2) + '\n');
 console.log(JSON.stringify({promptCases: promptCases.length, userCases: userCases.length, refreshCases: refreshCases.length, storeSteps: scenarios.reduce((n, scenario) => n + scenario.steps.length, 0), output}));

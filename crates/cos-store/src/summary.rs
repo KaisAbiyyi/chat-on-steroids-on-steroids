@@ -1,6 +1,42 @@
 //! Validated metadata is a checkpoint, never a replacement for unreadable history.
 use serde_json::{Value, json};
 
+/// Detect the JSON string representation serde_json cannot own, before a valid
+/// source checkpoint could be mistaken for damaged metadata and overwritten.
+pub(crate) fn requires_lossless_strings(text: &str) -> bool {
+    fn escaped_unit(bytes: &[u8], at: usize) -> Option<u16> {
+        let encoded = bytes.get(at..at.checked_add(6)?)?;
+        if &encoded[..2] != b"\\u" || !encoded[2..].iter().all(u8::is_ascii_hexdigit) {
+            return None;
+        }
+        u16::from_str_radix(std::str::from_utf8(&encoded[2..]).ok()?, 16).ok()
+    }
+    let bytes = text.as_bytes();
+    let mut inside = false;
+    let mut at = 0;
+    while let Some(byte) = bytes.get(at) {
+        if *byte == b'"' {
+            inside = !inside;
+            at += 1;
+        } else if inside && *byte == b'\\' {
+            match escaped_unit(bytes, at) {
+                Some(0xd800..=0xdbff) => {
+                    if !matches!(escaped_unit(bytes, at + 6), Some(0xdc00..=0xdfff)) {
+                        return true;
+                    }
+                    at += 12;
+                }
+                Some(0xdc00..=0xdfff) => return true,
+                Some(_) => at += 6,
+                None => at += 2,
+            }
+        } else {
+            at += 1;
+        }
+    }
+    false
+}
+
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Checkpoint {

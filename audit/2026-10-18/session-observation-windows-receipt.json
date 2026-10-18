@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "baseCommit": "88c0867a1ffa5816b959dd7987ff1895b2668d95",
+  "scope": "Native Windows integrated workspace with data-preserving metadata string refusal, source UTF8 decoding and model/title/raw-message observations",
+  "command": "python tools/check-workspace.py --strict",
+  "checks": {
+    "format": 0,
+    "workspaceTests": 0,
+    "strictClippy": 0
+  },
+  "tests": {
+    "passed": 225,
+    "failed": 0,
+    "ignored": 0
+  },
+  "sha256": {
+    "crates/cos-store/src/summary.rs": "d84390753e0c34f76f5757fc16fbf99318a84a5f1cc7a8bc13cbb78ab78746c7",
+    "crates/cos-store/src/store.rs": "976db91b4fb4f50e8258eea1cd64aa22d680ad4289fa20b51728aedcea120ecc",
+    "crates/cos-store/src/recorder.rs": "f707f5471e9e6ff9b3bac62410d8dd95bff70d0f8fbf4a2cb37d3892dc66b969",
+    "fixtures/upstream/phase1-6-closure/session-metadata.json": "6d88a5f6f4fb3ec0ee099d60135f0b78e1c71a7b5d2e2410b7e148512f3724e9",
+    "fixtures/upstream/phase1-6-closure/session-model-selection.json": "60d03b468cd2e750ae5e83889657fc227166af4973265c859cd0f9a412484a1b"
+  },
+  "sourceCorpus": {
+    "selectionSteps": 17,
+    "stringCases": 4,
+    "stringsExact": 2,
+    "unpairedStringsRefusedGap": 2,
+    "byteDecodingCases": 7
+  },
+  "nativeEvidence": [
+    "unchanged primary and backup on unrepresentable input",
+    "paired/literal escapes accepted",
+    "same-conversation and newest-time authority",
+    "durable write before model selection publication",
+    "retired/disabled observation refusal",
+    "five-second recursive-lock regression RED to GREEN",
+    "raw text framing and authored-time correction"
+  ],
+  "log": "audit/2026-10-18-session-observation-workspace-2.log",
+  "logSha256": "6e7bcd29039c7e04d6e7813903bccdf87e94b79aabadd5e153647660cf4449c1",
+  "storage": {
+    "debugSymbols": 0,
+    "incremental": false,
+    "cacheBytes": 1855679135,
+    "workspaceFree": 71530590208,
+    "systemFree": 40249270272
+  },
+  "wholeScopeReview": "NOT RUN",
+  "globalLosslessJson": "OPEN",
+  "macOS": "HOLD by user request"
+}

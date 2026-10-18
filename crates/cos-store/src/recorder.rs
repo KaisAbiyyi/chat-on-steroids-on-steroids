@@ -46,7 +46,8 @@ impl Recorder {
         if conversation.is_empty() || conversation.len() > 200 {
             return Err(invalid("Invalid observed conversation id"));
         }
-        if let Some(id) = lock(&self.bindings)?.get(conversation).cloned() {
+        let bound = { lock(&self.bindings)?.get(conversation).cloned() };
+        if let Some(id) = bound {
             let summary = self.store.summary(&id)?;
             if summary
                 .as_ref()
@@ -106,12 +107,27 @@ impl Recorder {
                 ends.insert(turn);
             }
         }
+        let mut page_title = None;
         for observation in observations {
             let mut event = observation.clone();
             event["source"] = json!("extension");
             event["conversationId"] = json!(conversation);
             let turn = string(&event, "turnId").to_owned();
             match string(&event, "kind") {
+                "conversation_title" => {
+                    page_title = observation["text"].as_str();
+                }
+                "model_selection" => {
+                    if let Some(model) = event["model"].as_str() {
+                        self.store.observe_model(
+                            &id,
+                            conversation,
+                            model,
+                            event["time"].as_f64().unwrap_or(f64::NAN),
+                            event["reasoningEffort"].as_str(),
+                        )?;
+                    }
+                }
                 "turn_start" => {
                     if !turn.is_empty() && !starts.contains(&turn) && !ends.contains(&turn) {
                         self.store.append(&id, event)?;
@@ -125,6 +141,19 @@ impl Recorder {
                     }
                 }
                 "user_message" | "assistant_message" => {
+                    let prefer_time = event["authoredTime"] == true;
+                    if event.get("message").is_none() {
+                        if string(&event, "messageId").is_empty() {
+                            continue;
+                        }
+                        if event.get("text").is_some_and(|text| !text.is_string()) {
+                            return Err(invalid("Invalid native message text"));
+                        }
+                        let text = event["text"].as_str().unwrap_or("");
+                        event["message"] = json!({"text":text,"truncated":false,"chars":text.encode_utf16().count()});
+                        event.as_object_mut().unwrap().remove("text");
+                        event.as_object_mut().unwrap().remove("authoredTime");
+                    }
                     let final_message =
                         event["kind"] == "assistant_message" && model::terminal(&event);
                     if let Some(text) = event["message"]["text"].as_str()
@@ -144,9 +173,9 @@ impl Recorder {
                         &id,
                         event,
                         UpsertOptions {
+                            prefer_time,
                             now: Some(at),
                             work: Some(!ends.contains(&turn)),
-                            ..Default::default()
                         },
                     )?;
                     if final_message && starts.contains(&turn) && !ends.contains(&turn) {
@@ -159,6 +188,17 @@ impl Recorder {
                 }
                 _ => return Err(invalid("Unsupported browser observation kind")),
             }
+        }
+        if let Some(title) = page_title
+            .map(cos_core::config::js_trim)
+            .filter(|s| !s.is_empty())
+        {
+            self.store.rename(
+                &id,
+                title,
+                crate::title::TitleSource::Provider,
+                Some(conversation),
+            )?;
         }
         Ok(Some(id))
     }

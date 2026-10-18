@@ -6,8 +6,8 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 ## Current result
 
-- Latest integrated checks: **219 Windows / 193 Linux tests PASS**, 0 failed/ignored, formatting and
-  strict Clippy PASS. Linux executed exact default-profile commit `628b027`; Windows cold-built the lean profiles.
+- Latest integrated checks: **225 Windows / 209 Linux tests PASS**, 0 failed/ignored, formatting and
+  strict Clippy PASS. Linux executed exact session commit `88c0867`; Windows uses the same lean profiles.
 - Windows service `4a40c93`: **11.923 MiB**, 41 executable/source checks PASS. Full desktop and installer
   acceptance remain open. [Release receipt](../../audit/2026-10-18/search-release-receipt.json).
 - Storage checkpoint: Cargo removed the verified 25.394 GiB development cache; a complete lean rebuild
@@ -29,10 +29,10 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **219 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
-[Windows receipt](../../audit/2026-10-18/session-projection-windows-receipt.json). Latest exact-commit Linux
-proof covers default-profile commit `628b027`: **193 PASS**:
-[Linux receipt](../../audit/2026-10-18/linux-default-lean-profile-receipt.json).
+Latest integrated closure checkpoint: **225 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
+[Windows receipt](../../audit/2026-10-18/session-observation-windows-receipt.json). Latest exact-commit Linux
+proof covers session commit `88c0867`: **209 PASS**:
+[Linux receipt](../../audit/2026-10-18/linux-session-projection-receipt.json).
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -282,8 +282,34 @@ and recent rows remain identical. The warm assertion remains; the restart assert
 complete cold source snapshot with a hash of its exact input fixture. Product behavior was unchanged
 for this correction. [Failed attempt](../../audit/2026-10-18/session-projection-first-run.json).
 The Windows development cache now measures **1.684 GiB**, with **37.69 GiB free on C / 66.66 GiB on D**
-at qualification. Linux proof for this session checkpoint follows; the release artifact above still
+at qualification. Exact commit `88c0867` also passes **209 Linux tests**, formatting and strict Clippy,
+with a 1.1 GiB shared cache. The release artifact above still
 applies to `4a40c93`, before the session changes.
+
+## Metadata strings and native observations — 2026-10-18
+
+Two further native regressions exposed a source-valid unpaired JSON string being answered from an
+older backup and a different file UTF-8 decoding path. The metadata reader now preserves both files
+and reports Unsupported for an unrepresentable primary. Paired/literal escapes remain usable; seven
+actual Node byte-decoding inputs qualify decoding before JSON parsing. This preserves data while the
+global lossless JSON representation remains OPEN. Both focused tests passed after observed RED.
+
+The recorder now routes conversation titles after canonical messages, handles explicit model-selection
+observations and accepts native request text with authored-time correction. Seventeen actual store
+selection steps qualify model syntax, repeated/stale/non-finite time, conversation authority, rebind
+and restart. Selection metadata is staged and durably written before publication; failed writes keep
+the previous value. Retired/disabled observations cannot change the replacement session's selection.
+
+A bounded native regression also reproduced a recursive binding-cache lock after rebind. The copied
+binding now outlives only the lookup guard; the five-second acceptance bound remains and the lookup
+settles. Four observation tests pass, including raw request and provider/manual title authority.
+Broader recorder activity/proof/recovery branches, content references/tables/export and other tasks
+remain open. Combined workspace qualification passes **225 Windows tests**, formatting and strict
+Clippy: [receipt](../../audit/2026-10-18/session-observation-windows-receipt.json). The first attempt
+passed every test but failed strict Clippy on a redundant struct update. That syntax was removed and
+the entire suite rerun; the failed log/receipt remain. The shared Windows cache measures **1.728 GiB**,
+with **37.49 GiB free on C / 66.62 GiB on D** at qualification. Exact new-commit Linux proof follows;
+whole-scope review remains NOT RUN.
 
 ## Documents
 
