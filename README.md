@@ -5,9 +5,10 @@ explicit local Windows/device qualification on D:. See [current state](docs/CURR
 [BIG roadmap](docs/BIG-IMPLEMENTATION-PLAN.md), [C/L/U phase breakdown](docs/implementation-plan/2026-10-18-cloud-first-units.md),
 [workflow](docs/DEVELOPMENT-WORKFLOW.md) and [agent instructions](AGENTS.md).
 Target GitHub: [KaisAbiyyi/chat-on-steroids-on-steroids](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids).
-`origin` is configured but the public repository is still empty as of the transition audit. Initial
-publication awaits a full history/privacy review. Eight prior local recorder/caption WIP paths
-remain unpublished and feature work remains paused until bootstrap.
+The public GitHub `main` branch was first published at commit `8637c12` on 2026-10-18 with
+the previously qualified Rust service history. See the [bootstrap receipt](docs/implementation-summary/2026-10-18-github-bootstrap.md)
+and [current handoff](docs/CURRENT-PHASE.md) for the status of CI and the next cloud unit.
+Eight unfinished local recorder/caption WIP paths remain outside GitHub.
 
 The baseline is the open-source [Chat On Steroids upstream repository](https://github.com/totec448-spec/chat-on-steroids),
 pinned to `024731d8083d92c46e8248d64e7e0b36ab0a470f`. An optional local clone is kept under

@@ -6,10 +6,10 @@ For the active Rust owner, inspect callers and the applicable source contract fi
 
 ## Operating model
 
-- **Cloud-first**: after the GitHub bootstrap is safely published, implement in cloud agents using `KaisAbiyyi/chat-on-steroids-on-steroids` as the canonical repository. Ship coherent changes through a branch/PR, successful CI and exact-SHA handoff. The Windows checkout on D: is principally for native qualification after a phase or early feasibility gate, and for protecting prior unpublished work.
+- **Cloud-first**: implement in cloud agents using the now-published `KaisAbiyyi/chat-on-steroids-on-steroids` repository as canonical. Ship coherent changes through a branch/PR, successful CI and exact-SHA handoff. The Windows checkout on D: is principally for native qualification after a phase or early feasibility gate, and for protecting prior unpublished work.
 - Follow the Mind Place engineering discipline: small named cloud units, explicit state and dependencies, source-linked contracts, security and performance gates, professional Git, complete handoffs, and selective user acceptance.
 - The 16-phase parity objective is unchanged. Windows is the active native target; Linux may be qualified using isolated test infrastructure; macOS and other targets remain on hold. Headless service evidence never proves desktop or installer acceptance.
-- **Feature implementation remains paused for safe GitHub bootstrap**. Do not resume the uncommitted recorder/caption feature work merely because its files exist. Only after publication, an explicit next cloud unit and a verified handoff may implementation resume.
+- **Feature implementation begins with cloud unit `CL-01` only after initial GitHub CI qualifies**. Do not resume local uncommitted recorder/caption files merely because they exist; cloud agents must reconstruct or separately inspect a sanitized transfer. Check `docs/CURRENT-PHASE.md` for exact CI and work-unit gates.
 - Preserve the existing eight uncommitted recording-related paths identified in `docs/CURRENT-PHASE.md`. Do not reset, stash, stage, format, clean, delete, or incorporate them into a documentation commit without checking current ownership and an explicit next-unit decision.
 - Keep upstream `024731d8083d92c46e8248d64e7e0b36ab0a470f` pinned and untouched. Preserve historical test receipts and original synthetic fixtures; never change old evidence to make new code pass.
 
@@ -31,4 +31,4 @@ For the active Rust owner, inspect callers and the applicable source contract fi
 - A cloud unit handoff must state `UNIT`, branch/PR/merge and commit SHA, `CHANGES`, `CLOUD VALIDATION`, `PERFORMANCE`, `LOCAL REQUIRED` (none / exact local gate), `YOU REQUIRED` (no / yes, when and what), `KNOWN LIMITS`, and exact `NEXT`. Update `docs/CURRENT-PHASE.md` and relevant dated evidence. A local agent returns an evidence receipt and failure handoff to cloud; it does not silently become the feature implementation authority.
 - Do not label a branch or phase DONE without the documented acceptance gate. Keep precise states: `PASS`, `FAIL`, `PARTIAL`, `BLOCKED`, `NOT RUN`, and `HOLD`.
 
-Read [the cloud-first development workflow](docs/DEVELOPMENT-WORKFLOW.md) for branch, PR, local and user acceptance steps. `origin` is configured, but **the GitHub repository is still empty** as of the bootstrap audit; no cloud code unit should assume its base exists until the first reviewed publication completes.
+Read [the cloud-first development workflow](docs/DEVELOPMENT-WORKFLOW.md) for branch, PR, local and user acceptance steps. GitHub `main` was first published at `8637c12`; verify the current default-branch SHA and required CI before beginning `CL-01`.

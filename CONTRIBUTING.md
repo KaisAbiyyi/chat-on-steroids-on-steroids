@@ -5,7 +5,7 @@ the [cloud-first development workflow](docs/DEVELOPMENT-WORKFLOW.md), and the
 [BIG implementation plan](docs/BIG-IMPLEMENTATION-PLAN.md). Work is divided into bounded
 cloud units with tested exit criteria, reviewed PRs, green Windows/Linux CI and exact-SHA handoffs.
 The intended canonical repository is `KaisAbiyyi/chat-on-steroids-on-steroids` (public), with
-`origin` configured locally; the initial push is still awaiting publication audit. **Cloud agents
+`origin` configured locally; the first public `main` was published at `8637c12`. **Cloud agents
 implement; the Windows D: workspace qualifies native/device behavior at named local gates.**
 See the [cloud/local/manual unit schedule](docs/implementation-plan/2026-10-18-cloud-first-units.md).
 Do not mix uncommitted work from another agent into your own checkpoint or initial push.
