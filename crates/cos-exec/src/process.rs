@@ -292,6 +292,10 @@ impl Manager {
         if self.0.stopped.load(Ordering::Acquire) {
             return Err(invalid("Execution manager is shutting down"));
         }
+        #[cfg(windows)]
+        let prepared_environment = crate::toolchain::child_overrides(environment)?;
+        #[cfg(windows)]
+        let environment = Some(&prepared_environment);
         let mut registry = lock(&self.0.sessions)?;
         if registry.len() >= MAX_PROCESSES {
             let evict = registry

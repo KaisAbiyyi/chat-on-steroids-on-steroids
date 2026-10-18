@@ -1,0 +1,1631 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "env.ts": "1b16e7f12bc0ce8ac10344206c671a8fc18b4f15bc1f5fa01b9b23a09ff42500",
+    "toolchain.ts": "ecf12b153c218b5070aeb9d4b93b08c98e641c5ff9ba8ae843e20861541d33ce"
+  },
+  "scenarios": [
+    {
+      "files": [
+        "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe",
+        "C:\\public\\Program Files\\Go\\bin\\go.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Go\\bin;C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr",
+              "GOROOT": "C:\\public\\Program Files\\Go"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr",
+              "GOROOT=C:\\public\\Program Files\\Go"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Go\\bin;C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr",
+              "GOROOT": "C:\\public\\Program Files\\Go"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr",
+              "GOROOT=C:\\public\\Program Files\\Go"
+            ]
+          },
+          "calls": []
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\Program Files\\Android\\Android Studio\\jre\\bin\\java.exe",
+        "C:\\public\\Program Files\\Java\\jdk-21\\bin\\javac.exe"
+      ],
+      "directories": {
+        "C:\\public\\Program Files\\Java": [
+          "C:\\public\\Program Files\\Java\\jdk-9",
+          "C:\\public\\Program Files\\Java\\jre1.8.0_411",
+          "C:\\public\\Program Files\\Java\\jdk-21"
+        ]
+      },
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Java\\jdk-21\\bin;C:\\public\\path",
+              "JAVA_HOME": "C:\\public\\Program Files\\Java\\jdk-21"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Java\\jdk-21"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jre\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jre"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files x86\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files x86\\Android\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Eclipse Adoptium\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Eclipse Adoptium"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Java\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Java"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Java\\jre1.8.0_411\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Java\\jdk-21\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\Program Files\\Java\\jdk-21.0.12\\bin\\javac.exe",
+        "C:\\public\\Program Files\\Java\\jdk-21.0.5\\bin\\javac.exe"
+      ],
+      "directories": {
+        "C:\\public\\Program Files\\Java": [
+          "C:\\public\\Program Files\\Java\\jdk-21.0.5",
+          "C:\\public\\Program Files\\Java\\jdk-21.0.12"
+        ]
+      },
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Java\\jdk-21.0.12\\bin;C:\\public\\path",
+              "JAVA_HOME": "C:\\public\\Program Files\\Java\\jdk-21.0.12"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Java\\jdk-21.0.12"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jre\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jre"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files x86\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files x86\\Android\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Eclipse Adoptium\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Eclipse Adoptium"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Java\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Java"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Java\\jdk-21.0.12\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe",
+        "C:\\public\\Program Files\\Go\\bin\\go.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "JAVA_HOME": "",
+            "GOROOT": ""
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\path",
+              "JAVA_HOME": "",
+              "GOROOT": ""
+            },
+            "added": []
+          },
+          "calls": []
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "java_home": "C:\\chosen\\jdk",
+            "goroot": "C:\\chosen\\go"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\path",
+              "java_home": "C:\\chosen\\jdk",
+              "goroot": "C:\\chosen\\go"
+            },
+            "added": []
+          },
+          "calls": []
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\path\\java.exe",
+        "C:\\public\\path\\go.exe",
+        "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\path"
+            },
+            "added": []
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe",
+        "C:\\public\\Program Files\\Go\\bin\\go.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": " \"C:\\public\\path\" ; ; C:\\PUBLIC\\PROGRAM FILES\\GO\\bin "
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Go\\bin;C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr",
+              "GOROOT": "C:\\public\\Program Files\\Go"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr",
+              "GOROOT=C:\\public\\Program Files\\Go"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\PUBLIC\\PROGRAM FILES\\GO\\bin\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\PUBLIC\\PROGRAM FILES\\GO\\bin\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\path"
+            },
+            "added": []
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jre\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jre"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files x86\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files x86\\Android\\Android Studio\\jbr"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Eclipse Adoptium\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Eclipse Adoptium"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Java\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Java"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Microsoft\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Microsoft"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Amazon Corretto\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Amazon Corretto"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Zulu\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Zulu"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\JetBrains\\Toolbox\\apps\\bin\\javac.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\JetBrains\\Toolbox\\apps"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\path"
+            },
+            "added": []
+          },
+          "calls": []
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\different",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\different",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": []
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path0",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path0",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path0\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path0\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Program Files\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Program Files\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path1",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path1",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path1\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path1\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path2",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path2",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path2\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path2\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path3",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path3",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path3\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path3\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path4",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path4",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path4\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path4\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path5",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path5",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path5\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path5\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path6",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path6",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path6\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path6\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path7",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path7",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path7\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path7\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path8",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path8",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path8\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path8\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path9",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path9",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path9\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path9\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path10",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path10",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path10\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path10\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path11",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path11",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path11\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path11\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path12",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path12",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path12\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path12\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path13",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path13",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path13\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path13\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path14",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path14",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path14\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path14\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path15",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path15",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path15\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path15\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path16",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path16",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path16\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path16\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path17",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path17",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path17\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path17\\go.exe"
+            ]
+          ]
+        },
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\Program Files",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path0",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\Program Files",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\Program Files\\Android\\Android Studio\\jbr\\bin;C:\\public\\path0",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\Program Files\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path0\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path0\\go.exe"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [
+        "\\\\public-server\\share\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "\\\\public-server\\share",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "\\\\public-server\\share",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "\\\\public-server\\share\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "\\\\public-server\\share\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=\\\\public-server\\share\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "\\\\public-server\\share\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "\\\\public-server\\share\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "\\\\public-server\\share\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "files": [
+        "C:\\public\\b\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+      ],
+      "directories": {},
+      "steps": [
+        {
+          "env": {
+            "ProgramFiles": "C:\\public\\a\\..\\b",
+            "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+            "LOCALAPPDATA": "C:\\public\\Local",
+            "Path": "C:\\public\\path",
+            "GOROOT": "chosen"
+          },
+          "expected": {
+            "env": {
+              "ProgramFiles": "C:\\public\\a\\..\\b",
+              "ProgramFiles(x86)": "C:\\public\\Program Files x86",
+              "LOCALAPPDATA": "C:\\public\\Local",
+              "Path": "C:\\public\\b\\Android\\Android Studio\\jbr\\bin;C:\\public\\path",
+              "GOROOT": "chosen",
+              "JAVA_HOME": "C:\\public\\b\\Android\\Android Studio\\jbr"
+            },
+            "added": [
+              "JAVA_HOME=C:\\public\\b\\Android\\Android Studio\\jbr"
+            ]
+          },
+          "calls": [
+            [
+              "isFile",
+              "C:\\public\\path\\java.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\path\\go.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\b\\Android\\Android Studio\\jbr\\bin\\javac.exe"
+            ],
+            [
+              "isFile",
+              "C:\\public\\b\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\b\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\public\\Local\\Programs\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\public\\Local\\Programs\\Go"
+            ],
+            [
+              "isFile",
+              "C:\\Go\\bin\\go.exe"
+            ],
+            [
+              "directories",
+              "C:\\Go"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "versions": [
+    {
+      "names": [
+        "jdk-9",
+        "jdk-21",
+        "jdk-21.0.5",
+        "jdk-21.0.12"
+      ],
+      "expected": [
+        "jdk-21.0.12",
+        "jdk-21.0.5",
+        "jdk-21",
+        "jdk-9"
+      ]
+    },
+    {
+      "names": [
+        "JDK-21",
+        "jdk-21",
+        "current",
+        "jbr"
+      ],
+      "expected": [
+        "jdk-21",
+        "JDK-21",
+        "jbr",
+        "current"
+      ]
+    },
+    {
+      "names": [
+        "jdk-9007199254740993",
+        "jdk-9007199254740992"
+      ],
+      "expected": [
+        "jdk-9007199254740993",
+        "jdk-9007199254740992"
+      ]
+    },
+    {
+      "names": [
+        "jdk-9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+        "jdk-8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"
+      ],
+      "expected": [
+        "jdk-9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+        "jdk-8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"
+      ]
+    },
+    {
+      "names": [
+        "jdk-😀",
+        "jdk-",
+        "jdk-Ä",
+        "jdk-a"
+      ],
+      "expected": [
+        "jdk-",
+        "jdk-😀",
+        "jdk-Ä",
+        "jdk-a"
+      ]
+    }
+  ]
+}

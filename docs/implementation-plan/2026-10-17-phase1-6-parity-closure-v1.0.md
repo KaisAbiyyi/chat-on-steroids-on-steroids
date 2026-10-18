@@ -200,3 +200,26 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   dependency alongside the existing QuickJS exception; it is not a pure-Rust parser claim. A release
   size comparison follows this implementation checkpoint. Replacing it with another grammar would
   require fresh invocation conformance proof; 504 vectors are bounded evidence, not every Bash script.
+
+- Invocation commit `23c1f95`: **172 Linux tests PASS, 0 failed/ignored**, strict Clippy and formatting
+  PASS. Windows service release **12,299,776 bytes (11.731 MiB)**, +1,531,904 bytes against `10d4c81`
+  for the patch-mode/streaming/invocation work together; 17 executable and 13 project-file source checks
+  PASS. This measures the headless service, not a full desktop/installer or isolated compiler cost.
+
+- Task 4d: Windows JDK/Go discovery is integrated into both pipe and PTY child preparation. It fills
+  only missing unreachable toolchains, requires `javac.exe` for a JDK, ranks versions with source
+  JS Number/UTF-16 semantics, memoizes discovery and bounds PATH reachability to 16 keys. A 34-step
+  source corpus (12 scenarios) and five version lists pass; all three initial functional tests were RED.
+  A native public filesystem/compiler-selection and real cmd child prove child-only environment changes.
+- A further real Windows subprocess regression reproduced native unpaired UTF-16 `JAVA_HOME` being
+  treated as absent. The repair preserves presence; unrepresentable PATH/discovery inputs suppress
+  automatic discovery, preserving inheritance and explicit overrides. Both native UTF-16 cases pass
+  after observed RED. This does not close global JSON/unpaired-string parity. Current Windows suite:
+  **180 PASS, 0 failed/ignored**, strict Clippy PASS. The last Linux receipt still applies to `23c1f95`.
+- Ruling: if native PATH/discovery inputs cannot be represented losslessly by this UTF-8 owner,
+  preserve them and explicit overrides. Cost: automatic JDK/Go discovery in that uncommon native
+  UTF-16 case remains a conservative compatibility difference until the global representation gate
+  is resolved. A pre-existing JAVA_HOME/GOROOT choice is never replaced as a consequence.
+- Search investigation captured 160 include-glob, 60 exclusion, 12 scan and six ordered-tree source
+  scenarios. These are investigation artifacts; native search integration and its source exactness
+  proof have not started. The UTF-16 clipping boundary includes the existing global unpaired-string gate.

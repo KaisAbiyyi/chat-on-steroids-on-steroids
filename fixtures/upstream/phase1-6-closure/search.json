@@ -1,0 +1,1755 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "search.ts": "2b4ef689d9c19f3bfe58b59764ce50d1867c1c417db30ad25933303c560bb8c1",
+    "fsops.ts": "cdf22e0bc58da0eb8e363590c3312ee11c682c5a2d7a49af3e87527e24132846"
+  },
+  "defaultExcludes": [
+    "node_modules",
+    ".git",
+    ".svn",
+    ".hg",
+    "dist",
+    "build",
+    "out",
+    "target",
+    ".next",
+    ".nuxt",
+    ".gradle",
+    ".gradle-user",
+    ".idea",
+    ".vs",
+    ".vscode",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "coverage",
+    ".cache",
+    ".turbo",
+    ".go-build-cache",
+    ".go-module-cache",
+    ".go-tools",
+    ".gopath",
+    ".tmp",
+    ".tmp-go-cache",
+    ".tmp-go-path",
+    ".android",
+    ".bun",
+    ".claude",
+    ".claude-*",
+    ".codex",
+    ".cursor",
+    ".gemini",
+    ".npm",
+    ".pnpm-store",
+    ".yarn",
+    "release",
+    "release-*",
+    "appdata"
+  ],
+  "globs": [
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "*.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "**/*.ts",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "src/?a.*",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "[a].txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "foo{bar}",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": false,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "pattern": "file?.txt",
+      "sensitive": true,
+      "file": "",
+      "expected": false
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "foob",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": false,
+      "file": "",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "foob",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": true
+    },
+    {
+      "pattern": "**",
+      "sensitive": true,
+      "file": "",
+      "expected": true
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": false,
+      "file": "",
+      "expected": true
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/a.TS",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "a.ts",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "src/aa.rs",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "[a].txt",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "foob",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "foo{bar}",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "file😀.txt",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "filex.txt",
+      "expected": false
+    },
+    {
+      "pattern": "",
+      "sensitive": true,
+      "file": "",
+      "expected": true
+    }
+  ],
+  "excludes": [
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "build",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "BUILD",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "build"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "release-public",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "release-*"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": ".claude-x",
+      "expected": true
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        ".claude-*"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "[cache]",
+      "expected": true
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "[cache]"
+      ],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [],
+      "name": "a*b",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "build",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "BUILD",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "builder",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "release-public",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "release",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "[cache]",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "cache",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": ".claude-x",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "AXXB",
+      "expected": false
+    },
+    {
+      "patterns": [
+        "A*B"
+      ],
+      "name": "a*b",
+      "expected": true
+    }
+  ],
+  "scans": [
+    {
+      "bytes": "ICBuZWVkbGUgIA0KbGFzdCBuZWVkbGUN",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle"
+          },
+          {
+            "path": "/p/a.txt",
+            "line": 2,
+            "text": "last needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "77u/bmVlZGxlAAo=",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle\u0000"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "//5uAGUAZQBkAGwAZQAKAA==",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "/v8AbgBlAGUAZABsAGUACg==",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlIPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIA=",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀\ud83d…"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlwoU=",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlCgo=",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "",
+      "query": "needle",
+      "expected": {
+        "hits": [],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "AQJuZWVkbGU=",
+      "query": "needle",
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "\u0001\u0002needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxl/w==",
+      "query": "needle",
+      "maxResults": 50,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle�"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlCm5lZWRsZQo=",
+      "query": "needle",
+      "maxResults": 1,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "text": "needle"
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": true,
+        "stoppedBecause": "limit"
+      }
+    },
+    {
+      "zeroBytes": 2097153,
+      "query": "needle",
+      "maxResults": 50,
+      "expected": {
+        "hits": [],
+        "filesScanned": 0,
+        "truncated": true,
+        "stoppedBecause": "size"
+      }
+    }
+  ],
+  "trees": [
+    {
+      "options": {
+        "query": "needle"
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/deep/needle.txt"
+          },
+          {
+            "path": "/p/deep/inner/needle.rs"
+          }
+        ],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "deep"
+      },
+      "expected": {
+        "hits": [],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "needle",
+        "maxResults": 1
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/deep/needle.txt"
+          }
+        ],
+        "filesScanned": 3,
+        "truncated": true,
+        "stoppedBecause": "limit"
+      }
+    },
+    {
+      "options": {
+        "query": "needle",
+        "exclude": []
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/deep/needle.txt"
+          },
+          {
+            "path": "/p/BUILD/needle.js"
+          },
+          {
+            "path": "/p/deep/inner/needle.rs"
+          }
+        ],
+        "filesScanned": 5,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "a",
+        "include": "*.ts"
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.TS"
+          }
+        ],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "a",
+        "include": "*.ts",
+        "caseSensitive": true
+      },
+      "expected": {
+        "hits": [],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    }
+  ],
+  "directories": {
+    "/public": [
+      [
+        "deep",
+        "directory"
+      ],
+      [
+        "z.txt",
+        "file"
+      ],
+      [
+        "BUILD",
+        "directory"
+      ],
+      [
+        "link",
+        "link"
+      ],
+      [
+        "a.TS",
+        "file"
+      ]
+    ],
+    "/public/deep": [
+      [
+        "inner",
+        "directory"
+      ],
+      [
+        "needle.txt",
+        "file"
+      ]
+    ],
+    "/public/deep/inner": [
+      [
+        "needle.rs",
+        "file"
+      ]
+    ],
+    "/public/BUILD": [
+      [
+        "needle.js",
+        "file"
+      ]
+    ]
+  },
+  "files": {
+    "/public/z.txt": "root needle\n",
+    "/public/a.TS": "Alpha needle\n",
+    "/public/deep/needle.txt": "deep needle\n",
+    "/public/deep/inner/needle.rs": "last needle\n",
+    "/public/BUILD/needle.js": "hidden needle\n"
+  }
+}

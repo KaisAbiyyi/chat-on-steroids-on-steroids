@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sourceSha256": "53d96cca9fa68788f667c3d4352bdd86d862dbe43fbd2e7c313fb254f8fdf075",
+  "oracleSources": {
+    "src/main/project-files.ts": "53d96cca9fa68788f667c3d4352bdd86d862dbe43fbd2e7c313fb254f8fdf075",
+    "src/main/fsops.ts": "cdf22e0bc58da0eb8e363590c3312ee11c682c5a2d7a49af3e87527e24132846",
+    "src/main/codex/read-backend.ts": "f9e28d430184f24bf29ac9ff181aecd303311dd100b1a5054c15c1392f125cbc",
+    "src/main/codex/filesystem.ts": "8a76563568a907704f12cf5389f89f47caa23b9acabd86c40b8af9ca90398ffa"
+  },
+  "binarySha256": "e7b299301195b896f6ede118212416b942aec649acc187bec320b0371b7563fa",
+  "platform": "win32",
+  "node": "v24.21.0",
+  "checks": [
+    {
+      "name": "utf8.txt",
+      "status": "PASS",
+      "checks": [
+        "source-byte/text/mtime/revision equality",
+        "save using actual source revision"
+      ]
+    },
+    {
+      "name": "bom-crlf.txt",
+      "status": "PASS",
+      "checks": [
+        "source-byte/text/mtime/revision equality",
+        "save using actual source revision"
+      ]
+    },
+    {
+      "name": "empty.txt",
+      "status": "PASS",
+      "checks": [
+        "source-byte/text/mtime/revision equality",
+        "save using actual source revision"
+      ]
+    },
+    {
+      "name": "invalid.txt",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "binary.dat",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "control.txt",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "utf16.txt",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "fake-large.png",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "large.txt",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "first-line.txt",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "document.pdf",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "invalid.pdf",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    },
+    {
+      "name": "invalid.png",
+      "status": "PASS",
+      "checks": [
+        "entire preview projection equals actual source"
+      ]
+    }
+  ],
+  "scope": "Pinned declaration-only textSnapshot and previewProjectFile on actual public files versus the Rust host CLI. Native metadata and stream providers; no app bootstrap/profile imports. Raster encoders, all locales and filesystem races are separate gates."
+}

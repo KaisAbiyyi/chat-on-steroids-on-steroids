@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "date": "2026-10-18",
+  "sourceCommit": "23c1f957865b88289dc9a75187894dedb0df055f",
+  "artifact": "Windows headless service/CLI",
+  "bytes": 12299776,
+  "mib": 11.72998046875,
+  "binarySha256": "e7b299301195b896f6ede118212416b942aec649acc187bec320b0371b7563fa",
+  "localArchive": "audit/2026-10-18/release-artifact/cos-rust-23c1f95.exe",
+  "previousComparableService": {
+    "sourceCommit": "10d4c8135d479a02ef115703be3ec3beb58b99ea",
+    "bytes": 10767872
+  },
+  "increaseBytes": 1531904,
+  "costScope": "Patch modes, streaming and invocation changes together; not a separately isolated compiler measurement",
+  "checks": {
+    "windowsRustTests": 176,
+    "linuxRustTests": 172,
+    "windowsClippy": "PASS",
+    "linuxClippy": "PASS",
+    "format": "PASS",
+    "executableRuntime": 17,
+    "projectFileSourceComparisons": 13
+  },
+  "runtimeReceipt": "audit/2026-10-18/invocation-release-runtime.json",
+  "sourceReceipt": "audit/2026-10-18/invocation-release-project-files.json",
+  "linuxReceipt": "audit/2026-10-18/linux-invocation-strict-receipt.json",
+  "exceptions": [
+    "QuickJS C interpreter",
+    "Tree-sitter C parser/scanner"
+  ],
+  "fullApplicationReady": false,
+  "installerStartupRam": "NOT RUN",
+  "macOS": "HOLD by user request"
+}

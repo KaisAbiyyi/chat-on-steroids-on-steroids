@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **176 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **180 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -123,8 +123,27 @@ Windows qualification is **176 PASS, 0 failed/ignored**, strict Clippy and forma
 The pinned Tree-sitter/Bash 0.25.1 bindings retain the source grammar/query. Grammar/scanner/type
 hashes match; generated parser tables differ only in package version metadata:
 [provenance](../../audit/2026-10-18/bash-grammar-provenance.json). This adds an MIT C parser dependency,
-so the runtime is not claimed to be pure Rust. Release size and exact-commit Linux qualification follow.
+so the runtime is not claimed to be pure Rust. Exact invocation commit `23c1f95` also passes **172 Linux tests**, strict Clippy and formatting.
+The service release is **11.731 MiB** (12,299,776 bytes), +1.461 MiB against `10d4c81` for
+the patch-mode/streaming/invocation changes together. It passes 17 executable runtime checks and
+13 project-file source comparisons: [release receipt](../../audit/2026-10-18/invocation-release-receipt.json).
+Installer, full desktop startup and RAM remain NOT RUN.
 Search/toolchain, session/runtime/control branches and final whole-scope review remain in progress.
+
+## Toolchain continuation — 2026-10-18
+
+Windows child preparation now discovers otherwise unreachable JDK/Go installations without changing
+existing toolchain choices or the parent environment. It requires a compiler, retains source version
+ranking and cache behavior, and matches 34 source steps plus five version lists. Native public files
+and a real cmd child verify selection/delivery. Four functional tests were demonstrated RED then GREEN,
+including actual Windows environment blocks containing unpaired UTF-16. Such inherited values are
+preserved; automatic discovery is suppressed if its inputs cannot be represented losslessly. Global
+JSON/unpaired-string exactness remains open.
+
+Current integrated Windows result: **180 PASS, 0 failed/ignored**, strict Clippy PASS. Exact Linux
+qualification of this checkpoint follows; the 172-test Linux receipt and 11.731 MiB/17-runtime-check
+release above apply to `23c1f95`, before these toolchain changes. Search source corpora are captured
+(160 globs, 60 excludes, 12 scans, six trees); native search changes have not started.
 
 ## Documents
 

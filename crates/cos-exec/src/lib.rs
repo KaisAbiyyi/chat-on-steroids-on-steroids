@@ -6,6 +6,8 @@ pub mod process;
 pub mod shell;
 pub mod ssh;
 pub mod terminal;
+#[cfg(windows)]
+pub mod toolchain;
 pub mod tree;
 #[cfg(windows)]
 mod winpty;
