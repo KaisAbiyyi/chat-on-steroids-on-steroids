@@ -1,11 +1,13 @@
 # CoS-Rust
 
-Current development policy: **local-first, structured work units**, following the Mind Place
-engineering workflow while keeping CoS-Rust implementation and native qualification in the
-Windows D: workspace. See [current state](docs/CURRENT-PHASE.md),
-[BIG roadmap](docs/BIG-IMPLEMENTATION-PLAN.md), [workflow](docs/DEVELOPMENT-WORKFLOW.md)
-and [agent instructions](AGENTS.md). The previous recorder/caption WIP is paused pending
-an explicit next-unit instruction.
+Current development policy: **cloud-first, like Mind Place**, with GitHub coding/PR/CI and
+explicit local Windows/device qualification on D:. See [current state](docs/CURRENT-PHASE.md),
+[BIG roadmap](docs/BIG-IMPLEMENTATION-PLAN.md), [C/L/U phase breakdown](docs/implementation-plan/2026-10-18-cloud-first-units.md),
+[workflow](docs/DEVELOPMENT-WORKFLOW.md) and [agent instructions](AGENTS.md).
+Target GitHub: [KaisAbiyyi/chat-on-steroids-on-steroids](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids).
+`origin` is configured but the public repository is still empty as of the transition audit. Initial
+publication awaits a full history/privacy review. Eight prior local recorder/caption WIP paths
+remain unpublished and feature work remains paused until bootstrap.
 
 Upstream Chat On Steroids is cloned at [`upstream/chat-on-steroids`](upstream/chat-on-steroids).
 Rust runtime, sessions, MCP, files/projects/SSH and process/terminal services now run in this workspace.

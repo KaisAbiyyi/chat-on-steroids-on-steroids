@@ -3,9 +3,11 @@
 ## Active engineering authority
 
 - [Current phase and next-unit handoff](CURRENT-PHASE.md) — live checkpoint, previous agent's protected WIP, and explicit outstanding gates
-- [BIG implementation plan](BIG-IMPLEMENTATION-PLAN.md) — local-first phase/work-unit roadmap for all 16 migration phases
+- [BIG implementation plan](BIG-IMPLEMENTATION-PLAN.md) — cloud-first phase/work-unit roadmap for all 16 migration phases
+- [Cloud development and local/manual acceptance matrix](implementation-plan/2026-10-18-cloud-first-units.md) — bounded cloud coding units, native Windows gates and direct user involvement by phase
 - [Development workflow](DEVELOPMENT-WORKFLOW.md) — agent discipline, security, performance, tests, docs and Git rules
-- [Local-first engineering decision](decisions/2026-10-18-local-first-engineering.md) — why the Mind Place workflow was adopted with a Windows-local implementation authority
+- [Current cloud-first engineering decision](decisions/2026-10-18-cloud-first-supersession.md) — supersedes the earlier local-first policy
+- [Historical local-first decision](decisions/2026-10-18-local-first-engineering.md) — superseded, retained for traceability
 - [Root agent instructions](../AGENTS.md)
 
 ## Current phase 1–6 parity closure

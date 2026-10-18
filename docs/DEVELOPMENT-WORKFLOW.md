@@ -1,6 +1,6 @@
-# CoS-Rust local-first development workflow
+# CoS-Rust cloud-first development workflow
 
-Decision date: 2026-10-18 (Asia/Jakarta). Authority: the user's direction to apply the structured Mind Place engineering workflow while keeping implementation **local-first**. This is an operating contract, not a claim of feature completeness.
+Decision updated: 2026-10-18 (Asia/Jakarta). The user now requests **the same cloud-first development model as Mind Place**, with more explicit Windows device/local agent gates. This is a process contract, not proof that current feature implementations are finished.
 
 ## 1. Sources of truth
 
@@ -8,23 +8,23 @@ Decision date: 2026-10-18 (Asia/Jakarta). Authority: the user's direction to app
 2. `AGENTS.md` sets persistent agent rules; `docs/CURRENT-PHASE.md` names the one active work unit and its evidence.
 3. `docs/BIG-IMPLEMENTATION-PLAN.md` supplies sequencing and exit criteria; the original [16-phase assessment](implementation-plan/2026-10-16-rust-migration-phases-v1.0.md) remains the technical feature/parity scope.
 4. Dated `implementation-plan/`, `implementation-summary/`, `implementation-review/`, `research/`, and `audit/` contain historical contracts and immutable evidence. They can contradict later conclusions because they capture different SHAs or environments; do not rewrite their history.
-5. Actual local Git commits are reproducible checkpoints. The pinned upstream source and public synthetic fixtures are the behavior comparison baseline. No Git remote is configured as of this decision.
+5. **After the first reviewed GitHub publication**, canonical implementation comes from `https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids` and the exact merged SHA. The remote is presently configured but empty; GitHub is not canonical until initial publication succeeds. Earlier local Git commits remain historical checkpoints and pinned upstream/public synthetic fixtures remain the behavioral reference.
 
-For handoff across agents or long conversations, the repository's committed docs and exact Git SHA are the durable shared memory. Chat memory may assist discovery but must never be the only source of a project decision.
+For handoff across agents or long conversations, committed docs and exact GitHub SHA are the durable project memory. Chat memory may assist discovery but is not source-control evidence. `CURRENT-PHASE.md` records the last merged unit and outstanding L/U gates.
 
 ## 2. Unit lifecycle
 
 ```text
-read CURRENT-PHASE + repo status + source contract
+cloud agent reads CURRENT-PHASE + GitHub SHA + source contract
                  |
                  v
 scope one bounded unit; define baseline / RED behavior
                  |
                  v
-local implementation on D: + targeted tests
+cloud implementation on topic branch + RED/GREEN tests
                  |
                  v
-strict workspace checks + necessary native/integration proof
+strict Windows/Linux CI + security/performance review
                  |
                  v
 review security, performance, durability, fixture authenticity
@@ -32,24 +32,29 @@ review security, performance, durability, fixture authenticity
                  +-- FAIL/BLOCKED --> retain evidence, narrow fix unit
                  |
                  v
-commit focused changes + write precise evidence handoff
+PR -> review -> merge -> exact SHA cloud handoff
                  |
                  v
-phase qualification --> user acceptance only when truly needed
+local D: qualification only at named L gate
+                 |
+                 +-- FAIL -> cloud fix unit / new SHA / retest
+                 |
+                 v
+user acceptance only at named U gate
                  |
                  v
 next named unit
 ```
 
-Each unit should be one API contract, invariant, security boundary or vertically testable feature slice. It is small enough for one agent invocation without relying on context compaction. Split a unit when independent subsystems, unclear platform dependencies, or expanding fault matrices make review uncertain. Never compress security, durable schema, filesystem authority, browser identity, or destructive state transitions merely to reduce unit counts.
+Each **cloud unit** is one API contract, invariant, security boundary or vertical integration boundary, sized for one agent run and reviewable GitHub outcome. Split when independent subsystems, platform dependencies or fault matrices make review uncertain. Never compress security, durable schema, filesystem authority, browser identity or destructive state transitions merely to reduce cloud-unit count. See the [cloud/local/user breakdown](implementation-plan/2026-10-18-cloud-first-units.md).
 
-At the **start**, read the relevant repository instructions, `CURRENT-PHASE`, relevant files/callers, upstream baseline and prior evidence; record worktree state and identify pre-existing changes. Identify the failure or missing contract and define concrete success/failure tests before coding.
+At the **start** of a cloud unit, read GitHub branch/PR status, root instructions, `CURRENT-PHASE`, callers, upstream baseline and prior evidence. Define an observable RED case or missing contract. Work in a short-lived branch/worktree; do not assume local uncommitted WIP is present in the cloud.
 
-During **implementation**, keep changes within the unit; reuse explicit crate owners, isolate platform adapters, avoid scattered compatibility special cases, guard all resource admission, and preserve failure semantics. Favor clear and maintainable Rust, small modules and typed errors; avoid both speculative abstraction and repeated ad-hoc logic. Independent reviewer agents may inspect separate tasks, but one owner integrates and verifies the final patch.
+During **cloud implementation**, keep edits within the unit; reuse explicit crate owners, isolate platform adapters, guard resource admission and preserve failure semantics. Favor clear Rust, small modules, typed errors and bounded behavior. Independent reviewer agents can inspect security/architecture boundaries; one owner integrates and verifies the final GitHub PR.
 
-At **qualification**, prove behavior with targeted Rust tests, the strict workspace check, and the unit's real Windows/CLI/MCP/browser/process gate as appropriate. Use pinned synthetic upstream comparisons for exactness, and real disposable runtime flows where a mock would miss a failure. Linux validation is supplementary when allowed. User acceptance is limited to account-bound or subjective flows automation cannot establish.
+At **cloud qualification**, run targeted Rust tests, Rustfmt, strict Clippy and relevant GitHub Actions Windows/Linux jobs, with pinned synthetic source-oracle comparisons. At a named **L gate**, the user asks the local agent to pull the **exact merged SHA** on D:, verify a clean qualification checkout, and exercise real NTFS/SSH, browser, OS/device or packaged-app behavior. It returns PASS/FAIL/BLOCKED with receipts. A native failure becomes a cloud fix unit and a retest against the new SHA. At a named **U gate**, the user personally handles real account permissions, irreversible actions or subjective UX. **Consent U gates follow cloud/synthetic safety preflight but precede any L test that accesses private accounts, copies profiles, or requests OS input/capture; subjective U acceptance follows L qualification.** Without scoped consent, use synthetic-only tests and mark the private/live gate BLOCKED.
 
-At **handoff**, update unit status and proof with SHA, checked scope, unverified scope and next unit. The next agent starts from this handoff. A new feature run must not silently pick up unknown dirty files from a previous attempt.
+At **handoff**, update unit status, checked scope, merged GitHub SHA, scheduled L/U gates and exact next unit. The next cloud agent reads the committed handoff. The existing local recorder/caption WIP is protected and cannot be silently pushed or merged during bootstrap; transfer only a reviewed, sanitized contract or explicitly approved safe patch.
 
 ## 3. Quality matrix
 
@@ -60,7 +65,7 @@ At **handoff**, update unit status and proof with SHA, checked scope, unverified
 | Concurrency and recovery | Stale-owner, revoked-root, cancellation, partial write, crash/restart, retry idempotence, process/worker custody tests. |
 | Performance | Same input/environment/commit class, baseline versus candidate, p50/p95 when relevant, elapsed time/RSS/disk/binary-size units, bounded fixture work. |
 | Maintainability | Clear crate responsibility, typed errors, modest dependencies, reusable existing mechanisms, no dead compatibility paths. |
-| Validation | Focused RED/GREEN, affected test suites, Rustfmt, strict Clippy, full workspace checks at unit/phase gate, real native route where necessary. |
+| Validation | Focused RED/GREEN, affected test suites, Rustfmt, strict Clippy, Windows/Linux cloud CI and device tests at named L gates. |
 | Evidence integrity | Commit and fixture hashes, raw output/receipts, clear test counts; preserve FAIL/PARTIAL/NOT RUN without relabeling. |
 | Documentation | Update `CURRENT-PHASE`, relevant versioned plan/summary/review, architectural decisions and README only when the behavior actually changed. |
 
@@ -68,29 +73,32 @@ No number of passing Rust unit tests substitutes for a missing desktop, provider
 
 ## 4. Git and review
 
-Use an issue/unit ID, a short-lived topic branch where the current worktree permits it, and Conventional Commits. Keep a commit limited to one coherent change (implementation plus directly relevant tests, or docs-only governance), with a message that explains the outcome. Multiple commits per unit are fine. Avoid noisy "work in progress", fabricated verification receipts, unrelated mass formatting and ambiguous messages.
+Use the explicit `C` unit ID on a short-lived GitHub branch/PR and Conventional Commits. Each PR delivers a coherent outcome with tests, relevant documentation, review and green CI. Merge/rebase only as appropriate to the approved GitHub workflow; do not rewrite published qualified history. Avoid noisy WIP commits, unreviewed sweeping formatting, hidden test skips and false evidence.
 
-Never reset/clean/overwrite other agents' dirty changes. With shared WIP, stage explicit file paths; review both `git diff --cached` and the unstaged status immediately before a commit. Use a separate branch/worktree for unrelated work if necessary. Before publishing when GitHub is configured, open a reviewable PR, require applicable CI and human gates, and merge a green coherent outcome. Until then, local commits and receipt-linked SHA are canonical; remote CI is **NOT RUN**, not PASS.
+**Bootstrap exception:** GitHub is currently a public empty repository. `BOOT-L1` must audit *the entire committed Git history*, sensitive data, tracked files and license obligations before initial publication; `BOOT-U1` requires user review of that public push. Only after verified bootstrap does the GitHub merged SHA become canonical. Before this, retain the historical local commits and WIP unchanged. Never reset/clean/overwrite other agents' dirty work; stage explicit paths only. Never use a forced push to overwrite an existing remote branch.
 
-Commit subject examples: `fix(store): redact recorder payloads before persistence`, `test(mcp): prove nonzero process recording`, `docs: establish local-first engineering workflow`. Preserve historical qualifying commits and their receipts; make additive corrections instead of rewriting them.
+Commit subjects: `fix(store): redact recorder payloads before persistence`, `test(mcp): prove nonzero process recording`, `docs: adopt cloud-first implementation gates`. Preserve historical qualifying commits and receipts and make additive corrections rather than rewriting them.
 
-Required unit handoff:
+Required **cloud C** unit handoff (show these fields to the user even when no manual step is needed):
 
 ```text
 UNIT: <ID and behavioral outcome>
-GIT: <branch, commit SHA, clean/dirty state, remote/PR status>
-CHANGES: <owner modules, observable behavior, protocol/schema decisions>
-VALIDATION: <exact commands, PASS/FAIL counts, native/CI status, evidence paths>
+GITHUB: <topic branch, PR URL, merge state and exact merged SHA>
+CHANGES: <modules, observable behavior, schema/protocol decisions>
+CLOUD CHECKS: <exact CI jobs, PASS/FAIL, fixture/source evidence>
 PERFORMANCE: <baseline/candidate with units or NOT MEASURED>
-LOCAL / MANUAL ACCEPTANCE: <PASS, NOT RUN, BLOCKED, HOLD; reason>
+LOCAL REQUIRED: <NONE or exact L-ID; immediately / phase gate>
+YOU REQUIRED: <NO or YES; exact user action and WHEN>
 KNOWN LIMITS: <deviations, failed proofs, compatibility and security gaps>
-NEXT: <one exact named unit or qualification gate>
+NEXT: <next C-ID or L-ID, with dependencies>
 ```
+
+Required **local L** result: `GITHUB SHA UNDER TEST`, `MACHINE/OS/DRIVE`, `NATIVE TESTS`, `EVIDENCE`, `STATUS`, `YOU REQUIRED`, `NEXT`. A failed test creates a cloud fix unit; the local agent must hand back a reproducible failure without silently modifying canonical source. A **U** gate is a short checklist for the user's own account/permissions/subjective judgment: consent before a sensitive native action, subjective acceptance after native proof.
 
 ## 5. Storage, resources and publication
 
-Keep repository work at `D:\projects\CoS-Rust`; use ignored `.test-tmp/`, `.cache/` and `target/` or other explicitly approved D: paths for large temporary data. Set tool/test subprocess temp directories on D:. Budget disk and memory before large builds and release suites; avoid simultaneous heavy builds when free RAM is low. Keep bounded progress evidence on long operations. Never redirect caches, exports or bulk fixtures to C: as a convenience. Any cleanup first verifies file ownership and exact targets; no system-wide Docker/Cargo/temp purge.
+Cloud runners use isolated cloud-owned cache/storage, with no personal profiles. Keep **local qualification** at `D:\projects\CoS-Rust`; use ignored `.test-tmp/`, `.cache/` and `target/` or explicitly approved D: paths for artifacts and large temporary data. Set local subprocess temp directories on D:. Budget disk/memory before heavy native tests and builds and provide bounded progress evidence. Never redirect local caches, exports or fixtures to C:. Clean only verified task-owned paths, never global Docker/Cargo/temp data.
 
 **Docker/WSL preflight:** before optional Linux or SSH-container qualification, determine where Docker Desktop's Windows-host disk data and WSL2 virtual disks physically reside. Verify they are backed by D: before executing builds/pulls or creating large caches; in-container paths such as `/work/target` and Linux `DockerRootDir` alone do not establish Windows physical storage. The current Linux runner reserves 12 GiB free on the system drive but does **not** enforce D: backing. If storage cannot be verified, report the optional qualification as `BLOCKED` and keep the previously recorded Linux receipts as historical evidence. Do not move or delete Docker/WSL data without a separately reviewed action.
 
-Do not publish or push a new GitHub repository or existing local-history rewrite implicitly. External publication requires a concrete known destination and reviewable result. When a remote is eventually configured, record it here and adopt PR/CI as additional gates; it does not change the project's local-first development location.
+GitHub `origin` is configured as `https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids.git`, but this **does not mean anything was pushed**. Publishing a public initial history is a separate reviewed bootstrap step; the user requested a tidy later push. After publication, PRs and CI are normal cloud development gates, and local Windows remains the device-qualification target.

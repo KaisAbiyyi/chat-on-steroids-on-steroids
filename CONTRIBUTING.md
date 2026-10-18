@@ -1,11 +1,14 @@
 # Contributing to CoS-Rust
 
 Before editing, read [agent rules](AGENTS.md), the [current work unit](docs/CURRENT-PHASE.md),
-the [local-first development workflow](docs/DEVELOPMENT-WORKFLOW.md), and the
+the [cloud-first development workflow](docs/DEVELOPMENT-WORKFLOW.md), and the
 [BIG implementation plan](docs/BIG-IMPLEMENTATION-PLAN.md). Work is divided into bounded
-units with tested exit criteria, reviewable conventional commits and exact-SHA handoffs.
-CoS-Rust development runs locally on the Windows D: workspace; no GitHub remote is currently
-configured. Do not mix uncommitted work from another agent into your own checkpoint.
+cloud units with tested exit criteria, reviewed PRs, green Windows/Linux CI and exact-SHA handoffs.
+The intended canonical repository is `KaisAbiyyi/chat-on-steroids-on-steroids` (public), with
+`origin` configured locally; the initial push is still awaiting publication audit. **Cloud agents
+implement; the Windows D: workspace qualifies native/device behavior at named local gates.**
+See the [cloud/local/manual unit schedule](docs/implementation-plan/2026-10-18-cloud-first-units.md).
+Do not mix uncommitted work from another agent into your own checkpoint or initial push.
 
 Contributions are welcome. Windows is the active qualification target. Linux work is welcome with
 native execution evidence; macOS and other platforms are currently on hold. See
@@ -84,7 +87,7 @@ one shared `/work/target`. Assertions and test limits are unchanged. Host source
 the ignored workspace `.cache/qualification/`; the runner reserves 8 GiB on that drive and 12 GiB
 on the system drive before using Docker. It records the profile and cache usage in the receipt.
 **Important storage gate:** these free-space checks do not prove Docker Desktop's backing data,
-container layers or WSL2 VHD reside on D:. Under the current local-first policy, independently
+container layers or WSL2 VHD reside on D:. Under the current native-qualification policy, independently
 verify the real Windows-host locations are on D: *before* starting this optional qualification.
 If not confirmed, mark the Linux Docker gate BLOCKED and do not start a cache-producing run.
 Historical Linux receipts remain valid for their recorded test scope, but do not establish this
