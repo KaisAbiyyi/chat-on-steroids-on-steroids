@@ -267,7 +267,11 @@ mod tests {
         );
         assert!(!clean.contains("RESULT_SECRET_321"));
         assert!(clean.contains("ok"));
-        let env = result("exec_command", &json!({}), "OPENAI_API_KEY=ENV_RESULT_SECRET");
+        let env = result(
+            "exec_command",
+            &json!({}),
+            "OPENAI_API_KEY=ENV_RESULT_SECRET",
+        );
         assert!(!env.contains("ENV_RESULT_SECRET"));
     }
 
