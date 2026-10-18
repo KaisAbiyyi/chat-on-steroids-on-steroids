@@ -10,7 +10,7 @@ use cos_tools::search::{
     native::Native,
     server::Server,
 };
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::{
     io,
     time::{Duration, Instant},
@@ -161,7 +161,10 @@ impl Kernel {
                     ));
                 }
                 authorize()?;
-                return Ok(ok(format_hits(outcome.hits)));
+                let count = outcome.hits.len();
+                let mut value = ok(format_hits(outcome.hits));
+                value["_recordingEvidence"] = json!({"count":count});
+                return Ok(value);
             }
             scanned += outcome.files_scanned;
             elapsed += outcome.elapsed_ms;
@@ -187,7 +190,9 @@ impl Kernel {
             text.push_str(&format!("\nnot_searched: {}", unreachable.join("; ")));
         }
         authorize()?;
-        Ok(ok(text))
+        let mut value = ok(text);
+        value["_recordingEvidence"] = json!({"count":count});
+        Ok(value)
     }
 }
 fn format_hits(hits: Vec<engine::Hit>) -> String {
