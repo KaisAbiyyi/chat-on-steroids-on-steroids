@@ -4,6 +4,7 @@ pub mod chronology;
 pub mod content;
 pub mod correlation;
 pub mod dil;
+pub mod evidence;
 pub mod markdown;
 pub mod model;
 pub mod provider_usage;
