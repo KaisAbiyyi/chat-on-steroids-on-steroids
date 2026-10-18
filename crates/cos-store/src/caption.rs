@@ -501,6 +501,7 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                     "list recent recordings",
                 )
             };
+            p.special_error = args["action"] == "read" && args["cursor"].is_string();
             p.detail = detail_count(count, "session", "sessions");
             p
         }
@@ -570,14 +571,30 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
         }
     }
 }
+// JS toFixed(1) rounds the actual f64 binary value, not a decimal
+// multiplication rounded to another f64. Use exact mantissa arithmetic.
+fn fixed_tenths(seconds: f64) -> u64 {
+    let bits = seconds.to_bits();
+    let exponent = ((bits >> 52) & 0x7ff) as i32 - 1023 - 52;
+    let mantissa = ((bits & ((1_u64 << 52) - 1)) | (1_u64 << 52)) as u128;
+    let numerator = mantissa * 10;
+    if exponent >= 0 {
+        return (numerator << exponent) as u64;
+    }
+    let denominator = 1_u128 << -exponent;
+    let quotient = numerator / denominator;
+    let remainder = numerator % denominator;
+    (quotient + u128::from(remainder * 2 >= denominator)) as u64
+}
 fn duration(ms: f64) -> String {
-    let ms = (ms + 0.5).floor() as i64;
-    if ms < 1000 {
-        format!("{ms}ms")
-    } else if ms < 60000 {
-        format!("{:.1}s", (ms as f64 / 1000.0 * 10.0 + 0.5).floor() / 10.0)
+    let rounded = (ms + 0.5).floor() as i64;
+    if ms < 1000.0 {
+        format!("{rounded}ms")
+    } else if ms < 60000.0 {
+        let tenths = fixed_tenths(ms / 1000.0);
+        format!("{}.{:01}s", tenths / 10, tenths % 10)
     } else {
-        format!("{}m", ((ms as f64 / 60000.0) + 0.5).floor() as i64)
+        format!("{}m", (ms / 60000.0 + 0.5).floor() as i64)
     }
 }
 fn extra_error(detail: &mut Option<String>, result_head: &str) {
@@ -602,6 +619,12 @@ fn format_summary(mut p: Phrase, tool: &str, outcome: &str, result_head: &str) -
                 };
             }
             p.metric = Some("refused".into());
+            if tool == "apply_patch"
+                && result_head.starts_with("apply_patch verification failed: Failed to find")
+            {
+                p.past = "Patch didn’t match".into();
+                p.metric = Some("not applied".into());
+            }
             extra_error(&mut p.detail, result_head);
         }
         "tool_execution_error" => {
