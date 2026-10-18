@@ -31,10 +31,7 @@ fn command(dir: &Path, args: &[&str]) {
 fn roots(dir: &Path) -> [Root; 1] {
     [Root {
         name: "p".into(),
-        path: std::fs::canonicalize(dir)
-            .unwrap()
-            .to_string_lossy()
-            .into(),
+        path: std::fs::canonicalize(dir).unwrap().to_string_lossy().into(),
         remote: None,
     }]
 }
