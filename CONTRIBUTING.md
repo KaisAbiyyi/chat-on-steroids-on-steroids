@@ -1,5 +1,12 @@
 # Contributing to CoS-Rust
 
+Before editing, read [agent rules](AGENTS.md), the [current work unit](docs/CURRENT-PHASE.md),
+the [local-first development workflow](docs/DEVELOPMENT-WORKFLOW.md), and the
+[BIG implementation plan](docs/BIG-IMPLEMENTATION-PLAN.md). Work is divided into bounded
+units with tested exit criteria, reviewable conventional commits and exact-SHA handoffs.
+CoS-Rust development runs locally on the Windows D: workspace; no GitHub remote is currently
+configured. Do not mix uncommitted work from another agent into your own checkpoint.
+
 Contributions are welcome. Windows is the active qualification target. Linux work is welcome with
 native execution evidence; macOS and other platforms are currently on hold. See
 [current implementation work](docs/implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md).

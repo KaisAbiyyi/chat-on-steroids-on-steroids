@@ -1,5 +1,12 @@
 # CoS-Rust
 
+Current development policy: **local-first, structured work units**, following the Mind Place
+engineering workflow while keeping CoS-Rust implementation and native qualification in the
+Windows D: workspace. See [current state](docs/CURRENT-PHASE.md),
+[BIG roadmap](docs/BIG-IMPLEMENTATION-PLAN.md), [workflow](docs/DEVELOPMENT-WORKFLOW.md)
+and [agent instructions](AGENTS.md). The previous recorder/caption WIP is paused pending
+an explicit next-unit instruction.
+
 Upstream Chat On Steroids is cloned at [`upstream/chat-on-steroids`](upstream/chat-on-steroids).
 Rust runtime, sessions, MCP, files/projects/SSH and process/terminal services now run in this workspace.
 The original **16-phase** roadmap remains the scope reference. **Phases 1–6 remain PARTIAL against
