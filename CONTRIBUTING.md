@@ -21,6 +21,10 @@ On Windows, prefer `python tools/check-workspace.py --strict`. It uses the works
 ignored `.test-tmp/` for child temporary files and `target/` for Cargo, preserves an explicitly
 configured `CARGO_TARGET_DIR`, and requires 8 GiB free on the workspace drive. Environment changes
 apply only to the check subprocesses. This avoids large fixture files filling the system Temp.
+Development/test profiles omit debug symbols and incremental state by default; debug assertions,
+overflow checks and test limits remain enabled. For a debugger, request symbols through Cargo's
+`CARGO_PROFILE_DEV_DEBUG=2` / `CARGO_PROFILE_TEST_DEBUG=2` environment overrides. Different profiles
+produce additional cache artifacts, so retain a single profile unless debugging requires another.
 
 Tests use temporary public fixtures and fresh profiles. The service always requires an explicit
 absolute `--data-dir`; never point tests at a personal CoS, browser or provider profile. Optional
@@ -68,11 +72,18 @@ container build cache and records the commit, image, kernel, test counts and log
 include uncommitted host changes, start Docker or install system dependencies. Add `--strict` for
 formatting and all-target Clippy; the container then also needs those rustup components. Use a new
 output path for each run so that historical receipts cannot be overwritten.
-Add `--lean-build` for the storage-conscious Linux profile: no debug symbols or incremental cache,
+The default `--lean-build` profile uses no debug symbols or incremental cache,
 one shared `/work/target`. Assertions and test limits are unchanged. Host source archives live in
 the ignored workspace `.cache/qualification/`; the runner reserves 8 GiB on that drive and 12 GiB
 on the system drive before using Docker. It records the profile and cache usage in the receipt.
 Do not alternate build profiles unnecessarily or prune unrelated Docker data.
+Use `--no-lean-build` only when full debug symbols/incremental state are deliberately needed.
+
+`python tools/qualify-search.py --binary target/release/cos-rust.exe --output audit/<date>/<receipt>.json`
+compares the actual loopback MCP service with the captured registered source handler, checks its
+protocol metadata and exercises find through the isolated code worker. Public fixtures and fresh
+profiles live under workspace `.test-tmp/`. Both directory-order inputs are captured; the actual
+filesystem input selects the oracle without changing result counts or response acceptance.
 
 `node tools/qualify-project-files.mjs [binary]` compares public native files against selected pinned
 source declarations. It requires the upstream development dependencies, including Babel's parser,

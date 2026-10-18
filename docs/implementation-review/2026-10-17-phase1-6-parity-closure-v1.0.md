@@ -22,3 +22,11 @@ The first search-engine Linux receipt is FAIL because the test compared differen
 inputs. Both inputs are now captured from the original handler and the exact native input selects
 the expected response; counts are never rewritten. Review that selection separately from product
 traversal. Updated Windows qualification remains 201 PASS; subsequent Linux proof is still required.
+
+Exact correction commit `4a40c93` subsequently passed **193 Linux tests**, formatting and strict
+Clippy. Windows cold qualification under the default lean profiles passed **201 tests** plus strict
+checks; review symbol/incremental settings separately from unchanged assertions and acceptance limits.
+The release passes 41 actual runtime/source checks and measures 11.923 MiB. Storage cleanup and the
+1.464 GiB rebuilt Windows / 1.1 GiB Linux caches have separate receipts. Content fixtures qualify the
+source filesystem fallback; full local ripgrep, partial-read hit retention and stream/chunk semantics
+stay open. These notes remain implementation evidence; independent whole-scope review is **NOT RUN**.

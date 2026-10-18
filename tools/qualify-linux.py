@@ -6,7 +6,7 @@ p.add_argument('--container',default='cos-rust-qualify-20261017')
 p.add_argument('--source',default='HEAD')
 p.add_argument('--output',required=True)
 p.add_argument('--strict',action='store_true',help='Also run formatting and strict all-target Clippy')
-p.add_argument('--lean-build',action='store_true',help='Disable debug symbols and incremental caches in the shared Linux build directory')
+p.add_argument('--lean-build',action=argparse.BooleanOptionalAction,default=True,help='Use the default storage-conscious cache; --no-lean-build explicitly requests full debug symbols/incremental state')
 a=p.parse_args()
 repo=pathlib.Path(__file__).resolve().parents[1]
 
@@ -40,6 +40,8 @@ if system_free < 12*1024**3:
 build_env={'CARGO_TARGET_DIR':'/work/target'}
 if a.lean_build:
     build_env.update(CARGO_INCREMENTAL='0',CARGO_PROFILE_DEV_DEBUG='0',CARGO_PROFILE_TEST_DEBUG='0')
+else:
+    build_env.update(CARGO_INCREMENTAL='1',CARGO_PROFILE_DEV_DEBUG='2',CARGO_PROFILE_TEST_DEBUG='2')
 docker_exec=['docker','exec']
 for key,value in build_env.items():
     docker_exec.extend(['-e',key+'='+value])

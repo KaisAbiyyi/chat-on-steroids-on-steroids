@@ -291,3 +291,21 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   actual order, and still compares the entire response exactly. Product traversal is unchanged;
   no counts are normalized, cases removed or thresholds relaxed. The failed Linux receipt is
   preserved. The updated fixture passed the full Windows suite again: **201 PASS**, strict checks.
+
+- Search checkpoint `4a40c93`: **193 native Linux tests PASS**, 0 failed/ignored, formatting and
+  strict Clippy PASS; the shared lean cache measures 1.1 GiB. The Windows release is 12,502,528
+  bytes (11.923 MiB), +202,752 bytes against `23c1f95` for toolchain/search work together. It passes
+  17 runtime, 13 project-file source comparisons and 11 actual search/MCP/code-worker checks.
+- Scope ruling: captured content and handler projections exercise the original public filesystem
+  fallback provider. They do not close all local bundled-ripgrep behavior, partial-read hit retention
+  or chunk-boundary exactness. These remain open with server JavaScript regex, global unpaired JSON
+  strings and SFTP pipelining/entry caps; do not extrapolate the bounded source comparisons.
+- Storage ruling: dev/test profiles default to symbols 0 and incremental false, preserving default
+  assertions, overflow checks and all acceptance/file-size limits. Debugger overrides are documented.
+  Cost: less incremental reuse and explicit symbol opt-in when debugging. After exact scope/reparse/
+  process verification, Cargo's development-profile cleanup removed 39,243 files (25.394 GiB), keeping
+  release archives. The cold rebuild passed **201 Windows tests**, formatting and strict Clippy; its
+  cache measures **1.464 GiB**. No global Docker prune, user-data cleanup or factory reset occurred.
+  Linux defaults to the same lean settings; an exact committed default-run receipt follows.
+- Next: Task 5 source title/prompt/rename/summary/history contracts. Tasks 2–8 and final review remain
+  in progress; this checkpoint is not whole-application or whole-phase exactness acceptance.

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "method": "Cargo profile-scoped clean after successful dry run",
+  "target": "D:\\projects\\CoS-Rust\\target\\debug",
+  "logicalBytesBefore": 27267898740,
+  "freeBytesBefore": 41940615168,
+  "freeBytesAfter": 68948963328,
+  "remainingDebugDirectory": false,
+  "releaseArchivePreserved": true,
+  "reparsePointsAtPreflight": 0,
+  "activeBuildOrDebugProcesses": 0,
+  "directShellDeletion": "Rejected by automatic policy; no direct deletion executed"
+}

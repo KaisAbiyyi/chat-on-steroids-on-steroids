@@ -1,11 +1,18 @@
 # Phase 1–6 parity closure — implementation summary v1.0
 
-Date: 2026-10-17, Asia/Jakarta. Status: **IN PROGRESS**.
+Started: 2026-10-17; updated: 2026-10-18, Asia/Jakarta. Status: **IN PROGRESS**.
 Authorization: close all PARTIAL items, initialize Git and continue implementation.
 Windows is active; macOS/other platforms are **HOLD at the user's request**. Linux is permitted if feasible.
 
 ## Current result
 
+- Latest integrated checks: **201 Windows / 193 Linux tests PASS**, 0 failed/ignored, formatting and
+  strict Clippy PASS. Linux executed exact commit `4a40c93`; Windows also cold-built the new lean profiles.
+- Windows service `4a40c93`: **11.923 MiB**, 41 executable/source checks PASS. Full desktop and installer
+  acceptance remain open. [Release receipt](../../audit/2026-10-18/search-release-receipt.json).
+- Storage checkpoint: Cargo removed the verified 25.394 GiB development cache; a complete lean rebuild
+  including Clippy uses **1.464 GiB**. Assertions, overflow checks and fixture limits are unchanged.
+  [Cold-build receipt](../../audit/2026-10-18/windows-lean-profile-receipt.json).
 - Initialized the root repository and committed the verified prior source as `68f7954`.
 - Continuing on `feat/close-phase1-6-partials`. The nested upstream remains pinned, ignored and untouched.
 - Historical baseline: 116 Windows Rust tests, 17 executable checks, 8.476 MiB service binary.
@@ -24,7 +31,8 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 Latest integrated closure checkpoint: **201 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
 [Windows receipt](../../audit/2026-10-18/search-engine-native-order-windows-receipt.json). Latest exact-commit Linux
-proof currently covers matcher commit `531fcac`: **177 PASS**; search-engine Linux qualification follows.
+proof covers search-engine commit `4a40c93`: **193 PASS**:
+[Linux receipt](../../audit/2026-10-18/linux-search-engine-native-order-receipt.json).
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -216,6 +224,30 @@ It completed 63 tests successfully and failed one before Cargo stopped; it is no
 The full updated Windows suite passes **201 tests**, formatting and strict Clippy:
 [receipt](../../audit/2026-10-18/search-engine-native-order-windows-receipt.json). A fresh Linux
 exact-commit qualification follows this correction.
+
+## Storage and executable qualification — 2026-10-18
+
+The native-order correction at `4a40c93` passed **193 Linux tests**, formatting and strict Clippy,
+with a **1.1 GiB** shared cache. The failed prior Linux run remains historical evidence. The Windows
+release is 12,502,528 bytes, SHA-256 `f5a9a7aa80b5c6785fcbd38798d1557f3d6722be0158cf13dad567f051525877`.
+It adds 202,752 bytes against `23c1f95`, covering toolchain and search work together. Actual release
+qualification passed 17 runtime checks, 13 project-file comparisons and 11 search/MCP/code-worker checks.
+The source handler corpus captures both directory inputs; each native run selects its actual input.
+
+Content/handler fixtures use the original public filesystem fallback provider. They do not qualify
+every local bundled-ripgrep branch. Partial-read hit retention and chunk-boundary behavior remain open,
+alongside JavaScript server regex, unpaired JSON strings and SFTP pipelining/entry budgets. Installer,
+full desktop startup and RAM measurements remain NOT RUN; the fresh whole-scope review is NOT RUN.
+
+Development and test profiles now omit symbols and incremental state by default. A cold native Windows
+rebuild passed all **201 tests**, formatting and strict Clippy. Debugger symbols remain available through
+documented Cargo environment overrides; requesting another profile can allocate additional artifacts.
+Before cleanup, the exact workspace development target, ancestry, reparse points and active processes
+were verified. Cargo's scoped cleanup removed 39,243 files; the archived release and other Docker/user
+data were retained. [Cleanup receipt](../../audit/2026-10-18/windows-debug-cache-cleanup.json).
+The rebuilt cache measures 1,571,649,517 bytes. Free space at that receipt was **39.09 GiB on C / 67.01 GiB
+on D**; external free-space changes are not attributed to this cleanup. Host fixture/archive temporary
+files stay on D. Linux uses the same lean cache by default, with explicit opt-in for debugger profiles.
 
 ## Documents
 

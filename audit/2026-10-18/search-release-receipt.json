@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "date": "2026-10-18",
+  "sourceCommit": "4a40c93703cd14588cbd1ef97585dbbb0e7133eb",
+  "artifact": "Windows headless service/CLI",
+  "bytes": 12502528,
+  "mib": 11.92333984375,
+  "binarySha256": "f5a9a7aa80b5c6785fcbd38798d1557f3d6722be0158cf13dad567f051525877",
+  "localArchive": "audit/2026-10-18/release-artifact/cos-rust-4a40c93.exe",
+  "previousComparableService": {
+    "sourceCommit": "23c1f957865b88289dc9a75187894dedb0df055f",
+    "bytes": 12299776
+  },
+  "increaseBytes": 202752,
+  "costScope": "Windows toolchain discovery and search matching/traversal/content/SFTP integration together; not an isolated measurement of one feature",
+  "checks": {
+    "windowsRustTests": 201,
+    "linuxRustTests": 193,
+    "windowsClippy": "PASS",
+    "linuxClippy": "PASS",
+    "format": "PASS",
+    "executableRuntime": 17,
+    "projectFileSourceComparisons": 13,
+    "searchExecutableChecks": 11
+  },
+  "runtimeReceipt": "audit/2026-10-18/search-release-runtime.json",
+  "sourceReceipt": "audit/2026-10-18/search-release-project-files.json",
+  "searchReceipt": "audit/2026-10-18/search-release-find-3.json",
+  "linuxReceipt": "audit/2026-10-18/linux-search-engine-native-order-receipt.json",
+  "exceptions": [
+    "QuickJS C interpreter",
+    "Tree-sitter C parser/scanner"
+  ],
+  "fullApplicationReady": false,
+  "installerStartupRam": "NOT RUN",
+  "macOS": "HOLD by user request"
+}

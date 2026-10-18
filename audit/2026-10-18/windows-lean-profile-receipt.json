@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "baseCommit": "4a40c93703cd14588cbd1ef97585dbbb0e7133eb",
+  "scope": "Native Windows cold rebuild under the storage-conscious dev/test profiles",
+  "command": "python tools/check-workspace.py --strict",
+  "checks": {
+    "format": 0,
+    "workspaceTests": 0,
+    "strictClippy": 0
+  },
+  "tests": {
+    "passed": 201,
+    "failed": 0,
+    "ignored": 0
+  },
+  "profiles": {
+    "dev": {
+      "debug": 0,
+      "incremental": false
+    },
+    "test": {
+      "debug": 0,
+      "incremental": false
+    },
+    "assertionsAndThresholds": "Unchanged; default debug assertions and overflow checks retained"
+  },
+  "cargoTomlSha256": "1e4fde3bdd2a018372292d72a58483eae11ddcc3dc8d9e0fab8df1286f0537ee",
+  "cacheBytesAfter": 1571649517,
+  "cacheMiBAfter": 1498.841778755188,
+  "temporaryDirectory": "D:\\projects\\CoS-Rust\\.test-tmp",
+  "driveFreeAfter": {
+    "C": 41972699136,
+    "D": 71948398592
+  },
+  "log": "audit/2026-10-18-windows-lean-profile-workspace.log",
+  "logSha256": "d3e1b2ac8dc53f7dd89340b2a653f7df9a835d47d525d8e79ada27e0828015a0"
+}
