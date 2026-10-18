@@ -139,6 +139,18 @@ mod tests {
     }
 
     #[test]
+    fn committed_paths_are_scrubbed_against_sensitive_inputs() {
+        let safe = for_recording(
+            "apply_patch",
+            &json!({"env":{"PRIVATE_DIR":"private-path-value"}}),
+            json!({"changes":[{"path":"/p/private-path-value/created.txt","kind":"add"}]}),
+        );
+        let path = safe["changes"][0]["path"].as_str().unwrap();
+        assert!(!path.contains("private-path-value"));
+        assert!(path.ends_with("/created.txt"));
+    }
+
+    #[test]
     fn bounded_trusted_find_and_patch_facts() {
         let good = json!({"content":[{"type":"text","text":"success"}]});
         assert_eq!(from_runtime("find", &good, &json!({"count":3}))["count"], 3);
