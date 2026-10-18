@@ -23,12 +23,15 @@ impl Fixture {
             )
             .unwrap(),
         );
-        config.update(|value| {
-            value["roots"] = json!([{"name":"left","path":left_path},{"name":"right","path":right_path}]);
-            value["multiAgent"]["allowUnattributedCalls"] = json!(true);
-            value["capabilities"]["command"] = json!(false);
-            value["capabilities"]["read"] = json!(false);
-        }).unwrap();
+        config
+            .update(|value| {
+                value["roots"] =
+                    json!([{"name":"left","path":left_path},{"name":"right","path":right_path}]);
+                value["multiAgent"]["allowUnattributedCalls"] = json!(true);
+                value["capabilities"]["command"] = json!(false);
+                value["capabilities"]["read"] = json!(false);
+            })
+            .unwrap();
         let kernel = Kernel::new(config.clone()).unwrap();
         Self {
             _profile: profile,
