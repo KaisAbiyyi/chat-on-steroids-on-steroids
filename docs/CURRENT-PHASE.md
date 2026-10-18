@@ -4,13 +4,15 @@ Captured: **2026-10-18, Asia/Jakarta**. This is the agent-to-agent resume pointe
 
 ## Current directive
 
-- **Work unit:** `BOOT-CLOSE` — publish the verified GitHub default branch, record initial CI outcome, and hand off cloud unit `CL-01`. **No feature work in this bootstrap receipt.**
-- **Feature implementation:** The first public GitHub main publication is complete. **Start `CL-01` only after required GitHub CI passes on the current default `main` and bootstrap documentation is accepted.** Its priority is the Critical recorder redaction gap.
+- **Work unit:** `CL-01` — cloud recorder privacy patch [PR #3](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/3), branch `fix/cl-01-recorder-redaction`. **In review until all current-head CI and merge gates pass.**
+- **Feature implementation:** `CL-01` reconstructs the redaction boundary directly on GitHub and tests inline, overflow asset and cold-restart persistence. The original eight local dirty files have not been staged or pushed. **Next after accepted PR #3: `CL-02` structured runtime outcome evidence.**
 - **Canonical development (after publication):** cloud coding agents using GitHub branches/PRs and Windows/Linux CI. The user's `D:\projects\CoS-Rust` remains the **local device-qualification environment**, with all local artifacts/temp/cache on D:.
 - **Canonical remote:** [GitHub main](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/tree/main), initial published SHA `8637c12ccda8610e5a06534f30af4688034cc9b6`; Windows fixture correction squash-merged as `299caa190aa2049309b9a39896dec28fb7d4e7e6`. The latest SHA may advance through reviewed bootstrap documentation PRs; verify the live SHA and checks before a new cloud unit.
 - **Local history:** old local `main` was `68f7954`; the original advanced feature branch and all its 24 subsequent commits were preserved through an ancestry-safe fast-forward to published main. The last feature implementation checkpoint before governance was `45db209` (2026-10-18 20:15 WIB). Original local dirty WIP is still separate.
 
 ## Verified baseline versus unverified WIP
+
+Cloud CL-01 code and tests are described in [the dated cloud summary](implementation-summary/2026-10-18-cl-01-recorder-privacy.md). The older rows below refer to bootstrap/historical checkouts and must not be mistaken for current PR #3 CI acceptance.
 
 | Area | Status | Evidence boundary |
 | --- | --- | --- |
@@ -43,7 +45,7 @@ The following eight paths were **dirty/untracked at the audit** and belong to th
 ?? tools/capture-recording-redaction.mjs
 ```
 
-The previous agent captured 343 caption source cases plus running captions, and was working on argument privacy, exit status and evidence. Read-only review finds one **Critical** privacy gap and one **Important** correctness gap:
+The previous agent captured 343 caption source cases plus running captions, and was working on argument privacy, exit status and evidence. The historical **uncommitted local** branch had one **Critical** privacy gap and one **Important** correctness gap:
 
 1. **Critical — privacy:** `Recorder::record_call` still passes original argument/result values to the durable store; new `redaction::arguments` and `redaction::result` have no production callers. Environment/secret/base64/clipboard data can remain persisted unless this is fixed before storage, including overflow assets and derived caption text.
 2. Captions are generated with `caption::empty_evidence()` even when real responses carry `structuredContent.exit_code`, `session_id`, search counts and patch changes. This can misrepresent failed/background commands as successful and drops actual evidence. The uncommitted integration tests describe the intended contract, but are not a passing proof.
@@ -56,5 +58,5 @@ The local WIP **is not in GitHub**. Publishing committed history alone will not 
 - Cloud-first rules, [BIG roadmap](BIG-IMPLEMENTATION-PLAN.md), [C/L/U matrix](implementation-plan/2026-10-18-cloud-first-units.md), and [superseding ADR](decisions/2026-10-18-cloud-first-supersession.md) are published. A follow-up docs PR records the resulting bootstrap proof.
 - `BOOT-L1` and `BOOT-U1` publication are finished. Initial hosted CI **FAIL** was traced to temporary approved-root aliases in Windows tests. The test-only correction in PR #2 merged as `299caa1` after both PR CI jobs passed. The [post-merge main workflow](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39140089208) must pass before declaring cloud bootstrap accepted; production sandbox authorization is unchanged.
 - The public commit metadata includes Git author/committer email supplied by local Git config. For future commits, use a GitHub noreply identity if the user wants to avoid further disclosure. Do not rewrite published qualified history casually.
-- `CL-01` is the first next **cloud** coding unit: reconstruct or securely review the local recorder WIP, prevent raw secrets in stored args/results/captions/assets, prove restart and negative cases, then produce PR/CI and the next-unit handoff. **No direct user testing is scheduled for `CL-01`; local native recorder gate is `CL-L1` after `CL-03`.**
+- `CL-01` cloud work is implemented in [PR #3](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/3), subject to current-head CI and review. The **NEXT** unit is `CL-02` only after successful merge. **LOCAL REQUIRED:** none now; recorder native gate `CL-L1` follows `CL-03`. **YOU REQUIRED:** NO for this cloud unit.
 - At every future C unit response state **LOCAL REQUIRED** and **YOU REQUIRED** (NO/YES + when). Phase-level L and U gates are enumerated in the matrix. The full phase 1–6 independent review is still NOT RUN.
