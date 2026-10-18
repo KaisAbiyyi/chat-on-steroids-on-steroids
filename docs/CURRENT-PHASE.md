@@ -16,6 +16,7 @@ Captured: **2026-10-18, Asia/Jakarta**. This is the agent-to-agent resume pointe
 | --- | --- | --- |
 | Rust Windows workspace | PASS at prior checkpoint | 237 tests, 0 failed/ignored, format and strict Clippy, recorded at `209462d` scope |
 | Rust Linux workspace | PASS at prior checkpoint | 227 tests, strict Clippy and format on exact content commit `209462d` |
+| Future Docker/WSL-based Linux qualification | BLOCKED pending D: storage proof | Historical source tests remain valid; the existing runner does not verify the Windows-host location of Docker/WSL cache volumes |
 | Headless Windows service | PASS for checked scope | 12,696,576 bytes (12.108 MiB); 63 executable/source comparisons; no UI/installer acceptance |
 | Current dirty recorder/caption integration | **NOT RUN as full integrated proof** | Uncommitted code; one Critical and one Important risk described below; newly added integration tests are not an accepted release |
 | Whole phase 1–6 exactness | IN PROGRESS / PARTIAL | Closure plan's Tasks 2–8 and final independent review still open |

@@ -21,6 +21,7 @@ For the active Rust owner, inspect callers and the applicable source contract fi
 - Reproduce meaningful behavior failures with a RED regression; fix the cause; demonstrate GREEN. Cover failure, restart, race/revocation and real platform behavior proportionally. Do not change acceptance thresholds, skip tests or call unsupported behavior PASS.
 - Measure memory, startup, throughput, binary/installer size and disk usage with identified fixtures and comparable environments before claiming an improvement. Include baseline, units, commit SHA and limitations; do not optimize from guesses.
 - Use `D:\projects\CoS-Rust` for repository-owned build/test/export/receipt output. Keep `TEMP`/`TMP` for test subprocesses and Cargo build cache on D:. Do not introduce large task-owned output on C:. Never delete unknown C: data; any cleanup requires verified ownership and a bounded target.
+- Before any Docker/WSL-based qualification, verify the **actual Windows-host storage location** of Docker's image/container data and its WSL VHD(s). An in-container `/work/target` path or `docker info`'s Linux data root does not establish that the backing disk is D:. If the host storage location is unverified or on C:, mark the optional Linux gate `BLOCKED` and do not start a cache-producing run. Preserve historical Linux receipts without extending their storage claims.
 
 ## Change and Git gates
 

@@ -83,6 +83,12 @@ The default `--lean-build` profile uses no debug symbols or incremental cache,
 one shared `/work/target`. Assertions and test limits are unchanged. Host source archives live in
 the ignored workspace `.cache/qualification/`; the runner reserves 8 GiB on that drive and 12 GiB
 on the system drive before using Docker. It records the profile and cache usage in the receipt.
+**Important storage gate:** these free-space checks do not prove Docker Desktop's backing data,
+container layers or WSL2 VHD reside on D:. Under the current local-first policy, independently
+verify the real Windows-host locations are on D: *before* starting this optional qualification.
+If not confirmed, mark the Linux Docker gate BLOCKED and do not start a cache-producing run.
+Historical Linux receipts remain valid for their recorded test scope, but do not establish this
+new storage preflight. See [development workflow](docs/DEVELOPMENT-WORKFLOW.md#5-storage-resources-and-publication).
 Do not alternate build profiles unnecessarily or prune unrelated Docker data.
 Use `--no-lean-build` only when full debug symbols/incremental state are deliberately needed.
 
