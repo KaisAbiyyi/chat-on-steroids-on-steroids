@@ -35,6 +35,9 @@ the store enforces title and conversation authority. These are host operations w
 
 `history <id> --from 1 --limit 200`, `search <query>` and `export <id> --format md/json` read the stored
 record. `usage --context-cap 400000` selects an explicit comparison cap; the CLI has no provider catalog.
+`export <id> --format md --scope answer --turn <turn-id>` exports the answer of a recorded completed
+turn. Markdown retains recorded DIL table rows and converts provider link cards into links; complete
+inline text stays inline, while truncated text can use its overflow asset.
 `provider-usage` requires explicit `--codex-home` and `--claude-home`, respects opt-out and reports a
 truncated scan with `limited:true`. No signed-in provider profile is selected automatically.
 

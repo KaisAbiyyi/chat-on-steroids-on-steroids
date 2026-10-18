@@ -1,0 +1,2288 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "scope": "Actual pure content/table/transcript functions and real export function with public reads plus a memory-only text sink; native clipboard/dialog NOT RUN",
+  "sources": {
+    "src/shared/content-reference.ts": "87de96a789cb423c62151934116d6a1053c2297ba8851a6bf41cf7db88bc767f",
+    "src/shared/dil-tables.ts": "00dc2659888d0355a1c8386e4100e0431bd2be3f30b35c7afaa2881103095447",
+    "src/shared/markdown-export.ts": "5251d53b44f204d758bc4dc252df5f21af341a0155798fcb6d559e3b6bbe52bc",
+    "src/main/session/markdown-export.ts": "fd60e209a94195fd0d2d164e65bfc808c85686a9c9b779c479e9a383ae23f8c5",
+    "src/shared/session.ts": "59fd546021383ba6b75896022d8dd4e876464ccb3dc1ff977c687d16611870e1"
+  },
+  "pure": [
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        ""
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        ""
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        ""
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "plain text"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "plain text"
+      ],
+      "expected": {
+        "value": "plain text"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "plain text"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "before\n::chatgpt-content-reference{index=\"0\" source_message_id=\"public\"}\nafter"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "before\n::chatgpt-content-reference{index=\"0\" source_message_id=\"public\"}\nafter"
+      ],
+      "expected": {
+        "value": "before\n\nafter"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "before\n::chatgpt-content-reference{index=\"0\" source_message_id=\"public\"}\nafter"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::widget"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::widget"
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::widget"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "  ::Widget{x=\"public\"}\t"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "  ::Widget{x=\"public\"}\t"
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "  ::Widget{x=\"public\"}\t"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        ":::unknown\nbody\n:::"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        ":::unknown\nbody\n:::"
+      ],
+      "expected": {
+        "value": "body"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        ":::unknown\nbody\n:::"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        ":::writing\nbody\n:::"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        ":::writing\nbody\n:::"
+      ],
+      "expected": {
+        "value": ":::writing\nbody\n:::"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        ":::writing\nbody\n:::"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        ":::writing-card\nbody\n:::"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        ":::writing-card\nbody\n:::"
+      ],
+      "expected": {
+        "value": ":::writing-card\nbody\n:::"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        ":::writing-card\nbody\n:::"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        ":::writing_card\nbody\n:::"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        ":::writing_card\nbody\n:::"
+      ],
+      "expected": {
+        "value": "body"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        ":::writing_card\nbody\n:::"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::widget\r\nnext"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::widget\r\nnext"
+      ],
+      "expected": {
+        "value": "next"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::widget\r\nnext"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "left\r::widget\rright"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "left\r::widget\rright"
+      ],
+      "expected": {
+        "value": "left\r\rright"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "left\r::widget\rright"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "left ::widget right"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "left ::widget right"
+      ],
+      "expected": {
+        "value": "left  right"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "left ::widget right"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::widget{x=\"across\rcarriage\"}"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::widget{x=\"across\rcarriage\"}"
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::widget{x=\"across\rcarriage\"}"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::ſpecial"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::ſpecial"
+      ],
+      "expected": {
+        "value": "::ſpecial"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::ſpecial"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::widget"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::widget"
+      ],
+      "expected": {
+        "value": "::widget"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::widget"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "x ::widget"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "x ::widget"
+      ],
+      "expected": {
+        "value": "x ::widget"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "x ::widget"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::widget\n\n\n\nnext"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::widget\n\n\n\nnext"
+      ],
+      "expected": {
+        "value": "next"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::widget\n\n\n\nnext"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::widget{x=\"a}b\"}"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::widget{x=\"a}b\"}"
+      ],
+      "expected": {
+        "value": "::widget{x=\"a}b\"}"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::widget{x=\"a}b\"}"
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "hasProviderDirective",
+      "args": [
+        "::writing\n:::unknown\nbody\n:::"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "withoutProviderDirectives",
+      "args": [
+        "::writing\n:::unknown\nbody\n:::"
+      ],
+      "expected": {
+        "value": "body"
+      }
+    },
+    {
+      "name": "hasContentReference",
+      "args": [
+        "::writing\n:::unknown\nbody\n:::"
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        ""
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<p>public &amp; safe</p><div>next<br/>line</div>"
+      ],
+      "expected": {
+        "value": "public & safe\nnext\nline"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<SCRIPT>private()</SCRIPT><style>hidden</style><p>shown</p>"
+      ],
+      "expected": {
+        "value": "shown"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<script>mismatched</style><p>shown</p>"
+      ],
+      "expected": {
+        "value": "mismatchedshown"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<scripture>literal</scripture>"
+      ],
+      "expected": {
+        "value": "literal"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<scripté>removed by ASCII word boundary</script>"
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<p>  a \t <br >b\n\n\nend </p>"
+      ],
+      "expected": {
+        "value": "a\nb\n\nend"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&unknown; &AMP; &#39; &#x1F600; &#65; &#x00;"
+      ],
+      "expected": {
+        "value": "&unknown; & ' 😀 A \u0000"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#xD800;"
+      ],
+      "expected": {
+        "needsLosslessString": true,
+        "units": [
+          55296
+        ]
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x110000;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1114112"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<!-- comment --><h2>Title</h2><table><tr><td>a</td></tr></table>"
+      ],
+      "expected": {
+        "value": "Title\na"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<p>&#X61; &#00065; &nbsp; &apos; &quot;</p>"
+      ],
+      "expected": {
+        "value": "a A   ' \""
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "<p>&lt;b&gt;literal&lt;/b&gt;</p>"
+      ],
+      "expected": {
+        "value": "<b>literal</b>"
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#9999999999999999999999999999999;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1e+31"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point Infinity"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#xFFFFFFFFFFFFFFFFFFFF;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1.2089258196146292e+24"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x123456789abcdef012345;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1.3754889325393114e+24"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x20000000000000;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 9007199254740992"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x20000000000001;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 9007199254740992"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x20000000000003;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 9007199254740996"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x4000000000000201;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 4611686018427389000"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point Infinity"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 8.98846567431158e+307"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#xfffffffffffff800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;"
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1.7976931348623157e+308"
+        }
+      }
+    },
+    {
+      "name": "plainTextOfHtml",
+      "args": [
+        "&#x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041;"
+      ],
+      "expected": {
+        "value": "A"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "plain  text"
+      ],
+      "expected": {
+        "value": "plain  text"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "url Public label  https://example.invalid/public "
+      ],
+      "expected": {
+        "value": "[Public label](https://example.invalid/public)"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "See citepublic , next"
+      ],
+      "expected": {
+        "value": "See, next"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "URLLabelhttps://example.invalid"
+      ],
+      "expected": {
+        "value": ""
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "brokenpublic"
+      ],
+      "expected": {
+        "value": "brokenpublic"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "beforexonetwo\tafter"
+      ],
+      "expected": {
+        "value": "before\tafter"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "x \t !  next"
+      ],
+      "expected": {
+        "value": "x \t !  next"
+      }
+    },
+    {
+      "name": "providerEntitiesAsMarkdown",
+      "args": [
+        "url\t https://example.invalid "
+      ],
+      "expected": {
+        "value": "https://example.invalid"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        null
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        null
+      ],
+      "expected": {
+        "value": "[This reply points to content from another message that was not recorded.]"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        null
+      ],
+      "expected": {
+        "value": "before\n\ninner\n\nafter"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        null
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": ""
+        }
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": ""
+        }
+      ],
+      "expected": {
+        "value": "[This reply points to content from another message that was not recorded.]"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": ""
+        }
+      ],
+      "expected": {
+        "value": "before\n\ninner\n\nafter"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": ""
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": "<p>Resolved <b>public</b></p>"
+        }
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": "<p>Resolved <b>public</b></p>"
+        }
+      ],
+      "expected": {
+        "value": "Resolved public"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": "<p>Resolved <b>public</b></p>"
+        }
+      ],
+      "expected": {
+        "value": "Resolved public"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": "<p>Resolved <b>public</b></p>"
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": "<p>Resolved public</p>",
+          "truncated": true
+        }
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": "<p>Resolved public</p>",
+          "truncated": true
+        }
+      ],
+      "expected": {
+        "value": "[This reply points to content from another message that was not recorded.]"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": "<p>Resolved public</p>",
+          "truncated": true
+        }
+      ],
+      "expected": {
+        "value": "before\n\ninner\n\nafter"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": "<p>Resolved public</p>",
+          "truncated": true
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": "<p>::widget</p>"
+        }
+      ],
+      "expected": {
+        "value": false
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": "<p>::widget</p>"
+        }
+      ],
+      "expected": {
+        "value": "[This reply points to content from another message that was not recorded.]"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": "<p>::widget</p>"
+        }
+      ],
+      "expected": {
+        "value": "before\n\ninner\n\nafter"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": "<p>::widget</p>"
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": "<p> &#xD800; </p>"
+        }
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": "<p> &#xD800; </p>"
+        }
+      ],
+      "expected": {
+        "needsLosslessString": true,
+        "units": [
+          55296
+        ]
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": "<p> &#xD800; </p>"
+        }
+      ],
+      "expected": {
+        "needsLosslessString": true,
+        "units": [
+          55296
+        ]
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": "<p> &#xD800; </p>"
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": "<p>&#x110000;</p>"
+        }
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1114112"
+        }
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": "<p>&#x110000;</p>"
+        }
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1114112"
+        }
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": "<p>&#x110000;</p>"
+        }
+      ],
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "message": "Invalid code point 1114112"
+        }
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": "<p>&#x110000;</p>"
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    },
+    {
+      "name": "resolvedCapture",
+      "args": [
+        {
+          "text": "   "
+        }
+      ],
+      "expected": {
+        "value": true
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "::chatgpt-content-reference{index=\"0\"}",
+        {
+          "text": "   "
+        }
+      ],
+      "expected": {
+        "value": "[This reply points to content from another message that was not recorded.]"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "before\n:::unknown\ninner\n:::\nafter",
+        {
+          "text": "   "
+        }
+      ],
+      "expected": {
+        "value": "before\n\ninner\n\nafter"
+      }
+    },
+    {
+      "name": "modelFacingText",
+      "args": [
+        "ordinary urllinkhttps://example.invalid",
+        {
+          "text": "   "
+        }
+      ],
+      "expected": {
+        "value": "ordinary [link](https://example.invalid)"
+      }
+    }
+  ],
+  "tableCases": [
+    {
+      "text": "| Name | Value |\n| --- | --- |",
+      "capture": null,
+      "expected": {
+        "value": "| Name | Value |\n| --- | --- |"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| --- | --- |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "| Name | Value |\n| --- | --- |\n| A \\| B | 1\\\\2 |\n| C | & 3 |"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| --- | --- |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "| Name | Value |\n| --- | --- |"
+      }
+    },
+    {
+      "text": "before\n\n| **Name** | Value |\n| :--- | ---: |\n| incomplete | row |\n\nafter",
+      "capture": null,
+      "expected": {
+        "value": "before\n\n| **Name** | Value |\n| :--- | ---: |\n| incomplete | row |\n\nafter"
+      }
+    },
+    {
+      "text": "before\n\n| **Name** | Value |\n| :--- | ---: |\n| incomplete | row |\n\nafter",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "before\n\n| **Name** | Value |\n| :--- | ---: |\n| A \\| B | 1\\\\2 |\n| C | & 3 |\n\nafter"
+      }
+    },
+    {
+      "text": "before\n\n| **Name** | Value |\n| :--- | ---: |\n| incomplete | row |\n\nafter",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "before\n\n| **Name** | Value |\n| :--- | ---: |\n| incomplete | row |\n\nafter"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| --- | --- |\n| one | row |\n| two | row |",
+      "capture": null,
+      "expected": {
+        "value": "| Name | Value |\n| --- | --- |\n| one | row |\n| two | row |"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| --- | --- |\n| one | row |\n| two | row |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "| Name | Value |\n| --- | --- |\n| one | row |\n| two | row |"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| --- | --- |\n| one | row |\n| two | row |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "| Name | Value |\n| --- | --- |\n| one | row |\n| two | row |"
+      }
+    },
+    {
+      "text": "| Other | Value |\n| --- | --- |",
+      "capture": null,
+      "expected": {
+        "value": "| Other | Value |\n| --- | --- |"
+      }
+    },
+    {
+      "text": "| Other | Value |\n| --- | --- |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "| Other | Value |\n| --- | --- |"
+      }
+    },
+    {
+      "text": "| Other | Value |\n| --- | --- |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "| Other | Value |\n| --- | --- |"
+      }
+    },
+    {
+      "text": "Before\n\n[Open public]\n\nAfter",
+      "capture": null,
+      "expected": {
+        "value": "Before\n\n[Open public]\n\nAfter"
+      }
+    },
+    {
+      "text": "Before\n\n[Open public]\n\nAfter",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "Before\n\nAfter"
+      }
+    },
+    {
+      "text": "Before\n\n[Open public]\n\nAfter",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "Before\n\n[Open public]\n\nAfter"
+      }
+    },
+    {
+      "text": "[Different]\n[Open public]",
+      "capture": null,
+      "expected": {
+        "value": "[Different]\n[Open public]"
+      }
+    },
+    {
+      "text": "[Different]\n[Open public]",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "[Different]"
+      }
+    },
+    {
+      "text": "[Different]\n[Open public]",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "[Different]\n[Open public]"
+      }
+    },
+    {
+      "text": "| Name | Value |\r\n| --- | --- |\r\n",
+      "capture": null,
+      "expected": {
+        "value": "| Name | Value |\r\n| --- | --- |\r\n"
+      }
+    },
+    {
+      "text": "| Name | Value |\r\n| --- | --- |\r\n",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "| Name | Value |\r\n| --- | --- |\r\n| A \\| B | 1\\\\2 |\n| C | & 3 |\n"
+      }
+    },
+    {
+      "text": "| Name | Value |\r\n| --- | --- |\r\n",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "| Name | Value |\r\n| --- | --- |\r\n"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| -- | --- |",
+      "capture": null,
+      "expected": {
+        "value": "| Name | Value |\n| -- | --- |"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| -- | --- |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>"
+      },
+      "expected": {
+        "value": "| Name | Value |\n| -- | --- |"
+      }
+    },
+    {
+      "text": "| Name | Value |\n| -- | --- |",
+      "capture": {
+        "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+        "truncated": true
+      },
+      "expected": {
+        "value": "| Name | Value |\n| -- | --- |"
+      }
+    }
+  ],
+  "transcripts": [
+    {
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "raw instructions",
+            "truncated": false,
+            "chars": 16
+          },
+          "authoredText": "public request"
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "stream",
+            "truncated": false,
+            "chars": 6
+          },
+          "final": false
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 3,
+          "time": 103,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "final public",
+            "truncated": false,
+            "chars": 12
+          },
+          "final": true,
+          "origin": 2,
+          "turnId": "turn-public",
+          "renderedHtml": {
+            "text": "<p>drawing</p>",
+            "truncated": false,
+            "chars": 14
+          }
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 4,
+          "time": 104,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "older revision",
+            "truncated": false,
+            "chars": 14
+          },
+          "final": true,
+          "origin": 2,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "out of order",
+            "truncated": false,
+            "chars": 12
+          },
+          "final": true,
+          "origin": 2
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "stored": {
+            "text": "public request",
+            "truncated": false,
+            "chars": 14
+          },
+          "turnId": null,
+          "seq": 1
+        },
+        {
+          "role": "assistant",
+          "stored": {
+            "text": "older revision",
+            "truncated": false,
+            "chars": 14
+          },
+          "turnId": "turn-public",
+          "seq": 4
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "[[CLF-RESUME:public_identity_123456789]]\n\ncontrol",
+            "truncated": false,
+            "chars": 49
+          }
+        },
+        {
+          "kind": "user_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "second",
+          "message": {
+            "text": "second",
+            "truncated": false,
+            "chars": 6
+          }
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 3,
+          "time": 103,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "state-only final",
+            "truncated": false,
+            "chars": 16
+          },
+          "final": false,
+          "state": "final"
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 4,
+          "time": 104,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "actual final",
+            "truncated": false,
+            "chars": 12
+          },
+          "final": true,
+          "state": "final"
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "stored": {
+            "text": "second",
+            "truncated": false,
+            "chars": 6
+          },
+          "turnId": null,
+          "seq": 2
+        },
+        {
+          "role": "assistant",
+          "stored": {
+            "text": "actual final",
+            "truncated": false,
+            "chars": 12
+          },
+          "turnId": null,
+          "seq": 4
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "kind": "assistant_message",
+          "seq": 3,
+          "time": 103,
+          "source": "extension",
+          "messageId": "",
+          "message": {
+            "text": "anonymous answer",
+            "truncated": false,
+            "chars": 16
+          },
+          "final": true
+        },
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "",
+          "message": {
+            "text": "anonymous question",
+            "truncated": false,
+            "chars": 18
+          }
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 5,
+          "time": 105,
+          "source": "extension",
+          "messageId": "later",
+          "message": {
+            "text": "not final",
+            "truncated": false,
+            "chars": 9
+          },
+          "final": false
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "stored": {
+            "text": "anonymous question",
+            "truncated": false,
+            "chars": 18
+          },
+          "turnId": null,
+          "seq": 1
+        },
+        {
+          "role": "assistant",
+          "stored": {
+            "text": "anonymous answer",
+            "truncated": false,
+            "chars": 16
+          },
+          "turnId": null,
+          "seq": 3
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 4,
+          "time": 104,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "first revised",
+            "truncated": false,
+            "chars": 13
+          },
+          "origin": 1
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 3,
+          "time": 103,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "answer",
+            "truncated": false,
+            "chars": 6
+          },
+          "origin": 2,
+          "final": true
+        },
+        {
+          "kind": "user_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "earlier body",
+            "truncated": false,
+            "chars": 12
+          },
+          "origin": 1
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "stored": {
+            "text": "first revised",
+            "truncated": false,
+            "chars": 13
+          },
+          "turnId": null,
+          "seq": 4
+        },
+        {
+          "role": "assistant",
+          "stored": {
+            "text": "answer",
+            "truncated": false,
+            "chars": 6
+          },
+          "turnId": null,
+          "seq": 3
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "                                                                                                                                                         \\[\\[CLF\\-RESUME\\:public_identity_123456789\\]\\]😀tail",
+            "truncated": false,
+            "chars": 205
+          }
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "stored": {
+            "text": "                                                                                                                                                         \\[\\[CLF\\-RESUME\\:public_identity_123456789\\]\\]😀tail",
+            "truncated": false,
+            "chars": 205
+          },
+          "turnId": null,
+          "seq": 1
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "                                                                                                                                                          \\[\\[CLF\\-RESUME\\:public_identity_123456789\\]\\]😀tail",
+            "truncated": false,
+            "chars": 206
+          }
+        }
+      ],
+      "expected": []
+    },
+    {
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "                                                                                                                                                           \\[\\[CLF\\-RESUME\\:public_identity_123456789\\]\\]😀tail",
+            "truncated": false,
+            "chars": 207
+          }
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "stored": {
+            "text": "                                                                                                                                                           \\[\\[CLF\\-RESUME\\:public_identity_123456789\\]\\]😀tail",
+            "truncated": false,
+            "chars": 207
+          },
+          "turnId": null,
+          "seq": 1
+        }
+      ]
+    }
+  ],
+  "lifecycle": [
+    {
+      "kind": "turn_end",
+      "seq": 1,
+      "time": 1,
+      "turnId": "a",
+      "outcome": "completed"
+    },
+    {
+      "kind": "turn_end",
+      "seq": 2,
+      "time": 2,
+      "turnId": "b",
+      "outcome": "completed"
+    },
+    {
+      "kind": "turn_end",
+      "seq": 3,
+      "time": 3,
+      "turnId": "a",
+      "outcome": "stopped"
+    },
+    {
+      "kind": "turn_end",
+      "seq": 4,
+      "time": 4,
+      "turnId": "a",
+      "outcome": "completed"
+    }
+  ],
+  "completed": [
+    "b",
+    "a"
+  ],
+  "anchors": {
+    "events": [
+      {
+        "kind": "assistant_message",
+        "seq": 1,
+        "time": 101,
+        "source": "extension",
+        "messageId": "answer-a-1",
+        "message": {
+          "text": "first A",
+          "truncated": false,
+          "chars": 7
+        },
+        "turnId": "a",
+        "final": true
+      },
+      {
+        "kind": "assistant_message",
+        "seq": 2,
+        "time": 102,
+        "source": "extension",
+        "messageId": "answer-b",
+        "message": {
+          "text": "answer B",
+          "truncated": false,
+          "chars": 8
+        },
+        "turnId": "b",
+        "final": true
+      },
+      {
+        "kind": "assistant_message",
+        "seq": 3,
+        "time": 103,
+        "source": "extension",
+        "messageId": "answer-a-2",
+        "message": {
+          "text": "second A",
+          "truncated": false,
+          "chars": 8
+        },
+        "turnId": "a",
+        "final": true
+      },
+      {
+        "kind": "turn_end",
+        "seq": 4,
+        "time": 1,
+        "turnId": "a",
+        "outcome": "completed"
+      },
+      {
+        "kind": "turn_end",
+        "seq": 5,
+        "time": 2,
+        "turnId": "b",
+        "outcome": "completed"
+      },
+      {
+        "kind": "turn_end",
+        "seq": 6,
+        "time": 3,
+        "turnId": "a",
+        "outcome": "stopped"
+      },
+      {
+        "kind": "turn_end",
+        "seq": 7,
+        "time": 4,
+        "turnId": "a",
+        "outcome": "completed"
+      }
+    ],
+    "completed": [
+      "b",
+      "a"
+    ],
+    "expected": [
+      [
+        "a",
+        3
+      ],
+      [
+        "b",
+        2
+      ]
+    ],
+    "answers": [
+      {
+        "turnId": "a",
+        "expected": [
+          {
+            "role": "assistant",
+            "stored": {
+              "text": "first A",
+              "truncated": false,
+              "chars": 7
+            },
+            "turnId": "a",
+            "seq": 1
+          },
+          {
+            "role": "assistant",
+            "stored": {
+              "text": "second A",
+              "truncated": false,
+              "chars": 8
+            },
+            "turnId": "a",
+            "seq": 3
+          }
+        ]
+      },
+      {
+        "turnId": "b",
+        "expected": [
+          {
+            "role": "assistant",
+            "stored": {
+              "text": "answer B",
+              "truncated": false,
+              "chars": 8
+            },
+            "turnId": "b",
+            "seq": 2
+          }
+        ]
+      },
+      {
+        "turnId": "unknown",
+        "expected": []
+      }
+    ]
+  },
+  "formatting": [
+    {
+      "title": "  Public title  ",
+      "entries": [
+        {
+          "role": "user",
+          "text": "  hello  "
+        },
+        {
+          "role": "assistant",
+          "text": " answer "
+        }
+      ],
+      "expected": "# Public title\n\n## You\n\nhello\n\n## ChatGPT\n\nanswer\n"
+    },
+    {
+      "title": "﻿ ",
+      "entries": [
+        {
+          "role": "assistant",
+          "text": ""
+        },
+        {
+          "role": "user",
+          "text": "literal"
+        }
+      ],
+      "labels": {
+        "user": "Kamu",
+        "assistant": "Asisten"
+      },
+      "expected": "# Chat\n\n## Kamu\n\nliteral\n"
+    }
+  ],
+  "filenames": [
+    {
+      "title": "",
+      "suffix": " - answer",
+      "expected": "chat - answer.md"
+    },
+    {
+      "title": " public / unsafe:*?\"<>| name.  ",
+      "suffix": " - answer",
+      "expected": "public unsafe name - answer.md"
+    },
+    {
+      "title": "école",
+      "suffix": " - answer",
+      "expected": "école - answer.md"
+    },
+    {
+      "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail",
+      "suffix": " - answer",
+      "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa - answer.md"
+    },
+    {
+      "title": "private",
+      "suffix": " - answer",
+      "expected": "private - answer.md"
+    },
+    {
+      "title": "﻿public ",
+      "suffix": " - answer",
+      "expected": "public - answer.md"
+    },
+    {
+      "title": "CON",
+      "suffix": " - answer",
+      "expected": "CON - answer.md"
+    },
+    {
+      "title": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "suffix": " - answer",
+      "expected": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 - answer.md"
+    }
+  ],
+  "exports": [
+    {
+      "name": "entities",
+      "title": "Public export",
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "request",
+            "truncated": false,
+            "chars": 7
+          }
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "See urlPublichttps://example.invalid",
+            "truncated": false,
+            "chars": 40
+          },
+          "final": true,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "turn_end",
+          "seq": 3,
+          "source": "extension",
+          "time": 103,
+          "turnId": "turn-public",
+          "outcome": "completed"
+        }
+      ],
+      "overflow": {
+        "35128e4280cc4a8bcc375d7e479ec23e.txt": "Full public overflow urllinkhttps://example.invalid"
+      },
+      "outcomes": [
+        {
+          "scope": "session",
+          "text": "# Public export\n\n## You\n\nrequest\n\n## ChatGPT\n\nSee [Public](https://example.invalid)\n"
+        },
+        {
+          "scope": "answer",
+          "text": "See [Public](https://example.invalid)\n"
+        }
+      ]
+    },
+    {
+      "name": "drawn-table",
+      "title": "Public export",
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "request",
+            "truncated": false,
+            "chars": 7
+          }
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "| Name | Value |\n| --- | --- |\n\n[Open public]",
+            "truncated": false,
+            "chars": 45
+          },
+          "final": true,
+          "turnId": "turn-public",
+          "renderedHtml": {
+            "text": "<div data-d-component=\"table\"><table><tr><th><b>Name</b></th><th>Value</th></tr><tr><td>A | B</td><td>1\\2</td></tr><tr><td>C</td><td>&amp; 3</td></tr></table></div><button data-d-component=\"button\">Open public</button>",
+            "truncated": false,
+            "chars": 218
+          }
+        },
+        {
+          "kind": "turn_end",
+          "seq": 3,
+          "source": "extension",
+          "time": 103,
+          "turnId": "turn-public",
+          "outcome": "completed"
+        }
+      ],
+      "overflow": {
+        "35128e4280cc4a8bcc375d7e479ec23e.txt": "Full public overflow urllinkhttps://example.invalid"
+      },
+      "outcomes": [
+        {
+          "scope": "session",
+          "text": "# Public export\n\n## You\n\nrequest\n\n## ChatGPT\n\n| Name | Value |\n| --- | --- |\n| A \\| B | 1\\\\2 |\n| C | & 3 |\n"
+        },
+        {
+          "scope": "answer",
+          "text": "| Name | Value |\n| --- | --- |\n| A \\| B | 1\\\\2 |\n| C | & 3 |\n"
+        }
+      ]
+    },
+    {
+      "name": "overflow",
+      "title": "Public export",
+      "events": [
+        {
+          "kind": "user_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "user_message-public",
+          "message": {
+            "text": "inline public",
+            "truncated": false,
+            "chars": 13,
+            "assetId": "35128e4280cc4a8bcc375d7e479ec23e.txt"
+          }
+        },
+        {
+          "kind": "assistant_message",
+          "seq": 2,
+          "time": 102,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "clipped",
+            "truncated": true,
+            "chars": 55,
+            "assetId": "35128e4280cc4a8bcc375d7e479ec23e.txt"
+          },
+          "final": true,
+          "turnId": "turn-public"
+        },
+        {
+          "kind": "turn_end",
+          "seq": 3,
+          "source": "extension",
+          "time": 103,
+          "turnId": "turn-public",
+          "outcome": "completed"
+        }
+      ],
+      "overflow": {
+        "35128e4280cc4a8bcc375d7e479ec23e.txt": "Full public overflow urllinkhttps://example.invalid"
+      },
+      "outcomes": [
+        {
+          "scope": "session",
+          "text": "# Public export\n\n## You\n\ninline public\n\n## ChatGPT\n\nFull public overflow [link](https://example.invalid)\n"
+        },
+        {
+          "scope": "answer",
+          "text": "Full public overflow [link](https://example.invalid)\n"
+        }
+      ]
+    },
+    {
+      "name": "incomplete",
+      "title": "Public export",
+      "events": [
+        {
+          "kind": "assistant_message",
+          "seq": 1,
+          "time": 101,
+          "source": "extension",
+          "messageId": "assistant_message-public",
+          "message": {
+            "text": "final text",
+            "truncated": false,
+            "chars": 10
+          },
+          "final": true,
+          "turnId": "turn-public"
+        }
+      ],
+      "overflow": {
+        "35128e4280cc4a8bcc375d7e479ec23e.txt": "Full public overflow urllinkhttps://example.invalid"
+      },
+      "outcomes": [
+        {
+          "scope": "session",
+          "text": "# Public export\n\n## ChatGPT\n\nfinal text\n"
+        },
+        {
+          "scope": "answer",
+          "error": "This turn has not completed"
+        }
+      ]
+    }
+  ]
+}

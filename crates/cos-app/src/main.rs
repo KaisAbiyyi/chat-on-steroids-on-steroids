@@ -23,7 +23,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create/rename/clear-name | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
+const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create/rename/clear-name | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--scope session/answer --turn id] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
 fn platform() -> &'static str {
     if cfg!(windows) {
         "win32"
@@ -519,9 +519,21 @@ impl Runtime {
             "export" => {
                 let format = take_option(&mut args, "--format")?.unwrap_or_else(|| "json".into());
                 let output = take_option(&mut args, "--output")?;
+                let scope = take_option(&mut args, "--scope")?.unwrap_or_else(|| "session".into());
+                let turn = take_option(&mut args, "--turn")?;
+                if !matches!(scope.as_str(), "session" | "answer") {
+                    return Err(invalid("Export scope must be session or answer"));
+                }
+                if scope == "answer" && format != "md" {
+                    return Err(invalid("Answer scope requires Markdown format"));
+                }
                 let id = required(&args, 0)?;
                 let bytes = match format.as_str() {
                     "json" => serde_json::to_vec_pretty(&self.store.export_json(id)?)?,
+                    "md" if scope == "answer" => self
+                        .store
+                        .export_answer_markdown(id, turn.as_deref().unwrap_or(""))?
+                        .into_bytes(),
                     "md" => self.store.export_markdown(id)?.into_bytes(),
                     _ => return Err(invalid("Export format must be json or md")),
                 };

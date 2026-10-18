@@ -12,6 +12,7 @@ serde_json.workspace = true
 thiserror.workspace = true
 sha2.workspace = true
 regex.workspace = true
+ryu-js = "=1.0.3"
 chrono.workspace = true
 uuid.workspace = true
 base64 = "0.22.1"

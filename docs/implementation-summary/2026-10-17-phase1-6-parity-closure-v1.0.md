@@ -6,8 +6,8 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
 
 ## Current result
 
-- Latest integrated checks: **225 Windows / 209 Linux tests PASS**, 0 failed/ignored, formatting and
-  strict Clippy PASS. Linux executed exact session commit `88c0867`; Windows uses the same lean profiles.
+- Latest integrated checks: **237 Windows / 215 Linux tests PASS**, 0 failed/ignored, formatting and
+  strict Clippy PASS. Linux executed exact observation commit `caa234a`; Windows uses the lean profiles.
 - Windows service `4a40c93`: **11.923 MiB**, 41 executable/source checks PASS. Full desktop and installer
   acceptance remain open. [Release receipt](../../audit/2026-10-18/search-release-receipt.json).
 - Storage checkpoint: Cargo removed the verified 25.394 GiB development cache; a complete lean rebuild
@@ -29,10 +29,10 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **225 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
-[Windows receipt](../../audit/2026-10-18/session-observation-windows-receipt.json). Latest exact-commit Linux
-proof covers session commit `88c0867`: **209 PASS**:
-[Linux receipt](../../audit/2026-10-18/linux-session-projection-receipt.json).
+Latest integrated closure checkpoint: **237 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
+[Windows receipt](../../audit/2026-10-18/session-content-windows-receipt.json). Latest exact-commit Linux
+proof covers observation commit `caa234a`: **215 PASS**:
+[Linux receipt](../../audit/2026-10-18/linux-session-observation-receipt.json).
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -310,6 +310,32 @@ passed every test but failed strict Clippy on a redundant struct update. That sy
 the entire suite rerun; the failed log/receipt remain. The shared Windows cache measures **1.728 GiB**,
 with **37.49 GiB free on C / 66.62 GiB on D** at qualification. Exact new-commit Linux proof follows;
 whole-scope review remains NOT RUN.
+
+## Content, DIL and Markdown continuation — 2026-10-18
+
+Content/directive, HTML, provider-entity, DIL table and transcript/answer projections are now ported.
+Markdown fills recorded table rows, removes recorded dead-button labels, converts link cards and
+hydrates only truncated text. `export <id> --format md --scope answer --turn <turn-id>` requires a
+recorded completed turn and exports its final answer. Native source regressions were observed RED
+for links, tables, hydration and the CLI answer route, then GREEN. The source function's text is
+captured with a memory-only sink; real clipboard/dialog and full desktop acceptance remain NOT RUN.
+
+The corpus contains 122 content rows (104 exact values, 15 exact source errors, three unpaired output
+refusals), 24 DIL rows, seven transcript cases, eight filenames and eight full export text outcomes.
+JS line boundaries, escaped continuation's 200-unit window, source whitespace and NFC filename
+clipping are preserved. An intermediate unpaired HTML value can still qualify a boolean predicate;
+it is never substituted into output. Numeric entity errors use the existing pinned ryu-js dependency
+for JS Number formatting and correctly rounded hex parsing. These fixes have focused source/native
+proof; combined qualification passes **237 Windows tests**, formatting and strict Clippy:
+[receipt](../../audit/2026-10-18/session-content-windows-receipt.json). The Windows cache is **2.241 GiB**,
+with **37.41 GiB free on C / 66.07 GiB on D** at qualification. Assertions, acceptance limits and the
+shared lean build profile are unchanged; current-commit Linux and release measurements follow.
+
+Model-facing content text remains a qualified library contract for the later final-response owner.
+The Rust JSON archive is a separate extension. Global lossless JSON, bounded-asset differences,
+broader recorder/provider/history branches and remaining plan tasks stay open. Exact observation
+commit `caa234a` passed **215 Linux tests**, formatting/strict Clippy, using the same **1.1 GiB** cache.
+Whole-scope independent review remains NOT RUN.
 
 ## Documents
 

@@ -75,6 +75,81 @@ fn session_names_track_provider_authority_and_clear_through_the_real_cli() {
     assert!(result.get("autoTitle").is_none());
 }
 #[test]
+fn markdown_answer_export_requires_a_completed_turn_and_uses_only_its_answer() {
+    let profile = tempfile::tempdir().unwrap();
+    let id = "session-answer-cli";
+    assert!(run(profile.path(), &["info"]).status.success());
+    assert!(
+        run(
+            profile.path(),
+            &["sessions", "create", "Public export", "--id", id]
+        )
+        .status
+        .success()
+    );
+    let fixture: Value = serde_json::from_str(include_str!(
+        "../../../fixtures/upstream/phase1-6-closure/session-content.json"
+    ))
+    .unwrap();
+    let case = fixture["exports"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["name"] == "entities")
+        .unwrap();
+    for (index, event) in case["events"].as_array().unwrap().iter().enumerate() {
+        let input = profile.path().join(format!("public-event-{index}.json"));
+        fs::write(&input, event.to_string()).unwrap();
+        let appended = run(profile.path(), &["append", id, input.to_str().unwrap()]);
+        assert!(
+            appended.status.success(),
+            "{}",
+            String::from_utf8_lossy(&appended.stderr)
+        );
+    }
+    let output = run(
+        profile.path(),
+        &[
+            "export",
+            id,
+            "--format",
+            "md",
+            "--scope",
+            "answer",
+            "--turn",
+            "turn-public",
+        ],
+    );
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let actual: Value = serde_json::from_slice(&output.stdout).unwrap();
+    let expected = case["outcomes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["scope"] == "answer")
+        .unwrap();
+    assert_eq!(actual["text"], expected["text"]);
+    let unknown = run(
+        profile.path(),
+        &[
+            "export",
+            id,
+            "--format",
+            "md",
+            "--scope",
+            "answer",
+            "--turn",
+            "turn-unknown",
+        ],
+    );
+    assert!(!unknown.status.success());
+    assert!(String::from_utf8_lossy(&unknown.stderr).contains("This turn has not completed"));
+}
+#[test]
 fn project_file_panel_is_runnable_with_stale_edit_and_root_revocation_guards() {
     let profile = tempfile::tempdir().unwrap();
     let root = tempfile::tempdir().unwrap();

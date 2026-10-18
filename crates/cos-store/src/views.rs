@@ -1,7 +1,7 @@
 //! Bounded search projections and explicit complete exports; no pruning.
 use crate::{
     ReadOptions, SessionStore,
-    model::{self, position, string},
+    model::{position, string},
 };
 use serde_json::{Value, json};
 use std::{collections::HashSet, io};
@@ -204,54 +204,58 @@ impl SessionStore {
             json!({"format":"cos-rust-history-v1","summary":summary,"events":events,"sourceCommit":cos_core::UPSTREAM_COMMIT}),
         )
     }
+    fn markdown_entry_text(&self, id: &str, entry: &Value) -> io::Result<String> {
+        let stored = &entry["stored"];
+        let mut text = string(stored, "text").to_owned();
+        if stored["truncated"] == true
+            && let Some(asset) = stored["assetId"].as_str()
+            && crate::content::re!(r"^[0-9a-f]{8,64}\.(png|jpg|txt|bin)$").is_match(asset)
+            && let Some(bytes) = self.read_asset(id, asset, None)?
+        {
+            text = String::from_utf8_lossy(&bytes).into_owned();
+        }
+        let completed = crate::dil::completed_dil_text(&text, entry.get("html"))?;
+        Ok(crate::content::provider_entities_as_markdown(&completed))
+    }
     pub fn export_markdown(&self, id: &str) -> io::Result<String> {
         let summary = self
             .summary(id)?
-            .ok_or_else(|| cos_core::persistence::invalid("Unknown session"))?;
-        let mut events = self.read(
-            id,
-            ReadOptions {
-                kinds: vec!["user_message".into(), "assistant_message".into()],
-                ..Default::default()
-            },
-        )?;
-        events.retain(|e| e["kind"] == "user_message" || e["final"] == true);
-        events.sort_by_key(|e| (model::work_sequence(e), model::number(e, "seq")));
-        let marker =
-            regex::Regex::new(r"^\s*\[\[CLF-(HANDOFF|RESUME):([A-Za-z0-9_-]{16,64})\]\](?:\s|$)")
-                .unwrap();
-        let escaped=regex::Regex::new(r"^\s*(?:\\?\[){2}CLF\\?-(HANDOFF|RESUME)\\?:((?:[A-Za-z0-9]|\\?[_-]){16,64})(?:\\?\]){2}\\?(?:\s|$)").unwrap();
-        let title = cos_core::config::js_trim(string(&summary, "title"));
-        let mut parts = vec![format!(
-            "# {}",
-            if title.is_empty() { "Chat" } else { title }
-        )];
-        for event in events {
-            let raw = string(&event["message"], "text");
-            if marker.is_match(raw) || escaped.is_match(raw) {
-                continue;
-            }
-            let text = if event["kind"] == "user_message"
-                && event["authoredText"]
-                    .as_str()
-                    .is_some_and(|s| !cos_core::config::js_trim(s).is_empty())
-            {
-                string(&event, "authoredText").to_owned()
-            } else {
-                self.read_full_text(id, &event["message"])?
-            };
-            let text = cos_core::config::js_trim(&text);
-            if !text.is_empty() {
-                parts.push(format!(
-                    "## {}\n\n{text}",
-                    if event["kind"] == "user_message" {
-                        "You"
-                    } else {
-                        "ChatGPT"
-                    }
-                ));
-            }
+            .ok_or_else(|| cos_core::persistence::invalid("Session not found"))?;
+        let events = self.read(id, ReadOptions::default())?;
+        let mut entries = crate::markdown::transcript_entries(&events);
+        for entry in &mut entries {
+            entry["text"] = json!(self.markdown_entry_text(id, entry)?);
         }
-        Ok(format!("{}\n", parts.join("\n\n")))
+        Ok(crate::markdown::session_markdown(
+            string(&summary, "title"),
+            &entries,
+            "You",
+            "ChatGPT",
+        ))
+    }
+    pub fn export_answer_markdown(&self, id: &str, turn_id: &str) -> io::Result<String> {
+        self.summary(id)?
+            .ok_or_else(|| cos_core::persistence::invalid("Session not found"))?;
+        let events = self.read(id, ReadOptions::default())?;
+        if turn_id.is_empty()
+            || !crate::markdown::completed_turn_ids(&events)
+                .iter()
+                .any(|id| id == turn_id)
+        {
+            return Err(cos_core::persistence::invalid(
+                "This turn has not completed",
+            ));
+        }
+        let entries = crate::markdown::turn_answer_entries(&events, turn_id);
+        if entries.is_empty() {
+            return Err(cos_core::persistence::invalid(
+                "This turn has no answer to export",
+            ));
+        }
+        let texts = entries
+            .iter()
+            .map(|entry| self.markdown_entry_text(id, entry))
+            .collect::<io::Result<Vec<_>>>()?;
+        Ok(crate::markdown::answer_markdown(&texts))
     }
 }

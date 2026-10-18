@@ -367,6 +367,7 @@ dependencies = [
  "chrono",
  "cos-core",
  "regex",
+ "ryu-js",
  "serde",
  "serde_json",
  "sha2",

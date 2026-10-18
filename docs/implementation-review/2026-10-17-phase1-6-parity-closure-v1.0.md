@@ -57,3 +57,15 @@ must remain bounded. Broader recorder activity, proof and superseded-prose seman
 The combined metadata/observation checkpoint passes **225 native Windows tests**, formatting and
 strict Clippy. Retain the prior Clippy failure (all tests passed) and complete rerun separately.
 Linux current-commit qualification follows; existing 209-test proof applies only to `88c0867`.
+Exact commit `caa234a` subsequently passes 215 Linux tests and strict checks, keeping a 1.1 GiB cache.
+For Task 5c, inspect stored-text hydration only when truncated, recorded HTML admission, transcript
+deduplication/first placement, answer completion gates and source JS whitespace/line boundaries.
+The export source function uses a memory sink; clipboard/dialog proof stays NOT RUN. Three unpaired
+content projections remain explicit refusals. Number formatting reuses pinned ryu-js, already present
+in the workspace. Cached regex references were hoisted after strict Clippy feedback. Integrated checks
+are running; the fresh whole-scope review remains NOT RUN.
+The content checkpoint passes 237 native Windows tests, formatting and strict Clippy. Its corpus
+includes 199/200/201-unit escaped continuation boundaries and all eight session/answer outcomes.
+Keep three unpaired output refusals distinct from 119 exact content values/errors. No threshold or
+resource limit changed. Current-commit Linux/release evidence follows; this remains implementation
+evidence ahead of the single whole-scope review.

@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "baseCommit": "caa234aa0ce130fb74f82a8e647742aa9ccd6b4f",
+  "scope": "Native Windows integrated workspace with content/DIL/transcript/answer Markdown behavior; native clipboard/dialog and full GUI NOT RUN",
+  "checks": {
+    "format": 0,
+    "workspaceTests": 0,
+    "strictClippy": 0
+  },
+  "tests": {
+    "passed": 237,
+    "failed": 0,
+    "ignored": 0
+  },
+  "sha256": {
+    "Cargo.lock": "9d56208081c08d6074f41320d99e331ee06ff7b5e60c0c6d11e286ef611e48de",
+    "crates/cos-store/Cargo.toml": "bf0898576d2caccb13c17f2955cb54d659424281e1cfef73da2944d24c54055a",
+    "crates/cos-store/src/content.rs": "27afe671702873e78df797ee27303be6659ac23a2f1872c733213742de3a360e",
+    "crates/cos-store/src/dil.rs": "182fee42c79a409aac6a975a11bcb6a67274daa881af9d20d8748cc0120af96b",
+    "crates/cos-store/src/markdown.rs": "37c2d1586df932f2f7ece395a0d53ba36a9114d8c59745797026e1268a2d6466",
+    "crates/cos-store/src/views.rs": "9ad03a6b641ff7f5791abb95c16fa3b6b1aebf8aaf1d891ff5acba72862670cd",
+    "crates/cos-store/src/title.rs": "8baea48da4b6d296a48388ad3cfab2fdcc9fc9d3ac6e0e61b7f2da7bfffdf62a",
+    "crates/cos-app/src/main.rs": "41e76d907e9d3cf233bcbb0a6833830a2a38268a4ee90608546aacc0d0babbb1",
+    "fixtures/upstream/phase1-6-closure/session-content.json": "fb2d55dbf204379ae92937f26497bc76d149011d6c6be0e5e68b478ae17382ce"
+  },
+  "sourceComparisons": {
+    "contentRows": 122,
+    "exactValues": 104,
+    "exactSourceErrors": 15,
+    "unpairedOutputRefusalsGap": 3,
+    "dilRows": 24,
+    "transcriptCases": 7,
+    "filenameCases": 8,
+    "exportTextOutcomes": 8
+  },
+  "functionalRegressions": [
+    "raw provider link markers",
+    "missing DIL rows and dead buttons",
+    "unconditional asset hydration",
+    "CLI answer scope exporting a session",
+    "unpaired intermediate HTML causing wrong predicate refusal",
+    "Number error formatting"
+  ],
+  "dependency": "Reuse pinned ryu-js 1.0.3 already in workspace; no new package download or C dependency",
+  "log": "audit/2026-10-18-session-content-workspace.log",
+  "logSha256": "39820862594c0001d7a3900ad02036c89a322ea04623f2887eb9aede85d89740",
+  "storage": {
+    "debugSymbols": 0,
+    "incremental": false,
+    "cacheBytes": 2406297051,
+    "workspaceFree": 70939971584,
+    "systemFree": 40168095744
+  },
+  "wholeScopeReview": "NOT RUN",
+  "globalLosslessJson": "OPEN",
+  "macOS": "HOLD by user request"
+}

@@ -369,3 +369,27 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   default struct update; removing that syntax and rerunning the entire suite passed. Both receipts
   are retained. Windows cache 1.728 GiB; no assertions, timeouts or file-size limits were relaxed.
   Linux exact-commit proof follows; content/DIL/Markdown projection work is next within Task 5.
+- Exact metadata/observation checkpoint `caa234a`: **215 native Linux tests PASS**, formatting and
+  strict Clippy, shared cache still 1.1 GiB. Windows checkpoint is 225 PASS; later content changes
+  require their own integrated proof.
+- Task 5c: capture actual content/directive/HTML/provider-entity functions, DIL tables, transcript/
+  answer selection and main-process export projection. The corpus has 122 content rows, 24 DIL
+  rows, seven transcripts, eight filenames and eight session/answer export outcomes. Source reads
+  use public synthetic data and a memory-only text sink; real clipboard/dialog acceptance is NOT RUN.
+  Native RED exposed raw link markers, missing table rows/dead-button removal and unconditional
+  overflow hydration. CLI RED reproduced exporting a full session for answer scope. All are now GREEN.
+- Additional source regressions exposed an unpaired intermediate HTML string wrongly refusing a
+  boolean predicate and numeric entity errors using Rust number formatting. Exact UTF-16 units stay
+  internal to HTML processing; predicate-only foreign-unit mapping cannot become output text. Three
+  source outputs still need unpaired JSON strings and are explicitly refused. Numeric errors use the
+  existing pinned pure-Rust ryu-js 1.0.3 dependency and correctly rounded hexadecimal Numbers.
+  Strict Clippy passes after hoisting cached regex references out of loops; integrated proof is running.
+- Source compatibility scope: Markdown applies completedDilText then providerEntitiesAsMarkdown;
+  modelFacingText remains a separately qualified library contract for its later final-response owner.
+  The original Rust JSON archive stays a separate extension. Asset read bounds and explicit read
+  failures remain; native UI copy/save and every-locale/Unicode-version proof are not implied here.
+- Content/Markdown checkpoint: **237 Windows tests PASS**, 0 failed/ignored, formatting and strict
+  Clippy PASS. Source errors include correctly rounded hex and JS Number formatting across 2^53,
+  scientific notation and overflow. The escaped-marker corpus tests 199/200/201-unit boundaries.
+  All eight actual source session/answer outcomes are compared, including incomplete-turn refusal.
+  Cache 2.241 GiB; Windows assertions/resource limits unchanged. Exact Linux/release proof follows.
