@@ -82,10 +82,14 @@ pub fn from_runtime(tool: &str, response: &Value, private: &Value) -> Value {
         &Value::Null
     };
     let retained = changes(report);
-    let changes_total = report.as_array().map_or(Value::Null, |items| json!(items.len()));
-    let changes_truncated = report
+    let changes_total = report
         .as_array()
-        .is_some_and(|items| retained.as_array().is_some_and(|rows| rows.len() < items.len()));
+        .map_or(Value::Null, |items| json!(items.len()));
+    let changes_truncated = report.as_array().is_some_and(|items| {
+        retained
+            .as_array()
+            .is_some_and(|rows| rows.len() < items.len())
+    });
     json!({
         "count":count,
         "changes":retained,
