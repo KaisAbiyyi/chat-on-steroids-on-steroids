@@ -805,7 +805,10 @@ mod custody_tests {
         std::fs::create_dir_all(project.join("nested")).unwrap();
         let roots = [Root {
             name: "r".into(),
-            path: root.path().to_string_lossy().into(),
+            path: std::fs::canonicalize(root.path())
+                .unwrap()
+                .to_string_lossy()
+                .into(),
             remote: None,
         }];
         let projects =
@@ -856,7 +859,10 @@ mod custody_tests {
         std::fs::write(project.join("old.txt"), "original public data").unwrap();
         let roots = [Root {
             name: "r".into(),
-            path: root.path().to_string_lossy().into(),
+            path: std::fs::canonicalize(root.path())
+                .unwrap()
+                .to_string_lossy()
+                .into(),
             remote: None,
         }];
         let projects =
