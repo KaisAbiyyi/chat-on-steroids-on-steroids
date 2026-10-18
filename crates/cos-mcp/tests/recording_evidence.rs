@@ -82,7 +82,8 @@ fn patch_evidence_uses_committed_report_and_never_a_failed_patch_body() {
     let result = f.invoke("apply_patch", json!({"patch":source}));
     assert_ne!(result["isError"], true, "{result}");
     assert!(f.root.path().join("made.txt").is_file());
-    let evidence = &f.recent("apply_patch")["call"]["evidence"];
+    let event = f.recent("apply_patch");
+    let evidence = &event["call"]["evidence"];
     assert_eq!(evidence["failed"], false);
     let changes = evidence["changes"].as_array().unwrap();
     assert_eq!(changes.len(), 1, "{evidence}");
@@ -138,7 +139,8 @@ fn shell_intercepted_patch_has_change_evidence_without_phantom_process() {
     assert_ne!(result["isError"], true, "{result}");
     assert!(f.root.path().join("intercepted.txt").exists());
     assert!(result.get("_recordingEvidence").is_none());
-    let facts = &f.recent("exec_command")["call"]["evidence"];
+    let event = f.recent("exec_command");
+    let facts = &event["call"]["evidence"];
     assert_eq!(facts["changes"].as_array().unwrap().len(), 1, "{facts}");
     assert!(facts["running"].is_null(), "{facts}");
     assert!(facts["exitCode"].is_null(), "{facts}");
