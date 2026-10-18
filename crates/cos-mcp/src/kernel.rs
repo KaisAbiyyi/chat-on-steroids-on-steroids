@@ -428,6 +428,13 @@ impl Kernel {
             Ok(v) => v,
             Err(e) => fail(cos_core::logging::redact_credentials(&e.to_string())),
         };
+        // Internal evidence belongs to the native handler. Strip it before
+        // recording the public MCP result or returning anything to the caller.
+        let private_evidence = value
+            .as_object_mut()
+            .and_then(|value| value.remove("_recordingEvidence"))
+            .unwrap_or(Value::Null);
+        let evidence = cos_store::evidence::from_runtime(name, &value, &private_evidence);
         if surface == Surface::Core
             && config::effective_capabilities(&self.config.get(), platform())["command"] == true
             && let Ok(owner) = self.admit(request)
@@ -490,6 +497,7 @@ impl Kernel {
                 call_id,
                 parent_call_id: parent.map(str::to_owned),
                 duration_ms: elapsed.elapsed().as_millis() as u64,
+                evidence,
             }),
         ) {
             return fail(format!(
@@ -748,9 +756,12 @@ impl Kernel {
                                 owner,
                                 crate::patch::PatchAuthority::Command,
                             )?;
-                            return Ok(exec_result(
+                            let mut value = exec_result(
                                 json!({"chunk_id":"","wall_time_seconds":0.0,"output":result["content"][0]["text"],"exit_code":null,"session_id":null,"original_token_count":null}),
-                            ));
+                            );
+                            value["_recordingEvidence"] =
+                                json!({"changes":result["structuredContent"]["changes"]});
+                            return Ok(value);
                         }
                         Invocation::NotApplyPatch => {}
                     }

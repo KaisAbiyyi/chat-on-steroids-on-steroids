@@ -25,6 +25,7 @@ pub struct ToolRecordContext {
     pub call_id: String,
     pub parent_call_id: Option<String>,
     pub duration_ms: u64,
+    pub evidence: Value,
 }
 impl Recorder {
     pub fn new(store: SessionStore, correlations: Arc<Correlations>) -> Self {
@@ -263,11 +264,15 @@ impl Recorder {
         // Raw data never enters the event, returned call, caption or asset store.
         let safe_args = crate::redaction::arguments(tool, &args);
         let safe_result = crate::redaction::result(tool, &args, result);
-        let args = self
-            .store
-            .store_text(&id, &serde_json::to_string(&safe_args)?, 8000)?;
-        let result = self.store.store_text(&id, &safe_result, 8000)?;
-        let mut call = json!({"callId":context.map(|c|c.call_id.clone()).unwrap_or_else(||uuid::Uuid::new_v4().to_string()),"tool":tool,"requestId":if request.is_empty(){None}else{Some(request)},"conversationId":conversation,"attributionMethod":method,"attribution":if method=="request_id"{"request_id"}else{"unattributed"},"startedAt":started_at,"durationMs":context.map(|c|c.duration_ms).unwrap_or(0),"args":args,"result":result,"outcome":outcome,"summary":{"kind":"tool","title":tool}});
+        let recorded_args =
+            self.store
+                .store_text(&id, &serde_json::to_string(&safe_args)?, 8000)?;
+        let recorded_result = self.store.store_text(&id, &safe_result, 8000)?;
+        let mut call = json!({"callId":context.map(|c|c.call_id.clone()).unwrap_or_else(||uuid::Uuid::new_v4().to_string()),"tool":tool,"requestId":if request.is_empty(){None}else{Some(request)},"conversationId":conversation,"attributionMethod":method,"attribution":if method=="request_id"{"request_id"}else{"unattributed"},"startedAt":started_at,"durationMs":context.map(|c|c.duration_ms).unwrap_or(0),"args":recorded_args,"result":recorded_result,"outcome":outcome,"summary":{"kind":"tool","title":tool}});
+        if let Some(context) = context {
+            call["evidence"] =
+                crate::evidence::for_recording(tool, &args, context.evidence.clone());
+        }
         if let Some(parent) = context.and_then(|c| c.parent_call_id.as_deref()) {
             call["nested"] = json!(true);
             call["parentCallId"] = json!(parent);
