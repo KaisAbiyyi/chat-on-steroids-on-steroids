@@ -1,0 +1,10 @@
+{
+  "status": "runtime-directory-preserved",
+  "scope": "Engine absent and no Docker processes; preserve only exact two stale runtime endpoints; no data disk or settings changed",
+  "entries": [
+    "dockerInference",
+    "userAnalyticsOtlpHttp.sock"
+  ],
+  "freshRuntime": "C:\\Users\\kaisa\\AppData\\Local\\Docker\\run",
+  "previousRuntime": "C:\\Users\\kaisa\\AppData\\Local\\Docker\\run.cos-rust-recovery-20261018T122040"
+}

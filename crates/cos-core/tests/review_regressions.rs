@@ -1,8 +1,10 @@
+#[cfg(windows)]
+use cos_core::secrets::{SecretCipher, WindowsCipher};
 use cos_core::{
     config::{self, Root},
     sandbox,
-    secrets::{SecretCipher, WindowsCipher},
 };
+#[cfg(windows)]
 use serde_json::json;
 use std::{fs, path::Path};
 #[cfg(windows)]

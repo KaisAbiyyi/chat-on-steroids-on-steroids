@@ -48,4 +48,32 @@ for(const mode of ['normalize_to_lf','preserve_line_endings'])for(const [lines,p
 ])seeks.push({lines,pattern,start,eof,mode,expected:api.seekSequence(lines,pattern,start,eof,mode)});
 const out=path.join(root,'fixtures/upstream/phase1-6-closure');
 await fs.writeFile(path.join(out,'patch-updates.json'),JSON.stringify({updates,seeks,upstreamCommit:commit,sources:Object.fromEntries(sources.map(([name,body])=>[name,createHash('sha256').update(body).digest('hex')]))},null,2)+'\n');
-console.log(JSON.stringify({updates:updates.length,seeks:seeks.length,upstreamCommit:commit}));
+const streamInputs=[
+  '*** Begin Patch\n*** Add File: public.txt\n+é 😀\n*** End Patch',
+  '*** Begin Patch\r\n*** Environment ID: public-env\r\n*** Delete File: a\r\n*** End Patch\r\n',
+  '*** Begin Patch\n*** Update File: a\n*** Move to: b\n@@ public context\n unchanged\n-old\n+new\n*** End of File\n*** End Patch',
+  '*** End Patch','*** Begin Patch\n*** Update File: a\n*** End Patch',
+  '*** Begin Patch\n*** Update File: a\n@@\n*** End Patch',
+  '*** Begin Patch\n*** Environment ID: a\n*** Environment ID: b\n*** End Patch',
+  '*** Begin Patch\n*** Add File: a\n+public\n*** End Patch\ntrailing',
+  '*** Begin Patch\n*** Update File: a\n@@\n-public\n+new\n*** End of File\n+bad\n*** End Patch',
+  '*** Begin Patch\n*** Update File: a\n@@\n-public\n+new\n*** End of File\n@@ next\n text\n*** End Patch',
+  '*** Begin Patch\n*** Update File: a\n@@\n@@\n*** End Patch','*** Begin Patch\n*** Add File: a\n+partial'
+];
+const streams=[];
+for(const input of streamInputs)for(const size of [1,5,10000]){
+  const parser=new api.StreamingPatchParser(),units=Array.from(input),steps=[];
+  for(let i=0;i<units.length;i+=size){
+    const delta=units.slice(i,i+size).join('');
+    try{steps.push({delta,expected:parser.pushDelta(delta),environmentId:parser.environmentId()});}
+    catch(error){steps.push({delta,error:error.message,environmentId:parser.environmentId()});break;}
+  }
+  let finish;try{finish={expected:parser.finish(),environmentId:parser.environmentId()};}catch(error){finish={error:error.message,environmentId:parser.environmentId()};}
+  streams.push({steps,finish});
+}
+const parsing=[];
+for(const mode of ['strict','lenient'])for(const patch of ['','*** Begin Patch\n*** End Patch',"<<'EOF'\n*** Begin Patch\n*** Add File: a\n+public\n*** End Patch\nEOF",' *** Begin Patch\n*** Delete File: a\n *** End Patch ','*** Begin Patch\n*** Update File: a\n@@\n\n*** End Patch']){
+  try{parsing.push({mode,patch,expected:api.parsePatchText(patch,mode)});}catch(error){parsing.push({mode,patch,error:error.message});}
+}
+await fs.writeFile(path.join(out,'patch-streaming.json'),JSON.stringify({streams,parsing,upstreamCommit:commit,sources:Object.fromEntries(sources.filter(([name])=>['errors.ts','hunk.ts','parser.ts','streaming-parser.ts'].includes(name)).map(([name,body])=>[name,createHash('sha256').update(body).digest('hex')]))},null,2)+'\n');
+console.log(JSON.stringify({updates:updates.length,seeks:seeks.length,streams:streams.length,parsing:parsing.length,upstreamCommit:commit}));

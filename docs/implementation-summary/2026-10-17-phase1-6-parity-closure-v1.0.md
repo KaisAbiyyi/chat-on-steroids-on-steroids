@@ -22,7 +22,7 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **166 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **169 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -88,12 +88,27 @@ Typed mismatch diagnostics retain bounded, reliable source anchors; the model re
 only with current Read permission and unchanged caller/root authority. Five MCP regressions and a
 differential corpus of 36 updates/14 searches pass. Native SFTP also verifies both update modes,
 move-only byte preservation and typed diagnostics. Integrated Windows qualification: **166 PASS,
-0 failed/ignored**; strict Clippy and formatting PASS. Linux qualification for this patch commit follows.
+0 failed/ignored**; strict Clippy and formatting PASS. The exact patch commit `0e5457e` also passes **162 Linux tests**, 0 failed/ignored:
+[receipt](../../audit/2026-10-18/linux-patch-modes-receipt.json).
 
 The existing Edit guard remains when a nominal move would rewrite bytes, including an unterminated
 file gaining a newline. This conservative edge differs from the upstream applier; it remains explicit
-in the plan's ruling. Streaming/invocation parsing, full search/toolchain behavior and the later tasks
+in the plan's ruling. Shell invocation parsing, full search/toolchain behavior and the later tasks
 are still open. The 10.269 MiB release receipt above applies to `10d4c81`, before these patch changes.
+
+## Streaming continuation — 2026-10-18
+
+Native streaming patch parsing is integrated with the main parser and strict/lenient modes. Three
+regressions were observed RED then GREEN; 36 source stream scenarios verify intermediate snapshots,
+errors and environment IDs, and 10 source cases verify full parsing. Input admission precedes buffering.
+The integrated Windows suite passes **169 tests, 0 failed/ignored**, with strict Clippy. Linux's first
+strict all-target Clippy run exposed Unix-only style/import warnings; the focused repaired checkout
+passes, with a fresh exact-commit combined receipt to follow. This does not close invocation/search.
+
+Docker's engine was absent at continuation. The exact two stale runtime sockets were preserved and
+Docker plus the owned test container restarted: [recovery](../../audit/2026-10-18/docker-runtime-recovery.json).
+No Docker data disks, volumes or settings were reset. The earlier service release measurements remain
+applicable only to their named commit. Whole phase 1–6 exactness and final review remain IN PROGRESS.
 
 ## Documents
 

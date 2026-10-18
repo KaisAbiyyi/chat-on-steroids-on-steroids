@@ -169,3 +169,16 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   appends that newline, while the frozen contract keeps Move separate from content editing.
   Cost: that upstream edge case remains a conservative compatibility deviation; the caller needs
   Edit or a byte-preserving rename. Exact CRLF/context-only moves now work with Move alone.
+
+- Linux patch checkpoint `0e5457e`: **162 PASS, 0 failed/ignored**, recorded separately from the
+  following streaming work. The first native all-target strict Clippy run exposed two Unix-only
+  collapsible conditions and Windows-only test imports. These are corrected without changing behavior;
+  the focused dirty-checkout Clippy run passes. A new exact-commit strict receipt follows the checkpoint.
+- Task 4b: the native incremental parser now produces source-compatible hunk snapshots and environment
+  IDs at each chunk, with strict/lenient entry points integrated into the normal parser. Three functional
+  regressions were observed RED, then GREEN. The corpus covers 36 source streams and 10 full parse cases;
+  aggregate admission runs before an unterminated buffer can exceed its limit. Integrated Windows suite:
+  **169 PASS, 0 failed/ignored; strict Clippy PASS**. Shell interception/search/toolchain remain open.
+- Docker recurrence: no Docker processes/engine were present, and the same two stale socket endpoints
+  remained. Their verified runtime directory was preserved again, then the engine and owned container
+  restarted. No Docker data disks, volumes or settings were reset. See the dated recovery receipt.

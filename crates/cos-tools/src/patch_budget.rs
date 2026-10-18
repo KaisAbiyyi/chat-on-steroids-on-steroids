@@ -21,7 +21,10 @@ fn refused() -> io::Error {
     )
 }
 pub(crate) fn check_source(source: &str) -> io::Result<()> {
-    if cost(source.len(), breaks(source.as_bytes()).saturating_mul(3)) > LIMIT {
+    check_source_counts(source.len(), breaks(source.as_bytes()))
+}
+pub(crate) fn check_source_counts(bytes: usize, breaks: usize) -> io::Result<()> {
+    if cost(bytes, breaks.saturating_mul(3)) > LIMIT {
         return Err(refused());
     }
     Ok(())

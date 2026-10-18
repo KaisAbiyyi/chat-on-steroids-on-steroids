@@ -1,7 +1,9 @@
+#[cfg(windows)]
+use cos_core::secrets::WindowsCipher;
 use cos_core::{
     logging::{DiagnosticLog, redact_credentials},
     runtime::{Cancellation, ShutdownPhase, shutdown},
-    secrets::{Decrypted, SecretCipher, SecretStore, WindowsCipher},
+    secrets::{Decrypted, SecretCipher, SecretStore},
 };
 use std::{
     fs, io,

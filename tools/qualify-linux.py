@@ -5,6 +5,7 @@ p=argparse.ArgumentParser()
 p.add_argument('--container',default='cos-rust-qualify-20261017')
 p.add_argument('--source',default='HEAD')
 p.add_argument('--output',required=True)
+p.add_argument('--strict',action='store_true',help='Also run formatting and strict all-target Clippy')
 a=p.parse_args()
 repo=pathlib.Path(__file__).resolve().parents[1]
 
@@ -21,6 +22,8 @@ output=(repo/a.output).resolve()
 assert output.is_relative_to(repo/'audit'),'Receipts must stay inside the workspace audit directory'
 output.parent.mkdir(parents=True,exist_ok=True)
 log=output.with_suffix('.log')
+if output.exists() or log.exists():
+    raise FileExistsError('Preserve historical qualification receipts; choose a new output path')
 token=uuid.uuid4().hex
 checkout='/work/checkouts/'+source[:12]+'-'+token
 archive='/tmp/cos-rust-source-'+token+'.tar'
@@ -31,16 +34,21 @@ with tempfile.TemporaryDirectory(prefix='cos-rust-public-linux-') as temporary:
     subprocess.run(['docker','exec',a.container,'mkdir','-p',checkout],check=True)
     subprocess.run(['docker','exec',a.container,'tar','xf',archive,'-C',checkout],check=True)
     print('Running actual Linux tests for '+source,flush=True)
-    with log.open('w',encoding='utf-8',newline='\n') as stream:
+    checks={}
+    with log.open('x',encoding='utf-8',newline='\n') as stream:
         result=subprocess.run(['docker','exec','-e','CARGO_TARGET_DIR=/work/target','-w',checkout,a.container,'/usr/local/cargo/bin/cargo','test','--workspace','--locked','-j2'],stdout=stream,stderr=subprocess.STDOUT)
+        checks['workspaceTests']=result.returncode
+        if a.strict:
+            for name,command in [('format',['fmt','--all','--','--check']),('clippy',['clippy','--workspace','--all-targets','--locked','-j2','--','-D','warnings'])]:
+                checks[name]=subprocess.run(['docker','exec','-e','CARGO_TARGET_DIR=/work/target','-w',checkout,a.container,'/usr/local/cargo/bin/cargo',*command],stdout=stream,stderr=subprocess.STDOUT).returncode
     subprocess.run(['docker','exec',a.container,'rm','--',archive],check=True)
 text=log.read_text(encoding='utf-8')
 rows=re.findall(r'test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored',text)
 counts=dict(zip(['passed','failed','ignored'],[sum(int(row[i]) for row in rows) for i in range(3)]))
 receipt={
-    'status':'PASS' if result.returncode==0 and counts['passed']>0 and counts['failed']==0 and counts['ignored']==0 else 'FAIL',
+    'status':'PASS' if all(code==0 for code in checks.values()) and counts['passed']>0 and counts['failed']==0 and counts['ignored']==0 else 'FAIL',
     'sourceCommit':source,'scope':'Actual native Linux execution of an isolated Git archive; host working-tree changes excluded',
-    'rustImage':image,'rustc':run('docker','exec',a.container,'/usr/local/cargo/bin/rustc','--version'),
+    'rustImage':image,'rustc':run('docker','exec',a.container,'/usr/local/cargo/bin/rustc','--version'),'checks':checks,'checkout':checkout,
     'kernel':run('docker','exec',a.container,'uname','-srmo'),'tests':counts,
     'log':log.relative_to(repo).as_posix(),'logSha256':hashlib.sha256(log.read_bytes()).hexdigest(),
     'personalProfilesUsed':False,'macOS':'HOLD by user request'

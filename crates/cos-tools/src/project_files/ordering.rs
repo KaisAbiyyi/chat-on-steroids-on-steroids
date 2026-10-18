@@ -33,10 +33,11 @@ fn locale_name() -> String {
     #[cfg(unix)]
     {
         for key in ["LC_ALL", "LC_MESSAGES", "LANG"] {
-            if let Ok(value) = std::env::var(key) {
-                if !value.is_empty() && !matches!(value.as_str(), "C" | "POSIX" | "C.UTF-8") {
-                    return value;
-                }
+            if let Ok(value) = std::env::var(key)
+                && !value.is_empty()
+                && !matches!(value.as_str(), "C" | "POSIX" | "C.UTF-8")
+            {
+                return value;
             }
         }
     }

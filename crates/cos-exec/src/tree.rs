@@ -199,13 +199,13 @@ impl Tree {
         }
     }
     pub fn interrupt(&self) {
-        if let Ok(mut custody) = self.custody.lock() {
-            if !custody.retired {
-                if self.peek().is_ok() {
-                    self.signal(libc::SIGINT);
-                } else {
-                    custody.retired = true;
-                }
+        if let Ok(mut custody) = self.custody.lock()
+            && !custody.retired
+        {
+            if self.peek().is_ok() {
+                self.signal(libc::SIGINT);
+            } else {
+                custody.retired = true;
             }
         }
     }
