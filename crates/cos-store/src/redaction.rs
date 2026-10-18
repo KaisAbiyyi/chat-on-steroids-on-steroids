@@ -258,6 +258,13 @@ mod tests {
     }
 
     #[test]
+    fn json_credentials_are_not_written_to_results() {
+        let clean = result("read", &json!({}), r#"{"token":"RESULT_SECRET_321", "status":"ok"}"#);
+        assert!(!clean.contains("RESULT_SECRET_321"));
+        assert!(clean.contains("ok"));
+    }
+
+    #[test]
     fn clipboard_reads_fail_closed() {
         assert_eq!(
             result("read_clipboard", &json!({}), "anything"),
