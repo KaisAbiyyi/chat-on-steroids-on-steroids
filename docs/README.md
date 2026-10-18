@@ -3,6 +3,7 @@
 ## Active engineering authority
 
 - [Current phase and next-unit handoff](CURRENT-PHASE.md) — live checkpoint, previous agent's protected WIP, and explicit outstanding gates
+- [GitHub bootstrap receipt](implementation-summary/2026-10-18-github-bootstrap.md) — first public main SHA, publication screening and CI scope
 - [BIG implementation plan](BIG-IMPLEMENTATION-PLAN.md) — cloud-first phase/work-unit roadmap for all 16 migration phases
 - [Cloud development and local/manual acceptance matrix](implementation-plan/2026-10-18-cloud-first-units.md) — bounded cloud coding units, native Windows gates and direct user involvement by phase
 - [Development workflow](DEVELOPMENT-WORKFLOW.md) — agent discipline, security, performance, tests, docs and Git rules

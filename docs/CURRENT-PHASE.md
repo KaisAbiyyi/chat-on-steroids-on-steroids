@@ -4,11 +4,11 @@ Captured: **2026-10-18, Asia/Jakarta**. This is the agent-to-agent resume pointe
 
 ## Current directive
 
-- **Work unit:** `BOOT-L1` — prepare reviewed publication of the existing Git history and cloud-first engineering rules. **Do not begin feature code.**
-- **Feature implementation:** PAUSED until initial public GitHub publication is checked, approved and verified. Next cloud coding unit will be `CL-01` after bootstrap.
+- **Work unit:** `BOOT-CLOSE` — publish the verified GitHub default branch, record initial CI outcome, and hand off cloud unit `CL-01`. **No feature work in this bootstrap receipt.**
+- **Feature implementation:** The first public GitHub main publication is complete. **Start `CL-01` only after required GitHub CI passes on the current default `main` and bootstrap documentation is accepted.** Its priority is the Critical recorder redaction gap.
 - **Canonical development (after publication):** cloud coding agents using GitHub branches/PRs and Windows/Linux CI. The user's `D:\projects\CoS-Rust` remains the **local device-qualification environment**, with all local artifacts/temp/cache on D:.
-- **Remote configured:** `origin` = `https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids.git`. The repository is **PUBLIC and has ZERO branches/commits** at the audit; no push has been performed. GitHub is the *intended* source of truth, not yet the published one.
-- **Local history at transition:** branch `feat/close-phase1-6-partials` at documentation checkpoint `e2cf523` before this workflow revision; `main` = `68f7954`. Actual HEAD advances with this docs-only preparation, so use live Git before publication. The last feature checkpoint was `45db209` (2026-10-18 20:15 WIB).
+- **Canonical remote:** [GitHub main](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/tree/main), initial published SHA `8637c12ccda8610e5a06534f30af4688034cc9b6`; Windows fixture correction squash-merged as `299caa190aa2049309b9a39896dec28fb7d4e7e6`. The latest SHA may advance through reviewed bootstrap documentation PRs; verify the live SHA and checks before a new cloud unit.
+- **Local history:** old local `main` was `68f7954`; the original advanced feature branch and all its 24 subsequent commits were preserved through an ancestry-safe fast-forward to published main. The last feature implementation checkpoint before governance was `45db209` (2026-10-18 20:15 WIB). Original local dirty WIP is still separate.
 
 ## Verified baseline versus unverified WIP
 
@@ -22,11 +22,11 @@ Captured: **2026-10-18, Asia/Jakarta**. This is the agent-to-agent resume pointe
 | Whole phase 1–6 exactness | IN PROGRESS / PARTIAL | Closure plan's Tasks 2–8 and final independent review still open |
 | Browser/full desktop/installer | NOT RUN / NOT ACCEPTED | Original phases 7–16 remain to be implemented and qualified |
 | macOS and other target platforms | HOLD | User directed Windows priority; Linux supplementary if feasible |
-| GitHub/hosted CI | NOT RUN | Remote configured but target repository has no commits; `.github/workflows/ci.yml` has not run on hosted CI |
-| `BOOT-L1` history/security publication review | IN PROGRESS / NOT ACCEPTED | Public remote empty; inspect **entire local Git history**, secrets, licenses, artifacts and branch plan before push |
-| `BOOT-U1` user review of public publication | NOT RUN | User receives a concrete reviewed GitHub bootstrap receipt before source history is made public |
+| GitHub/hosted CI | **Initial FAIL, repair PR PASS; verify latest main checks for acceptance** | [First Actions run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39136263403): Ubuntu PASS, Windows FAIL on noncanonical test roots. [PR #2](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/2) merged as `299caa1` after green Windows/Ubuntu fmt, Clippy, tests and release builds. [Post-merge main CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39140089208) and any subsequent current-main checks must be PASS before `CL-01` |
+| `BOOT-L1` history/publication review | PASS for initial screening, broader guarantees limited | 24 committed post-baseline changes, high-confidence key/token patterns absent; no tracked credential-profile/binary files identified; receipt linked below |
+| `BOOT-U1` publication | COMPLETE by explicit user instruction | User requested a careful push to the specified public repository; branch/main SHA verified after publication |
 
-Key dated evidence: [phase 1–6 implementation summary](implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md), [closure plan/ledger](implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md), [pending whole-scope review](implementation-review/2026-10-17-phase1-6-parity-closure-v1.0.md), [Windows session receipt](../audit/2026-10-18/session-content-windows-receipt.json), [Linux receipt](../audit/2026-10-18/linux-session-content-receipt.json) and [release receipt](../audit/2026-10-18/session-release-receipt.json).
+Key dated evidence: [GitHub bootstrap receipt](implementation-summary/2026-10-18-github-bootstrap.md), [phase 1–6 implementation summary](implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md), [closure plan/ledger](implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md), [pending whole-scope review](implementation-review/2026-10-17-phase1-6-parity-closure-v1.0.md), [Windows session receipt](../audit/2026-10-18/session-content-windows-receipt.json), [Linux receipt](../audit/2026-10-18/linux-session-content-receipt.json) and [release receipt](../audit/2026-10-18/session-release-receipt.json).
 
 ## Preserve this previous agent's incomplete work
 
@@ -50,10 +50,11 @@ The previous agent captured 343 caption source cases plus running captions, and 
 
 The local WIP **is not in GitHub**. Publishing committed history alone will not transfer it. After bootstrap, a cloud agent can rebuild the work from source fixtures or receive an independently vetted, sanitized patch. `CL-01` privacy comes before `CL-02` evidence, with real persistence, cold restart and error-path proof. Prior 237/227-test checkpoints are not evidence for this WIP.
 
-## Current bootstrap handoff and next action
+## Bootstrap handoff and next cloud unit
 
 - Completed historical local `CL-00`: `a996a75` (local-first governance) and `e2cf523` (Docker/WSL D: gate). The current cloud-first decision **supersedes those workflow rules**; their Git history is preserved.
-- This documentation work prepares the [cloud-first workflow](DEVELOPMENT-WORKFLOW.md), [BIG roadmap](BIG-IMPLEMENTATION-PLAN.md), [cloud/local/manual unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and a superseding ADR.
-- `BOOT-L1`: audit the committed Git history for public-safe publication, branch ancestry, tracked artifacts, licenses and secrets. The eight local WIP paths remain uncommitted/unpublished. Cloud implementation has not started.
-- `BOOT-U1`: user reviews the concrete public-repository publication result/risks before the first push. Following successful GitHub publication, verify main and CI; only then start `CL-01` in cloud.
+- Cloud-first rules, [BIG roadmap](BIG-IMPLEMENTATION-PLAN.md), [C/L/U matrix](implementation-plan/2026-10-18-cloud-first-units.md), and [superseding ADR](decisions/2026-10-18-cloud-first-supersession.md) are published. A follow-up docs PR records the resulting bootstrap proof.
+- `BOOT-L1` and `BOOT-U1` publication are finished. Initial hosted CI **FAIL** was traced to temporary approved-root aliases in Windows tests. The test-only correction in PR #2 merged as `299caa1` after both PR CI jobs passed. The [post-merge main workflow](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39140089208) must pass before declaring cloud bootstrap accepted; production sandbox authorization is unchanged.
+- The public commit metadata includes Git author/committer email supplied by local Git config. For future commits, use a GitHub noreply identity if the user wants to avoid further disclosure. Do not rewrite published qualified history casually.
+- `CL-01` is the first next **cloud** coding unit: reconstruct or securely review the local recorder WIP, prevent raw secrets in stored args/results/captions/assets, prove restart and negative cases, then produce PR/CI and the next-unit handoff. **No direct user testing is scheduled for `CL-01`; local native recorder gate is `CL-L1` after `CL-03`.**
 - At every future C unit response state **LOCAL REQUIRED** and **YOU REQUIRED** (NO/YES + when). Phase-level L and U gates are enumerated in the matrix. The full phase 1–6 independent review is still NOT RUN.
