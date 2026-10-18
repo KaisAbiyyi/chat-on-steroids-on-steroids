@@ -21,7 +21,7 @@ impl Fixture {
         );
         config
             .update(|v| {
-                v["roots"] = json!([{"name":"p","path":root.path()}]);
+                v["roots"] = json!([{"name":"p","path":fs::canonicalize(root.path()).unwrap()}]);
                 v["multiAgent"]["allowUnattributedCalls"] = json!(true);
             })
             .unwrap();

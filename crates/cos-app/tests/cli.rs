@@ -8,6 +8,23 @@ fn run(directory: &std::path::Path, args: &[&str]) -> std::process::Output {
         .output()
         .unwrap()
 }
+fn add_project(directory: &std::path::Path) -> Value {
+    let output = run(directory, &["projects", "add", "/p"]);
+    assert!(
+        output.status.success(),
+        "projects add /p failed: status={} stderr={} stdout={}",
+        output.status,
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout)
+    );
+    serde_json::from_slice(&output.stdout).expect("successful project add must return JSON")
+}
+fn approved_temp_root(directory: &std::path::Path) -> String {
+    // Hosted Windows TEMP may be an alias for another volume. The approved
+    // root contract requires the actual canonical location, not that alias.
+    let real = fs::canonicalize(directory).unwrap();
+    json!([{"name":"p","path":real}]).to_string()
+}
 #[test]
 fn session_names_track_provider_authority_and_clear_through_the_real_cli() {
     let profile = tempfile::tempdir().unwrap();
@@ -154,14 +171,13 @@ fn project_file_panel_is_runnable_with_stale_edit_and_root_revocation_guards() {
     let profile = tempfile::tempdir().unwrap();
     let root = tempfile::tempdir().unwrap();
     assert!(run(profile.path(), &["info"]).status.success());
-    let roots = json!([{"name":"p","path":root.path()}]).to_string();
+    let roots = approved_temp_root(root.path());
     assert!(
         run(profile.path(), &["config", "set", "roots", &roots])
             .status
             .success()
     );
-    let p: Value =
-        serde_json::from_slice(&run(profile.path(), &["projects", "add", "/p"]).stdout).unwrap();
+    let p = add_project(profile.path());
     let id = p["id"].as_str().unwrap();
     let result = run(
         profile.path(),
@@ -237,14 +253,13 @@ fn project_color_and_soft_removal_are_runnable_without_losing_catalog_identity()
     let profile = tempfile::tempdir().unwrap();
     let folder = tempfile::tempdir().unwrap();
     assert!(run(profile.path(), &["info"]).status.success());
-    let roots = json!([{"name":"p","path":folder.path()}]).to_string();
+    let roots = approved_temp_root(folder.path());
     assert!(
         run(profile.path(), &["config", "set", "roots", &roots])
             .status
             .success()
     );
-    let p: Value =
-        serde_json::from_slice(&run(profile.path(), &["projects", "add", "/p"]).stdout).unwrap();
+    let p = add_project(profile.path());
     let id = p["id"].as_str().unwrap();
     let result = run(profile.path(), &["projects", "color", id, "rose"]);
     assert!(
@@ -282,14 +297,13 @@ fn project_git_review_and_revision_fenced_diff_are_runnable() {
     );
     fs::write(project.path().join("a.txt"), "public lines\n").unwrap();
     assert!(run(profile.path(), &["info"]).status.success());
-    let roots = json!([{"name":"p","path":project.path()}]).to_string();
+    let roots = approved_temp_root(project.path());
     assert!(
         run(profile.path(), &["config", "set", "roots", &roots])
             .status
             .success()
     );
-    let p: Value =
-        serde_json::from_slice(&run(profile.path(), &["projects", "add", "/p"]).stdout).unwrap();
+    let p = add_project(profile.path());
     let id = p["id"].as_str().unwrap();
     let result = run(profile.path(), &["projects", "review", id]);
     assert!(

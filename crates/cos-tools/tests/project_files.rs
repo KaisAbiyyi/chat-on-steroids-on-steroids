@@ -23,7 +23,10 @@ impl Fixture {
         fs::create_dir(&folder).unwrap();
         let roots = [Root {
             name: "r".into(),
-            path: root.path().to_string_lossy().into(),
+            path: fs::canonicalize(root.path())
+                .unwrap()
+                .to_string_lossy()
+                .into(),
             remote: None,
         }];
         let projects = Projects::open(DurableStore::open(profile.path()).unwrap());

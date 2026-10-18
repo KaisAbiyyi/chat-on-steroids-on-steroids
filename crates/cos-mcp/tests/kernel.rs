@@ -18,9 +18,10 @@ fn platform() -> &'static str {
 fn exec_text_contains_continuation_and_completion_metadata() {
     let d = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(project.path()).unwrap();
     let conf = Arc::new(ConfigStore::open(d.path(), platform()).unwrap());
     conf.update(|v| {
-        v["roots"] = json!([{"name":"p","path":project.path()}]);
+        v["roots"] = json!([{"name":"p","path":approved}]);
         v["multiAgent"]["allowUnattributedCalls"] = json!(true);
     })
     .unwrap();
@@ -36,8 +37,9 @@ fn exec_text_contains_continuation_and_completion_metadata() {
 fn removing_a_root_revokes_its_watch() {
     let d = tempfile::tempdir().unwrap();
     let project = tempfile::tempdir().unwrap();
+    let approved = std::fs::canonicalize(project.path()).unwrap();
     let conf = Arc::new(ConfigStore::open(d.path(), platform()).unwrap());
-    conf.update(|v| v["roots"] = json!([{"name":"p","path":project.path()}]))
+    conf.update(|v| v["roots"] = json!([{"name":"p","path":approved}]))
         .unwrap();
     let kernel = Kernel::new(conf.clone()).unwrap();
     let id = kernel.watch("renderer-public", "/p").unwrap();

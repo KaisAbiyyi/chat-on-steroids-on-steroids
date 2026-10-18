@@ -1018,7 +1018,10 @@ mod recovery_tests {
         std::fs::write(d.path().join("a"), "original contents\n").unwrap();
         let roots = [Root {
             name: "p".into(),
-            path: d.path().to_string_lossy().into_owned(),
+            path: std::fs::canonicalize(d.path())
+                .unwrap()
+                .to_string_lossy()
+                .into_owned(),
             remote: None,
         }];
         FAIL_WRITE_AFTER.with(|f| f.set(Some(4)));
