@@ -140,7 +140,7 @@ fn approved_virtual_native_relative_and_missing_paths_share_one_boundary() {
     assert_eq!(
         sandbox::resolve(
             &roots,
-            &fs::canonicalize(dir.path().join("src/file.txt"))
+            fs::canonicalize(dir.path().join("src/file.txt"))
                 .unwrap()
                 .to_string_lossy()
                 .trim_start_matches("\\\\?\\"),
