@@ -81,9 +81,16 @@ pub fn from_runtime(tool: &str, response: &Value, private: &Value) -> Value {
     } else {
         &Value::Null
     };
+    let retained = changes(report);
+    let changes_total = report.as_array().map_or(Value::Null, |items| json!(items.len()));
+    let changes_truncated = report
+        .as_array()
+        .is_some_and(|items| retained.as_array().is_some_and(|rows| rows.len() < items.len()));
     json!({
         "count":count,
-        "changes":changes(report),
+        "changes":retained,
+        "changesTotal":changes_total,
+        "changesTruncated":changes_truncated,
         "exitCode":exit_code,
         "running":running,
         "processSessionId":process_session_id,
@@ -170,5 +177,16 @@ mod tests {
             &Value::Null,
         );
         assert_eq!(failed["changes"], json!([]));
+        let many = (0..129)
+            .map(|n| json!({"path":format!("/p/{n}.txt"),"kind":"add"}))
+            .collect::<Vec<_>>();
+        let truncated = from_runtime(
+            "apply_patch",
+            &json!({"structuredContent":{"changes":many}}),
+            &Value::Null,
+        );
+        assert_eq!(truncated["changesTotal"], 129);
+        assert_eq!(truncated["changes"].as_array().unwrap().len(), 128);
+        assert_eq!(truncated["changesTruncated"], true);
     }
 }
