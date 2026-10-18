@@ -322,7 +322,11 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
             } else if exit == Some(0) {
                 p.tone = "good";
             }
-            if !running && (cmds.is_some() || timedout || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true) {
+            if !running
+                && (cmds.is_some()
+                    || timedout
+                    || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true)
+            {
                 p.doing = "Running exec_command".into();
             }
             p
@@ -404,10 +408,15 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                 "click" => ("input", "Clicked", "Clicking", "click"),
                 _ => ("clipboard", "Acted", "Acting", "act"),
             };
-            let distinct = acts.map(|actions| {
-                actions.iter().filter_map(|action| action["type"].as_str())
-                    .collect::<std::collections::HashSet<_>>().len()
-            }).unwrap_or(0);
+            let distinct = acts
+                .map(|actions| {
+                    actions
+                        .iter()
+                        .filter_map(|action| action["type"].as_str())
+                        .collect::<std::collections::HashSet<_>>()
+                        .len()
+                })
+                .unwrap_or(0);
             let more = distinct as i64 - 1;
             let extra = format!(" and {more} more");
             let mut p = phrase(
@@ -577,7 +586,10 @@ fn extra_error(detail: &mut Option<String>, result_head: &str) {
     }
 }
 fn format_summary(mut p: Phrase, tool: &str, outcome: &str, result_head: &str) -> Value {
-    let known_exit_failure = p.metric.as_deref().is_some_and(|metric| metric.starts_with("✕ "));
+    let known_exit_failure = p
+        .metric
+        .as_deref()
+        .is_some_and(|metric| metric.starts_with("✕ "));
     let command_failed = tool == "exec_command" && p.tone == "bad";
     match outcome {
         "tool_rejected" => {
