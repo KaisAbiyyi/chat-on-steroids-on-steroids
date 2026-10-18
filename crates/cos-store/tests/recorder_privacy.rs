@@ -43,13 +43,14 @@ fn recorder_redacts_before_inline_journal_and_asset_persistence_even_after_resta
         "token-sentinel-004", "binary-sentinel-005", "result-secret-sentinel-006",
     ];
     let (store, recorder) = open_recorder(temp.path());
-    let args = json!({
+    let mut args = json!({
         "path": "/public/a.txt",
         "env": {"HOME":"env-sentinel-unique-001", "PUBLIC_SETTING":"normal"},
         "nested":{"password":"password-sentinel-003","authorization":"token-sentinel-004"},
         "dataBase64":"binary-sentinel-005",
         "actions":[{"type":"write_clipboard","text":"clipboard-sentinel-002"}]
     });
+    args["notes"] = json!("public metadata ".repeat(850));
     let long_result = format!(
         "{} token=result-secret-sentinel-006; Authorization: Bearer inline-token",
         "safe output ".repeat(1000)
@@ -59,7 +60,8 @@ fn recorder_redacts_before_inline_journal_and_asset_persistence_even_after_resta
     assert_no_secrets(&out_json, &secrets);
     assert!(out_json.contains("/public/a.txt"));
     assert!(!out_json.contains("inline-token"));
-    assert!(out["call"]["result"]["assetId"].is_string(), "overflow should exercise asset persistence");
+    assert!(out["call"]["result"]["assetId"].is_string(), "result overflow must write asset");
+    assert!(out["call"]["args"]["assetId"].is_string(), "argument overflow must write asset");
     let id = out["sessionId"].as_str().unwrap().to_owned();
     let stored_args = store.read_full_text(&id, &out["call"]["args"]).unwrap();
     let stored_result = store.read_full_text(&id, &out["call"]["result"]).unwrap();
@@ -99,10 +101,10 @@ fn clipboard_reads_and_binary_payloads_fail_closed_in_recorded_events() {
     assert_no_secrets(&nested_clipboard.to_string(), &["SECRET_NESTED_CLIPBOARD_SENTINEL"]);
     let download = recorder.record_call(
         "", "download_artifact",
-        json!({"file":"PRIVATE_FILE_HANDLE","dataBase64":"LONG_BINARY_BODY"}),
+        json!({"file":"PRIVATE_FILE_HANDLE","dataBase64":"LONG_BINARY_BODY", "image":{"type":"image","mimeType":"image/png","data":"ENCODED_IMAGE_BODY"}}),
         "public downloaded", 302, "ok"
     ).unwrap();
-    assert_no_secrets(&download.to_string(), &["PRIVATE_FILE_HANDLE", "LONG_BINARY_BODY"]);
+    assert_no_secrets(&download.to_string(), &["PRIVATE_FILE_HANDLE", "LONG_BINARY_BODY", "ENCODED_IMAGE_BODY"]);
     let clipboard_write = recorder.record_call(
         "", "write_clipboard",
         json!({"text":"SECRET_CLIPBOARD_WRITE"}),
@@ -112,7 +114,7 @@ fn clipboard_reads_and_binary_payloads_fail_closed_in_recorded_events() {
     recorder.flush().unwrap();
     check_persisted_files(&temp.path().join("sessions"), &[
         "SECRET_READ_CLIPBOARD_SENTINEL", "SECRET_NESTED_CLIPBOARD_SENTINEL",
-        "PRIVATE_FILE_HANDLE", "LONG_BINARY_BODY", "SECRET_CLIPBOARD_WRITE",
+        "PRIVATE_FILE_HANDLE", "LONG_BINARY_BODY", "ENCODED_IMAGE_BODY", "SECRET_CLIPBOARD_WRITE",
     ]);
 }
 
