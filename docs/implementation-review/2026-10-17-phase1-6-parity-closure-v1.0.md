@@ -6,3 +6,14 @@ Existing review findings and receipts remain historical evidence; this file does
 
 - [Plan and ledger](../implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md)
 - [Current implementation summary](../implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md)
+
+## Qualification notes for the pending whole-scope review — 2026-10-18
+
+These are implementation receipts, not an independent review or approval. Search currently passes
+201 native Windows tests plus formatting/strict Clippy. Inspect the caller-thread authorization
+coordinator, worker settlement after revocation, native directory relocation, all-root selection
+and SFTP handle cleanup against the dated source/hash receipts. Retain the unpaired-string refusal
+as OPEN; it must not be counted among the eleven exact content projections. Server regex, local
+ripgrep details, SFTP pipelining/entry bounds and remaining tasks still require closure. The matcher
+commit's 177-test Linux receipt does not qualify the subsequent search engine. Storage is separately
+recorded: workspace-drive temp/archive paths and a 998 MiB fresh lean Linux build cache.

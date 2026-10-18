@@ -248,3 +248,36 @@ Task details, commits, RED/GREEN evidence and outstanding acceptance are appende
   gains a lean profile (debug symbols/incremental disabled) and records its storage choices.
   At continuation C already had about 42 GiB free and the old Linux cache was absent;
   that intervening free-space change is not attributed to this implementation.
+
+- Matcher checkpoint `531fcac`: **177 Linux tests PASS**, formatting and strict Clippy PASS.
+  Its fresh lean build cache is **998 MiB**, with no incremental/debug-symbol state; source archives
+  are staged on D. This is a new cache measurement, not a claim that this task deleted the old cache.
+- Task 4f: model search now walks breadth first in native entry order, counts regular files before
+  include filtering, stops name traversal at the result limit, and retains source file/directory
+  budgets. A bounded queue keeps the same first 10,000 directory prefix. Omitted paths search every
+  approved root with one whole-tool deadline; explicit files use the source response and size refusal.
+  Six native/MCP regressions were observed RED then GREEN. Six actual source trees, two source bounds
+  and eight executions of the actual registered find handler qualify ordering/counts/text projections.
+- Task 4f content: lossy TextDecoder behavior, BOM-aware binary sniffing, LF/CR splitting and JS trim
+  match 11 representable source cases. Twelve initial content jobs are admitted before completion;
+  native reads overlap and results publish in completion order. All grant checks run on the calling
+  thread, including during worker reads and publication. A native twelve-reader gate qualifies both
+  success and mid-flight revocation. Source-handler differential testing exposed wrong size formatting
+  and an incorrect truncation flag after one exact hit plus an already-admitted oversized file; both
+  passed RED to GREEN after the source formatting and scheduling rules were integrated.
+- Task 4f server search: native OpenSSH SFTP proves BFS name results, content reads, all-root routing,
+  runtime-only path trust, multi-chunk root revocation, handle closure and usable transport afterward.
+  The twelve jobs share the existing mutable SFTP request owner, so wire requests remain serialized.
+  JS-regex behavior, local bundled-ripgrep conformance and the existing 5,000-entry server directory
+  cap remain open; these are not claimed closed by the new source response comparisons.
+- Qualification repairs: Windows refused a held-directory relocation with native sharing violation
+  32 (Rust categorizes it as Uncategorized). The test now asserts that observed native code and
+  preserved source/destination state; Linux exercises the successful relocation/refused publication
+  branch. A further regression found the legacy search adapter resolving a path before its grant
+  check; it now refuses before resolution (observed RED to GREEN). Integrated Windows result:
+  **201 PASS, 0 failed/ignored**, formatting and strict all-target Clippy PASS.
+- Ruling: keep the original unpaired UTF-16 clipping result as code units in the source corpus and
+  explicitly refuse an unrepresentable output instead of substituting or dropping a code unit.
+  Cost: that content result remains a compatibility gap until the whole-workspace lossless JSON
+  string owner is implemented. Eleven content projections pass; the twelfth is a refusal test,
+  not an exactness pass. Counted reads also retain the existing hard 2 MiB growth ceiling.

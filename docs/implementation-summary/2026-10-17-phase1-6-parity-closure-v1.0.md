@@ -22,7 +22,9 @@ Windows is active; macOS/other platforms are **HOLD at the user's request**. Lin
   not the subsequent Git implementation. [Docker recovery](../../audit/2026-10-17/docker-runtime-recovery.json).
 - Remaining phase 1–6 gaps stay open and are being implemented; macOS is held by user instruction.
 
-Latest integrated closure checkpoint: **181 Windows Rust tests PASS, 0 failed/ignored; strict Clippy PASS**.
+Latest integrated closure checkpoint: **201 Windows Rust tests PASS, 0 failed/ignored; formatting and strict Clippy PASS**.
+[Windows receipt](../../audit/2026-10-18/search-engine-windows-receipt.json). Latest exact-commit Linux
+proof currently covers matcher commit `531fcac`: **177 PASS**; search-engine Linux qualification follows.
 The missing-project binding regression now refuses a default cwd instead of writing into another folder.
 Git branches, committed comparisons, untracked/binary/large files, revision refusal and both new/legacy
 metadata containment paths are covered. The initial concurrent link failed on Windows paging exhaustion;
@@ -173,6 +175,34 @@ places host archives on D. It preserves test assertions and records storage sett
 The system drive had already recovered to about 42 GiB free at continuation, and the old Linux
 cache was absent; no claim is made that this work recovered that space. Native Windows build
 cache remains on D. Exact search-commit Linux qualification follows this checkpoint.
+
+## Search traversal/content continuation — 2026-10-18
+
+Model search now uses breadth-first native ordering, counts files before include filtering and
+stops filename traversal immediately at its result limit. Omitting path searches every approved
+root with a shared deadline. Explicit files, directory metadata, size errors and content results
+match eight executions of the original registered `find` handler; six source trees and two
+large synthetic source filesystem bounds qualify traversal without allocating large disk fixtures.
+Native content uses twelve overlapping readers while checking grants on the owner thread; an
+actual twelve-reader gate verifies success and revoked publication. Native SFTP covers name/content
+search, lifetime-only trust and multi-chunk revocation with transport reuse after handle closure.
+
+Full Windows qualification: **201 PASS, 0 failed/ignored**, formatting and strict Clippy PASS:
+[receipt](../../audit/2026-10-18/search-engine-windows-receipt.json). Six initial behavior regressions,
+a missing server route, two differential projection defects and admission-before-resolution were
+observed RED then GREEN. Windows sharing violation 32 was measured before correcting that test's
+OS error classification; its containment requirement was retained.
+
+Eleven content projections match source decoding/sniffing/line behavior. The twelfth contains an
+unpaired surrogate produced by source clipping: its exact code units remain in the fixture and
+the Rust adapter explicitly refuses that result. This is an **OPEN exactness gap**, despite the
+refusal test passing. Server JS regex, full local ripgrep conformance, SFTP pipelining/entry budgets
+and the other plan tasks remain open. The whole phase 1–6 gate and fresh final review stay in progress.
+
+Matcher commit `531fcac` passed **177 Linux tests**, formatting and strict Clippy:
+[receipt](../../audit/2026-10-18/linux-search-matcher-lean-receipt.json). Its fresh cache measured
+**998 MiB**. Archives/temp files stay on the workspace drive; tests retain all original assertions
+and file-size limits. The final search-engine commit needs its own Linux receipt.
 
 ## Documents
 

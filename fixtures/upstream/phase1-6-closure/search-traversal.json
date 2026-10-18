@@ -1,0 +1,183 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "search.ts": "2b4ef689d9c19f3bfe58b59764ce50d1867c1c417db30ad25933303c560bb8c1"
+  },
+  "directories": {
+    "/public": [
+      [
+        "deep",
+        "directory"
+      ],
+      [
+        "z.txt",
+        "file"
+      ],
+      [
+        "BUILD",
+        "directory"
+      ],
+      [
+        "link",
+        "link"
+      ],
+      [
+        "a.TS",
+        "file"
+      ]
+    ],
+    "/public/deep": [
+      [
+        "inner",
+        "directory"
+      ],
+      [
+        "needle.txt",
+        "file"
+      ]
+    ],
+    "/public/deep/inner": [
+      [
+        "needle.rs",
+        "file"
+      ]
+    ],
+    "/public/BUILD": [
+      [
+        "needle.js",
+        "file"
+      ]
+    ]
+  },
+  "files": {
+    "/public/z.txt": "root needle\n",
+    "/public/a.TS": "Alpha needle\n",
+    "/public/deep/needle.txt": "deep needle\n",
+    "/public/deep/inner/needle.rs": "last needle\n",
+    "/public/BUILD/needle.js": "hidden needle\n"
+  },
+  "trees": [
+    {
+      "options": {
+        "query": "needle"
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/deep/needle.txt"
+          },
+          {
+            "path": "/p/deep/inner/needle.rs"
+          }
+        ],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "deep"
+      },
+      "expected": {
+        "hits": [],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "needle",
+        "maxResults": 1
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/deep/needle.txt"
+          }
+        ],
+        "filesScanned": 3,
+        "truncated": true,
+        "stoppedBecause": "limit"
+      }
+    },
+    {
+      "options": {
+        "query": "needle",
+        "exclude": []
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/deep/needle.txt"
+          },
+          {
+            "path": "/p/BUILD/needle.js"
+          },
+          {
+            "path": "/p/deep/inner/needle.rs"
+          }
+        ],
+        "filesScanned": 5,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "a",
+        "include": "*.ts"
+      },
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.TS"
+          }
+        ],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "options": {
+        "query": "a",
+        "include": "*.ts",
+        "caseSensitive": true
+      },
+      "expected": {
+        "hits": [],
+        "filesScanned": 4,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    }
+  ],
+  "bounds": [
+    {
+      "options": {
+        "files": 40002,
+        "folders": 0
+      },
+      "expected": {
+        "hits": [],
+        "filesScanned": 40000,
+        "truncated": true,
+        "stoppedBecause": "files"
+      }
+    },
+    {
+      "options": {
+        "files": 1,
+        "folders": 10002
+      },
+      "expected": {
+        "hits": [],
+        "filesScanned": 1,
+        "truncated": true,
+        "stoppedBecause": "files"
+      }
+    }
+  ]
+}

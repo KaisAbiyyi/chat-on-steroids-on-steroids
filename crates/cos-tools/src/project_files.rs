@@ -348,7 +348,7 @@ fn metadata_modified(file: &File) -> io::Result<String> {
             .to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
     )
 }
-fn sniff(head: &[u8]) -> bool {
+pub(crate) fn sniff(head: &[u8]) -> bool {
     if head.is_empty()
         || head.starts_with(&[255, 254])
         || head.starts_with(&[254, 255])

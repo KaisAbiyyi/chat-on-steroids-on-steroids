@@ -1,6 +1,7 @@
 //! Isolated tool surfaces and authenticated local ingress.
 pub mod code;
 pub mod control;
+mod find;
 pub mod http;
 pub mod kernel;
 mod patch;

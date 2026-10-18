@@ -1,8 +1,5 @@
-use crate::{
-    files::{Files, locate},
-    text,
-};
-use cos_core::{config::Root, persistence::invalid};
+use crate::files::Files;
+use cos_core::config::Root;
 use serde_json::{Value, json};
 use std::{
     io,
@@ -51,8 +48,13 @@ pub const DEFAULT_EXCLUDES: &[&str] = &[
     "release-*",
     "appdata",
 ];
+pub mod engine;
 mod matcher;
+pub mod native;
+mod scheduling;
+pub mod server;
 pub use matcher::IncludeMatcher;
+#[derive(Clone, Copy)]
 pub struct Options<'a> {
     pub query: &'a str,
     pub content: bool,
@@ -75,140 +77,42 @@ impl<'a> Options<'a> {
         }
     }
 }
+/// Legacy library projection retains its established lexical display ordering.
+/// Model tools consume the typed source outcome directly, including BFS name order.
 pub fn find_options(
     files: &Files,
     roots: &[Root],
     base: &str,
     options: &Options<'_>,
 ) -> io::Result<Value> {
-    find_checked(files, roots, base, options, &|| Ok(()))
+    let mut report = find_checked(files, roots, base, options, &|| Ok(()))?;
+    if let Some(hits) = report["matches"].as_array_mut() {
+        hits.sort_by(|a, b| {
+            a["path"]
+                .as_str()
+                .cmp(&b["path"].as_str())
+                .then(a["line"].as_u64().cmp(&b["line"].as_u64()))
+        });
+    }
+    Ok(report)
 }
 pub fn find_checked(
-    files: &Files,
+    _files: &Files,
     roots: &[Root],
     base: &str,
     options: &Options<'_>,
     authorize: &dyn Fn() -> io::Result<()>,
 ) -> io::Result<Value> {
     authorize()?;
-    let Options {
-        query,
-        content,
-        glob,
-        exclude,
-        limit,
-        case_sensitive,
-        regex,
-    } = *options;
-    if limit == 0 || limit > 500 {
-        return Err(invalid("limit must be between 1 and 500"));
-    }
-    if regex && !content {
-        return Err(invalid("regex=true is only valid with mode=content"));
-    }
-    let excludes = exclude
-        .map(|v| v.to_vec())
-        .unwrap_or_else(|| DEFAULT_EXCLUDES.iter().map(|s| (*s).into()).collect());
-    let deadline = Instant::now() + Duration::from_secs(10);
-    let location = locate(roots, base, None, false)?;
-    let walked = if location.root.metadata(&location.relative)?.is_file() {
-        crate::files::WalkResult {
-            paths: vec![location.virtual_path],
-            truncated: false,
-        }
-    } else {
-        files.walk_checked(roots, base, &excludes, 40000, deadline, authorize)?
-    };
-    let pattern = glob
-        .filter(|pattern| !pattern.is_empty())
-        .map(|pattern| IncludeMatcher::new(pattern, case_sensitive))
-        .transpose()?;
-    let mut matches = vec![];
-    let mut skipped = 0;
-    let mut scanned = 0;
-    let mut truncated = walked.truncated;
-    let expression = if regex {
-        Some(
-            regex::RegexBuilder::new(query)
-                .case_insensitive(!case_sensitive)
-                .size_limit(1024 * 1024)
-                .build()
-                .map_err(|e| invalid(format!("Invalid regex: {e}")))?,
-        )
-    } else {
-        None
-    };
-    let query = if case_sensitive {
-        query.to_owned()
-    } else {
-        query.to_lowercase()
-    };
-    let matching = |text: &str| {
-        if let Some(regex) = &expression {
-            regex.is_match(text)
-        } else if case_sensitive {
-            text.contains(&query)
-        } else {
-            text.to_lowercase().contains(&query)
-        }
-    };
-    for path in walked.paths {
-        authorize()?;
-        if matches.len() >= limit.min(1000) || Instant::now() > deadline {
-            truncated = true;
-            break;
-        }
-        let relative = path
-            .strip_prefix(&format!("{}/", base.trim_end_matches('/')))
-            .unwrap_or_else(|| path.rsplit('/').next().unwrap_or(&path));
-        if pattern
-            .as_ref()
-            .is_some_and(|matcher| !matcher.matches(relative))
-        {
-            continue;
-        }
-        scanned += 1;
-        if content {
-            let location = locate(roots, &path, None, false)?;
-            let raw = match location.open(2 * 1024 * 1024) {
-                Ok(bytes) => bytes,
-                Err(_) => {
-                    skipped += 1;
-                    continue;
-                }
-            };
-            let (text, _) = match text::decode(&raw) {
-                Ok(t) => t,
-                Err(_) => {
-                    skipped += 1;
-                    continue;
-                }
-            };
-            for (line, text) in text.lines().enumerate() {
-                if line % 256 == 0 {
-                    authorize()?;
-                    if Instant::now() > deadline {
-                        truncated = true;
-                        break;
-                    }
-                }
-                if matching(text) {
-                    matches.push(json!({"path":path,"line":line+1,"text":text.trim().chars().take(300).collect::<String>()}));
-                    if matches.len() >= limit.min(1000) {
-                        truncated = true;
-                        break;
-                    }
-                }
-            }
-        } else if matching(path.rsplit('/').next().unwrap_or(&path)) {
-            matches.push(json!({"path":path}));
-        }
-    }
-    if limit == 0 {
-        return Err(invalid("limit must be positive"));
-    }
-    authorize()?;
+    let canonical = crate::files::locate(roots, base, None, false)?.virtual_path;
+    let result = engine::search(
+        &mut native::Native::new(roots),
+        &canonical,
+        options,
+        Instant::now() + Duration::from_secs(10),
+        authorize,
+    )?;
     Ok(
-        json!({"matches":matches,"truncated":truncated,"scanned":scanned,"skipped":skipped,"content_file_limit":2*1024*1024}),
+        json!({"matches": result.hits, "truncated": result.truncated, "scanned": result.files_scanned, "skipped": result.skipped, "content_file_limit": engine::MAX_CONTENT_FILE_BYTES, "stopped_because": result.stopped_because}),
     )
 }

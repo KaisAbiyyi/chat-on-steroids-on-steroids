@@ -18,7 +18,7 @@ function declarations(body,names){
  if(selected.length!==names.length)throw Error('Missing source declaration');
  return selected.map(s=>body.slice(s.start,s.end)).join('\n');
 }
-const code=search.replace(/^import[\s\S]*?;\r?$/gm,'')+'\n'+declarations(fsops,['isExcludedFolderName','sniffBinaryBytes'])+'\nglobalThis.fixture={search,searchOneFile,globToRegExp,compileIncludeMatcher,isExcludedFolderName,DEFAULT_EXCLUDES};';
+const code=search.replace(/^import[\s\S]*?;\r?$/gm,'')+'\n'+declarations(fsops,['isExcludedFolderName','sniffBinaryBytes','formatBytes'])+'\nglobalThis.fixture={search,searchOneFile,globToRegExp,compileIncludeMatcher,isExcludedFolderName,DEFAULT_EXCLUDES,MAX_CONTENT_FILE_BYTES,formatBytes};';
 const js=await require('esbuild').transform(code,{loader:'ts',format:'cjs'});
 const context=vm.createContext({module:{exports:{}},exports:{},path:path.posix,Buffer,TextDecoder,locateRipgrep:()=>null});vm.runInContext(js.code,context);
 const api=context.fixture,globs=[],excludes=[];
@@ -29,7 +29,7 @@ for(const platform of ['linux','win32']){
 context.path=path.posix;
 for(const pattern of [['build'],['release-*'],['.claude-*'],['[cache]'],[],['A*B'],['äbuild'],['ß'],['ΑΣ']])for(const name of ['build','BUILD','builder','release-public','release','[cache]','cache','.claude-x','AXXB','a*b','Äbuild','ẞ','Ας'])excludes.push({patterns:pattern,name,expected:api.isExcludedFolderName(name,pattern)});
 function backend(files,dirs){return {path:path.posix,
- async getMetadata(file){if(!files.has(file))throw Error('ENOENT');return {size:files.get(file).length,isFile:true,isDirectory:false};},
+ async getMetadata(file){if(file in dirs)return {size:0,isFile:false,isDirectory:true};if(!files.has(file))throw Error('ENOENT');return {size:files.get(file).length,isFile:true,isDirectory:false};},
  async readDirectory(dir){if(!(dir in dirs))throw Error('ENOENT');return dirs[dir].map(([name,type])=>({fileName:name,isFile:type==='file',isDirectory:type==='directory'}));},
  async *readFileStream(file){yield files.get(file);}
 };}
@@ -59,4 +59,49 @@ for(const options of [{query:'needle'},{query:'deep'},{query:'needle',maxResults
 }
 await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search.json'),JSON.stringify({upstreamCommit:commit,sources:{'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},defaultExcludes:api.DEFAULT_EXCLUDES,globs,excludes,scans,trees,directories,files},null,2)+'\n');
 await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-globs.json'),JSON.stringify({upstreamCommit:commit,sources:{'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},defaultExcludes:api.DEFAULT_EXCLUDES,globs,excludes},null,2)+'\n');
+const bounds=[];
+for(const options of [{files:40002,folders:0},{files:1,folders:10002}]){
+ const entries=[...Array.from({length:options.folders},(_,i)=>['dir-'+i,'directory']),...Array.from({length:options.files},(_,i)=>['public-'+i+'.txt','file'])];
+ const dirs={'/public':entries};for(let i=0;i<options.folders;i++)dirs['/public/dir-'+i]=[];
+ const expected=await api.search({realDir:'/public',virtualDir:'/p',query:'absent',mode:'name',caseSensitive:false,maxResults:50,exclude:api.DEFAULT_EXCLUDES,server:backend(new Map(),dirs)});delete expected.elapsedMs;
+ bounds.push({options,expected});
+}
+await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-traversal.json'),JSON.stringify({upstreamCommit:commit,sources:{'search.ts':createHash('sha256').update(search).digest('hex')},directories,files,trees,bounds},null,2)+'\n');
+const content=scans.map(({expected,...input})=>{
+ const hits=expected.hits.map(({text,...hit})=>({...hit,...(text===undefined?{}:{textUnits:Array.from({length:text.length},(_,i)=>text.charCodeAt(i))})}));
+ const needsLosslessString=expected.hits.some(hit=>hit.text!==undefined&&!hit.text.isWellFormed());
+ return {...input,needsLosslessString,expected:{...expected,hits}};
+});
+await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-content.json'),JSON.stringify({upstreamCommit:commit,sources:{'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},content},null,2)+'\n');
+// Execute the actual registered find handler, with approved public virtual filesystem providers.
+// This captures response assembly as well as search, without importing app/bootstrap handlers.
+const toolSource=await fs.readFile(path.join(upstream,'src/main/mcp/tools-core.ts'),'utf8');
+const toolAst=require('@babel/parser').parse(toolSource,{sourceType:'module',plugins:['typescript']});
+const callbacks=[];
+function visit(node){
+ if(!node||typeof node!=='object')return;
+ if(node.type==='CallExpression'&&node.callee?.property?.name==='register'&&node.arguments[0]?.value==='find')callbacks.push(node.arguments[2]);
+ for(const value of Object.values(node))if(Array.isArray(value))value.forEach(visit);else if(value&&typeof value==='object')visit(value);
+}
+visit(toolAst.program);if(callbacks.length!==1)throw Error('Expected exactly one source find handler');
+const kernelSource=await fs.readFile(path.join(upstream,'src/main/mcp/kernel.ts'),'utf8');
+const kernelAst=require('@babel/parser').parse(kernelSource,{sourceType:'module',plugins:['typescript']});
+const results=kernelAst.program.body.map(node=>node.type==='ExportNamedDeclaration'?node.declaration:node).filter(node=>node?.type==='VariableDeclaration'&&node.declarations.some(d=>['ok','fail'].includes(d.id.name)));
+if(results.length!==2)throw Error('Missing source result projections');
+const toolFiles={'/left/needle-left.txt':{text:'public left\n'},'/right/needle-right.txt':{text:' public right needle \r\n'},'/left/zz-large.txt':{zeroBytes:api.MAX_CONTENT_FILE_BYTES+1}};
+const toolMap=new Map(Object.entries(toolFiles).map(([key,value])=>[key,value.text===undefined?Buffer.alloc(value.zeroBytes):Buffer.from(value.text)]));
+const toolDirs={'/left':[['needle-left.txt','file'],['zz-large.txt','file']],'/right':[['needle-right.txt','file']]};
+const toolRoots=['left','right'].map(name=>({name,path:'/'+name,remote:{host:'public-fixture',path:'/'+name}}));
+const toolFs=backend(toolMap,toolDirs);
+const resolve=async(roots,input)=>{const root=roots.find(root=>input==='/'+root.name||input.startsWith('/'+root.name+'/'));if(!root)throw Error('not approved');return {root,real:input,virtual:input};};
+const toolContext=vm.createContext({module:{exports:{}},exports:{},reg:{guarded:async(_cap,_name,call)=>call()},ctx:{roots:toolRoots},resolveIn:resolve,resolvePath:resolve,fsForRoot:()=>toolFs,search:api.search,searchOneFile:api.searchOneFile,DEFAULT_EXCLUDES:api.DEFAULT_EXCLUDES,MAX_CONTENT_FILE_BYTES:api.MAX_CONTENT_FILE_BYTES,formatBytes:api.formatBytes,noteCount(){},friendlyError:error=>error.message});
+const toolJs=await require('esbuild').transform(results.map(node=>kernelSource.slice(node.start,node.end)).join('\n')+'\nglobalThis.find='+toolSource.slice(callbacks[0].start,callbacks[0].end)+';',{loader:'ts',format:'cjs'});
+vm.runInContext(toolJs.code,toolContext);
+const toolCases=[];
+for(const args of [{query:'needle'},{query:'needle',path:'/right'},{query:'needle',path:'/right/needle-right.txt',mode:'content'},{query:'absent',path:'/right/needle-right.txt'},{query:'needle',path:'/left/zz-large.txt',mode:'content'},{query:'needle',path:'/left/zz-large.txt',mode:'content',include:'*.rs'},{query:'public',mode:'content',max_results:1},{query:'needle',max_results:1}]){
+ const expected=JSON.parse(JSON.stringify(await toolContext.find(args)));
+ for(const item of expected.content??[])if(item.type==='text')item.text=item.text.replace(/elapsed_ms: \d+/g,'elapsed_ms: <elapsed>');
+ toolCases.push({args,expected});
+}
+await fs.writeFile(path.join(root,'fixtures/upstream/phase1-6-closure/search-tool.json'),JSON.stringify({upstreamCommit:commit,sources:{'tools-core.ts':createHash('sha256').update(toolSource).digest('hex'),'kernel.ts':createHash('sha256').update(kernelSource).digest('hex'),'search.ts':createHash('sha256').update(search).digest('hex'),'fsops.ts':createHash('sha256').update(fsops).digest('hex')},files:toolFiles,cases:toolCases},null,2)+'\n');
 console.log(JSON.stringify({globs:globs.length,excludes:excludes.length,scans:scans.length,trees:trees.length}));

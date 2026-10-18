@@ -631,42 +631,7 @@ impl Kernel {
                 }
                 Ok(json!({"content":[cos_tools::image::content(&raw)?]}))
             }
-            "find" => {
-                require("search")?;
-                if args["regex"] == true && args["mode"] != "content" {
-                    return Err(invalid("regex=true is only valid with mode=content"));
-                }
-                let base = self.cwd(&roots, args["path"].as_str(), owner)?;
-                let excludes = args["exclude"].as_array().map(|v| {
-                    v.iter()
-                        .map(|s| s.as_str().unwrap().into())
-                        .collect::<Vec<String>>()
-                });
-                let report = cos_tools::search::find_checked(
-                    &self.files,
-                    &roots,
-                    &base,
-                    &cos_tools::search::Options {
-                        query: args["query"].as_str().unwrap(),
-                        content: args["mode"] == "content",
-                        glob: args["include"].as_str(),
-                        exclude: excludes.as_deref(),
-                        limit: args["max_results"].as_u64().unwrap_or(50) as usize,
-                        case_sensitive: args["case_sensitive"] == true,
-                        regex: args["regex"] == true,
-                    },
-                    &|| {
-                        require("search")?;
-                        if self.roots()? != roots {
-                            return Err(invalid("Workspace changed during search"));
-                        }
-                        Ok(())
-                    },
-                )?;
-                Ok(
-                    json!({"content":[{"type":"text","text":report.to_string()}],"structuredContent":report}),
-                )
-            }
+            "find" => self.find_tool(&roots, &args, request, owner),
             "apply_patch" => {
                 let source = args["patch"].as_str().unwrap();
                 let base = self.cwd(&roots, None, owner)?;
@@ -1073,6 +1038,135 @@ fn exec_result(output: Value) -> Value {
 #[cfg(test)]
 mod remote_trust_tests {
     use super::*;
+    #[test]
+    fn server_search_uses_native_sftp_and_requires_runtime_trust() {
+        let folder = tempfile::tempdir().unwrap();
+        let profile = tempfile::tempdir().unwrap();
+        std::fs::create_dir(folder.path().join("a")).unwrap();
+        std::fs::write(folder.path().join("a/needle.txt"), "public nested\n").unwrap();
+        std::fs::write(folder.path().join("z-needle.txt"), " public needle \r\n").unwrap();
+        let program = if cfg!(windows) {
+            "C:/Program Files/Git/usr/lib/ssh/sftp-server.exe"
+        } else if std::path::Path::new("/usr/lib/openssh/sftp-server").is_file() {
+            "/usr/lib/openssh/sftp-server"
+        } else {
+            "/usr/libexec/sftp-server"
+        };
+        assert!(
+            std::path::Path::new(program).is_file(),
+            "Native SFTP subsystem required"
+        );
+        let environment = if cfg!(windows) {
+            BTreeMap::from([(
+                "PATH".into(),
+                format!(
+                    "C:/Program Files/Git/usr/bin;C:/Program Files/Git/mingw64/bin;{}",
+                    std::env::var("PATH").unwrap_or_default()
+                ),
+            )])
+        } else {
+            BTreeMap::new()
+        };
+        let mut sftp = cos_tools::remote::Sftp::spawn_environment(
+            program,
+            &[],
+            Some(folder.path()),
+            &environment,
+        )
+        .unwrap();
+        let real = sftp.realpath(".").unwrap();
+        let remote = json!({"host":"public-fixture", "path":real});
+        let config = Arc::new(ConfigStore::open(profile.path(), platform()).unwrap());
+        config
+            .update(|v| {
+                v["roots"] = json!([{"name":"server", "path":real, "remote":remote}]);
+                v["capabilities"]["command"] = json!(false);
+                v["capabilities"]["read"] = json!(false);
+                v["multiAgent"]["allowUnattributedCalls"] = json!(true);
+            })
+            .unwrap();
+        let kernel = Kernel::new(config.clone()).unwrap();
+        kernel.remote.lock().unwrap().insert(
+            remote.to_string(),
+            Arc::new(Mutex::new(RemoteFiles { sftp, root: real })),
+        );
+        let find = |args| kernel.invoke(Surface::Core, "public-search", "find", args);
+        let denied = find(json!({"query":"needle", "path":"/server"}));
+        assert_eq!(denied["isError"], true, "{denied}");
+        assert!(
+            denied["content"][0]["text"]
+                .as_str()
+                .unwrap()
+                .contains("SSH_PATH_TRUST_REQUIRED"),
+            "{denied}"
+        );
+        kernel.trust_ssh_server_paths_for_lifetime();
+        let result = find(json!({"query":"needle", "path":"/server", "max_results":1}));
+        let text = result["content"][0]["text"].as_str().unwrap();
+        assert!(
+            text.starts_with("1 matches\n/server/z-needle.txt\n\nfiles_scanned: 1\n"),
+            "{result}"
+        );
+        assert!(text.ends_with("\ntruncated: limit"), "{result}");
+        let result =
+            find(json!({"query":"needle", "path":"/server/z-needle.txt", "mode":"content"}));
+        assert_eq!(
+            result,
+            ok("1 matches\n/server/z-needle.txt:1: public needle")
+        );
+        let result = find(json!({"query":"needle"}));
+        assert!(
+            result["content"][0]["text"]
+                .as_str()
+                .unwrap()
+                .starts_with("2 matches\n/server/z-needle.txt\n/server/a/needle.txt\n"),
+            "{result}"
+        );
+        std::fs::write(
+            folder.path().join("stream.txt"),
+            "public needle\n".repeat(40000),
+        )
+        .unwrap();
+        let roots = kernel.roots().unwrap();
+        let checks = std::cell::Cell::new(0usize);
+        let interrupted = kernel.with_remote(&roots[0], |client| {
+            cos_tools::search::engine::search(
+                &mut cos_tools::search::server::Server::new(client, "/server".into()),
+                "/server/stream.txt",
+                &cos_tools::search::Options {
+                    content: true,
+                    ..cos_tools::search::Options::new("needle")
+                },
+                std::time::Instant::now() + Duration::from_secs(10),
+                &|| {
+                    checks.set(checks.get() + 1);
+                    if checks.get() == 6 {
+                        config.update(|value| value["roots"] = json!([]))?;
+                    }
+                    if kernel.roots()? != roots {
+                        return Err(invalid("Search authority revoked during SFTP read"));
+                    }
+                    Ok(())
+                },
+            )
+        });
+        assert!(
+            interrupted.is_err(),
+            "Server search published after root revocation"
+        );
+        config
+            .update(|value| value["roots"] = json!(roots))
+            .unwrap();
+        assert_eq!(
+            find(json!({"query":"needle", "path":"/server/z-needle.txt", "mode":"content"})),
+            ok("1 matches\n/server/z-needle.txt:1: public needle"),
+            "Interrupted search must close its SFTP handle and leave the transport usable"
+        );
+        config
+            .update(|v| v["capabilities"]["search"] = json!(false))
+            .unwrap();
+        assert_eq!(find(json!({"query":"needle"}))["isError"], true);
+    }
     #[test]
     fn server_project_file_panel_uses_native_sftp_and_runtime_path_trust() {
         let folder = tempfile::tempdir().unwrap();

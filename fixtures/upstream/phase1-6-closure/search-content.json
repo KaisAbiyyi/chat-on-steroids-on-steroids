@@ -1,0 +1,591 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sources": {
+    "search.ts": "2b4ef689d9c19f3bfe58b59764ce50d1867c1c417db30ad25933303c560bb8c1",
+    "fsops.ts": "cdf22e0bc58da0eb8e363590c3312ee11c682c5a2d7a49af3e87527e24132846"
+  },
+  "content": [
+    {
+      "bytes": "ICBuZWVkbGUgIA0KbGFzdCBuZWVkbGUN",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          },
+          {
+            "path": "/p/a.txt",
+            "line": 2,
+            "textUnits": [
+              108,
+              97,
+              115,
+              116,
+              32,
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "77u/bmVlZGxlAAo=",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101,
+              0
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "//5uAGUAZQBkAGwAZQAKAA==",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "/v8AbgBlAGUAZABsAGUACg==",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlIPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIDwn5iA8J+YgPCfmIA=",
+      "query": "needle",
+      "needsLosslessString": true,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101,
+              32,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              56832,
+              55357,
+              8230
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlwoU=",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101,
+              133
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlCgo=",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "AQJuZWVkbGU=",
+      "query": "needle",
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              1,
+              2,
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxl/w==",
+      "query": "needle",
+      "maxResults": 50,
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101,
+              65533
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": false,
+        "stoppedBecause": null
+      }
+    },
+    {
+      "bytes": "bmVlZGxlCm5lZWRsZQo=",
+      "query": "needle",
+      "maxResults": 1,
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [
+          {
+            "path": "/p/a.txt",
+            "line": 1,
+            "textUnits": [
+              110,
+              101,
+              101,
+              100,
+              108,
+              101
+            ]
+          }
+        ],
+        "filesScanned": 1,
+        "truncated": true,
+        "stoppedBecause": "limit"
+      }
+    },
+    {
+      "zeroBytes": 2097153,
+      "query": "needle",
+      "maxResults": 50,
+      "needsLosslessString": false,
+      "expected": {
+        "hits": [],
+        "filesScanned": 0,
+        "truncated": true,
+        "stoppedBecause": "size"
+      }
+    }
+  ]
+}
