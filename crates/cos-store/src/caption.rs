@@ -341,10 +341,11 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
             );
             p.tone = tone;
             if let Some(exit) = evidence["exitCode"].as_i64()
-                && exit != 0 && evidence["benignExit"] != true
+                && exit != 0
+                && evidence["benignExit"] != true
             {
-                    p.tone = "bad";
-                    p.metric = Some(format!("✕ exit {exit}"));
+                p.tone = "bad";
+                p.metric = Some(format!("✕ exit {exit}"));
             }
             p
         }
