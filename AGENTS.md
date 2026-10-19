@@ -32,3 +32,12 @@ For the active Rust owner, inspect callers and the applicable source contract fi
 - Do not label a branch or phase DONE without the documented acceptance gate. Keep precise states: `PASS`, `FAIL`, `PARTIAL`, `BLOCKED`, `NOT RUN`, and `HOLD`.
 
 Read [the cloud-first development workflow](docs/DEVELOPMENT-WORKFLOW.md) for branch, PR, local and user acceptance steps. GitHub `main` was first published at `8637c12`; verify the current default-branch SHA and required CI before beginning `CL-01`.
+
+## Shared multi-agent orchestration (2026-10-19)
+
+**Required reading:** [docs/AGENT-ORCHESTRATION.md](docs/AGENT-ORCHESTRATION.md). Existing project, cloud-first D:, security and native acceptance rules remain in force.
+
+- Tasks stay agent-neutral until claimed. ChatGPT Work, Codex and future agents can each plan, implement or review according to supported tools and usage.
+- Inspect active PRs/claims, dependencies, resources and exact SHA before writing. Single-writer per unit and logical contract; issue labels are not atomic locks. Serialize conflicts until a transaction-safe controller is installed.
+- Push safe intermediate branch checkpoints and open draft PRs; log last durable SHA and unsaved VM work. Only fence/release and re-claim when handing an interrupted unit to a replacement. Report-only review needs no write claim.
+- Do not bypass CL-L1 or subsequent gates. Prefer owner-authorized verified GitHub noreply identity for new commits where possible; track actual agent involvement in task/PR metadata and disclose attribution exceptions.
