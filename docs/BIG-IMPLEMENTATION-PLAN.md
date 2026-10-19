@@ -131,3 +131,7 @@ Record one of `PASS`, `FAIL`, `PARTIAL`, `BLOCKED`, `NOT RUN`, `HOLD` for each g
 ## Handoff and Git expectations
 
 Every named cloud unit returns the [standard cloud handoff](DEVELOPMENT-WORKFLOW.md#4-git-and-review) with branch/PR/merged SHA, exact CI validation, `LOCAL REQUIRED`, `YOU REQUIRED` and next action. Source code and unit notes are committed through reviewable GitHub branches/PRs; release and device receipts are labeled by the exact pulled SHA. The D: Windows workspace is the **qualification** authority for machine-specific behavior after bootstrap; canonical implementation commits live on GitHub. Historical local and source receipts remain immutable.
+
+## Shared multi-agent execution governance (2026-10-19)
+
+Roadmap tasks remain **unassigned** until actively claimed. Read [agent orchestration policy](AGENT-ORCHESTRATION.md) for exclusive claims, independent parallel units, remote checkpoints, interruption/takeover safety, dynamic agent roles, shared usage budgeting and Git author attribution. No backend acceptance gate, including CL-L1, changes through this governance update.
