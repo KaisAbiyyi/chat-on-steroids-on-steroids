@@ -135,3 +135,8 @@ Every named cloud unit returns the [standard cloud handoff](DEVELOPMENT-WORKFLOW
 ## Shared multi-agent execution governance (2026-10-19)
 
 Roadmap tasks remain **unassigned** until actively claimed. Read [agent orchestration policy](AGENT-ORCHESTRATION.md) for exclusive claims, independent parallel units, remote checkpoints, interruption/takeover safety, dynamic agent roles, shared usage budgeting and Git author attribution. No backend acceptance gate, including CL-L1, changes through this governance update.
+
+
+## Parallel claimable task index
+
+The [full dependency and parallel work-unit map](PARALLEL-EXECUTION-BOARD.md) records all remaining named CL/Phase 7–16 units, native/human gates and shared-resource locks. IDs remain neutral until claimed. The original phase order and acceptance contracts are unchanged.
