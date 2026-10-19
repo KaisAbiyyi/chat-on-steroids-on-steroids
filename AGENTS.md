@@ -41,3 +41,7 @@ Read [the cloud-first development workflow](docs/DEVELOPMENT-WORKFLOW.md) for br
 - Inspect active PRs/claims, dependencies, resources and exact SHA before writing. Single-writer per unit and logical contract; issue labels are not atomic locks. Serialize conflicts until a transaction-safe controller is installed.
 - Push safe intermediate branch checkpoints and open draft PRs; log last durable SHA and unsaved VM work. Only fence/release and re-claim when handing an interrupted unit to a replacement. Report-only review needs no write claim.
 - Do not bypass CL-L1 or subsequent gates. Prefer owner-authorized verified GitHub noreply identity for new commits where possible; track actual agent involvement in task/PR metadata and disclose attribution exceptions.
+
+## Neutral task registry
+
+Read [docs/PARALLEL-EXECUTION-BOARD.md](docs/PARALLEL-EXECUTION-BOARD.md) before taking an ID such as `CL-05A` or `11C`. Dependencies and lock boundaries govern concurrency; claimed owners remain exclusive.
