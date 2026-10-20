@@ -273,7 +273,11 @@ impl SessionStore {
                 if let Some(map) = raw.as_object() {
                     for (key, event) in map {
                         if message_key(event).as_ref() == Some(key) && event["seq"].is_u64() {
-                            budget_canonical_bytes(&mut canonical_bytes, 0, serde_json::to_vec(event)?.len())?;
+                            budget_canonical_bytes(
+                                &mut canonical_bytes,
+                                0,
+                                serde_json::to_vec(event)?.len(),
+                            )?;
                             messages.insert(key.clone(), event.clone());
                         }
                     }
@@ -285,7 +289,10 @@ impl SessionStore {
             // Malformed legacy maps may be reconstructed from durable shards.
             // Resource-budget violations must not silently drop a map instead.
             Err(e)
-                if matches!(e.kind(), io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput) =>
+                if matches!(
+                    e.kind(),
+                    io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput
+                ) =>
             {
                 return Err(e);
             }
@@ -325,7 +332,8 @@ impl SessionStore {
                         return Err(invalid("Canonical history exceeds in-memory record budget"));
                     }
                     let next_bytes = serde_json::to_vec(&event)?.len();
-                    let previous_bytes = messages.get(&key)
+                    let previous_bytes = messages
+                        .get(&key)
                         .map(serde_json::to_vec)
                         .transpose()?
                         .map_or(0, |bytes| bytes.len());
@@ -1011,11 +1019,15 @@ impl SessionStore {
             }
         })?;
         if exceeded {
-            return Err(invalid("History read exceeds result budget; use bounded pagination"));
+            return Err(invalid(
+                "History read exceeds result budget; use bounded pagination",
+            ));
         }
         for event in entry.messages.values().filter(|event| selected(event)) {
             if events.len() >= MAX_HISTORY_READ_EVENTS {
-                return Err(invalid("History read exceeds result budget; use bounded pagination"));
+                return Err(invalid(
+                    "History read exceeds result budget; use bounded pagination",
+                ));
             }
             events.push(event.clone());
         }
