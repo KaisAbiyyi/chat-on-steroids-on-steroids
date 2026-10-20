@@ -144,7 +144,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "CL-06B",
@@ -170,7 +170,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "CL-07B",
@@ -249,7 +249,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "claimed"
+      "status": "todo"
     },
     {
       "id": "CL-09B",

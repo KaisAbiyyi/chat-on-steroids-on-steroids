@@ -502,6 +502,10 @@ impl Files {
                     if c.new.is_none() {
                         return Err(invalid(format!("Failed to read file to delete {path}")));
                     }
+                    // Authorize the actual operation, not just the initial
+                    // transaction entry. Direct callers of Files::apply_checked
+                    // must not need a separate MCP permission preflight.
+                    authorize("deleteFile")?;
                     c.new = None;
                 }
                 Hunk::UpdateFile {
@@ -524,6 +528,10 @@ impl Files {
                         authorize("edit")?;
                     }
                     if let Some(destination) = move_path {
+                        // Moving unchanged content still requires move authority.
+                        // Keep the preflight and commit-time checks as separate
+                        // fences for permission revocation.
+                        authorize("move")?;
                         let source_path = c.location.virtual_path.clone();
                         c.new = None;
                         let target = get(&mut changes, roots, &destination, base, &mut budget)?;

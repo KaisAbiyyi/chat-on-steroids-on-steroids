@@ -1,14 +1,22 @@
 # Current CoS-Rust work state
 
-## CL-09A cloud MCP conformance — active claim (2026-10-20)
+## CL-07A accepted and merged (2026-10-21)
 
-- **TASK / CLAIM:** `CL-09A`, ChatGPT GitHub-connected cloud agent, session `chatgpt-20261020-cl09a-01`, generation 1; exclusive logical lock `mcp-protocol`.
-- **BRANCH / PR:** `work/cl-09a-mcp-conformance-20261020`, [PR #21](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/21), initial base `340cf55eddb2766c96e1e1f36eaeb118faecad04`. [Durable claim](claims/CL-09A.md).
-- **CHANGES:** MCP protocol rejects malformed params; HTTP enforces unambiguous MCP headers and emits JSON-RPC parse-error envelope; focused negative protocol/schema/live-permission regressions cover core/desktop/plugins surfaces.
-- **CLOUD VALIDATION:** CHECK EXACT FINAL PR HEAD; initial RED/format failures were addressed in subsequent branch checkpoints. No completion PASS or independent review claimed until verified on exact head. Repository dependency DAG is consistent with `CL-09A=claimed`.
-- **PARALLEL:** CL-05A [PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18) (`process-supervisor`) and CL-06A [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19) (`project-files`) are separately claimed; avoid their locked code and contracts.
-- **GATES:** no local Windows action now; CL-L5 remains BLOCKED until CL-09B **and** CL-09C are accepted. No owner U gate now. Phases 1–6 remain PARTIAL.
-- **NEXT:** exact-SHA Windows/Ubuntu Rust CI and independent boundary review; merge only after accepted verification and then update registry `claimed→done`, release lock and unlock CL-09B / CL-09C when all dependencies are done.
+- **MERGED:** [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20), squash merge `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116` from head `60a931714cf69289066a96658f06edd5becae23d`. Source review (separate CL-08A agent) found no scoped code blocker, with review comment on PR #20.
+- **EXACT HEAD:** Windows/Ubuntu Rust formatter, strict Clippy, all workspace tests, release build PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900070)); DAG Windows/Ubuntu PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900377)). No native L3 proof claimed.
+- **CLAIM:** `search-patch` released after accepted merge. `CL-07B` is next cloud candidate after main CI/review; CL-L3 still depends on CL-06B and CL-07B. CL-05A, CL-08A and CL-09A retain separate active locks, not Done.
+
+
+## CL-06A MERGED / claim released (2026-10-20)
+
+- **UNIT:** CL-06A Git/project/file-panel/watcher closure, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), squash merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`; final head `9c42e87589c02b235880ef3a409c234a2870ff3f`.
+- **CLOUD VALIDATION PASS:** Windows 279/279 and Ubuntu 272/272 tests, no failures/ignored; format, strict Clippy, release and DAG matrix PASS on exact head ([PR CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446216893), [push CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297)). Independent review PASS; seven observed RED→GREEN cases. Earlier Windows event-order test failure is preserved in the evidence, corrected without weakening the subsequent-event assertion.
+- **CLAIM RELEASED:** session `codex-20261020-cl06a-01`, generation 1; `project-files` free. Registry marks only CL-06A done; other owners/claims remain exclusive and require live inspection.
+- **CHANGES / PERFORMANCE / LIMITS:** strengthened opaque working-tree revision tokens, selected-project no-link reads, final diff publication fence, bounded watcher refresh/rearm; existing panel preview/save contracts retained. [Full evidence and measured latency cost](implementation-summary/2026-10-20-cl-06a-project-files.md). Source fixtures unchanged; no full filesystem atomicity or performance improvement claim.
+- **TRACKING:** markdown claim/summary/registry and [existing Notion task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) synchronized to accepted cloud scope. Main post-merge CI is separately identified; an earlier head is not proof for later changes.
+- **LOCAL REQUIRED:** CL-L3 after CL-06B and CL-07B; NONE immediately. **YOU REQUIRED:** NO. Native Windows host acceptance NOT RUN; full Phases 1–6 remain PARTIAL.
+- **NEXT:** CL-06B is a READY_CANDIDATE, subject to current main CI and a new `sftp` claim. Preserve CL-L3 dependencies and disjoint CL-05A ownership. Older sections below are historical checkpoints.
+
 
 ## CL-06A cloud review (2026-10-20)
 

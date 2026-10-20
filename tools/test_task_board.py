@@ -55,16 +55,14 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_wave_excludes_claimed_mcp_unit(self):
+    def test_current_ready_wave_is_five_disjoint_cloud_tasks(self):
         ready, _ = board.readiness(self.data)
         self.assertEqual(
             {task["id"] for task in ready},
-            {"CL-05A", "CL-06A", "CL-07A", "CL-08A"},
+            {"CL-05A", "CL-06B", "CL-07B", "CL-08A", "CL-09A"},
         )
         self.assertTrue(all(task["kind"] == "C" for task in ready))
-        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 4)
-        self.assertEqual(self.tasks["CL-09A"]["status"], "claimed")
-        self.assertNotIn("CL-09A", {task["id"] for task in ready})
+        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 5)
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
@@ -91,12 +89,8 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("physical-windows-host", board.effective_locks(self.tasks["CL-05A"]))
 
     def test_waves_do_not_skip_local_or_user_gates(self):
-        # Plan a hypothetical fully released claim to validate chronological edges.
-        # The actual resolver must keep the claimed CL-09A blocked.
-        simulated = copy.deepcopy(self.data)
-        next(task for task in simulated["tasks"] if task["id"] == "CL-09A")["status"] = "todo"
-        waves = board.waves(simulated)
-        self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"})
+        waves = board.waves(self.data)
+        self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06B", "CL-07B", "CL-08A", "CL-09A"})
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
         self.assertLess(flat.index("7P-L1"), flat.index("7A"))
@@ -126,7 +120,7 @@ class TaskBoardTests(unittest.TestCase):
     def test_completed_units_are_not_reoffered_as_ready(self):
         ready, _ = board.readiness(self.data)
         offered = {t["id"] for t in ready}
-        self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1"}.isdisjoint(offered))
+        self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-06A", "CL-07A"}.isdisjoint(offered))
 
 
 if __name__ == "__main__":

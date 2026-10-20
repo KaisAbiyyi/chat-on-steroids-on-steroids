@@ -6,9 +6,7 @@
 
 Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspect the latest claim/PR registry and state `CLAIM <ID>, owner session, base SHA, resource lock(s), branch, planned test` before editing. Claims are **not preassigned** to ChatGPT or Codex. Without an atomic controller, a single coordinator serializes write conflicts. Report-only inspections do not acquire write ownership; continuation after interrupted browser/quota requires fenced transfer and reconciliation with last remote checkpoint.
 
-`CL-01` through `CL-04C` and `CL-L1` are accepted for their scoped gates. **READY CANDIDATES FROM THE BASELINE:** `CL-05A`, `CL-06A`, `CL-07A`, `CL-08A`; **`CL-09A` is now CLAIMED** in [PR #21](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/21), holding `mcp-protocol`. These tasks have separate logical locks; live cross-PR file/interface overlaps must still be checked. Preserve local WIP and treat broader Phase 1–6 parity as PARTIAL. **Phase order is strictly 1–6 closure → Phase 7 preflight `7P-A → 7P-B → 7P-L1` → Phase 7 browser bridge `7A–7E` → Phase 8 built-in browser `8A–8C`.** The preflight validates the old Phase 1 feasibility contract but is *executed and counted in Phase 7*, never called early Phase 8.
-
-**CLAIM TRACKER:** `CL-09A` is **CLAIMED, not eligible for another executor** (exclusive protocol lock); offline resolver displays `BLOCKED` while the claim is held. [Claim file](claims/CL-09A.md) · [PR #21](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/21). No CI or native acceptance is implied.
+`CL-01` through `CL-04C` and `CL-L1` are accepted for their scoped gates. **CL-06A accepted:** PR #19, merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`, exact-head Windows/Ubuntu CI PASS. **READY CANDIDATES FROM MERGED REGISTRY:** `CL-05A`, `CL-06B`, `CL-07B`, `CL-08A`, `CL-09A`. CL-07A accepted via PR #20 merge `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116`; CL-05A/CL-08A/CL-09A hold live claims in separate PRs and are not assignable. (separate logical locks); no work unit has been claimed by this planning task. Preserve local WIP and treat broader Phase 1–6 parity as PARTIAL. **Phase order is strictly 1–6 closure → Phase 7 preflight `7P-A → 7P-B → 7P-L1` → Phase 7 browser bridge `7A–7E` → Phase 8 built-in browser `8A–8C`.** The preflight validates the old Phase 1 feasibility contract but is *executed and counted in Phase 7*, never called early Phase 8.
 
 ## Live prerequisites and executable readiness
 
@@ -32,15 +30,15 @@ Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspe
 | `CL-05A` | Child ownership, cancellation and output custody | `CL-L1` | `process-supervisor` | C (cloud) | **READY · PARALLEL** |
 | `CL-05B` | PTY/shell/SSH native process semantics | `CL-05A` | `process-pty` | C (cloud) | BLOCKED |
 | `CL-L2` | Native Windows pipe/ConPTY/shell/SSH proof | `CL-05B` | `windows-pty` | L (Windows) | BLOCKED |
-| `CL-06A` | Git/project/file-panel/watcher parity | `CL-L1` | `project-files` | C (cloud) | **READY · PARALLEL** |
-| `CL-06B` | SFTP authorization/containment/native errors | `CL-06A` | `sftp` | C (cloud) | BLOCKED |
-| `CL-07A` | Search/patch traversal and transactional parity | `CL-L1` | `search-patch` | C (cloud) | **READY · PARALLEL** |
-| `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | BLOCKED |
+| `CL-06A` | Git/project/file-panel/watcher parity | `CL-L1` | `project-files` | C (cloud) | DONE |
+| `CL-06B` | SFTP authorization/containment/native errors | `CL-06A` | `sftp` | C (cloud) | **READY · PARALLEL** |
+| `CL-07A` | Search/patch traversal and transactional parity | `CL-L1` | `search-patch` | C (cloud) | DONE |
+| `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | **READY · PARALLEL** |
 | `CL-L3` | NTFS file-panel/search + native SFTP proof | `CL-06B`, `CL-07B` | `windows-files` | L (Windows) | BLOCKED |
 | `CL-08A` | Windows startup/config/secret-store integration | `CL-L1` | `runtime-secrets` | C (cloud) | **READY · PARALLEL** |
 | `CL-08B` | Diagnostics/logging/awake/shutdown bounded behavior | `CL-08A` | `runtime-diagnostics` | C (cloud) | BLOCKED |
 | `CL-L4` | Native startup/secret/diagnostics resource proof | `CL-08B` | `windows-startup` | L (Windows) | BLOCKED |
-| `CL-09A` | MCP schema/errors/permission conformance | `CL-L1` | `mcp-protocol` | C (cloud) | BLOCKED |
+| `CL-09A` | MCP schema/errors/permission conformance | `CL-L1` | `mcp-protocol` | C (cloud) | **READY · PARALLEL** |
 | `CL-09B` | Connection retries/proxy/health/tunnel teardown | `CL-09A` | `mcp-transport` | C (cloud) | BLOCKED |
 | `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | BLOCKED |
 | `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | BLOCKED |

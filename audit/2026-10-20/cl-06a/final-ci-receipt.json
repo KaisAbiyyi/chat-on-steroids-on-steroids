@@ -1,0 +1,174 @@
+{
+  "conclusion": "success",
+  "headSha": "9c42e87589c02b235880ef3a409c234a2870ff3f",
+  "jobs": [
+    {
+      "completedAt": "2026-10-20T15:19:29Z",
+      "conclusion": "success",
+      "databaseId": 118708688035,
+      "name": "test (windows-latest)",
+      "startedAt": "2026-10-20T15:12:06Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec",
+          "number": 3,
+          "status": "completed"
+        },
+        {
+          "conclusion": "skipped",
+          "name": "Install native Linux test dependencies",
+          "number": 4,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo fmt --all --check",
+          "number": 5,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo clippy --workspace --all-targets --locked -- -D warnings",
+          "number": 6,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo test --workspace --locked",
+          "number": 7,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo build --release --locked",
+          "number": 8,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09",
+          "number": 16,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 17,
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297/job/118708688035"
+    },
+    {
+      "completedAt": "2026-10-20T15:16:58Z",
+      "conclusion": "success",
+      "databaseId": 118708692597,
+      "name": "test (ubuntu-latest)",
+      "startedAt": "2026-10-20T15:12:06Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec",
+          "number": 3,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Install native Linux test dependencies",
+          "number": 4,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo fmt --all --check",
+          "number": 5,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo clippy --workspace --all-targets --locked -- -D warnings",
+          "number": 6,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo test --workspace --locked",
+          "number": 7,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run cargo build --release --locked",
+          "number": 8,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09",
+          "number": 16,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 17,
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297/job/118708692597"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297",
+  "unit": "CL-06A",
+  "merge": {
+    "headRefOid": "9c42e87589c02b235880ef3a409c234a2870ff3f",
+    "mergeCommit": {
+      "oid": "dd45a2585e8371bb51c1e00e84c5796a1b3dc163"
+    },
+    "mergedAt": "2026-10-20T15:21:54Z",
+    "state": "MERGED",
+    "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19"
+  },
+  "workspace_results": {
+    "windows-latest": {
+      "passed": 279,
+      "failed": 0,
+      "ignored": 0
+    },
+    "ubuntu-latest": {
+      "passed": 272,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "pr_ci": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446216893",
+  "scope": "Exact final PR head qualified before merge; native CL-L3 NOT RUN; post-merge main run separate."
+}
