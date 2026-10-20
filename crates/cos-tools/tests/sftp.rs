@@ -16,13 +16,17 @@ fn send(s: &mut TcpStream, p: &[u8]) {
 }
 #[test]
 fn public_sftp_v3_protocol_fixture() {
-    fixture(false);
+    fixture(false, false);
 }
 #[test]
 fn remote_read_checks_the_open_handle_type() {
-    fixture(true);
+    fixture(true, false);
 }
-fn fixture(directory_handle: bool) {
+#[test]
+fn non_utf8_sftp_realpath_is_rejected_without_lossy_aliasing() {
+    fixture(false, true);
+}
+fn fixture(directory_handle: bool, bad_path: bool) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
     client
@@ -51,8 +55,13 @@ fn fixture(directory_handle: bool) {
                     r.push(104);
                     r.extend(id);
                     u32(1, &mut r);
-                    string(b"/srv/project", &mut r);
-                    string(b"/srv/project", &mut r);
+                    if bad_path {
+                        string(b"/srv/\xff", &mut r);
+                        string(b"/srv/\xff", &mut r);
+                    } else {
+                        string(b"/srv/project", &mut r);
+                        string(b"/srv/project", &mut r);
+                    }
                     u32(0, &mut r);
                 }
                 17 | 8 => {
@@ -100,6 +109,12 @@ fn fixture(directory_handle: bool) {
         }
     });
     let mut s = Sftp::from_io(client.try_clone().unwrap(), client).unwrap();
+    if bad_path {
+        let error = s.realpath("~/project").unwrap_err();
+        assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+        assert!(error.to_string().contains("not valid UTF-8"));
+        return;
+    }
     assert_eq!(s.realpath("~/project").unwrap(), "/srv/project");
     assert_eq!(s.stat("/srv/project/a").unwrap()["isFile"], true);
     if directory_handle {
