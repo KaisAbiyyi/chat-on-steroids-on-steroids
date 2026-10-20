@@ -1,0 +1,62 @@
+[
+  {
+    "id": "unattributed-activity",
+    "title": "CL-L1 synthetic timeline",
+    "conversationId": "cl-l1-timeline",
+    "chatIds": [
+      "cl-l1-timeline"
+    ],
+    "startedAt": 1792488699348,
+    "updatedAt": 1792488706464,
+    "endedAt": null,
+    "events": 23,
+    "timelineTurns": {
+      "cl-l1-turn": {
+        "origin": 2,
+        "time": 1792488699256,
+        "questionId": "cl-l1-question",
+        "endTime": 1792488699379,
+        "endOrigin": 4
+      }
+    },
+    "nativeQuestion": {
+      "messageId": "cl-l1-question",
+      "origin": 1
+    },
+    "requestTurns": {},
+    "userMessages": 1,
+    "toolCalls": 19,
+    "lastToolCallAt": 1792488706464,
+    "lastToolActivity": {
+      "title": "Read a.txt",
+      "kind": "read"
+    },
+    "lastAssistantFinalAt": 1792488699257,
+    "lastTurnEndAt": 1792488699379,
+    "lastFinishReportAt": null,
+    "processExitNonzero": 1,
+    "toolRejected": 0,
+    "toolInternalErrors": 0,
+    "errors": 0,
+    "estimatedTokens": 13975,
+    "contextTokens": 13975,
+    "lastHandoffId": null,
+    "lastHandoffAt": null,
+    "lastCommittedResumeHandoffId": null,
+    "lastTurnOutcome": "completed",
+    "activeTurnId": null,
+    "finishTurn": {
+      "turnId": "cl-l1-turn",
+      "conversationId": "cl-l1-timeline",
+      "startedAt": 1792488699256,
+      "notified": false,
+      "released": false,
+      "decisionRevision": null,
+      "workSeq": 23,
+      "decisionSeq": 0,
+      "decisionInputRevision": null
+    },
+    "agents": [],
+    "origin": null
+  }
+]

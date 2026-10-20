@@ -2,7 +2,15 @@
 
 Captured: **2026-10-20, Asia/Jakarta**. This is the agent-to-agent resume pointer. Check actual `git status` and repository state on every new run; do not rely on this snapshot if files or commits have changed.
 
-## Latest local gate: CL-L1 FAIL (2026-10-20)
+## Latest candidate retest: PASS; merged-SHA acceptance BLOCKED (2026-10-20)
+
+Reviewed and retested cloud [PR #11](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/11) at exact head **`6f4e6acc3594edc2759c8cb1dbefe551cb51e132`** in a new clean D: checkout. **PR #11 is still OPEN / NOT MERGED.** [Retest implementation summary](implementation-summary/2026-10-20-cl-l1-candidate-retest-v2.0.md) / [receipt](../audit/2026-10-20/cl-l1-retest-6f4e6ac-receipt.json).
+
+- **PASS:** source review (no actionable findings), independently authenticated 44/44 additive cases and 14 original inputs; Windows strict 257 tests / 0 failures / 0 ignored, release build, native harness 96 PASS / 0 FAIL, runtime caption oracle 14/14 / zero mismatches, privacy/sentinel scans and clean service restart/timeline.
+- The three formerly failing completion checks now PASS and long-command captions match the pinned source. Eight old WIP paths, old FAIL artifacts, original executable and upstream remain unchanged; all outputs stayed on D:.
+- **STATUS:** candidate qualification PASS; official CL-L1 **BLOCKED** until a reviewed merged repair SHA is locally qualified. **NEXT:** review/merge PR #11 through the repository workflow, hand off the exact merged SHA, then run CL-L1 there. **CL-04A remains BLOCKED. YOU REQUIRED: NO** direct account/clipboard/manual desktop acceptance. No feature implementation or merge was performed by this retest session.
+
+## Historical local gate: CL-L1 FAIL at 06f586e (2026-10-20)
 
 Tested merged SHA **`06f586e423e5abb4f95eba582996c4a5278c1311`** in a clean separate D: checkout. [Implementation summary / cloud handoff](implementation-summary/2026-10-20-cl-l1-windows-qualification-v1.0.md), [machine-readable receipt](../audit/2026-10-20/cl-l1-windows-06f586e-receipt.json).
 

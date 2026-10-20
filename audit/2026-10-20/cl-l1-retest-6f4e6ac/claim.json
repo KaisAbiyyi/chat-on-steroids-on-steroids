@@ -1,0 +1,14 @@
+{
+  "pr": 11,
+  "assignment": "Direct user request",
+  "merged": false,
+  "role": "Local candidate review and native retest only",
+  "nativeCheckout": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-retest-6f4e6ac",
+  "sourceSha": "6f4e6acc3594edc2759c8cb1dbefe551cb51e132",
+  "resourceLocks": [
+    "windows-native"
+  ],
+  "status": "RUNNING",
+  "unit": "CL-L1-RETEST-01",
+  "cloudWriteClaim": "NONE; report-only code review"
+}

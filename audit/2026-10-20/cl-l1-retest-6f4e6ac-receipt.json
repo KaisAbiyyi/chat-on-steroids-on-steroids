@@ -1,0 +1,342 @@
+{
+  "unit": "CL-L1-RETEST-01",
+  "date": "2026-10-20",
+  "timezone": "Asia/Jakarta",
+  "status": "PARTIAL",
+  "candidateNativeStatus": "PASS",
+  "officialClL1Acceptance": "BLOCKED",
+  "acceptanceReason": "Only the PR head was qualified. A reviewed merged repair SHA has not been locally qualified.",
+  "githubShaUnderTest": "6f4e6acc3594edc2759c8cb1dbefe551cb51e132",
+  "github": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/11",
+  "prAtCompletion": {
+    "headRefOid": "6f4e6acc3594edc2759c8cb1dbefe551cb51e132",
+    "mergeCommit": null,
+    "mergedAt": null,
+    "number": 11,
+    "state": "OPEN",
+    "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/11"
+  },
+  "baseSha": "06f586e423e5abb4f95eba582996c4a5278c1311",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sourceReview": {
+    "status": "PASS",
+    "actionableFindings": 0,
+    "verified": [
+      "caption-only product change; no schema/grant/runtime dependency change",
+      "successful/benign write_stdin metric uses trusted exit evidence",
+      "source-equivalent command label helper for completed/running single and batch captions",
+      "redaction remains before projection/storage; full sanitized arguments retained",
+      "44 additive source outputs and 14 archived native inputs independently authenticated",
+      "original corpus byte-identical to the base; five historical UTF-16 exclusions unchanged"
+    ],
+    "formalGithubApproval": "NOT SUBMITTED"
+  },
+  "native": {
+    "strictWorkspace": {
+      "status": "PASS",
+      "passed": 257,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 70
+    },
+    "releaseBuild": {
+      "name": "release-build",
+      "command": "cargo build --release --locked -j2",
+      "exitCode": 0,
+      "elapsedSeconds": 242.4268304,
+      "status": "PASS"
+    },
+    "probeStatus": "PASS",
+    "passedAssertions": 96,
+    "failedAssertions": 0,
+    "unhandledError": null,
+    "runtimeCaptionSourceComparison": {
+      "status": "PASS",
+      "cases": 14,
+      "mismatches": 0
+    },
+    "newCorpusSourceAuthentication": {
+      "status": "PASS",
+      "cases": 44,
+      "nativeInputs": 14
+    },
+    "privacyScan": {
+      "status": "PASS",
+      "syntheticSentinels": 10,
+      "stages": 4,
+      "fileObservations": 28,
+      "leaks": 0
+    },
+    "historyEvents": 23,
+    "binarySha256": "db7602d642431dabaf85b686402e6f1c5067c045ef70222553158f09cdf81c37",
+    "binaryBytes": 12828672
+  },
+  "protectedWip": {
+    "status": "PASS",
+    "paths": 8,
+    "headStatusAndHashesUnchanged": true
+  },
+  "oldEvidence": "Original FAIL receipt, all old attempts, upstream and previous executable left unchanged.",
+  "machineEnvironment": {
+    "sourceSha": "6f4e6acc3594edc2759c8cb1dbefe551cb51e132",
+    "initialGitStatus": [],
+    "os": "Microsoft Windows NT 10.0.26300.0",
+    "architecture": "AMD64",
+    "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+    "cargo": "cargo 1.91.1 (ea2d97820 2025-10-10)",
+    "temp": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-retest-20261020-01\\temp",
+    "cargoHome": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-20261020\\cargo-offline",
+    "cargoTarget": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-retest-20261020-01\\target",
+    "startedAt": "2026-10-20T09:23:21.1901461Z"
+  },
+  "sourceCheckout": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-retest-6f4e6ac",
+  "runtimeRoot": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-retest-20261020-01",
+  "evidenceDirectory": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-06f586e\\audit\\2026-10-20\\cl-l1-retest-6f4e6ac",
+  "storage": "All task outputs/cache/temp/profiles on D: under D:\\projects\\CoS-Rust; old D: target copied to a separate retest target, registry cache reused on D:; no Docker/WSL run.",
+  "productChangesByLocalSession": false,
+  "personalProfilesUsed": false,
+  "actualClipboardAccess": false,
+  "cloudCI": {
+    "conclusion": "success",
+    "databaseId": 39397636815,
+    "headSha": "6f4e6acc3594edc2759c8cb1dbefe551cb51e132",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "test (ubuntu-latest)"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (windows-latest)"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39397636815"
+  },
+  "performance": {
+    "comparison": "NOT MEASURED",
+    "binaryBytesObservation": 12828672,
+    "strictCheckSeconds": 221.7849477,
+    "releaseBuildSeconds": 242.4268304,
+    "nativeProbeSeconds": 27.98399999999947,
+    "timingComparisonNotComparable": "Retest used a seeded D: cache; no performance improvement claimed"
+  },
+  "limits": {
+    "localLinux": "BLOCKED: Windows host backing location not verified; not run",
+    "macOS": "HOLD",
+    "desktopBrowserInstaller": "NOT RUN",
+    "crashRecovery": "NOT RUN",
+    "unicodeLossless": "CL-04C still open"
+  },
+  "handoff": {
+    "UNIT": "CL-L1-RETEST-01, candidate review/native qualification",
+    "CHANGES": "New additive receipt/implementation summary only; no feature code and no merge",
+    "LOCAL REQUIRED": "Full CL-L1 against the reviewed merged repair SHA",
+    "YOU REQUIRED": "NO account/clipboard/manual desktop acceptance",
+    "NEXT": "Review/merge cloud PR #11 through repository workflow, qualify the exact merged SHA, then consider CL-04A; CL-04A remains BLOCKED"
+  },
+  "publication": {
+    "branch": "feature/cl-l1-windows-qualification-20261020",
+    "pr": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/10",
+    "stateAtCapture": "LOCAL_PREPARED"
+  },
+  "evidenceEncoding": "Canonical LF; captured hashes refer to unchanged raw captures retained on D:.",
+  "evidenceManifest": [
+    {
+      "file": "cloud-pr11.json",
+      "bytes": 8698,
+      "sha256": "6cd89a35fec388546ba01992cd9c3574e430ca6a7f08776c51316c471648b0ac",
+      "capturedBytes": 8699,
+      "capturedSha256": "b2fd700ddd37afb0e6904e0b8770e65a9d25b36882cd2749ae8485b0b4fca56e"
+    },
+    {
+      "file": "pr11-at-completion.json",
+      "bytes": 195,
+      "sha256": "71cdbdd10358577f18758ddac1487a18a1d814f49450f5b6e194ed1eda9aa8da",
+      "capturedBytes": 196,
+      "capturedSha256": "f30d06176159a33a1ee2d4895960c8da14854c5cf099862d4b6e659019c8758c"
+    },
+    {
+      "file": "cloud-ci-push.json",
+      "bytes": 336,
+      "sha256": "62025a3b1b04f253e30d3a20f8ea30341d4b0b8f3cab61224167a820024e09b0",
+      "capturedBytes": 337,
+      "capturedSha256": "88a560a8551cbbf63cd65b0839b145a1618be3043dafd5b0a1fc73b51da3cfbe"
+    },
+    {
+      "file": "environment.json",
+      "bytes": 551,
+      "sha256": "87c38260ca1826e35962270b00e97ab4917b0dfce37531fcd32570f4a7c142e6",
+      "capturedBytes": 563,
+      "capturedSha256": "346dbef0e07f07f007f4bac5d412ab1f906a1445d5f61cb19be923fcacc04732"
+    },
+    {
+      "file": "checks.json",
+      "bytes": 344,
+      "sha256": "7c3d8665dc13b06465f9c2e331719c383407543816fa0bfb6c4cbec9fa1a39fd",
+      "capturedBytes": 360,
+      "capturedSha256": "dad1843c87127885f14d34ef1e1246704dc781cb1d34fa556181671a05a76942"
+    },
+    {
+      "file": "wip-before.json",
+      "bytes": 1851,
+      "sha256": "88b35bb5b68f2a0f74c2f0ddb804860943ad03c5c926ba8dd6fccfe93fcd9558",
+      "capturedBytes": 1906,
+      "capturedSha256": "b216af761c9f9cb5d51c4430da6abbdbdfe67f45f592595569b043e7f7b11716"
+    },
+    {
+      "file": "wip-after.json",
+      "bytes": 1851,
+      "sha256": "18e9430de0851dc01a11f27a68af5b991bdd86b7462fcbe1e4e075e49a431f35",
+      "capturedBytes": 1851,
+      "capturedSha256": "18e9430de0851dc01a11f27a68af5b991bdd86b7462fcbe1e4e075e49a431f35"
+    },
+    {
+      "file": "claim.json",
+      "bytes": 424,
+      "sha256": "40e200cf4695e37c8048765b1739cd704e7e62ffe2fa797f3c051bb5677de4fb",
+      "capturedBytes": 438,
+      "capturedSha256": "2de795be82ca048296386b680d375dc9a596256a1c8c5b69c626920fed0d368d"
+    },
+    {
+      "file": "harness-provenance.json",
+      "bytes": 590,
+      "sha256": "f6becfcd38ecdbbbc5e6e9cb09a7752e04bbc27843bf57604ef2466eb7055fd1",
+      "capturedBytes": 590,
+      "capturedSha256": "f6becfcd38ecdbbbc5e6e9cb09a7752e04bbc27843bf57604ef2466eb7055fd1"
+    },
+    {
+      "file": "baseline-preservation.json",
+      "bytes": 229,
+      "sha256": "735e91d945a47af5d261d7ff36fabbf03a011b6e226b7a23bf26617482d7bd7c",
+      "capturedBytes": 229,
+      "capturedSha256": "735e91d945a47af5d261d7ff36fabbf03a011b6e226b7a23bf26617482d7bd7c"
+    },
+    {
+      "file": "native-receipt.json",
+      "bytes": 14070,
+      "sha256": "720e304755b18a1044642e33caade9fe0510325d551c7638e5c78f62f37cf7b8",
+      "capturedBytes": 14634,
+      "capturedSha256": "8dae718f9fe4ebcc69b630a74a9ea2a1c2ae39b9c4e882fd6982dca7f7d5f6f4"
+    },
+    {
+      "file": "disk-scan-manifests.json",
+      "bytes": 6263,
+      "sha256": "ecdd397a014cf811e8667c83cb5020e726c5d0262ce01a156796894b853c514d",
+      "capturedBytes": 6433,
+      "capturedSha256": "fd8858dca1d7cd516e9892bdd29b7bc89a69afc327f5c99f77c761df18ffb0fe"
+    },
+    {
+      "file": "native-runtime-projections.json",
+      "bytes": 31219,
+      "sha256": "ebb1f77181e7118b42d122a1faff295c29916392afe56d599c566c3d0ab3cc11",
+      "capturedBytes": 32171,
+      "capturedSha256": "ca68e0c740091b8994f938f94e0ceeda850b011ca700f25630ad34f76ef4b061"
+    },
+    {
+      "file": "completed-source-oracle.json",
+      "bytes": 16793,
+      "sha256": "e31c0ad6dae153c3b507aa7d6be2c6d02925b6ceb5a9e6f508c683752c4cfc1c",
+      "capturedBytes": 16793,
+      "capturedSha256": "e31c0ad6dae153c3b507aa7d6be2c6d02925b6ceb5a9e6f508c683752c4cfc1c"
+    },
+    {
+      "file": "additive-corpus-source-authentication.json",
+      "bytes": 18092,
+      "sha256": "fcfccd4a4c952908e5e9df55b0d4ae17e69db6d5220870a2a959d3cc3c300118",
+      "capturedBytes": 18092,
+      "capturedSha256": "fcfccd4a4c952908e5e9df55b0d4ae17e69db6d5220870a2a959d3cc3c300118"
+    },
+    {
+      "file": "privacy-history-after-restart.json",
+      "bytes": 22238,
+      "sha256": "ca4874c6c10daa3298da4daed077a166816d86e70619eec323812e3da2227ec5",
+      "capturedBytes": 22467,
+      "capturedSha256": "034313ea469bd15bcf619ed7bb118a1d99e9742c85814ebab579c0cdb54f0098"
+    },
+    {
+      "file": "runtime-history-before-restart.json",
+      "bytes": 47061,
+      "sha256": "9d64a8ff230c18023faf0e024b3c57507ca7f41db0e1a0722e68eb7c63fb3c7d",
+      "capturedBytes": 48008,
+      "capturedSha256": "68f73a957246804f70b4ea38df757693f94c17fc60ed69c570a9b6686949a097"
+    },
+    {
+      "file": "runtime-history-after-restart.json",
+      "bytes": 48422,
+      "sha256": "55d57a5e28430da1cd54bafe734814749607b59412726c5a49315c200513d37a",
+      "capturedBytes": 49427,
+      "capturedSha256": "36471e06cf56f458d3d69873c07ba362aefee96bb8d602afa7f12f579e83822a"
+    },
+    {
+      "file": "runtime-overview-before-restart.json",
+      "bytes": 1519,
+      "sha256": "fe62124dead056111976efd103c47e01c85215fc15fde7f0ba99eaf161a07ff7",
+      "capturedBytes": 1581,
+      "capturedSha256": "5daadb25ef64beb7c51411addc2c9990111f7d888943b84c42fbb62b35fd017f"
+    },
+    {
+      "file": "runtime-overview-after-restart.json",
+      "bytes": 1519,
+      "sha256": "fe62124dead056111976efd103c47e01c85215fc15fde7f0ba99eaf161a07ff7",
+      "capturedBytes": 1581,
+      "capturedSha256": "5daadb25ef64beb7c51411addc2c9990111f7d888943b84c42fbb62b35fd017f"
+    },
+    {
+      "file": "qualify-cl-l1.py",
+      "bytes": 21433,
+      "sha256": "27acfa06fc72d7ee03ae32b4247b0cf274e1d65a6720d6ee7f2eab86724bfb55",
+      "capturedBytes": 21433,
+      "capturedSha256": "27acfa06fc72d7ee03ae32b4247b0cf274e1d65a6720d6ee7f2eab86724bfb55"
+    },
+    {
+      "file": "check-completed-oracle.mjs",
+      "bytes": 2795,
+      "sha256": "48f8301f9d16153c7e12eb537fdf6ba2a37a30ee85b7f31d7a433ff577aca8d3",
+      "capturedBytes": 2795,
+      "capturedSha256": "48f8301f9d16153c7e12eb537fdf6ba2a37a30ee85b7f31d7a433ff577aca8d3"
+    },
+    {
+      "file": "check-corpus-oracles.mjs",
+      "bytes": 4083,
+      "sha256": "bb43c8bcb2c192cee73e52a8b06aab30002a0c5179846de61ebe31dca3dff74d",
+      "capturedBytes": 4083,
+      "capturedSha256": "bb43c8bcb2c192cee73e52a8b06aab30002a0c5179846de61ebe31dca3dff74d"
+    },
+    {
+      "file": "workspace-strict.txt",
+      "bytes": 36925,
+      "sha256": "84a04de5f971792773af377c7083efcd384f6d00fa160b4b6b02a4616f57994f",
+      "capturedBytes": 37618,
+      "capturedSha256": "2d6a0d5010765f906b7d839047380caaa274b2a2f1ea2010673a6ec82f7d2283"
+    },
+    {
+      "file": "release-build.txt",
+      "bytes": 663,
+      "sha256": "1cd41f77788535901beb795c9b68428a39ddc79bdfb07195f491429d46de6a3f",
+      "capturedBytes": 670,
+      "capturedSha256": "8b091cf5cda14e195b71c0cd619b0abf6351a794b9bf2f4f963c53dd8c54b3f4"
+    },
+    {
+      "file": "native-probe.txt",
+      "bytes": 5035,
+      "sha256": "4f2c90a787c2fd71651359fa1daa9fc8ef8ca68e92e099f99e0399c46aa3b6f9",
+      "capturedBytes": 5131,
+      "capturedSha256": "768bb948ac02c0f6e05007886dd5da711560e58b99a6f54e2477fcfb39e991f9"
+    },
+    {
+      "file": "source-oracle.txt",
+      "bytes": 48,
+      "sha256": "21fd70759f8b65ced74b8727b8e31c2677bd252a1a844762df339bd1bb5a07ba",
+      "capturedBytes": 49,
+      "capturedSha256": "be98ba86560132a81c717b6c5784262b8d61793c3c03b2459799e0142bd14f61"
+    },
+    {
+      "file": "additive-oracle.txt",
+      "bytes": 107,
+      "sha256": "f104ab7f2b5cf2b3732fe23fa6c7ea5869f6388dce31a4385df9a243883aabdb",
+      "capturedBytes": 108,
+      "capturedSha256": "feaf335f48ee9fbb329eaa3047c5134d02ff5af059dcc9b6335fd34c2d2b4587"
+    }
+  ]
+}

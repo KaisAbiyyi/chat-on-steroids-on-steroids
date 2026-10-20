@@ -1,0 +1,14 @@
+{
+  "originalHarness": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-20261020-06f586e\\qualify-cl-l1.py",
+  "originalSha256": "36f4ecc40e13484602ceecc16a5a495b3df8e2e5321d3ed045b935c4112b2b93",
+  "candidateHarness": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-retest-20261020-01\\qualify-cl-l1.py",
+  "candidateSha256": "27acfa06fc72d7ee03ae32b4247b0cf274e1d65a6720d6ee7f2eab86724bfb55",
+  "assertionsPreserved": true,
+  "allowedSubstitutions": [
+    "D checkout path",
+    "D binary path",
+    "requested source SHA",
+    "fresh synthetic profile name"
+  ],
+  "oldFailEvidencePreserved": true
+}
