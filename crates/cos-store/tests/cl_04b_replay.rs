@@ -106,6 +106,59 @@ fn replay_refuses_unsafe_canonical_shard_without_discarding_stored_history() {
 }
 
 #[test]
+fn oversized_canonical_shard_refuses_replay_instead_of_silently_losing_a_message() {
+    use cos_store::store::MAX_MESSAGE_BYTES;
+    let temp = tempfile::tempdir().unwrap();
+    let id = "session-oversized-shard";
+    let store = setup(temp.path(), id);
+    store
+        .upsert(
+            id,
+            json!({
+                "kind": "user_message",
+                "messageId": "public-user",
+                "time": 100,
+                "source": "extension",
+                "message": { "text": "public", "truncated": false, "chars": 6 }
+            }),
+            Default::default(),
+        )
+        .unwrap();
+    store.flush().unwrap();
+    drop(store);
+    let shard = temp
+        .path()
+        .join("sessions")
+        .join(id)
+        .join("messages")
+        .join(format!(
+            "{}.json",
+            model::hash("user_message\\0public-user".as_bytes())
+        ));
+    let file = fs::OpenOptions::new().write(true).open(&shard).unwrap();
+    file.set_len(MAX_MESSAGE_BYTES as u64 + 1).unwrap();
+    drop(file);
+    let before = fs::metadata(&shard).unwrap().len();
+    let reopened = SessionStore::open(temp.path()).unwrap();
+    assert!(reopened.summary(id).is_err());
+    assert_eq!(fs::metadata(&shard).unwrap().len(), before);
+}
+
+#[test]
+fn history_page_budget_refuses_oversized_requests_without_deleting_events() {
+    use cos_store::store::MAX_HISTORY_READ_EVENTS;
+    let temp = tempfile::tempdir().unwrap();
+    let id = "session-page-budget";
+    let store = setup(temp.path(), id);
+    store.append(id, note(0)).unwrap();
+    let before = store.read(id, ReadOptions::default()).unwrap();
+    assert_eq!(before.len(), 1);
+    assert!(store.recent(id, MAX_HISTORY_READ_EVENTS + 1, None).is_err());
+    assert_eq!(store.recent(id, 1, None).unwrap().len(), 1);
+    assert_eq!(store.read(id, ReadOptions::default()).unwrap(), before);
+}
+
+#[test]
 fn corrupted_checkpoints_can_replay_valid_journal_without_losing_messages() {
     let temp = tempfile::tempdir().unwrap();
     let id = "session-rebuild-guard";
