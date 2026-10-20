@@ -25,9 +25,15 @@ fn broken_vault_does_not_appear_empty_on_startup() {
     let error = store.get("openaiApiKey").unwrap_err().to_string();
     assert!(error.contains("left untouched"), "{error}");
     assert!(store.is_unreadable().unwrap());
-    assert_eq!(fs::read(profile.path().join("secrets.bin")).unwrap(), b"sealed-fixture");
+    assert_eq!(
+        fs::read(profile.path().join("secrets.bin")).unwrap(),
+        b"sealed-fixture"
+    );
     assert!(store.set("openaiApiKey", "replacement").is_err());
-    assert_eq!(fs::read(profile.path().join("secrets.bin")).unwrap(), b"sealed-fixture");
+    assert_eq!(
+        fs::read(profile.path().join("secrets.bin")).unwrap(),
+        b"sealed-fixture"
+    );
 }
 
 #[test]
@@ -45,9 +51,7 @@ fn config_io_failure_is_not_equivalent_to_invalid_json_recovery() {
 fn protect_legacy(bytes: &[u8]) -> Vec<u8> {
     use windows_sys::Win32::{
         Foundation::LocalFree,
-        Security::Cryptography::{
-            CRYPT_INTEGER_BLOB, CRYPTPROTECT_UI_FORBIDDEN, CryptProtectData,
-        },
+        Security::Cryptography::{CRYPT_INTEGER_BLOB, CRYPTPROTECT_UI_FORBIDDEN, CryptProtectData},
     };
     let input = CRYPT_INTEGER_BLOB {
         cbData: u32::try_from(bytes.len()).unwrap(),
@@ -69,9 +73,8 @@ fn protect_legacy(bytes: &[u8]) -> Vec<u8> {
         )
     };
     assert_ne!(ok, 0);
-    let result = unsafe {
-        std::slice::from_raw_parts(output.pbData, output.cbData as usize).to_vec()
-    };
+    let result =
+        unsafe { std::slice::from_raw_parts(output.pbData, output.cbData as usize).to_vec() };
     unsafe {
         LocalFree(output.pbData.cast());
     }
@@ -91,9 +94,8 @@ fn legacy_dpapi_vault_migrates_without_erasing_other_local_state_fields() {
     )
     .unwrap();
     let cipher = Arc::new(WindowsCipher::open(profile.path(), true).unwrap());
-    let state: serde_json::Value = serde_json::from_slice(
-        &fs::read(profile.path().join("Local State")).unwrap(),
-    ).unwrap();
+    let state: serde_json::Value =
+        serde_json::from_slice(&fs::read(profile.path().join("Local State")).unwrap()).unwrap();
     assert_eq!(state["publicSetting"], "keep");
     assert_eq!(state["os_crypt"]["audit_enabled"], true);
     assert!(state["os_crypt"]["encrypted_key"].is_string());
@@ -117,7 +119,8 @@ fn legacy_dpapi_vault_migrates_without_erasing_other_local_state_fields() {
         profile.path(),
         "win32",
         Arc::new(WindowsCipher::open(profile.path(), false).unwrap()),
-    ).unwrap();
+    )
+    .unwrap();
     assert_eq!(
         reopened.get("openaiApiKey").unwrap().as_deref(),
         Some("public-legacy-secret"),
@@ -127,15 +130,24 @@ fn legacy_dpapi_vault_migrates_without_erasing_other_local_state_fields() {
 #[cfg(windows)]
 #[test]
 fn keyless_aes_vault_or_invalid_dpapi_never_creates_replacement_key() {
-    for fixture in [b"v10opaque-ciphertext".as_slice(), b"not-a-valid-dpapi-blob".as_slice()] {
+    for fixture in [
+        b"v10opaque-ciphertext".as_slice(),
+        b"not-a-valid-dpapi-blob".as_slice(),
+    ] {
         let profile = tempfile::tempdir().unwrap();
         fs::write(profile.path().join("secrets.bin"), fixture).unwrap();
-        fs::write(profile.path().join("Local State"), br#"{"publicSetting":"keep"}"#).unwrap();
+        fs::write(
+            profile.path().join("Local State"),
+            br#"{"publicSetting":"keep"}"#,
+        )
+        .unwrap();
         assert!(WindowsCipher::open(profile.path(), true).is_err());
-        assert_eq!(fs::read(profile.path().join("secrets.bin")).unwrap(), fixture);
-        let state: serde_json::Value = serde_json::from_slice(
-            &fs::read(profile.path().join("Local State")).unwrap(),
-        ).unwrap();
+        assert_eq!(
+            fs::read(profile.path().join("secrets.bin")).unwrap(),
+            fixture
+        );
+        let state: serde_json::Value =
+            serde_json::from_slice(&fs::read(profile.path().join("Local State")).unwrap()).unwrap();
         assert!(state.pointer("/os_crypt/encrypted_key").is_none());
         assert_eq!(state["publicSetting"], "keep");
     }
