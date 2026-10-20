@@ -133,7 +133,7 @@ fn oversized_canonical_shard_refuses_replay_instead_of_silently_losing_a_message
         .join("messages")
         .join(format!(
             "{}.json",
-            model::hash("user_message\\0public-user".as_bytes())
+            model::hash("user_message\0public-user".as_bytes())
         ));
     let file = fs::OpenOptions::new().write(true).open(&shard).unwrap();
     file.set_len(MAX_MESSAGE_BYTES as u64 + 1).unwrap();
