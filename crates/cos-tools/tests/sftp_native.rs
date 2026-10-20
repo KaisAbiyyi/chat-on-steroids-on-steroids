@@ -170,28 +170,49 @@ fn native_openssh_subsystem_round_trip() {
     // CL-06B: direct SFTP library callers must not bypass delete and move
     // permissions just because the bytes are unchanged.
     std::fs::write(d.path().join("deny-delete.txt"), b"keep me\n").unwrap();
-    let delete = patch::parse_typed(
-        "*** Begin Patch\n*** Delete File: deny-delete.txt\n*** End Patch",
-    ).unwrap().hunks;
-    let denied = remote.apply_hunks_checked(delete, None, &|right| {
-        if right == "deleteFile" {
-            Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, "delete disabled"))
-        } else { Ok(()) }
-    }).unwrap_err();
+    let delete =
+        patch::parse_typed("*** Begin Patch\n*** Delete File: deny-delete.txt\n*** End Patch")
+            .unwrap()
+            .hunks;
+    let denied = remote
+        .apply_hunks_checked(delete, None, &|right| {
+            if right == "deleteFile" {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    "delete disabled",
+                ))
+            } else {
+                Ok(())
+            }
+        })
+        .unwrap_err();
     assert_eq!(denied.kind(), std::io::ErrorKind::PermissionDenied);
-    assert_eq!(std::fs::read(d.path().join("deny-delete.txt")).unwrap(), b"keep me\n");
+    assert_eq!(
+        std::fs::read(d.path().join("deny-delete.txt")).unwrap(),
+        b"keep me\n"
+    );
 
     std::fs::write(d.path().join("deny-move.txt"), b"unchanged\n").unwrap();
     let move_hunks = patch::parse_typed(
         "*** Begin Patch\n*** Update File: deny-move.txt\n*** Move to: move-should-not-exist.txt\n@@\n unchanged\n*** End Patch",
     ).unwrap().hunks;
-    let denied = remote.apply_hunks_checked(move_hunks, None, &|right| {
-        if right == "move" {
-            Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, "move disabled"))
-        } else { Ok(()) }
-    }).unwrap_err();
+    let denied = remote
+        .apply_hunks_checked(move_hunks, None, &|right| {
+            if right == "move" {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    "move disabled",
+                ))
+            } else {
+                Ok(())
+            }
+        })
+        .unwrap_err();
     assert_eq!(denied.kind(), std::io::ErrorKind::PermissionDenied);
-    assert_eq!(std::fs::read(d.path().join("deny-move.txt")).unwrap(), b"unchanged\n");
+    assert_eq!(
+        std::fs::read(d.path().join("deny-move.txt")).unwrap(),
+        b"unchanged\n"
+    );
     assert!(!d.path().join("move-should-not-exist.txt").exists());
 
     // An authorization that disappears after remote staging must be checked
@@ -199,16 +220,33 @@ fn native_openssh_subsystem_round_trip() {
     let create_calls = std::sync::atomic::AtomicUsize::new(0);
     let add = patch::parse_typed(
         "*** Begin Patch\n*** Add File: revoke-at-commit.txt\n+public\n*** End Patch",
-    ).unwrap().hunks;
-    let denied = remote.apply_hunks_checked(add, None, &|right| {
-        if right == "create" && create_calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst) >= 2 {
-            Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, "create revoked"))
-        } else { Ok(()) }
-    }).unwrap_err();
+    )
+    .unwrap()
+    .hunks;
+    let denied = remote
+        .apply_hunks_checked(add, None, &|right| {
+            if right == "create"
+                && create_calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst) >= 2
+            {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    "create revoked",
+                ))
+            } else {
+                Ok(())
+            }
+        })
+        .unwrap_err();
     assert_eq!(denied.kind(), std::io::ErrorKind::PermissionDenied);
     assert!(!d.path().join("revoke-at-commit.txt").exists());
     assert!(create_calls.load(std::sync::atomic::Ordering::SeqCst) >= 3);
-    assert!(!std::fs::read_dir(d.path()).unwrap().any(|entry| entry.unwrap().file_name().to_string_lossy().starts_with("revoke-at-commit.txt.cos-rust-")));
+    assert!(!std::fs::read_dir(d.path()).unwrap().any(|entry| {
+        entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with("revoke-at-commit.txt.cos-rust-")
+    }));
     let same_path = "*** Begin Patch\n*** Add File: before-invalid-move\n+must not be written\n*** Update File: a.txt\n*** Move to: a.txt\n@@\n changed\n*** End Patch";
     let error = remote
         .apply_patch(same_path, None)
