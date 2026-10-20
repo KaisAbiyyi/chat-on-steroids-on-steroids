@@ -761,7 +761,10 @@ impl Manager {
         let mut state = lock(&p.state)?;
         // A publication belongs to the HTTP response until commit/rollback.
         // Never evict custody or lose unread output while it is still pending.
-        while state.exit.is_none() || state.readers > 0 || (state.publication_pending && !discard_pending) {
+        while state.exit.is_none()
+            || state.readers > 0
+            || (state.publication_pending && !discard_pending)
+        {
             let remaining = deadline.saturating_duration_since(Instant::now());
             if remaining.is_zero() {
                 return Err(io::Error::new(
