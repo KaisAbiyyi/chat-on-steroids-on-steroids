@@ -45,9 +45,22 @@ impl DiagnosticLog {
         }
     }
     pub fn push(&self, level: &str, message: &str) {
-        let mut entries = self.entries.lock().expect("diagnostic owner");
-        let clean = redact(message);
+        // Reject an oversized diagnostic in full, not a prefix of a credential.
+        const MAX_INPUT_BYTES: usize = 1024 * 1024;
+        let level = match level {
+            "trace" | "debug" | "info" | "warn" | "error" => level,
+            _ => "unknown",
+        };
+        let clean = if message.len() > MAX_INPUT_BYTES {
+            "[diagnostic omitted: size limit]".to_owned()
+        } else {
+            redact(message)
+        };
         let bounded: String = clean.chars().take(16000).collect();
+        let mut entries = self
+            .entries
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         entries.push_back(
             json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded}),
         );
@@ -58,7 +71,7 @@ impl DiagnosticLog {
     pub fn snapshot(&self) -> Vec<Value> {
         self.entries
             .lock()
-            .expect("diagnostic owner")
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
             .iter()
             .cloned()
             .collect()

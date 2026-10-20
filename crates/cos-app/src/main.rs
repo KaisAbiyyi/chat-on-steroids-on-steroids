@@ -92,19 +92,29 @@ impl Runtime {
         Ok(runtime)
     }
     fn close(&self) -> io::Result<()> {
-        self.kernel.stop_services()?;
+        // Publish cancellation before teardown; an unresponsive service must
+        // not prevent the subsequent persistence phases from being attempted.
+        self.cancel.cancel();
+        let kernel = self.kernel.clone();
         let sessions = self.store.clone();
         let durable = self.durable.clone();
         let report = shutdown(
             &self.cancel,
             vec![
+                ShutdownPhase::new("services", Duration::from_secs(3), move || {
+                    kernel.stop_services()
+                }),
                 ShutdownPhase::new("sessions", Duration::from_secs(3), move || sessions.flush()),
                 ShutdownPhase::new("durable", Duration::from_secs(3), move || durable.flush()),
             ],
         );
+        for phase in &report {
+            self.log
+                .push("info", &format!("shutdown {}: {}", phase.phase, phase.status));
+        }
         if report.iter().any(|r| r.status != "ok") {
             return Err(io::Error::other(
-                "Persistence shutdown did not fully settle",
+                "Runtime shutdown did not fully settle; see phase diagnostics",
             ));
         }
         Ok(())
@@ -715,6 +725,15 @@ fn run() -> io::Result<Value> {
                 "Use serve [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path]",
             ));
         }
+        // The Windows execution-state guard must stay on this serving thread.
+        #[cfg(windows)]
+        let _awake_guard = if runtime.config.get()["ui"]["keepAwake"] == true {
+            Some(cos_core::runtime::AwakeGuard::acquire_with_screen(
+                runtime.config.get()["ui"]["keepScreenAwake"] == true,
+            )?)
+        } else {
+            None
+        };
         let executor = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(2)
             .max_blocking_threads(32)
