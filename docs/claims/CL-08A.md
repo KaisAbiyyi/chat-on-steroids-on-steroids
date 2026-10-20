@@ -10,3 +10,11 @@
 - L gate: `CL-L4` only after `CL-08B` accepted, not performed by this cloud task. U gate: NONE.
 - Claim proof: GitHub branch and PR; update Notion task `CL-08A` at https://app.notion.com/3ffd8330eb468111945ffde33dab0e83.
 - Recovery: subsequent agents must check PR/claim/CI SHA and receive release or fenced transfer before modifying runtime-secrets.
+
+
+## Accepted merge and claim release — 2026-10-21
+
+- GitHub [PR #23](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/23) merged as `9abe84d9265c994ad1213330a1efa080409c8cf3` after independent scoped review.
+- Exact reconciled code head: `1744a96bc54b1a8c4d614d7c6175690d6bc7c098`. [Windows and Ubuntu CI plus DAG](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39476137680) PASS.
+- **Claim released:** `runtime-secrets` is no longer owned by this completed task. The local native gate is not implied.
+- Acceptance registry and Notion status must track this scoped DONE state; no user private profile accessed.

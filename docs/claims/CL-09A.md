@@ -18,3 +18,11 @@
 - NEXT: inspect source contract and implement bounded conformance regressions. Do not mark DONE until CI and independent review are accepted.
 
 Other agents: this claim owns the MCP protocol/permission logical contract until explicitly released. The GitHub branch/PR, not the Notion status field, is the durable checkpoint.
+
+
+## Accepted merge and claim release — 2026-10-21
+
+- GitHub [PR #21](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/21) merged as `26f0ac407b5efab9c234ad78af410930d2f07c36` after independent scoped review.
+- Exact reconciled code head: `768df800e2dd7683c4c3bb06f3ea0fc2ed191c8f`. [Windows and Ubuntu CI plus DAG](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39476431442) PASS.
+- **Claim released:** `mcp-protocol` is no longer owned by this completed task. The local native gate is not implied.
+- Acceptance registry and Notion status must track this scoped DONE state; no user private profile accessed.

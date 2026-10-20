@@ -1,5 +1,16 @@
 # Current CoS-Rust work state
 
+## CL A-units accepted and integrated — 2026-10-21
+
+- **CL-05A Done:** [PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18), accepted code merge `b35ba3892345712ff4c481b6339e9b6bfd873790`, reconciled exact head `3adb8527a8d5d0a835a35c5374a528455aab0dba`, [Windows/Ubuntu CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39476380751) PASS; logical lock `process-supervisor` released.
+- **CL-08A Done:** [PR #23](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/23), accepted code merge `9abe84d9265c994ad1213330a1efa080409c8cf3`, reconciled exact head `1744a96bc54b1a8c4d614d7c6175690d6bc7c098`, [Windows/Ubuntu CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39476137680) PASS; logical lock `runtime-secrets` released.
+- **CL-09A Done:** [PR #21](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/21), accepted code merge `26f0ac407b5efab9c234ad78af410930d2f07c36`, reconciled exact head `768df800e2dd7683c4c3bb06f3ea0fc2ed191c8f`, [Windows/Ubuntu CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39476431442) PASS; logical lock `mcp-protocol` released.
+- **Previously accepted:** CL-06A [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19) + docs #22; CL-07A [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20) + acceptance docs [#24](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/24).
+- **Next eligible cloud units:** `CL-05B`, `CL-06B`, `CL-07B`, `CL-08B`, `CL-09B`, `CL-09C`. These are candidates, NOT existing ownership assignments. Validate GitHub main/latest claims and disjoint logical resources before any worker takes one.
+- **Still required:** native Windows CL-L2/L3/L4/L5, then CL-10 independent backend integration and CL-L6; broader app/browser parity not implied by this cloud A-unit completion. User's local D: dirty checkout remains untouched.
+- **Acceptance ledger CI:** this documentation-only commit must pass fresh Windows/Ubuntu Rust and task DAG before its own merge. Post-merge main integration CI is a separate observation.
+
+
 ## CL-07A accepted and merged (2026-10-21)
 
 - **MERGED:** [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20), squash merge `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116` from head `60a931714cf69289066a96658f06edd5becae23d`. Source review (separate CL-08A agent) found no scoped code blocker, with review comment on PR #20.
