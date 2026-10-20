@@ -4,7 +4,7 @@
 - BASE: `340cf55eddb2766c96e1e1f36eaeb118faecad04` (CI-qualified main).
 - CODE CHECKPOINT: `d8b82faf4b23fa55c0ea0a333e7a5929605f512a`.
 - BRANCH / PR: `cl-06a/project-files-20261020`, [#19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19).
-- STATUS: **REVIEW**; implementation/review complete, final exact-head CI and merge pending.
+- STATUS: **MERGED / cloud PASS**, merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`; final qualified head `9c42e87589c02b235880ef3a409c234a2870ff3f`. Claim released; full phase/native acceptance remains separate.
 
 ## Changes and source compatibility
 
@@ -21,7 +21,7 @@ Pinned source hashes match the immutable manifest; original fixtures are unchang
 - **PASS:** 272 workspace tests, 0 failed/ignored, 73 test/doc-test suites on isolated cloud Linux, Rust 1.91.0; format, strict workspace/all-target Clippy, task-DAG validation and whitespace checks.
 - Seven observed **RED → GREEN** cases are in the [machine receipt](../../audit/2026-10-20/cl-06a/cloud-receipt.json). First five failed against baseline. Ref-namespace replacement failed against `5389a06`. The publication-race test failed with only the final snapshot fence removed, then passed with it restored.
 - **PASS independent review:** `/root/review_cl06a` found a P2 optional-watch replacement issue in `5389a06`; reproduced, repaired and re-reviewed in `d8b82fa`. Independent reproduction, all eight watcher tests and the deterministic diff-publication test pass. No remaining actionable blocker.
-- **PENDING:** final exact-head GitHub Windows/Ubuntu format, strict Clippy, workspace tests, release build and DAG checks. An older green SHA does not qualify a later head.
+- **PASS exact-head CI:** Windows 279/279 and Ubuntu 272/272 tests, format, strict Clippy, release and DAG matrix on `9c42e87589c02b235880ef3a409c234a2870ff3f`; [PR run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446216893) and [push run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297). [Final CI receipt](../../audit/2026-10-20/cl-06a/final-ci-receipt.json). Post-merge main CI is a separate run.
 - **Windows CI observation:** push run [39444869755](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39444869755) on `d8b82fa` failed the namespace test's immediate no-further-event assertion. Windows may deliver trailing native notifications after the first debounce. The regression now lives in the private watcher test module and requires bounded quiescence of both raw pending debounce state and published invalidations before creating the next branch. Restoring stale-watch retention still produces RED; rearming produces GREEN. Independent review accepted the stronger isolation; no runtime change was needed for this test correction.
 
 ## Performance and handoff
@@ -37,8 +37,8 @@ Final snapshot validation adds subprocess/metadata cost. This small debug sample
 
 LOCAL REQUIRED: **CL-L3** after CL-06B and CL-07B; none immediately. Native NTFS/device acceptance **NOT RUN**. YOU REQUIRED: **NO** now. Full Phase 1–6 parity remains **PARTIAL**; desktop/browser/installer acceptance is outside this cloud unit.
 
-NEXT: qualify the final PR head, merge after green CI/review, publish exact merge SHA and release claim. Then CL-06B is eligible; retain CL-L3 dependencies.
+NEXT: CL-06B is eligible for a new `sftp` claim after current main CI verification; retain CL-L3 dependencies. CL-06A merge SHA and released claim are recorded above.
 
-TRACKING: [existing CoSoS Notion CL-06A task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) is Review with checkpoints, tests, review repair, performance and native gates. GitHub remains source/claim/CI authority.
+TRACKING: [existing CoSoS Notion CL-06A task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) records cloud Done with merge/checkpoint SHAs, tests, review repair, performance and separate native gates. GitHub remains source/claim/CI authority.
 
 ATTRIBUTION: initial claim used the pre-existing repository author identity; subsequent implementation commits use the connected owner's verified GitHub noreply identity. Actual Codex implementer/reviewer involvement is recorded above.

@@ -1,5 +1,16 @@
 # Current CoS-Rust work state
 
+## CL-06A MERGED / claim released (2026-10-20)
+
+- **UNIT:** CL-06A Git/project/file-panel/watcher closure, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), squash merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`; final head `9c42e87589c02b235880ef3a409c234a2870ff3f`.
+- **CLOUD VALIDATION PASS:** Windows 279/279 and Ubuntu 272/272 tests, no failures/ignored; format, strict Clippy, release and DAG matrix PASS on exact head ([PR CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446216893), [push CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297)). Independent review PASS; seven observed RED→GREEN cases. Earlier Windows event-order test failure is preserved in the evidence, corrected without weakening the subsequent-event assertion.
+- **CLAIM RELEASED:** session `codex-20261020-cl06a-01`, generation 1; `project-files` free. Registry marks only CL-06A done; other owners/claims remain exclusive and require live inspection.
+- **CHANGES / PERFORMANCE / LIMITS:** strengthened opaque working-tree revision tokens, selected-project no-link reads, final diff publication fence, bounded watcher refresh/rearm; existing panel preview/save contracts retained. [Full evidence and measured latency cost](implementation-summary/2026-10-20-cl-06a-project-files.md). Source fixtures unchanged; no full filesystem atomicity or performance improvement claim.
+- **TRACKING:** markdown claim/summary/registry and [existing Notion task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) synchronized to accepted cloud scope. Main post-merge CI is separately identified; an earlier head is not proof for later changes.
+- **LOCAL REQUIRED:** CL-L3 after CL-06B and CL-07B; NONE immediately. **YOU REQUIRED:** NO. Native Windows host acceptance NOT RUN; full Phases 1–6 remain PARTIAL.
+- **NEXT:** CL-06B is a READY_CANDIDATE, subject to current main CI and a new `sftp` claim. Preserve CL-L3 dependencies and disjoint CL-05A ownership. Older sections below are historical checkpoints.
+
+
 ## CL-06A cloud review (2026-10-20)
 
 - **CLAIMED / RUNNING:** Codex session `codex-20261020-cl06a-01`, generation 1, `project-files`; branch `cl-06a/project-files-20261020`, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), base `340cf55eddb2766c96e1e1f36eaeb118faecad04` (main Windows/Linux and DAG CI PASS). CL-L1 accepted; concurrent CL-05A PR #18 owns disjoint `process-supervisor`.
