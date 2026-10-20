@@ -113,7 +113,7 @@ fn rebinding_fences_stale_manual_titles_models_and_request_correlation_after_res
         observed_at: 10,
     };
     assert_eq!(
-        registry.observe_and_commit(&[owner.clone()]).unwrap(),
+        registry.observe_and_commit(std::slice::from_ref(&owner)).unwrap(),
         ["stored"]
     );
     store
