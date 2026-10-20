@@ -34,11 +34,16 @@ class TaskBoardTests(unittest.TestCase):
             dependencies = [token.strip("`") for token in cols[2].split(", ")] if cols[2] != "NONE" else []
             self.assertEqual(dependencies, task["depends_on"], task_id)
             self.assertEqual(cols[3], "`" + task["resource_locks"][0] + "`", task_id)
-            desired = "DONE" if task["status"] == "done" else (
-                "**READY · PARALLEL**" if not any(
-                    self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
-                ) and task["status"] == "todo" else "BLOCKED"
-            )
+            if task["status"] == "done":
+                desired = "DONE"
+            elif task_id == "CL-05A" and task["status"] == "claimed":
+                desired = "**CLAIMED · PR #18 · CI PENDING**"
+            elif task["status"] == "todo" and all(
+                self.tasks[dep]["status"] == "done" for dep in task["depends_on"]
+            ):
+                desired = "**READY · PARALLEL**"
+            else:
+                desired = "BLOCKED"
             self.assertEqual(cols[5], desired, task_id)
 
     def test_historical_aliases_are_explicit_and_never_reused_as_current_preflight(self):
@@ -55,14 +60,21 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_wave_is_five_disjoint_cloud_tasks(self):
+    def test_claimed_unit_is_not_offered_as_ready(self):
         ready, _ = board.readiness(self.data)
         self.assertEqual(
             {task["id"] for task in ready},
-            {"CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"},
+            {"CL-06A", "CL-07A", "CL-08A", "CL-09A"},
         )
         self.assertTrue(all(task["kind"] == "C" for task in ready))
-        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 5)
+        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 4)
+        simulated_unclaimed = copy.deepcopy(self.data)
+        next(t for t in simulated_unclaimed["tasks"] if t["id"] == "CL-05A")["status"] = "todo"
+        original_wave, _ = board.readiness(simulated_unclaimed)
+        self.assertEqual(
+            {task["id"] for task in original_wave},
+            {"CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"},
+        )
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
@@ -70,7 +82,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(item["missing_direct"], ["CL-09A", "CL-05A"])
         self.assertIn("CL-L1", self.tasks["CL-09A"]["depends_on"])
         self.assertTrue(item["live_claim_check_required"])
-        self.assertEqual(board.explain(self.data, "CL-05A")["state"], "READY_CANDIDATE")
+        self.assertEqual(board.explain(self.data, "CL-05A")["state"], "BLOCKED")
 
     def test_browser_preflight_is_in_phase_seven_not_eight(self):
         for task_id in ("7P-A", "7P-B", "7P-L1"):
@@ -89,7 +101,11 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("physical-windows-host", board.effective_locks(self.tasks["CL-05A"]))
 
     def test_waves_do_not_skip_local_or_user_gates(self):
-        waves = board.waves(self.data)
+        live_waves = board.waves(self.data)
+        self.assertNotIn("CL-05A", {t["id"] for wave in live_waves for t in wave})
+        simulation = copy.deepcopy(self.data)
+        next(t for t in simulation["tasks"] if t["id"] == "CL-05A")["status"] = "todo"
+        waves = board.waves(simulation)
         self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"})
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
