@@ -90,7 +90,9 @@ fn admitted_canonical_bytes(entry: &Entry, key: &str, event: &Value) -> io::Resu
     if !entry.messages.contains_key(key) && entry.messages.len() >= MAX_CANONICAL_MESSAGES {
         return Err(invalid("Canonical history exceeds in-memory record budget"));
     }
-    let previous = entry.messages.get(key)
+    let previous = entry
+        .messages
+        .get(key)
         .map(serde_json::to_vec)
         .transpose()?
         .map_or(0, |bytes| bytes.len());
@@ -751,7 +753,9 @@ impl SessionStore {
             .and_then(|total| total.checked_add(u64::from(needs_separator)))
             .is_none_or(|total| total > MAX_HISTORY_JOURNAL_BYTES)
         {
-            return Err(invalid("History journal exceeds write budget; original bytes preserved"));
+            return Err(invalid(
+                "History journal exceeds write budget; original bytes preserved",
+            ));
         }
         if needs_separator {
             file.write_all(b"\n")?;
