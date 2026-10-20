@@ -55,14 +55,15 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_wave_is_five_disjoint_cloud_tasks(self):
+    def test_claimed_cl08a_is_not_scheduled_twice(self):
         ready, _ = board.readiness(self.data)
         self.assertEqual(
             {task["id"] for task in ready},
-            {"CL-05A", "CL-06B", "CL-07A", "CL-08A", "CL-09A"},
+            {"CL-05A", "CL-06B", "CL-07A", "CL-09A"},
         )
         self.assertTrue(all(task["kind"] == "C" for task in ready))
-        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 5)
+        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 4)
+        self.assertEqual(self.tasks["CL-08A"]["status"], "claimed")
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
@@ -89,7 +90,9 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("physical-windows-host", board.effective_locks(self.tasks["CL-05A"]))
 
     def test_waves_do_not_skip_local_or_user_gates(self):
-        waves = board.waves(self.data)
+        simulated = copy.deepcopy(self.data)
+        next(t for t in simulated["tasks"] if t["id"] == "CL-08A")["status"] = "todo"
+        waves = board.waves(simulated)
         self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06B", "CL-07A", "CL-08A", "CL-09A"})
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
