@@ -23,7 +23,8 @@ Date: 2026-10-20 (Asia/Jakarta). Canonical cloud source: `KaisAbiyyi/chat-on-ste
 
 The new `cl_04b_replay.rs` includes seven synthetic negative/recovery tests: unsafe journal cursor, last-safe sequence exhaustion, corrupted shard, oversized shard, bounded pages, dual-corrupt metadata rebuild, torn journal and no-op retention. Existing pinned baseline/history/metadata/source tests must also remain green. Windows and Ubuntu CI run Rustfmt, strict Clippy, full workspace tests and release build. Record an exact final head SHA and CI URLs in PR before merge; earlier intermediate failures cannot be counted as final acceptance.
 
-- Cloud CI: **PENDING final SHA checks** at document creation.
+- Cloud CI: **PASS** on exact PR head `39b80f3342f3885bb523136974395d9f7069e224`: Windows/Ubuntu fmt, strict Clippy, workspace tests and release (see [Actions run 39420069685](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39420069685)).
+- GitHub merge: [PR #13](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/13) squash merged as `ce065f8b449ff4a215f1169ca8efd9158760dbca`; cloud task ownership RELEASED.
 - Performance: **NOT MEASURED**; explicit resource ceilings are safety bounds, not speed claims.
 - Local required: **NONE immediately** for this cloud unit; later Windows backend integrated L gates remain.
 - Human required: **NO** real account/device acceptance.
