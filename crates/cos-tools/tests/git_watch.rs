@@ -98,6 +98,31 @@ fn linked_worktree_watches_new_ref_namespaces_after_refresh() {
     command(&main, &["branch", "team/second"]);
     assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
 }
+
+#[test]
+fn linked_worktree_rearms_a_ref_namespace_replaced_before_debounce() {
+    let d = tempfile::tempdir().unwrap();
+    let main = d.path().join("main");
+    std::fs::create_dir(&main).unwrap();
+    command(&main, &["init", "--quiet", "-b", "main"]);
+    std::fs::write(main.join("a"), "public base").unwrap();
+    command(&main, &["add", "a"]);
+    command(&main, &["commit", "--quiet", "-m", "base"]);
+    command(&main, &["branch", "team/first"]);
+    command(
+        &main,
+        &["worktree", "add", "--quiet", "-b", "feature", "../linked"],
+    );
+    let r = roots(d.path());
+    let mut w = GitWatchSet::default();
+    w.sync(&r, "/p/linked", Some("linked")).unwrap();
+    command(&main, &["branch", "-D", "team/first"]);
+    command(&main, &["branch", "team/second"]);
+    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+    assert!(wait(&mut w, &r).is_none());
+    command(&main, &["branch", "team/third"]);
+    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+}
 #[test]
 fn switching_projects_and_closing_discard_previous_generation_events() {
     let d = tempfile::tempdir().unwrap();

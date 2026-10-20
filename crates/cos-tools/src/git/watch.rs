@@ -58,13 +58,16 @@ impl Active {
     fn refresh_metadata(&mut self) {
         let git = self.context.custody[2].0.clone();
         let common = self.context.custody[3].0.clone();
-        let mut candidates = BTreeSet::from([git, common.clone()]);
+        let anchors = BTreeSet::from([git, common.clone()]);
+        let mut candidates = anchors.clone();
         collect(&common.join("refs"), &mut candidates);
         collect(&common.join("logs/refs"), &mut candidates);
         // Refs/log subdirectories are disposable Git data, not repository
-        // identity. Reconcile bounded native watches after an invalidation.
+        // identity. A path may have been deleted and recreated within one
+        // debounce interval, so rearm all optional watches even if it exists.
+        // Keep the validated repository anchors continuously registered.
         self.metadata.retain(|path| {
-            if candidates.contains(path) && ordinary_directory(path) {
+            if anchors.contains(path) {
                 true
             } else {
                 let _ = self.watcher.unwatch(path);

@@ -679,6 +679,12 @@ pub fn diff(
     let binary =
         c["binary"] == true || (!too_large && (base_text.is_none() || current_text.is_none()));
     ctx.validate(roots)?;
+    #[cfg(test)]
+    BEFORE_DIFF_PUBLISH.with(|hook| {
+        if let Some(hook) = hook.borrow_mut().take() {
+            hook();
+        }
+    });
     let latest = snapshot(roots, path, project, base)?;
     if latest["state"] != "ready" || latest["revision"] != s["revision"] {
         return Err(invalid("The Git comparison changed; refresh Review"));
@@ -733,6 +739,8 @@ pub(crate) fn legacy_snapshot(roots: &[Root], path: &str) -> io::Result<Value> {
     )
 }
 #[cfg(test)]
+thread_local! {static BEFORE_DIFF_PUBLISH:std::cell::RefCell<Option<Box<dyn FnOnce()>>>=const{std::cell::RefCell::new(None)};}
+#[cfg(test)]
 mod tests {
     use super::*;
     #[test]
@@ -753,5 +761,59 @@ mod tests {
             };
             assert_eq!(actual, c["expected"], "{c}");
         }
+    }
+
+    #[test]
+    fn a_worktree_edit_during_diff_construction_refuses_publication() {
+        let d = tempfile::tempdir().unwrap();
+        let command = |args: &[&str]| {
+            let out = std::process::Command::new("git")
+                .args([
+                    "-c",
+                    "core.hooksPath=/dev/null",
+                    "-c",
+                    "commit.gpgSign=false",
+                    "-c",
+                    "user.name=Public Fixture",
+                    "-c",
+                    "user.email=fixture@example.invalid",
+                ])
+                .args(args)
+                .current_dir(d.path())
+                .output()
+                .unwrap();
+            assert!(
+                out.status.success(),
+                "{}",
+                String::from_utf8_lossy(&out.stderr)
+            );
+        };
+        command(&["init", "--quiet", "-b", "main"]);
+        let path = d.path().join("a");
+        std::fs::write(&path, "base\n").unwrap();
+        command(&["add", "a"]);
+        command(&["commit", "--quiet", "-m", "public base"]);
+        std::fs::write(&path, "first\n").unwrap();
+        let roots = [Root {
+            name: "p".into(),
+            path: std::fs::canonicalize(d.path())
+                .unwrap()
+                .to_string_lossy()
+                .into(),
+            remote: None,
+        }];
+        let old = snapshot(&roots, "/p", "fixture", None).unwrap();
+        let changed = path.clone();
+        BEFORE_DIFF_PUBLISH.with(|hook| {
+            *hook.borrow_mut() = Some(Box::new(move || {
+                std::fs::write(changed, "other\n").unwrap();
+            }))
+        });
+        let result = diff(&roots, "/p", "fixture", "a", None, old["revision"].as_str());
+        assert_eq!(std::fs::read_to_string(path).unwrap(), "other\n");
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "The Git comparison changed; refresh Review"
+        );
     }
 }
