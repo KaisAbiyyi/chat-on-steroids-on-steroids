@@ -277,14 +277,13 @@ impl WindowsCipher {
                     if blob.is_empty() || blob.starts_with(b"v10") || blob.len() > 8 * 1024 * 1024 {
                         return Err(unreadable());
                     }
-                    let decoded = Zeroizing::new(
-                        dpapi(&blob, false).map_err(|_| unreadable())?
-                    );
-                    let value: Value = serde_json::from_slice(&decoded)
-                        .map_err(|_| unreadable())?;
-                    if value.as_object().is_none_or(|entries|
-                        entries.values().any(|v| !v.is_string())
-                    ) {
+                    let decoded = Zeroizing::new(dpapi(&blob, false).map_err(|_| unreadable())?);
+                    let value: Value =
+                        serde_json::from_slice(&decoded).map_err(|_| unreadable())?;
+                    if value
+                        .as_object()
+                        .is_none_or(|entries| entries.values().any(|v| !v.is_string()))
+                    {
                         return Err(unreadable());
                     }
                 }
