@@ -127,8 +127,8 @@ fn stopped_sidecars_do_not_exhaust_process_capacity() {
 
 #[test]
 fn proxy_fallback_and_loopback_bypass_are_fail_closed() {
-    use std::collections::BTreeMap;
     use cos_mcp::tunnel::proxy_environment;
+    use std::collections::BTreeMap;
     let vars = BTreeMap::from([
         ("ALL_PROXY".into(), "socks5://example.invalid:1080".into()),
         ("NO_PROXY".into(), "internal.example,localhost".into()),
