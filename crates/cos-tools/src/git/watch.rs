@@ -17,7 +17,8 @@ pub struct GitWatchSet {
 struct Active {
     project: String,
     context: Context,
-    _watcher: RecommendedWatcher,
+    watcher: RecommendedWatcher,
+    metadata: BTreeSet<PathBuf>,
     receiver: mpsc::Receiver<notify::Result<notify::Event>>,
     overflow: Arc<AtomicBool>,
     changed: Option<Instant>,
@@ -53,6 +54,39 @@ fn collect(path: &Path, out: &mut BTreeSet<PathBuf>) {
         }
     }
 }
+impl Active {
+    fn refresh_metadata(&mut self) {
+        let git = self.context.custody[2].0.clone();
+        let common = self.context.custody[3].0.clone();
+        let anchors = BTreeSet::from([git, common.clone()]);
+        let mut candidates = anchors.clone();
+        collect(&common.join("refs"), &mut candidates);
+        collect(&common.join("logs/refs"), &mut candidates);
+        // Refs/log subdirectories are disposable Git data, not repository
+        // identity. A path may have been deleted and recreated within one
+        // debounce interval, so rearm all optional watches even if it exists.
+        // Keep the validated repository anchors continuously registered.
+        self.metadata.retain(|path| {
+            if anchors.contains(path) {
+                true
+            } else {
+                let _ = self.watcher.unwatch(path);
+                false
+            }
+        });
+        for candidate in candidates {
+            if !self.metadata.contains(&candidate)
+                && ordinary_directory(&candidate)
+                && self
+                    .watcher
+                    .watch(&candidate, RecursiveMode::NonRecursive)
+                    .is_ok()
+            {
+                self.metadata.insert(candidate);
+            }
+        }
+    }
+}
 impl GitWatchSet {
     pub fn sync(&mut self, roots: &[Root], path: &str, project: Option<&str>) -> io::Result<()> {
         if let Some(active) = &self.active
@@ -70,14 +104,19 @@ impl GitWatchSet {
         let Some(project) = project else {
             return Ok(());
         };
-        let Some(mut context) = context(roots, path)? else {
+        let Some(context) = context(roots, path)? else {
             return Ok(());
         };
         let (tx, receiver) = mpsc::sync_channel(64);
         let overflow = Arc::new(AtomicBool::new(false));
         let flag = overflow.clone();
         let mut watcher = RecommendedWatcher::new(
-            move |event| {
+            move |event: notify::Result<notify::Event>| {
+                // Reads performed by refresh/preview must not trigger another
+                // refresh or fill the bounded invalidation queue.
+                if event.as_ref().is_ok_and(|e| e.kind.is_access()) {
+                    return;
+                }
                 if tx.try_send(event).is_err() {
                     flag.store(true, Ordering::Release);
                 }
@@ -88,32 +127,18 @@ impl GitWatchSet {
         watcher
             .watch(&context.real, RecursiveMode::Recursive)
             .map_err(io::Error::other)?;
-        let git = context.custody[2].0.clone();
-        let common = context.custody[3].0.clone();
-        let mut candidates = BTreeSet::from([git, common.clone()]);
-        collect(&common.join("refs"), &mut candidates);
-        collect(&common.join("logs/refs"), &mut candidates);
-        for candidate in candidates {
-            if !ordinary_directory(&candidate) {
-                continue;
-            }
-            let held = directory_handle(&candidate)?;
-            if watcher
-                .watch(&candidate, RecursiveMode::NonRecursive)
-                .is_ok()
-            {
-                context.custody.push((candidate, held));
-            }
-        }
-        context.validate(roots)?;
-        self.active = Some(Active {
+        let mut active = Active {
             project: project.into(),
             context,
-            _watcher: watcher,
+            watcher,
+            metadata: BTreeSet::new(),
             receiver,
             overflow,
             changed: None,
-        });
+        };
+        active.refresh_metadata();
+        active.context.validate(roots)?;
+        self.active = Some(active);
         Ok(())
     }
     pub fn poll(&mut self, roots: &[Root]) -> io::Result<Option<Value>> {
@@ -136,11 +161,102 @@ impl GitWatchSet {
             .is_some_and(|at| at.elapsed() >= Duration::from_millis(180))
         {
             active.changed = None;
+            active.refresh_metadata();
             return Ok(Some(json!({"projectId":active.project})));
         }
         Ok(None)
     }
     pub fn close(&mut self) {
         self.active = None;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn command(dir: &Path, args: &[&str]) {
+        let result = std::process::Command::new("git")
+            .args([
+                "-c",
+                "core.hooksPath=/dev/null",
+                "-c",
+                "user.name=Public Fixture",
+                "-c",
+                "user.email=fixture@example.invalid",
+                "-c",
+                "commit.gpgSign=false",
+            ])
+            .args(args)
+            .current_dir(dir)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+    }
+    fn roots(dir: &Path) -> [Root; 1] {
+        [Root {
+            name: "p".into(),
+            path: std::fs::canonicalize(dir).unwrap().to_string_lossy().into(),
+            remote: None,
+        }]
+    }
+    fn wait(w: &mut GitWatchSet, roots: &[Root]) -> Option<Value> {
+        let deadline = Instant::now() + Duration::from_secs(3);
+        loop {
+            let result = w.poll(roots).unwrap();
+            if result.is_some() || Instant::now() >= deadline {
+                return result;
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        }
+    }
+    fn settle(w: &mut GitWatchSet, roots: &[Root]) {
+        let deadline = Instant::now() + Duration::from_secs(3);
+        let mut quiet = Instant::now();
+        loop {
+            let emitted = w.poll(roots).unwrap().is_some();
+            // Observe raw events waiting for debounce as well as publications.
+            // Trailing native events must not satisfy the next ref's assertion.
+            if emitted || w.active.as_ref().unwrap().changed.is_some() {
+                quiet = Instant::now();
+            }
+            if quiet.elapsed() >= Duration::from_millis(500) {
+                return;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "Git watcher did not become quiescent"
+            );
+            std::thread::sleep(Duration::from_millis(20));
+        }
+    }
+    #[test]
+    fn linked_worktree_rearms_a_ref_namespace_replaced_before_debounce() {
+        let d = tempfile::tempdir().unwrap();
+        let main = d.path().join("main");
+        std::fs::create_dir(&main).unwrap();
+        command(&main, &["init", "--quiet", "-b", "main"]);
+        std::fs::write(main.join("a"), "public base").unwrap();
+        command(&main, &["add", "a"]);
+        command(&main, &["commit", "--quiet", "-m", "base"]);
+        command(&main, &["branch", "team/first"]);
+        command(
+            &main,
+            &["worktree", "add", "--quiet", "-b", "feature", "../linked"],
+        );
+        let r = roots(d.path());
+        let mut w = GitWatchSet::default();
+        w.sync(&r, "/p/linked", Some("linked")).unwrap();
+        command(&main, &["branch", "-D", "team/first"]);
+        command(&main, &["branch", "team/second"]);
+        assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+        // Windows can deliver trailing notifications after the first debounce.
+        // Drain until quiescent so none can masquerade as the next ref's event.
+        settle(&mut w, &r);
+        command(&main, &["branch", "team/third"]);
+        assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
     }
 }

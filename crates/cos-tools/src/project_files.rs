@@ -20,6 +20,10 @@ use std::{
 mod native;
 mod ordering;
 mod server;
+// Git review shares the same native identity/change stamp as optimistic saves.
+pub(crate) fn file_stamp(file: &File) -> io::Result<Value> {
+    native::stamp(file)
+}
 const TEXT_BYTES: usize = 256 * 1024;
 const IMAGE_BYTES: usize = 5 * 1024 * 1024;
 const PDF_BYTES: usize = 20 * 1024 * 1024;

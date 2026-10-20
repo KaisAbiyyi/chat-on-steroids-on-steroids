@@ -201,6 +201,29 @@ fn same_bytes_replacement_changes_revision_and_rejects_stale_save() {
     stale["modifiedAt"] = json!("1970-01-01T00:00:00.000Z");
     assert!(f.save("a.txt", "new edit", &stale).is_err());
 }
+
+#[test]
+fn same_size_edit_with_restored_mtime_refuses_stale_save_and_keeps_external_bytes() {
+    let f = Fixture::new();
+    let path = f.folder.join("a.txt");
+    fs::write(&path, "first\r\n").unwrap();
+    let time = fs::metadata(&path).unwrap().modified().unwrap();
+    let old = f.preview("a.txt");
+    fs::write(&path, "other\r\n").unwrap();
+    fs::OpenOptions::new()
+        .write(true)
+        .open(&path)
+        .unwrap()
+        .set_times(fs::FileTimes::new().set_modified(time))
+        .unwrap();
+    let current = f.preview("a.txt");
+    assert_eq!(old["bytes"], current["bytes"]);
+    assert_eq!(old["modifiedAt"], current["modifiedAt"]);
+    assert_ne!(old["revision"], current["revision"]);
+    assert!(f.save("a.txt", "stale edit", &old).is_err());
+    assert_eq!(fs::read(&path).unwrap(), b"other\r\n");
+    assert_eq!(fs::read_dir(&f.folder).unwrap().count(), 1);
+}
 #[test]
 fn invalid_utf8_and_control_bytes_never_become_editable_text() {
     let f = Fixture::new();
