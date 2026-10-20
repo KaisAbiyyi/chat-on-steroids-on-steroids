@@ -102,10 +102,13 @@ and process behavior are unchanged. Linux cloud release build PASS; ELF binary
 with the historical Windows binary or an installer-size claim.
 
 [Machine-readable receipt and log hashes](../../audit/2026-10-20/cl-l1-fix-01/receipt.json)
-identify the exact product checkpoint, source blob, fixture and five raw logs:
+identify the exact product checkpoint, source blob, fixture and five command logs:
 initial RED, completed-batch RED, final GREEN, strict workspace checks and release
 build. Hosted CI was still running when that receipt was captured; live final-head
 PR checks supersede only that CI observation, not the immutable native failure.
+Published logs use one final LF for a clean Git whitespace check; the manifest
+also retains the original-capture byte counts/hashes. Original command output
+remains unchanged in the ignored cloud cache. No assertion or result changed.
 
 **KNOWN LIMITS:** cutting a surrogate uses the existing printable-escape policy;
 lossless JS UTF-16 remains `CL-04C`. No historical exclusions were broadened and

@@ -18,4 +18,3 @@ test native_windows_captions_match_pinned_source ... ok
 test corrected_captions_and_full_arguments_survive_recording_and_cold_reopen ... ok
 
 test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
-

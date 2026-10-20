@@ -113,31 +113,42 @@
     {
       "file": "red.txt",
       "bytes": 9151,
-      "sha256": "e4dc62c1d675c0ea0ec76db22eec095e31551c164d512d36ad93089da087ce5e"
+      "sha256": "e4dc62c1d675c0ea0ec76db22eec095e31551c164d512d36ad93089da087ce5e",
+      "capturedBytes": 9151,
+      "capturedSha256": "e4dc62c1d675c0ea0ec76db22eec095e31551c164d512d36ad93089da087ce5e"
     },
     {
       "file": "label-completion-red.txt",
       "bytes": 1732,
-      "sha256": "f96a9ff882e30f0979a87d5ceddcff24419994558d8e1f28e4cd8bdfa97ba4da"
+      "sha256": "f96a9ff882e30f0979a87d5ceddcff24419994558d8e1f28e4cd8bdfa97ba4da",
+      "capturedBytes": 1732,
+      "capturedSha256": "f96a9ff882e30f0979a87d5ceddcff24419994558d8e1f28e4cd8bdfa97ba4da"
     },
     {
       "file": "green.txt",
-      "bytes": 1058,
-      "sha256": "0efb12fe67d8f3343c7fcb657c4aa0b25bb55462cf3a44b244a553b6b73cf9bb"
+      "bytes": 1057,
+      "sha256": "48753435bedc98762660b54ce305fd16ba8c9bb2bc2015205268cba044106856",
+      "capturedBytes": 1058,
+      "capturedSha256": "0efb12fe67d8f3343c7fcb657c4aa0b25bb55462cf3a44b244a553b6b73cf9bb"
     },
     {
       "file": "workspace-strict.txt",
       "bytes": 31825,
-      "sha256": "444d932f0c4554db549f7b647306c5d29e71bdb4118d0c5115ccc3210678f54e"
+      "sha256": "444d932f0c4554db549f7b647306c5d29e71bdb4118d0c5115ccc3210678f54e",
+      "capturedBytes": 31825,
+      "capturedSha256": "444d932f0c4554db549f7b647306c5d29e71bdb4118d0c5115ccc3210678f54e"
     },
     {
       "file": "release-build.txt",
       "bytes": 322,
-      "sha256": "405c49114d30d4b97bb77fbda87ea4dcc98b67c3da44df15fdb0d334ce3e25e1"
+      "sha256": "405c49114d30d4b97bb77fbda87ea4dcc98b67c3da44df15fdb0d334ce3e25e1",
+      "capturedBytes": 322,
+      "capturedSha256": "405c49114d30d4b97bb77fbda87ea4dcc98b67c3da44df15fdb0d334ce3e25e1"
     }
   ],
   "fixture": {
     "path": "fixtures/upstream/phase1-6-closure/cl-l1-captions.json",
     "sha256": "472f5e2aca39f6c14717fc87afb74962d0c43760b8199a322b7a2093603bcbbb"
-  }
+  },
+  "evidenceEncoding": "Published command logs have one final LF; capturedBytes/capturedSha256 identify original command outputs retained in the ignored .cache/cl-l1-oracle directory. No assertion or test result is changed."
 }
