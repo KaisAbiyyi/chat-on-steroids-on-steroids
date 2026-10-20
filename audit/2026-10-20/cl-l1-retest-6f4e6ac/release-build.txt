@@ -1,0 +1,7 @@
+   Compiling cos-core v0.1.0 (D:\projects\CoS-Rust\.worktrees\cl-l1-retest-6f4e6ac\crates\cos-core)
+   Compiling cos-exec v0.1.0 (D:\projects\CoS-Rust\.worktrees\cl-l1-retest-6f4e6ac\crates\cos-exec)
+   Compiling cos-tools v0.1.0 (D:\projects\CoS-Rust\.worktrees\cl-l1-retest-6f4e6ac\crates\cos-tools)
+   Compiling cos-store v0.1.0 (D:\projects\CoS-Rust\.worktrees\cl-l1-retest-6f4e6ac\crates\cos-store)
+   Compiling cos-mcp v0.1.0 (D:\projects\CoS-Rust\.worktrees\cl-l1-retest-6f4e6ac\crates\cos-mcp)
+   Compiling cos-app v0.1.0 (D:\projects\CoS-Rust\.worktrees\cl-l1-retest-6f4e6ac\crates\cos-app)
+    Finished `release` profile [optimized] target(s) in 4m 02s

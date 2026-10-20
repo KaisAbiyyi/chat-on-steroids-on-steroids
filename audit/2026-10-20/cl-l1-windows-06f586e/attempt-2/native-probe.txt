@@ -1,0 +1,70 @@
+PASS Windows native host
+PASS exact requested product SHA
+PASS clean product source before native probe
+PASS all task output roots on D
+PASS sentinel scanner positive control
+PASS inline: returned record sanitized
+PASS inline: no overflow asset
+PASS overflow: returned record sanitized
+PASS overflow: both argument and result assets
+PASS overflow: args complete and sanitized
+PASS overflow: complete argument JSON
+PASS overflow: result complete and sanitized
+PASS clipboard-write: returned record sanitized
+PASS clipboard-read: returned record sanitized
+PASS nested-clipboard: returned record sanitized
+PASS binary-and-handle: returned record sanitized
+PASS privacy: captions only use sanitized values
+PASS privacy-before-restart: nonempty journal scan
+PASS privacy-before-restart: disk journal/assets contain zero synthetic sentinels
+PASS privacy: stable complete events after process restart
+PASS privacy: restarted JSON export sanitized
+PASS privacy-after-restart: nonempty journal scan
+PASS privacy-after-restart: disk journal/assets contain zero synthetic sentinels
+PASS service: real Windows process started
+PASS exec_command: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS nonzero: actual completed exit
+PASS nonzero: recorded outcome matches process
+PASS nonzero: nonzero caption
+PASS nonzero: progressive caption persisted
+PASS exec_command: private recording evidence stripped
+PASS background-pipe: native running session
+PASS background-pipe: started caption without success verdict
+PASS write_stdin: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS background-pipe: actual completed exit
+PASS background-pipe: recorded outcome matches process
+PASS background-pipe: progressive caption persisted
+PASS background-pipe: completed unread output delivered
+PASS exec_command: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS completed: actual completed exit
+PASS completed: recorded outcome matches process
+PASS completed: progressive caption persisted
+PASS exec_command: private recording evidence stripped
+PASS background-conpty: native running session
+PASS background-conpty: started caption without success verdict
+PASS write_stdin: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS background-conpty: actual completed exit
+PASS background-conpty: recorded outcome matches process
+PASS background-conpty: progressive caption persisted
+PASS background-conpty: completed output delivered
+PASS exec_command: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS live-privacy-inline: real stdout positive sentinel control
+PASS live-privacy-inline: successful real process
+PASS live-privacy-inline: stored args result captions sanitized
+PASS live-privacy-inline: actual runtime inline fields
+PASS exec_command: private recording evidence stripped
+PASS write_stdin: private recording evidence stripped
+PASS live-privacy-overflow: real stdout positive sentinel control
+PASS live-privacy-overflow: successful real process
+PASS live-privacy-overflow: stored args result captions sanitized
+FAIL live-privacy-overflow: actual runtime argument and result assets
+QUALIFICATION FAIL {"type": "AssertionError", "message": "live-privacy-overflow: actual runtime argument and result assets"}

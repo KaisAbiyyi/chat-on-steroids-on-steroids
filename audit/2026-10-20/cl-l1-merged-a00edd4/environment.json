@@ -1,0 +1,12 @@
+{
+  "sourceSha": "a00edd4a67e6c8acc9fc45bee659094719d6673a",
+  "initialGitStatus": [],
+  "os": "Microsoft Windows NT 10.0.26300.0",
+  "architecture": "AMD64",
+  "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+  "cargo": "cargo 1.91.1 (ea2d97820 2025-10-10)",
+  "temp": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-merged-20261020-a00edd4\\temp",
+  "cargoHome": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-20261020\\cargo-offline",
+  "cargoTarget": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-retest-20261020-01\\target",
+  "startedAt": "2026-10-20T09:38:04.8667287Z"
+}

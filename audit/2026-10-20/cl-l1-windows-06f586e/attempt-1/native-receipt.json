@@ -1,0 +1,122 @@
+{
+  "unit": "CL-L1",
+  "status": "FAIL",
+  "sourceSha": "06f586e423e5abb4f95eba582996c4a5278c1311",
+  "binarySha256": "7d1ebdb4e34f9074f38fe0ea87e45160bca7de1cef3694945ca708f4eb4f5f45",
+  "binaryBytes": 12825600,
+  "elapsedSeconds": 1.094000000000051,
+  "checks": [
+    {
+      "name": "Windows native host",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exact requested product SHA",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "clean product source before native probe",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "all task output roots on D",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "sentinel scanner positive control",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "inline: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "inline: no overflow asset",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: both argument and result assets",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: args complete and sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: complete argument JSON",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: result complete and sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "clipboard-write: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "clipboard-read: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "nested-clipboard: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "binary-and-handle: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy: captions only use sanitized values",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy-before-restart: nonempty journal scan",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy-before-restart: disk journal/assets contain zero synthetic sentinels",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "privacy: stable complete events after process restart",
+      "status": "FAIL",
+      "detail": null
+    }
+  ],
+  "error": {
+    "type": "AssertionError",
+    "message": "privacy: stable complete events after process restart"
+  },
+  "personalProfilesUsed": false,
+  "actualClipboardAccess": false,
+  "scope": "Windows release CLI, loopback MCP, native pipes/ConPTY, synthetic recorder; clean restart only",
+  "linux": "NOT RUN",
+  "macOS": "HOLD",
+  "desktopInstallerAcceptance": "NOT RUN",
+  "performanceComparison": "NOT MEASURED",
+  "productSourceChanged": false
+}

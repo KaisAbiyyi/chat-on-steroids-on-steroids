@@ -1,0 +1,123 @@
+[
+  {
+    "profile": "recorder-synthetic",
+    "stage": "privacy-before-restart",
+    "files": [
+      {
+        "path": "sessions/unattributed-activity/assets/0c94a827612bb31b61a6d10b9d6328e8.txt",
+        "bytes": 16868,
+        "sha256": "0c94a827612bb31b61a6d10b9d6328e89afbf0aa4fee0595fd7635c2ad897d36"
+      },
+      {
+        "path": "sessions/unattributed-activity/assets/c3659ffca289494e9d374ed7dc9ef2fe.txt",
+        "bytes": 16173,
+        "sha256": "c3659ffca289494e9d374ed7dc9ef2fefd02929992018dd61f4105674a140f19"
+      },
+      {
+        "path": "sessions/unattributed-activity/events.jsonl",
+        "bytes": 20343,
+        "sha256": "abd24409914edf363ed170fcf4655e29358daae2a340ebe905126313fb1c9554"
+      },
+      {
+        "path": "sessions/unattributed-activity/messages.json",
+        "bytes": 2,
+        "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.backup.json",
+        "bytes": 981,
+        "sha256": "0617a8bd056048f6fd423f56c8e82a5b139e2848edc41cbc9fce3507afae5f48"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.json",
+        "bytes": 969,
+        "sha256": "b8fc4a84d3203108835c6d536079001a5440a2757990ebdade083300c5e95318"
+      }
+    ],
+    "leaks": []
+  },
+  {
+    "profile": "recorder-synthetic",
+    "stage": "privacy-after-restart",
+    "files": [
+      {
+        "path": "sessions/unattributed-activity/assets/0c94a827612bb31b61a6d10b9d6328e8.txt",
+        "bytes": 16868,
+        "sha256": "0c94a827612bb31b61a6d10b9d6328e89afbf0aa4fee0595fd7635c2ad897d36"
+      },
+      {
+        "path": "sessions/unattributed-activity/assets/c3659ffca289494e9d374ed7dc9ef2fe.txt",
+        "bytes": 16173,
+        "sha256": "c3659ffca289494e9d374ed7dc9ef2fefd02929992018dd61f4105674a140f19"
+      },
+      {
+        "path": "sessions/unattributed-activity/events.jsonl",
+        "bytes": 20343,
+        "sha256": "abd24409914edf363ed170fcf4655e29358daae2a340ebe905126313fb1c9554"
+      },
+      {
+        "path": "sessions/unattributed-activity/messages.json",
+        "bytes": 2,
+        "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.backup.json",
+        "bytes": 981,
+        "sha256": "0617a8bd056048f6fd423f56c8e82a5b139e2848edc41cbc9fce3507afae5f48"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.json",
+        "bytes": 969,
+        "sha256": "b8fc4a84d3203108835c6d536079001a5440a2757990ebdade083300c5e95318"
+      }
+    ],
+    "leaks": []
+  },
+  {
+    "profile": "runtime-synthetic",
+    "stage": "runtime-before-shutdown",
+    "files": [
+      {
+        "path": "sessions/unattributed-activity/assets/033a06115c4730a9a4d8eb7b5bea7fcb.txt",
+        "bytes": 14538,
+        "sha256": "033a06115c4730a9a4d8eb7b5bea7fcb5c5e3a7676ab67b7050685c66bea031b"
+      },
+      {
+        "path": "sessions/unattributed-activity/assets/81f02e50403b9c34c767422d87e8d39a.txt",
+        "bytes": 33893,
+        "sha256": "81f02e50403b9c34c767422d87e8d39aba71d8d9b67a904ae517721a38fccfb9"
+      },
+      {
+        "path": "sessions/unattributed-activity/events.jsonl",
+        "bytes": 39168,
+        "sha256": "c18712dd335c5bf8140357a7ffca7cdc208fb2735f842ace75a710330270c696"
+      },
+      {
+        "path": "sessions/unattributed-activity/messages/34b0008904271fdaec34539eceafca73a431108ec0a4d5ff73db3dd0aeb9d73f.json",
+        "bytes": 252,
+        "sha256": "b8bbd35e7f38af318f30c1e1b8040671038431de11d01abf99ea991db37f20ba"
+      },
+      {
+        "path": "sessions/unattributed-activity/messages/f2571afe5bf814b097cd6b64aeb57e91f6e7788cd05d0af906c40815291d40a1.json",
+        "bytes": 356,
+        "sha256": "c538075c21a619837347eb49a8ed0690f192004b82c839c0af2f04a74f675048"
+      },
+      {
+        "path": "sessions/unattributed-activity/messages.json",
+        "bytes": 2,
+        "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.backup.json",
+        "bytes": 906,
+        "sha256": "bfddba5aea67cb27bcfca65bf0719316d68ffe0b08f91ac86f2c7dad58c35671"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.json",
+        "bytes": 1404,
+        "sha256": "b72a0ac7f478d40de4aa498993217ee95537fe9a052971ab25c6a391ff80be89"
+      }
+    ],
+    "leaks": []
+  }
+]

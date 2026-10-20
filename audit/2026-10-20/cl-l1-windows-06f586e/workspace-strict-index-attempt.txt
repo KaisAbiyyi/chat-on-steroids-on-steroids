@@ -1,0 +1,3 @@
+Test temporary files: D:\projects\CoS-Rust\.worktrees\cl-l1-06f586e\.test-tmp
+Build cache: D:\projects\CoS-Rust\.cache\cl-l1-20261020\target
+    Updating crates.io index

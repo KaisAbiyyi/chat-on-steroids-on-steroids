@@ -1,0 +1,1000 @@
+[
+  {
+    "kind": "user_message",
+    "messageId": "cl-l1-question",
+    "message": {
+      "text": "Public synthetic qualification question",
+      "truncated": false,
+      "chars": 39
+    },
+    "time": 1792485221284,
+    "source": "extension",
+    "conversationId": "cl-l1-timeline",
+    "contentSeq": 1,
+    "origin": 1,
+    "seq": 1,
+    "turnOrigin": null
+  },
+  {
+    "kind": "turn_start",
+    "turnId": "cl-l1-turn",
+    "time": 1792485221285,
+    "source": "extension",
+    "conversationId": "cl-l1-timeline",
+    "seq": 2,
+    "turnOrigin": 2
+  },
+  {
+    "kind": "assistant_message",
+    "messageId": "cl-l1-answer",
+    "turnId": "cl-l1-turn",
+    "message": {
+      "text": "Public synthetic qualification answer",
+      "truncated": false,
+      "chars": 37
+    },
+    "time": 1792485221286,
+    "state": "final",
+    "final": true,
+    "source": "extension",
+    "conversationId": "cl-l1-timeline",
+    "contentSeq": 3,
+    "finalContentSeq": 3,
+    "finalObservedAt": 1792485221420,
+    "origin": 3,
+    "seq": 3,
+    "turnOrigin": 2
+  },
+  {
+    "kind": "turn_end",
+    "source": "extension",
+    "time": 1792485221420,
+    "turnId": "cl-l1-turn",
+    "conversationId": "cl-l1-timeline",
+    "outcome": "completed",
+    "seq": 4,
+    "turnOrigin": 2
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485221553,
+    "call": {
+      "callId": "0e1374c1-4e25-47a5-86f6-996e0230fa50",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485221553,
+      "durationMs": 472,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_NONZERO; exit 7\",\"workdir\":\"/p\",\"login\":false,\"tty\":false,\"yield_time_ms\":10000}",
+        "truncated": false,
+        "chars": 107
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 9b0af1\\nWall time: 0.3775 seconds\\nProcess running with session ID 864710261\\nOutput:\\nCL_L1_NONZERO\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"9b0af1\",\"wall_time_seconds\":0.3774913,\"output\":\"CL_L1_NONZERO\\r\\n\",\"session_id\":864710261}}",
+        "truncated": false,
+        "chars": 277
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_NONZERO; exit 7",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_NONZERO; exit 7",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 864710261,
+        "durationMs": 377,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 5,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485222062,
+    "call": {
+      "callId": "e23783b0-ca76-4acc-b55d-652a1595659c",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485222062,
+      "durationMs": 20,
+      "args": {
+        "text": "{\"session_id\":864710261,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 25c172\\nWall time: 0.0200 seconds\\nProcess exited with code 7\\nCompleted session ID: 864710261\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"25c172\",\"wall_time_seconds\":0.0199851,\"output\":\"\",\"exit_code\":7,\"completed_session_id\":864710261}}",
+        "truncated": false,
+        "chars": 285
+      },
+      "outcome": "process_exit_nonzero",
+      "summary": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Waited on session 864710261",
+        "metric": "✕ exit 7"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 864710261",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 7,
+        "running": false,
+        "processSessionId": 864710261,
+        "durationMs": 20,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 6,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485222112,
+    "call": {
+      "callId": "296dd41e-b1ae-4270-9699-1294e8569e28",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485222112,
+      "durationMs": 356,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0\",\"workdir\":\"/p\",\"login\":false,\"tty\":false,\"yield_time_ms\":250}",
+        "truncated": false,
+        "chars": 159
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: be7f48\\nWall time: 0.2588 seconds\\nProcess running with session ID 484543008\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"be7f48\",\"wall_time_seconds\":0.2587846,\"output\":\"\",\"session_id\":484543008}}",
+        "truncated": false,
+        "chars": 243
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 484543008,
+        "durationMs": 259,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 7,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485222515,
+    "call": {
+      "callId": "67638c8f-8841-438b-8817-ca77501d3724",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485222515,
+      "durationMs": 215,
+      "args": {
+        "text": "{\"session_id\":484543008,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 7de260\\nWall time: 0.2156 seconds\\nProcess running with session ID 484543008\\nOutput:\\nCL_L1_BEGIN\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"7de260\",\"wall_time_seconds\":0.215608,\"output\":\"CL_L1_BEGIN\\r\\n\",\"session_id\":484543008}}",
+        "truncated": false,
+        "chars": 272
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 484543008,
+        "durationMs": 216,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 8,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485222778,
+    "call": {
+      "callId": "e43be324-6a91-4948-9203-e95b9bba8709",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485222778,
+      "durationMs": 1004,
+      "args": {
+        "text": "{\"session_id\":484543008,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: d520d8\\nWall time: 1.0040 seconds\\nProcess running with session ID 484543008\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"d520d8\",\"wall_time_seconds\":1.0039981,\"output\":\"\",\"session_id\":484543008}}",
+        "truncated": false,
+        "chars": 243
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 484543008,
+        "durationMs": 1004,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 9,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485223845,
+    "call": {
+      "callId": "2243974a-66d5-450d-8786-8c6d6d021e0b",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485223845,
+      "durationMs": 560,
+      "args": {
+        "text": "{\"session_id\":484543008,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 22b507\\nWall time: 0.5601 seconds\\nProcess running with session ID 484543008\\nOutput:\\nCL_L1_END\"}],\"structuredContent\":{\"chunk_id\":\"22b507\",\"wall_time_seconds\":0.5601225,\"output\":\"CL_L1_END\",\"session_id\":484543008}}",
+        "truncated": false,
+        "chars": 261
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 484543008,
+        "durationMs": 560,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 10,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485224452,
+    "call": {
+      "callId": "f5ba7ed1-a473-4279-9f14-f5a896d9447c",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485224452,
+      "durationMs": 11,
+      "args": {
+        "text": "{\"session_id\":484543008,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 1e8433\\nWall time: 0.0114 seconds\\nProcess exited with code 0\\nCompleted session ID: 484543008\\nOutput:\\n\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"1e8433\",\"wall_time_seconds\":0.0113626,\"output\":\"\\r\\n\",\"exit_code\":0,\"completed_session_id\":484543008}}",
+        "truncated": false,
+        "chars": 293
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 484543008,
+        "durationMs": 11,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 11,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485224515,
+    "call": {
+      "callId": "55bb0e70-fcab-4718-91f9-d48c9e567b9d",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485224515,
+      "durationMs": 564,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_COMPLETE; exit 0\",\"workdir\":\"/p\",\"login\":false,\"tty\":false,\"yield_time_ms\":10000}",
+        "truncated": false,
+        "chars": 108
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 602344\\nWall time: 0.3671 seconds\\nProcess running with session ID 1628553971\\nOutput:\\nCL_L1_COMPLETE\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"602344\",\"wall_time_seconds\":0.3671385,\"output\":\"CL_L1_COMPLETE\\r\\n\",\"session_id\":1628553971}}",
+        "truncated": false,
+        "chars": 281
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_COMPLETE; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_COMPLETE; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1628553971,
+        "durationMs": 367,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 12,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485225119,
+    "call": {
+      "callId": "d929034c-a229-4569-9fae-66ed75fd0136",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485225119,
+      "durationMs": 14,
+      "args": {
+        "text": "{\"session_id\":1628553971,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: b357ce\\nWall time: 0.0142 seconds\\nProcess exited with code 0\\nCompleted session ID: 1628553971\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"b357ce\",\"wall_time_seconds\":0.014226,\"output\":\"\",\"exit_code\":0,\"completed_session_id\":1628553971}}",
+        "truncated": false,
+        "chars": 286
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1628553971"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1628553971",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 1628553971,
+        "durationMs": 14,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 13,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485225175,
+    "call": {
+      "callId": "cad4cf9e-c24d-42d1-9ec5-4697107f2b09",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485225175,
+      "durationMs": 224,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0\",\"workdir\":\"/p\",\"login\":false,\"tty\":true,\"yield_time_ms\":250}",
+        "truncated": false,
+        "chars": 166
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 34cdc8\\nWall time: 0.1806 seconds\\nProcess running with session ID 896110135\\nOutput:\\n\\u001b[?9001h\\u001b[?1004h\"}],\"structuredContent\":{\"chunk_id\":\"34cdc8\",\"wall_time_seconds\":0.1805654,\"output\":\"\\u001b[?9001h\\u001b[?1004h\",\"session_id\":896110135}}",
+        "truncated": false,
+        "chars": 295
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 896110135,
+        "durationMs": 181,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 14,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485225430,
+    "call": {
+      "callId": "492359eb-af45-493c-b826-28281f779068",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485225430,
+      "durationMs": 295,
+      "args": {
+        "text": "{\"session_id\":896110135,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: c3ed8b\\nWall time: 0.2943 seconds\\nProcess running with session ID 896110135\\nOutput:\\n\\u001b[?25l\\u001b[2J\\u001b[m\\u001b[HCL_L1_PTY_BEGIN\\r\\n\\u001b]0;C:\\\\Users\\\\kaisa\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\\u0007\\u001b[?25h\"}],\"structuredContent\":{\"chunk_id\":\"c3ed8b\",\"wall_time_seconds\":0.294332,\"output\":\"\\u001b[?25l\\u001b[2J\\u001b[m\\u001b[HCL_L1_PTY_BEGIN\\r\\n\\u001b]0;C:\\\\Users\\\\kaisa\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\\u0007\\u001b[?25h\",\"session_id\":896110135}}",
+        "truncated": false,
+        "chars": 618
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 896110135,
+        "durationMs": 294,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 15,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485225768,
+    "call": {
+      "callId": "9957711f-93b7-4c7c-ab66-d9bd6f03ef5d",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485225768,
+      "durationMs": 1009,
+      "args": {
+        "text": "{\"session_id\":896110135,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 54358a\\nWall time: 1.0090 seconds\\nProcess running with session ID 896110135\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"54358a\",\"wall_time_seconds\":1.0090197,\"output\":\"\",\"session_id\":896110135}}",
+        "truncated": false,
+        "chars": 243
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 896110135,
+        "durationMs": 1009,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 16,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485226840,
+    "call": {
+      "callId": "6ad1d8d6-675a-428a-bdb7-a930ee48211c",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485226840,
+      "durationMs": 543,
+      "args": {
+        "text": "{\"session_id\":896110135,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 304707\\nWall time: 0.5426 seconds\\nProcess running with session ID 896110135\\nOutput:\\nCL_L1_PTY_END\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"304707\",\"wall_time_seconds\":0.5425996,\"output\":\"CL_L1_PTY_END\\r\\n\",\"session_id\":896110135}}",
+        "truncated": false,
+        "chars": 277
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 896110135,
+        "durationMs": 543,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 17,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485227430,
+    "call": {
+      "callId": "f3e9eb28-88db-43a8-ab1b-2bd4362307e6",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485227430,
+      "durationMs": 20,
+      "args": {
+        "text": "{\"session_id\":896110135,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 1c42e9\\nWall time: 0.0201 seconds\\nProcess exited with code 0\\nCompleted session ID: 896110135\\nOutput:\\n\\u001b[?9001l\\u001b[?1004l\"}],\"structuredContent\":{\"chunk_id\":\"1c42e9\",\"wall_time_seconds\":0.0200667,\"output\":\"\\u001b[?9001l\\u001b[?1004l\",\"exit_code\":0,\"completed_session_id\":896110135}}",
+        "truncated": false,
+        "chars": 337
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 896110135,
+        "durationMs": 20,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 18,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485227488,
+    "call": {
+      "callId": "1bdeeb1f-bcc4-454d-b956-89f2587889d0",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485227488,
+      "durationMs": 539,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output '[redacted]'; Write-Output 'public output'; exit 0\",\"workdir\":\"/p\",\"login\":false,\"yield_time_ms\":10000}",
+        "truncated": false,
+        "chars": 124
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: f69e79\\nWall time: 0.3470 seconds\\nProcess running with session ID 926340905\\nOutput:\\[redacted]\"}],\"structuredContent\":{\"chunk_id\":\"f69e79\",\"wall_time_seconds\":0.3470012,\"output\":\"[redacted]\",\"session_id\":926340905}}",
+        "truncated": false,
+        "chars": 262
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output '[redacted]'; Write-Output 'public output'; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output '[redacted]'; Write-Output 'public output'; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 926340905,
+        "durationMs": 347,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 19,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485228081,
+    "call": {
+      "callId": "73c0571d-03bd-4f9d-bbcb-a7d87916eac7",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485228081,
+      "durationMs": 6,
+      "args": {
+        "text": "{\"session_id\":926340905,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: a3725a\\nWall time: 0.0055 seconds\\nProcess exited with code 0\\nCompleted session ID: 926340905\\nOutput:\\npublic output\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"a3725a\",\"wall_time_seconds\":0.0054913,\"output\":\"public output\\r\\n\",\"exit_code\":0,\"completed_session_id\":926340905}}",
+        "truncated": false,
+        "chars": 319
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 926340905"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 926340905",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 926340905,
+        "durationMs": 5,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 20,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485228142,
+    "call": {
+      "callId": "b43bda15-414a-4c38-b666-0ddd12cb72be",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485228142,
+      "durationMs": 614,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output '[redacted]'; Write-Output ('public output ' * 1200); exit 0\\n# public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public meta",
+        "truncated": true,
+        "chars": 14538,
+        "assetId": "033a06115c4730a9a4d8eb7b5bea7fcb.txt",
+        "digest": "033a06115c4730a9a4d8eb7b5bea7fcb5c5e3a7676ab67b7050685c66bea031b"
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 3dbcef\\nWall time: 0.3816 seconds\\nProcess running with session ID 2147056169\\nOutput:\\[redacted]\"}],\"structuredContent\":{\"chunk_id\":\"3dbcef\",\"wall_time_seconds\":0.3815646,\"output\":\"[redacted]\",\"session_id\":2147056169}}",
+        "truncated": false,
+        "chars": 264
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output '[redacted]'; Write-Output ('public output ' * 1200); exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output '[redacted]'; Write-Output ('public output ' * 1200); exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 2147056169,
+        "durationMs": 382,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 21,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485228809,
+    "call": {
+      "callId": "7091ff46-18bf-48d6-b4b6-ad746cc76b53",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485228809,
+      "durationMs": 3,
+      "args": {
+        "text": "{\"session_id\":2147056169,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 6cd411\\nWall time: 0.0025 seconds\\nProcess exited with code 0\\nCompleted session ID: 2147056169\\nOutput:\\n\\r\\npublic output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output publi",
+        "truncated": true,
+        "chars": 33903,
+        "assetId": "20959656b0addb20b7acf050eb164396.txt",
+        "digest": "20959656b0addb20b7acf050eb1643969a2a8ea00d34b9160a229042a94f157e"
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 2147056169"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 2147056169",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 2147056169,
+        "durationMs": 3,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 22,
+    "turnOrigin": null
+  },
+  {
+    "kind": "tool_call",
+    "source": "mcp",
+    "time": 1792485228875,
+    "call": {
+      "callId": "550aeda7-00a0-419c-a08a-b5918ed37b72",
+      "tool": "read",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485228875,
+      "durationMs": 10,
+      "args": {
+        "text": "{\"paths\":[\"/p/a.txt\"]}",
+        "truncated": false,
+        "chars": 22
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"--- /p/a.txt — lines 1-2 of 2 ---\\nsize: 24 B\\n1\\tone needle\\n2\\ttwo needle\"}]}",
+        "truncated": false,
+        "chars": 114
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "read",
+        "tone": "neutral",
+        "title": "Read a.txt"
+      },
+      "runningSummary": {
+        "title": "Reading a.txt",
+        "kind": "read"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": null,
+        "processSessionId": null,
+        "durationMs": null,
+        "timedOut": false,
+        "failed": false
+      }
+    },
+    "seq": 23,
+    "turnOrigin": null
+  }
+]

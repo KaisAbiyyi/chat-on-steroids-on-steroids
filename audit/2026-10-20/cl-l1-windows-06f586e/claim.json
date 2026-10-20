@@ -1,0 +1,15 @@
+{
+  "remoteClaim": "No shared lock controller installed; no open PR/issue claim observed at preflight",
+  "resourceLocks": [
+    "windows-native"
+  ],
+  "assignment": "Direct user request",
+  "owner": "Codex local session 2026-10-20",
+  "status": "RUNNING",
+  "scope": "Synthetic Windows qualification only; no feature implementation",
+  "claimGeneration": 1,
+  "taskId": "CL-L1",
+  "qualificationCheckout": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-06f586e",
+  "baseSha": "06f586e423e5abb4f95eba582996c4a5278c1311",
+  "branch": "detached HEAD for exact-SHA qualification"
+}
