@@ -151,3 +151,78 @@ fn oversized_untracked_binary_keeps_binary_classification_without_preview() {
     assert_eq!(diff["tooLarge"], true);
     assert!(diff["currentText"].is_null());
 }
+
+#[test]
+fn same_statistic_worktree_edits_invalidate_the_review_revision() {
+    let d = repository();
+    std::fs::write(d.path().join("a"), "base\n").unwrap();
+    commit(d.path());
+    std::fs::write(d.path().join("a"), "first\n").unwrap();
+    let old = git::snapshot(&roots(d.path()), "/p", "fixture", None).unwrap();
+    std::fs::write(d.path().join("a"), "other\n").unwrap();
+    let new = git::snapshot(&roots(d.path()), "/p", "fixture", None).unwrap();
+    assert_eq!(old["changes"], new["changes"]);
+    assert_ne!(old["revision"], new["revision"]);
+    assert!(
+        git::diff(
+            &roots(d.path()),
+            "/p",
+            "fixture",
+            "a",
+            None,
+            old["revision"].as_str()
+        )
+        .is_err()
+    );
+    assert_eq!(
+        git::diff(
+            &roots(d.path()),
+            "/p",
+            "fixture",
+            "a",
+            None,
+            new["revision"].as_str()
+        )
+        .unwrap()["currentText"],
+        "other\n"
+    );
+}
+
+#[test]
+fn worktree_review_revision_includes_the_base_commit() {
+    let d = repository();
+    std::fs::write(d.path().join("a"), "base\n").unwrap();
+    commit(d.path());
+    std::fs::write(d.path().join("a"), "edit\n").unwrap();
+    let old = git::snapshot(&roots(d.path()), "/p", "fixture", None).unwrap();
+    command(
+        d.path(),
+        &["commit", "--allow-empty", "--quiet", "-m", "new base"],
+    );
+    let new = git::snapshot(&roots(d.path()), "/p", "fixture", None).unwrap();
+    assert_eq!(old["changes"], new["changes"]);
+    assert_ne!(old["revision"], new["revision"]);
+}
+
+#[cfg(unix)]
+#[test]
+fn git_diff_refuses_symlinks_to_other_approved_project_files() {
+    let d = repository();
+    std::fs::create_dir(d.path().join("selected")).unwrap();
+    std::fs::write(d.path().join("sibling.txt"), "outside selected project").unwrap();
+    std::os::unix::fs::symlink("../sibling.txt", d.path().join("selected/link")).unwrap();
+    let s = git::snapshot(&roots(d.path()), "/p/selected", "fixture", None).unwrap();
+    assert_eq!(s["state"], "ready");
+    assert_eq!(s["changes"][0]["binary"], true);
+    assert!(
+        git::diff(
+            &roots(d.path()),
+            "/p/selected",
+            "fixture",
+            "link",
+            None,
+            None
+        )
+        .is_err()
+    );
+}
