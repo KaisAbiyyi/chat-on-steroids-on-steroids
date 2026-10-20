@@ -212,6 +212,46 @@ fn rebinding_fences_stale_manual_titles_models_and_request_correlation_after_res
 }
 
 #[test]
+fn reactivating_an_owned_retired_alias_is_consistent_before_and_after_restart() {
+    let temp = tempfile::tempdir().unwrap();
+    let store = SessionStore::open(temp.path()).unwrap();
+    create(&store, "session-roundtrip", "conversation-original");
+    assert!(
+        store
+            .rebind(
+                "session-roundtrip",
+                Some("conversation-original"),
+                "conversation-next",
+                None,
+                110
+            )
+            .unwrap()
+    );
+    assert!(
+        store
+            .rebind(
+                "session-roundtrip",
+                Some("conversation-next"),
+                "conversation-original",
+                None,
+                120
+            )
+            .unwrap()
+    );
+    let before = store.summary("session-roundtrip").unwrap().unwrap();
+    assert_eq!(before["conversationId"], "conversation-original");
+    assert_eq!(before["retiredChatAt"]["conversation-original"], serde_json::Value::Null);
+    assert_eq!(before["retiredChatAt"]["conversation-next"], 120);
+    drop(store);
+    let after = SessionStore::open(temp.path())
+        .unwrap()
+        .summary("session-roundtrip")
+        .unwrap()
+        .unwrap();
+    assert_eq!(after, before);
+}
+
+#[test]
 fn failed_rebind_keeps_last_committed_epoch_on_disk_and_in_memory() {
     let temp = tempfile::tempdir().unwrap();
     let store = SessionStore::open(temp.path()).unwrap();
