@@ -31,6 +31,8 @@ struct Entry {
     project: Option<String>,
     launch: Launch,
     flow: Mutex<Flow>,
+    // Serializes operations against close and rechecks live grants at use.
+    operation: Mutex<()>,
     wake: Condvar,
     writer: Mutex<Option<Box<dyn Write + Send>>>,
     master: Mutex<Option<Box<dyn MasterPty + Send>>>,
@@ -88,7 +90,12 @@ impl Terminals {
         cols: u16,
         rows: u16,
     ) -> io::Result<Value> {
-        if id.is_empty() || id.len() > 200 || !(self.0.allowed)() {
+        if id.is_empty()
+            || id.len() > 200
+            || !(1..=1000).contains(&cols)
+            || !(1..=500).contains(&rows)
+            || !(self.0.allowed)()
+        {
             return Err(denied());
         }
         let ticket = uuid::Uuid::new_v4();
@@ -171,6 +178,11 @@ impl Terminals {
                 let mut command = CommandBuilder::new(&launch.program);
                 command.args(&launch.args);
                 command.cwd(&launch.cwd);
+                for (key, _) in std::env::vars_os() {
+                    if crate::process::secret_environment(&key.to_string_lossy()) {
+                        command.env_remove(key);
+                    }
+                }
                 command.env_remove("ELECTRON_RUN_AS_NODE");
                 command.env("TERM", "xterm-256color");
                 let reader = pair.master.try_clone_reader().map_err(io::Error::other)?;
@@ -197,6 +209,7 @@ impl Terminals {
                 unacked: 0,
                 paused: false,
             }),
+            operation: Mutex::new(()),
             wake: Condvar::new(),
             writer: Mutex::new(Some(writer)),
             master: Mutex::new(Some(master)),
@@ -290,6 +303,8 @@ impl Terminals {
     }
     pub fn write(&self, id: &str, data: &str) -> io::Result<()> {
         let entry = self.entry(id)?;
+        // No stale entry may write after a concurrent close has completed.
+        let _operation = entry.operation.lock().unwrap();
         if !(self.0.allowed)()
             || !(self.0.validate)(entry.project.as_deref(), &entry.launch)?
             || !entry.flow.lock().unwrap().live
@@ -314,7 +329,17 @@ impl Terminals {
         }
     }
     pub fn resize(&self, id: &str, cols: u16, rows: u16) -> io::Result<()> {
+        if !(1..=1000).contains(&cols) || !(1..=500).contains(&rows) {
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, "Invalid terminal dimensions"));
+        }
         let entry = self.entry(id)?;
+        let _operation = entry.operation.lock().unwrap();
+        if !(self.0.allowed)()
+            || !(self.0.validate)(entry.project.as_deref(), &entry.launch)?
+            || !entry.flow.lock().unwrap().live
+        {
+            return Err(denied());
+        }
         if let Some(master) = entry.master.lock().unwrap().as_ref() {
             master.resize(size(cols, rows)).map_err(io::Error::other)?;
         }
@@ -327,6 +352,8 @@ impl Terminals {
             state.entries.remove(id)
         };
         if let Some(entry) = entry {
+            // Wait for any accepted in-flight write/resize before retirement.
+            let _operation = entry.operation.lock().unwrap();
             let mut flow = entry.flow.lock().unwrap();
             flow.live = false;
             flow.paused = false;
