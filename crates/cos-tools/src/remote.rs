@@ -245,6 +245,7 @@ impl Sftp {
             Ok(t) => t,
             Err(e) => {
                 let _ = child.kill();
+                let _ = child.wait();
                 return Err(e);
             }
         };
