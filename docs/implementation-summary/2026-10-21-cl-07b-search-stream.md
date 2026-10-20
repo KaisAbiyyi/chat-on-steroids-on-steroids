@@ -14,3 +14,6 @@
 ## Known limits
 - This branch does not bundle or invoke an external ripgrep binary, and does not claim full native ripgrep results/output streaming or full JavaScript regex equivalence. Existing content readers stream into a bounded 2 MiB buffer before matching; client receives only the final bounded outcome, not incremental partial events. These gaps remain CL-07B acceptance review targets, not retroactive PASS claims.
 - UNIT CL-07B; BRANCH work/cl-07b-search-stream-20261021; PR #28; PERFORMANCE not measured; LOCAL REQUIRED CL-L3 after CL-06B also accepted; YOU REQUIRED no; NEXT CI, parity review and remaining streamed-result scope, then merge/reconciliation if qualified.
+
+## Late-worker result fence
+- Coordinator rejects results completed after the shared search deadline and returns `truncated: time`, preserving earlier accepted hits rather than claiming success after timeout. Native/SFTP read calls cannot be forcibly interrupted while blocked in an OS operation; client-side hard 10-second latency is NOT proven.

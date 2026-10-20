@@ -155,6 +155,14 @@ pub(super) fn scan(
                             done = true;
                             continue;
                         }
+                        // Work already in flight may finish after the shared deadline.
+                        // Keep previously published hits but never claim late results
+                        // were delivered within the search time budget.
+                        if Instant::now() > deadline {
+                            outcome.stop(StopReason::Time);
+                            done = true;
+                            continue;
+                        }
                         outcome.skipped += skipped;
                         for hit in hits {
                             if outcome.hits.len() >= options.limit {
