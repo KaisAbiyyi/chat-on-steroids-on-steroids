@@ -67,7 +67,8 @@ impl DiagnosticLog {
             .entries
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let record = json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded});
+        let record =
+            json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded});
         // Count encoded bytes rather than only entries so a large ring never
         // becomes an unbounded RAM report under repeated long diagnostics.
         let bytes = serde_json::to_vec(&record)
@@ -75,9 +76,7 @@ impl DiagnosticLog {
             .len();
         entries.total_bytes += bytes;
         entries.rows.push_back((record, bytes));
-        while entries.rows.len() > self.capacity
-            || entries.total_bytes > MAX_DIAGNOSTIC_BYTES
-        {
+        while entries.rows.len() > self.capacity || entries.total_bytes > MAX_DIAGNOSTIC_BYTES {
             if let Some((_, old_bytes)) = entries.rows.pop_front() {
                 entries.total_bytes -= old_bytes;
             }

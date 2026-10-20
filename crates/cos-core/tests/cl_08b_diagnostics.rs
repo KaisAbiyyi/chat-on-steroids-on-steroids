@@ -39,7 +39,10 @@ fn total_diagnostic_size_stays_bounded_with_many_long_entries() {
         log.push("info", &long);
     }
     let snapshot = log.snapshot();
-    assert!(snapshot.len() < 300, "A count-only ring would retain every entry");
+    assert!(
+        snapshot.len() < 300,
+        "A count-only ring would retain every entry"
+    );
     assert!(!snapshot.is_empty());
     let total: usize = snapshot
         .iter()
