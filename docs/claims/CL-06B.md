@@ -9,8 +9,12 @@
 - RESOURCE_LOCKS: sftp
 - DEPENDENCIES: CL-06A merged and accepted
 - EXCLUSIVE WRITE SCOPE: crates/cos-tools/src/remote.rs and focused SFTP tests
-- CHECKPOINT_SHA: pending first implementation checkpoint
+- CHECKPOINT_SHA: cdc8a5d3f6bbedec1bde037b1ead6f488c56ff4f (pre-summary source checkpoint; final-head CI pending)
 - ACCEPTANCE: Remote path/handle confinement, transport trust, bounded SFTP behavior and stable error mapping. Local CL-L3 remains separate.
 - NOTION: https://app.notion.com/p/3ffd8330eb46818684e5f9a116e56336
 - LOCAL REQUIRED: CL-L3; Windows native gate NOT RUN
 - OTHER AGENTS: Do not edit this unit or the overlapping authority while this claim is active. Both requested B units have independent logical locks and worktrees.
+
+## Implementation checkpoint — 2026-10-21
+
+Source changes and regression cases are on this claimed branch. Detailed limitations and gates: [implementation summary](../implementation-summary/2026-10-21-cl-06b-sftp.md). Exact final-head Windows/Ubuntu CI, independent review, merge, task-registry acceptance and native gate all remain pending; no claim release.
