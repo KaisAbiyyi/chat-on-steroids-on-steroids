@@ -59,7 +59,7 @@ class TaskBoardTests(unittest.TestCase):
         ready, _ = board.readiness(self.data)
         self.assertEqual(
             {task["id"] for task in ready},
-            {"CL-05A", "CL-06B", "CL-07A", "CL-08A", "CL-09A"},
+            {"CL-05A", "CL-06B", "CL-07B", "CL-08A", "CL-09A"},
         )
         self.assertTrue(all(task["kind"] == "C" for task in ready))
         self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 5)
@@ -120,7 +120,7 @@ class TaskBoardTests(unittest.TestCase):
     def test_completed_units_are_not_reoffered_as_ready(self):
         ready, _ = board.readiness(self.data)
         offered = {t["id"] for t in ready}
-        self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-06A"}.isdisjoint(offered))
+        self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-06A", "CL-07A"}.isdisjoint(offered))
 
 
 if __name__ == "__main__":
