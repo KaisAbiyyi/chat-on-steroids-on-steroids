@@ -157,7 +157,9 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
         return Err(invalid("Journal is not a regular file"));
     }
     if metadata.len() > MAX_HISTORY_JOURNAL_BYTES {
-        return Err(invalid("History journal exceeds replay budget; original bytes preserved"));
+        return Err(invalid(
+            "History journal exceeds replay budget; original bytes preserved",
+        ));
     }
     let mut reader = BufReader::with_capacity(64 * 1024, file);
     let mut carry = Vec::new();
@@ -206,9 +208,9 @@ fn accept_line(raw: &[u8], accept: &mut impl FnMut(Value), damaged: &mut usize) 
         return Ok(());
     }
     match serde_json::from_slice::<Value>(raw) {
-        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > MAX_HISTORY_SEQUENCE) => {
-            Err(invalid("History journal contains an unsafe sequence; original bytes preserved"))
-        }
+        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > MAX_HISTORY_SEQUENCE) => Err(invalid(
+            "History journal contains an unsafe sequence; original bytes preserved",
+        )),
         Ok(v) if v["seq"].as_u64().is_some_and(|n| n > 0) && v["kind"].is_string() => {
             accept(v);
             Ok(())
@@ -349,7 +351,10 @@ impl SessionStore {
         // A corrupt shard/map with an unsafe JSON sequence must not drive a
         // replay cursor beyond the range external JS consumers can represent.
         for event in messages.values() {
-            if event["seq"].as_u64().is_some_and(|seq| seq > MAX_HISTORY_SEQUENCE) {
+            if event["seq"]
+                .as_u64()
+                .is_some_and(|seq| seq > MAX_HISTORY_SEQUENCE)
+            {
                 return Err(invalid("Canonical message has an unsafe history sequence"));
             }
         }
