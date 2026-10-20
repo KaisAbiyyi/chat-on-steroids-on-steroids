@@ -92,16 +92,15 @@ pub(super) fn scan(
                     let mut job = Some(initial);
                     while let Some(path) = job {
                         let mut skipped = 0;
-                        let result =
-                            engine::scan_file(
-                                backend,
-                                &path,
-                                options,
-                                expression,
-                                &authorize,
-                                &mut skipped,
-                            )
-                                .map(|hits| (hits, skipped));
+                        let result = engine::scan_file(
+                            backend,
+                            &path,
+                            options,
+                            expression,
+                            &authorize,
+                            &mut skipped,
+                        )
+                        .map(|hits| (hits, skipped));
                         if sender.send(Event::Completed(result)).is_err() {
                             break;
                         }

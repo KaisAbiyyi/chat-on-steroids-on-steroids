@@ -26,24 +26,12 @@ fn malformed_regex_is_rejected_even_for_empty_directory_or_skipped_file() {
         regex: true,
         ..Options::new("[unterminated")
     };
-    let error = search::find_checked(
-        &Files::default(),
-        &roots,
-        "/p",
-        &opts,
-        &|| Ok(()),
-    )
-    .unwrap_err();
+    let error =
+        search::find_checked(&Files::default(), &roots, "/p", &opts, &|| Ok(())).unwrap_err();
     assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
     fs::write(temp.path().join("big.txt"), vec![0; 2 * 1024 * 1024 + 1]).unwrap();
-    let error = search::find_checked(
-        &Files::default(),
-        &roots,
-        "/p/big.txt",
-        &opts,
-        &|| Ok(()),
-    )
-    .unwrap_err();
+    let error = search::find_checked(&Files::default(), &roots, "/p/big.txt", &opts, &|| Ok(()))
+        .unwrap_err();
     assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
 }
 
@@ -56,15 +44,13 @@ fn unsupported_js_backreference_and_lookaround_fail_explicitly() {
             regex: true,
             ..Options::new(pattern)
         };
-        let error = search::find_checked(
-            &Files::default(),
-            &roots,
-            "/p",
-            &opts,
-            &|| Ok(()),
-        )
-        .unwrap_err();
-        assert_eq!(error.kind(), io::ErrorKind::Unsupported, "{pattern}: {error}");
+        let error =
+            search::find_checked(&Files::default(), &roots, "/p", &opts, &|| Ok(())).unwrap_err();
+        assert_eq!(
+            error.kind(),
+            io::ErrorKind::Unsupported,
+            "{pattern}: {error}"
+        );
     }
 }
 

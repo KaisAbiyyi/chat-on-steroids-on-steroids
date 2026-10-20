@@ -121,7 +121,10 @@ pub fn search(
     // Compile once, before metadata/traversal: an invalid or unsupported
     // expression must never be reported as a successful empty search.
     let expression = if options.regex {
-        Some(compile_content_regex(options.query, options.case_sensitive)?)
+        Some(compile_content_regex(
+            options.query,
+            options.case_sensitive,
+        )?)
     } else {
         None
     };
@@ -415,7 +418,10 @@ fn compile_content_regex(pattern: &str, case_sensitive: bool) -> io::Result<Rege
             chars.next();
         }
     }
-    if ["(?=", "(?!", "(?<=", "(?<!"].iter().any(|s| pattern.contains(s)) {
+    if ["(?=", "(?!", "(?<=", "(?<!"]
+        .iter()
+        .any(|s| pattern.contains(s))
+    {
         return Err(io::Error::new(
             io::ErrorKind::Unsupported,
             "Search regex uses JavaScript lookaround syntax not supported by ripgrep",
