@@ -231,7 +231,11 @@ impl Supervisor {
         };
         if let Some((id, owner_generation)) = process {
             let owner = format!("tunnel:{owner_generation}");
-            if let Err(error) = self.0.processes.retire_discard_pending(id, &owner, Duration::from_secs(2)) {
+            if let Err(error) =
+                self.0
+                    .processes
+                    .retire_discard_pending(id, &owner, Duration::from_secs(2))
+            {
                 let mut state = lock(&self.0.state)?;
                 // Keep custody on every failure. A generation never goes backwards,
                 // so a delayed old observer cannot become current again.
