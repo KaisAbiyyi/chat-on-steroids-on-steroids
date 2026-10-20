@@ -181,13 +181,22 @@ fn terminal_id_cannot_be_reused_before_old_exit_event_settles() {
     let first = Arc::new(AtomicBool::new(false));
     let was_first = first.clone();
     let terminals = Terminals::new(
-        Arc::new(move |_| Ok(Launch {
-            program: shell.path.clone(),
-            args: shell.args(if cfg!(windows) { "ping -n 5 127.0.0.1 >nul" } else { "sleep 3" }, false),
-            cwd: cwd.clone(),
-            shell: shell.kind.clone(),
-            identity: None,
-        })),
+        Arc::new(move |_| {
+            Ok(Launch {
+                program: shell.path.clone(),
+                args: shell.args(
+                    if cfg!(windows) {
+                        "ping -n 5 127.0.0.1 >nul"
+                    } else {
+                        "sleep 3"
+                    },
+                    false,
+                ),
+                cwd: cwd.clone(),
+                shell: shell.kind.clone(),
+                identity: None,
+            })
+        }),
         Arc::new(|| true),
         Arc::new(|_, _| Ok(true)),
         Arc::new(move |event| {
@@ -200,8 +209,10 @@ fn terminal_id_cannot_be_reused_before_old_exit_event_settles() {
     terminals.create("same-id", None, 80, 24).unwrap();
     terminals.close("same-id");
     event_rx.recv_timeout(Duration::from_secs(6)).unwrap();
-    assert!(terminals.create("same-id", None, 80, 24).is_err(),
-        "the previous terminal still owns its final exit event");
+    assert!(
+        terminals.create("same-id", None, 80, 24).is_err(),
+        "the previous terminal still owns its final exit event"
+    );
     barrier.wait();
     assert!(terminals.exited(Duration::from_secs(6)));
     terminals.create("same-id", None, 80, 24).unwrap();
