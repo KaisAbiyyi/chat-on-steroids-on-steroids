@@ -346,9 +346,7 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                 p.tone = "good";
             }
             if !running
-                && (cmds.is_some()
-                    || timedout
-                    || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true)
+                && (timedout || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true)
             {
                 p.doing = "Running exec_command".into();
             }

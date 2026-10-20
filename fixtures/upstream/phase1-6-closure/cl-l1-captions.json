@@ -658,13 +658,14 @@
     },
     {
       "group": "label",
-      "name": "69-units",
+      "name": "69-units/running",
       "tool": "exec_command",
       "args": {
         "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -683,13 +684,40 @@
     },
     {
       "group": "label",
-      "name": "70-units",
+      "name": "69-units/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "70-units/running",
       "tool": "exec_command",
       "args": {
         "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -708,13 +736,40 @@
     },
     {
       "group": "label",
-      "name": "71-units",
+      "name": "70-units/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "71-units/running",
       "tool": "exec_command",
       "args": {
         "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -733,13 +788,40 @@
     },
     {
       "group": "label",
-      "name": "astral-at-boundary",
+      "name": "71-units/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "astral-at-boundary/running",
       "tool": "exec_command",
       "args": {
         "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -758,13 +840,40 @@
     },
     {
       "group": "label",
-      "name": "bmp-over-boundary",
+      "name": "astral-at-boundary/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "bmp-over-boundary/running",
       "tool": "exec_command",
       "args": {
         "cmd": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -783,13 +892,40 @@
     },
     {
       "group": "label",
-      "name": "whitespace",
+      "name": "bmp-over-boundary/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "whitespace/running",
       "tool": "exec_command",
       "args": {
         "cmd": "# comment\r\n\r\n  echo\t\tpublic   text  \r\n  echo next"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -808,13 +944,40 @@
     },
     {
       "group": "label",
-      "name": "js-whitespace",
+      "name": "whitespace/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "# comment\r\n\r\n  echo\t\tpublic   text  \r\n  echo next"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo public text …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo public text …",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "js-whitespace/running",
       "tool": "exec_command",
       "args": {
         "cmd": "﻿echo  public﻿ text﻿"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -833,13 +996,40 @@
     },
     {
       "group": "label",
-      "name": "non-js-whitespace",
+      "name": "js-whitespace/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "﻿echo  public﻿ text﻿"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo public text",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo public text",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "non-js-whitespace/running",
       "tool": "exec_command",
       "args": {
         "cmd": "echopublic"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -858,13 +1048,40 @@
     },
     {
       "group": "label",
-      "name": "multiline",
+      "name": "non-js-whitespace/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "echopublic"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echopublic",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echopublic",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "multiline/running",
       "tool": "exec_command",
       "args": {
         "cmd": "echo public\necho second"
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -883,13 +1100,40 @@
     },
     {
       "group": "label",
-      "name": "empty",
+      "name": "multiline/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "echo public\necho second"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo public …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo public …",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "empty/running",
       "tool": "exec_command",
       "args": {
         "cmd": "# comment\n  "
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -908,7 +1152,33 @@
     },
     {
       "group": "label",
-      "name": "commands-array",
+      "name": "empty/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "# comment\n  "
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran a command",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running a command",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "commands-array/running",
       "tool": "exec_command",
       "args": {
         "cmds": [
@@ -919,6 +1189,7 @@
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -937,7 +1208,37 @@
     },
     {
       "group": "label",
-      "name": "empty-commands-array",
+      "name": "commands-array/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmds": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          3,
+          "echo second"
+        ]
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "empty-commands-array/running",
       "tool": "exec_command",
       "args": {
         "cmds": [],
@@ -945,6 +1246,7 @@
       },
       "evidence": {
         "running": true,
+        "exitCode": null,
         "durationMs": 5
       },
       "outcome": "ok",
@@ -958,6 +1260,33 @@
       },
       "running": {
         "title": "Starting echo fallback",
+        "kind": "run"
+      }
+    },
+    {
+      "group": "label",
+      "name": "empty-commands-array/completed",
+      "tool": "exec_command",
+      "args": {
+        "cmds": [],
+        "cmd": "echo fallback"
+      },
+      "evidence": {
+        "running": false,
+        "exitCode": 0,
+        "durationMs": 5
+      },
+      "outcome": "ok",
+      "durationMs": 5,
+      "resultHead": "",
+      "expected": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo fallback",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo fallback",
         "kind": "run"
       }
     }

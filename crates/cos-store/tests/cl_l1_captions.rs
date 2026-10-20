@@ -57,7 +57,7 @@ fn completion_metrics_require_exit_evidence_and_preserve_errors() {
 
 #[test]
 fn command_labels_match_source_whitespace_and_utf16_boundaries() {
-    check_group("label", 12);
+    check_group("label", 24);
 }
 
 #[test]

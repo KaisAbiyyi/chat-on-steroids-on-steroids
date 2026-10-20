@@ -54,7 +54,11 @@ for (const [name, args] of [
   ['empty', {cmd: '# comment\n  '}],
   ['commands-array', {cmds: ['a'.repeat(68), 3, 'echo second']}],
   ['empty-commands-array', {cmds: [], cmd: 'echo fallback'}],
-]) inputs.push({group: 'label', name, tool: 'exec_command', args, evidence: {running: true, durationMs: 5}, outcome: 'ok', durationMs: 5, resultHead: ''});
+]) for (const running of [true, false]) inputs.push({
+  group: 'label', name: `${name}/${running ? 'running' : 'completed'}`,
+  tool: 'exec_command', args, evidence: {running, exitCode: running ? null : 0, durationMs: 5},
+  outcome: 'ok', durationMs: 5, resultHead: '',
+});
 const cases = inputs.map(input => {
   const evidence = {...context.emptyEvidence(), ...input.evidence};
   const expected = api.summarizeToolCall({...input, evidence});
