@@ -1,5 +1,15 @@
 # Current CoS-Rust work state
 
+## CL-09A cloud MCP conformance — active claim (2026-10-20)
+
+- **TASK / CLAIM:** `CL-09A`, ChatGPT GitHub-connected cloud agent, session `chatgpt-20261020-cl09a-01`, generation 1; exclusive logical lock `mcp-protocol`.
+- **BRANCH / PR:** `work/cl-09a-mcp-conformance-20261020`, [PR #21](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/21), initial base `340cf55eddb2766c96e1e1f36eaeb118faecad04`. [Durable claim](claims/CL-09A.md).
+- **CHANGES:** MCP protocol rejects malformed params; HTTP enforces unambiguous MCP headers and emits JSON-RPC parse-error envelope; focused negative protocol/schema/live-permission regressions cover core/desktop/plugins surfaces.
+- **CLOUD VALIDATION:** CHECK EXACT FINAL PR HEAD; initial RED/format failures were addressed in subsequent branch checkpoints. No completion PASS or independent review claimed until verified on exact head. Repository dependency DAG is consistent with `CL-09A=claimed`.
+- **PARALLEL:** CL-05A [PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18) (`process-supervisor`) and CL-06A [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19) (`project-files`) are separately claimed; avoid their locked code and contracts.
+- **GATES:** no local Windows action now; CL-L5 remains BLOCKED until CL-09B **and** CL-09C are accepted. No owner U gate now. Phases 1–6 remain PARTIAL.
+- **NEXT:** exact-SHA Windows/Ubuntu Rust CI and independent boundary review; merge only after accepted verification and then update registry `claimed→done`, release lock and unlock CL-09B / CL-09C when all dependencies are done.
+
 ## Canonical Phase 7 preflight / readiness governance (2026-10-20)
 
 - **TASK:** `PLAN-LINEAR-01` adjusts roadmap and task eligibility only. Cloud branch `docs/phase-linear-dag-20261020`, PR [#17](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/17); this historical section records that edit and must not imply a feature unit is claimed.
