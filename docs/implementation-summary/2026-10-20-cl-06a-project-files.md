@@ -22,6 +22,7 @@ Pinned source hashes match the immutable manifest; original fixtures are unchang
 - Seven observed **RED → GREEN** cases are in the [machine receipt](../../audit/2026-10-20/cl-06a/cloud-receipt.json). First five failed against baseline. Ref-namespace replacement failed against `5389a06`. The publication-race test failed with only the final snapshot fence removed, then passed with it restored.
 - **PASS independent review:** `/root/review_cl06a` found a P2 optional-watch replacement issue in `5389a06`; reproduced, repaired and re-reviewed in `d8b82fa`. Independent reproduction, all eight watcher tests and the deterministic diff-publication test pass. No remaining actionable blocker.
 - **PENDING:** final exact-head GitHub Windows/Ubuntu format, strict Clippy, workspace tests, release build and DAG checks. An older green SHA does not qualify a later head.
+- **Windows CI observation:** push run [39444869755](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39444869755) on `d8b82fa` failed the namespace test's immediate no-further-event assertion. Windows may deliver trailing native notifications after the first debounce. The regression now lives in the private watcher test module and requires bounded quiescence of both raw pending debounce state and published invalidations before creating the next branch. Restoring stale-watch retention still produces RED; rearming produces GREEN. Independent review accepted the stronger isolation; no runtime change was needed for this test correction.
 
 ## Performance and handoff
 

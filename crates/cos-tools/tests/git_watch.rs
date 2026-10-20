@@ -45,23 +45,6 @@ fn wait(w: &mut GitWatchSet, roots: &[Root]) -> Option<Value> {
         std::thread::sleep(Duration::from_millis(20));
     }
 }
-fn settle(w: &mut GitWatchSet, roots: &[Root]) {
-    let deadline = Instant::now() + Duration::from_secs(3);
-    let mut quiet = Instant::now();
-    loop {
-        if w.poll(roots).unwrap().is_some() {
-            quiet = Instant::now();
-        }
-        if quiet.elapsed() >= Duration::from_millis(500) {
-            return;
-        }
-        assert!(
-            Instant::now() < deadline,
-            "Git watcher did not become quiescent"
-        );
-        std::thread::sleep(Duration::from_millis(20));
-    }
-}
 #[test]
 fn nested_worktree_writes_invalidate_one_active_project() {
     let d = tempfile::tempdir().unwrap();
@@ -116,32 +99,6 @@ fn linked_worktree_watches_new_ref_namespaces_after_refresh() {
     assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
 }
 
-#[test]
-fn linked_worktree_rearms_a_ref_namespace_replaced_before_debounce() {
-    let d = tempfile::tempdir().unwrap();
-    let main = d.path().join("main");
-    std::fs::create_dir(&main).unwrap();
-    command(&main, &["init", "--quiet", "-b", "main"]);
-    std::fs::write(main.join("a"), "public base").unwrap();
-    command(&main, &["add", "a"]);
-    command(&main, &["commit", "--quiet", "-m", "base"]);
-    command(&main, &["branch", "team/first"]);
-    command(
-        &main,
-        &["worktree", "add", "--quiet", "-b", "feature", "../linked"],
-    );
-    let r = roots(d.path());
-    let mut w = GitWatchSet::default();
-    w.sync(&r, "/p/linked", Some("linked")).unwrap();
-    command(&main, &["branch", "-D", "team/first"]);
-    command(&main, &["branch", "team/second"]);
-    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
-    // Windows can deliver trailing notifications after the first debounce.
-    // Drain until quiescent so none can masquerade as the next ref's event.
-    settle(&mut w, &r);
-    command(&main, &["branch", "team/third"]);
-    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
-}
 #[test]
 fn switching_projects_and_closing_discard_previous_generation_events() {
     let d = tempfile::tempdir().unwrap();

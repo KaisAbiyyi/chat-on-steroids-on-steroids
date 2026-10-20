@@ -90,5 +90,16 @@
   },
   "native_windows_gate": "NOT RUN; CL-L3 after CL-06B and CL-07B",
   "full_phase_1_6": "PARTIAL",
-  "you_required": "NO"
+  "you_required": "NO",
+  "ci_observations": [
+    {
+      "run": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39444869755",
+      "head_sha": "d8b82faf4b23fa55c0ea0a333e7a5929605f512a",
+      "platform": "windows-latest",
+      "result": "FAIL",
+      "test": "linked_worktree_rearms_a_ref_namespace_replaced_before_debounce",
+      "reason": "Immediate no-trailing-event assumption failed; Windows may deliver later native notifications.",
+      "resolution": "Private unit regression waits for both raw pending debounce and publications to become quiescent within a fixed bound; old stale-retain behavior remains RED, rearm GREEN. Independent review PASS; final-head CI pending."
+    }
+  ]
 }

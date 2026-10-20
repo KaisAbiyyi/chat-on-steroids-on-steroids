@@ -170,3 +170,93 @@ impl GitWatchSet {
         self.active = None;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn command(dir: &Path, args: &[&str]) {
+        let result = std::process::Command::new("git")
+            .args([
+                "-c",
+                "core.hooksPath=/dev/null",
+                "-c",
+                "user.name=Public Fixture",
+                "-c",
+                "user.email=fixture@example.invalid",
+                "-c",
+                "commit.gpgSign=false",
+            ])
+            .args(args)
+            .current_dir(dir)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+    }
+    fn roots(dir: &Path) -> [Root; 1] {
+        [Root {
+            name: "p".into(),
+            path: std::fs::canonicalize(dir).unwrap().to_string_lossy().into(),
+            remote: None,
+        }]
+    }
+    fn wait(w: &mut GitWatchSet, roots: &[Root]) -> Option<Value> {
+        let deadline = Instant::now() + Duration::from_secs(3);
+        loop {
+            let result = w.poll(roots).unwrap();
+            if result.is_some() || Instant::now() >= deadline {
+                return result;
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        }
+    }
+    fn settle(w: &mut GitWatchSet, roots: &[Root]) {
+        let deadline = Instant::now() + Duration::from_secs(3);
+        let mut quiet = Instant::now();
+        loop {
+            let emitted = w.poll(roots).unwrap().is_some();
+            // Observe raw events waiting for debounce as well as publications.
+            // Trailing native events must not satisfy the next ref's assertion.
+            if emitted || w.active.as_ref().unwrap().changed.is_some() {
+                quiet = Instant::now();
+            }
+            if quiet.elapsed() >= Duration::from_millis(500) {
+                return;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "Git watcher did not become quiescent"
+            );
+            std::thread::sleep(Duration::from_millis(20));
+        }
+    }
+    #[test]
+    fn linked_worktree_rearms_a_ref_namespace_replaced_before_debounce() {
+        let d = tempfile::tempdir().unwrap();
+        let main = d.path().join("main");
+        std::fs::create_dir(&main).unwrap();
+        command(&main, &["init", "--quiet", "-b", "main"]);
+        std::fs::write(main.join("a"), "public base").unwrap();
+        command(&main, &["add", "a"]);
+        command(&main, &["commit", "--quiet", "-m", "base"]);
+        command(&main, &["branch", "team/first"]);
+        command(
+            &main,
+            &["worktree", "add", "--quiet", "-b", "feature", "../linked"],
+        );
+        let r = roots(d.path());
+        let mut w = GitWatchSet::default();
+        w.sync(&r, "/p/linked", Some("linked")).unwrap();
+        command(&main, &["branch", "-D", "team/first"]);
+        command(&main, &["branch", "team/second"]);
+        assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+        // Windows can deliver trailing notifications after the first debounce.
+        // Drain until quiescent so none can masquerade as the next ref's event.
+        settle(&mut w, &r);
+        command(&main, &["branch", "team/third"]);
+        assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+    }
+}
