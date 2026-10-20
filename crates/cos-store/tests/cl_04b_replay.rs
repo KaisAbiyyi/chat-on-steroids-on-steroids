@@ -1,8 +1,4 @@
-use cos_store::{
-    CreateOptions, ReadOptions, SessionStore,
-    model,
-    store::MAX_HISTORY_SEQUENCE,
-};
+use cos_store::{CreateOptions, ReadOptions, SessionStore, model, store::MAX_HISTORY_SEQUENCE};
 use serde_json::{Value, json};
 use std::{fs, io::Write};
 
@@ -41,7 +37,12 @@ fn replay_fails_closed_on_nonrepresentable_journal_cursor_without_touching_bytes
     let restored = SessionStore::open(temp.path()).unwrap();
     assert!(restored.summary(id).is_err());
     assert_eq!(fs::read(&journal).unwrap(), bytes);
-    assert!(SessionStore::open(temp.path()).unwrap().summary(id).is_err());
+    assert!(
+        SessionStore::open(temp.path())
+            .unwrap()
+            .summary(id)
+            .is_err()
+    );
 }
 
 #[test]
@@ -58,7 +59,14 @@ fn max_safe_journal_cursor_replays_but_never_advances_into_unsafe_range() {
     assert!(restored.append(id, note(0)).is_err());
     assert_eq!(fs::read(&journal).unwrap(), bytes);
     drop(restored);
-    assert_eq!(SessionStore::open(temp.path()).unwrap().read(id, ReadOptions::default()).unwrap().len(), 1);
+    assert_eq!(
+        SessionStore::open(temp.path())
+            .unwrap()
+            .read(id, ReadOptions::default())
+            .unwrap()
+            .len(),
+        1
+    );
 }
 
 #[test]
