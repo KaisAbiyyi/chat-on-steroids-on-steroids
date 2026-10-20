@@ -334,7 +334,10 @@ impl Terminals {
     }
     pub fn resize(&self, id: &str, cols: u16, rows: u16) -> io::Result<()> {
         if !(1..=1000).contains(&cols) || !(1..=500).contains(&rows) {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "Invalid terminal dimensions"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid terminal dimensions",
+            ));
         }
         let entry = self.entry(id)?;
         let _operation = entry.operation.lock().unwrap();
