@@ -1,0 +1,21 @@
+name: Task DAG validation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  task-graph:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Validate canonical task graph
+        run: python tools/task_board.py check
+      - name: Validate readiness and phase sequencing regressions
+        run: python -m unittest discover -s tools -p test_task_board.py -v
+      - name: Publish readiness projection
+        run: python tools/task_board.py ready --json
