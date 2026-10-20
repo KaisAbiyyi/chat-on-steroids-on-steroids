@@ -22,18 +22,18 @@ class TaskBoardTests(unittest.TestCase):
         table = text.split("## Full 16-phase task registry", 1)[1].split("## Parallel execution lanes", 1)[0]
         rows = {}
         for line in table.splitlines():
-            if not line.startswith("| \`"):
+            if not line.startswith("| `"):
                 continue
             parts = [part.strip() for part in line.strip().strip("|").split("|")]
-            task_id = parts[0].strip("\`")
+            task_id = parts[0].strip("`")
             self.assertNotIn(task_id, rows)
             rows[task_id] = parts
         self.assertEqual(set(rows), set(self.tasks))
         for task_id, task in self.tasks.items():
             cols = rows[task_id]
-            dependencies = [token.strip("\`") for token in cols[2].split(", ")] if cols[2] != "NONE" else []
+            dependencies = [token.strip("`") for token in cols[2].split(", ")] if cols[2] != "NONE" else []
             self.assertEqual(dependencies, task["depends_on"], task_id)
-            self.assertEqual(cols[3], "\`" + task["resource_locks"][0] + "\`", task_id)
+            self.assertEqual(cols[3], "`" + task["resource_locks"][0] + "`", task_id)
             desired = "DONE" if task["status"] == "done" else (
                 "**READY · PARALLEL**" if not any(
                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
