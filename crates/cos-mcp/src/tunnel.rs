@@ -72,16 +72,16 @@ pub fn proxy_environment(
     vars: &std::collections::BTreeMap<String, String>,
 ) -> std::collections::BTreeMap<String, String> {
     let mut out = std::collections::BTreeMap::new();
-    if vars.get("HTTPS_PROXY").is_none_or(|s| s.trim().is_empty()) {
-        if let Some(proxy) = vars.get("ALL_PROXY").filter(|s| {
+    if vars.get("HTTPS_PROXY").is_none_or(|s| s.trim().is_empty())
+        && let Some(proxy) = vars.get("ALL_PROXY").filter(|s| {
             let lower = s.to_ascii_lowercase();
             ["http://", "https://", "socks5://", "socks5h://"]
                 .iter()
                 .any(|prefix| lower.starts_with(prefix))
                 && !s.chars().any(char::is_whitespace)
-        }) {
-            out.insert("HTTPS_PROXY".into(), proxy.clone());
-        }
+        })
+    {
+        out.insert("HTTPS_PROXY".into(), proxy.clone());
     }
     let mut bypass = vars.get("NO_PROXY").cloned().unwrap_or_default();
     for host in ["localhost", "127.0.0.1", "::1", "[::1]"] {
