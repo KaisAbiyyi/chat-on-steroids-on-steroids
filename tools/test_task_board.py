@@ -55,22 +55,22 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_wave_is_five_disjoint_cloud_tasks(self):
+    def test_current_ready_wave_is_six_disjoint_cloud_tasks(self):
         ready, _ = board.readiness(self.data)
         self.assertEqual(
             {task["id"] for task in ready},
-            {"CL-05A", "CL-06B", "CL-07B", "CL-08A", "CL-09A"},
+            {"CL-05B", "CL-06B", "CL-07B", "CL-08B", "CL-09B", "CL-09C"},
         )
         self.assertTrue(all(task["kind"] == "C" for task in ready))
-        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 5)
+        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 6)
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
-        self.assertEqual(item["state"], "BLOCKED")
-        self.assertEqual(item["missing_direct"], ["CL-09A", "CL-05A"])
+        self.assertEqual(item["state"], "READY_CANDIDATE")
+        self.assertEqual(item["missing_direct"], [])
         self.assertIn("CL-L1", self.tasks["CL-09A"]["depends_on"])
         self.assertTrue(item["live_claim_check_required"])
-        self.assertEqual(board.explain(self.data, "CL-05A")["state"], "READY_CANDIDATE")
+        self.assertEqual(board.explain(self.data, "CL-05A")["state"], "DONE")
 
     def test_browser_preflight_is_in_phase_seven_not_eight(self):
         for task_id in ("7P-A", "7P-B", "7P-L1"):
@@ -90,7 +90,7 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
-        self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06B", "CL-07B", "CL-08A", "CL-09A"})
+        self.assertEqual({t["id"] for t in waves[0]}, {"CL-05B", "CL-06B", "CL-07B", "CL-08B", "CL-09B", "CL-09C"})
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
         self.assertLess(flat.index("7P-L1"), flat.index("7A"))
@@ -109,7 +109,7 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_done_cannot_depend_on_unfinished_task(self):
         data = copy.deepcopy(self.data)
-        next(t for t in data["tasks"] if t["id"] == "CL-05B")["status"] = "done"
+        next(t for t in data["tasks"] if t["id"] == "CL-L2")["status"] = "done"
         self.assertTrue(any("cannot be done" in e for e in board.validate(data)))
 
     def test_legacy_phase_ordering_cannot_regress(self):
@@ -120,7 +120,7 @@ class TaskBoardTests(unittest.TestCase):
     def test_completed_units_are_not_reoffered_as_ready(self):
         ready, _ = board.readiness(self.data)
         offered = {t["id"] for t in ready}
-        self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-06A", "CL-07A"}.isdisjoint(offered))
+        self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"}.isdisjoint(offered))
 
 
 if __name__ == "__main__":
