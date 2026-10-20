@@ -1,5 +1,14 @@
 # Current CoS-Rust work state
 
+## Canonical Phase 7 preflight / readiness governance (2026-10-20)
+
+- **TASK:** `PLAN-LINEAR-01` adjusts roadmap and task eligibility only. Cloud branch `docs/phase-linear-dag-20261020`, PR [#17](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/17); this historical section records that edit and must not imply a feature unit is claimed.
+- **PHASE ORDER:** `CL-L6 → 7P-A → 7P-B → 7P-L1 → 7A–7E → 8A–8C → 8L1 → 8U1 → Phase 9 onward`. The old early Phase 8 spike is now **Phase 7 preflight**, no backwards phase transition.
+- **CANONICAL DAG:** [docs/task-registry.json](task-registry.json) (115 units, 72 C / 28 L / 15 U); inspect with `python tools/task_board.py check`, `ready --json`, `task CL-09C --json`, and `waves --json`.
+- **READY CANDIDATES (not claimed):** `CL-05A`, `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A`. Cloud only, independent potential logical locks; recheck actual main CI, open PRs and all claim owners before parallel dispatch. `CL-L1` and `CL-04A/B/C` are accepted and remain DONE.
+- **LOCAL REQUIRED:** NONE for docs reclassification. **YOU REQUIRED:** NO. Full backend Phase 1–6 **PARTIAL** and later browser/UI native gates remain pending. Older dated sections below remain historical snapshots, not the current readiness authority.
+
+
 ## CL-04 group MERGED (2026-10-20) — next disjoint cloud units
 
 - **CL-04A MERGED:** PR [#12](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/12), merge `1232803d9dba3ba05cca11cfc8101bb54bd51cc2`.
