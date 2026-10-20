@@ -1081,6 +1081,11 @@ impl SessionStore {
             }
             staged["retiredChatAt"][from] = json!(at);
         }
+        // A round-trip rebind makes the old alias active again. Clear its
+        // retirement marker before publication, not only during cold restore.
+        if let Some(retired) = staged["retiredChatAt"].as_object_mut() {
+            retired.remove(to);
+        }
         if !staged["chatIds"]
             .as_array()
             .unwrap()
