@@ -20,6 +20,16 @@ pub const MAX_HISTORY_SEQUENCE: u64 = 9_007_199_254_740_991;
 pub const MAX_HISTORY_JOURNAL_BYTES: u64 = 1024 * 1024 * 1024;
 /// Guard canonical in-memory overlays against unbounded shard proliferation.
 pub const MAX_CANONICAL_MESSAGES: usize = 100_000;
+pub const MAX_CANONICAL_BYTES: usize = 256 * 1024 * 1024;
+pub const MAX_HISTORY_READ_EVENTS: usize = 100_000;
+fn budget_canonical_bytes(total: &mut usize, previous: usize, next: usize) -> io::Result<()> {
+    *total = total
+        .saturating_sub(previous)
+        .checked_add(next)
+        .filter(|bytes| *bytes <= MAX_CANONICAL_BYTES)
+        .ok_or_else(|| invalid("Canonical history exceeds in-memory byte budget"))?;
+    Ok(())
+}
 fn next_sequence(next: u64) -> io::Result<u64> {
     if (1..=MAX_HISTORY_SEQUENCE).contains(&next) {
         Ok(next)
@@ -253,6 +263,7 @@ impl SessionStore {
     }
     fn canonical(&self, id: &str) -> io::Result<(BTreeMap<String, Value>, bool)> {
         let mut messages = BTreeMap::new();
+        let mut canonical_bytes = 0usize;
         let mut aliases_collapsed = false;
         match self
             .path(id, "messages.json", true)
@@ -262,6 +273,7 @@ impl SessionStore {
                 if let Some(map) = raw.as_object() {
                     for (key, event) in map {
                         if message_key(event).as_ref() == Some(key) && event["seq"].is_u64() {
+                            budget_canonical_bytes(&mut canonical_bytes, 0, serde_json::to_vec(event)?.len())?;
                             messages.insert(key.clone(), event.clone());
                         }
                     }
@@ -304,6 +316,12 @@ impl SessionStore {
                     if messages.len() >= MAX_CANONICAL_MESSAGES && !messages.contains_key(&key) {
                         return Err(invalid("Canonical history exceeds in-memory record budget"));
                     }
+                    let next_bytes = serde_json::to_vec(&event)?.len();
+                    let previous_bytes = messages.get(&key)
+                        .map(serde_json::to_vec)
+                        .transpose()?
+                        .map_or(0, |bytes| bytes.len());
+                    budget_canonical_bytes(&mut canonical_bytes, previous_bytes, next_bytes)?;
                     messages.insert(key, event);
                 }
             }
@@ -967,8 +985,13 @@ impl SessionStore {
                 && options.agent.as_ref().is_none_or(|a| e["agent"] == *a)
         };
         let mut events = Vec::new();
+        let mut exceeded = false;
         scan(&self.path(id, "events.jsonl", true)?, |e| {
             if selected(&e) && !message_key(&e).is_some_and(|k| entry.messages.contains_key(&k)) {
+                if events.len() >= MAX_HISTORY_READ_EVENTS {
+                    exceeded = true;
+                    return;
+                }
                 events.push(e);
                 if options.from.is_some()
                     && options.limit < usize::MAX / 2
@@ -979,7 +1002,15 @@ impl SessionStore {
                 }
             }
         })?;
-        events.extend(entry.messages.values().filter(|e| selected(e)).cloned());
+        if exceeded {
+            return Err(invalid("History read exceeds result budget; use bounded pagination"));
+        }
+        for event in entry.messages.values().filter(|event| selected(event)) {
+            if events.len() >= MAX_HISTORY_READ_EVENTS {
+                return Err(invalid("History read exceeds result budget; use bounded pagination"));
+            }
+            events.push(event.clone());
+        }
         if options.from.is_some() {
             events.sort_by_key(|e| number(e, "seq"));
             events.truncate(options.limit);
@@ -991,6 +1022,9 @@ impl SessionStore {
         Ok(result)
     }
     pub fn recent(&self, id: &str, limit: usize, before: Option<u64>) -> io::Result<Vec<Value>> {
+        if limit > MAX_HISTORY_READ_EVENTS {
+            return Err(invalid("History page exceeds result budget"));
+        }
         let owner = self.entry(id)?;
         let entry = lock(&owner)?;
         let mut rows = Vec::new();
