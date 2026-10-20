@@ -1,0 +1,232 @@
+{
+  "events": [
+    {
+      "kind": "tool_call",
+      "source": "mcp",
+      "time": 1792484874204,
+      "call": {
+        "callId": "8ae42015-71ce-491d-b2e0-2509e2169def",
+        "tool": "exec_command",
+        "requestId": "cl-l1-public-fixture",
+        "conversationId": null,
+        "attributionMethod": "unattributed",
+        "attribution": "unattributed",
+        "startedAt": 1792484874204,
+        "durationMs": 0,
+        "args": {
+          "text": "{\"cmd\":\"Write-Output public\",\"workdir\":\"/p\",\"env\":{\"PRIVATE_ENV\":\"[redacted]\"},\"nested\":{\"password\":\"[redacted]\",\"secret\":\"[redacted]\"},\"dataBase64\":\"[redacted]\"}",
+          "truncated": false,
+          "chars": 162
+        },
+        "result": {
+          "text": "public output [redacted] [redacted] [redacted] [redacted] [redacted]",
+          "truncated": false,
+          "chars": 68
+        },
+        "outcome": "ok",
+        "summary": {
+          "kind": "run",
+          "tone": "neutral",
+          "title": "Ran Write-Output public"
+        },
+        "runningSummary": {
+          "title": "Running Write-Output public",
+          "kind": "run"
+        }
+      },
+      "seq": 1,
+      "turnOrigin": null
+    },
+    {
+      "kind": "tool_call",
+      "source": "mcp",
+      "time": 1792484874282,
+      "call": {
+        "callId": "7f57d2e8-4b75-4d0c-b6d5-de37a5de9e42",
+        "tool": "exec_command",
+        "requestId": "cl-l1-public-fixture",
+        "conversationId": null,
+        "attributionMethod": "unattributed",
+        "attribution": "unattributed",
+        "startedAt": 1792484874282,
+        "durationMs": 0,
+        "args": {
+          "text": "{\"cmd\":\"Write-Output public\",\"workdir\":\"/p\",\"env\":{\"PRIVATE_ENV\":\"[redacted]\"},\"nested\":{\"password\":\"[redacted]\",\"secret\":\"[redacted]\"},\"dataBase64\":\"[redacted]\",\"notes\":\"public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata public metadata publi",
+          "truncated": true,
+          "chars": 16173,
+          "assetId": "c3659ffca289494e9d374ed7dc9ef2fe.txt",
+          "digest": "c3659ffca289494e9d374ed7dc9ef2fefd02929992018dd61f4105674a140f19"
+        },
+        "result": {
+          "text": "public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public output public",
+          "truncated": true,
+          "chars": 16868,
+          "assetId": "0c94a827612bb31b61a6d10b9d6328e8.txt",
+          "digest": "0c94a827612bb31b61a6d10b9d6328e89afbf0aa4fee0595fd7635c2ad897d36"
+        },
+        "outcome": "ok",
+        "summary": {
+          "kind": "run",
+          "tone": "neutral",
+          "title": "Ran Write-Output public"
+        },
+        "runningSummary": {
+          "title": "Running Write-Output public",
+          "kind": "run"
+        }
+      },
+      "seq": 2,
+      "turnOrigin": null
+    },
+    {
+      "kind": "tool_call",
+      "source": "mcp",
+      "time": 1792484874443,
+      "call": {
+        "callId": "90b3f6b3-ee09-450e-aa92-79771a7450e5",
+        "tool": "write_clipboard",
+        "requestId": "cl-l1-public-fixture",
+        "conversationId": null,
+        "attributionMethod": "unattributed",
+        "attribution": "unattributed",
+        "startedAt": 1792484874443,
+        "durationMs": 0,
+        "args": {
+          "text": "{\"text\":\"[redacted]\"}",
+          "truncated": false,
+          "chars": 21
+        },
+        "result": {
+          "text": "echo [redacted]",
+          "truncated": false,
+          "chars": 15
+        },
+        "outcome": "ok",
+        "summary": {
+          "kind": "clipboard",
+          "tone": "neutral",
+          "title": "Replaced the clipboard text"
+        },
+        "runningSummary": {
+          "title": "Replacing the clipboard text",
+          "kind": "clipboard"
+        }
+      },
+      "seq": 3,
+      "turnOrigin": null
+    },
+    {
+      "kind": "tool_call",
+      "source": "mcp",
+      "time": 1792484874509,
+      "call": {
+        "callId": "57cbe07f-b4cd-4cc2-a1d9-077525bed2d8",
+        "tool": "read_clipboard",
+        "requestId": "cl-l1-public-fixture",
+        "conversationId": null,
+        "attributionMethod": "unattributed",
+        "attribution": "unattributed",
+        "startedAt": 1792484874509,
+        "durationMs": 0,
+        "args": {
+          "text": "{\"format\":\"text\"}",
+          "truncated": false,
+          "chars": 17
+        },
+        "result": {
+          "text": "<clipboard result not stored>",
+          "truncated": false,
+          "chars": 29
+        },
+        "outcome": "ok",
+        "summary": {
+          "kind": "clipboard",
+          "tone": "neutral",
+          "title": "Read the clipboard"
+        },
+        "runningSummary": {
+          "title": "Reading the clipboard",
+          "kind": "clipboard"
+        }
+      },
+      "seq": 4,
+      "turnOrigin": null
+    },
+    {
+      "kind": "tool_call",
+      "source": "mcp",
+      "time": 1792484874589,
+      "call": {
+        "callId": "aa8af5c2-bc7a-4899-b82f-b356e06fb89a",
+        "tool": "computer",
+        "requestId": "cl-l1-public-fixture",
+        "conversationId": null,
+        "attributionMethod": "unattributed",
+        "attribution": "unattributed",
+        "startedAt": 1792484874589,
+        "durationMs": 0,
+        "args": {
+          "text": "{\"actions\":[{\"type\":\"read_clipboard\"},{\"type\":\"write_clipboard\",\"text\":\"[redacted]\"}]}",
+          "truncated": false,
+          "chars": 86
+        },
+        "result": {
+          "text": "<clipboard result not stored>",
+          "truncated": false,
+          "chars": 29
+        },
+        "outcome": "ok",
+        "summary": {
+          "kind": "clipboard",
+          "tone": "neutral",
+          "title": "Read the clipboard and 1 more",
+          "detail": "2 actions"
+        },
+        "runningSummary": {
+          "title": "Reading the clipboard and 1 more",
+          "kind": "clipboard"
+        }
+      },
+      "seq": 5,
+      "turnOrigin": null
+    },
+    {
+      "kind": "tool_call",
+      "source": "mcp",
+      "time": 1792484874664,
+      "call": {
+        "callId": "806a091e-6105-499a-9a0e-03242cae5e9b",
+        "tool": "download_artifact",
+        "requestId": "cl-l1-public-fixture",
+        "conversationId": null,
+        "attributionMethod": "unattributed",
+        "attribution": "unattributed",
+        "startedAt": 1792484874664,
+        "durationMs": 0,
+        "args": {
+          "text": "{\"file\":\"[redacted]\",\"image\":{\"type\":\"image\",\"mimeType\":\"image/png\",\"data\":\"[redacted]\"}}",
+          "truncated": false,
+          "chars": 89
+        },
+        "result": {
+          "text": "public download",
+          "truncated": false,
+          "chars": 15
+        },
+        "outcome": "ok",
+        "summary": {
+          "kind": "other",
+          "tone": "neutral",
+          "title": "Ran download_artifact"
+        },
+        "runningSummary": {
+          "title": "Running download_artifact",
+          "kind": "other"
+        }
+      },
+      "seq": 6,
+      "turnOrigin": null
+    }
+  ],
+  "next": 7
+}

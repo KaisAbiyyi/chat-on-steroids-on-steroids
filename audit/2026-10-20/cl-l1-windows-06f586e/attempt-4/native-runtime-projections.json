@@ -1,0 +1,949 @@
+[
+  {
+    "case": "nonzero",
+    "stage": "launch",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: e98c92\nWall time: 0.3672 seconds\nProcess running with session ID 1307838522\nOutput:\nCL_L1_NONZERO\r\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "e98c92",
+        "wall_time_seconds": 0.3672331,
+        "output": "CL_L1_NONZERO\r\n",
+        "session_id": 1307838522
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "2e8d7a37-cd1d-4ef3-88a5-c46b8d8fb96c",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485127611,
+      "durationMs": 482,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_NONZERO; exit 7\",\"workdir\":\"/p\",\"login\":false,\"tty\":false,\"yield_time_ms\":10000}",
+        "truncated": false,
+        "chars": 107
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: e98c92\\nWall time: 0.3672 seconds\\nProcess running with session ID 1307838522\\nOutput:\\nCL_L1_NONZERO\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"e98c92\",\"wall_time_seconds\":0.3672331,\"output\":\"CL_L1_NONZERO\\r\\n\",\"session_id\":1307838522}}",
+        "truncated": false,
+        "chars": 279
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_NONZERO; exit 7",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_NONZERO; exit 7",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1307838522,
+        "durationMs": 367,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "nonzero",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 643d7d\nWall time: 0.0000 seconds\nProcess exited with code 7\nCompleted session ID: 1307838522\nOutput:\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "643d7d",
+        "wall_time_seconds": 2.9e-06,
+        "output": "",
+        "exit_code": 7,
+        "completed_session_id": 1307838522
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "b4763009-1e01-4706-90ef-9514213a2b39",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485128157,
+      "durationMs": 0,
+      "args": {
+        "text": "{\"session_id\":1307838522,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 643d7d\\nWall time: 0.0000 seconds\\nProcess exited with code 7\\nCompleted session ID: 1307838522\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"643d7d\",\"wall_time_seconds\":2.9e-6,\"output\":\"\",\"exit_code\":7,\"completed_session_id\":1307838522}}",
+        "truncated": false,
+        "chars": 284
+      },
+      "outcome": "process_exit_nonzero",
+      "summary": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Waited on session 1307838522",
+        "metric": "✕ exit 7"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1307838522",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 7,
+        "running": false,
+        "processSessionId": 1307838522,
+        "durationMs": 0,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-pipe",
+    "stage": "launch",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: f4ae5a\nWall time: 0.2577 seconds\nProcess running with session ID 583812630\nOutput:\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "f4ae5a",
+        "wall_time_seconds": 0.2576941,
+        "output": "",
+        "session_id": 583812630
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "77eefb7f-1c07-492b-9d41-cd827dcef71c",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485128186,
+      "durationMs": 360,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0\",\"workdir\":\"/p\",\"login\":false,\"tty\":false,\"yield_time_ms\":250}",
+        "truncated": false,
+        "chars": 159
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: f4ae5a\\nWall time: 0.2577 seconds\\nProcess running with session ID 583812630\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"f4ae5a\",\"wall_time_seconds\":0.2576941,\"output\":\"\",\"session_id\":583812630}}",
+        "truncated": false,
+        "chars": 243
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 583812630,
+        "durationMs": 258,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-pipe",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 665699\nWall time: 0.2231 seconds\nProcess running with session ID 583812630\nOutput:\nCL_L1_BEGIN\r\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "665699",
+        "wall_time_seconds": 0.2231436,
+        "output": "CL_L1_BEGIN\r\n",
+        "session_id": 583812630
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "702d2773-d465-4c9b-b9b9-a31abda9fea7",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485128574,
+      "durationMs": 223,
+      "args": {
+        "text": "{\"session_id\":583812630,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 665699\\nWall time: 0.2231 seconds\\nProcess running with session ID 583812630\\nOutput:\\nCL_L1_BEGIN\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"665699\",\"wall_time_seconds\":0.2231436,\"output\":\"CL_L1_BEGIN\\r\\n\",\"session_id\":583812630}}",
+        "truncated": false,
+        "chars": 273
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 583812630"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 583812630",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 583812630,
+        "durationMs": 223,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-pipe",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 437bbc\nWall time: 1.0059 seconds\nProcess running with session ID 583812630\nOutput:\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "437bbc",
+        "wall_time_seconds": 1.0059289,
+        "output": "",
+        "session_id": 583812630
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "1e7939a6-886a-4397-90b4-195fee1831f6",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485128845,
+      "durationMs": 1006,
+      "args": {
+        "text": "{\"session_id\":583812630,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 437bbc\\nWall time: 1.0059 seconds\\nProcess running with session ID 583812630\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"437bbc\",\"wall_time_seconds\":1.0059289,\"output\":\"\",\"session_id\":583812630}}",
+        "truncated": false,
+        "chars": 243
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 583812630"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 583812630",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 583812630,
+        "durationMs": 1006,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-pipe",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: cb0700\nWall time: 0.5418 seconds\nProcess running with session ID 583812630\nOutput:\nCL_L1_END\r\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "cb0700",
+        "wall_time_seconds": 0.541822,
+        "output": "CL_L1_END\r\n",
+        "session_id": 583812630
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "2c968691-8c6c-4df0-bc0d-eb17dd71eab5",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485129915,
+      "durationMs": 542,
+      "args": {
+        "text": "{\"session_id\":583812630,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: cb0700\\nWall time: 0.5418 seconds\\nProcess running with session ID 583812630\\nOutput:\\nCL_L1_END\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"cb0700\",\"wall_time_seconds\":0.541822,\"output\":\"CL_L1_END\\r\\n\",\"session_id\":583812630}}",
+        "truncated": false,
+        "chars": 268
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 583812630"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 583812630",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 583812630,
+        "durationMs": 542,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-pipe",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: d2343c\nWall time: 0.0047 seconds\nProcess exited with code 0\nCompleted session ID: 583812630\nOutput:\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "d2343c",
+        "wall_time_seconds": 0.0047315,
+        "output": "",
+        "exit_code": 0,
+        "completed_session_id": 583812630
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "6cdf5d99-8085-4c69-8331-853b6234f945",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485130519,
+      "durationMs": 5,
+      "args": {
+        "text": "{\"session_id\":583812630,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 56
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: d2343c\\nWall time: 0.0047 seconds\\nProcess exited with code 0\\nCompleted session ID: 583812630\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"d2343c\",\"wall_time_seconds\":0.0047315,\"output\":\"\",\"exit_code\":0,\"completed_session_id\":583812630}}",
+        "truncated": false,
+        "chars": 285
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 583812630"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 583812630",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 583812630,
+        "durationMs": 5,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "completed",
+    "stage": "launch",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 4f2927\nWall time: 0.3847 seconds\nProcess running with session ID 1531566424\nOutput:\nCL_L1_COMPLETE\r\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "4f2927",
+        "wall_time_seconds": 0.3847125,
+        "output": "CL_L1_COMPLETE\r\n",
+        "session_id": 1531566424
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "47367f31-04f5-4566-b8fd-53e615f6d4ca",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485130577,
+      "durationMs": 673,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_COMPLETE; exit 0\",\"workdir\":\"/p\",\"login\":false,\"tty\":false,\"yield_time_ms\":10000}",
+        "truncated": false,
+        "chars": 108
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 4f2927\\nWall time: 0.3847 seconds\\nProcess running with session ID 1531566424\\nOutput:\\nCL_L1_COMPLETE\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"4f2927\",\"wall_time_seconds\":0.3847125,\"output\":\"CL_L1_COMPLETE\\r\\n\",\"session_id\":1531566424}}",
+        "truncated": false,
+        "chars": 281
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_COMPLETE; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_COMPLETE; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1531566424,
+        "durationMs": 385,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "completed",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: c1d29e\nWall time: 0.0064 seconds\nProcess exited with code 0\nCompleted session ID: 1531566424\nOutput:\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "c1d29e",
+        "wall_time_seconds": 0.0064482,
+        "output": "",
+        "exit_code": 0,
+        "completed_session_id": 1531566424
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "2ef6f238-447c-4460-adc3-1b2675f8ca6c",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485131300,
+      "durationMs": 7,
+      "args": {
+        "text": "{\"session_id\":1531566424,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: c1d29e\\nWall time: 0.0064 seconds\\nProcess exited with code 0\\nCompleted session ID: 1531566424\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"c1d29e\",\"wall_time_seconds\":0.0064482,\"output\":\"\",\"exit_code\":0,\"completed_session_id\":1531566424}}",
+        "truncated": false,
+        "chars": 287
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1531566424"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1531566424",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 1531566424,
+        "durationMs": 6,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-conpty",
+    "stage": "launch",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 0a43dd\nWall time: 0.1691 seconds\nProcess running with session ID 1745112766\nOutput:\n\u001b[?9001h\u001b[?1004h"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "0a43dd",
+        "wall_time_seconds": 0.1691382,
+        "output": "\u001b[?9001h\u001b[?1004h",
+        "session_id": 1745112766
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "a76727b5-b52f-4755-a1eb-b16565af4e65",
+      "tool": "exec_command",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485131378,
+      "durationMs": 217,
+      "args": {
+        "text": "{\"cmd\":\"Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0\",\"workdir\":\"/p\",\"login\":false,\"tty\":true,\"yield_time_ms\":250}",
+        "truncated": false,
+        "chars": 166
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 0a43dd\\nWall time: 0.1691 seconds\\nProcess running with session ID 1745112766\\nOutput:\\n\\u001b[?9001h\\u001b[?1004h\"}],\"structuredContent\":{\"chunk_id\":\"0a43dd\",\"wall_time_seconds\":0.1691382,\"output\":\"\\u001b[?9001h\\u001b[?1004h\",\"session_id\":1745112766}}",
+        "truncated": false,
+        "chars": 297
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0",
+        "metric": "started"
+      },
+      "runningSummary": {
+        "title": "Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0",
+        "kind": "run"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1745112766,
+        "durationMs": 169,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-conpty",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 565c1d\nWall time: 0.3063 seconds\nProcess running with session ID 1745112766\nOutput:\n\u001b[?25l\u001b[2J\u001b[m\u001b[HCL_L1_PTY_BEGIN\r\n\u001b]0;C:\\Users\\kaisa\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe\u0007\u001b[?25h"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "565c1d",
+        "wall_time_seconds": 0.3063215,
+        "output": "\u001b[?25l\u001b[2J\u001b[m\u001b[HCL_L1_PTY_BEGIN\r\n\u001b]0;C:\\Users\\kaisa\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe\u0007\u001b[?25h",
+        "session_id": 1745112766
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "46938752-e160-4d1c-a843-395d936f7e1d",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485131629,
+      "durationMs": 307,
+      "args": {
+        "text": "{\"session_id\":1745112766,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 565c1d\\nWall time: 0.3063 seconds\\nProcess running with session ID 1745112766\\nOutput:\\n\\u001b[?25l\\u001b[2J\\u001b[m\\u001b[HCL_L1_PTY_BEGIN\\r\\n\\u001b]0;C:\\\\Users\\\\kaisa\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\\u0007\\u001b[?25h\"}],\"structuredContent\":{\"chunk_id\":\"565c1d\",\"wall_time_seconds\":0.3063215,\"output\":\"\\u001b[?25l\\u001b[2J\\u001b[m\\u001b[HCL_L1_PTY_BEGIN\\r\\n\\u001b]0;C:\\\\Users\\\\kaisa\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\\u0007\\u001b[?25h\",\"session_id\":1745112766}}",
+        "truncated": false,
+        "chars": 621
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1745112766"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1745112766",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1745112766,
+        "durationMs": 306,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-conpty",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: e971d6\nWall time: 1.0072 seconds\nProcess running with session ID 1745112766\nOutput:\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "e971d6",
+        "wall_time_seconds": 1.0071787,
+        "output": "",
+        "session_id": 1745112766
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "8735de88-6eec-4bcb-8d9b-5f4417faf6bb",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485131985,
+      "durationMs": 1008,
+      "args": {
+        "text": "{\"session_id\":1745112766,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: e971d6\\nWall time: 1.0072 seconds\\nProcess running with session ID 1745112766\\nOutput:\\n\"}],\"structuredContent\":{\"chunk_id\":\"e971d6\",\"wall_time_seconds\":1.0071787,\"output\":\"\",\"session_id\":1745112766}}",
+        "truncated": false,
+        "chars": 245
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1745112766"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1745112766",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1745112766,
+        "durationMs": 1007,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-conpty",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: f5649b\nWall time: 0.5427 seconds\nProcess running with session ID 1745112766\nOutput:\nCL_L1_PTY_END\r\n"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "f5649b",
+        "wall_time_seconds": 0.5427089,
+        "output": "CL_L1_PTY_END\r\n",
+        "session_id": 1745112766
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "ab551550-543a-41d4-8e45-c39bcb8c44c1",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485133040,
+      "durationMs": 543,
+      "args": {
+        "text": "{\"session_id\":1745112766,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: f5649b\\nWall time: 0.5427 seconds\\nProcess running with session ID 1745112766\\nOutput:\\nCL_L1_PTY_END\\r\\n\"}],\"structuredContent\":{\"chunk_id\":\"f5649b\",\"wall_time_seconds\":0.5427089,\"output\":\"CL_L1_PTY_END\\r\\n\",\"session_id\":1745112766}}",
+        "truncated": false,
+        "chars": 279
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1745112766"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1745112766",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1745112766,
+        "durationMs": 543,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  },
+  {
+    "case": "background-conpty",
+    "stage": "poll",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Chunk ID: 2653d6\nWall time: 0.0326 seconds\nProcess exited with code 0\nCompleted session ID: 1745112766\nOutput:\n\u001b[?9001l\u001b[?1004l"
+        }
+      ],
+      "structuredContent": {
+        "chunk_id": "2653d6",
+        "wall_time_seconds": 0.0326374,
+        "output": "\u001b[?9001l\u001b[?1004l",
+        "exit_code": 0,
+        "completed_session_id": 1745112766
+      },
+      "resultType": "complete",
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "chat-on-steroids-core",
+          "version": "2.1.39"
+        }
+      }
+    },
+    "call": {
+      "callId": "e8c50d6f-c987-45c0-b04c-536efe8a68d8",
+      "tool": "write_stdin",
+      "requestId": "cl-l1-public-runtime",
+      "conversationId": null,
+      "attributionMethod": "unattributed",
+      "attribution": "unattributed",
+      "startedAt": 1792485133617,
+      "durationMs": 33,
+      "args": {
+        "text": "{\"session_id\":1745112766,\"chars\":\"\",\"yield_time_ms\":1000}",
+        "truncated": false,
+        "chars": 57
+      },
+      "result": {
+        "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Chunk ID: 2653d6\\nWall time: 0.0326 seconds\\nProcess exited with code 0\\nCompleted session ID: 1745112766\\nOutput:\\n\\u001b[?9001l\\u001b[?1004l\"}],\"structuredContent\":{\"chunk_id\":\"2653d6\",\"wall_time_seconds\":0.0326374,\"output\":\"\\u001b[?9001l\\u001b[?1004l\",\"exit_code\":0,\"completed_session_id\":1745112766}}",
+        "truncated": false,
+        "chars": 339
+      },
+      "outcome": "ok",
+      "summary": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1745112766"
+      },
+      "runningSummary": {
+        "title": "Waiting on session 1745112766",
+        "kind": "process"
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 1745112766,
+        "durationMs": 33,
+        "timedOut": false,
+        "failed": false
+      }
+    }
+  }
+]

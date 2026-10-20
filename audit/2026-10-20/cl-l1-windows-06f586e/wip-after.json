@@ -1,0 +1,55 @@
+{
+  "status": [
+    " M crates/cos-store/src/lib.rs",
+    " M crates/cos-store/src/recorder.rs",
+    "?? crates/cos-mcp/tests/recording_evidence.rs",
+    "?? crates/cos-store/src/caption.rs",
+    "?? crates/cos-store/src/redaction.rs",
+    "?? crates/cos-store/tests/captions.rs",
+    "?? fixtures/upstream/phase1-6-closure/recording-redaction.json",
+    "?? tools/capture-recording-redaction.mjs"
+  ],
+  "paths": [
+    {
+      "path": "crates/cos-store/src/lib.rs",
+      "sha256": "A538DEB325A9872121AA8500E2B3B64971021C25DC7E719A536EE08A09B99414",
+      "bytes": 432
+    },
+    {
+      "path": "crates/cos-store/src/recorder.rs",
+      "sha256": "3AB82399299593BDA8E0A49F5F109F30C012608143F0C5210D3B5AFA0586FDAD",
+      "bytes": 12150
+    },
+    {
+      "path": "crates/cos-mcp/tests/recording_evidence.rs",
+      "sha256": "8554C86B1A73DEEA6964B8E845C300373F7A6323C204ACBF25227E5AB289BFB4",
+      "bytes": 3806
+    },
+    {
+      "path": "crates/cos-store/src/caption.rs",
+      "sha256": "6F893A1E1F582FEFA1D931F897F55C88D029BC4ADB94E704873CFB27D1575550",
+      "bytes": 27754
+    },
+    {
+      "path": "crates/cos-store/src/redaction.rs",
+      "sha256": "4A30EA29F536D9C36AED3142AEE29F1E6A7A1BFF99BBA4ECDB7A0DD6A0FDFAB4",
+      "bytes": 2070
+    },
+    {
+      "path": "crates/cos-store/tests/captions.rs",
+      "sha256": "88A355E5472AF03AF475FE7BB82EF9CC9EC0986607F31D7E0EE4C40BD44CCEF6",
+      "bytes": 8369
+    },
+    {
+      "path": "fixtures/upstream/phase1-6-closure/recording-redaction.json",
+      "sha256": "58A705B43B213F970591B591B15BB777637B67B70552AF8A63287AE069F4B16B",
+      "bytes": 4895
+    },
+    {
+      "path": "tools/capture-recording-redaction.mjs",
+      "sha256": "A2502D14548266E20FF26E2721B1B9C20E80D37B33A35C0830D886B2B2AD74B6",
+      "bytes": 3342
+    }
+  ],
+  "head": "8637c12ccda8610e5a06534f30af4688034cc9b6"
+}

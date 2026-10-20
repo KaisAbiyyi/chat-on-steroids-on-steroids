@@ -1,0 +1,327 @@
+[
+  {
+    "seq": 2,
+    "kind": "turn_start",
+    "turnId": "cl-l1-turn",
+    "origin": null,
+    "changedCanonicalKeys": [
+      "kind",
+      "turnId",
+      "time",
+      "seq"
+    ],
+    "derivedFields": {
+      "messageId": "cl-l1-question",
+      "message": {
+        "text": "Public synthetic qualification question",
+        "truncated": false,
+        "chars": 39
+      },
+      "contentSeq": 1,
+      "origin": 1,
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 4,
+    "kind": "turn_end",
+    "turnId": "cl-l1-turn",
+    "origin": null,
+    "changedCanonicalKeys": [
+      "kind",
+      "time",
+      "outcome",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": 2
+    }
+  },
+  {
+    "seq": 5,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "kind",
+      "source",
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "messageId": "cl-l1-answer",
+      "turnId": "cl-l1-turn",
+      "message": {
+        "text": "Public synthetic qualification answer",
+        "truncated": false,
+        "chars": 37
+      },
+      "state": "final",
+      "final": true,
+      "conversationId": "cl-l1-timeline",
+      "contentSeq": 3,
+      "finalContentSeq": 3,
+      "finalObservedAt": 1792485127466,
+      "origin": 3,
+      "turnOrigin": 2
+    }
+  },
+  {
+    "seq": 6,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "kind",
+      "source",
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnId": "cl-l1-turn",
+      "conversationId": "cl-l1-timeline",
+      "outcome": "completed",
+      "turnOrigin": 2
+    }
+  },
+  {
+    "seq": 7,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 8,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 9,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 10,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 11,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 12,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 13,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 14,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 15,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 16,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 17,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 18,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 19,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 20,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 21,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 22,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  },
+  {
+    "seq": 23,
+    "kind": "tool_call",
+    "turnId": null,
+    "origin": null,
+    "changedCanonicalKeys": [
+      "time",
+      "call",
+      "seq"
+    ],
+    "derivedFields": {
+      "turnOrigin": null
+    }
+  }
+]

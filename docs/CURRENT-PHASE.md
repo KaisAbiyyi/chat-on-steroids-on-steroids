@@ -1,6 +1,17 @@
 # Current CoS-Rust work state
 
-Captured: **2026-10-19, Asia/Jakarta**. This is the agent-to-agent resume pointer. Check actual `git status` and repository state on every new run; do not rely on this snapshot if files or commits have changed.
+Captured: **2026-10-20, Asia/Jakarta**. This is the agent-to-agent resume pointer. Check actual `git status` and repository state on every new run; do not rely on this snapshot if files or commits have changed.
+
+## Latest local gate: CL-L1 FAIL (2026-10-20)
+
+Tested merged SHA **`06f586e423e5abb4f95eba582996c4a5278c1311`** in a clean separate D: checkout. [Implementation summary / cloud handoff](implementation-summary/2026-10-20-cl-l1-windows-qualification-v1.0.md), [machine-readable receipt](../audit/2026-10-20/cl-l1-windows-06f586e-receipt.json).
+
+- **PASS:** Windows strict checks (253 tests, 0 failures/ignored), release build; recorder inline/overflow and live stdout redaction; 0 sentinel leaks in journal/assets; actual nonzero/running/completed pipe/ConPTY facts; full history/captions/timeline across a distinct service-process restart. Eight original WIP paths, original checkout HEAD/status/hashes and pinned upstream remain unchanged.
+- **FAIL:** source captions omit `write_stdin` exit-0 metric `✓ finished` and omit the source 70-UTF-16-unit command-label truncation. Executed pinned source oracle: 5 mismatches / 14 additional native projections. Existing 338-case differential remains green but lacks successful `write_stdin` coverage.
+- **NEXT:** proposed cloud repair `CL-L1-FIX-01`, source-linked RED/GREEN tests and Windows/Linux CI, reviewed merge and new SHA, then repeat CL-L1. **CL-04A remains BLOCKED.** No feature implementation or cloud repair was started by this local qualification session. **YOU REQUIRED: NO** direct manual acceptance.
+- Optional local Linux remains **BLOCKED** on unverified D: Docker/WSL backing. Desktop/browser/installer **NOT RUN**, macOS **HOLD**. Original phase 1–6 parity remains **PARTIAL**.
+
+This result supersedes the older NEXT CL-L1 directive below for current scheduling; historical merged cloud receipts remain valid for their own scope.
 
 ## Current directive
 

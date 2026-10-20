@@ -1,0 +1,21 @@
+PASS Windows native host
+PASS exact requested product SHA
+PASS clean product source before native probe
+PASS all task output roots on D
+PASS sentinel scanner positive control
+PASS inline: returned record sanitized
+PASS inline: no overflow asset
+PASS overflow: returned record sanitized
+PASS overflow: both argument and result assets
+PASS overflow: args complete and sanitized
+PASS overflow: complete argument JSON
+PASS overflow: result complete and sanitized
+PASS clipboard-write: returned record sanitized
+PASS clipboard-read: returned record sanitized
+PASS nested-clipboard: returned record sanitized
+PASS binary-and-handle: returned record sanitized
+PASS privacy: captions only use sanitized values
+PASS privacy-before-restart: nonempty journal scan
+PASS privacy-before-restart: disk journal/assets contain zero synthetic sentinels
+FAIL privacy: stable complete events after process restart
+QUALIFICATION FAIL {"type": "AssertionError", "message": "privacy: stable complete events after process restart"}

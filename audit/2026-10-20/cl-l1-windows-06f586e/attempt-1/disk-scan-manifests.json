@@ -1,0 +1,39 @@
+[
+  {
+    "profile": "recorder-synthetic",
+    "stage": "privacy-before-restart",
+    "files": [
+      {
+        "path": "sessions/unattributed-activity/assets/0c94a827612bb31b61a6d10b9d6328e8.txt",
+        "bytes": 16868,
+        "sha256": "0c94a827612bb31b61a6d10b9d6328e89afbf0aa4fee0595fd7635c2ad897d36"
+      },
+      {
+        "path": "sessions/unattributed-activity/assets/c3659ffca289494e9d374ed7dc9ef2fe.txt",
+        "bytes": 16173,
+        "sha256": "c3659ffca289494e9d374ed7dc9ef2fefd02929992018dd61f4105674a140f19"
+      },
+      {
+        "path": "sessions/unattributed-activity/events.jsonl",
+        "bytes": 20343,
+        "sha256": "8c0da000eaa399cccd7058117be3802435db2083f5c5604930e6fd25a620a506"
+      },
+      {
+        "path": "sessions/unattributed-activity/messages.json",
+        "bytes": 2,
+        "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.backup.json",
+        "bytes": 981,
+        "sha256": "7fd41748d2a0d0ec243503a623dc4cb0df31526830388d5afbdd32b1ca2279e1"
+      },
+      {
+        "path": "sessions/unattributed-activity/meta.json",
+        "bytes": 969,
+        "sha256": "41f883d17bee0b3e5cd114c1bf03a07c921bd44654f6e1a03d3c189a972923bf"
+      }
+    ],
+    "leaks": []
+  }
+]

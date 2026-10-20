@@ -1,0 +1,561 @@
+{
+  "unit": "CL-L1",
+  "status": "FAIL",
+  "sourceSha": "06f586e423e5abb4f95eba582996c4a5278c1311",
+  "binarySha256": "7d1ebdb4e34f9074f38fe0ea87e45160bca7de1cef3694945ca708f4eb4f5f45",
+  "binaryBytes": 12825600,
+  "elapsedSeconds": 28.202999999999975,
+  "checks": [
+    {
+      "name": "Windows native host",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exact requested product SHA",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "clean product source before native probe",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "all task output roots on D",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "sentinel scanner positive control",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "inline: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "inline: no overflow asset",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: both argument and result assets",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: args complete and sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: complete argument JSON",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "overflow: result complete and sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "clipboard-write: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "clipboard-read: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "nested-clipboard: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "binary-and-handle: returned record sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy: captions only use sanitized values",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy-before-restart: nonempty journal scan",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy-before-restart: disk journal/assets contain zero synthetic sentinels",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "privacy: stable complete events after process restart",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy: restarted JSON export sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy-after-restart: nonempty journal scan",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "privacy-after-restart: disk journal/assets contain zero synthetic sentinels",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "service: real Windows process started",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exec_command: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "nonzero: actual completed exit",
+      "status": "PASS",
+      "detail": {
+        "exitCode": 7,
+        "running": false,
+        "session": 864710261
+      }
+    },
+    {
+      "name": "nonzero: recorded outcome matches process",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "nonzero: nonzero caption",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "nonzero: progressive caption persisted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exec_command: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-pipe: native running session",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-pipe: started caption without success verdict",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-pipe: actual completed exit",
+      "status": "PASS",
+      "detail": {
+        "exitCode": 0,
+        "running": false,
+        "session": 484543008
+      }
+    },
+    {
+      "name": "background-pipe: recorded outcome matches process",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-pipe: source-compatible completed caption metric",
+      "status": "FAIL",
+      "detail": {
+        "tool": "write_stdin",
+        "exitCode": 0,
+        "actual": {
+          "kind": "process",
+          "tone": "neutral",
+          "title": "Waited on session 484543008"
+        },
+        "expectedMetric": "✓ finished",
+        "source": "pinned summarize.ts write_stdin exitCode=0"
+      }
+    },
+    {
+      "name": "background-pipe: progressive caption persisted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-pipe: completed unread output delivered",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exec_command: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "completed: actual completed exit",
+      "status": "PASS",
+      "detail": {
+        "exitCode": 0,
+        "running": false,
+        "session": 1628553971
+      }
+    },
+    {
+      "name": "completed: recorded outcome matches process",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "completed: source-compatible completed caption metric",
+      "status": "FAIL",
+      "detail": {
+        "tool": "write_stdin",
+        "exitCode": 0,
+        "actual": {
+          "kind": "process",
+          "tone": "neutral",
+          "title": "Waited on session 1628553971"
+        },
+        "expectedMetric": "✓ finished",
+        "source": "pinned summarize.ts write_stdin exitCode=0"
+      }
+    },
+    {
+      "name": "completed: progressive caption persisted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exec_command: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-conpty: native running session",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-conpty: started caption without success verdict",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-conpty: actual completed exit",
+      "status": "PASS",
+      "detail": {
+        "exitCode": 0,
+        "running": false,
+        "session": 896110135
+      }
+    },
+    {
+      "name": "background-conpty: recorded outcome matches process",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-conpty: source-compatible completed caption metric",
+      "status": "FAIL",
+      "detail": {
+        "tool": "write_stdin",
+        "exitCode": 0,
+        "actual": {
+          "kind": "process",
+          "tone": "neutral",
+          "title": "Waited on session 896110135"
+        },
+        "expectedMetric": "✓ finished",
+        "source": "pinned summarize.ts write_stdin exitCode=0"
+      }
+    },
+    {
+      "name": "background-conpty: progressive caption persisted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "background-conpty: completed output delivered",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exec_command: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-inline: real stdout positive sentinel control",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-inline: successful real process",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-inline: stored args result captions sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-inline: completion result and captions sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-inline: actual runtime inline fields",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "exec_command: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "write_stdin: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: real stdout positive sentinel control",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: successful real process",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: stored args result captions sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: completion result and captions sanitized",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: actual runtime argument and completion result assets",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: complete sanitized args asset",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "live-privacy-overflow: complete sanitized result asset",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "read: private recording evidence stripped",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "read: actual approved file and activity caption",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: stable unique ordered sequences",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "runtime-before-shutdown: nonempty journal scan",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "runtime-before-shutdown: disk journal/assets contain zero synthetic sentinels",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "service-1: graceful process shutdown",
+      "status": "PASS",
+      "detail": {
+        "pid": 37216,
+        "exit": 0,
+        "shutdown": {
+          "drained": true,
+          "listenerSettled": true,
+          "acceptedRemaining": 0
+        }
+      }
+    },
+    {
+      "name": "timeline: complete canonical journal preserved in cold history",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: both native message shards rehydrated",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: source-defined turn projections",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: contiguous full history sequence",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: persisted nonzero count",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: observed question and complete turn retained",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: persisted last activity",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "service: distinct OS process restart",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "service-2: graceful process shutdown",
+      "status": "PASS",
+      "detail": {
+        "pid": 37680,
+        "exit": 0,
+        "shutdown": {
+          "drained": true,
+          "listenerSettled": true,
+          "acceptedRemaining": 0
+        }
+      }
+    },
+    {
+      "name": "timeline: captions facts call IDs chronology survive service restart",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "timeline: summary projection survives service restart",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "runtime-after-restart: nonempty journal scan",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "runtime-after-restart: disk journal/assets contain zero synthetic sentinels",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "native runtime evidence contains no sentinels",
+      "status": "PASS",
+      "detail": null
+    }
+  ],
+  "error": null,
+  "personalProfilesUsed": false,
+  "actualClipboardAccess": false,
+  "scope": "Windows release CLI, loopback MCP, native pipes/ConPTY, synthetic recorder; clean restart only",
+  "linux": "NOT RUN",
+  "macOS": "HOLD",
+  "desktopInstallerAcceptance": "NOT RUN",
+  "performanceComparison": "NOT MEASURED",
+  "productSourceChanged": false
+}

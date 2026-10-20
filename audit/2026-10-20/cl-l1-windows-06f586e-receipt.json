@@ -1,0 +1,513 @@
+{
+  "unit": "CL-L1",
+  "date": "2026-10-20",
+  "timezone": "Asia/Jakarta",
+  "status": "FAIL",
+  "githubShaUnderTest": "06f586e423e5abb4f95eba582996c4a5278c1311",
+  "githubMergedPr": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/9",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "machine": {
+    "os": "Windows 11 Home Single Language",
+    "version": "10.0.26300",
+    "architecture": "AMD64",
+    "drive": "D:"
+  },
+  "checkout": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-06f586e",
+  "evidence": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-06f586e\\audit\\2026-10-20\\cl-l1-windows-06f586e",
+  "runtimeTemporaryRoot": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-20261020-06f586e",
+  "sourceCleanAtNativeStart": true,
+  "productImplementationChanged": false,
+  "protectedWipPaths": 8,
+  "wipHeadStatusAndSha256Unchanged": true,
+  "binary": {
+    "path": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-20261020\\target\\release\\cos-rust.exe",
+    "bytes": 12825600,
+    "sha256": "7d1ebdb4e34f9074f38fe0ea87e45160bca7de1cef3694945ca708f4eb4f5f45"
+  },
+  "gates": {
+    "exactShaAndCleanIsolatedSource": "PASS",
+    "protectedEightPathWip": "PASS",
+    "cargoFmtStrictClippyWorkspaceTests": {
+      "status": "PASS",
+      "passed": 253,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 69
+    },
+    "releaseBuild": {
+      "name": "release-build",
+      "command": "cargo build --release --locked -j2",
+      "exitCode": 0,
+      "elapsedSeconds": 385.6744894,
+      "status": "PASS"
+    },
+    "exactShaCloudCI": {
+      "status": "PASS",
+      "runId": 39233631170,
+      "jobs": [
+        "test (windows-latest)",
+        "test (ubuntu-latest)"
+      ]
+    },
+    "recorderInlineOverflowPrivacy": "PASS",
+    "livePoisonedStdoutPrivacy": "PASS",
+    "syntheticClipboardEnvSecretBinaryPrivacy": "PASS",
+    "journalAndAssetsSentinelScan": {
+      "status": "PASS",
+      "syntheticSentinels": 10,
+      "stages": 4,
+      "fileObservations": 28,
+      "leaks": 0
+    },
+    "windowsProcessNonzeroRunningCompleted": {
+      "status": "PASS",
+      "nonzeroExit": 7,
+      "completedExit": 0,
+      "adapters": [
+        "pipes",
+        "ConPTY"
+      ]
+    },
+    "cleanServiceRestartTimeline": {
+      "status": "PASS",
+      "historyEvents": 23,
+      "messages": 2,
+      "compared": "all canonical journal fields, full projected history/captions/evidence/call IDs/seq, turn identities, summary counters and last activity"
+    },
+    "nativeProbeAssertions": {
+      "passed": 93,
+      "failed": 3,
+      "unhandledError": null
+    },
+    "livePinnedCaptionDifferential": {
+      "status": "FAIL",
+      "cases": 14,
+      "mismatches": 5,
+      "sourceSha256": "f807705d2534e54c95edd9df64fd60ab75d91e7206e22e12f7f0471ff4486596"
+    },
+    "optionalLocalLinux": {
+      "status": "BLOCKED",
+      "reason": "Windows-host Docker/WSL backing storage not verified on D:; no local Linux run started"
+    },
+    "macOS": "HOLD",
+    "desktopBrowserInstallerAcceptance": "NOT RUN",
+    "baselinePerformanceComparison": "NOT RUN",
+    "nextCL04A": "BLOCKED"
+  },
+  "findings": [
+    {
+      "id": "CL-L1-F1",
+      "status": "FAIL",
+      "priority": "P2",
+      "owner": "cos-store caption::write_stdin",
+      "trigger": "A native command finishes with trusted exitCode=0 and running=false; write_stdin returns completion",
+      "actual": "summary.metric absent",
+      "expected": "summary.metric = ✓ finished",
+      "rustSource": "crates/cos-store/src/caption.rs:334",
+      "upstreamSource": "src/main/session/summarize.ts:367",
+      "nativeReproductions": [
+        "background-pipe",
+        "completed",
+        "background-conpty"
+      ]
+    },
+    {
+      "id": "CL-L1-F2",
+      "status": "FAIL",
+      "priority": "P2",
+      "owner": "cos-store caption::exec_command",
+      "trigger": "First non-comment command line is longer than 70 UTF-16 code units",
+      "actual": "caption includes entire first command line",
+      "expected": "source first.slice(0,70) plus space and ellipsis",
+      "rustSource": "crates/cos-store/src/caption.rs:291",
+      "upstreamSource": "src/main/session/summarize.ts:93",
+      "nativeReproductions": [
+        "background-pipe",
+        "background-conpty"
+      ]
+    }
+  ],
+  "harnessCorrections": [
+    "Attempt 1 compared raw journal with read projection; history adds turnOrigin. No canonical field changed.",
+    "Attempt 2 expected launch args/result overflow in one event; native output settles in write_stdin. Assert each actual boundary.",
+    "Attempt 3 used find with command capability enabled; source gates find off. Use advertised read for final activity.",
+    "Attempt 4 treated journal as full history; native messages live in shards. Compare journal by seq plus both rehydrated message records and complete API history across restart.",
+    "Attempt 5 completes all required privacy/process/restart checks and retains three real completed-caption assertions as FAIL."
+  ],
+  "performance": {
+    "comparison": "NOT MEASURED",
+    "binaryBytesOnly": 12825600,
+    "workspaceStrictSeconds": 357.1113852,
+    "releaseBuildSeconds": 385.6744894,
+    "nativeProbeSeconds": 28.202999999999975,
+    "noImprovementClaim": true
+  },
+  "localRequired": "CL-L1 retest on new merged repair SHA",
+  "youRequired": "NO private-account, actual clipboard or manual desktop acceptance required",
+  "next": "Cloud repair proposal CL-L1-FIX-01: source-equivalent successful-completion metric and command-label truncation, additive RED/GREEN source-oracle tests, Windows/Linux CI, merged SHA; then rerun CL-L1. CL-04A remains blocked.",
+  "publication": {
+    "branch": "feature/cl-l1-windows-qualification-20261020",
+    "kind": "qualification evidence and documentation only",
+    "stateAtCapture": "CHECKPOINT_NOT_REMOTE",
+    "laterPublication": "See the documentation handoff branch/PR; capture state is historical."
+  },
+  "evidenceManifest": [
+    {
+      "file": "attempt-1/disk-scan-manifests.json",
+      "bytes": 1315,
+      "sha256": "8aa29eed5251eb4269a6cea8f0f91cfe5f2c15adcb525e5c7698de4282acf12b",
+      "capturedBytes": 1354,
+      "capturedSha256": "36fc2ab0844d06d847b8c4f6d63d5c17c357ed17fc5da6c1bbb9218b6b8d7ad4"
+    },
+    {
+      "file": "attempt-1/history-after-restart.json",
+      "bytes": 22723,
+      "sha256": "c16539f158931380e6939387483467908e113c7562895a1267204ee7ebf51c79",
+      "capturedBytes": 22955,
+      "capturedSha256": "6724d7c56315a09e96e82a39ab61b2176dfb8da5ed88f37f4d419d1dffca66fd"
+    },
+    {
+      "file": "attempt-1/native-checks-progress.json",
+      "bytes": 2095,
+      "sha256": "04da7a5e5865ae72376bec5c57bd6f934982a4c3d1fd637cc2abfacb00ad9e9b",
+      "capturedBytes": 2197,
+      "capturedSha256": "892e0ad4c167449b62e99b918c841b4c0ad1f4204a7e90bf01dc1a96a9b1c21e"
+    },
+    {
+      "file": "attempt-1/native-probe.txt",
+      "bytes": 1008,
+      "sha256": "cd1566394b0c36482b608975d48c8cac461c4d1818b4ef5c01fe26dbf5d85e42",
+      "capturedBytes": 1029,
+      "capturedSha256": "2d7a4f8bc5b81bbb6c702829f4cd17442e4afa70f529289ed163d9c00a6e068f"
+    },
+    {
+      "file": "attempt-1/native-receipt.json",
+      "bytes": 3018,
+      "sha256": "2248cea1cf34358cfc5bd65b76568f587f5758b5ec003171d9727044c1550c49",
+      "capturedBytes": 3140,
+      "capturedSha256": "08c364d097bc45df0064af351485f0e7e4fa449c3264124b82bef8bbdb2485e4"
+    },
+    {
+      "file": "attempt-1/native-runtime-projections.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "capturedBytes": 4,
+      "capturedSha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+    },
+    {
+      "file": "attempt-1/projection-boundary-diff.json",
+      "bytes": 656,
+      "sha256": "95cfcf0380f462a8aab84c50cc5a72ae2f61ba4e1cd057fdedb25c3bbb1599db",
+      "capturedBytes": 699,
+      "capturedSha256": "e423c16514a2b1b5ef036190138c57ac9d262d5da44b926111902937fa11d4ae"
+    },
+    {
+      "file": "attempt-1/qualify-cl-l1.py",
+      "bytes": 19327,
+      "sha256": "915882a030cd500abf86274896854a174b5c3244da48d48d63a73d37f16ea1ea",
+      "capturedBytes": 19327,
+      "capturedSha256": "915882a030cd500abf86274896854a174b5c3244da48d48d63a73d37f16ea1ea"
+    },
+    {
+      "file": "attempt-2/disk-scan-manifests.json",
+      "bytes": 2626,
+      "sha256": "d64618e6a76dbe352c7d5067b5c20b0a05dc4c176f03cb56bcd17fdf66cb73df",
+      "capturedBytes": 2702,
+      "capturedSha256": "3470ff402db2b6e53841856a97ad2afac2231861c06766e364750869ee1f7ae2"
+    },
+    {
+      "file": "attempt-2/native-checks-progress.json",
+      "bytes": 7945,
+      "sha256": "b17a891e79d3ef7260e755398c6d5037dbf8e8ea0d438608fa6b21bf7c4ce8d5",
+      "capturedBytes": 8308,
+      "capturedSha256": "db33dbf74b35744ae42fa8b67ce1ec3bdcb5c0a56633559f829dd89c8255eab8"
+    },
+    {
+      "file": "attempt-2/native-probe.txt",
+      "bytes": 3627,
+      "sha256": "37453b53618c2cc038d021d924c82ce0efefce7af0cfcf6652d4eeeabf86d7ef",
+      "capturedBytes": 3697,
+      "capturedSha256": "aec55324ece08a81a96e847f21b0127be35b54efbb662fe4a6cc94ee05b5212e"
+    },
+    {
+      "file": "attempt-2/native-receipt.json",
+      "bytes": 9401,
+      "sha256": "5972692b42b5acc8b93255810b4382d4eb667eb3878166f379061d16fe23511e",
+      "capturedBytes": 9784,
+      "capturedSha256": "7abb4b996f1493decb0552ceace1ac699360fd6f1b5c97e7782d62853e35f879"
+    },
+    {
+      "file": "attempt-2/native-runtime-projections.json",
+      "bytes": 31187,
+      "sha256": "d0df278cb2ed984b0ea5a71a025167255a9108ecebfd6e1bbf087ee99c07c9e5",
+      "capturedBytes": 32136,
+      "capturedSha256": "1aafab13b93a698786782e7c10c1c9267f67d226f6548fccc43a3012740371d0"
+    },
+    {
+      "file": "attempt-2/qualify-cl-l1.py",
+      "bytes": 19757,
+      "sha256": "0109872231d1891b750f1493abfbb5dce64f06280eb8ff80736547de15324fc6",
+      "capturedBytes": 19757,
+      "capturedSha256": "0109872231d1891b750f1493abfbb5dce64f06280eb8ff80736547de15324fc6"
+    },
+    {
+      "file": "attempt-3/disk-scan-manifests.json",
+      "bytes": 2626,
+      "sha256": "f5ef6e7c53fdfb87e268f4d584f8eb7ca7e591c7e300da19aebe4c252e201443",
+      "capturedBytes": 2702,
+      "capturedSha256": "93bd8b89f8b81bad82831cbc0bc64020bc31960e13ea2528eac27551908a51fa"
+    },
+    {
+      "file": "attempt-3/native-checks-progress.json",
+      "bytes": 9661,
+      "sha256": "ceb1d68ebed4e9c3f592dab7b9685e2dcc73905ea79e8c6b7c8d27efd5830b51",
+      "capturedBytes": 10089,
+      "capturedSha256": "99092fd6f0d6d105f8254c50c0fd194cec11364424b130c757e8bffa5c42201e"
+    },
+    {
+      "file": "attempt-3/native-probe.txt",
+      "bytes": 4021,
+      "sha256": "636c427c5e1acf497fb58e83ae5f196968807da3834137a9b3d175f8b742c445",
+      "capturedBytes": 4098,
+      "capturedSha256": "0e256e3512ee0f072395129270782ac5c7c95a936e35e3a21b0439f722ccea4d"
+    },
+    {
+      "file": "attempt-3/native-receipt.json",
+      "bytes": 11185,
+      "sha256": "4a6bc67a2959fda30900d2170321d9ba58e6af6c2c30e0622c2cdc2fa41e5b53",
+      "capturedBytes": 11633,
+      "capturedSha256": "7c4073d2de89e31dd1ba755339f16af6c4007e420f2982b96059abcc7f0d5a42"
+    },
+    {
+      "file": "attempt-3/native-runtime-projections.json",
+      "bytes": 31047,
+      "sha256": "36943693f020155a739d0304b8435254fd9582ce6a3e1eab62208dab1c369328",
+      "capturedBytes": 31996,
+      "capturedSha256": "76451db40097b05f64b26c6062ccb7136ede70ecade8b4d908f8e4274b4a5d15"
+    },
+    {
+      "file": "attempt-3/qualify-cl-l1.py",
+      "bytes": 20590,
+      "sha256": "cef5079fcdff2762d608a84f13debc87d539ce4d9c5042d04aa82ad2706f2830",
+      "capturedBytes": 20590,
+      "capturedSha256": "cef5079fcdff2762d608a84f13debc87d539ce4d9c5042d04aa82ad2706f2830"
+    },
+    {
+      "file": "attempt-4/disk-scan-manifests.json",
+      "bytes": 4445,
+      "sha256": "6761e8d56b0bb96353001bc3f6ac211ade70d84d64d854cee0427a2de756e432",
+      "capturedBytes": 4568,
+      "capturedSha256": "95fb99a2778f37099b2b5eda6680ecc5fd822238f5eb6934a52e7de22ac380f0"
+    },
+    {
+      "file": "attempt-4/native-checks-progress.json",
+      "bytes": 10644,
+      "sha256": "f1392b3c9461fb0c97f60d3e33c6e666ff9948b08ac9aca917e8a7e215163bb6",
+      "capturedBytes": 11115,
+      "capturedSha256": "6e376c0f4af4b1d13003e53d618eb9fb93a2789f84268c3e7ae9a117c05ae612"
+    },
+    {
+      "file": "attempt-4/native-probe.txt",
+      "bytes": 4491,
+      "sha256": "ae5f3e8f49f5f0daef899e198fb17988f94703d998898f93a2fefe5ad5055453",
+      "capturedBytes": 4575,
+      "capturedSha256": "50c8a01144444a7190047d38c6234bf1aa213897dcbe807388ec9b6d22b05c0f"
+    },
+    {
+      "file": "attempt-4/native-receipt.json",
+      "bytes": 12324,
+      "sha256": "18680f043bc479abfb37fe250cbed6b05d2871ce6f654f95f8888d99ade37b0d",
+      "capturedBytes": 12815,
+      "capturedSha256": "72892fb09185a90dcd3c21988dd2598da5087712cd37e108041dbb93d4a4ecf1"
+    },
+    {
+      "file": "attempt-4/native-runtime-projections.json",
+      "bytes": 31145,
+      "sha256": "a337ee8e47a1c98766eaf22e51f5ab1bbd275da3c02ae6a8e021452181327143",
+      "capturedBytes": 32094,
+      "capturedSha256": "d8c01f7b875ed32bda5987c2b31155e9084f3a6d03f515cab1fca297e4d2dd8e"
+    },
+    {
+      "file": "attempt-4/qualify-cl-l1.py",
+      "bytes": 20708,
+      "sha256": "fb611640401d8ef04d34d2d999729ddb4d0305eaabeb2a8ad218cbb9a10fb1dd",
+      "capturedBytes": 20708,
+      "capturedSha256": "fb611640401d8ef04d34d2d999729ddb4d0305eaabeb2a8ad218cbb9a10fb1dd"
+    },
+    {
+      "file": "check-completed-oracle.mjs",
+      "bytes": 2786,
+      "sha256": "5ca75a6f302f0151a7ac484dfa7aeae881970f2b3b18eb86bc30a35b7e691f0a",
+      "capturedBytes": 2786,
+      "capturedSha256": "5ca75a6f302f0151a7ac484dfa7aeae881970f2b3b18eb86bc30a35b7e691f0a"
+    },
+    {
+      "file": "checks.json",
+      "bytes": 344,
+      "sha256": "d9b5c9c3819f2a462fae8bd7f3354ce066a226f4b5a58e6602362686229f61c4",
+      "capturedBytes": 360,
+      "capturedSha256": "c91f49fd44aca257fb8a313332022596cb19ec32f713eb97fd3736fde1df063b"
+    },
+    {
+      "file": "claim.json",
+      "bytes": 576,
+      "sha256": "4b539976a16c0fdb07120850cecc1f1926a15dc98260963810b08a0210eb5e87",
+      "capturedBytes": 591,
+      "capturedSha256": "88cd22d721011e5b38c971c59da4744b45ff929560a340330aa0a17a1c7d168c"
+    },
+    {
+      "file": "cloud-ci-jobs.json",
+      "bytes": 2052,
+      "sha256": "2efa2344861f1aa5099b85c5a819d42a01a8f53ec798f963c683f5257a6780e8",
+      "capturedBytes": 2053,
+      "capturedSha256": "db7a8d771ed2344d16fc32d21ee6368e57b0e2b610b672b17330ae7213b15267"
+    },
+    {
+      "file": "completed-source-oracle.json",
+      "bytes": 16711,
+      "sha256": "cca2fd37cf4c220d1c774813f5aec6e04b39252618a37180db465377e207cfcd",
+      "capturedBytes": 16711,
+      "capturedSha256": "cca2fd37cf4c220d1c774813f5aec6e04b39252618a37180db465377e207cfcd"
+    },
+    {
+      "file": "disk-scan-manifests.json",
+      "bytes": 6263,
+      "sha256": "122ceac7929a4a092d8203c380ae76e7eb3a86264a7080e5c23dbb02f825171c",
+      "capturedBytes": 6433,
+      "capturedSha256": "91ec7db1efa38120a24016bcf61a0b068cd0eca0b8d8804c6fd7489e75859c77"
+    },
+    {
+      "file": "environment.json",
+      "bytes": 539,
+      "sha256": "92d79608a3fbd740bf27b07faaeec7e1b002fe56f7d74b6347b163016c8664a6",
+      "capturedBytes": 551,
+      "capturedSha256": "ac0090c31e712a6e9b49cc155e4d3956b6fbea3ebf2068bfda115b4d161883d0"
+    },
+    {
+      "file": "github-merge.json",
+      "bytes": 384,
+      "sha256": "662bedcc75a66f599d1274b31081a148d165e3ff030b93134e62e540d1f91873",
+      "capturedBytes": 385,
+      "capturedSha256": "ea12ed3507b7a4ff904232450e11195299783814b70290cdf7855fb3b3646a09"
+    },
+    {
+      "file": "native-probe.txt",
+      "bytes": 5035,
+      "sha256": "a94880e994cd9d657a0d4598df2c83750ae582d58ef639bc71ad9655c1ab5431",
+      "capturedBytes": 5131,
+      "capturedSha256": "5630995abe77d1272641754148c8bf13516bbc1a9430f0f2a3177ef2cc38dfdd"
+    },
+    {
+      "file": "native-receipt.json",
+      "bytes": 13958,
+      "sha256": "f4809354ff8066d49cffb5c505c57b6278744e48c2c88cb60d01594aa0a598cb",
+      "capturedBytes": 14519,
+      "capturedSha256": "334a5e98646f5172cc1bf92521ec8c42dd99c9ea5ba27bb2fd6172fdef225b49"
+    },
+    {
+      "file": "native-runtime-projections.json",
+      "bytes": 31102,
+      "sha256": "fc9ded9d7afaef3cbd6b68aced8d28a15486aa1d354b0892d632061ba13cf694",
+      "capturedBytes": 32051,
+      "capturedSha256": "7ac7803bd770600fa33a313df57dc4950a3c04b82556b5b5bc8130824ec3e313"
+    },
+    {
+      "file": "privacy-history-after-restart.json",
+      "bytes": 22238,
+      "sha256": "64aef197c292e8c612642909d88091508c7bd37134b55b8e7a91cd36b385ce97",
+      "capturedBytes": 22467,
+      "capturedSha256": "3abcc5d7b6773f3028fb7f259cc990b856921dcc8ba23622c39925089d80369d"
+    },
+    {
+      "file": "qualify-cl-l1.py",
+      "bytes": 21426,
+      "sha256": "36f4ecc40e13484602ceecc16a5a495b3df8e2e5321d3ed045b935c4112b2b93",
+      "capturedBytes": 21426,
+      "capturedSha256": "36f4ecc40e13484602ceecc16a5a495b3df8e2e5321d3ed045b935c4112b2b93"
+    },
+    {
+      "file": "release-build.txt",
+      "bytes": 6579,
+      "sha256": "4ecc64f7a30d78be09998ce6138f1a7366ab68ed1210e947bcb77263ce99de5e",
+      "capturedBytes": 6778,
+      "capturedSha256": "2215c19ca38689f0ce1cc3c0fcd314d8ee9e2af4aa7761e9ff52fa35fcc0578f"
+    },
+    {
+      "file": "runtime-history-after-restart.json",
+      "bytes": 48265,
+      "sha256": "2c246fd8d034316ca80985e00454cc37af5c562dbc8eb942c2802043f77c7433",
+      "capturedBytes": 49265,
+      "capturedSha256": "67d81789f05ca23dd273218f9c7dcfa6a67861bef5d989983293d1aab5098b77"
+    },
+    {
+      "file": "runtime-history-before-restart.json",
+      "bytes": 46904,
+      "sha256": "488abb8a5a2f7b1ab88f6af396114ff6ef527d7e15d538c165adedb439bcc283",
+      "capturedBytes": 47846,
+      "capturedSha256": "90ffc0dcb906c1416a8b6f9d9cdd679db577b041fa93bb19cb277a57ceba3db4"
+    },
+    {
+      "file": "runtime-overview-after-restart.json",
+      "bytes": 1519,
+      "sha256": "171525a9d839bb94917ac10493d0ef7b011a5a0c1559b56b099947a352ab22c2",
+      "capturedBytes": 1581,
+      "capturedSha256": "f61e450ee26f0187085e3a9483bd0dde9e8087de0ee5181434f11dbadd332575"
+    },
+    {
+      "file": "runtime-overview-before-restart.json",
+      "bytes": 1519,
+      "sha256": "171525a9d839bb94917ac10493d0ef7b011a5a0c1559b56b099947a352ab22c2",
+      "capturedBytes": 1581,
+      "capturedSha256": "f61e450ee26f0187085e3a9483bd0dde9e8087de0ee5181434f11dbadd332575"
+    },
+    {
+      "file": "source-oracle.txt",
+      "bytes": 1596,
+      "sha256": "31a6e445f50dcd84ad4e78c3970219cc5765523f7e90018850c46dfdab131d6b",
+      "capturedBytes": 1597,
+      "capturedSha256": "4ecdd1e0976740c6352095247be5ef6a2f27a8d43ecb79aa84db317bdbc8e7a9"
+    },
+    {
+      "file": "timeline-projection-diff.json",
+      "bytes": 5426,
+      "sha256": "7a84f75c89a9b376bb74ef99c0e5a4f63a6acdb8e6a15f263f616a6297e22074",
+      "capturedBytes": 5752,
+      "capturedSha256": "57c1e155f58d692c4c70f8a1e853cfe94b488879001025fc044270f68a784192"
+    },
+    {
+      "file": "wip-after.json",
+      "bytes": 1851,
+      "sha256": "7088b3d132ecd36c329dca99d5a1c8f74c5dc56fec3f25676250cd210b42a556",
+      "capturedBytes": 1906,
+      "capturedSha256": "8d164d29a3404916a1db364ddb81abe0957b524b94bb2acafeb8b5df45f02150"
+    },
+    {
+      "file": "wip-before.json",
+      "bytes": 1851,
+      "sha256": "8c6d9c5aaf5d47328235057c541b92fad8bc8d1a8a328c784d7dccb0341cbb26",
+      "capturedBytes": 1906,
+      "capturedSha256": "ae1912dc71838a910af78229d7474e45dbc39bcc4f2a8325b26dbdb7382a98ff"
+    },
+    {
+      "file": "workspace-strict-index-attempt.txt",
+      "bytes": 170,
+      "sha256": "62cdbe483fc129cd1d662f1b500fadd345a1af3a568df839c0d8e3142e4a20fa",
+      "capturedBytes": 173,
+      "capturedSha256": "9b9c13ef06a448e6f5663376f254338a67e0b85ba105caf5c7139abad629bc20"
+    },
+    {
+      "file": "workspace-strict.txt",
+      "bytes": 46920,
+      "sha256": "94b9231adbfbde073ff0d2979dfe08d999c49dcbf7205e8e499ae5dba5eecc7d",
+      "capturedBytes": 47967,
+      "capturedSha256": "126247accb9a02d728eabd13a69f46132b81ef1a3c4cae69cae34329f1502f20"
+    }
+  ],
+  "limitations": [
+    "Synthetic explicit profiles only; no personal credentials/profile/clipboard access.",
+    "Clean service stop/restart, not crash durability or installed desktop acceptance.",
+    "338 existing representable caption cases still PASS; 5 UTF-16 exclusions unchanged. Existing corpus has zero write_stdin exitCode=0 cases.",
+    "Raw synthetic profiles and all caches/temp stay ignored on D:; only sanitized evidence is eligible for publication."
+  ],
+  "evidenceEncoding": "Published JSON/text uses canonical LF; capturedBytes/capturedSha256 refer to unchanged original capture bytes retained under runtimeTemporaryRoot. sha256 hashes published evidence bytes."
+}
