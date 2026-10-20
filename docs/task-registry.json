@@ -1527,5 +1527,19 @@
       "kind": "U",
       "status": "todo"
     }
-  ]
+  ],
+  "legacy_pre_2026_10_20_ids": {
+    "explanation": "Interpret these only when reading historical documents written before PLAN-LINEAR-01. Canonical current ID 8A always refers to Phase 8 Chrome/extension adapter, not old browser feasibility.",
+    "preflight": {
+      "former 8A": "7P-A",
+      "former 8B": "7P-B",
+      "former 8L1": "7P-L1"
+    },
+    "full_phase_8": {
+      "former 8C": "8A",
+      "former 8D": "8B",
+      "former 8E": "8C",
+      "former 8L2": "8L1"
+    }
+  }
 }
