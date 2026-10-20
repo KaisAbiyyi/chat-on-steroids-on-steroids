@@ -26,6 +26,15 @@ impl Default for Limits {
         }
     }
 }
+impl Limits {
+    /// Admission boundary shared by the in-process engine and isolated worker.
+    /// The child process has a separate 128 MiB OS cap; this is the JS heap cap.
+    pub fn valid(self) -> bool {
+        (1..=60_000).contains(&self.cpu_ms)
+            && (1..=60_000).contains(&self.wall_ms)
+            && (1024 * 1024..=64 * 1024 * 1024).contains(&self.memory)
+    }
+}
 static ACTIVE: AtomicUsize = AtomicUsize::new(0);
 struct Permit;
 impl Drop for Permit {
@@ -71,6 +80,9 @@ pub fn run_notifying(
     limits: Limits,
     notify: Option<Notify>,
 ) -> Value {
+    if !limits.valid() {
+        return error("RESOURCE_LIMIT");
+    }
     if code.trim().is_empty() || cos_core::config::js_len(code) > 64000 {
         return error("CODE_LIMIT");
     }
@@ -125,7 +137,7 @@ pub fn run_notifying(
         Err(_) => return error("RUNTIME_ERROR"),
     };
     let setup=context.with(|ctx|->rquickjs::Result<_>{
-  let calls=state.clone();ctx.globals().set("__call",Func::from(move|id:u32,name:String,args:String|->rquickjs::Result<()>{let mut s=calls.lock().unwrap();if s.failure.is_some(){return Err(js_error());}let refusal=if !allowed.contains(&name){Some("UNKNOWN_TOOL")}else if s.calls>=32||s.pending>=8||args.len()>1024*1024{Some("CALL_LIMIT")}else{None};if let Some(reason)=refusal{s.failure=Some(reason.into());return Err(js_error());}let args=serde_json::from_str(&args).map_err(|_|js_error())?;s.calls+=1;s.pending+=1;s.queue.push_back((id,name,args));Ok(())}))?;
+  let calls=state.clone();ctx.globals().set("__call",Func::from(move|id:u32,name:String,args:String|->rquickjs::Result<()>{let mut s=calls.lock().unwrap();if s.failure.is_some(){return Err(js_error());}let refusal=if !allowed.contains(&name){Some("UNKNOWN_TOOL")}else if s.calls>=32||s.pending>=8||args.len()>1024*1024{Some("CALL_LIMIT")}else{None};if let Some(reason)=refusal{s.failure=Some(reason.into());return Err(js_error());}let args=serde_json::from_str(&args).map_err(|_|{s.failure=Some("INVALID_ARGS".into());js_error()})?;s.calls+=1;s.pending+=1;s.queue.push_back((id,name,args));Ok(())}))?;
   let emits=state.clone();ctx.globals().set("__emit",Func::from(move|kind:String,value:String|->rquickjs::Result<()>{let mut s=emits.lock().unwrap();if s.failure.is_some(){return Err(js_error());}
   if s.content.len()>=32||s.output_bytes+value.len()>12*1024*1024{s.failure=Some("OUTPUT_LIMIT".into());return Err(js_error());}let value:Value=serde_json::from_str(&value).map_err(|_|js_error())?;if kind=="text"{let value=value.as_str().ok_or_else(js_error)?;let remaining=40000usize.saturating_sub(s.text_bytes);if value.len()>remaining{let mut end=remaining;while !value.is_char_boundary(end){end-=1;}
   if end>0{let item=json!({"type":"text","text":&value[..end]});if let Some(notify)=&notify{notify(item.clone());}s.content.push(item);}s.failure=Some("OUTPUT_LIMIT".into());return Err(js_error());}s.text_bytes+=value.len();s.output_bytes+=value.len();s.content.push(json!({"type":"text","text":value}));}else if kind=="image"{
