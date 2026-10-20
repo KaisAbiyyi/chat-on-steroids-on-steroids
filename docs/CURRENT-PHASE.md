@@ -1,3 +1,13 @@
+# CL-05A current cloud claim and checkpoint (2026-10-20)
+
+- **CLAIMED:** `CL-05A`, ChatGPT GitHub-connected cloud session `chatgpt-2026-10-20-cl05a-01`, [draft PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18), branch `work/cl-05a-process-custody-20261020`, base `340cf55eddb2766c96e1e1f36eaeb118faecad04`, exclusive logical lock `process-supervisor`. Last code/test checkpoint before this doc update: `137f2eebcf86a2079b0b054252dd1b721acf8862`.
+- **IMPLEMENTED CANDIDATE:** owner revalidation at actual input/resize/termination/publication use; serialized ownership promotion; retirement fences stale references and waits for output-publication commit/rollback; failed exit probe closes I/O/script custody. Added negative owner, rebind, pending-publication and stale-Arc regressions.
+- **VALIDATION:** CI for exact final head **PENDING** on GitHub Actions Windows/Ubuntu; first failing format run was followed by source-aligned rustfmt corrections. Do not mark DONE or unblock CL-05B until exact head format/strict Clippy/tests/release and independent review PASS, followed by merged SHA and registry update.
+- **SCOPE:** GitHub cloud only. Dirty Windows D: checkout and native qualification **NOT TOUCHED**. `CL-L2` remains after CL-05B; `CL` total backend still PARTIAL. No owner U gate.
+- **PARALLEL:** `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A` remain potential disjoint candidates subject to their own claims. Next checkpoint: inspect CI, repair failures, review/merge, then update all Notion and Markdown receipts.
+
+---
+
 # Current CoS-Rust work state
 
 ## Canonical Phase 7 preflight / readiness governance (2026-10-20)
