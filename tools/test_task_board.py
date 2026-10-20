@@ -109,7 +109,7 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_done_cannot_depend_on_unfinished_task(self):
         data = copy.deepcopy(self.data)
-        next(t for t in data["tasks"] if t["id"] == "CL-05B")["status"] = "done"
+        next(t for t in data["tasks"] if t["id"] == "CL-L2")["status"] = "done"
         self.assertTrue(any("cannot be done" in e for e in board.validate(data)))
 
     def test_legacy_phase_ordering_cannot_regress(self):
