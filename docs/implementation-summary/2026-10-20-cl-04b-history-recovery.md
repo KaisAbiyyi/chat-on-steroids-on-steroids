@@ -10,8 +10,8 @@ Date: 2026-10-20 (Asia/Jakarta). Canonical cloud source: `KaisAbiyyi/chat-on-ste
 
 ## Behavior and limits implemented
 
-1. Replay journals at most **1 GiB** each (metadata checked before scanning); preserve oversized original file bytes, fail explicitly rather than scan without resource bounds.
-2. Canonical in-memory message overlays at most **100,000 identities and 256 MiB serialized content**. Check the existing map count and stop shard ingestion on the first distinct identity exceeding the limit, without deleting originals.
+1. Replay journals at most **1 GiB** each (metadata checked before scanning) and reject appends that would cross that same bound, including separator bytes; preserve oversized original file bytes.
+2. Canonical in-memory message overlays at most **100,000 identities and 256 MiB serialized content**. Check the existing map count, bound shard ingestion, and enforce identical limits before each canonical write using a per-session byte ledger; never accept writes that would become unrecoverable at restart.
 3. Journal/shard sequence IDs must remain within **JavaScript's safe integer range (2^53−1)**. Refuse corrupt unsafe IDs at replay and refuse sequence writes once exhausted, instead of overflowing or creating unsafe cursors. A valid last safe ID remains readable, but cannot be followed by an unsafe write.
 4. Bound history read materialization at **100,000 records** and refuse oversized `recent()` page requests; consumers should paginate explicitly. Oversized legacy map/shard input refuses recovery rather than silently omitting records.
 5. Leave history `prune()` deliberately **non-destructive**, preserving existing source contract; do not introduce silent age-based deletion or recycling.
