@@ -164,7 +164,7 @@ fn invalid_terminal_dimensions_are_rejected_before_factory_or_spawn() {
                 .create("bad-dimensions", None, cols, rows)
                 .unwrap_err()
                 .kind(),
-            std::io::ErrorKind::PermissionDenied
+            std::io::ErrorKind::InvalidInput
         );
     }
     assert_eq!(called.load(Ordering::SeqCst), 0);
