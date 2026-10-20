@@ -11,3 +11,7 @@
 - **CODE CHECKPOINT:** `a2140ab18ab01e0bdb9cfa286e309fc9d058b2bc`; implementation head before documentation closeout `52916c7764a2e425144d80f35a9b4811d74b0f99`. Five CL-07A regression tests; search denied-path and patch move/delete authority. **EXACT-HEAD CI PASS:** Rust Windows/Linux (fmt, strict Clippy, complete workspace tests, release) [39447056961](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39447056961) and Task DAG [39447057301](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39447057301). Documentation-only closeout commits require new exact-head checks. **Independent reviewer sign-off pending; no accepted merge.**
 - **LOCAL REQUIRED:** none for this cloud unit; `CL-L3` occurs only after CL-06B and CL-07B; D: native checkout untouched.
 - **NEXT:** PR #20 ready for independent review after exact CI; reviewer must verify permission semantics, traversal exclusions/ordering/bounds, transaction rollback and source parity; then merge against current green main and commit acceptance ledger (registry/board/current phase) without overwriting CL-05A or CL-09A claims. CL-07B stays blocked until accepted merge. Notion task is Review, not Done.
+
+## Accepted and released — 2026-10-21
+
+PR #20 merged as `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116` after exact-head Windows/Ubuntu Rust and DAG PASS, and separate-agent scoped read-only review. `search-patch` claim released. CL-07B now eligible; CL-L3 still pending.
