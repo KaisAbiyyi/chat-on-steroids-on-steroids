@@ -102,21 +102,33 @@ fn human_terminal_backpressure_is_bounded_and_permissions_are_live() {
     assert!(count.load(Ordering::Acquire) < 300000);
     permitted.store(false, Ordering::Release);
     assert_eq!(
-        terminals.write("renderer-terminal", "x").unwrap_err().kind(),
+        terminals
+            .write("renderer-terminal", "x")
+            .unwrap_err()
+            .kind(),
         std::io::ErrorKind::PermissionDenied
     );
     // Resize used to bypass the live project/user permission check.
     assert_eq!(
-        terminals.resize("renderer-terminal", 90, 30).unwrap_err().kind(),
+        terminals
+            .resize("renderer-terminal", 90, 30)
+            .unwrap_err()
+            .kind(),
         std::io::ErrorKind::PermissionDenied
     );
     permitted.store(true, Ordering::Release);
     assert_eq!(
-        terminals.resize("renderer-terminal", 0, 24).unwrap_err().kind(),
+        terminals
+            .resize("renderer-terminal", 0, 24)
+            .unwrap_err()
+            .kind(),
         std::io::ErrorKind::InvalidInput
     );
     assert_eq!(
-        terminals.resize("renderer-terminal", 1001, 24).unwrap_err().kind(),
+        terminals
+            .resize("renderer-terminal", 1001, 24)
+            .unwrap_err()
+            .kind(),
         std::io::ErrorKind::InvalidInput
     );
     let mut acked = 0;
@@ -148,7 +160,10 @@ fn invalid_terminal_dimensions_are_rejected_before_factory_or_spawn() {
     );
     for (cols, rows) in [(0, 24), (80, 0), (1001, 24), (80, 501)] {
         assert_eq!(
-            terminals.create("bad-dimensions", None, cols, rows).unwrap_err().kind(),
+            terminals
+                .create("bad-dimensions", None, cols, rows)
+                .unwrap_err()
+                .kind(),
             std::io::ErrorKind::PermissionDenied
         );
     }
