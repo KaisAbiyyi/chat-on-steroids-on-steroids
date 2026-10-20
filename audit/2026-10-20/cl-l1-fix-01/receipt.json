@@ -1,0 +1,143 @@
+{
+  "unit": "CL-L1-FIX-01",
+  "date": "2026-10-20",
+  "timezone": "Asia/Jakarta",
+  "status": "PARTIAL",
+  "scope": "Cloud repair validated on Linux; hosted CI and merge are separate gates; native CL-L1 retest remains required.",
+  "baseSha": "06f586e423e5abb4f95eba582996c4a5278c1311",
+  "productCommit": "9594e0e44bc6b44a1c3cd6943e54029274249813",
+  "sourceBlobSha": "44a4e39b163982c481bbd4819596959f3085efb9",
+  "branch": "fix/cl-l1-caption-parity",
+  "pr": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/11",
+  "agents": {
+    "implementer": "Codex cloud, session 01a15879-c39b-703a-aa3f-f2302052209e",
+    "independentReviewer": "/root/review_cl_l1",
+    "singleWriter": true
+  },
+  "environment": {
+    "kind": "isolated Linux cloud VM",
+    "os": "Linux 6.18.55 x86_64",
+    "rust": "1.91.0",
+    "nativeWindows": false
+  },
+  "gates": {
+    "initialRed": {
+      "status": "PASS",
+      "meaning": "Expected four failing regression tests on unchanged product",
+      "exitCode": 101,
+      "redCheckpointSha": "2ee5ae7ad51173fbfa9581fd7ac816d4ce8a9600",
+      "nativeMismatches": 5
+    },
+    "completedBatchLabelRed": {
+      "status": "PASS",
+      "meaning": "Expected failure reproduces two completed-batch runningSummary mismatches",
+      "exitCode": 101
+    },
+    "targetedFinal": {
+      "status": "PASS",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "additiveSourceCases": {
+      "status": "PASS",
+      "cases": 44,
+      "nativeReplayCases": 14,
+      "completionControls": 6,
+      "labelControls": 24,
+      "excluded": 0
+    },
+    "originalCorpus": {
+      "status": "PASS",
+      "representable": 338,
+      "historicalExclusions": 5,
+      "sha256": "351b6c5ddd762e127a012a6d946c8664b0abb2a8bc9496ef8ccec09235c28884",
+      "changed": false
+    },
+    "sourceRegeneration": {
+      "status": "PASS",
+      "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+      "unchangedUpstream": true,
+      "sourceHashesMatchOriginalCorpus": true
+    },
+    "recorderColdReopen": {
+      "status": "PASS",
+      "events": 14,
+      "fullSanitizedArgsPreserved": true,
+      "historyMetricsAndRunningCaptionsPreserved": true,
+      "lastActivityProjection": "title/kind"
+    },
+    "strictLinuxWorkspace": {
+      "status": "PASS",
+      "command": "python tools/check-workspace.py --strict",
+      "passed": 247,
+      "failed": 0,
+      "ignored": 0,
+      "suiteReports": 70,
+      "rustfmt": "PASS",
+      "allTargetClippy": "PASS"
+    },
+    "releaseBuild": {
+      "status": "PASS",
+      "command": "cargo build --release --locked -j2"
+    },
+    "independentReview": {
+      "status": "PASS",
+      "reviewedProductSha": "9594e0e44bc6b44a1c3cd6943e54029274249813",
+      "remainingActionableFindings": 0
+    },
+    "hostedWindowsLinuxCI": {
+      "status": "PARTIAL",
+      "atCapture": "IN_PROGRESS",
+      "checksUrl": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/11/checks",
+      "acceptance": "Require PASS for both OS jobs on final head before merge"
+    },
+    "nativeCLL1Retest": "NOT RUN",
+    "nextCL04A": "BLOCKED"
+  },
+  "performance": {
+    "comparison": "NOT MEASURED",
+    "linuxBinaryBytes": 12249336,
+    "linuxBinarySha256": "df45009fe1f4d6a0cc20e5bcf5d61de1694aa5a45ad3578645ca0fa96ab0b713",
+    "note": "Observed cloud ELF size only; no baseline/candidate improvement claim or Windows installer comparison."
+  },
+  "localRequired": "Rerun full CL-L1 on a clean D: checkout of the reviewed merged repair SHA, with new synthetic profiles and preserved old FAIL evidence/WIP.",
+  "youRequired": "NO private-account, actual clipboard or manual desktop acceptance.",
+  "knownLimits": [
+    "Lossless unpaired UTF-16 is deferred to CL-04C; no historical exclusions changed.",
+    "Cloud replay does not execute the archived Windows commands.",
+    "Crash recovery, desktop, browser and installer acceptance NOT RUN; macOS HOLD."
+  ],
+  "next": "Complete hosted CI/review and merge, then native CL-L1 retest; do not start CL-04A before PASS.",
+  "evidenceManifest": [
+    {
+      "file": "red.txt",
+      "bytes": 9151,
+      "sha256": "e4dc62c1d675c0ea0ec76db22eec095e31551c164d512d36ad93089da087ce5e"
+    },
+    {
+      "file": "label-completion-red.txt",
+      "bytes": 1732,
+      "sha256": "f96a9ff882e30f0979a87d5ceddcff24419994558d8e1f28e4cd8bdfa97ba4da"
+    },
+    {
+      "file": "green.txt",
+      "bytes": 1058,
+      "sha256": "0efb12fe67d8f3343c7fcb657c4aa0b25bb55462cf3a44b244a553b6b73cf9bb"
+    },
+    {
+      "file": "workspace-strict.txt",
+      "bytes": 31825,
+      "sha256": "444d932f0c4554db549f7b647306c5d29e71bdb4118d0c5115ccc3210678f54e"
+    },
+    {
+      "file": "release-build.txt",
+      "bytes": 322,
+      "sha256": "405c49114d30d4b97bb77fbda87ea4dcc98b67c3da44df15fdb0d334ce3e25e1"
+    }
+  ],
+  "fixture": {
+    "path": "fixtures/upstream/phase1-6-closure/cl-l1-captions.json",
+    "sha256": "472f5e2aca39f6c14717fc87afb74962d0c43760b8199a322b7a2093603bcbbb"
+  }
+}
