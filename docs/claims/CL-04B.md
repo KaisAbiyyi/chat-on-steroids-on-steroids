@@ -7,8 +7,11 @@
 - BRANCH: work/cl-04b-history-recovery-20261020
 - RESOURCE_LOCKS: session-store, history replay/checkpoint and bounded history reads
 - DEPENDENCIES: CL-04A merged; post-merge main CI awaiting final result at claim
-- STATUS: CLAIMED / RUNNING
+- STATUS: RELEASED / MERGED (2026-10-20); cloud code accepted at PR head Windows/Ubuntu CI
 - EXPECTED: prevent crash/metadata replay from corrupting sequence authority, enforce safe large-session read budgets, preserve non-destructive retention; add restart/fault/limits tests and source-compatible evidence
 - LOCAL_REQUIRED: NONE directly for this C unit
 - YOU_REQUIRED: NO
-- NEXT: implement on this branch, PR + Windows/Ubuntu CI, do not merge without final validation
+- CHECKPOINT_SHA: 39b80f3342f3885bb523136974395d9f7069e224 (PR-head Windows/Ubuntu PASS)
+- PR: https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/13
+- MERGE_SHA: ce065f8b449ff4a215f1169ca8efd9158760dbca
+- NEXT: CL-04C; independent resource locks required for parallel lanes
