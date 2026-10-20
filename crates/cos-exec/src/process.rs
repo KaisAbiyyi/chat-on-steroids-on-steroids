@@ -375,8 +375,24 @@ impl Manager {
                         return Err(e);
                     }
                 };
-                let read = pair.master.try_clone_reader().map_err(io::Error::other)?;
-                let input = pair.master.take_writer().map_err(io::Error::other)?;
+                // A spawned PTY owns a live child even when its host-side
+                // reader/writer setup fails; never orphan that child.
+                let read = match pair.master.try_clone_reader() {
+                    Ok(reader) => reader,
+                    Err(error) => {
+                        tree.terminate();
+                        let _ = child.kill();
+                        return Err(io::Error::other(error));
+                    }
+                };
+                let input = match pair.master.take_writer() {
+                    Ok(writer) => writer,
+                    Err(error) => {
+                        tree.terminate();
+                        let _ = child.kill();
+                        return Err(io::Error::other(error));
+                    }
+                };
                 drop(pair.slave);
                 (
                     Process::Pty(child),
