@@ -112,6 +112,11 @@ fn corrected_captions_and_full_arguments_survive_recording_and_cold_reopen() {
         );
     }
     let overview = reopened.summary("unattributed-activity").unwrap().unwrap();
-    assert_eq!(overview["lastToolActivity"]["metric"], "✓ finished");
+    // Last activity is a title/kind projection; full metrics live in history.
+    let last = rows.last().unwrap();
+    assert_eq!(
+        overview["lastToolActivity"],
+        json!({"title":last["expected"]["title"],"kind":last["expected"]["kind"]})
+    );
     assert_eq!(overview["processExitNonzero"], json!(1));
 }
