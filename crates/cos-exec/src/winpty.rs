@@ -242,7 +242,9 @@ pub fn spawn(
     let mut env = BTreeMap::<String, (OsString, OsString)>::new();
     for (key, value) in std::env::vars_os() {
         if !secret_environment(&key.to_string_lossy())
-            && !key.to_string_lossy().eq_ignore_ascii_case("ELECTRON_RUN_AS_NODE")
+            && !key
+                .to_string_lossy()
+                .eq_ignore_ascii_case("ELECTRON_RUN_AS_NODE")
         {
             env.insert(key.to_string_lossy().to_uppercase(), (key, value));
         }
