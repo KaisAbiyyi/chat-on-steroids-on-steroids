@@ -8,6 +8,6 @@
 - **LIVE CONFLICT CHECK:** main CI Windows/Linux PASS; #18 CL-05A process-supervisor and #19 CL-06A project-files have disjoint owned source files; no other active PR was observed.
 - **LOCKED CODE SCOPE:** `crates/cos-tools/src/search/engine.rs`, search-traversal parity tests, `crates/cos-tools/src/patch/updates.rs`, patch/transaction parity tests. Avoid `project_files.rs`, `git.rs`, process supervisor and other agents' contracts.
 - **ACCEPTANCE:** source-aligned traversal ordering, exclusion and bound semantics; transactional refusals and unchanged bytes on failure; RED/GREEN regressions, rustfmt/strict Clippy/full workspace tests/release for Ubuntu+Windows, task-DAG CI, independent review and exact SHA.
-- **CHECKPOINT:** this durable claim commit. CODE: not yet changed. Test failures must not be relabeled PASS.
+- **CODE CHECKPOINT:** `a2140ab18ab01e0bdb9cfa286e309fc9d058b2bc` (move/delete authorization, failed-closed search PermissionDenied, five CL-07A negative/positive integration regressions, rustfmt). CI Windows/Ubuntu fmt PASS, Clippy/tests/release pending at this checkpoint. Do not relabel partial checks PASS.
 - **LOCAL REQUIRED:** none for this cloud unit; `CL-L3` occurs only after CL-06B and CL-07B; D: native checkout untouched.
 - **NEXT:** create draft PR, implement bounded patch/search safety fixes, post exact checks, update Notion task/project and acceptance ledger without duplicating task.
