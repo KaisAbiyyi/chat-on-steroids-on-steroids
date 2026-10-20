@@ -169,3 +169,42 @@ fn invalid_terminal_dimensions_are_rejected_before_factory_or_spawn() {
     }
     assert_eq!(called.load(Ordering::SeqCst), 0);
 }
+
+#[test]
+fn terminal_id_cannot_be_reused_before_old_exit_event_settles() {
+    let d = tempfile::tempdir().unwrap();
+    let cwd = d.path().to_path_buf();
+    let shell = shell::detect(Some(if cfg!(windows) { "cmd" } else { "sh" })).unwrap();
+    let (event_tx, event_rx) = std::sync::mpsc::channel();
+    let barrier = Arc::new(std::sync::Barrier::new(2));
+    let event_barrier = barrier.clone();
+    let first = Arc::new(AtomicBool::new(false));
+    let was_first = first.clone();
+    let terminals = Terminals::new(
+        Arc::new(move |_| Ok(Launch {
+            program: shell.path.clone(),
+            args: shell.args(if cfg!(windows) { "ping -n 5 127.0.0.1 >nul" } else { "sleep 3" }, false),
+            cwd: cwd.clone(),
+            shell: shell.kind.clone(),
+            identity: None,
+        })),
+        Arc::new(|| true),
+        Arc::new(|_, _| Ok(true)),
+        Arc::new(move |event| {
+            if event["exitCode"].is_number() && !was_first.swap(true, Ordering::AcqRel) {
+                let _ = event_tx.send(());
+                event_barrier.wait();
+            }
+        }),
+    );
+    terminals.create("same-id", None, 80, 24).unwrap();
+    terminals.close("same-id");
+    event_rx.recv_timeout(Duration::from_secs(6)).unwrap();
+    assert!(terminals.create("same-id", None, 80, 24).is_err(),
+        "the previous terminal still owns its final exit event");
+    barrier.wait();
+    assert!(terminals.exited(Duration::from_secs(6)));
+    terminals.create("same-id", None, 80, 24).unwrap();
+    terminals.close("same-id");
+    assert!(terminals.exited(Duration::from_secs(6)));
+}
