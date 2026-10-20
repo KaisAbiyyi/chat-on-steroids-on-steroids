@@ -55,14 +55,16 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_wave_is_five_disjoint_cloud_tasks(self):
+    def test_current_ready_wave_excludes_claimed_mcp_unit(self):
         ready, _ = board.readiness(self.data)
         self.assertEqual(
             {task["id"] for task in ready},
-            {"CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"},
+            {"CL-05A", "CL-06A", "CL-07A", "CL-08A"},
         )
         self.assertTrue(all(task["kind"] == "C" for task in ready))
-        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 5)
+        self.assertEqual(len(set().union(*(board.effective_locks(t) for t in ready))), 4)
+        self.assertEqual(self.tasks["CL-09A"]["status"], "claimed")
+        self.assertNotIn("CL-09A", {task["id"] for task in ready})
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
@@ -89,7 +91,11 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("physical-windows-host", board.effective_locks(self.tasks["CL-05A"]))
 
     def test_waves_do_not_skip_local_or_user_gates(self):
-        waves = board.waves(self.data)
+        # Plan a hypothetical fully released claim to validate chronological edges.
+        # The actual resolver must keep the claimed CL-09A blocked.
+        simulated = copy.deepcopy(self.data)
+        next(task for task in simulated["tasks"] if task["id"] == "CL-09A")["status"] = "todo"
+        waves = board.waves(simulated)
         self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A"})
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
