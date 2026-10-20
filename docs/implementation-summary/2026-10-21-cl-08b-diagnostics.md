@@ -10,3 +10,7 @@
 - Exact-head Windows+Ubuntu CI and DAG: NOT RUN until Actions execute. Independent reviewer: NOT RUN. Native CL-L4: NOT RUN.
 - A timed-out thread cannot be forcibly unwound; reporting a timeout does not certify clean OS resource teardown. No user private data or local D: workstation touched.
 - UNIT CL-08B; BRANCH work/cl-08b-diagnostics-20261021; PR #29; PERFORMANCE no measured claim; LOCAL REQUIRED CL-L4 only after code acceptance; YOU REQUIRED no; NEXT CI, review, merge then registry/board/Notion Done.
+
+## Follow-up boundedness checkpoint
+- Diagnostic ring additionally capped by **4 MiB of serialized JSON** (not just entry count); per-entry encoded size tracked on eviction. Synthetic 350-long-entry stress test asserts byte and count limits.
+- Status remains In Progress until exact-head CI and review; this follow-up changes the required CI SHA.

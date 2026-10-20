@@ -33,15 +33,21 @@ pub fn redact(text: &str) -> String {
     }
     out
 }
+const MAX_DIAGNOSTIC_BYTES: usize = 4 * 1024 * 1024;
+#[derive(Default)]
+struct LogEntries {
+    rows: VecDeque<(Value, usize)>,
+    total_bytes: usize,
+}
 pub struct DiagnosticLog {
     capacity: usize,
-    entries: Mutex<VecDeque<Value>>,
+    entries: Mutex<LogEntries>,
 }
 impl DiagnosticLog {
     pub fn new(capacity: usize) -> Self {
         Self {
             capacity: capacity.clamp(1, 10000),
-            entries: Mutex::new(VecDeque::new()),
+            entries: Mutex::new(LogEntries::default()),
         }
     }
     pub fn push(&self, level: &str, message: &str) {
@@ -61,19 +67,29 @@ impl DiagnosticLog {
             .entries
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
-        entries.push_back(
-            json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded}),
-        );
-        while entries.len() > self.capacity {
-            entries.pop_front();
+        let record = json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded});
+        // Count encoded bytes rather than only entries so a large ring never
+        // becomes an unbounded RAM report under repeated long diagnostics.
+        let bytes = serde_json::to_vec(&record)
+            .expect("bounded diagnostic JSON")
+            .len();
+        entries.total_bytes += bytes;
+        entries.rows.push_back((record, bytes));
+        while entries.rows.len() > self.capacity
+            || entries.total_bytes > MAX_DIAGNOSTIC_BYTES
+        {
+            if let Some((_, old_bytes)) = entries.rows.pop_front() {
+                entries.total_bytes -= old_bytes;
+            }
         }
     }
     pub fn snapshot(&self) -> Vec<Value> {
         self.entries
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .rows
             .iter()
-            .cloned()
+            .map(|(entry, _)| entry.clone())
             .collect()
     }
     pub fn export(&self) -> String {

@@ -32,6 +32,23 @@ fn diagnostic_secrets_and_size_are_bounded() {
 }
 
 #[test]
+fn total_diagnostic_size_stays_bounded_with_many_long_entries() {
+    let log = DiagnosticLog::new(10_000);
+    let long = "v".repeat(16_000);
+    for _ in 0..350 {
+        log.push("info", &long);
+    }
+    let snapshot = log.snapshot();
+    assert!(snapshot.len() < 300, "A count-only ring would retain every entry");
+    assert!(!snapshot.is_empty());
+    let total: usize = snapshot
+        .iter()
+        .map(|entry| serde_json::to_vec(entry).unwrap().len())
+        .sum();
+    assert!(total <= 4 * 1024 * 1024);
+}
+
+#[test]
 fn shutdown_continues_after_panic_and_sets_cancel() {
     let cancel = Cancellation::default();
     let reached = Arc::new(AtomicBool::new(false));
