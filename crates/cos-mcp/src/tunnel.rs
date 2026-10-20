@@ -68,7 +68,9 @@ fn observe(state: &mut State, result: &Value) {
 }
 /// Preserve configured HTTPS_PROXY precedence, but never proxy a bearer-path
 /// loopback MCP request. Go tunnel clients do not honor ALL_PROXY directly.
-pub fn proxy_environment(vars: &std::collections::BTreeMap<String, String>) -> std::collections::BTreeMap<String, String> {
+pub fn proxy_environment(
+    vars: &std::collections::BTreeMap<String, String>,
+) -> std::collections::BTreeMap<String, String> {
     let mut out = std::collections::BTreeMap::new();
     if vars.get("HTTPS_PROXY").is_none_or(|s| s.trim().is_empty()) {
         if let Some(proxy) = vars.get("ALL_PROXY").filter(|s| {
@@ -83,8 +85,13 @@ pub fn proxy_environment(vars: &std::collections::BTreeMap<String, String>) -> s
     }
     let mut bypass = vars.get("NO_PROXY").cloned().unwrap_or_default();
     for host in ["localhost", "127.0.0.1", "::1", "[::1]"] {
-        if !bypass.split(',').any(|v| v.trim().eq_ignore_ascii_case(host)) {
-            if !bypass.is_empty() { bypass.push(','); }
+        if !bypass
+            .split(',')
+            .any(|v| v.trim().eq_ignore_ascii_case(host))
+        {
+            if !bypass.is_empty() {
+                bypass.push(',');
+            }
             bypass.push_str(host);
         }
     }
@@ -98,7 +105,11 @@ pub fn retry_delay(attempt: u32) -> Duration {
 }
 fn health_phase(health: &Value, was_connected: bool) -> &'static str {
     if health["localHealthy"] != true {
-        if was_connected { "reconnecting" } else { "awaiting_sidecar" }
+        if was_connected {
+            "reconnecting"
+        } else {
+            "awaiting_sidecar"
+        }
     } else if health["controlPlaneConnected"] == true {
         "running"
     } else if was_connected {
@@ -218,7 +229,8 @@ impl Supervisor {
                     let work = inner.state.lock().ok().and_then(|s| s.work.clone());
                     let should_probe = work.is_some() && std::time::Instant::now() >= next_probe;
                     let health = if should_probe {
-                        work.as_ref().and_then(|d| read_health(&d.path().join("health.url")))
+                        work.as_ref()
+                            .and_then(|d| read_health(&d.path().join("health.url")))
                     } else {
                         None
                     };
@@ -238,13 +250,26 @@ impl Supervisor {
                                 if state.phase != "failed" {
                                     state.phase = health_phase(&health, state.connected).into();
                                     state.connected |= connected;
-                                    state.retries = if connected { 0 } else { state.retries.saturating_add(1) };
+                                    state.retries = if connected {
+                                        0
+                                    } else {
+                                        state.retries.saturating_add(1)
+                                    };
                                     next_probe = std::time::Instant::now()
-                                        + if connected { Duration::from_secs(1) } else { retry_delay(state.retries) };
+                                        + if connected {
+                                            Duration::from_secs(1)
+                                        } else {
+                                            retry_delay(state.retries)
+                                        };
                                 }
                                 state.health = health;
                             } else if should_probe && state.phase != "failed" {
-                                state.phase = if state.connected { "reconnecting" } else { "awaiting_sidecar" }.into();
+                                state.phase = if state.connected {
+                                    "reconnecting"
+                                } else {
+                                    "awaiting_sidecar"
+                                }
+                                .into();
                                 state.retries = state.retries.saturating_add(1);
                                 next_probe = std::time::Instant::now() + retry_delay(state.retries);
                             }
