@@ -101,8 +101,24 @@ fn human_terminal_backpressure_is_bounded_and_permissions_are_live() {
     std::thread::sleep(Duration::from_millis(60));
     assert!(count.load(Ordering::Acquire) < 300000);
     permitted.store(false, Ordering::Release);
-    assert!(terminals.write("renderer-terminal", "x").is_err());
+    assert_eq!(
+        terminals.write("renderer-terminal", "x").unwrap_err().kind(),
+        std::io::ErrorKind::PermissionDenied
+    );
+    // Resize used to bypass the live project/user permission check.
+    assert_eq!(
+        terminals.resize("renderer-terminal", 90, 30).unwrap_err().kind(),
+        std::io::ErrorKind::PermissionDenied
+    );
     permitted.store(true, Ordering::Release);
+    assert_eq!(
+        terminals.resize("renderer-terminal", 0, 24).unwrap_err().kind(),
+        std::io::ErrorKind::InvalidInput
+    );
+    assert_eq!(
+        terminals.resize("renderer-terminal", 1001, 24).unwrap_err().kind(),
+        std::io::ErrorKind::InvalidInput
+    );
     let mut acked = 0;
     let start = Instant::now();
     while !done.load(Ordering::Acquire) && start.elapsed() < Duration::from_secs(8) {
@@ -115,4 +131,26 @@ fn human_terminal_backpressure_is_bounded_and_permissions_are_live() {
     assert!(count.load(Ordering::Acquire) > 500000);
     terminals.dispose();
     assert!(terminals.exited(Duration::from_secs(3)));
+}
+
+#[test]
+fn invalid_terminal_dimensions_are_rejected_before_factory_or_spawn() {
+    let called = Arc::new(AtomicUsize::new(0));
+    let gate = called.clone();
+    let terminals = Terminals::new(
+        Arc::new(move |_| {
+            gate.fetch_add(1, Ordering::SeqCst);
+            Err(std::io::Error::other("factory must not run"))
+        }),
+        Arc::new(|| true),
+        Arc::new(|_, _| Ok(true)),
+        Arc::new(|_| {}),
+    );
+    for (cols, rows) in [(0, 24), (80, 0), (1001, 24), (80, 501)] {
+        assert_eq!(
+            terminals.create("bad-dimensions", None, cols, rows).unwrap_err().kind(),
+            std::io::ErrorKind::PermissionDenied
+        );
+    }
+    assert_eq!(called.load(Ordering::SeqCst), 0);
 }
