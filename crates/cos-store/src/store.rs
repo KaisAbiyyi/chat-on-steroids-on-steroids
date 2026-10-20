@@ -282,7 +282,13 @@ impl SessionStore {
                     return Err(invalid("Canonical history exceeds in-memory record budget"));
                 }
             }
-            Err(e) if e.kind() == io::ErrorKind::PermissionDenied => return Err(e),
+            // Malformed legacy maps may be reconstructed from durable shards.
+            // Resource-budget violations must not silently drop a map instead.
+            Err(e)
+                if matches!(e.kind(), io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput) =>
+            {
+                return Err(e);
+            }
             Err(_) => {}
         }
         let shards = self.path(id, "messages", true)?;
@@ -306,8 +312,10 @@ impl SessionStore {
                     continue;
                 }
                 let path = self.path(id, &format!("messages/{name}"), false)?;
-                let Ok(event) = read_json(&path, MAX_MESSAGE_BYTES as u64) else {
-                    continue;
+                let event = match read_json(&path, MAX_MESSAGE_BYTES as u64) {
+                    Ok(event) => event,
+                    Err(error) if error.kind() == io::ErrorKind::InvalidInput => return Err(error),
+                    Err(_) => continue,
                 };
                 if let Some(key) = message_key(&event)
                     && name == format!("{}.json", hash(key.as_bytes()))
