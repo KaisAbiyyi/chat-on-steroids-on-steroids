@@ -9,6 +9,14 @@
 - **GitHub:** durable source of truth for committed work, PRs, CI, SHA-specific evidence and handoffs. Conversation context and temporary cloud VMs are not durable coordination stores.
 - **Shared usage:** budget ChatGPT Work and Codex as one constrained pool where they share allowance; do not assume switching between them replenishes usage. Prefer bounded tasks, no idle agent waiting for CI, and measured concurrency over maximum simultaneous sessions. Do not assume rate/usage APIs exist.
 
+## Canonical prerequisite resolution and parallel claims (2026-10-20)
+
+The [machine-readable task registry](task-registry.json) and [parallel board](PARALLEL-EXECUTION-BOARD.md) are the current task topology. Before EVERY new unit, run `python tools/task_board.py check`, `ready --json`, and `task <ID> --json`. The resolver shows prerequisites, inherited blockers, status, and candidate waves; it is intentionally **offline** and **cannot** see GitHub PRs, local Windows receipts not yet merged, real account consent, or concurrent owners. Therefore a `READY_CANDIDATE` is **never an automatic grant**.
+
+Confirm current default branch SHA/CI, PRs, claim ledger, actual files and logical contract overlap and all L/U evidence **after** offline resolution and **before** recording a claim. Single-writer per lock; independent resource strings are not conclusive if both tasks edit the same interface, shared files or dependency contract. Every accepted unit must advance the registry's `status` with durable proof (PR/merged SHA, L receipt or explicit U consent), and every dependent unit must re-run readiness on the updated `main`. An L unit always requires the appropriate local native Windows proof, and overlapping use of one Windows machine should be serialized.
+
+**Linear canonical phase boundary:** `CL-L6 → 7P-A → 7P-B → 7P-L1 → 7A–7E → 8A–8C → 8L1 → 8U1`. The Phase 7 preflight tests the original Phase 1 browser feasibility requirement. Historical plans calling it “early Phase 8” are superseded, not a mandate to perform Phase 8 before Phase 7.
+
 ## Neutral roadmaps and work units
 
 Roadmaps and phase documents list task IDs, scope, prerequisites, expected outputs, tests, local (L) and human (U) gates; they **do not preassign agents**. Phase completion is a dependency/acceptance result, never merely a finished conversation. Before starting a task, inspect current `main` SHA, active PRs/claims, instructions, neighboring work, unmerged changes and its dependency DAG.
@@ -43,7 +51,7 @@ Each handoff must give: `PROJECT, REPO(S), TASK_ID, CLAIM_STATUS/OWNER/GENERATIO
 
 ## Repository-specific qualification boundary
 
-Current gate is CL-L1 Windows qualification before CL-04A. Protect historical uncommitted D: WIP; phases 1–6 remain partially accepted.
+CL-L1 and CL-04A/B/C have now passed their recorded qualified gates; the next proposed independent cloud wave is CL-05A, CL-06A, CL-07A, CL-08A and CL-09A after live checks. Protect historical uncommitted D: WIP; phases 1–6 remain partially accepted.
 
 Current phase/dependency evidence: [CURRENT-PHASE.md](CURRENT-PHASE.md). This policy does **not** claim any existing phase as complete or start/stop another agent. No task registry, lock controller, checkpoint automation or agent dispatch API is installed by this docs change; these are enforceable operating requirements for agents and a specification for a future controller.
 

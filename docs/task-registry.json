@@ -1,0 +1,1545 @@
+{
+  "schema_version": 1,
+  "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
+  "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
+  "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed.",
+  "task_status_source": "GitHub main / docs/CURRENT-PHASE.md as of 2026-10-20, refresh before starting next unit",
+  "tasks": [
+    {
+      "id": "CL-01",
+      "title": "Recorder privacy redaction before persistence",
+      "depends_on": [],
+      "resource_locks": [
+        "recorder-privacy"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "done"
+    },
+    {
+      "id": "CL-02",
+      "title": "Trusted tool outcome evidence",
+      "depends_on": [
+        "CL-01"
+      ],
+      "resource_locks": [
+        "tool-evidence"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "done"
+    },
+    {
+      "id": "CL-03",
+      "title": "Source-compatible durable captions/timeline",
+      "depends_on": [
+        "CL-02"
+      ],
+      "resource_locks": [
+        "caption-projection"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "done"
+    },
+    {
+      "id": "CL-L1",
+      "title": "Windows recorder/privacy/process restart proof",
+      "depends_on": [
+        "CL-03"
+      ],
+      "resource_locks": [
+        "windows-native"
+      ],
+      "phase": "1-6",
+      "kind": "L",
+      "status": "done"
+    },
+    {
+      "id": "CL-04A",
+      "title": "Provider/model/rebind/title authority",
+      "depends_on": [
+        "CL-L1"
+      ],
+      "resource_locks": [
+        "session-identity"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "done"
+    },
+    {
+      "id": "CL-04B",
+      "title": "History retention/replay crash limits",
+      "depends_on": [
+        "CL-04A"
+      ],
+      "resource_locks": [
+        "session-store"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "done"
+    },
+    {
+      "id": "CL-04C",
+      "title": "Unpaired UTF-16/JSON source edge representation",
+      "depends_on": [
+        "CL-03"
+      ],
+      "resource_locks": [
+        "unicode-boundary"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "done"
+    },
+    {
+      "id": "CL-05A",
+      "title": "Child ownership, cancellation and output custody",
+      "depends_on": [
+        "CL-L1"
+      ],
+      "resource_locks": [
+        "process-supervisor"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-05B",
+      "title": "PTY/shell/SSH native process semantics",
+      "depends_on": [
+        "CL-05A"
+      ],
+      "resource_locks": [
+        "process-pty"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-L2",
+      "title": "Native Windows pipe/ConPTY/shell/SSH proof",
+      "depends_on": [
+        "CL-05B"
+      ],
+      "resource_locks": [
+        "windows-pty"
+      ],
+      "phase": "1-6",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "CL-06A",
+      "title": "Git/project/file-panel/watcher parity",
+      "depends_on": [
+        "CL-L1"
+      ],
+      "resource_locks": [
+        "project-files"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-06B",
+      "title": "SFTP authorization/containment/native errors",
+      "depends_on": [
+        "CL-06A"
+      ],
+      "resource_locks": [
+        "sftp"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-07A",
+      "title": "Search/patch traversal and transactional parity",
+      "depends_on": [
+        "CL-L1"
+      ],
+      "resource_locks": [
+        "search-patch"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-07B",
+      "title": "Ripgrep/JS regex streamed search exactness",
+      "depends_on": [
+        "CL-07A"
+      ],
+      "resource_locks": [
+        "search-stream"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-L3",
+      "title": "NTFS file-panel/search + native SFTP proof",
+      "depends_on": [
+        "CL-06B",
+        "CL-07B"
+      ],
+      "resource_locks": [
+        "windows-files"
+      ],
+      "phase": "1-6",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "CL-08A",
+      "title": "Windows startup/config/secret-store integration",
+      "depends_on": [
+        "CL-L1"
+      ],
+      "resource_locks": [
+        "runtime-secrets"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-08B",
+      "title": "Diagnostics/logging/awake/shutdown bounded behavior",
+      "depends_on": [
+        "CL-08A"
+      ],
+      "resource_locks": [
+        "runtime-diagnostics"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-L4",
+      "title": "Native startup/secret/diagnostics resource proof",
+      "depends_on": [
+        "CL-08B"
+      ],
+      "resource_locks": [
+        "windows-startup"
+      ],
+      "phase": "1-6",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "CL-09A",
+      "title": "MCP schema/errors/permission conformance",
+      "depends_on": [
+        "CL-L1"
+      ],
+      "resource_locks": [
+        "mcp-protocol"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-09B",
+      "title": "Connection retries/proxy/health/tunnel teardown",
+      "depends_on": [
+        "CL-09A"
+      ],
+      "resource_locks": [
+        "mcp-transport"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-09C",
+      "title": "Code-engine and nested execution limits",
+      "depends_on": [
+        "CL-09A",
+        "CL-05A"
+      ],
+      "resource_locks": [
+        "code-engine"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-L5",
+      "title": "Live loopback MCP/code-worker native proof",
+      "depends_on": [
+        "CL-09B",
+        "CL-09C"
+      ],
+      "resource_locks": [
+        "windows-mcp"
+      ],
+      "phase": "1-6",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "CL-10",
+      "title": "Integrated backend parity and independent audit",
+      "depends_on": [
+        "CL-04B",
+        "CL-04C",
+        "CL-L2",
+        "CL-L3",
+        "CL-L4",
+        "CL-L5"
+      ],
+      "resource_locks": [
+        "backend-closure"
+      ],
+      "phase": "1-6",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "CL-L6",
+      "title": "Native Windows integrated backend release receipt",
+      "depends_on": [
+        "CL-10"
+      ],
+      "resource_locks": [
+        "windows-backend"
+      ],
+      "phase": "1-6",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "7P-A",
+      "title": "Early embedded-browser architecture feasibility",
+      "depends_on": [
+        "CL-L6"
+      ],
+      "resource_locks": [
+        "browser-architecture"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7P-B",
+      "title": "Embedded host, extension, debugger, UI renderer probe",
+      "depends_on": [
+        "7P-A"
+      ],
+      "resource_locks": [
+        "browser-host"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7P-L1",
+      "title": "Real Windows embedded browser feasibility gate",
+      "depends_on": [
+        "7P-B"
+      ],
+      "resource_locks": [
+        "windows-browser"
+      ],
+      "phase": "7",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "7A",
+      "title": "Browser bridge protocol 14/identity contract",
+      "depends_on": [
+        "7P-L1"
+      ],
+      "resource_locks": [
+        "browser-protocol"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7B",
+      "title": "Native authenticated bridge and generation fencing",
+      "depends_on": [
+        "7A"
+      ],
+      "resource_locks": [
+        "browser-bridge"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7C",
+      "title": "Extension companion ACK/repair/MV3 lifecycle",
+      "depends_on": [
+        "7B"
+      ],
+      "resource_locks": [
+        "browser-extension"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7L1",
+      "title": "Real extension handshake/MV3 restart",
+      "depends_on": [
+        "7C"
+      ],
+      "resource_locks": [
+        "windows-bridge"
+      ],
+      "phase": "7",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "7D",
+      "title": "Direct browser tools/debugger/frame ownership",
+      "depends_on": [
+        "7C",
+        "7L1"
+      ],
+      "resource_locks": [
+        "browser-tools"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7E",
+      "title": "Differential transport fuzz/error/reconnect review",
+      "depends_on": [
+        "7D"
+      ],
+      "resource_locks": [
+        "browser-qualification"
+      ],
+      "phase": "7",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "7L2",
+      "title": "Native browser tools/duplicate input safety",
+      "depends_on": [
+        "7E"
+      ],
+      "resource_locks": [
+        "windows-browser-tools"
+      ],
+      "phase": "7",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "7U1",
+      "title": "Owner real signed-in observe-only browser test",
+      "depends_on": [
+        "7L2"
+      ],
+      "resource_locks": [
+        "human-provider"
+      ],
+      "phase": "7",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "8A",
+      "title": "Chrome API/extension adapter and worker world",
+      "depends_on": [
+        "7E"
+      ],
+      "resource_locks": [
+        "embedded-adapter"
+      ],
+      "phase": "8",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "8B",
+      "title": "Sign-in, isolated profiles, session transfer",
+      "depends_on": [
+        "8A"
+      ],
+      "resource_locks": [
+        "browser-profiles"
+      ],
+      "phase": "8",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "8C",
+      "title": "Native browser lifecycle and permission hardening",
+      "depends_on": [
+        "8B"
+      ],
+      "resource_locks": [
+        "browser-lifecycle"
+      ],
+      "phase": "8",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "8L1",
+      "title": "Native embedded restart/multi-tab/profile behavior",
+      "depends_on": [
+        "8C"
+      ],
+      "resource_locks": [
+        "windows-embedded"
+      ],
+      "phase": "8",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "8U1",
+      "title": "Owner provider sign-in and profile UX",
+      "depends_on": [
+        "8L1"
+      ],
+      "resource_locks": [
+        "human-provider"
+      ],
+      "phase": "8",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "9A",
+      "title": "Durable outbox attachment ownership",
+      "depends_on": [
+        "8U1"
+      ],
+      "resource_locks": [
+        "outbox-schema"
+      ],
+      "phase": "9",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "9B",
+      "title": "Queue/edit/reorder/cancel state machine",
+      "depends_on": [
+        "9A"
+      ],
+      "resource_locks": [
+        "outbox-queue"
+      ],
+      "phase": "9",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "9C",
+      "title": "Send claim/ACK and retry fencing",
+      "depends_on": [
+        "9B"
+      ],
+      "resource_locks": [
+        "outbox-send"
+      ],
+      "phase": "9",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "9L1",
+      "title": "Native ambiguous ACK and send claim proof",
+      "depends_on": [
+        "9C"
+      ],
+      "resource_locks": [
+        "windows-send"
+      ],
+      "phase": "9",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "9D",
+      "title": "Native uploads and steering/rotation",
+      "depends_on": [
+        "9C",
+        "9L1"
+      ],
+      "resource_locks": [
+        "outbox-upload"
+      ],
+      "phase": "9",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "9E",
+      "title": "Crash/reconnect/duplicate-action qualification",
+      "depends_on": [
+        "9D"
+      ],
+      "resource_locks": [
+        "outbox-recovery"
+      ],
+      "phase": "9",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "9L2",
+      "title": "Real native attachment/upload/cancellation proof",
+      "depends_on": [
+        "9E"
+      ],
+      "resource_locks": [
+        "windows-upload"
+      ],
+      "phase": "9",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "9U1",
+      "title": "Owner bounded Send/upload approval",
+      "depends_on": [
+        "9L2"
+      ],
+      "resource_locks": [
+        "human-send"
+      ],
+      "phase": "9",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "10A",
+      "title": "Compact & Resume WAL/checkpoint identity",
+      "depends_on": [
+        "9C"
+      ],
+      "resource_locks": [
+        "resume-journal"
+      ],
+      "phase": "10",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "10B",
+      "title": "Source/destination binding and lineage",
+      "depends_on": [
+        "10A"
+      ],
+      "resource_locks": [
+        "resume-identity"
+      ],
+      "phase": "10",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "10C",
+      "title": "Resume gate, uncertain send idempotence",
+      "depends_on": [
+        "10B"
+      ],
+      "resource_locks": [
+        "resume-protocol"
+      ],
+      "phase": "10",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "10L1",
+      "title": "Real native/browser resumed conversation isolation",
+      "depends_on": [
+        "10C"
+      ],
+      "resource_locks": [
+        "windows-resume"
+      ],
+      "phase": "10",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "10D",
+      "title": "Repair/retry/timeout and worker integration",
+      "depends_on": [
+        "10C"
+      ],
+      "resource_locks": [
+        "resume-worker"
+      ],
+      "phase": "10",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "10E",
+      "title": "Simulated crash points and source differential",
+      "depends_on": [
+        "10D"
+      ],
+      "resource_locks": [
+        "resume-qualification"
+      ],
+      "phase": "10",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "10L2",
+      "title": "Real restart and recovery of pending uploads",
+      "depends_on": [
+        "10E"
+      ],
+      "resource_locks": [
+        "windows-recovery"
+      ],
+      "phase": "10",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "10U1",
+      "title": "Owner compact-resume conversation acceptance",
+      "depends_on": [
+        "10L2"
+      ],
+      "resource_locks": [
+        "human-resume"
+      ],
+      "phase": "10",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "11A",
+      "title": "Durable family/worker IDs and custody",
+      "depends_on": [
+        "10E"
+      ],
+      "resource_locks": [
+        "worker-identity"
+      ],
+      "phase": "11",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "11B",
+      "title": "Worker admission and bounded slot schedule",
+      "depends_on": [
+        "11A"
+      ],
+      "resource_locks": [
+        "worker-scheduler"
+      ],
+      "phase": "11",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "11C",
+      "title": "Inbox addressing, sleep and resume/reuse",
+      "depends_on": [
+        "11A"
+      ],
+      "resource_locks": [
+        "worker-inbox"
+      ],
+      "phase": "11",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "11D",
+      "title": "Safe worktree creation/disposal and archive",
+      "depends_on": [
+        "11A"
+      ],
+      "resource_locks": [
+        "worker-worktree"
+      ],
+      "phase": "11",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "11E",
+      "title": "Isolation/concurrency/custody negative suite",
+      "depends_on": [
+        "11B",
+        "11C",
+        "11D"
+      ],
+      "resource_locks": [
+        "worker-integration"
+      ],
+      "phase": "11",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "11L1",
+      "title": "Multi-run Windows worktree/inbox qualification",
+      "depends_on": [
+        "11E"
+      ],
+      "resource_locks": [
+        "windows-workers"
+      ],
+      "phase": "11",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "11U1",
+      "title": "Owner delegation/stop UX acceptance",
+      "depends_on": [
+        "11L1"
+      ],
+      "resource_locks": [
+        "human-workers"
+      ],
+      "phase": "11",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "12A",
+      "title": "Durable Goal/Loop obligation ledger",
+      "depends_on": [
+        "11E"
+      ],
+      "resource_locks": [
+        "goal-state"
+      ],
+      "phase": "12",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "12B",
+      "title": "Provider/helper selection, routing and limits",
+      "depends_on": [
+        "12A"
+      ],
+      "resource_locks": [
+        "goal-helper"
+      ],
+      "phase": "12",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "12L1",
+      "title": "Native hosted/local helper connectivity",
+      "depends_on": [
+        "12B"
+      ],
+      "resource_locks": [
+        "windows-helper"
+      ],
+      "phase": "12",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "12C",
+      "title": "Restart/resume/Off-On fences",
+      "depends_on": [
+        "12A"
+      ],
+      "resource_locks": [
+        "goal-lifecycle"
+      ],
+      "phase": "12",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "12D",
+      "title": "Cancel/stale response conformance",
+      "depends_on": [
+        "12B",
+        "12C"
+      ],
+      "resource_locks": [
+        "goal-qualification"
+      ],
+      "phase": "12",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "12L2",
+      "title": "Real native provider Goal/Loop run",
+      "depends_on": [
+        "12D"
+      ],
+      "resource_locks": [
+        "windows-goal"
+      ],
+      "phase": "12",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "12U1",
+      "title": "Owner bounded agent autonomy acceptance",
+      "depends_on": [
+        "12L2"
+      ],
+      "resource_locks": [
+        "human-goal"
+      ],
+      "phase": "12",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "13A",
+      "title": "Plugin manifest and capability catalog",
+      "depends_on": [
+        "11E"
+      ],
+      "resource_locks": [
+        "plugin-catalog"
+      ],
+      "phase": "13",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "13B",
+      "title": "Sandboxed stdio/HTTP adapters",
+      "depends_on": [
+        "13A"
+      ],
+      "resource_locks": [
+        "plugin-runtime"
+      ],
+      "phase": "13",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "13C",
+      "title": "OAuth scoped authorization/revocation",
+      "depends_on": [
+        "13A"
+      ],
+      "resource_locks": [
+        "oauth-auth"
+      ],
+      "phase": "13",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "13U1",
+      "title": "Owner test account OAuth consent",
+      "depends_on": [
+        "13C"
+      ],
+      "resource_locks": [
+        "human-oauth"
+      ],
+      "phase": "13",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "13D",
+      "title": "Skills install/hash/permission contract",
+      "depends_on": [
+        "13A"
+      ],
+      "resource_locks": [
+        "skill-import"
+      ],
+      "phase": "13",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "13E",
+      "title": "Optional runtimes/provenance/licensing",
+      "depends_on": [
+        "13D"
+      ],
+      "resource_locks": [
+        "plugin-provenance"
+      ],
+      "phase": "13",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "13F",
+      "title": "Plugin/Skill/OAuth integration security suite",
+      "depends_on": [
+        "13B",
+        "13C",
+        "13E"
+      ],
+      "resource_locks": [
+        "plugin-integration"
+      ],
+      "phase": "13",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "13L1",
+      "title": "Real account OAuth callbacks/token rotation",
+      "depends_on": [
+        "13U1",
+        "13F"
+      ],
+      "resource_locks": [
+        "windows-oauth"
+      ],
+      "phase": "13",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "13L2",
+      "title": "Native Skills install/revoke/upgrade",
+      "depends_on": [
+        "13F"
+      ],
+      "resource_locks": [
+        "windows-plugin"
+      ],
+      "phase": "13",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "13U2",
+      "title": "Owner capabilities and permissions UX",
+      "depends_on": [
+        "13L1",
+        "13L2"
+      ],
+      "resource_locks": [
+        "human-plugin"
+      ],
+      "phase": "13",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "14A",
+      "title": "Native windows/foreground/capture adapter",
+      "depends_on": [
+        "8U1"
+      ],
+      "resource_locks": [
+        "desktop-window"
+      ],
+      "phase": "14",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "14B",
+      "title": "UIA/accessibility/DPI target references",
+      "depends_on": [
+        "14A"
+      ],
+      "resource_locks": [
+        "desktop-accessibility"
+      ],
+      "phase": "14",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "14U1",
+      "title": "Owner Windows permissions consent before capture",
+      "depends_on": [
+        "14B"
+      ],
+      "resource_locks": [
+        "human-os-consent"
+      ],
+      "phase": "14",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "14C",
+      "title": "Keyboard/mouse/clipboard custody fences",
+      "depends_on": [
+        "14B"
+      ],
+      "resource_locks": [
+        "desktop-input"
+      ],
+      "phase": "14",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "14D",
+      "title": "Image/media export and processing",
+      "depends_on": [
+        "14A"
+      ],
+      "resource_locks": [
+        "desktop-media"
+      ],
+      "phase": "14",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "14L1",
+      "title": "Real DPI/UIA/capture authorized target proof",
+      "depends_on": [
+        "14U1",
+        "14B"
+      ],
+      "resource_locks": [
+        "windows-capture"
+      ],
+      "phase": "14",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "14L2",
+      "title": "Real input/clipboard/media latency proof",
+      "depends_on": [
+        "14C",
+        "14D",
+        "14L1"
+      ],
+      "resource_locks": [
+        "windows-input"
+      ],
+      "phase": "14",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "14E",
+      "title": "Dictation and target-draft isolation",
+      "depends_on": [
+        "14C"
+      ],
+      "resource_locks": [
+        "desktop-dictation"
+      ],
+      "phase": "14",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "14F",
+      "title": "Pet overlay/native lifecycle/security",
+      "depends_on": [
+        "14D",
+        "14E"
+      ],
+      "resource_locks": [
+        "desktop-overlay"
+      ],
+      "phase": "14",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "14L3",
+      "title": "Native dictation/pet lifecycle proof",
+      "depends_on": [
+        "14F"
+      ],
+      "resource_locks": [
+        "windows-pet"
+      ],
+      "phase": "14",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "14U2",
+      "title": "Owner dictation, overlay privacy acceptance",
+      "depends_on": [
+        "14L3"
+      ],
+      "resource_locks": [
+        "human-desktop"
+      ],
+      "phase": "14",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "15A",
+      "title": "UI navigation and IPC contracts",
+      "depends_on": [
+        "8C"
+      ],
+      "resource_locks": [
+        "ui-architecture"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15B",
+      "title": "Conversation rendering and large history",
+      "depends_on": [
+        "15A"
+      ],
+      "resource_locks": [
+        "ui-conversation"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15C",
+      "title": "Rich editor/terminal/code/PDF/math panels",
+      "depends_on": [
+        "15A"
+      ],
+      "resource_locks": [
+        "ui-rich"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15L1",
+      "title": "Native editor/terminal/PDF/math proof",
+      "depends_on": [
+        "15C"
+      ],
+      "resource_locks": [
+        "windows-ui-rich"
+      ],
+      "phase": "15",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "15D",
+      "title": "Projects/files/agents/plugins settings",
+      "depends_on": [
+        "15A"
+      ],
+      "resource_locks": [
+        "ui-settings"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15E",
+      "title": "13 locales, accessiblity and focus keyboard",
+      "depends_on": [
+        "15A"
+      ],
+      "resource_locks": [
+        "ui-i18n"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15F",
+      "title": "Screenshot/regression fixed DPI/themes",
+      "depends_on": [
+        "15B",
+        "15C",
+        "15D",
+        "15E"
+      ],
+      "resource_locks": [
+        "ui-snapshots"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15L2",
+      "title": "Native 13-locale/DPI interaction matrices",
+      "depends_on": [
+        "15F"
+      ],
+      "resource_locks": [
+        "windows-ui-i18n"
+      ],
+      "phase": "15",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "15G",
+      "title": "Full desktop integration/performance review",
+      "depends_on": [
+        "15F"
+      ],
+      "resource_locks": [
+        "ui-integration"
+      ],
+      "phase": "15",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "15L3",
+      "title": "Real large-history desktop RAM/performance",
+      "depends_on": [
+        "15G"
+      ],
+      "resource_locks": [
+        "windows-ui-load"
+      ],
+      "phase": "15",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "15U1",
+      "title": "Owner daily navigation/editor approval",
+      "depends_on": [
+        "15L1"
+      ],
+      "resource_locks": [
+        "human-ui"
+      ],
+      "phase": "15",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "15U2",
+      "title": "Owner keyboard/i18n/accessibility approval",
+      "depends_on": [
+        "15L2"
+      ],
+      "resource_locks": [
+        "human-ui"
+      ],
+      "phase": "15",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "15U3",
+      "title": "Owner feature-completeness acceptance",
+      "depends_on": [
+        "15L3"
+      ],
+      "resource_locks": [
+        "human-ui"
+      ],
+      "phase": "15",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "16A",
+      "title": "Versioned reversible migration/backup contract",
+      "depends_on": [
+        "15G"
+      ],
+      "resource_locks": [
+        "release-migration"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "16B",
+      "title": "Updater/signing/installer interface",
+      "depends_on": [
+        "16A"
+      ],
+      "resource_locks": [
+        "release-updater"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "16C",
+      "title": "Bundling/runtime dependencies and licenses",
+      "depends_on": [
+        "16A"
+      ],
+      "resource_locks": [
+        "release-bundle"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "16D",
+      "title": "Startup/RAM/size performance gates",
+      "depends_on": [
+        "16C"
+      ],
+      "resource_locks": [
+        "release-perf"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "16E",
+      "title": "Install/upgrade/rollback automated matrix",
+      "depends_on": [
+        "16B",
+        "16C"
+      ],
+      "resource_locks": [
+        "release-installer-test"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "16U1",
+      "title": "Owner private profile migration consent",
+      "depends_on": [
+        "16E"
+      ],
+      "resource_locks": [
+        "human-migration"
+      ],
+      "phase": "16",
+      "kind": "U",
+      "status": "todo"
+    },
+    {
+      "id": "16L1",
+      "title": "Native clean install/uninstall/updater",
+      "depends_on": [
+        "16E"
+      ],
+      "resource_locks": [
+        "windows-installer"
+      ],
+      "phase": "16",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "16L2",
+      "title": "Only owner-approved profile copy migration",
+      "depends_on": [
+        "16U1",
+        "16E"
+      ],
+      "resource_locks": [
+        "windows-migration"
+      ],
+      "phase": "16",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "16F",
+      "title": "Security/provenance final release report",
+      "depends_on": [
+        "16D",
+        "16E"
+      ],
+      "resource_locks": [
+        "release-closure"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "todo"
+    },
+    {
+      "id": "16L3",
+      "title": "Full Windows release/startup/size proof",
+      "depends_on": [
+        "16F",
+        "16L1",
+        "16L2"
+      ],
+      "resource_locks": [
+        "windows-release"
+      ],
+      "phase": "16",
+      "kind": "L",
+      "status": "todo"
+    },
+    {
+      "id": "16U2",
+      "title": "Owner guided final release decision",
+      "depends_on": [
+        "16L3"
+      ],
+      "resource_locks": [
+        "human-release"
+      ],
+      "phase": "16",
+      "kind": "U",
+      "status": "todo"
+    }
+  ],
+  "legacy_pre_2026_10_20_ids": {
+    "explanation": "Interpret these only when reading historical documents written before PLAN-LINEAR-01. Canonical current ID 8A always refers to Phase 8 Chrome/extension adapter, not old browser feasibility.",
+    "preflight": {
+      "former 8A": "7P-A",
+      "former 8B": "7P-B",
+      "former 8L1": "7P-L1"
+    },
+    "full_phase_8": {
+      "former 8C": "8A",
+      "former 8D": "8B",
+      "former 8E": "8C",
+      "former 8L2": "8L1"
+    }
+  }
+}

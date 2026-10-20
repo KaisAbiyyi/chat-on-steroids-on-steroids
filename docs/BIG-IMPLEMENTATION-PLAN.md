@@ -82,12 +82,12 @@ The existing closure [ledger](implementation-plan/2026-10-17-phase1-6-parity-clo
 
 ## Future phases 7–16: cloud implementation, local acceptance
 
-Each phase begins with a small design/contract cloud unit, continues through 3–6 bounded cloud units and ends with named acceptance gates. The [detailed matrix](implementation-plan/2026-10-18-cloud-first-units.md) lists every cloud unit, local session and human action. The original Phase 1 demands browser/extension/debugger and rich UI toolkit feasibility **before** a long browser rewrite. Therefore `8A` + `8B` run as an early cloud feasibility spike **after `CL-L6` and before Phase 7**, followed immediately by local Windows `8L1`. If `8L1` fails, do not start Phase 7; revisit the architecture. Only full Phase 8 implementation (`8C` onward) waits on Phase 7. These early units are counted once in Phase 8 C/L totals.
+Every phase now has a **linear execution sequence**. After `CL-L6` closes the Phase 1–6 backend, Phase 7 begins with **`7P-A → 7P-B → 7P-L1`**: a required browser/extension/debugger/rich-UI feasibility gate inherited from the original Phase 1 contract, but **scheduled, named and counted entirely within Phase 7**. If `7P-L1` fails, stop all Phase 7 bridge implementation (`7A–7E`) and redesign before proceeding. Then `7A–7E` completes browser bridge and direct tools. **Only after Phase 7** does Phase 8 begin at `8A`, followed by `8B`, `8C`, `8L1` and `8U1`. There is no early Phase 8 spike and no phase-number backtracking. The [task DAG](task-registry.json) is the canonical machine-readable prerequisite registry; the [parallel board](PARALLEL-EXECUTION-BOARD.md) shows status and locks.
 
 | Phase | First unit / engineering priority | Automatic qualification | Manual gate when applicable |
 | --- | --- | --- | --- |
-| 7 | `7A` bridge protocol/host architecture | Simulated epoch/reconnect/attribution plus real local browser service | Signed-in provider flows as needed |
-| 8 | `8A` embedded browser feasibility | Browser host/extension/debugger/native sign-in evidence | Actual account/profile flow |
+| 7 | `7P-A` browser feasibility preflight, then `7A` bridge protocol | Native preflight host/debugger/rendering, then simulated bridge/epoch/reconnect proof | Signed-in provider flows as needed |
+| 8 | `8A` embedded browser API/worker compatibility | Profile/session lifecycle and real native embed checks | Actual account/profile flow |
 | 9 | `9A` durable input custody | Crash/retry/send-ACK proof and native upload fixtures | Ambiguous Send/attachment UX |
 | 10 | `10A` continuation journal/ownership | Restart-at-each-boundary, stale session/input suppression | Provider continuation where automation insufficient |
 | 11 | `11A` worker run identity | Multi-prime concurrency and cross-worktree isolation | Human delegation/UX checks |
@@ -105,8 +105,8 @@ The original 16-phase dependency map is authoritative: browser capability must b
 | --- | ---: | ---: | ---: |
 | GitHub bootstrap | 0 | 1 | 1 |
 | Remaining phases 1–6 `CL` | 18 | 6 | 0 |
-| Phase 7 — bridge | 5 | 2 | 1 |
-| Phase 8 — embedded browser | 5 | 2 | 1 |
+| Phase 7 — preflight + bridge | 7 | 3 | 1 |
+| Phase 8 — embedded browser | 3 | 1 | 1 |
 | Phase 9 — outbox/uploads | 5 | 2 | 1 |
 | Phase 10 — Compact & Resume | 5 | 2 | 1 |
 | Phase 11 — workers | 5 | 1 | 1 |

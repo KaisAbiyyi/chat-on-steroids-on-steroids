@@ -7,7 +7,7 @@ Decision 2026-10-18 (Asia/Jakarta). **Planning matrix, not a progress report.** 
 - **C**: one cloud coding-agent work unit, with its own bounded scope, functional tests, documentation, PR and CI-green merged GitHub SHA. One work unit should not require a multi-hour uninterrupted agent session.
 - **L**: a distinct local qualification session, initiated by the user when provided an exact GitHub SHA and short Windows checklist. The local agent tests device-dependent behavior on D: and returns evidence. It does not implement features unless separately instructed to change the workflow.
 - **U**: a short direct user action for real account consent, ambiguous user-visible actions, privacy/migration approval or subjective experience. **Consent/permission U gates run BEFORE any local test touching real private profiles/accounts or OS-granted capture/input; subjective acceptance U gates follow the relevant automated/local checks.** U=0 means no scheduled direct user intervention for that phase.
-- A phase may have multiple C, L, U gates. An *early* gate interrupts dependent cloud development until its result is known; other native checks can wait for the completed phase. **Special ordering: `8A`, `8B`, `8L1` are a Phase 1 architectural-feasibility spike, scheduled immediately after backend `CL-L6` and before any Phase 7 cloud development.** These units are counted under Phase 8 once, not repeated there. Additional fix/retry units are not counted in baseline estimates.
+- A phase may have multiple C, L, U gates. An *early* gate interrupts dependent cloud development until its result is known; other native checks can wait for the completed phase. **Linear ordering: Phase 7 starts with architecture preflight `7P-A → 7P-B → 7P-L1` immediately after backend `CL-L6`, before `7A`.** These are Phase 7 tasks, not early Phase 8. Full Phase 8 starts at `8A` after Phase 7 closure. Additional fix/retry units are not counted in baseline estimates.
 - CI coverage needs Windows + Linux where applicable. An OS runner proves its isolated scope, not installed consumer browser/profile/network/UI fidelity. Windows local profile and all locally generated artifacts remain on D:.
 
 ## Phase workload matrix
@@ -16,8 +16,8 @@ Decision 2026-10-18 (Asia/Jakarta). **Planning matrix, not a progress report.** 
 | --- | ---: | ---: | ---: | --- |
 | Bootstrap `BOOT` | 0 | 1 | 1 | Local publishing audit + one explicit confirmation of public initial GitHub publication; no feature code |
 | Phases 1–6 remaining closure `CL` | 18 | 6 | 0 | Native security, filesystem/SSH, runtime, session and interoperability |
-| Phase 7 — browser bridge | 5 | 2 | 1 | Actual browser extension/protocol and provider action confirmation |
-| Phase 8 — built-in browser | 5 | 2 | 1 | **Early feasibility gate**, embedded extension/profile/sign-in |
+| Phase 7 — preflight + browser bridge | 7 | 3 | 1 | Preflight browser feasibility before bridge work; actual extension/protocol and provider action confirmation |
+| Phase 8 — built-in browser | 3 | 1 | 1 | Chrome adapter, embedded profiles and native lifecycle after Phase 7 |
 | Phase 9 — outbox/uploads | 5 | 2 | 1 | Durable send, native uploads and uncertain receipts |
 | Phase 10 — Compact & Resume | 5 | 2 | 1 | Crash/rebind with real provider sessions |
 | Phase 11 — workers/worktrees | 5 | 1 | 1 | Real multi-agent desktop flow and human delegation UX |
@@ -75,17 +75,17 @@ These numbers are a safe initial breakdown, **not** an elapsed-time estimate or 
 
 `CL` has **U0**. User need only request the next `L` command/handoff and review a phase completion report; no real signed-in account or subjective UX session is mandatory here. A privacy or external-action approval that emerges unexpectedly becomes a named additional gate, not a hidden task.
 
-## Phase 7 — browser bridge and direct tools (`5C / 2L / 1U`)
+## Phase 7 — feasibility preflight, browser bridge and direct tools (`7C / 3L / 1U`)
 
-**Prerequisite: `8L1` early Phase 1 feasibility PASS** for the intended browser/extension/UI architecture. `7A` freeze bridge protocol 14 and document/session identity; `7B` implement native bridge authenticated handshake and generation fencing; `7C` implement extension companion events, claim/ACK/repair and MV3 suspension; `7D` direct browser tools, debugger/snapshot/frame and handle ownership; `7E` source-wire differential fuzz/error/reconnect tests and independent security review.
+**Prerequisite: Phase 7 preflight `7P-L1` PASS** for the intended browser/extension/UI architecture. **Phase 7 preflight (first):** `7P-A` select/prototype native browser/extension and rich UI renderer feasibility; `7P-B` prove minimal host, Chrome extension/debugger isolated world, tabs/profiles, editor/PDF/math/terminal probes; `7P-L1` run the actual isolated Windows browser host viability test. **STOP Phase 7A–7E if 7P-L1 fails** and re-evaluate the architecture. After passing, `7A` freezes bridge protocol 14 and document/session identity; `7B` implement native bridge authenticated handshake and generation fencing; `7C` implement extension companion events, claim/ACK/repair and MV3 suspension; `7D` direct browser tools, debugger/snapshot/frame and handle ownership; `7E` source-wire differential fuzz/error/reconnect tests and independent security review.
 
 `7L1` after `7C` **early**: real Windows bridge/extension handshake, tab elections and MV3 restart. `7L2` after `7E`: actual browser tool lifecycle/duplicate input prevention. `7U1` after `7L2`: user signs into own provider and verifies a safe observed conversation without automatic Send. Further phases may not assume browser support before `7L1` passes.
 
-## Phase 8 — embedded browser and sign-in (`5C / 2L / 1U`)
+## Phase 8 — embedded browser and sign-in (`3C / 1L / 1U`)
 
-`8A` choose/prototype feasible native browser architecture, minimal Rust/Wasm extension path and rich UI toolkit probe; `8B` prove minimal embedded browser host, debugger/extension world compatibility, tabs/profiles, and early editor/PDF/math/terminal feasibility; `8C` implement the Chrome API/extension worker/debugger compatibility adapter; `8D` sign-in and safe profile/transfer paths; `8E` native browser lifecycle/permission/security closure.
+**Starts only after Phase 7 browser bridge qualification.** `8A` implements the Chrome API/extension worker/debugger compatibility adapter; `8B` implements sign-in and safe isolated profile/transfer paths; `8C` closes native browser lifecycle, permission and security behavior. There is **no Phase 8 work before Phase 7**.
 
-`8L1` **immediately after `8A`/`8B` and BEFORE all Phase 7 implementation**: real Windows embedded browser/extension/isolated world/debugger feasibility, plus bounded rich editor/PDF/math/terminal probes required by original Phase 1. **STOP Phase 7 and 8C–8E if blocked** and revisit the Phase 1 architecture. The `8A`/`8B` spike is the only deliberate advance of Phase 8 work; full Phase 8 implementation still depends on Phase 7. `8L2` after `8E`: clean/restart/multi-tab/profile preservation checks. `8U1` after `8L2`: actual user sign-in/consent and session stability. This architecture gate is never postponed until release.
+`8L1` after `8C`: real Windows clean-start/restart/multi-tab/profile-preservation proof. `8U1` after `8L1`: owner approves actual provider sign-in/consent and session stability. The original Phase 1 architectural feasibility obligation is executed earlier as **Phase 7 preflight `7P-A/B/L1`**, and remains blocking for the bridge.
 
 ## Phase 9 — outbox, uploads, steering, finish (`5C / 2L / 1U`)
 
