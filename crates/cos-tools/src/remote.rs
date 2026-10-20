@@ -47,7 +47,7 @@ impl Packet {
         Ok(bytes)
     }
     fn string(&mut self) -> io::Result<String> {
-        Ok(String::from_utf8_lossy(&self.data()?).into_owned())
+        String::from_utf8(self.data()?).map_err(|_| invalid("EPROTO: SFTP string is not valid UTF-8"))
     }
     fn attrs(&mut self) -> io::Result<Value> {
         let flags = self.u32()?;
@@ -655,16 +655,20 @@ impl RemoteFiles {
             Ok(real)
         }
         let mut changes = BTreeMap::new();
+        // Revalidate every actual mutation right before remote publication.
+        let mut commit_authorities = BTreeSet::new();
         for hunk in hunks {
             match hunk {
                 Hunk::AddFile { path, contents } => {
                     let key = at(self, &mut changes, &path, &mut budget)?;
                     budget.bytes(&key, contents.as_bytes())?;
-                    authorize(if changes[&key].new.is_some() {
+                    let operation = if changes[&key].new.is_some() {
                         "edit"
                     } else {
                         "create"
-                    })?;
+                    };
+                    authorize(operation)?;
+                    commit_authorities.insert(operation);
                     changes.get_mut(&key).unwrap().new = Some(contents.into_bytes());
                 }
                 Hunk::DeleteFile { path } => {
@@ -673,6 +677,8 @@ impl RemoteFiles {
                     if c.new.is_none() {
                         return Err(invalid(format!("Failed to read file to delete {path}")));
                     }
+                    authorize("deleteFile")?;
+                    commit_authorities.insert("deleteFile");
                     c.new = None;
                 }
                 Hunk::UpdateFile {
@@ -693,8 +699,12 @@ impl RemoteFiles {
                         .into_bytes();
                     if &new != old {
                         authorize("edit")?;
+                        commit_authorities.insert("edit");
                     }
                     if let Some(destination) = move_path {
+                        // Unchanged-content moves must still be authorized.
+                        authorize("move")?;
+                        commit_authorities.insert("move");
                         let dest = at(self, &mut changes, &destination, &mut budget)?;
                         if dest == key {
                             return Err(invalid(
@@ -703,6 +713,7 @@ impl RemoteFiles {
                         }
                         if changes[&dest].new.is_some() {
                             authorize("edit")?;
+                            commit_authorities.insert("edit");
                         }
                         budget.bytes(&dest, &new)?;
                         changes.get_mut(&key).unwrap().new = None;
@@ -737,6 +748,9 @@ impl RemoteFiles {
         let result = (|| -> io::Result<()> {
             for (path, c) in &changes {
                 authorize("")?;
+                for right in &commit_authorities {
+                    authorize(right)?;
+                }
                 if snapshot(&mut self.sftp, path)? != c.old {
                     return Err(invalid(
                         "FILE_REVISION_CHANGED: no remote edits were applied",
@@ -786,6 +800,9 @@ impl RemoteFiles {
             }
             for (i, stage) in stages.iter().enumerate() {
                 authorize("")?;
+                for right in &commit_authorities {
+                    authorize(right)?;
+                }
                 if fail_after == Some(i) {
                     return Err(io::Error::other("Injected remote commit failure"));
                 }
