@@ -137,6 +137,11 @@ impl SecretStore {
                 }
             })
             .filter(|s| !s.is_empty());
+        if state.unreadable {
+            // An unreadable credential vault must not be confused with an
+            // empty vault (in particular by the startup tunnel caller).
+            return Err(unreadable());
+        }
         if state.rotate
             && let Some(next) = state.cache.clone()
         {
@@ -259,11 +264,31 @@ impl WindowsCipher {
             }
             dpapi(&raw[5..], false)?
         } else {
-            if !create
-                || state.pointer("/os_crypt/encrypted_key").is_some()
-                || owned_path(profile, Path::new("secrets.bin"), true)?.exists()
-            {
+            if !create || state.pointer("/os_crypt/encrypted_key").is_some() {
                 return Err(unreadable());
+            }
+            // Legacy Windows profiles may have direct DPAPI credentials but
+            // no Chromium AES key yet. Only issue a new key after proving that
+            // the existing blob really is readable direct-DPAPI JSON. Never
+            // replace missing key material for v10 AES or damaged credentials.
+            let legacy_path = owned_path(profile, Path::new("secrets.bin"), true)?;
+            match fs::read(&legacy_path) {
+                Ok(blob) => {
+                    if blob.is_empty() || blob.starts_with(b"v10") || blob.len() > 8 * 1024 * 1024 {
+                        return Err(unreadable());
+                    }
+                    let decoded = Zeroizing::new(dpapi(&blob, false).map_err(|_| unreadable())?);
+                    let value: Value =
+                        serde_json::from_slice(&decoded).map_err(|_| unreadable())?;
+                    if value
+                        .as_object()
+                        .is_none_or(|entries| entries.values().any(|v| !v.is_string()))
+                    {
+                        return Err(unreadable());
+                    }
+                }
+                Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+                Err(_) => return Err(unreadable()),
             }
             let mut key = Zeroizing::new(vec![0; 32]);
             getrandom::fill(&mut key).map_err(|_| unavailable())?;
