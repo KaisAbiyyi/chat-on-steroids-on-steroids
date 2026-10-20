@@ -161,7 +161,6 @@ fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
         &tools(),
         Arc::new(move |_, _| {
             observed.fetch_add(1, Ordering::AcqRel);
-            std::thread::sleep(std::time::Duration::from_millis(100));
             json!({"content":[]})
         }),
         Limits::default(),
