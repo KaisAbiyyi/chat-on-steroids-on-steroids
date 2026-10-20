@@ -112,14 +112,24 @@ fn unsafe_canonical_shard_and_legacy_map_fail_closed_without_dropping_messages()
 
     let base = dir.path().join("sessions").join(id);
     let message_dir = base.join("messages");
-    let entry = fs::read_dir(&message_dir).unwrap().next().unwrap().unwrap().path();
+    let entry = fs::read_dir(&message_dir)
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
     let original_shard = fs::read(&entry).unwrap();
     let bad_shard = String::from_utf8(original_shard.clone())
         .unwrap()
         .replace("\"hello\"", r#""\uDFFF""#);
     assert_ne!(bad_shard.as_bytes(), original_shard);
     fs::write(&entry, bad_shard.as_bytes()).unwrap();
-    unsupported(SessionStore::open(dir.path()).unwrap().summary(id).unwrap_err());
+    unsupported(
+        SessionStore::open(dir.path())
+            .unwrap()
+            .summary(id)
+            .unwrap_err(),
+    );
     assert_eq!(fs::read(&entry).unwrap(), bad_shard.as_bytes());
 
     fs::write(&entry, &original_shard).unwrap();
@@ -131,7 +141,12 @@ fn unsafe_canonical_shard_and_legacy_map_fail_closed_without_dropping_messages()
     assert_ne!(original_map, bad_map);
     let legacy = base.join("messages.json");
     fs::write(&legacy, bad_map.as_bytes()).unwrap();
-    unsupported(SessionStore::open(dir.path()).unwrap().summary(id).unwrap_err());
+    unsupported(
+        SessionStore::open(dir.path())
+            .unwrap()
+            .summary(id)
+            .unwrap_err(),
+    );
     assert_eq!(fs::read(&legacy).unwrap(), bad_map.as_bytes());
     assert_eq!(fs::read(&entry).unwrap(), original_shard);
 }
