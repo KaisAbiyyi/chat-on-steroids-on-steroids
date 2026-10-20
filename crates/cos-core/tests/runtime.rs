@@ -77,7 +77,13 @@ fn malformed_secret_shape_preserved_until_explicit_recovery() {
     let raw = cipher.encrypt("{\"future\":34}").unwrap();
     fs::write(&path, &raw).unwrap();
     let store = SecretStore::open(dir.path(), "win32", cipher).unwrap();
-    assert!(store.get("future").unwrap_err().to_string().contains("left untouched"));
+    assert!(
+        store
+            .get("future")
+            .unwrap_err()
+            .to_string()
+            .contains("left untouched")
+    );
     assert!(store.set("bridgeToken", "new").is_err());
     assert_eq!(fs::read(&path).unwrap(), raw);
     let backup = store.set_aside_unreadable().unwrap().unwrap();
@@ -109,7 +115,13 @@ fn linux_basic_text_blob_refused_even_when_provider_reports_secure() {
         }),
     )
     .unwrap();
-    assert!(store.get("bridgeToken").unwrap_err().to_string().contains("left untouched"));
+    assert!(
+        store
+            .get("bridgeToken")
+            .unwrap_err()
+            .to_string()
+            .contains("left untouched")
+    );
     assert!(store.set("bridgeToken", "new").is_err());
 }
 #[test]
