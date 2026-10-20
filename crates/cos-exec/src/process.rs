@@ -365,9 +365,13 @@ impl Manager {
                     .slave
                     .spawn_command(command)
                     .map_err(io::Error::other)?;
-                let pid = child
-                    .process_id()
-                    .ok_or_else(|| invalid("PTY has no process identity"))?;
+                let pid = match child.process_id() {
+                    Some(pid) => pid,
+                    None => {
+                        let _ = child.kill();
+                        return Err(invalid("PTY has no process identity"));
+                    }
+                };
                 let tree = match Tree::attach(pid, false) {
                     Ok(t) => t,
                     Err(e) => {
