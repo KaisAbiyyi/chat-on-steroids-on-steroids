@@ -93,12 +93,13 @@ impl Terminals {
         cols: u16,
         rows: u16,
     ) -> io::Result<Value> {
-        if id.is_empty()
-            || id.len() > 200
-            || !(1..=1000).contains(&cols)
-            || !(1..=500).contains(&rows)
-            || !(self.0.allowed)()
-        {
+        if !(1..=1000).contains(&cols) || !(1..=500).contains(&rows) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid terminal dimensions",
+            ));
+        }
+        if id.is_empty() || id.len() > 200 || !(self.0.allowed)() {
             return Err(denied());
         }
         let ticket = uuid::Uuid::new_v4();
