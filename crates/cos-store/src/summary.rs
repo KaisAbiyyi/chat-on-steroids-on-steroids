@@ -4,6 +4,13 @@ use serde_json::{Value, json};
 /// Detect the JSON string representation serde_json cannot own, before a valid
 /// source checkpoint could be mistaken for damaged metadata and overwritten.
 pub(crate) fn requires_lossless_strings(text: &str) -> bool {
+    requires_lossless_strings_bytes(text.as_bytes())
+}
+
+/// Detect surrogate escapes in JSON string tokens without decoding or replacing
+/// original bytes. Valid high+low pairs and escaped literal backslashes remain valid.
+/// This is a representation guard, not a replacement for JSON syntax validation.
+pub(crate) fn requires_lossless_strings_bytes(bytes: &[u8]) -> bool {
     fn escaped_unit(bytes: &[u8], at: usize) -> Option<u16> {
         let encoded = bytes.get(at..at.checked_add(6)?)?;
         if &encoded[..2] != b"\\u" || !encoded[2..].iter().all(u8::is_ascii_hexdigit) {
@@ -11,7 +18,6 @@ pub(crate) fn requires_lossless_strings(text: &str) -> bool {
         }
         u16::from_str_radix(std::str::from_utf8(&encoded[2..]).ok()?, 16).ok()
     }
-    let bytes = text.as_bytes();
     let mut inside = false;
     let mut at = 0;
     while let Some(byte) = bytes.get(at) {

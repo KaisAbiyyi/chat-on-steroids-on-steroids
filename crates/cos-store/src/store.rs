@@ -129,6 +129,12 @@ fn read_json(path: &Path, limit: u64) -> io::Result<Value> {
     if bytes.len() as u64 > limit {
         return Err(invalid("History record grew beyond its read bound"));
     }
+    if summary::requires_lossless_strings_bytes(&bytes) {
+        return Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "History JSON requires lossless unpaired UTF-16 strings; original file retained",
+        ));
+    }
     serde_json::from_slice(&bytes)
         .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Unreadable history JSON"))
 }
@@ -233,6 +239,12 @@ fn accept_line(raw: &[u8], accept: &mut impl FnMut(Value), damaged: &mut usize) 
     if raw.iter().all(u8::is_ascii_whitespace) {
         return Ok(());
     }
+    if summary::requires_lossless_strings_bytes(raw) {
+        return Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "History journal requires lossless unpaired UTF-16 strings; original bytes retained",
+        ));
+    }
     match serde_json::from_slice::<Value>(raw) {
         Ok(v) if v["seq"].as_u64().is_some_and(|n| n > MAX_HISTORY_SEQUENCE) => Err(invalid(
             "History journal contains an unsafe sequence; original bytes preserved",
@@ -307,7 +319,9 @@ impl SessionStore {
             Err(e)
                 if matches!(
                     e.kind(),
-                    io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput
+                    io::ErrorKind::PermissionDenied
+                        | io::ErrorKind::InvalidInput
+                        | io::ErrorKind::Unsupported
                 ) =>
             {
                 return Err(e);
@@ -337,7 +351,14 @@ impl SessionStore {
                 let path = self.path(id, &format!("messages/{name}"), false)?;
                 let event = match read_json(&path, MAX_MESSAGE_BYTES as u64) {
                     Ok(event) => event,
-                    Err(error) if error.kind() == io::ErrorKind::InvalidInput => return Err(error),
+                    Err(error)
+                        if matches!(
+                            error.kind(),
+                            io::ErrorKind::InvalidInput | io::ErrorKind::Unsupported
+                        ) =>
+                    {
+                        return Err(error);
+                    }
                     Err(_) => continue,
                 };
                 if let Some(key) = message_key(&event)
@@ -1877,9 +1898,13 @@ impl SessionStore {
             return Ok(false);
         }
         let path = self.path(id, &format!("traces/{turn}.json"), true)?;
-        let previous = read_json(&path, 512 * 1024)
-            .ok()
-            .and_then(|v| normalize_trace(&v));
+        // A stale malformed trace may be ignored, but never overwrite a trace
+        // carrying UTF-16 units that serde_json cannot represent losslessly.
+        let previous = match read_json(&path, 512 * 1024) {
+            Ok(value) => normalize_trace(&value),
+            Err(error) if error.kind() == io::ErrorKind::Unsupported => return Err(error),
+            Err(_) => None,
+        };
         let known: HashMap<_, _> = previous
             .as_ref()
             .into_iter()

@@ -1,5 +1,14 @@
 # Current CoS-Rust work state
 
+## CL-04C cloud active (2026-10-20) — UTF-16 JSON representation
+
+- **CLAIMED:** `CL-04C` in [PR #15](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/15), base `a4728fb282aa4dc616e1c6652a13fdc10d2af862`. Lock: `lossless-json-ingress`, single GitHub cloud implementer; all edits/fixtures in PR and no local CoS workspace changes.
+- **Decision:** Rust `serde_json::Value` cannot losslessly represent lone UTF-16 surrogate units accepted as strings by JavaScript `JSON.parse`. Refuse with `Unsupported` and preserve exact on-disk source; never silently erase, substitute `U+FFFD`, or skip a canonical record. Valid adjacent high+low escapes, normal emoji, and escaped literal backslashes are retained.
+- **Scope:** metadata, journal, legacy map, canonical shard, document and trace JSON ingestion. Pinned upstream fixtures unchanged, synthetic negative/positive tests added.
+- **Acceptance:** `cargo fmt`, strict Clippy, full workspace tests and release build on Windows/Ubuntu, exact PR head before merge; current status **PENDING CI**. Full Phase 1–6 parity still PARTIAL.
+- **LOCAL REQUIRED:** NONE now. **YOU REQUIRED:** NO real provider account, device or clipboard testing. Future true lossless surrogate representation requires new scoped design/unit and must not be claimed by this refusal decision.
+
+
 ## Latest accepted cloud units (2026-10-20) — CL-04B merged, next CL-04C
 
 - **CL-04A MERGED:** [PR #12](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/12) → `1232803d9dba3ba05cca11cfc8101bb54bd51cc2`; exact-head Windows/Ubuntu CI PASS and post-merge `main` CI PASS.
