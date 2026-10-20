@@ -1,5 +1,12 @@
 # Current CoS-Rust work state
 
+## CL-07A accepted and merged (2026-10-21)
+
+- **MERGED:** [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20), squash merge `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116` from head `60a931714cf69289066a96658f06edd5becae23d`. Source review (separate CL-08A agent) found no scoped code blocker, with review comment on PR #20.
+- **EXACT HEAD:** Windows/Ubuntu Rust formatter, strict Clippy, all workspace tests, release build PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900070)); DAG Windows/Ubuntu PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900377)). No native L3 proof claimed.
+- **CLAIM:** `search-patch` released after accepted merge. `CL-07B` is next cloud candidate after main CI/review; CL-L3 still depends on CL-06B and CL-07B. CL-05A, CL-08A and CL-09A retain separate active locks, not Done.
+
+
 ## CL-06A MERGED / claim released (2026-10-20)
 
 - **UNIT:** CL-06A Git/project/file-panel/watcher closure, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), squash merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`; final head `9c42e87589c02b235880ef3a409c234a2870ff3f`.
