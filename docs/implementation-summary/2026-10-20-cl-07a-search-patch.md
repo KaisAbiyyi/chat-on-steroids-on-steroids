@@ -5,7 +5,7 @@
 **Branch/PR:** `work/cl-07a-search-patch-20261020` / [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20)  
 **Base SHA:** `340cf55eddb2766c96e1e1f36eaeb118faecad04`  
 **Implementer:** ChatGPT GitHub cloud session `chatgpt-2026-10-20-cl07a-01`, claim generation 1, resource lock `search-patch`.  
-**Implementation checkpoint:** `a2140ab18ab01e0bdb9cfa286e309fc9d058b2bc`.
+**Implementation checkpoint:** `a2140ab18ab01e0bdb9cfa286e309fc9d058b2bc`. **Verified PR code head:** `52916c7764a2e425144d80f35a9b4811d74b0f99`.
 
 ## Proven scope
 
@@ -16,13 +16,14 @@
 
 ## Validation gates
 
-- CI rustfmt Windows/Ubuntu: **PASS** at code checkpoint `a2140ab1`.
-- Strict Clippy / full workspace tests / release on Ubuntu and Windows: **PENDING** at this checkpoint. Do not infer success from previously green `main` or earlier heads.
-- Task DAG workflow: previous checkpoint PASS; final PR head will need successful workflow.
-- Independent review / exact-head merge / post-merge CI: **NOT RUN / NOT ACCEPTED**.
+- CI [run 39447056961](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39447056961): **PASS on code head `52916c77`**, including Windows and Ubuntu rustfmt, strict Clippy, entire workspace tests and release builds.
+- Task DAG [run 39447057301](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39447057301): **PASS on the same code head**.
+- Current `main` moved to `7942906cc845a02df4629de3b7830f2f729573d4` after disjoint CL-06A acceptance; its Rust and DAG workflows both PASS ([main CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39449604269)). GitHub reports PR #20 mergeable with no reported conflict; reverify at merge time.
+- This evidence precedes documentation closeout commits; require fresh exact-head CI on the final PR SHA.
+- **Independent review / merge / post-merge CI:** NOT DONE. Do not mark the task accepted solely from CI or self-review.
 - Native gate: `CL-L3` only after both `CL-06B` and `CL-07B`; user gate: none for CL-07A.
 - Overall Phase 1–6 backend parity: PARTIAL, not full desktop equivalence.
 
 ## Follow-up
 
-Keep PR #20 in Review after exact Windows+Ubuntu checks; reconcile with other current cloud PRs before merge. On accepted merge update `docs/task-registry.json` CL-07A to `done`, the parallel execution board, `docs/CURRENT-PHASE.md`, and [Notion CL-07A](https://app.notion.com/p/3ffd8330eb4681848b58c848a94f16c9) from Claimed/Review to Done with exact merged SHA, then rerun readiness and claim CL-07B separately. Do not edit concurrently claimed shared planning files inside PR #18/#19 to record this unmerged state; the durable [CL-07A claim](../claims/CL-07A.md) and PR are the active source.
+Mark PR #20 Ready for Review on completion of documentation and exact-head CI; request an actual independent reviewer rather than representing the author audit as independent. Reconcile with other current cloud PRs before merge. On accepted merge update `docs/task-registry.json` CL-07A to `done`, the parallel execution board, `docs/CURRENT-PHASE.md`, and [Notion CL-07A](https://app.notion.com/p/3ffd8330eb4681848b58c848a94f16c9) from Claimed/Review to Done with exact merged SHA, then rerun readiness and claim CL-07B separately. Do not edit concurrently claimed shared planning files inside PR #18/#19 to record this unmerged state; the durable [CL-07A claim](../claims/CL-07A.md) and PR are the active source.
