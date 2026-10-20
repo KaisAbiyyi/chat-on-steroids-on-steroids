@@ -121,6 +121,7 @@ struct State {
     readers: usize,
     exit_read: bool,
     publication_pending: bool,
+    retired: bool,
     total: u64,
     cursor: u64,
 }
@@ -447,6 +448,7 @@ impl Manager {
                 owner: launch.owner.into(),
                 unread: HeadTail::new(OUTPUT_BYTES),
                 publication_pending: false,
+                retired: false,
                 retained: HeadTail::new(256 * 1024),
                 exit: None,
                 readers: readers.len(),
@@ -496,6 +498,19 @@ impl Manager {
                         break;
                     }
                     Err(_) => {
+                        // An unobservable native exit is still a custody failure: close the
+                        // writers/PTY and temporary script before publishing terminal state.
+                        // Tree::terminate() is PID-reuse safe on Unix after lost ownership.
+                        waiting.tree.terminate();
+                        if let Ok(mut input) = waiting.input.lock() {
+                            input.take();
+                        }
+                        if let Ok(mut master) = waiting.master.lock() {
+                            master.take();
+                        }
+                        if let Ok(mut script) = waiting.script.lock() {
+                            script.take();
+                        }
                         if let Ok(mut s) = waiting.state.lock() {
                             s.exit = Some(-1);
                             waiting.changed.notify_all();
@@ -509,23 +524,37 @@ impl Manager {
         });
         Self::response(id, &session, wait, false, max_tokens)
     }
-    fn owned(&self, id: i32, owner: &str) -> io::Result<Arc<Session>> {
-        let p = lock(&self.0.sessions)?
-            .get(&id)
-            .cloned()
-            .ok_or_else(|| invalid(format!("Unknown process ID {id}")))?;
-        if lock(&p.state)?.owner != owner {
+    // Registry lookup is only an initial authority check: a returned Arc may
+    // outlive a concurrent promotion or retirement. Recheck under interaction
+    // custody immediately before every mutation, input delivery or publication.
+    fn require_live_owner(p: &Session, owner: &str) -> io::Result<()> {
+        let state = lock(&p.state)?;
+        if state.retired {
+            return Err(invalid("EXEC_SESSION_RETIRED: process custody was released"));
+        }
+        if state.owner != owner {
             return Err(io::Error::new(
                 io::ErrorKind::PermissionDenied,
                 "EXEC_SESSION_NOT_OWNED: this process belongs to another session or request",
             ));
         }
+        Ok(())
+    }
+    fn owned(&self, id: i32, owner: &str) -> io::Result<Arc<Session>> {
+        let p = lock(&self.0.sessions)?
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| invalid(format!("Unknown process ID {id}")))?;
+        Self::require_live_owner(&p, owner)?;
         Ok(p)
     }
     pub fn promote(&self, request: &str, session: &str) -> io::Result<()> {
         for p in lock(&self.0.sessions)?.values() {
+            // Serialize a rebind against a pending write_stdin, resize, interrupt
+            // or retirement. The old principal cannot act after this handoff.
+            let _interaction = lock(&p.interaction)?;
             let mut s = lock(&p.state)?;
-            if s.owner == format!("request:{request}") {
+            if !s.retired && s.owner == format!("request:{request}") {
                 s.owner = format!("session:{session}");
             }
         }
@@ -629,6 +658,7 @@ impl Manager {
     ) -> io::Result<Value> {
         let p = self.owned(id, owner)?;
         let _interaction = lock(&p.interaction)?;
+        Self::require_live_owner(&p, owner)?;
         let completed = {
             let s = lock(&p.state)?;
             if s.publication_pending {
@@ -673,13 +703,17 @@ impl Manager {
     }
     pub fn reread(&self, id: i32, owner: &str) -> io::Result<Value> {
         let p = self.owned(id, owner)?;
-        Self::response(id, &p, Duration::ZERO, true, 10000)
+        let _interaction = lock(&p.interaction)?;
+        Self::require_live_owner(&p, owner)?;
+        Self::respond(id, &p, Duration::ZERO, true, 10000)
     }
     pub fn resize(&self, id: i32, owner: &str, rows: u16, cols: u16) -> io::Result<()> {
         if rows == 0 || cols == 0 || rows > 500 || cols > 1000 {
             return Err(invalid("Invalid terminal dimensions"));
         }
         let p = self.owned(id, owner)?;
+        let _interaction = lock(&p.interaction)?;
+        Self::require_live_owner(&p, owner)?;
         let m = lock(&p.master)?;
         m.as_ref()
             .ok_or_else(|| invalid("Not a PTY session"))?
@@ -693,6 +727,8 @@ impl Manager {
     }
     pub fn terminate(&self, id: i32, owner: &str) -> io::Result<()> {
         let p = self.owned(id, owner)?;
+        let _interaction = lock(&p.interaction)?;
+        Self::require_live_owner(&p, owner)?;
         p.tree.terminate();
         Ok(())
     }
@@ -701,17 +737,21 @@ impl Manager {
     /// Admission and ordinary model polling never use this destructive retirement path.
     pub fn retire(&self, id: i32, owner: &str, wait: Duration) -> io::Result<()> {
         let p = self.owned(id, owner)?;
+        let interaction = lock(&p.interaction)?;
+        Self::require_live_owner(&p, owner)?;
         p.tree.terminate();
         let deadline = Instant::now() + wait.min(Duration::from_secs(30));
         let mut state = lock(&p.state)?;
-        while state.exit.is_none() || state.readers > 0 {
+        // A publication belongs to the HTTP response until commit/rollback.
+        // Never evict custody or lose unread output while it is still pending.
+        while state.exit.is_none() || state.readers > 0 || state.publication_pending {
             let remaining = deadline.saturating_duration_since(Instant::now());
             if remaining.is_zero() {
                 return Err(io::Error::new(
                     io::ErrorKind::TimedOut,
                     format!(
-                        "Owned process {id} did not settle: exit={:?}, open_readers={}",
-                        state.exit, state.readers
+                        "Owned process {id} did not settle: exit={:?}, open_readers={}, publication_pending={}",
+                        state.exit, state.readers, state.publication_pending
                     ),
                 ));
             }
@@ -721,7 +761,13 @@ impl Manager {
                 .map_err(|_| io::Error::other("Process wait poisoned"))?
                 .0;
         }
+        // Mark the Arc itself retired before releasing the interaction lock:
+        // callers that looked it up before removal must not act on stale custody.
+        state.retired = true;
         drop(state);
+        drop(interaction);
+        // No interaction mutex is held while acquiring registry (promote uses
+        // registry -> interaction); this avoids a cross-lock deadlock.
         let mut sessions = lock(&self.0.sessions)?;
         if sessions
             .get(&id)
