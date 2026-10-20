@@ -3,7 +3,7 @@ use crate::tree::Tree;
 use portable_pty::{Child, MasterPty, PtySize};
 use serde_json::{Value, json};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     io::{self, Read, Write},
     path::PathBuf,
     sync::{Arc, Condvar, Mutex},
@@ -42,6 +42,8 @@ struct State {
     live: bool,
     pending: HashMap<String, uuid::Uuid>,
     entries: HashMap<String, Arc<Entry>>,
+    // A retiring terminal must not reuse an ID until its final exit event.
+    closing: HashSet<String>,
     owed: usize,
 }
 struct Inner {
@@ -74,6 +76,7 @@ impl Terminals {
                 live: true,
                 pending: HashMap::new(),
                 entries: HashMap::new(),
+                closing: HashSet::new(),
                 owed: 0,
             }),
             wake: Condvar::new(),
@@ -104,7 +107,8 @@ impl Terminals {
             if !state.live
                 || state.pending.contains_key(id)
                 || state.entries.contains_key(id)
-                || state.entries.len() + state.pending.len() >= 8
+                || state.closing.contains(id)
+                || state.entries.len() + state.pending.len() + state.closing.len() >= 8
             {
                 return Err(io::Error::other(
                     "Terminal limit reached or ID already open",
@@ -287,6 +291,7 @@ impl Terminals {
             (owner.emit)(json!({"id": terminal, "exitCode": code}));
             {
                 let mut state = owner.state.lock().unwrap();
+                state.closing.remove(&terminal);
                 state.owed = state.owed.saturating_sub(1);
                 owner.wake.notify_all();
             }
@@ -356,7 +361,11 @@ impl Terminals {
         let entry = {
             let mut state = self.0.state.lock().unwrap();
             state.pending.remove(id);
-            state.entries.remove(id)
+            let entry = state.entries.remove(id);
+            if entry.is_some() {
+                state.closing.insert(id.to_owned());
+            }
+            entry
         };
         if let Some(entry) = entry {
             // Wait for any accepted in-flight write/resize before retirement.
