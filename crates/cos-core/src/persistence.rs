@@ -115,10 +115,10 @@ impl ConfigStore {
                 v["ui"]["lastSeenVersion"] = json!(crate::APP_VERSION);
                 v
             }
-            Err(_) => {
-                recovered = true;
-                crate::config::recovery_config()
-            }
+            // Permission, filesystem and device failures are not damaged
+            // JSON. Recovering here would mask an inaccessible existing
+            // profile as a valid fresh read-only configuration.
+            Err(error) => return Err(error),
             Ok(raw) => {
                 let parsed = std::str::from_utf8(&raw).ok().and_then(|text| {
                     serde_json::from_str::<Value>(text.trim_start_matches('\u{feff}')).ok()
