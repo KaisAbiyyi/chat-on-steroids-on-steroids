@@ -1,5 +1,13 @@
 # Current CoS-Rust work state
 
+## CL-08A cloud active claim (2026-10-21)
+
+- **OWNER / BRANCH / PR:** ChatGPT GitHub cloud session `chatgpt-20261021-cl08a-01`, generation 1, lock `runtime-secrets`, base `7942906cc845a02df4629de3b7830f2f729573d4`, branch `work/cl-08a-startup-secrets-20261021`, [PR #23](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/23).
+- **WORK:** Windows legacy direct-DPAPI vault migration to authenticated v10 key, intact Local State preferences, refusal of missing AES key/corrupt blob, config I/O errors fail closed and unreadable secrets never look absent. Focused platform regressions and CI required.
+- **STATUS:** claimed, implementation on branch; CI and independent reviewer acceptance still pending. Other resource locks untouched; no local D: access.
+- **NEXT:** exact-head Linux + Windows fmt/Clippy/tests/release + independent review; merge only if all pass; then task registry `done`, release claim, Notion `Done` and unlock CL-08B. Native Windows gate CL-L4 waits for accepted CL-08B.
+
+
 ## CL-06A MERGED / claim released (2026-10-20)
 
 - **UNIT:** CL-06A Git/project/file-panel/watcher closure, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), squash merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`; final head `9c42e87589c02b235880ef3a409c234a2870ff3f`.
