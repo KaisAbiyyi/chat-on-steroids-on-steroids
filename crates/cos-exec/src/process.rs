@@ -530,7 +530,9 @@ impl Manager {
     fn require_live_owner(p: &Session, owner: &str) -> io::Result<()> {
         let state = lock(&p.state)?;
         if state.retired {
-            return Err(invalid("EXEC_SESSION_RETIRED: process custody was released"));
+            return Err(invalid(
+                "EXEC_SESSION_RETIRED: process custody was released",
+            ));
         }
         if state.owner != owner {
             return Err(io::Error::new(
@@ -827,7 +829,10 @@ mod retirement_tests {
     fn stale_arc_cannot_publish_after_rebind_or_retirement() {
         let d = tempfile::tempdir().unwrap();
         let (program, args) = if cfg!(windows) {
-            ("cmd.exe", vec!["/d".into(), "/c".into(), "echo stable".into()])
+            (
+                "cmd.exe",
+                vec!["/d".into(), "/c".into(), "echo stable".into()],
+            )
         } else {
             ("sh", vec!["-c".into(), "printf stable".into()])
         };
@@ -850,12 +855,19 @@ mod retirement_tests {
         manager.promote("old", "new").unwrap();
         assert_eq!(
             Manager::require_live_owner(&stale, "request:old")
-                .unwrap_err().kind(),
+                .unwrap_err()
+                .kind(),
             io::ErrorKind::PermissionDenied
         );
-        manager.retire(id, "session:new", Duration::from_secs(2)).unwrap();
-        assert!(Manager::require_live_owner(&stale, "session:new")
-            .unwrap_err().to_string().contains("EXEC_SESSION_RETIRED"));
+        manager
+            .retire(id, "session:new", Duration::from_secs(2))
+            .unwrap();
+        assert!(
+            Manager::require_live_owner(&stale, "session:new")
+                .unwrap_err()
+                .to_string()
+                .contains("EXEC_SESSION_RETIRED")
+        );
     }
     #[test]
     fn retirement_timeout_preserves_owned_custody_until_a_successful_retry() {
