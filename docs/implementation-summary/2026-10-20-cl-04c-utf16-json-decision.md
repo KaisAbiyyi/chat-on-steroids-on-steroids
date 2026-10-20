@@ -24,6 +24,7 @@ Valid adjacent high+low JSON escapes form a scalar and are parsed exactly, inclu
 - Tests: `cargo test --workspace --locked` (both platforms)
 - Build: `cargo build --release --locked` (both platforms)
 - No pinned source fixture edits, tests must verify exact persisted bytes before/after rejection.
-- **CI at document authoring: PENDING**. Qualify exact PR head, then merge only after CI passes; post-merge `main` CI is a separate gate.
+- **CI: PASS** on exact PR head `3e8796d82f3bfade13d3693f7a89f12d167d0efc`: Windows+Ubuntu fmt, strict Clippy, workspace tests, release ([Actions 39423355490](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39423355490)).
+- **MERGED:** [PR #15](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/15) squash commit `306c65a94fcdd170d97df00bf1a2f3f39d2940a2`. Claim released, no local modifications. Post-merge `main` CI is independently tracked.
 - **Performance:** NOT MEASURED; no throughput assertion. **LOCAL REQUIRED:** NONE for this cloud unit. **YOU REQUIRED:** NO manual account/device test. Full Phase 1–6 and later native UI/browser/installer work remain PARTIAL.
 - **Known limitations:** malformed non-UTF-8 in non-metadata JSON files still follows existing malformed-file handling, old unpaired strings are preserved but cannot be read through Rust `Value`, and an eventual surrogate-preserving representation must be scoped as a future separate unit, not silently conflated with CL-04C.
