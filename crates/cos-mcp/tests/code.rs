@@ -111,12 +111,30 @@ fn accepted_side_effect_survives_timeout() {
 fn rejects_invalid_resource_admission_before_invoking_tools() {
     let calls = Arc::new(AtomicUsize::new(0));
     for limits in [
-        Limits { cpu_ms: 0, ..Limits::default() },
-        Limits { wall_ms: 0, ..Limits::default() },
-        Limits { cpu_ms: 60_001, ..Limits::default() },
-        Limits { wall_ms: 60_001, ..Limits::default() },
-        Limits { memory: 1024, ..Limits::default() },
-        Limits { memory: 65 * 1024 * 1024, ..Limits::default() },
+        Limits {
+            cpu_ms: 0,
+            ..Limits::default()
+        },
+        Limits {
+            wall_ms: 0,
+            ..Limits::default()
+        },
+        Limits {
+            cpu_ms: 60_001,
+            ..Limits::default()
+        },
+        Limits {
+            wall_ms: 60_001,
+            ..Limits::default()
+        },
+        Limits {
+            memory: 1024,
+            ..Limits::default()
+        },
+        Limits {
+            memory: 65 * 1024 * 1024,
+            ..Limits::default()
+        },
     ] {
         let counter = calls.clone();
         let result = code::run(
@@ -149,11 +167,12 @@ fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
         Limits::default(),
     );
     assert_eq!(unawaited["isError"], true);
-    assert!(unawaited["content"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .any(|item| item["text"].as_str().unwrap_or("").contains("UNAWAITED_CALLS")));
+    assert!(unawaited["content"].as_array().unwrap().iter().any(|item| {
+        item["text"]
+            .as_str()
+            .unwrap_or("")
+            .contains("UNAWAITED_CALLS")
+    }));
     // A completed script must not represent dispatched, unsettled mutations as success.
     let overflow = code::run(
         "await Promise.all(Array.from({length: 33}, () => tools.read({text:'many'})));",
