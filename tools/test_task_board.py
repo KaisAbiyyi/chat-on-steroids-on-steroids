@@ -38,7 +38,7 @@ class TaskBoardTests(unittest.TestCase):
         item = board.explain(self.data, "CL-09C")
         self.assertEqual(item["state"], "BLOCKED")
         self.assertEqual(item["missing_direct"], ["CL-09A", "CL-05A"])
-        self.assertIn("CL-L1", item["depends_on"] if False else self.tasks["CL-09A"]["depends_on"])
+        self.assertIn("CL-L1", self.tasks["CL-09A"]["depends_on"])
         self.assertTrue(item["live_claim_check_required"])
         self.assertEqual(board.explain(self.data, "CL-05A")["state"], "READY_CANDIDATE")
 
@@ -79,7 +79,7 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_done_cannot_depend_on_unfinished_task(self):
         data = copy.deepcopy(self.data)
-        next(t for t in data["tasks"] if t["id"] == "CL-05A")["status"] = "done"
+        next(t for t in data["tasks"] if t["id"] == "CL-05B")["status"] = "done"
         self.assertTrue(any("cannot be done" in e for e in board.validate(data)))
 
     def test_legacy_phase_ordering_cannot_regress(self):
