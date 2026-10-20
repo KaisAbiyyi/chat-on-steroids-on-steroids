@@ -187,7 +187,7 @@ impl Terminals {
                 command.env("TERM", "xterm-256color");
                 let reader = pair.master.try_clone_reader().map_err(io::Error::other)?;
                 let writer = pair.master.take_writer().map_err(io::Error::other)?;
-                let child = pair
+                let mut child = pair
                     .slave
                     .spawn_command(command)
                     .map_err(io::Error::other)?;
