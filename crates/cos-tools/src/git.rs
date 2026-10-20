@@ -367,26 +367,54 @@ fn branch_identity(ctx: &Context) -> io::Result<(String, Option<String>, Vec<Val
     }
     Ok((current, head, branches, truncated))
 }
-fn working_bytes(roots: &[Root], ctx: &Context, file: &str) -> io::Result<(Vec<u8>, bool)> {
+fn working_path(ctx: &Context, file: &str) -> io::Result<PathBuf> {
+    let mut path = ctx.real.clone();
+    for part in file.split('/') {
+        path.push(part);
+        let meta = std::fs::symlink_metadata(&path)?;
+        #[cfg(windows)]
+        let linked = {
+            use std::os::windows::fs::MetadataExt;
+            meta.file_attributes() & 0x400 != 0
+        };
+        #[cfg(not(windows))]
+        let linked = meta.file_type().is_symlink();
+        if linked {
+            return Err(invalid("Files does not follow symbolic links or junctions"));
+        }
+    }
+    Ok(path)
+}
+fn working_file(roots: &[Root], ctx: &Context, file: &str) -> io::Result<std::fs::File> {
+    let path = working_path(ctx, file)?;
     let virtual_path = format!("{}/{file}", ctx.virtual_path.trim_end_matches('/'));
     let location = files::locate(roots, &virtual_path, None, false)?;
-    let mut file = location.open_handle()?;
-    let before = file.metadata()?;
+    let opened = location.open_handle()?;
+    if files::handle_path(&opened)? != path || working_path(ctx, file)? != path {
+        return Err(invalid(
+            "The project file changed while Git changes were read",
+        ));
+    }
+    Ok(opened)
+}
+fn working_bytes(roots: &[Root], ctx: &Context, path: &str) -> io::Result<(Vec<u8>, bool)> {
+    let mut file = working_file(roots, ctx, path)?;
+    let before = crate::project_files::file_stamp(&file)?;
+    let size = file.metadata()?.len();
     let mut bytes = vec![];
     file.by_ref()
         .take(SIDE as u64 + 1)
         .read_to_end(&mut bytes)?;
-    let after = file.metadata()?;
-    let reopened = files::locate(roots, &virtual_path, None, false)?.open_handle()?;
+    let after = crate::project_files::file_stamp(&file)?;
+    let reopened = working_file(roots, ctx, path)?;
     if same_file::Handle::from_file(file.try_clone()?)? != same_file::Handle::from_file(reopened)?
-        || before.len() != after.len()
-        || before.modified()? != after.modified()?
+        || before != after
     {
         return Err(invalid(
             "The project file changed while Git changes were read",
         ));
     }
-    let large = before.len() > SIDE as u64 || bytes.len() > SIDE;
+    let large = size > SIDE as u64 || bytes.len() > SIDE;
     bytes.truncate(SIDE);
     Ok((bytes, large))
 }
@@ -518,12 +546,47 @@ fn snapshot_inner(
             }
         }
     }
+    // The upstream digest covered only row statistics. Include the base and
+    // native file identity/change times so equal-line-count edits and HEAD
+    // changes cannot reuse a stale Review token. The token remains opaque.
+    let mut stamps = Vec::new();
+    if comparison.is_none() {
+        for change in &changes {
+            if change.status == "D" {
+                stamps.push(Value::Null);
+                continue;
+            }
+            let meta = std::fs::symlink_metadata(ctx.real.join(&change.path))?;
+            if meta.is_file() && !meta.file_type().is_symlink() {
+                match working_file(roots, &ctx, &change.path) {
+                    Ok(file) => stamps.push(crate::project_files::file_stamp(&file)?),
+                    Err(_) => stamps.push(json!([
+                        "unreadable",
+                        meta.len(),
+                        meta.modified()?
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .ok()
+                            .map(|t| t.as_nanos().to_string())
+                    ])),
+                }
+            } else {
+                stamps.push(json!([
+                    "non-regular",
+                    meta.len(),
+                    meta.modified()?
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .ok()
+                        .map(|t| t.as_nanos().to_string())
+                ]));
+            }
+        }
+    }
     ctx.validate(roots)?;
     let changes = serde_json::to_value(changes)?;
     let revision = files::digest(&serde_json::to_vec(&if let Some(c) = &comparison {
         json!([c, changes])
     } else {
-        changes.clone()
+        json!([current, head, changes, stamps])
     })?);
     let mut result = json!({"projectId":project,"state":"ready","truncated":changes.as_array().unwrap().len()>=MAX,"changes":changes,"revision":revision,"currentBranch":current,"branches":branches,"branchesTruncated":branches_truncated});
     if let Some(comparison) = comparison {
@@ -616,6 +679,10 @@ pub fn diff(
     let binary =
         c["binary"] == true || (!too_large && (base_text.is_none() || current_text.is_none()));
     ctx.validate(roots)?;
+    let latest = snapshot(roots, path, project, base)?;
+    if latest["state"] != "ready" || latest["revision"] != s["revision"] {
+        return Err(invalid("The Git comparison changed; refresh Review"));
+    }
     let mut result = json!({"projectId":project,"status":c["status"],"path":file,"additions":c["additions"],"deletions":c["deletions"],"binary":binary,"tooLarge":too_large,"baseText":if binary||too_large{None}else{base_text},"currentText":if binary||too_large{None}else{current_text}});
     if let Some(previous) = c.get("previousPath") {
         result["previousPath"] = previous.clone();

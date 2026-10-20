@@ -8,7 +8,9 @@
 - RESOURCE_LOCKS: project-files (cos-tools Git, project panel, watcher contracts and tests)
 - DEPENDENCIES: CL-L1 PASS; registry READY_CANDIDATE; CL-05A PR #18 holds disjoint process-supervisor
 - STATUS: CLAIMED / RUNNING, 2026-10-20 Asia/Jakarta
-- CHECKPOINT_SHA: base above; claim checkpoint follows in this branch
+- CHECKPOINT_SHA: 476da26e181915152d1b2db50bdef2e0731d140d (durable claim); implementation checkpoint follows
+- PR: https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19
+- NOTION: https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8 (existing task, In Progress)
 - ACCEPTANCE: source-linked diff/preview/save/binary/symlink/watcher regressions; fmt, strict Clippy, workspace tests, Windows/Linux CI and independent review
 - LOCAL_REQUIRED: CL-L3 after CL-06B and CL-07B; no native/device qualification now
 - YOU_REQUIRED: NO
