@@ -43,6 +43,37 @@ fn plural(n: usize, one: &str, many: &str) -> String {
 fn counter(value: &Value) -> Option<usize> {
     value.as_u64().and_then(|n| usize::try_from(n).ok())
 }
+fn script_space(ch: char) -> bool {
+    // ECMAScript trim/\s includes BOM, but excludes Unicode NEXT LINE.
+    ch == '\u{feff}' || ch.is_whitespace() && ch != '\u{85}'
+}
+fn script_label(script: &str) -> String {
+    let mut lines = script
+        .split('\n')
+        .map(|line| line.trim_matches(script_space))
+        .filter(|line| !line.is_empty() && !line.starts_with('#'));
+    let Some(first) = lines.next() else {
+        return "a command".into();
+    };
+    let first = first
+        .split(script_space)
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ");
+    let shown = std::char::decode_utf16(first.encode_utf16().take(70))
+        .map(|part| match part {
+            Ok(ch) => ch.to_string(),
+            // As with quoted captions, keep a split surrogate visible rather
+            // than lossy U+FFFD. Lossless JS strings remain a CL-04C gate.
+            Err(err) => format!("\\u{:04x}", err.unpaired_surrogate()),
+        })
+        .collect::<String>();
+    if lines.next().is_some() || first.encode_utf16().count() > 70 {
+        format!("{shown} …")
+    } else {
+        shown
+    }
+}
 fn phrase(
     kind: &'static str,
     past: impl Into<String>,
@@ -274,26 +305,18 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
         }
         "exec_command" => {
             let cmds = args["cmds"].as_array();
-            let label = if let Some(cmds) = cmds {
-                let clean = cmds.iter().filter_map(Value::as_str).collect::<Vec<_>>();
-                if clean.is_empty() {
-                    None
-                } else {
-                    Some(format!("{} commands: {}", clean.len(), clean.join("; ")))
-                }
+            let clean = cmds
+                .map(|items| items.iter().filter_map(Value::as_str).collect::<Vec<_>>())
+                .unwrap_or_default();
+            let label = if !clean.is_empty() {
+                format!(
+                    "{} commands: {}",
+                    clean.len(),
+                    script_label(&clean.join("; "))
+                )
             } else {
-                args["cmd"].as_str().and_then(|cmd| {
-                    let lines = cmd
-                        .lines()
-                        .map(str::trim)
-                        .filter(|s| !s.is_empty() && !s.starts_with('#'))
-                        .collect::<Vec<_>>();
-                    lines.first().map(|first| {
-                        format!("{}{}", first, if lines.len() > 1 { " …" } else { "" })
-                    })
-                })
+                script_label(args["cmd"].as_str().unwrap_or(""))
             };
-            let label = label.unwrap_or_else(|| "a command".into());
             let mut p = phrase(
                 "run",
                 format!("Ran {label}"),
@@ -323,9 +346,7 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                 p.tone = "good";
             }
             if !running
-                && (cmds.is_some()
-                    || timedout
-                    || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true)
+                && (timedout || exit.is_some_and(|c| c != 0) && evidence["benignExit"] != true)
             {
                 p.doing = "Running exec_command".into();
             }
@@ -352,12 +373,13 @@ fn subject(tool: &str, args: &Value, evidence: &Value) -> Phrase {
                 format!("{infinitive} session {id}"),
             );
             p.tone = tone;
-            if let Some(exit) = evidence["exitCode"].as_i64()
-                && exit != 0
-                && evidence["benignExit"] != true
-            {
-                p.tone = "bad";
-                p.metric = Some(format!("✕ exit {exit}"));
+            if let Some(exit) = evidence["exitCode"].as_i64() {
+                if exit != 0 && evidence["benignExit"] != true {
+                    p.tone = "bad";
+                    p.metric = Some(format!("✕ exit {exit}"));
+                } else {
+                    p.metric = Some("✓ finished".into());
+                }
             }
             p
         }

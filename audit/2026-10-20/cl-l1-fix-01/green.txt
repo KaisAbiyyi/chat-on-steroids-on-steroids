@@ -1,0 +1,20 @@
+   Compiling cos-store v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-store)
+    Finished `test` profile [unoptimized] target(s) in 2.20s
+     Running tests/captions.rs (target/debug/deps/captions-e6dca69f44a62300)
+
+running 3 tests
+test failure_captions_do_not_claim_success_or_leak_sensitive_inputs ... ok
+test captured_source_caption_corpus_is_retained_as_a_differential_gate ... ok
+test sanitized_evidence_captions_and_last_activity_survive_cold_reopen ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/cl_l1_captions.rs (target/debug/deps/cl_l1_captions-1762f620be95d2af)
+
+running 4 tests
+test completion_metrics_require_exit_evidence_and_preserve_errors ... ok
+test command_labels_match_source_whitespace_and_utf16_boundaries ... ok
+test native_windows_captions_match_pinned_source ... ok
+test corrected_captions_and_full_arguments_survive_recording_and_cold_reopen ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
