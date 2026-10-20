@@ -271,6 +271,11 @@ pub(crate) fn rename<'a>(
     let kind = source.as_str();
     let other_conversation =
         conversation.is_some_and(|id| !id.is_empty() && summary["conversationId"] != id);
+    // An explicitly scoped manual rename from a retired conversation is stale.
+    // Unscoped local UI renames still apply to their selected session.
+    if source == TitleSource::Manual && other_conversation {
+        return Ok(());
+    }
     if source != TitleSource::Manual && summary["titleSource"] == "manual" {
         if other_conversation
             || !summary["origin"].is_null() && summary["origin"]["kind"] != "desktop"
