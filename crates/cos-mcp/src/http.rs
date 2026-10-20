@@ -318,6 +318,24 @@ async fn handle(State(state): State<Arc<HttpState>>, request: Request<Body>) -> 
         Ok(p) => p,
         Err(_) => return json_response(503, json!({"error":"busy"})),
     };
+    // These MCP authority headers must be unambiguous. HeaderMap::iter()
+    // can expose only one value for a repeated header and silently drop
+    // conflicting claims when collected into a map.
+    if ["mcp-protocol-version", "mcp-method", "mcp-name"]
+        .iter()
+        .any(|name| request.headers().get_all(*name).iter().count() > 1)
+    {
+        return json_response(
+            400,
+            protocol::error(
+                Value::Null,
+                400,
+                -32600,
+                "Invalid Request: duplicate MCP headers",
+            )
+            .body,
+        );
+    }
     let method = request.method().to_string();
     let mut headers = BTreeMap::<String, String>::new();
     for (key, val) in request.headers() {
@@ -356,7 +374,12 @@ async fn handle(State(state): State<Arc<HttpState>>, request: Request<Body>) -> 
         {
             Ok(Ok(bytes)) => match serde_json::from_slice(&bytes) {
                 Ok(body) => body,
-                Err(_) => return json_response(400, json!({"error":"invalid_json"})),
+                Err(_) => {
+                    return json_response(
+                        400,
+                        protocol::error(Value::Null, 400, -32700, "Parse error: Invalid JSON").body,
+                    );
+                }
             },
             Ok(Err(_)) => return json_response(413, json!({"error":"payload_too_large"})),
             Err(_) => return json_response(408, json!({"error":"body_timeout"})),

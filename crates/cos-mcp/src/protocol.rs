@@ -107,6 +107,12 @@ pub fn dispatch_server(
     {
         return error(id, 400, -32600, "Invalid Request");
     }
+    // MCP method parameters use named JSON objects. Reject scalar or array
+    // params before dispatch, rather than silently turning malformed calls
+    // into valid tools/list or invoking a handler.
+    if body.get("params").is_some_and(|params| !params.is_object()) {
+        return error(id, 200, -32602, "Invalid params");
+    }
     let method = body["method"].as_str().unwrap();
     let meta = &body["params"]["_meta"];
     let claim = meta["io.modelcontextprotocol/protocolVersion"].as_str();
