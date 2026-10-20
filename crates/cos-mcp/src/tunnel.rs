@@ -15,6 +15,8 @@ struct State {
     url: Option<String>,
     exit: Option<i64>,
     health: Value,
+    retries: u32,
+    connected: bool,
     work: Option<Arc<tempfile::TempDir>>,
 }
 struct Inner {
@@ -39,6 +41,8 @@ impl Default for Supervisor {
                 url: None,
                 exit: None,
                 health: Value::Null,
+                retries: 0,
+                connected: false,
                 work: None,
             }),
             processes: Manager::default(),
@@ -60,6 +64,47 @@ fn observe(state: &mut State, result: &Value) {
             state.url = Some(url.as_str().into());
             state.phase = "running".into();
         }
+    }
+}
+/// Preserve configured HTTPS_PROXY precedence, but never proxy a bearer-path
+/// loopback MCP request. Go tunnel clients do not honor ALL_PROXY directly.
+pub fn proxy_environment(vars: &std::collections::BTreeMap<String, String>) -> std::collections::BTreeMap<String, String> {
+    let mut out = std::collections::BTreeMap::new();
+    if vars.get("HTTPS_PROXY").is_none_or(|s| s.trim().is_empty()) {
+        if let Some(proxy) = vars.get("ALL_PROXY").filter(|s| {
+            let lower = s.to_ascii_lowercase();
+            ["http://", "https://", "socks5://", "socks5h://"]
+                .iter()
+                .any(|prefix| lower.starts_with(prefix))
+                && !s.chars().any(char::is_whitespace)
+        }) {
+            out.insert("HTTPS_PROXY".into(), proxy.clone());
+        }
+    }
+    let mut bypass = vars.get("NO_PROXY").cloned().unwrap_or_default();
+    for host in ["localhost", "127.0.0.1", "::1", "[::1]"] {
+        if !bypass.split(',').any(|v| v.trim().eq_ignore_ascii_case(host)) {
+            if !bypass.is_empty() { bypass.push(','); }
+            bypass.push_str(host);
+        }
+    }
+    out.insert("NO_PROXY".into(), bypass);
+    out
+}
+/// The sidecar retries the remote connection; health probes are capped and
+/// generation-fenced, never launching duplicate sidecars.
+pub fn retry_delay(attempt: u32) -> Duration {
+    Duration::from_millis(500u64.saturating_mul(1u64 << attempt.min(6)).min(30_000))
+}
+fn health_phase(health: &Value, was_connected: bool) -> &'static str {
+    if health["localHealthy"] != true {
+        if was_connected { "reconnecting" } else { "awaiting_sidecar" }
+    } else if health["controlPlaneConnected"] == true {
+        "running"
+    } else if was_connected {
+        "reconnecting"
+    } else {
+        "awaiting_control_plane"
     }
 }
 impl Supervisor {
@@ -106,18 +151,7 @@ impl Supervisor {
         let vars = std::env::vars()
             .map(|(k, v)| (k.to_uppercase(), v))
             .collect::<std::collections::BTreeMap<_, _>>();
-        if vars.get("HTTPS_PROXY").is_none_or(|s| s.trim().is_empty())
-            && let Some(proxy) = vars.get("ALL_PROXY").filter(|s| {
-                regex::Regex::new(r"(?i)^(https?|socks5h?)://\S+$")
-                    .unwrap()
-                    .is_match(s)
-            })
-        {
-            env.insert("HTTPS_PROXY".into(), proxy.clone());
-            if vars.get("NO_PROXY").is_none_or(|s| s.trim().is_empty()) {
-                env.insert("NO_PROXY".into(), "localhost,127.0.0.1,::1".into());
-            }
-        }
+        env.extend(proxy_environment(&vars));
         self.start_environment(program, &args, work.path(), Some(&env), Some(work.clone()))
     }
     fn start_environment(
@@ -136,6 +170,8 @@ impl Supervisor {
             state.phase = "starting".into();
             state.work = work;
             state.health = Value::Null;
+            state.retries = 0;
+            state.connected = false;
             state.generation
         };
         let owner = format!("tunnel:{generation}");
@@ -167,6 +203,7 @@ impl Supervisor {
         if let Some(process) = process {
             let weak = Arc::downgrade(&self.0);
             std::thread::spawn(move || {
+                let mut next_probe = std::time::Instant::now();
                 loop {
                     let Some(inner) = weak.upgrade() else {
                         break;
@@ -179,9 +216,12 @@ impl Supervisor {
                             .processes
                             .poll(process, &owner, "", Duration::from_millis(250));
                     let work = inner.state.lock().ok().and_then(|s| s.work.clone());
-                    let health = work
-                        .as_ref()
-                        .and_then(|d| read_health(&d.path().join("health.url")));
+                    let should_probe = work.is_some() && std::time::Instant::now() >= next_probe;
+                    let health = if should_probe {
+                        work.as_ref().and_then(|d| read_health(&d.path().join("health.url")))
+                    } else {
+                        None
+                    };
                     let mut state = match inner.state.lock() {
                         Ok(s) => s,
                         Err(_) => break,
@@ -193,16 +233,20 @@ impl Supervisor {
                         Ok(r) => {
                             observe(&mut state, &r);
                             if let Some(health) = health {
-                                let connected = health["controlPlaneConnected"] == true;
-                                state.health = health;
+                                let connected = health["localHealthy"] == true
+                                    && health["controlPlaneConnected"] == true;
                                 if state.phase != "failed" {
-                                    state.phase = if connected {
-                                        "running"
-                                    } else {
-                                        "awaiting_control_plane"
-                                    }
-                                    .into();
+                                    state.phase = health_phase(&health, state.connected).into();
+                                    state.connected |= connected;
+                                    state.retries = if connected { 0 } else { state.retries.saturating_add(1) };
+                                    next_probe = std::time::Instant::now()
+                                        + if connected { Duration::from_secs(1) } else { retry_delay(state.retries) };
                                 }
+                                state.health = health;
+                            } else if should_probe && state.phase != "failed" {
+                                state.phase = if state.connected { "reconnecting" } else { "awaiting_sidecar" }.into();
+                                state.retries = state.retries.saturating_add(1);
+                                next_probe = std::time::Instant::now() + retry_delay(state.retries);
                             }
                             if state.phase == "failed" {
                                 break;
@@ -220,7 +264,7 @@ impl Supervisor {
     }
     pub fn status(&self) -> Value {
         let s = self.0.state.lock().unwrap();
-        json!({"generation":s.generation,"state":s.phase,"url":s.url,"exitCode":s.exit,"health":s.health})
+        json!({"generation":s.generation,"state":s.phase,"url":s.url,"exitCode":s.exit,"health":s.health,"retryCount":s.retries})
     }
     fn stop_inner(&self) -> io::Result<()> {
         let (process, work) = {
@@ -252,6 +296,8 @@ impl Supervisor {
         state.url = None;
         state.exit = None;
         state.health = Value::Null;
+        state.retries = 0;
+        state.connected = false;
         Ok(())
     }
     pub fn stop(&self) -> io::Result<()> {
@@ -433,6 +479,6 @@ fn read_health(file: &Path) -> Option<Value> {
     let now = chrono::Utc::now().timestamp_millis();
     let handshake = poll.as_ref().and_then(|p| p["lastSuccessMs"].as_i64());
     Some(
-        json!({"localHealthy":local_healthy,"controlPlaneConnected":handshake.is_some_and(|at|now.saturating_sub(at)<=95000),"handshakeAt":handshake,"poll":poll,"client":status,"chatgptReached":false}),
+        json!({"localHealthy":local_healthy,"controlPlaneConnected":local_healthy && handshake.is_some_and(|at|now.saturating_sub(at)<=95000),"handshakeAt":handshake,"poll":poll,"client":status,"chatgptReached":false}),
     )
 }
