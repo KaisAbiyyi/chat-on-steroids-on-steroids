@@ -191,12 +191,16 @@ impl Terminals {
                     .slave
                     .spawn_command(command)
                     .map_err(io::Error::other)?;
-                let tree = Tree::attach(
-                    child
-                        .process_id()
-                        .ok_or_else(|| io::Error::other("Missing terminal PID"))?,
-                    false,
-                )?;
+                let pid = child
+                    .process_id()
+                    .ok_or_else(|| io::Error::other("Missing terminal PID"))?;
+                let tree = match Tree::attach(pid, false) {
+                    Ok(tree) => tree,
+                    Err(error) => {
+                        let _ = child.kill();
+                        return Err(error);
+                    }
+                };
                 drop(pair.slave);
                 (child, reader, writer, pair.master, tree)
             }
