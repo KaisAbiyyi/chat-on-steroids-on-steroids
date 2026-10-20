@@ -555,6 +555,18 @@ impl SessionStore {
             Err(e) if e.kind() != io::ErrorKind::NotFound => return Err(e),
             _ => {}
         }
+        // One provider conversation, including retired aliases, has one durable owner.
+        // Otherwise a restart can misattribute observed messages to a new epoch.
+        if let Some(conversation) = options.conversation_id.as_deref().filter(|s| !s.is_empty())
+            && self.list()?.iter().any(|row| {
+                row["conversationId"] == conversation
+                    || row["chatIds"]
+                        .as_array()
+                        .is_some_and(|ids| ids.iter().any(|id| id == conversation))
+            })
+        {
+            return Err(invalid("Conversation already belongs to another session"));
+        }
         let title = options
             .title
             .as_deref()
@@ -1045,14 +1057,15 @@ impl SessionStore {
             return Ok(false);
         }
         let _catalog = lock(&self.inner.catalog)?;
-        if to.len() >= 8
-            && to.len() <= 64
-            && to.bytes().all(|b| b.is_ascii_hexdigit() || b == b'-')
-            && self
-                .list()?
-                .iter()
-                .any(|r| r["conversationId"] == to && r["id"] != id)
-        {
+        // Provider conversation IDs are not necessarily UUIDs. Both active and
+        // retired aliases must remain fenced to their owning session epoch.
+        if self.list()?.iter().any(|row| {
+            row["id"] != id
+                && (row["conversationId"] == to
+                    || row["chatIds"]
+                        .as_array()
+                        .is_some_and(|ids| ids.iter().any(|chat| chat == to)))
+        }) {
             return Ok(false);
         }
         let owner = self.entry(id)?;
