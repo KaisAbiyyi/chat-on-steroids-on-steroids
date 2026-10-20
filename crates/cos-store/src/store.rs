@@ -82,8 +82,22 @@ pub struct UpsertResult {
 struct Entry {
     summary: Value,
     messages: BTreeMap<String, Value>,
+    canonical_bytes: usize,
     next: u64,
     dirty: bool,
+}
+fn admitted_canonical_bytes(entry: &Entry, key: &str, event: &Value) -> io::Result<usize> {
+    if !entry.messages.contains_key(key) && entry.messages.len() >= MAX_CANONICAL_MESSAGES {
+        return Err(invalid("Canonical history exceeds in-memory record budget"));
+    }
+    let previous = entry.messages.get(key)
+        .map(serde_json::to_vec)
+        .transpose()?
+        .map_or(0, |bytes| bytes.len());
+    let next = serde_json::to_vec(event)?.len();
+    let mut budget = entry.canonical_bytes;
+    budget_canonical_bytes(&mut budget, previous, next)?;
+    Ok(budget)
 }
 struct Assets {
     limit: u64,
@@ -408,6 +422,10 @@ impl SessionStore {
             },
         };
         let (messages, aliases_collapsed) = self.canonical(id)?;
+        let mut canonical_bytes = 0usize;
+        for event in messages.values() {
+            budget_canonical_bytes(&mut canonical_bytes, 0, serde_json::to_vec(event)?.len())?;
+        }
         let mut max_seq = messages
             .values()
             .map(|v| number(v, "seq"))
@@ -580,6 +598,7 @@ impl SessionStore {
         Ok(Entry {
             summary,
             messages,
+            canonical_bytes,
             next: max_seq + 1,
             dirty: false,
         })
@@ -688,6 +707,7 @@ impl SessionStore {
             Arc::new(Mutex::new(Entry {
                 summary: summary.clone(),
                 messages: BTreeMap::new(),
+                canonical_bytes: 0,
                 next: 1,
                 dirty: false,
             })),
@@ -719,13 +739,22 @@ impl SessionStore {
             .create(true)
             .open(&target)?;
         let len = file.metadata()?.len();
+        let mut needs_separator = false;
         if len > 0 {
             file.seek(SeekFrom::Start(len - 1))?;
             let mut last = [0];
             file.read_exact(&mut last)?;
-            if last[0] != b'\n' {
-                file.write_all(b"\n")?;
-            }
+            needs_separator = last[0] != b'\n';
+        }
+        if len
+            .checked_add(bytes.len() as u64)
+            .and_then(|total| total.checked_add(u64::from(needs_separator)))
+            .is_none_or(|total| total > MAX_HISTORY_JOURNAL_BYTES)
+        {
+            return Err(invalid("History journal exceeds write budget; original bytes preserved"));
+        }
+        if needs_separator {
+            file.write_all(b"\n")?;
         }
         if let Err(error) = file.write_all(&bytes).and_then(|_| file.sync_data()) {
             let mut committed = false;
@@ -944,8 +973,10 @@ impl SessionStore {
         }
         event["origin"] = json!(previous.as_ref().map(position).unwrap_or(seq));
         event["seq"] = json!(seq);
+        let budget = admitted_canonical_bytes(&entry, &key, &event)?;
         self.write_shard(id, &key, &event)?;
         entry.messages.insert(key, event.clone());
+        entry.canonical_bytes = budget;
         entry.next += 1;
         if event["kind"] == "user_message" {
             let mut preview = entry.summary.clone();
@@ -1512,10 +1543,12 @@ impl SessionStore {
         let seq = next_sequence(entry.next)?;
         event["seq"] = json!(seq);
         event["origin"] = json!(seq);
+        let budget = admitted_canonical_bytes(&entry, &key, &event)?;
         self.write_shard(id, &key, &event)?;
         entry.next += 1;
         model::apply_summary(&mut entry.summary, &event);
         entry.messages.insert(key, event);
+        entry.canonical_bytes = budget;
         entry.dirty = true;
         Ok(())
     }
@@ -1568,6 +1601,7 @@ impl SessionStore {
             "good"
         });
         full["seq"] = json!(next_sequence(entry.next)?);
+        let budget = admitted_canonical_bytes(&entry, &key, &full)?;
         self.write_shard(id, &key, &full)?;
         entry.next += 1;
         let delta = event_tokens(&full) as i64 - event_tokens(&previous) as i64;
@@ -1578,6 +1612,7 @@ impl SessionStore {
                 json!((number(&entry.summary, "contextTokens") as i64 + delta).max(0));
         }
         entry.messages.insert(key, full);
+        entry.canonical_bytes = budget;
         entry.dirty = true;
         Ok(true)
     }
@@ -1612,12 +1647,14 @@ impl SessionStore {
         let seq = next_sequence(entry.next)?;
         event["seq"] = json!(seq);
         event["origin"] = json!(previous.as_ref().map(position).unwrap_or(seq));
+        let budget = admitted_canonical_bytes(&entry, &key, &event)?;
         self.write_shard(id, &key, &event)?;
         entry.next += 1;
         if previous.is_none() {
             model::apply_summary(&mut entry.summary, &event);
         }
         entry.messages.insert(key, event.clone());
+        entry.canonical_bytes = budget;
         entry.dirty = true;
         Ok(UpsertResult {
             event,
@@ -1787,9 +1824,11 @@ impl SessionStore {
                 if changed {
                     next["origin"] = json!(position(&previous));
                     next["seq"] = json!(next_sequence(entry.next)?);
+                    let budget = admitted_canonical_bytes(&entry, &key, &next)?;
                     self.write_shard(id, &key, &next)?;
                     entry.next += 1;
                     entry.messages.insert(key, next);
+                    entry.canonical_bytes = budget;
                     entry.dirty = true;
                 }
             }
