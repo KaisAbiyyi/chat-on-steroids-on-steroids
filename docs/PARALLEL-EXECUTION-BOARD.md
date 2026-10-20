@@ -6,7 +6,7 @@
 
 Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspect the latest claim/PR registry and state `CLAIM <ID>, owner session, base SHA, resource lock(s), branch, planned test` before editing. Claims are **not preassigned** to ChatGPT or Codex. Without an atomic controller, a single coordinator serializes write conflicts. Report-only inspections do not acquire write ownership; continuation after interrupted browser/quota requires fenced transfer and reconciliation with last remote checkpoint.
 
-`CL-01` through `CL-04C` and `CL-L1` are accepted for their scoped gates. **READY CANDIDATES NOW:** `CL-05A`, `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A` (separate logical locks); no work unit has been claimed by this planning task. Preserve local WIP and treat broader Phase 1–6 parity as PARTIAL. **Phase order is strictly 1–6 closure → Phase 7 preflight `7P-A → 7P-B → 7P-L1` → Phase 7 browser bridge `7A–7E` → Phase 8 built-in browser `8A–8C`.** The preflight validates the old Phase 1 feasibility contract but is *executed and counted in Phase 7*, never called early Phase 8.
+`CL-01` through `CL-04C` and `CL-L1` are accepted for their scoped gates. **CLAIMED NOW:** `CL-05A` by ChatGPT cloud session `chatgpt-2026-10-20-cl05a-01`, [draft PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18), branch `work/cl-05a-process-custody-20261020`, base `340cf55`, exclusive lock `process-supervisor`. **OTHER READY CANDIDATES:** `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A` (still need live checks). CL-05A is not accepted until exact-head CI/review and merge. Preserve local WIP and treat broader Phase 1–6 parity as PARTIAL. **Phase order is strictly 1–6 closure → Phase 7 preflight `7P-A → 7P-B → 7P-L1` → Phase 7 browser bridge `7A–7E` → Phase 8 built-in browser `8A–8C`.** The preflight validates the old Phase 1 feasibility contract but is *executed and counted in Phase 7*, never called early Phase 8.
 
 ## Live prerequisites and executable readiness
 
@@ -27,7 +27,7 @@ Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspe
 | `CL-04A` | Provider/model/rebind/title authority | `CL-L1` | `session-identity` | C (cloud) | DONE |
 | `CL-04B` | History retention/replay crash limits | `CL-04A` | `session-store` | C (cloud) | DONE |
 | `CL-04C` | Unpaired UTF-16/JSON source edge representation | `CL-03` | `unicode-boundary` | C (cloud) | DONE |
-| `CL-05A` | Child ownership, cancellation and output custody | `CL-L1` | `process-supervisor` | C (cloud) | **READY · PARALLEL** |
+| `CL-05A` | Child ownership, cancellation and output custody | `CL-L1` | `process-supervisor` | C (cloud) | **CLAIMED · PR #18 · CI PENDING** |
 | `CL-05B` | PTY/shell/SSH native process semantics | `CL-05A` | `process-pty` | C (cloud) | BLOCKED |
 | `CL-L2` | Native Windows pipe/ConPTY/shell/SSH proof | `CL-05B` | `windows-pty` | L (Windows) | BLOCKED |
 | `CL-06A` | Git/project/file-panel/watcher parity | `CL-L1` | `project-files` | C (cloud) | **READY · PARALLEL** |
