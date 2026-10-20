@@ -17,6 +17,36 @@ class TaskBoardTests(unittest.TestCase):
         cls.data = board.load()
         cls.tasks = board.index(cls.data)
 
+    def test_markdown_board_matches_machine_graph_and_candidate_status(self):
+        text = (Path(__file__).resolve().parents[1] / "docs" / "PARALLEL-EXECUTION-BOARD.md").read_text(encoding="utf-8")
+        table = text.split("## Full 16-phase task registry", 1)[1].split("## Parallel execution lanes", 1)[0]
+        rows = {}
+        for line in table.splitlines():
+            if not line.startswith("| \`"):
+                continue
+            parts = [part.strip() for part in line.strip().strip("|").split("|")]
+            task_id = parts[0].strip("\`")
+            self.assertNotIn(task_id, rows)
+            rows[task_id] = parts
+        self.assertEqual(set(rows), set(self.tasks))
+        for task_id, task in self.tasks.items():
+            cols = rows[task_id]
+            dependencies = [token.strip("\`") for token in cols[2].split(", ")] if cols[2] != "NONE" else []
+            self.assertEqual(dependencies, task["depends_on"], task_id)
+            self.assertEqual(cols[3], "\`" + task["resource_locks"][0] + "\`", task_id)
+            desired = "DONE" if task["status"] == "done" else (
+                "**READY · PARALLEL**" if not any(
+                    self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
+                ) and task["status"] == "todo" else "BLOCKED"
+            )
+            self.assertEqual(cols[5], desired, task_id)
+
+    def test_historical_aliases_are_explicit_and_never_reused_as_current_preflight(self):
+        aliases = self.data["legacy_pre_2026_10_20_ids"]
+        self.assertEqual(aliases["preflight"]["former 8A"], "7P-A")
+        self.assertEqual(aliases["full_phase_8"]["former 8C"], "8A")
+        self.assertNotEqual(self.tasks["8A"]["title"], self.tasks["7P-A"]["title"])
+
     def test_registry_is_valid_and_acyclic(self):
         self.assertEqual(board.validate(self.data), [])
 
