@@ -14,6 +14,17 @@ use std::{
     sync::{Arc, Mutex},
 };
 pub const MAX_LINE_BYTES: usize = 512 * 1024;
+/// JSON/JS readers cannot round-trip integers beyond Number.MAX_SAFE_INTEGER.
+pub const MAX_HISTORY_SEQUENCE: u64 = 9_007_199_254_740_991;
+/// Fail closed on implausibly large journals rather than scanning unbounded files.
+pub const MAX_HISTORY_JOURNAL_BYTES: u64 = 1024 * 1024 * 1024;
+fn next_sequence(next: u64) -> io::Result<u64> {
+    if (1..=MAX_HISTORY_SEQUENCE).contains(&next) {
+        Ok(next)
+    } else {
+        Err(invalid("History sequence exhausted its safe integer range"))
+    }
+}
 pub const MAX_MESSAGE_BYTES: usize = 1024 * 1024;
 pub const MAX_ASSET_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_SESSION_ASSETS: u64 = 192 * 1024 * 1024;
@@ -139,8 +150,12 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
         Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(0),
         Err(e) => return Err(e),
     };
-    if !file.metadata()?.is_file() {
+    let metadata = file.metadata()?;
+    if !metadata.is_file() {
         return Err(invalid("Journal is not a regular file"));
+    }
+    if metadata.len() > MAX_HISTORY_JOURNAL_BYTES {
+        return Err(invalid("History journal exceeds replay budget; original bytes preserved"));
     }
     let mut reader = BufReader::with_capacity(64 * 1024, file);
     let mut carry = Vec::new();
@@ -152,7 +167,7 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
             if skipping {
                 damaged += 1;
             } else if !carry.is_empty() {
-                accept_line(&carry, &mut accept, &mut damaged);
+                accept_line(&carry, &mut accept, &mut damaged)?;
             }
             break;
         }
@@ -175,7 +190,7 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
             if skipping {
                 damaged += 1;
             } else {
-                accept_line(&carry, &mut accept, &mut damaged);
+                accept_line(&carry, &mut accept, &mut damaged)?;
             }
             carry.clear();
             skipping = false;
@@ -184,13 +199,22 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
     }
     Ok(damaged)
 }
-fn accept_line(raw: &[u8], accept: &mut impl FnMut(Value), damaged: &mut usize) {
+fn accept_line(raw: &[u8], accept: &mut impl FnMut(Value), damaged: &mut usize) -> io::Result<()> {
     if raw.iter().all(u8::is_ascii_whitespace) {
-        return;
+        return Ok(());
     }
     match serde_json::from_slice::<Value>(raw) {
-        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > 0) && v["kind"].is_string() => accept(v),
-        _ => *damaged += 1,
+        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > MAX_HISTORY_SEQUENCE) => {
+            Err(invalid("History journal contains an unsafe sequence; original bytes preserved"))
+        }
+        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > 0) && v["kind"].is_string() => {
+            accept(v);
+            Ok(())
+        }
+        _ => {
+            *damaged += 1;
+            Ok(())
+        }
     }
 }
 impl SessionStore {
@@ -313,6 +337,13 @@ impl SessionStore {
                 latest["goalEligible"] = json!(true);
             }
             messages.insert(first_key, latest);
+        }
+        // A corrupt shard/map with an unsafe JSON sequence must not drive a
+        // replay cursor beyond the range external JS consumers can represent.
+        for event in messages.values() {
+            if event["seq"].as_u64().is_some_and(|seq| seq > MAX_HISTORY_SEQUENCE) {
+                return Err(invalid("Canonical message has an unsafe history sequence"));
+            }
         }
         Ok((messages, aliases_collapsed))
     }
@@ -628,7 +659,7 @@ impl SessionStore {
         let owner = self.entry(id)?;
         let mut entry = lock(&owner)?;
         event.as_object_mut().unwrap().remove("seq");
-        event["seq"] = json!(entry.next);
+        event["seq"] = json!(next_sequence(entry.next)?);
         let mut bytes = serde_json::to_vec(&event)?;
         if bytes.len() > MAX_LINE_BYTES {
             return Err(invalid("History event exceeds line limit"));
@@ -824,7 +855,7 @@ impl SessionStore {
                 });
             }
         }
-        let seq = entry.next;
+        let seq = next_sequence(entry.next)?;
         let content_seq = if options.work == Some(false)
             && ((event["kind"] == "user_message" && previous.is_some())
                 || (event["kind"] == "assistant_message" && !terminal(&event)))
@@ -1411,8 +1442,9 @@ impl SessionStore {
         if entry.messages.contains_key(&key) {
             return Err(invalid("Process call identity already recorded"));
         }
-        event["seq"] = json!(entry.next);
-        event["origin"] = json!(entry.next);
+        let seq = next_sequence(entry.next)?;
+        event["seq"] = json!(seq);
+        event["origin"] = json!(seq);
         self.write_shard(id, &key, &event)?;
         entry.next += 1;
         model::apply_summary(&mut entry.summary, &event);
@@ -1468,7 +1500,7 @@ impl SessionStore {
         } else {
             "good"
         });
-        full["seq"] = json!(entry.next);
+        full["seq"] = json!(next_sequence(entry.next)?);
         self.write_shard(id, &key, &full)?;
         entry.next += 1;
         let delta = event_tokens(&full) as i64 - event_tokens(&previous) as i64;
@@ -1510,8 +1542,9 @@ impl SessionStore {
             }
             event["time"] = previous["time"].clone();
         }
-        event["seq"] = json!(entry.next);
-        event["origin"] = json!(previous.as_ref().map(position).unwrap_or(entry.next));
+        let seq = next_sequence(entry.next)?;
+        event["seq"] = json!(seq);
+        event["origin"] = json!(previous.as_ref().map(position).unwrap_or(seq));
         self.write_shard(id, &key, &event)?;
         entry.next += 1;
         if previous.is_none() {
@@ -1686,7 +1719,7 @@ impl SessionStore {
                 }
                 if changed {
                     next["origin"] = json!(position(&previous));
-                    next["seq"] = json!(entry.next);
+                    next["seq"] = json!(next_sequence(entry.next)?);
                     self.write_shard(id, &key, &next)?;
                     entry.next += 1;
                     entry.messages.insert(key, next);
