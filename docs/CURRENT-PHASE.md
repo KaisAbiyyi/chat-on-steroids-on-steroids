@@ -1,11 +1,10 @@
 # Current CoS-Rust work state
 
-## CL-08A cloud active claim (2026-10-21)
+## CL-07A accepted and merged (2026-10-21)
 
-- **OWNER / BRANCH / PR:** ChatGPT GitHub cloud session `chatgpt-20261021-cl08a-01`, generation 1, lock `runtime-secrets`, base `7942906cc845a02df4629de3b7830f2f729573d4`, branch `work/cl-08a-startup-secrets-20261021`, [PR #23](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/23).
-- **WORK:** Windows legacy direct-DPAPI vault migration to authenticated v10 key, intact Local State preferences, refusal of missing AES key/corrupt blob, config I/O errors fail closed and unreadable secrets never look absent. Focused platform regressions and CI required.
-- **STATUS:** claimed, implementation on branch; CI and independent reviewer acceptance still pending. Other resource locks untouched; no local D: access.
-- **NEXT:** exact-head Linux + Windows fmt/Clippy/tests/release + independent review; merge only if all pass; then task registry `done`, release claim, Notion `Done` and unlock CL-08B. Native Windows gate CL-L4 waits for accepted CL-08B.
+- **MERGED:** [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20), squash merge `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116` from head `60a931714cf69289066a96658f06edd5becae23d`. Source review (separate CL-08A agent) found no scoped code blocker, with review comment on PR #20.
+- **EXACT HEAD:** Windows/Ubuntu Rust formatter, strict Clippy, all workspace tests, release build PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900070)); DAG Windows/Ubuntu PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900377)). No native L3 proof claimed.
+- **CLAIM:** `search-patch` released after accepted merge. `CL-07B` is next cloud candidate after main CI/review; CL-L3 still depends on CL-06B and CL-07B. CL-05A, CL-08A and CL-09A retain separate active locks, not Done.
 
 
 ## CL-06A MERGED / claim released (2026-10-20)

@@ -187,7 +187,12 @@ pub fn search(
             directories += 1;
             let entries = match backend.open_folder(&path) {
                 Ok(entries) => entries,
-                // A folder that cannot be opened contributes no entries, as in the source.
+                // Unavailable folders are skipped, matching the source. A
+                // permission failure is different: fail closed rather than
+                // returning a plausible but incomplete authorized search.
+                Err(error) if error.kind() == io::ErrorKind::PermissionDenied => {
+                    return Err(error);
+                }
                 Err(_) => {
                     authorize()?;
                     continue;
@@ -275,6 +280,9 @@ pub(super) fn scan_file(
     authorize()?;
     let metadata = match backend.metadata(path) {
         Ok(metadata) => metadata,
+        Err(error) if error.kind() == io::ErrorKind::PermissionDenied => {
+            return Err(error);
+        }
         Err(_) => {
             authorize()?;
             *skipped += 1;
@@ -290,6 +298,9 @@ pub(super) fn scan_file(
     }
     let bytes = match backend.read_file(path, MAX_CONTENT_FILE_BYTES, authorize) {
         Ok(bytes) => bytes,
+        Err(error) if error.kind() == io::ErrorKind::PermissionDenied => {
+            return Err(error);
+        }
         Err(_) => {
             authorize()?;
             *skipped += 1;
