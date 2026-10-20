@@ -90,7 +90,7 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
-        self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06B", "CL-07A", "CL-08A", "CL-09A"})
+        self.assertEqual({t["id"] for t in waves[0]}, {"CL-05A", "CL-06B", "CL-07B", "CL-08A", "CL-09A"})
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
         self.assertLess(flat.index("7P-L1"), flat.index("7A"))
