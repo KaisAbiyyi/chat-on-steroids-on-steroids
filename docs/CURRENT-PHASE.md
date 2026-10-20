@@ -1,5 +1,13 @@
 # Current CoS-Rust work state
 
+## Latest cloud checkpoint (2026-10-20) — CL-04A merged; CL-04B in progress
+
+- **CL-04A MERGED**: [PR #12](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/12) squash merge `1232803d9dba3ba05cca11cfc8101bb54bd51cc2`. Exact PR head `dfd3bd72` had Windows/Ubuntu format, strict Clippy, tests, release **PASS**. Post-merge `main` CI must be checked by exact SHA, independently from head checks.
+- **CL-04B CLAIMED / RUNNING**: [PR #13](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/13), branch `work/cl-04b-history-recovery-20261020`, `session-store` lock. History sequence safety, bounded replay/journal/canonical loading, non-destructive retention and crash/metadata replay tests. **Acceptance requires final Windows/Ubuntu CI, review and merged SHA.**
+- **LOCAL REQUIRED:** NONE immediately for this cloud unit. **YOU REQUIRED:** NO signed-in account/device tests. **NEXT:** complete CL-04B validation, merge with recorded SHA when qualified, then CL-04C (Unicode source edge behavior), subject to independent dependency board.
+- This later checkpoint supersedes the historical CL-L1 NEXT statements preserved below. CL-L1 stays PASS on `a00edd4`; full Phase 1–6 parity remains PARTIAL and browser/desktop/installer gates are not covered.
+
+
 Captured: **2026-10-20, Asia/Jakarta**. This is the agent-to-agent resume pointer. Check actual `git status` and repository state on every new run; do not rely on this snapshot if files or commits have changed.
 
 ## Latest accepted local gate: CL-L1 PASS on merged repair (2026-10-20)

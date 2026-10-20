@@ -14,6 +14,29 @@ use std::{
     sync::{Arc, Mutex},
 };
 pub const MAX_LINE_BYTES: usize = 512 * 1024;
+/// JSON/JS readers cannot round-trip integers beyond Number.MAX_SAFE_INTEGER.
+pub const MAX_HISTORY_SEQUENCE: u64 = 9_007_199_254_740_991;
+/// Fail closed on implausibly large journals rather than scanning unbounded files.
+pub const MAX_HISTORY_JOURNAL_BYTES: u64 = 1024 * 1024 * 1024;
+/// Guard canonical in-memory overlays against unbounded shard proliferation.
+pub const MAX_CANONICAL_MESSAGES: usize = 100_000;
+pub const MAX_CANONICAL_BYTES: usize = 256 * 1024 * 1024;
+pub const MAX_HISTORY_READ_EVENTS: usize = 100_000;
+fn budget_canonical_bytes(total: &mut usize, previous: usize, next: usize) -> io::Result<()> {
+    *total = total
+        .saturating_sub(previous)
+        .checked_add(next)
+        .filter(|bytes| *bytes <= MAX_CANONICAL_BYTES)
+        .ok_or_else(|| invalid("Canonical history exceeds in-memory byte budget"))?;
+    Ok(())
+}
+fn next_sequence(next: u64) -> io::Result<u64> {
+    if (1..=MAX_HISTORY_SEQUENCE).contains(&next) {
+        Ok(next)
+    } else {
+        Err(invalid("History sequence exhausted its safe integer range"))
+    }
+}
 pub const MAX_MESSAGE_BYTES: usize = 1024 * 1024;
 pub const MAX_ASSET_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_SESSION_ASSETS: u64 = 192 * 1024 * 1024;
@@ -59,8 +82,24 @@ pub struct UpsertResult {
 struct Entry {
     summary: Value,
     messages: BTreeMap<String, Value>,
+    canonical_bytes: usize,
     next: u64,
     dirty: bool,
+}
+fn admitted_canonical_bytes(entry: &Entry, key: &str, event: &Value) -> io::Result<usize> {
+    if !entry.messages.contains_key(key) && entry.messages.len() >= MAX_CANONICAL_MESSAGES {
+        return Err(invalid("Canonical history exceeds in-memory record budget"));
+    }
+    let previous = entry
+        .messages
+        .get(key)
+        .map(serde_json::to_vec)
+        .transpose()?
+        .map_or(0, |bytes| bytes.len());
+    let next = serde_json::to_vec(event)?.len();
+    let mut budget = entry.canonical_bytes;
+    budget_canonical_bytes(&mut budget, previous, next)?;
+    Ok(budget)
 }
 struct Assets {
     limit: u64,
@@ -139,8 +178,14 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
         Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(0),
         Err(e) => return Err(e),
     };
-    if !file.metadata()?.is_file() {
+    let metadata = file.metadata()?;
+    if !metadata.is_file() {
         return Err(invalid("Journal is not a regular file"));
+    }
+    if metadata.len() > MAX_HISTORY_JOURNAL_BYTES {
+        return Err(invalid(
+            "History journal exceeds replay budget; original bytes preserved",
+        ));
     }
     let mut reader = BufReader::with_capacity(64 * 1024, file);
     let mut carry = Vec::new();
@@ -152,7 +197,7 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
             if skipping {
                 damaged += 1;
             } else if !carry.is_empty() {
-                accept_line(&carry, &mut accept, &mut damaged);
+                accept_line(&carry, &mut accept, &mut damaged)?;
             }
             break;
         }
@@ -175,7 +220,7 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
             if skipping {
                 damaged += 1;
             } else {
-                accept_line(&carry, &mut accept, &mut damaged);
+                accept_line(&carry, &mut accept, &mut damaged)?;
             }
             carry.clear();
             skipping = false;
@@ -184,13 +229,22 @@ fn scan(path: &Path, mut accept: impl FnMut(Value)) -> io::Result<usize> {
     }
     Ok(damaged)
 }
-fn accept_line(raw: &[u8], accept: &mut impl FnMut(Value), damaged: &mut usize) {
+fn accept_line(raw: &[u8], accept: &mut impl FnMut(Value), damaged: &mut usize) -> io::Result<()> {
     if raw.iter().all(u8::is_ascii_whitespace) {
-        return;
+        return Ok(());
     }
     match serde_json::from_slice::<Value>(raw) {
-        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > 0) && v["kind"].is_string() => accept(v),
-        _ => *damaged += 1,
+        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > MAX_HISTORY_SEQUENCE) => Err(invalid(
+            "History journal contains an unsafe sequence; original bytes preserved",
+        )),
+        Ok(v) if v["seq"].as_u64().is_some_and(|n| n > 0) && v["kind"].is_string() => {
+            accept(v);
+            Ok(())
+        }
+        _ => {
+            *damaged += 1;
+            Ok(())
+        }
     }
 }
 impl SessionStore {
@@ -225,6 +279,7 @@ impl SessionStore {
     }
     fn canonical(&self, id: &str) -> io::Result<(BTreeMap<String, Value>, bool)> {
         let mut messages = BTreeMap::new();
+        let mut canonical_bytes = 0usize;
         let mut aliases_collapsed = false;
         match self
             .path(id, "messages.json", true)
@@ -234,12 +289,29 @@ impl SessionStore {
                 if let Some(map) = raw.as_object() {
                     for (key, event) in map {
                         if message_key(event).as_ref() == Some(key) && event["seq"].is_u64() {
+                            budget_canonical_bytes(
+                                &mut canonical_bytes,
+                                0,
+                                serde_json::to_vec(event)?.len(),
+                            )?;
                             messages.insert(key.clone(), event.clone());
                         }
                     }
                 }
+                if messages.len() > MAX_CANONICAL_MESSAGES {
+                    return Err(invalid("Canonical history exceeds in-memory record budget"));
+                }
             }
-            Err(e) if e.kind() == io::ErrorKind::PermissionDenied => return Err(e),
+            // Malformed legacy maps may be reconstructed from durable shards.
+            // Resource-budget violations must not silently drop a map instead.
+            Err(e)
+                if matches!(
+                    e.kind(),
+                    io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput
+                ) =>
+            {
+                return Err(e);
+            }
             Err(_) => {}
         }
         let shards = self.path(id, "messages", true)?;
@@ -263,13 +335,25 @@ impl SessionStore {
                     continue;
                 }
                 let path = self.path(id, &format!("messages/{name}"), false)?;
-                let Ok(event) = read_json(&path, MAX_MESSAGE_BYTES as u64) else {
-                    continue;
+                let event = match read_json(&path, MAX_MESSAGE_BYTES as u64) {
+                    Ok(event) => event,
+                    Err(error) if error.kind() == io::ErrorKind::InvalidInput => return Err(error),
+                    Err(_) => continue,
                 };
                 if let Some(key) = message_key(&event)
                     && name == format!("{}.json", hash(key.as_bytes()))
                     && event["seq"].is_u64()
                 {
+                    if messages.len() >= MAX_CANONICAL_MESSAGES && !messages.contains_key(&key) {
+                        return Err(invalid("Canonical history exceeds in-memory record budget"));
+                    }
+                    let next_bytes = serde_json::to_vec(&event)?.len();
+                    let previous_bytes = messages
+                        .get(&key)
+                        .map(serde_json::to_vec)
+                        .transpose()?
+                        .map_or(0, |bytes| bytes.len());
+                    budget_canonical_bytes(&mut canonical_bytes, previous_bytes, next_bytes)?;
                     messages.insert(key, event);
                 }
             }
@@ -314,6 +398,16 @@ impl SessionStore {
             }
             messages.insert(first_key, latest);
         }
+        // A corrupt shard/map with an unsafe JSON sequence must not drive a
+        // replay cursor beyond the range external JS consumers can represent.
+        for event in messages.values() {
+            if event["seq"]
+                .as_u64()
+                .is_some_and(|seq| seq > MAX_HISTORY_SEQUENCE)
+            {
+                return Err(invalid("Canonical message has an unsafe history sequence"));
+            }
+        }
         Ok((messages, aliases_collapsed))
     }
     fn load(&self, id: &str) -> io::Result<Entry> {
@@ -330,6 +424,10 @@ impl SessionStore {
             },
         };
         let (messages, aliases_collapsed) = self.canonical(id)?;
+        let mut canonical_bytes = 0usize;
+        for event in messages.values() {
+            budget_canonical_bytes(&mut canonical_bytes, 0, serde_json::to_vec(event)?.len())?;
+        }
         let mut max_seq = messages
             .values()
             .map(|v| number(v, "seq"))
@@ -502,6 +600,7 @@ impl SessionStore {
         Ok(Entry {
             summary,
             messages,
+            canonical_bytes,
             next: max_seq + 1,
             dirty: false,
         })
@@ -610,6 +709,7 @@ impl SessionStore {
             Arc::new(Mutex::new(Entry {
                 summary: summary.clone(),
                 messages: BTreeMap::new(),
+                canonical_bytes: 0,
                 next: 1,
                 dirty: false,
             })),
@@ -628,7 +728,7 @@ impl SessionStore {
         let owner = self.entry(id)?;
         let mut entry = lock(&owner)?;
         event.as_object_mut().unwrap().remove("seq");
-        event["seq"] = json!(entry.next);
+        event["seq"] = json!(next_sequence(entry.next)?);
         let mut bytes = serde_json::to_vec(&event)?;
         if bytes.len() > MAX_LINE_BYTES {
             return Err(invalid("History event exceeds line limit"));
@@ -641,13 +741,24 @@ impl SessionStore {
             .create(true)
             .open(&target)?;
         let len = file.metadata()?.len();
+        let mut needs_separator = false;
         if len > 0 {
             file.seek(SeekFrom::Start(len - 1))?;
             let mut last = [0];
             file.read_exact(&mut last)?;
-            if last[0] != b'\n' {
-                file.write_all(b"\n")?;
-            }
+            needs_separator = last[0] != b'\n';
+        }
+        if len
+            .checked_add(bytes.len() as u64)
+            .and_then(|total| total.checked_add(u64::from(needs_separator)))
+            .is_none_or(|total| total > MAX_HISTORY_JOURNAL_BYTES)
+        {
+            return Err(invalid(
+                "History journal exceeds write budget; original bytes preserved",
+            ));
+        }
+        if needs_separator {
+            file.write_all(b"\n")?;
         }
         if let Err(error) = file.write_all(&bytes).and_then(|_| file.sync_data()) {
             let mut committed = false;
@@ -824,7 +935,7 @@ impl SessionStore {
                 });
             }
         }
-        let seq = entry.next;
+        let seq = next_sequence(entry.next)?;
         let content_seq = if options.work == Some(false)
             && ((event["kind"] == "user_message" && previous.is_some())
                 || (event["kind"] == "assistant_message" && !terminal(&event)))
@@ -866,8 +977,10 @@ impl SessionStore {
         }
         event["origin"] = json!(previous.as_ref().map(position).unwrap_or(seq));
         event["seq"] = json!(seq);
+        let budget = admitted_canonical_bytes(&entry, &key, &event)?;
         self.write_shard(id, &key, &event)?;
         entry.messages.insert(key, event.clone());
+        entry.canonical_bytes = budget;
         entry.next += 1;
         if event["kind"] == "user_message" {
             let mut preview = entry.summary.clone();
@@ -923,8 +1036,13 @@ impl SessionStore {
                 && options.agent.as_ref().is_none_or(|a| e["agent"] == *a)
         };
         let mut events = Vec::new();
+        let mut exceeded = false;
         scan(&self.path(id, "events.jsonl", true)?, |e| {
             if selected(&e) && !message_key(&e).is_some_and(|k| entry.messages.contains_key(&k)) {
+                if events.len() >= MAX_HISTORY_READ_EVENTS {
+                    exceeded = true;
+                    return;
+                }
                 events.push(e);
                 if options.from.is_some()
                     && options.limit < usize::MAX / 2
@@ -935,7 +1053,19 @@ impl SessionStore {
                 }
             }
         })?;
-        events.extend(entry.messages.values().filter(|e| selected(e)).cloned());
+        if exceeded {
+            return Err(invalid(
+                "History read exceeds result budget; use bounded pagination",
+            ));
+        }
+        for event in entry.messages.values().filter(|event| selected(event)) {
+            if events.len() >= MAX_HISTORY_READ_EVENTS {
+                return Err(invalid(
+                    "History read exceeds result budget; use bounded pagination",
+                ));
+            }
+            events.push(event.clone());
+        }
         if options.from.is_some() {
             events.sort_by_key(|e| number(e, "seq"));
             events.truncate(options.limit);
@@ -947,6 +1077,9 @@ impl SessionStore {
         Ok(result)
     }
     pub fn recent(&self, id: &str, limit: usize, before: Option<u64>) -> io::Result<Vec<Value>> {
+        if limit > MAX_HISTORY_READ_EVENTS {
+            return Err(invalid("History page exceeds result budget"));
+        }
         let owner = self.entry(id)?;
         let entry = lock(&owner)?;
         let mut rows = Vec::new();
@@ -1411,12 +1544,15 @@ impl SessionStore {
         if entry.messages.contains_key(&key) {
             return Err(invalid("Process call identity already recorded"));
         }
-        event["seq"] = json!(entry.next);
-        event["origin"] = json!(entry.next);
+        let seq = next_sequence(entry.next)?;
+        event["seq"] = json!(seq);
+        event["origin"] = json!(seq);
+        let budget = admitted_canonical_bytes(&entry, &key, &event)?;
         self.write_shard(id, &key, &event)?;
         entry.next += 1;
         model::apply_summary(&mut entry.summary, &event);
         entry.messages.insert(key, event);
+        entry.canonical_bytes = budget;
         entry.dirty = true;
         Ok(())
     }
@@ -1468,7 +1604,8 @@ impl SessionStore {
         } else {
             "good"
         });
-        full["seq"] = json!(entry.next);
+        full["seq"] = json!(next_sequence(entry.next)?);
+        let budget = admitted_canonical_bytes(&entry, &key, &full)?;
         self.write_shard(id, &key, &full)?;
         entry.next += 1;
         let delta = event_tokens(&full) as i64 - event_tokens(&previous) as i64;
@@ -1479,6 +1616,7 @@ impl SessionStore {
                 json!((number(&entry.summary, "contextTokens") as i64 + delta).max(0));
         }
         entry.messages.insert(key, full);
+        entry.canonical_bytes = budget;
         entry.dirty = true;
         Ok(true)
     }
@@ -1510,14 +1648,17 @@ impl SessionStore {
             }
             event["time"] = previous["time"].clone();
         }
-        event["seq"] = json!(entry.next);
-        event["origin"] = json!(previous.as_ref().map(position).unwrap_or(entry.next));
+        let seq = next_sequence(entry.next)?;
+        event["seq"] = json!(seq);
+        event["origin"] = json!(previous.as_ref().map(position).unwrap_or(seq));
+        let budget = admitted_canonical_bytes(&entry, &key, &event)?;
         self.write_shard(id, &key, &event)?;
         entry.next += 1;
         if previous.is_none() {
             model::apply_summary(&mut entry.summary, &event);
         }
         entry.messages.insert(key, event.clone());
+        entry.canonical_bytes = budget;
         entry.dirty = true;
         Ok(UpsertResult {
             event,
@@ -1686,10 +1827,12 @@ impl SessionStore {
                 }
                 if changed {
                     next["origin"] = json!(position(&previous));
-                    next["seq"] = json!(entry.next);
+                    next["seq"] = json!(next_sequence(entry.next)?);
+                    let budget = admitted_canonical_bytes(&entry, &key, &next)?;
                     self.write_shard(id, &key, &next)?;
                     entry.next += 1;
                     entry.messages.insert(key, next);
+                    entry.canonical_bytes = budget;
                     entry.dirty = true;
                 }
             }
