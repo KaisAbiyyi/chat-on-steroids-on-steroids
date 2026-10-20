@@ -1,5 +1,15 @@
 # Current CoS-Rust work state
 
+## CL-04 group MERGED (2026-10-20) — next disjoint cloud units
+
+- **CL-04A MERGED:** PR [#12](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/12), merge `1232803d9dba3ba05cca11cfc8101bb54bd51cc2`.
+- **CL-04B MERGED:** PR [#13](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/13), merge `ce065f8b449ff4a215f1169ca8efd9158760dbca`.
+- **CL-04C MERGED:** PR [#15](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/15), merge `306c65a94fcdd170d97df00bf1a2f3f39d2940a2`. Exact head `3e8796d82f3bfade13d3693f7a89f12d167d0efc` Windows/Ubuntu format, strict Clippy, full workspace tests and release **PASS** ([CI run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39423355490)). The GitHub `main` post-merge run is a separate verification gate.
+- **CL-04C claim RELEASED:** `lossless-json-ingress` is free for disjoint tasks. **Compatibility decision:** JavaScript lone-surrogate JSON strings are not representable by Rust `serde_json::Value`; refuse with `Unsupported`, preserve original bytes, and never report full parity for these values. Valid pairs and literal backslash-u strings remain supported.
+- **NEXT CLOUD:** `CL-05A` process supervisor or other independently ready/disjoint locks per `docs/PARALLEL-EXECUTION-BOARD.md`. Existing Phase 1–6 full parity is still PARTIAL; browser, installed desktop, crash and macOS gates remain open.
+- **LOCAL REQUIRED:** NONE for just-completed CL-04C. **YOU REQUIRED:** NO user-provider account/device tests.
+
+
 ## CL-04C cloud active (2026-10-20) — UTF-16 JSON representation
 
 - **CLAIMED:** `CL-04C` in [PR #15](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/15), base `a4728fb282aa4dc616e1c6652a13fdc10d2af862`. Lock: `lossless-json-ingress`, single GitHub cloud implementer; all edits/fixtures in PR and no local CoS workspace changes.
