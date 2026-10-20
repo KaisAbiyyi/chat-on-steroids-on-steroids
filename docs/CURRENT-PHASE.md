@@ -1,10 +1,10 @@
 # Current CoS-Rust work state
 
-## CL-06A cloud implementation (2026-10-20)
+## CL-06A cloud review (2026-10-20)
 
 - **CLAIMED / RUNNING:** Codex session `codex-20261020-cl06a-01`, generation 1, `project-files`; branch `cl-06a/project-files-20261020`, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), base `340cf55eddb2766c96e1e1f36eaeb118faecad04` (main Windows/Linux and DAG CI PASS). CL-L1 accepted; concurrent CL-05A PR #18 owns disjoint `process-supervisor`.
 - **CHANGES:** Git revision fences include worktree stamps and HEAD, selected-project no-link working reads, final diff refresh check; watcher ignores access events and survives optional-ref pruning/reconciles watches. Panel stale-save/preview/source fixtures retained. [Scoped plan and deliberate revision-token deviation](implementation-plan/2026-10-20-cl-06a-project-files.md).
-- **EVIDENCE:** targeted Git/panel tests PASS in cloud Linux after five observed RED regressions. Full workspace, strict Clippy, independent review and exact-head Windows/Linux CI pending; do not call accepted yet.
+- **EVIDENCE:** code checkpoint `d8b82faf4b23fa55c0ea0a333e7a5929605f512a`; cloud Linux 272/272 workspace tests, format/strict Clippy/DAG PASS; seven RED→GREEN cases, independent review PASS after optional-watch replacement repair. Exact-head Windows/Linux CI and merge pending. [Summary, measurements and limits](implementation-summary/2026-10-20-cl-06a-project-files.md).
 - **TRACKING:** [existing CoSoS Notion CL-06A task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) synchronized; GitHub remains claim/CI authority.
 - **LOCAL REQUIRED:** CL-L3 after CL-06B and CL-07B; NONE immediately. **YOU REQUIRED:** NO. Full Phase 1–6 acceptance remains PARTIAL.
 - **NEXT:** complete verification/review and exact-SHA handoff; CL-06B becomes eligible only after CL-06A acceptance.

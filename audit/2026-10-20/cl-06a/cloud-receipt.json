@@ -1,0 +1,94 @@
+{
+  "unit": "CL-06A",
+  "base_sha": "340cf55eddb2766c96e1e1f36eaeb118faecad04",
+  "code_sha": "d8b82faf4b23fa55c0ea0a333e7a5929605f512a",
+  "environment": {
+    "kind": "isolated cloud Linux",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "rust": "1.91.0",
+    "git": "git version 2.52.0",
+    "build_profile": "dev/test, debug=0, incremental=false"
+  },
+  "checks": {
+    "workspace": {
+      "passed": 272,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 73
+    },
+    "format": "PASS",
+    "strict_clippy": "PASS",
+    "task_dag": "PASS",
+    "independent_review": "PASS after P2 watcher replacement repair",
+    "windows_linux_ci": "PENDING; see GitHub exact head"
+  },
+  "red_green": [
+    {
+      "test": "same_statistic_worktree_edits_invalidate_the_review_revision",
+      "red": "FAIL",
+      "green": "PASS"
+    },
+    {
+      "test": "worktree_review_revision_includes_the_base_commit",
+      "red": "FAIL",
+      "green": "PASS"
+    },
+    {
+      "test": "git_diff_refuses_symlinks_to_other_approved_project_files",
+      "red": "FAIL",
+      "green": "PASS"
+    },
+    {
+      "test": "pruning_optional_ref_directories_keeps_watcher_usable",
+      "red": "FAIL",
+      "green": "PASS"
+    },
+    {
+      "test": "reading_project_files_does_not_invalidate_git_review",
+      "red": "FAIL",
+      "green": "PASS"
+    },
+    {
+      "test": "linked_worktree_rearms_a_ref_namespace_replaced_before_debounce",
+      "red": "FAIL",
+      "green": "PASS"
+    },
+    {
+      "test": "a_worktree_edit_during_diff_construction_refuses_publication",
+      "red": "FAIL",
+      "green": "PASS"
+    }
+  ],
+  "red_conditions": "First five against baseline; replaced refs against 5389a06; publication race against final code with final snapshot fence removed then restored.",
+  "performance": {
+    "baseline": {
+      "fixture": "64 modified UTF-8 files x 4000 bytes",
+      "samples": 10,
+      "warmups": 2,
+      "snapshot_ms_p50": 63.07939399999999,
+      "snapshot_ms_p95": 64.134145,
+      "diff_ms_p50": 94.390456,
+      "diff_ms_p95": 96.123439
+    },
+    "candidate": {
+      "fixture": "64 modified UTF-8 files x 4000 bytes",
+      "samples": 10,
+      "warmups": 2,
+      "snapshot_ms_p50": 64.816492,
+      "snapshot_ms_p95": 75.021621,
+      "diff_ms_p50": 161.253819,
+      "diff_ms_p95": 175.948867
+    },
+    "driver_sha256": "afe296293d06d917be158ab8c7fc47f448c1049f9e3ae9dafb588e1f758ae93d",
+    "percentile": "nearest-rank p50/p95 over 10 observations, 2 warmups excluded",
+    "execution": "sequential same VM and driver; baseline then final candidate; synthetic temp repository only",
+    "limits": "Small debug Linux sample; timing variance and extra snapshot work. No release/native/RSS/binary-size improvement claim."
+  },
+  "source_contracts": {
+    "project-files.ts": "53d96cca9fa68788f667c3d4352bdd86d862dbe43fbd2e7c313fb254f8fdf075",
+    "project-git.ts": "65bdac3c7e8de27f96f7c0c94ad3468783e3155617be1e4aed8b784135b79ed1"
+  },
+  "native_windows_gate": "NOT RUN; CL-L3 after CL-06B and CL-07B",
+  "full_phase_1_6": "PARTIAL",
+  "you_required": "NO"
+}
