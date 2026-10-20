@@ -76,6 +76,29 @@ fn linked_worktree_common_refs_are_watched_outside_selected_project() {
     command(&main, &["branch", "new-ref"]);
     assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
 }
+
+#[test]
+fn linked_worktree_watches_new_ref_namespaces_after_refresh() {
+    let d = tempfile::tempdir().unwrap();
+    let main = d.path().join("main");
+    std::fs::create_dir(&main).unwrap();
+    command(&main, &["init", "--quiet", "-b", "main"]);
+    std::fs::write(main.join("a"), "public base").unwrap();
+    command(&main, &["add", "a"]);
+    command(&main, &["commit", "--quiet", "-m", "base"]);
+    command(
+        &main,
+        &["worktree", "add", "--quiet", "-b", "feature", "../linked"],
+    );
+    let r = roots(d.path());
+    let mut w = GitWatchSet::default();
+    w.sync(&r, "/p/linked", Some("linked")).unwrap();
+    command(&main, &["branch", "team/first"]);
+    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+    command(&main, &["branch", "team/second"]);
+    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"linked"})));
+}
+
 #[test]
 fn switching_projects_and_closing_discard_previous_generation_events() {
     let d = tempfile::tempdir().unwrap();
@@ -107,4 +130,33 @@ fn revoked_roots_refuse_queued_git_watch_events_and_drop_handles() {
     std::fs::write(d.path().join("a"), "public event").unwrap();
     assert!(w.poll(&[]).is_err());
     assert!(w.poll(&[]).unwrap().is_none());
+}
+
+#[cfg(unix)]
+#[test]
+fn pruning_optional_ref_directories_keeps_watcher_usable() {
+    let d = tempfile::tempdir().unwrap();
+    let r = roots(d.path());
+    command(d.path(), &["init", "--quiet", "-b", "main"]);
+    let mut w = GitWatchSet::default();
+    w.sync(&r, "/p", Some("one")).unwrap();
+    std::fs::remove_dir(d.path().join(".git/refs/tags")).unwrap();
+    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"one"})));
+    std::fs::write(d.path().join("after-prune"), "public change").unwrap();
+    assert_eq!(wait(&mut w, &r), Some(json!({"projectId":"one"})));
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn reading_project_files_does_not_invalidate_git_review() {
+    let d = tempfile::tempdir().unwrap();
+    let r = roots(d.path());
+    command(d.path(), &["init", "--quiet", "-b", "main"]);
+    std::fs::write(d.path().join("a"), "public file").unwrap();
+    let mut w = GitWatchSet::default();
+    w.sync(&r, "/p", Some("one")).unwrap();
+    // Drain setup activity before testing read-only access.
+    let _ = wait(&mut w, &r);
+    std::fs::read(d.path().join("a")).unwrap();
+    assert!(wait(&mut w, &r).is_none());
 }

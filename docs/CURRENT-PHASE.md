@@ -1,14 +1,31 @@
-# CL-05A current cloud claim and checkpoint (2026-10-20)
-
-- **CLAIMED:** `CL-05A`, ChatGPT GitHub-connected cloud session `chatgpt-2026-10-20-cl05a-01`, [draft PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18), branch `work/cl-05a-process-custody-20261020`, base `340cf55eddb2766c96e1e1f36eaeb118faecad04`, exclusive logical lock `process-supervisor`. Last code/test checkpoint before this doc update: `137f2eebcf86a2079b0b054252dd1b721acf8862`.
-- **IMPLEMENTED CANDIDATE:** owner revalidation at actual input/resize/termination/publication use; serialized ownership promotion; retirement fences stale references and waits for output-publication commit/rollback; failed exit probe closes I/O/script custody. Added negative owner, rebind, pending-publication and stale-Arc regressions.
-- **VALIDATION:** CI for exact final head **PENDING** on GitHub Actions Windows/Ubuntu; first failing format run was followed by source-aligned rustfmt corrections. Do not mark DONE or unblock CL-05B until exact head format/strict Clippy/tests/release and independent review PASS, followed by merged SHA and registry update.
-- **SCOPE:** GitHub cloud only. Dirty Windows D: checkout and native qualification **NOT TOUCHED**. `CL-L2` remains after CL-05B; `CL` total backend still PARTIAL. No owner U gate.
-- **PARALLEL:** `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A` remain potential disjoint candidates subject to their own claims. Next checkpoint: inspect CI, repair failures, review/merge, then update all Notion and Markdown receipts.
-
----
-
 # Current CoS-Rust work state
+
+## CL-07A accepted and merged (2026-10-21)
+
+- **MERGED:** [PR #20](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/20), squash merge `221de72ea5204df5f7f5e1c0e2dd8a6af9ae6116` from head `60a931714cf69289066a96658f06edd5becae23d`. Source review (separate CL-08A agent) found no scoped code blocker, with review comment on PR #20.
+- **EXACT HEAD:** Windows/Ubuntu Rust formatter, strict Clippy, all workspace tests, release build PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900070)); DAG Windows/Ubuntu PASS ([run](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39471900377)). No native L3 proof claimed.
+- **CLAIM:** `search-patch` released after accepted merge. `CL-07B` is next cloud candidate after main CI/review; CL-L3 still depends on CL-06B and CL-07B. CL-05A, CL-08A and CL-09A retain separate active locks, not Done.
+
+
+## CL-06A MERGED / claim released (2026-10-20)
+
+- **UNIT:** CL-06A Git/project/file-panel/watcher closure, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), squash merge `dd45a2585e8371bb51c1e00e84c5796a1b3dc163`; final head `9c42e87589c02b235880ef3a409c234a2870ff3f`.
+- **CLOUD VALIDATION PASS:** Windows 279/279 and Ubuntu 272/272 tests, no failures/ignored; format, strict Clippy, release and DAG matrix PASS on exact head ([PR CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446216893), [push CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39446209297)). Independent review PASS; seven observed RED→GREEN cases. Earlier Windows event-order test failure is preserved in the evidence, corrected without weakening the subsequent-event assertion.
+- **CLAIM RELEASED:** session `codex-20261020-cl06a-01`, generation 1; `project-files` free. Registry marks only CL-06A done; other owners/claims remain exclusive and require live inspection.
+- **CHANGES / PERFORMANCE / LIMITS:** strengthened opaque working-tree revision tokens, selected-project no-link reads, final diff publication fence, bounded watcher refresh/rearm; existing panel preview/save contracts retained. [Full evidence and measured latency cost](implementation-summary/2026-10-20-cl-06a-project-files.md). Source fixtures unchanged; no full filesystem atomicity or performance improvement claim.
+- **TRACKING:** markdown claim/summary/registry and [existing Notion task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) synchronized to accepted cloud scope. Main post-merge CI is separately identified; an earlier head is not proof for later changes.
+- **LOCAL REQUIRED:** CL-L3 after CL-06B and CL-07B; NONE immediately. **YOU REQUIRED:** NO. Native Windows host acceptance NOT RUN; full Phases 1–6 remain PARTIAL.
+- **NEXT:** CL-06B is a READY_CANDIDATE, subject to current main CI and a new `sftp` claim. Preserve CL-L3 dependencies and disjoint CL-05A ownership. Older sections below are historical checkpoints.
+
+
+## CL-06A cloud review (2026-10-20)
+
+- **CLAIMED / RUNNING:** Codex session `codex-20261020-cl06a-01`, generation 1, `project-files`; branch `cl-06a/project-files-20261020`, [PR #19](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/19), base `340cf55eddb2766c96e1e1f36eaeb118faecad04` (main Windows/Linux and DAG CI PASS). CL-L1 accepted; concurrent CL-05A PR #18 owns disjoint `process-supervisor`.
+- **CHANGES:** Git revision fences include worktree stamps and HEAD, selected-project no-link working reads, final diff refresh check; watcher ignores access events and survives optional-ref pruning/reconciles watches. Panel stale-save/preview/source fixtures retained. [Scoped plan and deliberate revision-token deviation](implementation-plan/2026-10-20-cl-06a-project-files.md).
+- **EVIDENCE:** code checkpoint `d8b82faf4b23fa55c0ea0a333e7a5929605f512a`; cloud Linux 272/272 workspace tests, format/strict Clippy/DAG PASS; seven RED→GREEN cases, independent review PASS after optional-watch replacement repair. Exact-head Windows/Linux CI and merge pending. [Summary, measurements and limits](implementation-summary/2026-10-20-cl-06a-project-files.md).
+- **TRACKING:** [existing CoSoS Notion CL-06A task](https://app.notion.com/3ffd8330eb4681c3bf09e0c3511376d8) synchronized; GitHub remains claim/CI authority.
+- **LOCAL REQUIRED:** CL-L3 after CL-06B and CL-07B; NONE immediately. **YOU REQUIRED:** NO. Full Phase 1–6 acceptance remains PARTIAL.
+- **NEXT:** complete verification/review and exact-SHA handoff; CL-06B becomes eligible only after CL-06A acceptance.
 
 ## Canonical Phase 7 preflight / readiness governance (2026-10-20)
 
