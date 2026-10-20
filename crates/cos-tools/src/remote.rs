@@ -47,7 +47,8 @@ impl Packet {
         Ok(bytes)
     }
     fn string(&mut self) -> io::Result<String> {
-        String::from_utf8(self.data()?).map_err(|_| invalid("EPROTO: SFTP string is not valid UTF-8"))
+        String::from_utf8(self.data()?)
+            .map_err(|_| invalid("EPROTO: SFTP string is not valid UTF-8"))
     }
     fn attrs(&mut self) -> io::Result<Value> {
         let flags = self.u32()?;
