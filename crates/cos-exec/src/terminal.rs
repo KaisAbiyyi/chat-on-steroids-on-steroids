@@ -286,6 +286,7 @@ impl Terminals {
                     .is_some_and(|e| Arc::ptr_eq(e, &entry))
                 {
                     state.entries.remove(&terminal);
+                    state.closing.insert(terminal.clone());
                 }
             }
             (owner.emit)(json!({"id": terminal, "exitCode": code}));
