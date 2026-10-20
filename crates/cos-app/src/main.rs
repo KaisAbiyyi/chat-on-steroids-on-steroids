@@ -109,8 +109,10 @@ impl Runtime {
             ],
         );
         for phase in &report {
-            self.log
-                .push("info", &format!("shutdown {}: {}", phase.phase, phase.status));
+            self.log.push(
+                "info",
+                &format!("shutdown {}: {}", phase.phase, phase.status),
+            );
         }
         if report.iter().any(|r| r.status != "ok") {
             return Err(io::Error::other(

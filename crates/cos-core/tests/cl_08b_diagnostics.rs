@@ -19,7 +19,10 @@ fn diagnostic_secrets_and_size_are_bounded() {
     let output = first[0]["message"].as_str().unwrap();
     assert!(!output.contains(&secret));
     assert!(output.chars().count() <= 16000);
-    log.push(&format!("error{}", secret), &format!("{}{}", secret, "x".repeat(1024 * 1024)));
+    log.push(
+        &format!("error{}", secret),
+        &format!("{}{}", secret, "x".repeat(1024 * 1024)),
+    );
     let second = log.snapshot();
     assert_eq!(second[1]["level"], "unknown");
     assert_eq!(second[1]["message"], "[diagnostic omitted: size limit]");
