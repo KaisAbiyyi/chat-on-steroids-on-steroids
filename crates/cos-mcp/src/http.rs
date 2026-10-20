@@ -327,8 +327,13 @@ async fn handle(State(state): State<Arc<HttpState>>, request: Request<Body>) -> 
     {
         return json_response(
             400,
-            protocol::error(Value::Null, 400, -32600, "Invalid Request: duplicate MCP headers")
-                .body,
+            protocol::error(
+                Value::Null,
+                400,
+                -32600,
+                "Invalid Request: duplicate MCP headers",
+            )
+            .body,
         );
     }
     let method = request.method().to_string();
@@ -372,8 +377,7 @@ async fn handle(State(state): State<Arc<HttpState>>, request: Request<Body>) -> 
                 Err(_) => {
                     return json_response(
                         400,
-                        protocol::error(Value::Null, 400, -32700, "Parse error: Invalid JSON")
-                            .body,
+                        protocol::error(Value::Null, 400, -32700, "Parse error: Invalid JSON").body,
                     );
                 }
             },
