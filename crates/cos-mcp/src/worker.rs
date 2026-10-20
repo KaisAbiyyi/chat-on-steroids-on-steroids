@@ -189,7 +189,8 @@ pub fn run(
                     let admitted = len <= 12 * 1024 * 1024
                         && nested_bytes
                             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
-                                n.checked_add(len).filter(|total| *total <= 32 * 1024 * 1024)
+                                n.checked_add(len)
+                                    .filter(|total| *total <= 32 * 1024 * 1024)
                             })
                             .is_ok();
                     let result = if admitted {
