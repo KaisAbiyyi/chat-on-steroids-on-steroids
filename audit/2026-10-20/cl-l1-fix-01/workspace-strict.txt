@@ -1,0 +1,677 @@
+Test temporary files: /workspace/chat-on-steroids-on-steroids/.test-tmp
+Build cache: /workspace/chat-on-steroids-on-steroids/target
+   Compiling cos-store v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-store)
+   Compiling cos-mcp v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-mcp)
+   Compiling cos-app v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-app)
+    Finished `test` profile [unoptimized] target(s) in 11.06s
+     Running unittests src/main.rs (target/debug/deps/cos_rust-f139cce148679a76)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-0f69dcac83d2930d)
+
+running 11 tests
+test explicit_profile_and_restart_are_required_and_supported ... ok
+test import_is_a_verified_copy_and_never_overwrites_source ... ok
+test project_color_and_soft_removal_are_runnable_without_losing_catalog_identity ... ok
+test markdown_answer_export_requires_a_completed_turn_and_uses_only_its_answer ... ok
+test project_file_panel_is_runnable_with_stale_edit_and_root_revocation_guards ... ok
+test public_fixture_smoke_is_durable_and_searchable ... ok
+test session_names_track_provider_authority_and_clear_through_the_real_cli ... ok
+test unknown_or_invalid_config_never_widens_saved_permissions ... ok
+test unmarked_original_profile_is_not_opened_for_writing ... ok
+test usage_comparison_cap_is_explicit_without_a_provider_catalog ... ok
+test project_git_review_and_revision_fenced_diff_are_runnable ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+     Running unittests src/lib.rs (target/debug/deps/cos_core-9d81f1891da7109e)
+
+running 1 test
+test persistence::review_tests::a_stale_immediate_retry_snapshot_cannot_overwrite_a_newer_commit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/config_parity.rs (target/debug/deps/config_parity-b4798f565c752b1f)
+
+running 2 tests
+test fresh_defaults_match_each_upstream_platform ... ok
+test upstream_config_normalization_and_refusals_match ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/foundation.rs (target/debug/deps/foundation-806d9b230c1d43ab)
+
+running 9 tests
+test approved_virtual_native_relative_and_missing_paths_share_one_boundary ... ok
+test bom_is_accepted_and_unknown_ui_choice_keeps_existing_roots ... ok
+test corrupted_settings_preserve_original_and_do_not_grant_fresh_permissions ... ok
+test concurrent_config_updates_compose_from_latest_committed_state ... ok
+test durable_coalescing_flush_and_null_removal_restore_correctly ... ok
+test invalid_authority_file_is_not_an_empty_strict_ledger ... ok
+test readonly_and_platform_projection_cannot_widen_grants ... ok
+test second_runtime_cannot_take_the_same_data_directory ... ok
+test failed_config_commit_does_not_publish_unsaved_permission ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/review_regressions.rs (target/debug/deps/review_regressions-d6c8c8cf9a4e0ce9)
+
+running 3 tests
+test approved_root_replacement_and_nested_junction_cannot_move_authority ... ok
+test non_utf8_paths_cannot_alias_through_replacement_characters ... ok
+test legacy_darwin_clipboard_mask_keeps_browser_screen_control ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/runtime.rs (target/debug/deps/runtime-f7c90f7c0f04b7a4)
+
+running 6 tests
+test failed_secret_write_does_not_publish_proposed_key ... ok
+test linux_basic_text_blob_refused_even_when_provider_reports_secure ... ok
+test diagnostics_and_exact_recording_have_distinct_redaction_policies ... ok
+test malformed_secret_shape_preserved_until_explicit_recovery ... ok
+test unavailable_secret_provider_never_erases_existing_ciphertext ... ok
+test shutdown_deadline_does_not_skip_later_persistence_phase ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/cos_exec-9cf4a6c6ad9936db)
+
+running 4 tests
+test tree::tests::exited_leader_is_not_reaped_before_descendant_pipe_cleanup ... ok
+test tree::tests::group_termination_is_one_shot_after_leader_reaping ... ok
+test tree::tests::lost_child_custody_never_signals_a_reused_group ... ok
+test process::retirement_tests::retirement_timeout_preserves_owned_custody_until_a_successful_retry ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/batch.rs (target/debug/deps/batch-0a4fafe5587d2ddd)
+
+running 1 test
+test upstream_shell_batch_programs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/batch_process.rs (target/debug/deps/batch_process-ad6f901352aaf03a)
+
+running 1 test
+test real_batch_keeps_variables_and_first_nonzero ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/cmd_pty.rs (target/debug/deps/cmd_pty-5879b3b693163350)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contracts.rs (target/debug/deps/contracts-2431b72c1644de54)
+
+running 4 tests
+test bounded_head_tail_drains_unread ... ok
+test original_command_policy_vectors ... ok
+test upstream_output_truncation ... ok
+test original_ssh_helpers ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/env.rs (target/debug/deps/env-8e2106582bce84a4)
+
+running 1 test
+test explicit_environment_and_inherited_connector_secrets_are_separate ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/process.rs (target/debug/deps/process-86af621de5e65d82)
+
+running 3 tests
+test native_pty_accepts_input_resize_and_interrupt ... ok
+test pipes_exit_nonzero_and_exact_cmd_quoting ... ok
+test foreign_poll_refused_and_unread_completion_retained ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+     Running tests/publication.rs (target/debug/deps/publication-a6c358e8c5accb35)
+
+running 2 tests
+test committed_publication_marks_the_result_read ... ok
+test aborted_publication_restores_unread_output_without_rerunning ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/terminal.rs (target/debug/deps/terminal-c71acf6d3596e27d)
+
+running 2 tests
+test closing_a_pending_terminal_prevents_launch ... ok
+test human_terminal_backpressure_is_bounded_and_permissions_are_live ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/toolchain.rs (target/debug/deps/toolchain-11be1975a4d15b28)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/cos_mcp-832bd3026aaa2c42)
+
+running 3 tests
+test kernel::remote_trust_tests::remote_operations_require_human_lifetime_path_trust_before_transport_use ... ok
+test kernel::remote_trust_tests::server_project_file_panel_uses_native_sftp_and_runtime_path_trust ... ok
+test kernel::remote_trust_tests::server_search_uses_native_sftp_and_requires_runtime_trust ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/code.rs (target/debug/deps/code-5aeb69f3ac1189b9)
+
+running 4 tests
+test accepted_side_effect_survives_timeout ... ok
+test explicit_outputs_only_fresh_globals ... ok
+test cpu_memory_calls_and_text_limits ... ok
+test no_node_network_or_cross_surface_tools ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/exec_patch.rs (target/debug/deps/exec_patch-1c32c372b2ddc24e)
+
+running 5 tests
+test command_revocation_still_refuses_an_intercepted_patch ... ok
+test implicit_and_malformed_patches_return_correctness_errors_without_a_process ... ok
+test explicit_patch_is_intercepted_before_native_shell_under_command_authority ... ok
+test interception_does_not_bypass_the_command_allowlist ... ok
+test intercepted_cd_uses_an_existing_approved_directory ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/find.rs (target/debug/deps/find-a8c91952a2bdcdab)
+
+running 4 tests
+test explicit_file_has_source_content_response_and_oversized_file_is_refused ... ok
+test omitted_path_searches_every_approved_root_with_source_text_metadata ... ok
+test native_find_matches_the_actual_registered_source_handler ... ok
+test source_find_results_keep_current_search_permission_and_requested_scope ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/http.rs (target/debug/deps/http-0b8505ee97a2e3ff)
+
+running 4 tests
+test control_directory_link_cannot_redirect_credentials_outside_profile ... ok
+test control_session_cursor_does_not_repeat_the_first_page ... ok
+test loopback_http_admission_control_and_secret_separation ... ok
+test disconnect_keeps_accepted_effects_and_restores_unread_completion ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+
+     Running tests/kernel.rs (target/debug/deps/kernel-d2c595b1c2d4a76a)
+
+running 4 tests
+test exact_argument_constraints_before_handlers ... ok
+test real_tools_live_revocation_and_surface_boundary ... ok
+test removing_a_root_revokes_its_watch ... ok
+test exec_text_contains_continuation_and_completion_metadata ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/oracle.rs (target/debug/deps/oracle-26ba3f64f59bce25)
+
+running 1 test
+test actual_sdk_protocol_oracle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/patch_closure.rs (target/debug/deps/patch_closure-c4f3988d817e7a07)
+
+running 6 tests
+test add_overwrite_requires_create_as_well_as_edit ... ok
+test mismatch_source_excerpt_requires_live_read_permission ... ok
+test move_only_patch_keeps_original_bytes_when_edit_permission_is_off ... ok
+test move_without_edit_cannot_replace_an_occupied_destination_or_rewrite_bytes ... ok
+test patch_default_mode_matches_source_normalization_on_a_real_crlf_file ... ok
+test native_move_path_verification_matches_source_and_preserves_atomic_refusal ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/project_terminal.rs (target/debug/deps/project_terminal-1a63be91ff9656c1)
+
+running 3 tests
+test catalog_project_native_path_opens_terminal_and_revoked_root_refuses ... ok
+test missing_bound_project_cannot_fallback_to_another_approved_folder ... ok
+test proven_session_project_resolves_default_tool_workspace ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/protocol.rs (target/debug/deps/protocol-0cc5056bb293e7f6)
+
+running 2 tests
+test host_origin_validation ... ok
+test protocol_versions_and_cross_surface_unknown ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/read.rs (target/debug/deps/read-72c4186ce56b0e59)
+
+running 1 test
+test mixed_read_keeps_successes_and_path_specific_line_ranges ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/recording_evidence.rs (target/debug/deps/recording_evidence-96ed48ddcff0d9cc)
+
+running 4 tests
+test find_count_is_from_engine_not_inferred_from_output ... ok
+test patch_evidence_uses_committed_report_and_never_a_failed_patch_body ... ok
+test actual_process_exit_and_background_are_recorded_from_structured_status ... ok
+test shell_intercepted_patch_has_change_evidence_without_phantom_process ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/request_plans.rs (target/debug/deps/request_plans-07db35b6da78b1e7)
+
+running 1 test
+test exact_proof_attaches_provisional_plan_without_changing_epoch ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/tunnel.rs (target/debug/deps/tunnel-e5cb970b6bfcf2dd)
+
+running 5 tests
+test adapters_match_actual_sidecar_flags_and_reject_invalid_ids ... ok
+test real_process_generation_and_stop ... ok
+test pending_output_publication_cannot_prevent_an_explicit_sidecar_stop ... ok
+test upstream_health_oracles ... ok
+test stopped_sidecars_do_not_exhaust_process_capacity ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.90s
+
+     Running unittests src/lib.rs (target/debug/deps/cos_store-47151bd311eb3653)
+
+running 6 tests
+test evidence::tests::bounded_trusted_find_and_patch_facts ... ok
+test evidence::tests::running_then_completed_process_only_from_structured_fields ... ok
+test redaction::tests::clipboard_reads_fail_closed ... ok
+test evidence::tests::committed_paths_are_scrubbed_against_sensitive_inputs ... ok
+test redaction::tests::json_credentials_are_not_written_to_results ... ok
+test redaction::tests::nested_args_and_results_are_scrubbed_without_touching_public_fields ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/activity.rs (target/debug/deps/activity-db67a0c654458d1c)
+
+running 5 tests
+test source_activity_preserves_fractional_time_and_newest_call ... ok
+test finish_decisions_require_their_typed_state_and_safe_sequence ... ok
+test source_activity_uses_utf16_title_units_without_substituting_lone_surrogates ... ok
+test source_finish_work_and_outcome_taxonomy_preserve_optional_identity ... ok
+test unrepresentable_activity_preview_keeps_the_exact_raw_call_across_restart ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/authority.rs (target/debug/deps/authority-fa9f81cab7df1f57)
+
+running 7 tests
+test failed_trust_commit_cannot_grant_now_or_later_after_retry ... ok
+test malformed_authority_ledgers_refuse_startup ... ok
+test proven_request_owner_and_session_epoch_cannot_move_on_reobservation ... ok
+test correlation_wait_uses_exact_id_and_committed_publication ... ok
+test search_export_and_estimates_preserve_body_and_model_attribution ... ok
+test strict_access_follows_exact_prime_and_committed_ancestry_with_revocation ... ok
+test recorder_restart_does_not_revive_completed_turn_and_unproved_call_stays_unattributed ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/captions.rs (target/debug/deps/captions-b3b954d3a1967a81)
+
+running 3 tests
+test failure_captions_do_not_claim_success_or_leak_sensitive_inputs ... ok
+test captured_source_caption_corpus_is_retained_as_a_differential_gate ... ok
+test sanitized_evidence_captions_and_last_activity_survive_cold_reopen ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/cl_l1_captions.rs (target/debug/deps/cl_l1_captions-fe9cd6fc302b0f90)
+
+running 4 tests
+test completion_metrics_require_exit_evidence_and_preserve_errors ... ok
+test command_labels_match_source_whitespace_and_utf16_boundaries ... ok
+test native_windows_captions_match_pinned_source ... ok
+test corrected_captions_and_full_arguments_survive_recording_and_cold_reopen ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/content_exports.rs (target/debug/deps/content_exports-874df1ba03550d0d)
+
+running 4 tests
+test markdown_hydrates_only_truncated_stored_text ... ok
+test drawn_table_rows_and_dead_button_labels_match_the_actual_source_export_function ... ok
+test markdown_link_cards_match_the_actual_source_export_function ... ok
+test session_and_answer_export_keep_the_original_completion_boundary ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/content_oracles.rs (target/debug/deps/content_oracles-70c445732d97ba03)
+
+running 7 tests
+test answer_completion_anchors_and_formatting_match_the_shared_source ... ok
+test captured_html_decoding_and_private_provider_entities_match_source ... ok
+test directive_grammar_retains_source_ascii_and_javascript_line_boundaries ... ok
+test dil_table_completion_preserves_unmatched_text_and_capture_admission ... ok
+test markdown_filenames_keep_source_nfc_and_avoid_split_surrogates ... ok
+test transcript_deduplication_and_final_selection_match_the_shared_source ... ok
+test resolved_capture_and_model_text_preserve_source_fallback_and_errors ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/history.rs (target/debug/deps/history-fd186c2cb4ca988e)
+
+running 13 tests
+test assets_are_deduplicated_bounded_and_not_pruned_with_history ... ok
+test chronology_and_usage_match_actual_upstream_helpers ... ok
+test actual_upstream_operations_and_restart_projection_match ... ok
+test cleanup_byte_target_retires_only_files_actually_selected ... ok
+test explicit_image_clear_cannot_remove_overflow_or_let_replay_revive_retired_reference ... ok
+test failed_shard_write_does_not_publish_message_or_advance_cursor ... ok
+test concurrent_appends_torn_tail_and_restart_never_reuse_sequences ... ok
+test markdown_transcript_matches_upstream ... ok
+test plan_epoch_and_revision_fences_preserve_details ... ok
+test reads_original_files_and_lazy_legacy_overlay_without_modifying_history ... ok
+test process_completion_is_a_single_stable_item_after_restart ... ok
+test rebind_preserves_local_epoch_and_lifetime_but_refuses_collision_and_stale_source ... ok
+test unicode_snippets_and_unrecognized_shard_names_do_not_panic ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/metadata_strings.rs (target/debug/deps/metadata_strings-0902af65f73dd7dd)
+
+running 2 tests
+test unpaired_metadata_is_refused_without_overwriting_the_primary_or_valid_backup ... ok
+test metadata_file_utf8_decoding_matches_the_actual_source_before_json_parsing ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/observations.rs (target/debug/deps/observations-fbd76b027c392451)
+
+running 4 tests
+test failed_model_selection_write_keeps_the_committed_provider_metadata ... ok
+test native_title_and_model_observations_keep_manual_and_conversation_authority ... ok
+test persistent_model_selection_matches_source_stale_time_epoch_and_restart_rules ... ok
+test raw_native_request_observations_use_source_framing_and_keep_authored_time ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/projections.rs (target/debug/deps/projections-9223fcc4d8ce352c)
+
+running 4 tests
+test accent_and_unicode_search_folding_match_upstream ... ok
+test provider_log_folding_matches_upstream_cumulative_resets_and_dedup ... ok
+test provider_reads_only_explicit_test_roots_and_respects_opt_out ... ok
+test provider_scan_budget_and_stale_filter_are_visible ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/recorder_privacy.rs (target/debug/deps/recorder_privacy-36a139d95bf758b7)
+
+running 3 tests
+test non_sensitive_execution_evidence_remains_recordable ... ok
+test clipboard_reads_and_binary_payloads_fail_closed_in_recorded_events ... ok
+test recorder_redacts_before_inline_journal_and_asset_persistence_even_after_restart ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/titles.rs (target/debug/deps/titles-3136d4e6e6392310)
+
+running 10 tests
+test actual_source_metadata_normalization_matches_all_legacy_and_damaged_inputs ... ok
+test framed_first_request_and_its_revisions_keep_source_spacing_and_identity ... ok
+test manual_and_provider_titles_follow_actual_store_authority_across_restarts ... ok
+test pinned_prompt_title_and_legacy_repair_functions_match_exact_source_units ... ok
+test planner_helper_is_reclassified_without_removing_its_recorded_message ... ok
+test refused_title_and_failed_metadata_publication_preserve_the_last_durable_name ... ok
+test restart_repairs_legacy_project_page_and_damaged_context_titles ... ok
+test source_stale_checkpoint_recovery_keeps_metadata_and_rebound_context_delta ... ok
+test title_projection_never_discards_an_unrepresentable_utf16_preview_message ... ok
+test legacy_and_invalid_presentation_metadata_are_normalized_without_losing_unknown_fields ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running unittests src/lib.rs (target/debug/deps/cos_tools-2ab8f833c2a8f0cc)
+
+running 6 tests
+test git::tests::upstream_git_projection_oracles ... ok
+test files::recovery_tests::partial_write_failure_restores_original_contents ... ok
+test project_files::custody_tests::large_native_file_identity_uses_source_javascript_number_serialization ... ok
+test project_files::custody_tests::parent_replacement_cannot_redirect_creation_outside_selected_project ... ok
+test project_files::custody_tests::source_replacement_cannot_rename_a_different_file_or_relocated_handle ... ok
+test project_files::custody_tests::actual_upstream_path_name_and_binary_vectors_match ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/files.rs (target/debug/deps/files-7e17ee3440b8b02e)
+
+running 8 tests
+test failed_multifile_patch_changes_nothing ... ok
+test encoding_and_stale_revision ... ok
+test patch_file_count_budget_rejects_before_creating_files ... ok
+test search_revocation_during_traversal_discards_collected_results ... ok
+test successful_patch_keeps_bom_and_context_newlines ... ok
+test upstream_mixed_line_endings ... ok
+test upstream_patch_parser_and_diagnostics ... ok
+test patch_aggregate_snapshot_budget_rejects_before_any_mutation ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/git_review.rs (target/debug/deps/git_review-601053c8c9a660f3)
+
+running 6 tests
+test legacy_git_status_also_refuses_metadata_outside_approved_folder ... ok
+test oversized_untracked_binary_keeps_binary_classification_without_preview ... ok
+test branch_comparison_uses_commits_and_excludes_dirty_worktree ... ok
+test subproject_cannot_read_unapproved_repository_metadata ... ok
+test rename_binary_and_stale_comparison_are_projected ... ok
+test unborn_snapshot_has_branches_and_untracked_line_counts ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+
+     Running tests/git_watch.rs (target/debug/deps/git_watch-b3413e255dff2ce2)
+
+running 4 tests
+test nested_worktree_writes_invalidate_one_active_project ... ok
+test linked_worktree_common_refs_are_watched_outside_selected_project ... ok
+test revoked_roots_refuse_queued_git_watch_events_and_drop_handles ... ok
+test switching_projects_and_closing_discard_previous_generation_events ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+     Running tests/large_read.rs (target/debug/deps/large_read-7690902fc5688a40)
+
+running 1 test
+test huge_file_small_read_is_bounded_and_reports_unknown_total ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/native_paths.rs (target/debug/deps/native_paths-f38539c7f2ebdc18)
+
+running 1 test
+test ordinary_windows_path_spelling_is_authorized ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/patch_closure.rs (target/debug/deps/patch_closure-cc5aff588cc48e42)
+
+running 1 test
+test source_patch_update_modes_seek_and_diagnostics_match ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/patch_invocation.rs (target/debug/deps/patch_invocation-fa15dc3f06711cb7)
+
+running 2 tests
+test invocation_classification_and_errors_match_actual_upstream_grammar ... ok
+test invocation_resource_admission_precedes_bash_tree_allocation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/patch_streaming.rs (target/debug/deps/patch_streaming-3c61528fe16f4b8c)
+
+running 3 tests
+test native_strict_and_lenient_parsing_match_actual_upstream ... ok
+test native_stream_steps_and_finish_match_actual_upstream ... ok
+test streaming_input_is_admitted_before_an_unterminated_buffer_can_exceed_its_limit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/project_files.rs (target/debug/deps/project_files-d6cd4b53c702aaf4)
+
+running 12 tests
+test explorer_lists_only_selected_project_children_and_hides_repository_internals ... ok
+test explorer_refuses_links_even_to_an_approved_sibling_and_honors_revocation ... ok
+test create_and_rename_refuse_collisions_and_root_mutation ... ok
+test invalid_utf8_and_control_bytes_never_become_editable_text ... ok
+test file_modified_at_uses_the_source_node_stats_millisecond_rounding ... ok
+test oversized_first_line_has_bounded_noneditable_preview_and_save_budget ... ok
+test pdf_header_and_payload_limits_are_enforced_before_publication ... ok
+test preview_and_atomic_save_preserve_exact_bom_and_crlf_text ... ok
+test raster_preview_is_validated_and_scaled_to_bounded_png ... ok
+test same_bytes_replacement_changes_revision_and_rejects_stale_save ... ok
+test noneditable_and_large_preview_use_source_metadata_time_and_content_detection ... ok
+test source_directory_order_and_truncation_match_native_project_listing ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/project_links.rs (target/debug/deps/project_links-9471cbefd395fd35)
+
+running 8 tests
+test claims_are_exclusive_expire_at_boundary_and_armed_attempts_never_auto_retry ... ok
+test color_and_removal_preserve_workspace_and_request_identity ... ok
+test concurrent_claimants_cannot_both_acquire_one_request ... ok
+test expiry_leaves_legacy_projects_without_link_metadata_unchanged ... ok
+test actual_upstream_project_link_scenarios_match_each_committed_step ... ok
+test failure_and_gone_links_preserve_user_retry_authority_across_restart ... ok
+test invalid_persisted_link_or_color_is_rejected_instead_of_reoffered ... ok
+test restored_armed_attempt_expires_without_a_browser_poll ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/projects.rs (target/debug/deps/projects-5936b396de5b7e47)
+
+running 1 test
+test persistent_catalog_git_and_native_watch ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/search_closure.rs (target/debug/deps/search_closure-a7bc0866fbb059a6)
+
+running 4 tests
+test explicit_unicode_folder_excludes_match_source_lowercasing ... ok
+test name_queries_match_the_filename_instead_of_the_parent_path ... ok
+test native_include_matches_nested_basenames_and_utf16_units ... ok
+test include_patterns_match_source_utf16_and_case_rules ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/search_content.rs (target/debug/deps/search_content-375857fc914434b5)
+
+running 2 tests
+test native_content_jobs_overlap_twelve_reads_without_moving_caller_authority ... ok
+test native_content_search_retains_source_decoder_sniff_lines_and_explicit_file_limits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/search_options.rs (target/debug/deps/search_options-122c36b1fcb7ebc7)
+
+running 1 test
+test case_regex_globs_and_single_file ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/search_oracles.rs (target/debug/deps/search_oracles-88f48ca0788d95f8)
+
+running 3 tests
+test an_expired_shared_deadline_does_not_open_a_directory ... ok
+test ordered_breadth_first_traversal_matches_actual_source_scenarios ... ok
+test file_and_directory_admission_match_source_bounds_without_large_disk_fixtures ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/search_traversal.rs (target/debug/deps/search_traversal-7ffb4bc050c4a940)
+
+running 6 tests
+test a_held_search_directory_cannot_publish_after_moving_outside_the_approved_root ... ok
+test explicitly_named_file_is_not_truncated_at_an_exact_match_limit ... ok
+test limited_name_search_returns_the_root_file_before_descending ... ok
+test native_search_does_not_traverse_child_links ... ok
+test revoked_search_is_refused_before_path_resolution ... ok
+test traversal_counts_regular_files_before_applying_the_include_filter ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sftp.rs (target/debug/deps/sftp-11049d57c963f0bc)
+
+running 2 tests
+test remote_read_checks_the_open_handle_type ... ok
+test public_sftp_v3_protocol_fixture ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s
+
+     Running tests/sftp_native.rs (target/debug/deps/sftp_native-5837bf623c0bde5d)
+
+running 1 test
+test native_openssh_subsystem_round_trip ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running tests/transactions.rs (target/debug/deps/transactions-6a9974a3a57051f4)
+
+running 5 tests
+test create_permission_cannot_overwrite_a_file_appearing_during_preflight ... ok
+test edit_keeps_file_identity ... ok
+test fifo_does_not_block_and_symlink_escape_refused ... ok
+test patch_refuses_utf16 ... ok
+test commit_failure_rolls_back_all_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/views.rs (target/debug/deps/views-da3142e8e0f3a0da)
+
+running 1 test
+test search_exclusions_order_and_image_decode ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cos_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cos_exec
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cos_mcp
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cos_store
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cos_tools
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking cos-store v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-store)
+    Checking cos-mcp v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-mcp)
+    Checking cos-app v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-app)
+    Finished `dev` profile [unoptimized] target(s) in 3.80s

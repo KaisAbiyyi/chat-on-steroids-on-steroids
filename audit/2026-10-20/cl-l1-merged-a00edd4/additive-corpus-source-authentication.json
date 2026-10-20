@@ -1,0 +1,668 @@
+{
+  "status": "PASS",
+  "productSha": "a00edd4a67e6c8acc9fc45bee659094719d6673a",
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "originalCorpusSha256": "351b6c5ddd762e127a012a6d946c8664b0abb2a8bc9496ef8ccec09235c28884",
+  "originalCorpusUnchanged": true,
+  "pinnedSourceHashes": {
+    "src/main/session/summarize.ts": "f807705d2534e54c95edd9df64fd60ab75d91e7206e22e12f7f0471ff4486596",
+    "src/main/mcp/call-context.ts": "96d270a677cc6d1fc5f0e5caef275ef3effa0334d5e9c47fc1a298870ff6ac9c",
+    "src/main/diffstat.ts": "e5d8acbe8bc4e866758431aec653b5f58395cb5d1fe09e3b0358372131eb0fc7"
+  },
+  "nativeInputAuthentication": "PASS",
+  "cases": 44,
+  "rows": [
+    {
+      "name": "nonzero/launch/0e1374c1-4e25-47a5-86f6-996e0230fa50",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_NONZERO; exit 7",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting Write-Output CL_L1_NONZERO; exit 7",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "nonzero/poll/e23783b0-ca76-4acc-b55d-652a1595659c",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Waited on session 864710261",
+        "metric": "✕ exit 7"
+      },
+      "running": {
+        "title": "Waiting on session 864710261",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-pipe/launch/296dd41e-b1ae-4270-9699-1294e8569e28",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "background-pipe/poll/67638c8f-8841-438b-8817-ca77501d3724",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "running": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-pipe/poll/e43be324-6a91-4948-9203-e95b9bba8709",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "running": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-pipe/poll/2243974a-66d5-450d-8786-8c6d6d021e0b",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008"
+      },
+      "running": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-pipe/poll/f5ba7ed1-a473-4279-9f14-f5a896d9447c",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 484543008",
+        "metric": "✓ finished"
+      },
+      "running": {
+        "title": "Waiting on session 484543008",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "completed/launch/55bb0e70-fcab-4718-91f9-d48c9e567b9d",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_COMPLETE; exit 0",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting Write-Output CL_L1_COMPLETE; exit 0",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "completed/poll/d929034c-a229-4569-9fae-66ed75fd0136",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1628553971",
+        "metric": "✓ finished"
+      },
+      "running": {
+        "title": "Waiting on session 1628553971",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-conpty/launch/cad4cf9e-c24d-42d1-9ec5-4697107f2b09",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "background-conpty/poll/492359eb-af45-493c-b826-28281f779068",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "running": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-conpty/poll/9957711f-93b7-4c7c-ab66-d9bd6f03ef5d",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "running": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-conpty/poll/6ad1d8d6-675a-428a-bdb7-a930ee48211c",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135"
+      },
+      "running": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "background-conpty/poll/f3e9eb28-88db-43a8-ab1b-2bd4362307e6",
+      "group": "native",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 896110135",
+        "metric": "✓ finished"
+      },
+      "running": {
+        "title": "Waiting on session 896110135",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "completed",
+      "group": "completion",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 42",
+        "metric": "✓ finished"
+      },
+      "running": {
+        "title": "Waiting on session 42",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "failed",
+      "group": "completion",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Waited on session 42",
+        "metric": "✕ exit 7"
+      },
+      "running": {
+        "title": "Waiting on session 42",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "benign-exit",
+      "group": "completion",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 42",
+        "metric": "✓ finished"
+      },
+      "running": {
+        "title": "Waiting on session 42",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "running",
+      "group": "completion",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 42"
+      },
+      "running": {
+        "title": "Waiting on session 42",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "missing-exit",
+      "group": "completion",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 42"
+      },
+      "running": {
+        "title": "Waiting on session 42",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "internal-error",
+      "group": "completion",
+      "pass": true,
+      "completed": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Could not wait on session 42",
+        "metric": "✕ failed"
+      },
+      "running": {
+        "title": "Waiting on session 42",
+        "kind": "process"
+      }
+    },
+    {
+      "name": "69-units/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "69-units/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "70-units/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "70-units/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "71-units/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "71-units/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "astral-at-boundary/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "astral-at-boundary/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "bmp-over-boundary/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "bmp-over-boundary/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "whitespace/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started echo public text …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting echo public text …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "whitespace/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo public text …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo public text …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "js-whitespace/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started echo public text",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting echo public text",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "js-whitespace/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo public text",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo public text",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "non-js-whitespace/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started echopublic",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting echopublic",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "non-js-whitespace/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echopublic",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echopublic",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "multiline/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started echo public …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting echo public …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "multiline/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo public …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo public …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "empty/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started a command",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting a command",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "empty/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran a command",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running a command",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "commands-array/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "commands-array/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "empty-commands-array/running",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started echo fallback",
+        "metric": "started"
+      },
+      "running": {
+        "title": "Starting echo fallback",
+        "kind": "run"
+      }
+    },
+    {
+      "name": "empty-commands-array/completed",
+      "group": "label",
+      "pass": true,
+      "completed": {
+        "kind": "run",
+        "tone": "good",
+        "title": "Ran echo fallback",
+        "metric": "✓ 5ms"
+      },
+      "running": {
+        "title": "Running echo fallback",
+        "kind": "run"
+      }
+    }
+  ]
+}

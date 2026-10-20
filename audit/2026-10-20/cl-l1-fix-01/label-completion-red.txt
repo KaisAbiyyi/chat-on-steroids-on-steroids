@@ -1,0 +1,23 @@
+   Compiling cos-store v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-store)
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running tests/cl_l1_captions.rs (target/debug/deps/cl_l1_captions-1762f620be95d2af)
+
+running 1 test
+test command_labels_match_source_whitespace_and_utf16_boundaries ... FAILED
+
+failures:
+
+---- command_labels_match_source_whitespace_and_utf16_boundaries stdout ----
+
+thread 'command_labels_match_source_whitespace_and_utf16_boundaries' (5282) panicked at crates/cos-store/tests/cl_l1_captions.rs:45:5:
+"commands-array/completed": expected={"kind":"run","tone":"good","title":"Ran 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …","metric":"✓ 5ms"} actual={"kind":"run","tone":"good","title":"Ran 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …","metric":"✓ 5ms"} running-expected={"title":"Running 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …","kind":"run"} actual={"title":"Running exec_command","kind":"run"}
+"empty-commands-array/completed": expected={"kind":"run","tone":"good","title":"Ran echo fallback","metric":"✓ 5ms"} actual={"kind":"run","tone":"good","title":"Ran echo fallback","metric":"✓ 5ms"} running-expected={"title":"Running echo fallback","kind":"run"} actual={"title":"Running exec_command","kind":"run"}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    command_labels_match_source_whitespace_and_utf16_boundaries
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p cos-store --test cl_l1_captions`

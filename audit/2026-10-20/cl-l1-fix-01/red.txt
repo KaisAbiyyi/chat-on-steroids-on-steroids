@@ -1,0 +1,56 @@
+   Compiling cos-store v0.1.0 (/workspace/chat-on-steroids-on-steroids/crates/cos-store)
+    Finished `test` profile [unoptimized] target(s) in 0.30s
+     Running tests/cl_l1_captions.rs (target/debug/deps/cl_l1_captions-1762f620be95d2af)
+
+running 4 tests
+test completion_metrics_require_exit_evidence_and_preserve_errors ... FAILED
+test command_labels_match_source_whitespace_and_utf16_boundaries ... FAILED
+test native_windows_captions_match_pinned_source ... FAILED
+test corrected_captions_and_full_arguments_survive_recording_and_cold_reopen ... FAILED
+
+failures:
+
+---- completion_metrics_require_exit_evidence_and_preserve_errors stdout ----
+
+thread 'completion_metrics_require_exit_evidence_and_preserve_errors' (1373) panicked at crates/cos-store/tests/cl_l1_captions.rs:45:5:
+"completed": expected={"kind":"process","tone":"neutral","title":"Waited on session 42","metric":"✓ finished"} actual={"kind":"process","tone":"neutral","title":"Waited on session 42"} running-expected={"title":"Waiting on session 42","kind":"process"} actual={"title":"Waiting on session 42","kind":"process"}
+"benign-exit": expected={"kind":"process","tone":"neutral","title":"Waited on session 42","metric":"✓ finished"} actual={"kind":"process","tone":"neutral","title":"Waited on session 42"} running-expected={"title":"Waiting on session 42","kind":"process"} actual={"title":"Waiting on session 42","kind":"process"}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- command_labels_match_source_whitespace_and_utf16_boundaries stdout ----
+
+thread 'command_labels_match_source_whitespace_and_utf16_boundaries' (1372) panicked at crates/cos-store/tests/cl_l1_captions.rs:45:5:
+"71-units": expected={"kind":"run","tone":"neutral","title":"Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","metric":"started"} running-expected={"title":"Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa …","kind":"run"} actual={"title":"Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","kind":"run"}
+"astral-at-boundary": expected={"kind":"run","tone":"neutral","title":"Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail","metric":"started"} running-expected={"title":"Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀 …","kind":"run"} actual={"title":"Starting aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀tail","kind":"run"}
+"bmp-over-boundary": expected={"kind":"run","tone":"neutral","title":"Started éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé","metric":"started"} running-expected={"title":"Starting éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé …","kind":"run"} actual={"title":"Starting ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé","kind":"run"}
+"whitespace": expected={"kind":"run","tone":"neutral","title":"Started echo public text …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started echo\t\tpublic   text …","metric":"started"} running-expected={"title":"Starting echo public text …","kind":"run"} actual={"title":"Starting echo\t\tpublic   text …","kind":"run"}
+"js-whitespace": expected={"kind":"run","tone":"neutral","title":"Started echo public text","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started ﻿echo  public﻿ text﻿","metric":"started"} running-expected={"title":"Starting echo public text","kind":"run"} actual={"title":"Starting ﻿echo  public﻿ text﻿","kind":"run"}
+"commands-array": expected={"kind":"run","tone":"neutral","title":"Started 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; echo second","metric":"started"} running-expected={"title":"Starting 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;  …","kind":"run"} actual={"title":"Starting 2 commands: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; echo second","kind":"run"}
+"empty-commands-array": expected={"kind":"run","tone":"neutral","title":"Started echo fallback","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started a command","metric":"started"} running-expected={"title":"Starting echo fallback","kind":"run"} actual={"title":"Starting a command","kind":"run"}
+
+---- native_windows_captions_match_pinned_source stdout ----
+
+thread 'native_windows_captions_match_pinned_source' (1375) panicked at crates/cos-store/tests/cl_l1_captions.rs:45:5:
+"background-pipe/launch/296dd41e-b1ae-4270-9699-1294e8569e28": expected={"kind":"run","tone":"neutral","title":"Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0","metric":"started"} running-expected={"title":"Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …","kind":"run"} actual={"title":"Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0","kind":"run"}
+"background-pipe/poll/f5ba7ed1-a473-4279-9f14-f5a896d9447c": expected={"kind":"process","tone":"neutral","title":"Waited on session 484543008","metric":"✓ finished"} actual={"kind":"process","tone":"neutral","title":"Waited on session 484543008"} running-expected={"title":"Waiting on session 484543008","kind":"process"} actual={"title":"Waiting on session 484543008","kind":"process"}
+"completed/poll/d929034c-a229-4569-9fae-66ed75fd0136": expected={"kind":"process","tone":"neutral","title":"Waited on session 1628553971","metric":"✓ finished"} actual={"kind":"process","tone":"neutral","title":"Waited on session 1628553971"} running-expected={"title":"Waiting on session 1628553971","kind":"process"} actual={"title":"Waiting on session 1628553971","kind":"process"}
+"background-conpty/launch/cad4cf9e-c24d-42d1-9ec5-4697107f2b09": expected={"kind":"run","tone":"neutral","title":"Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …","metric":"started"} actual={"kind":"run","tone":"neutral","title":"Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0","metric":"started"} running-expected={"title":"Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …","kind":"run"} actual={"title":"Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0","kind":"run"}
+"background-conpty/poll/f3e9eb28-88db-43a8-ab1b-2bd4362307e6": expected={"kind":"process","tone":"neutral","title":"Waited on session 896110135","metric":"✓ finished"} actual={"kind":"process","tone":"neutral","title":"Waited on session 896110135"} running-expected={"title":"Waiting on session 896110135","kind":"process"} actual={"title":"Waiting on session 896110135","kind":"process"}
+
+---- corrected_captions_and_full_arguments_survive_recording_and_cold_reopen stdout ----
+
+thread 'corrected_captions_and_full_arguments_survive_recording_and_cold_reopen' (1374) panicked at crates/cos-store/tests/cl_l1_captions.rs:94:9:
+assertion `left == right` failed: "background-pipe/launch/296dd41e-b1ae-4270-9699-1294e8569e28"
+  left: Object {"kind": String("run"), "tone": String("neutral"), "title": String("Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0"), "metric": String("started")}
+ right: Object {"kind": String("run"), "tone": String("neutral"), "title": String("Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …"), "metric": String("started")}
+
+
+failures:
+    command_labels_match_source_whitespace_and_utf16_boundaries
+    completion_metrics_require_exit_evidence_and_preserve_errors
+    corrected_captions_and_full_arguments_survive_recording_and_cold_reopen
+    native_windows_captions_match_pinned_source
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p cos-store --test cl_l1_captions`

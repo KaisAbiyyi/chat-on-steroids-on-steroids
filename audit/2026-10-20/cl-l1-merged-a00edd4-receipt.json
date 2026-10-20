@@ -1,0 +1,252 @@
+{
+  "UNIT": "CL-L1",
+  "status": "PASS",
+  "date": "2026-10-20",
+  "timezone": "Asia/Jakarta",
+  "githubShaUnderTest": "a00edd4a67e6c8acc9fc45bee659094719d6673a",
+  "mergedPr": {
+    "headRefOid": "6f4e6acc3594edc2759c8cb1dbefe551cb51e132",
+    "mergeCommit": {
+      "oid": "a00edd4a67e6c8acc9fc45bee659094719d6673a"
+    },
+    "mergedAt": "2026-10-20T09:37:49Z",
+    "state": "MERGED",
+    "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/11"
+  },
+  "sourceCheckout": "D:\\projects\\CoS-Rust\\.worktrees\\cl-l1-retest-6f4e6ac",
+  "environment": {
+    "sourceSha": "a00edd4a67e6c8acc9fc45bee659094719d6673a",
+    "initialGitStatus": [],
+    "os": "Microsoft Windows NT 10.0.26300.0",
+    "architecture": "AMD64",
+    "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+    "cargo": "cargo 1.91.1 (ea2d97820 2025-10-10)",
+    "temp": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l1-merged-20261020-a00edd4\\temp",
+    "cargoHome": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-20261020\\cargo-offline",
+    "cargoTarget": "D:\\projects\\CoS-Rust\\.cache\\cl-l1-retest-20261020-01\\target",
+    "startedAt": "2026-10-20T09:38:04.8667287Z"
+  },
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "nativeTests": {
+    "workspace": {
+      "passed": 257,
+      "failed": 0,
+      "ignored": 0
+    },
+    "strictChecks": "PASS",
+    "release": "PASS",
+    "assertionsPassed": 96,
+    "assertionsFailed": 0,
+    "runtimeOracle": {
+      "cases": 14,
+      "mismatches": 0
+    },
+    "additiveOracle": {
+      "cases": 44,
+      "status": "PASS"
+    },
+    "privacy": "PASS",
+    "cleanRestartTimeline": "PASS",
+    "sentinelLeaks": 0
+  },
+  "binary": {
+    "sha256": "db7602d642431dabaf85b686402e6f1c5067c045ef70222553158f09cdf81c37",
+    "bytes": 12828672
+  },
+  "protectedWip": {
+    "paths": 8,
+    "headStatusAndSha256Unchanged": true
+  },
+  "sourceEquivalenceToReviewedCandidate": "PASS; git diff 6f4e6acc..a00edd4 over crates/fixtures/tools/Cargo files empty",
+  "postMergeCiAtCapture": [
+    {
+      "conclusion": "",
+      "databaseId": 39402086019,
+      "headSha": "a00edd4a67e6c8acc9fc45bee659094719d6673a",
+      "status": "in_progress",
+      "url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39402086019"
+    }
+  ],
+  "PERFORMANCE": "NOT MEASURED; cached build cost and binary size observations are not baseline/candidate benchmarks",
+  "LOCAL REQUIRED": "NONE for CL-L1 after this PASS; subsequent units have their own L gates",
+  "YOU REQUIRED": "NO account/clipboard/manual desktop acceptance",
+  "KNOWN LIMITS": [
+    "Clean restart only; crash/desktop/browser/installer NOT RUN",
+    "Local Linux BLOCKED on unverified D: backing; macOS HOLD",
+    "CL-04C UTF-16 scope unchanged",
+    "Full phase 1-6 remains PARTIAL"
+  ],
+  "NEXT": "CL-04A eligible after the handoff/main checks are healthy and a separate cloud unit is explicitly started; no feature work started here",
+  "storage": "All task output/cache/temp/profiles under D:\\projects\\CoS-Rust; no private profile or actual clipboard access",
+  "evidenceEncoding": "Canonical LF; captured hashes describe unchanged raw captures retained on D:",
+  "evidenceManifest": [
+    {
+      "file": "merge.json",
+      "bytes": 249,
+      "sha256": "26f7e04ce12477235951bd36d6951debd62b0ae4f15fee9512ad8bbc502388b8",
+      "capturedBytes": 250,
+      "capturedSha256": "1cd89903465cccc8df5a2fcb92f854e39eabb0e66103f3bdaaea565625a25aab"
+    },
+    {
+      "file": "post-merge-ci-at-capture.json",
+      "bytes": 213,
+      "sha256": "7968e004bb9fa881cdbfb98b52efeb34ac8829da7e1b249edfc59d3274aae963",
+      "capturedBytes": 214,
+      "capturedSha256": "18109fae5ff8c16fb6139367634c1228847a8e9071b3291abd8902e0b1c6c9fb"
+    },
+    {
+      "file": "environment.json",
+      "bytes": 556,
+      "sha256": "1245bddf18968cf83b383390836f953bd2f7023fca886eb027c4be6e790e1d18",
+      "capturedBytes": 568,
+      "capturedSha256": "996f307fcebc7fc08a907b6da755fda7bb351c534af013754f9b0a8f69c9eea5"
+    },
+    {
+      "file": "checks.json",
+      "bytes": 341,
+      "sha256": "78e08f6f309b54a22cf7490dcb4176d17c6c570077754985f84ee88d95e0f0ba",
+      "capturedBytes": 357,
+      "capturedSha256": "6f073228fb986173dc9c615412f9f70d2951e57048aa5e301dd3bbe2bccb5dcc"
+    },
+    {
+      "file": "wip-before.json",
+      "bytes": 1851,
+      "sha256": "88b35bb5b68f2a0f74c2f0ddb804860943ad03c5c926ba8dd6fccfe93fcd9558",
+      "capturedBytes": 1906,
+      "capturedSha256": "b216af761c9f9cb5d51c4430da6abbdbdfe67f45f592595569b043e7f7b11716"
+    },
+    {
+      "file": "wip-after.json",
+      "bytes": 1682,
+      "sha256": "9e40b09af0ebea1cad0eb72d197bbe7a9d089a1dbeb7bf878dd5578aa97962fc",
+      "capturedBytes": 1682,
+      "capturedSha256": "9e40b09af0ebea1cad0eb72d197bbe7a9d089a1dbeb7bf878dd5578aa97962fc"
+    },
+    {
+      "file": "native-receipt.json",
+      "bytes": 14068,
+      "sha256": "d94bcc4e700905d0fac041cb07cace6346d31ec20ca6bbcdec947dc760c7d2f0",
+      "capturedBytes": 14632,
+      "capturedSha256": "12cf4f48acca4f0ad08dd7778057fcbf8d107d9f82657b83d0b07fc485463239"
+    },
+    {
+      "file": "completed-source-oracle.json",
+      "bytes": 16785,
+      "sha256": "c9acdb4e34f088bc17267c1776e14a71608ebf9f03339c6ed311d2289ddaf00f",
+      "capturedBytes": 16785,
+      "capturedSha256": "c9acdb4e34f088bc17267c1776e14a71608ebf9f03339c6ed311d2289ddaf00f"
+    },
+    {
+      "file": "native-runtime-projections.json",
+      "bytes": 31205,
+      "sha256": "8f4502225b39fa0d59a8a8d41785593eb33bce2f70fe717163f8b449be1da810",
+      "capturedBytes": 32157,
+      "capturedSha256": "04cf2a1f10b13ff17dc48819833a56efc6781bf44ad04849ff69d309bdfcf313"
+    },
+    {
+      "file": "disk-scan-manifests.json",
+      "bytes": 6263,
+      "sha256": "5c1a795dbe9a3f1e305243f666357ff4601759c11da0c8296e9dac75c12e872b",
+      "capturedBytes": 6433,
+      "capturedSha256": "7314ac7ab6c7f0e606107f3d0ab625d7a28850cec992c3823e469672dc9a5dbd"
+    },
+    {
+      "file": "additive-corpus-source-authentication.json",
+      "bytes": 18092,
+      "sha256": "d6df41d89195269d8b9471b53aca1d33388b95b8c61ba4aaf9ed49a3b1fdac42",
+      "capturedBytes": 18092,
+      "capturedSha256": "d6df41d89195269d8b9471b53aca1d33388b95b8c61ba4aaf9ed49a3b1fdac42"
+    },
+    {
+      "file": "runtime-history-before-restart.json",
+      "bytes": 47049,
+      "sha256": "d704548b75f08bf5f5841adf24fd5996ced83653025e2cb8baf65f72a4f7b1f9",
+      "capturedBytes": 47996,
+      "capturedSha256": "3a95c01b9ea3e411c36e44781cd7f9c8b511f5ce9c5f15570c30e1878c8ce769"
+    },
+    {
+      "file": "runtime-history-after-restart.json",
+      "bytes": 48410,
+      "sha256": "21c6cb9af507b667d624ad86eea1e15b47449d73edaf99748ed38b1089caa36c",
+      "capturedBytes": 49415,
+      "capturedSha256": "e2ead06df05dfbbf3b55bd09cd1c9c5e2d99769639602328c753536e938e21e7"
+    },
+    {
+      "file": "runtime-overview-before-restart.json",
+      "bytes": 1519,
+      "sha256": "5609e7e927badd79cc50102c6412b9e7e9a21a3147e8c7408c7ff925a1b2cc94",
+      "capturedBytes": 1581,
+      "capturedSha256": "149c1a5285cc3ca423b4ef96ab5831df2b5a8057dfe13e6f5e75e21ff9b35b9f"
+    },
+    {
+      "file": "runtime-overview-after-restart.json",
+      "bytes": 1519,
+      "sha256": "5609e7e927badd79cc50102c6412b9e7e9a21a3147e8c7408c7ff925a1b2cc94",
+      "capturedBytes": 1581,
+      "capturedSha256": "149c1a5285cc3ca423b4ef96ab5831df2b5a8057dfe13e6f5e75e21ff9b35b9f"
+    },
+    {
+      "file": "privacy-history-after-restart.json",
+      "bytes": 22238,
+      "sha256": "b15edd4129cd7053d5a509f7f11ec227f96cf877d3d14048b9d392bd3457dc55",
+      "capturedBytes": 22467,
+      "capturedSha256": "4f5406bad3cf5b8a0b5285d0cf3546e7ef614d3db5291599f96d3feda790b8d2"
+    },
+    {
+      "file": "qualify-cl-l1.py",
+      "bytes": 21433,
+      "sha256": "c230d30798ab380aace65f73427fe1e86ee771e3cc88a112a2fcb2c33b8b0c29",
+      "capturedBytes": 21433,
+      "capturedSha256": "c230d30798ab380aace65f73427fe1e86ee771e3cc88a112a2fcb2c33b8b0c29"
+    },
+    {
+      "file": "check-completed-oracle.mjs",
+      "bytes": 2800,
+      "sha256": "85ec8d819694de1cc7ae87cb0cc0aa0ab9b79013d6d0d17035e3f8e397be3dd5",
+      "capturedBytes": 2800,
+      "capturedSha256": "85ec8d819694de1cc7ae87cb0cc0aa0ab9b79013d6d0d17035e3f8e397be3dd5"
+    },
+    {
+      "file": "check-corpus-oracles.mjs",
+      "bytes": 4088,
+      "sha256": "018fb1d9a5c56d47ad8cc6fdd385e3360014aa51ab76fd32415b75676b5213dd",
+      "capturedBytes": 4088,
+      "capturedSha256": "018fb1d9a5c56d47ad8cc6fdd385e3360014aa51ab76fd32415b75676b5213dd"
+    },
+    {
+      "file": "workspace-strict.txt",
+      "bytes": 35722,
+      "sha256": "1a5329e1663da453e14c8d20b4e4b7519c555e0e50f0cd86e0c1309dc2cd0cf5",
+      "capturedBytes": 36403,
+      "capturedSha256": "b04264c46386262afab18ad6d73a8d8c59084ec741e8b61398a31002487d6763"
+    },
+    {
+      "file": "release-build.txt",
+      "bytes": 62,
+      "sha256": "1d77819c2a75c43fedab1e7b59a28d06cbebbc10974d4141443fe2f25b6a542b",
+      "capturedBytes": 63,
+      "capturedSha256": "96a49aec839aff99750fd7f63bca6554b109d487de0aa3d3ac631a6836c458e5"
+    },
+    {
+      "file": "native-probe.txt",
+      "bytes": 5035,
+      "sha256": "4f2c90a787c2fd71651359fa1daa9fc8ef8ca68e92e099f99e0399c46aa3b6f9",
+      "capturedBytes": 5131,
+      "capturedSha256": "768bb948ac02c0f6e05007886dd5da711560e58b99a6f54e2477fcfb39e991f9"
+    },
+    {
+      "file": "source-oracle.txt",
+      "bytes": 48,
+      "sha256": "21fd70759f8b65ced74b8727b8e31c2677bd252a1a844762df339bd1bb5a07ba",
+      "capturedBytes": 49,
+      "capturedSha256": "be98ba86560132a81c717b6c5784262b8d61793c3c03b2459799e0142bd14f61"
+    },
+    {
+      "file": "additive-oracle.txt",
+      "bytes": 107,
+      "sha256": "f104ab7f2b5cf2b3732fe23fa6c7ea5869f6388dce31a4385df9a243883aabdb",
+      "capturedBytes": 108,
+      "capturedSha256": "feaf335f48ee9fbb329eaa3047c5134d02ff5af059dcc9b6335fd34c2d2b4587"
+    }
+  ]
+}

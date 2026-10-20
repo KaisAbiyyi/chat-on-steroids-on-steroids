@@ -1,0 +1,16 @@
+[
+  {
+    "name": "workspace-strict",
+    "command": "python tools/check-workspace.py --strict",
+    "exitCode": 0,
+    "elapsedSeconds": 70.8679751,
+    "status": "PASS"
+  },
+  {
+    "name": "release-build",
+    "command": "cargo build --release --locked -j2",
+    "exitCode": 0,
+    "elapsedSeconds": 0.7813035,
+    "status": "PASS"
+  }
+]

@@ -1,0 +1,626 @@
+{
+  "upstreamCommit": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "sourceSha256": "f807705d2534e54c95edd9df64fd60ab75d91e7206e22e12f7f0471ff4486596",
+  "sourceFile": "src/main/session/summarize.ts",
+  "sourceUnchanged": true,
+  "productSha": "a00edd4a67e6c8acc9fc45bee659094719d6673a",
+  "existingCorpus": {
+    "total": 343,
+    "successfulWriteStdinCases": 0
+  },
+  "status": "PASS",
+  "rows": [
+    {
+      "case": "nonzero",
+      "stage": "launch",
+      "callId": "7555da62-d9c5-43c0-8215-505cae70ac86",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "Write-Output CL_L1_NONZERO; exit 7",
+        "workdir": "/p",
+        "login": false,
+        "tty": false,
+        "yield_time_ms": 10000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 2037649153,
+        "durationMs": 401,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_NONZERO; exit 7",
+        "metric": "started"
+      },
+      "expected": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_NONZERO; exit 7",
+        "metric": "started"
+      },
+      "actualRunning": {
+        "title": "Starting Write-Output CL_L1_NONZERO; exit 7",
+        "kind": "run"
+      },
+      "expectedRunning": {
+        "title": "Starting Write-Output CL_L1_NONZERO; exit 7",
+        "kind": "run"
+      },
+      "pass": true
+    },
+    {
+      "case": "nonzero",
+      "stage": "poll",
+      "callId": "3efff097-b323-4a87-a11f-657d72f7d1da",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 2037649153,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 7,
+        "running": false,
+        "processSessionId": 2037649153,
+        "durationMs": 20,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Waited on session 2037649153",
+        "metric": "✕ exit 7"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "bad",
+        "title": "Waited on session 2037649153",
+        "metric": "✕ exit 7"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 2037649153",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 2037649153",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-pipe",
+      "stage": "launch",
+      "callId": "2acf46ab-b707-4a25-9feb-11b683f89352",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_END; exit 0",
+        "workdir": "/p",
+        "login": false,
+        "tty": false,
+        "yield_time_ms": 250
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1970982998,
+        "durationMs": 262,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …",
+        "metric": "started"
+      },
+      "expected": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …",
+        "metric": "started"
+      },
+      "actualRunning": {
+        "title": "Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …",
+        "kind": "run"
+      },
+      "expectedRunning": {
+        "title": "Starting Write-Output CL_L1_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output …",
+        "kind": "run"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-pipe",
+      "stage": "poll",
+      "callId": "d63cf48e-daab-456c-b481-43b5ab3fd304",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1970982998,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1970982998,
+        "durationMs": 256,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-pipe",
+      "stage": "poll",
+      "callId": "468bc2d9-d134-49ae-8f61-4f78ebde9cb8",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1970982998,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1970982998,
+        "durationMs": 1004,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-pipe",
+      "stage": "poll",
+      "callId": "86cf425f-74b4-4494-a782-8b61c7f861c1",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1970982998,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1970982998,
+        "durationMs": 591,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-pipe",
+      "stage": "poll",
+      "callId": "2cbadb2a-c5fc-412c-a32c-1b4819412971",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1970982998,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 1970982998,
+        "durationMs": 23,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998",
+        "metric": "✓ finished"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1970982998",
+        "metric": "✓ finished"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1970982998",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "completed",
+      "stage": "launch",
+      "callId": "994a06e3-d1c3-4afc-a131-23177f0fcbc6",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "Write-Output CL_L1_COMPLETE; exit 0",
+        "workdir": "/p",
+        "login": false,
+        "tty": false,
+        "yield_time_ms": 10000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 580440186,
+        "durationMs": 380,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_COMPLETE; exit 0",
+        "metric": "started"
+      },
+      "expected": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_COMPLETE; exit 0",
+        "metric": "started"
+      },
+      "actualRunning": {
+        "title": "Starting Write-Output CL_L1_COMPLETE; exit 0",
+        "kind": "run"
+      },
+      "expectedRunning": {
+        "title": "Starting Write-Output CL_L1_COMPLETE; exit 0",
+        "kind": "run"
+      },
+      "pass": true
+    },
+    {
+      "case": "completed",
+      "stage": "poll",
+      "callId": "392e18a1-0a73-46fa-9e87-761bfeb19c2f",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 580440186,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 580440186,
+        "durationMs": 0,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 580440186",
+        "metric": "✓ finished"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 580440186",
+        "metric": "✓ finished"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 580440186",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 580440186",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-conpty",
+      "stage": "launch",
+      "callId": "f62ce8b4-beaf-4d93-8554-afc136624211",
+      "tool": "exec_command",
+      "args": {
+        "cmd": "Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Output CL_L1_PTY_END; exit 0",
+        "workdir": "/p",
+        "login": false,
+        "tty": true,
+        "yield_time_ms": 250
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1506811537,
+        "durationMs": 179,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …",
+        "metric": "started"
+      },
+      "expected": {
+        "kind": "run",
+        "tone": "neutral",
+        "title": "Started Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …",
+        "metric": "started"
+      },
+      "actualRunning": {
+        "title": "Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …",
+        "kind": "run"
+      },
+      "expectedRunning": {
+        "title": "Starting Write-Output CL_L1_PTY_BEGIN; Start-Sleep -Milliseconds 1800; Write-Ou …",
+        "kind": "run"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-conpty",
+      "stage": "poll",
+      "callId": "dfae5b3f-53f0-41fb-a22b-35ebbd5c6498",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1506811537,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1506811537,
+        "durationMs": 292,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-conpty",
+      "stage": "poll",
+      "callId": "9d3b3a00-b451-42b5-9e36-c53c423b3f8a",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1506811537,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1506811537,
+        "durationMs": 1008,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-conpty",
+      "stage": "poll",
+      "callId": "1521eede-ae23-4430-a925-857d1019e238",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1506811537,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": null,
+        "running": true,
+        "processSessionId": 1506811537,
+        "durationMs": 576,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "pass": true
+    },
+    {
+      "case": "background-conpty",
+      "stage": "poll",
+      "callId": "431815d3-8ecf-40c6-92f8-51d2cec24c52",
+      "tool": "write_stdin",
+      "args": {
+        "session_id": 1506811537,
+        "chars": "",
+        "yield_time_ms": 1000
+      },
+      "evidence": {
+        "count": null,
+        "changes": [],
+        "changesTotal": null,
+        "changesTruncated": false,
+        "exitCode": 0,
+        "running": false,
+        "processSessionId": 1506811537,
+        "durationMs": 11,
+        "timedOut": false,
+        "failed": false
+      },
+      "actual": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537",
+        "metric": "✓ finished"
+      },
+      "expected": {
+        "kind": "process",
+        "tone": "neutral",
+        "title": "Waited on session 1506811537",
+        "metric": "✓ finished"
+      },
+      "actualRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "expectedRunning": {
+        "title": "Waiting on session 1506811537",
+        "kind": "process"
+      },
+      "pass": true
+    }
+  ]
+}
