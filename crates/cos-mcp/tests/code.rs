@@ -106,3 +106,60 @@ fn accepted_side_effect_survives_timeout() {
     assert_eq!(r["isError"], true);
     assert_eq!(calls.load(Ordering::Acquire), 1);
 }
+
+#[test]
+fn rejects_invalid_resource_admission_before_invoking_tools() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    for limits in [
+        Limits { cpu_ms: 0, ..Limits::default() },
+        Limits { wall_ms: 0, ..Limits::default() },
+        Limits { cpu_ms: 60_001, ..Limits::default() },
+        Limits { wall_ms: 60_001, ..Limits::default() },
+        Limits { memory: 1024, ..Limits::default() },
+        Limits { memory: 65 * 1024 * 1024, ..Limits::default() },
+    ] {
+        let counter = calls.clone();
+        let result = code::run(
+            "await tools.read({text:'should-not-execute'});",
+            &tools(),
+            Arc::new(move |_, _| {
+                counter.fetch_add(1, Ordering::AcqRel);
+                json!({"content":[]})
+            }),
+            limits,
+        );
+        assert_eq!(result["isError"], true);
+        assert_eq!(result["content"][0]["text"], "CODE_MODE_RESOURCE_LIMIT");
+    }
+    assert_eq!(calls.load(Ordering::Acquire), 0);
+}
+
+#[test]
+fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
+    let seen = Arc::new(AtomicUsize::new(0));
+    let observed = seen.clone();
+    let unawaited = code::run(
+        "tools.read({text:'accepted'});",
+        &tools(),
+        Arc::new(move |_, _| {
+            observed.fetch_add(1, Ordering::AcqRel);
+            std::thread::sleep(std::time::Duration::from_millis(100));
+            json!({"content":[]})
+        }),
+        Limits::default(),
+    );
+    assert_eq!(unawaited["isError"], true);
+    assert!(unawaited["content"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|item| item["text"].as_str().unwrap_or("").contains("UNAWAITED_CALLS")));
+    // A completed script must not represent dispatched, unsettled mutations as success.
+    let overflow = code::run(
+        "await Promise.all(Array.from({length: 33}, () => tools.read({text:'many'})));",
+        &tools(),
+        invoke(),
+        Limits::default(),
+    );
+    assert_eq!(overflow["isError"], true);
+}
