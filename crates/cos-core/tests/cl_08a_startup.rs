@@ -1,7 +1,9 @@
 use cos_core::{
     persistence::ConfigStore,
-    secrets::{Decrypted, SecretCipher, SecretStore, WindowsCipher},
+    secrets::{Decrypted, SecretCipher, SecretStore},
 };
+#[cfg(windows)]
+use cos_core::secrets::WindowsCipher;
 use std::{fs, io, sync::Arc};
 
 struct LockedCipher;
