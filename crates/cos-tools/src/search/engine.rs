@@ -1,6 +1,7 @@
 use super::{DEFAULT_EXCLUDES, IncludeMatcher, Options};
 use crate::files::is_excluded_folder;
 use cos_core::persistence::invalid;
+use regex::{Regex, RegexBuilder};
 use serde::Serialize;
 use std::{
     collections::VecDeque,
@@ -114,6 +115,16 @@ pub fn search(
     if options.regex && !options.content {
         return Err(invalid("regex=true is only valid with mode=content"));
     }
+    if options.query.len() > 64 * 1024 {
+        return Err(invalid("Search query exceeds 64 KiB"));
+    }
+    // Compile once, before metadata/traversal: an invalid or unsupported
+    // expression must never be reported as a successful empty search.
+    let expression = if options.regex {
+        Some(compile_content_regex(options.query, options.case_sensitive)?)
+    } else {
+        None
+    };
     let started = Instant::now();
     let deadline = whole_tool_deadline.min(started + Duration::from_secs(10));
     let mut outcome = Outcome {
@@ -158,7 +169,14 @@ pub fn search(
                 outcome.files_scanned = 0;
                 outcome.stop(StopReason::Size);
             } else {
-                let found = scan_file(backend, base, options, authorize, &mut outcome.skipped)?;
+                let found = scan_file(
+                    backend,
+                    base,
+                    options,
+                    expression.as_ref(),
+                    authorize,
+                    &mut outcome.skipped,
+                )?;
                 let exceeded = found.len() > options.limit;
                 outcome.hits = found.into_iter().take(options.limit).collect();
                 if exceeded {
@@ -257,6 +275,7 @@ pub fn search(
                 backend,
                 candidates,
                 options,
+                expression.as_ref(),
                 deadline,
                 authorize,
                 &mut outcome,
@@ -274,6 +293,7 @@ pub(super) fn scan_file(
     backend: &mut dyn Backend,
     path: &str,
     options: &Options<'_>,
+    expression: Option<&Regex>,
     authorize: &dyn Fn() -> io::Result<()>,
     skipped: &mut usize,
 ) -> io::Result<Vec<Hit>> {
@@ -313,17 +333,8 @@ pub(super) fn scan_file(
     }
     // The source uses TextDecoder's replacement behavior, not strict editor decoding.
     let text = decode_search(&bytes);
-    let expression = if options.regex {
-        Some(
-            regex::RegexBuilder::new(options.query)
-                .case_insensitive(!options.case_sensitive)
-                .size_limit(1024 * 1024)
-                .build()
-                .map_err(|error| invalid(format!("Invalid regex: {error}")))?,
-        )
-    } else {
-        None
-    };
+    // The regex is validated once for the entire search and shared by all
+    // bounded content workers, not compiled repeatedly per file.
     let needle = if options.case_sensitive {
         options.query.into()
     } else {
@@ -335,7 +346,7 @@ pub(super) fn scan_file(
             authorize()?;
         }
         let line = line.strip_suffix('\r').unwrap_or(line);
-        let matched = if let Some(regex) = &expression {
+        let matched = if let Some(regex) = expression {
             regex.is_match(line)
         } else if options.case_sensitive {
             line.contains(&needle)
@@ -386,4 +397,33 @@ fn decode_search(bytes: &[u8]) -> String {
     } else {
         String::from_utf8_lossy(bytes.strip_prefix(&[239, 187, 191]).unwrap_or(bytes)).into()
     }
+}
+
+/// Native ripgrep uses Rust-regex-style regular expressions; JavaScript's
+/// backreferences/lookarounds are not supported by that engine. Fail closed
+/// instead of treating a different language as a successful equivalent.
+fn compile_content_regex(pattern: &str, case_sensitive: bool) -> io::Result<Regex> {
+    let mut chars = pattern.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch == '\\' {
+            if matches!(chars.peek(), Some('1'..='9' | 'k')) {
+                return Err(io::Error::new(
+                    io::ErrorKind::Unsupported,
+                    "Search regex uses JavaScript backreference syntax not supported by ripgrep",
+                ));
+            }
+            chars.next();
+        }
+    }
+    if ["(?=", "(?!", "(?<=", "(?<!"].iter().any(|s| pattern.contains(s)) {
+        return Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "Search regex uses JavaScript lookaround syntax not supported by ripgrep",
+        ));
+    }
+    RegexBuilder::new(pattern)
+        .case_insensitive(!case_sensitive)
+        .size_limit(1024 * 1024)
+        .build()
+        .map_err(|error| invalid(format!("Invalid search regex: {error}")))
 }

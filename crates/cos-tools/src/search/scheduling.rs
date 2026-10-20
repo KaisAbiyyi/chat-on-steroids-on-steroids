@@ -4,6 +4,7 @@ use super::{
     engine::{self, Backend, Entry, Hit, Metadata, Outcome, StopReason},
 };
 use cos_core::persistence::lock;
+use regex::Regex;
 use std::{
     io,
     sync::{Mutex, mpsc},
@@ -43,6 +44,7 @@ pub(super) fn scan(
     backend: &mut dyn Backend,
     candidates: Vec<String>,
     options: &Options<'_>,
+    expression: Option<&Regex>,
     deadline: Instant,
     authorize: &dyn Fn() -> io::Result<()>,
     outcome: &mut Outcome,
@@ -91,7 +93,14 @@ pub(super) fn scan(
                     while let Some(path) = job {
                         let mut skipped = 0;
                         let result =
-                            engine::scan_file(backend, &path, options, &authorize, &mut skipped)
+                            engine::scan_file(
+                                backend,
+                                &path,
+                                options,
+                                expression,
+                                &authorize,
+                                &mut skipped,
+                            )
                                 .map(|hits| (hits, skipped));
                         if sender.send(Event::Completed(result)).is_err() {
                             break;
