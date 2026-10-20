@@ -1,5 +1,14 @@
 # Current CoS-Rust work state
 
+## Latest accepted cloud units (2026-10-20) — CL-04B merged, next CL-04C
+
+- **CL-04A MERGED:** [PR #12](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/12) → `1232803d9dba3ba05cca11cfc8101bb54bd51cc2`; exact-head Windows/Ubuntu CI PASS and post-merge `main` CI PASS.
+- **CL-04B MERGED:** [PR #13](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/13) → `ce065f8b449ff4a215f1169ca8efd9158760dbca`; exact-head `39b80f3342f3885bb523136974395d9f7069e224` Windows/Ubuntu format, strict Clippy, workspace tests and release **PASS** ([Actions](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39420069685)). No uncommitted local code was used.
+- **CL-04B claim RELEASED:** `session-store` is no longer held by the cloud implementer. Next independent unit **CL-04C** (unpaired UTF-16 / JSON lossless-or-refusal decision); `CL-05A`, `CL-06A` and other disjoint ready lanes follow the dependency board.
+- **LOCAL REQUIRED:** NONE now. **YOU REQUIRED:** NO direct account, clipboard or manual UI acceptance. Later named native gates remain outstanding, and whole Phases 1–6 still PARTIAL.
+- **Known limits:** no destructive TTL policy, no automatic salvage of unsafe preexisting records, no browser/desktop/installer acceptance. Post-merge `main` SHA-specific CI should be verified independently when declaring any additional merged-state acceptance.
+
+
 ## Latest cloud checkpoint (2026-10-20) — CL-04A merged; CL-04B in progress
 
 - **CL-04A MERGED**: [PR #12](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/12) squash merge `1232803d9dba3ba05cca11cfc8101bb54bd51cc2`. Exact PR head `dfd3bd72` had Windows/Ubuntu format, strict Clippy, tests, release **PASS**. Post-merge `main` CI must be checked by exact SHA, independently from head checks.
