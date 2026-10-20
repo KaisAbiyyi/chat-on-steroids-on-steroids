@@ -240,7 +240,10 @@ fn reactivating_an_owned_retired_alias_is_consistent_before_and_after_restart() 
     );
     let before = store.summary("session-roundtrip").unwrap().unwrap();
     assert_eq!(before["conversationId"], "conversation-original");
-    assert_eq!(before["retiredChatAt"]["conversation-original"], serde_json::Value::Null);
+    assert_eq!(
+        before["retiredChatAt"]["conversation-original"],
+        serde_json::Value::Null
+    );
     assert_eq!(before["retiredChatAt"]["conversation-next"], 120);
     drop(store);
     let after = SessionStore::open(temp.path())
