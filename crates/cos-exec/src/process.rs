@@ -738,6 +738,21 @@ impl Manager {
     /// It waits on child/pipe state, independently of any response publication lock.
     /// Admission and ordinary model polling never use this destructive retirement path.
     pub fn retire(&self, id: i32, owner: &str, wait: Duration) -> io::Result<()> {
+        self.retire_inner(id, owner, wait, false)
+    }
+    /// Explicit internal sidecar shutdown: discard output pending HTTP publication
+    /// only after the owned child and all pipe readers have settled. Ordinary
+    /// terminal sessions must use retire() to preserve unread completion.
+    pub fn retire_discard_pending(&self, id: i32, owner: &str, wait: Duration) -> io::Result<()> {
+        self.retire_inner(id, owner, wait, true)
+    }
+    fn retire_inner(
+        &self,
+        id: i32,
+        owner: &str,
+        wait: Duration,
+        discard_pending: bool,
+    ) -> io::Result<()> {
         let p = self.owned(id, owner)?;
         let interaction = lock(&p.interaction)?;
         Self::require_live_owner(&p, owner)?;
@@ -746,7 +761,7 @@ impl Manager {
         let mut state = lock(&p.state)?;
         // A publication belongs to the HTTP response until commit/rollback.
         // Never evict custody or lose unread output while it is still pending.
-        while state.exit.is_none() || state.readers > 0 || state.publication_pending {
+        while state.exit.is_none() || state.readers > 0 || (state.publication_pending && !discard_pending) {
             let remaining = deadline.saturating_duration_since(Instant::now());
             if remaining.is_zero() {
                 return Err(io::Error::new(
