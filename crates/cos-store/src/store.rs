@@ -18,6 +18,8 @@ pub const MAX_LINE_BYTES: usize = 512 * 1024;
 pub const MAX_HISTORY_SEQUENCE: u64 = 9_007_199_254_740_991;
 /// Fail closed on implausibly large journals rather than scanning unbounded files.
 pub const MAX_HISTORY_JOURNAL_BYTES: u64 = 1024 * 1024 * 1024;
+/// Guard canonical in-memory overlays against unbounded shard proliferation.
+pub const MAX_CANONICAL_MESSAGES: usize = 100_000;
 fn next_sequence(next: u64) -> io::Result<u64> {
     if (1..=MAX_HISTORY_SEQUENCE).contains(&next) {
         Ok(next)
@@ -262,6 +264,9 @@ impl SessionStore {
                         }
                     }
                 }
+                if messages.len() > MAX_CANONICAL_MESSAGES {
+                    return Err(invalid("Canonical history exceeds in-memory record budget"));
+                }
             }
             Err(e) if e.kind() == io::ErrorKind::PermissionDenied => return Err(e),
             Err(_) => {}
@@ -294,6 +299,9 @@ impl SessionStore {
                     && name == format!("{}.json", hash(key.as_bytes()))
                     && event["seq"].is_u64()
                 {
+                    if messages.len() >= MAX_CANONICAL_MESSAGES && !messages.contains_key(&key) {
+                        return Err(invalid("Canonical history exceeds in-memory record budget"));
+                    }
                     messages.insert(key, event);
                 }
             }
