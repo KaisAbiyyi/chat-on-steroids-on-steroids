@@ -4,6 +4,7 @@ use super::{
     engine::{self, Backend, Entry, Hit, Metadata, Outcome, StopReason},
 };
 use cos_core::persistence::lock;
+use regex::Regex;
 use std::{
     io,
     sync::{Mutex, mpsc},
@@ -43,6 +44,7 @@ pub(super) fn scan(
     backend: &mut dyn Backend,
     candidates: Vec<String>,
     options: &Options<'_>,
+    expression: Option<&Regex>,
     deadline: Instant,
     authorize: &dyn Fn() -> io::Result<()>,
     outcome: &mut Outcome,
@@ -90,9 +92,15 @@ pub(super) fn scan(
                     let mut job = Some(initial);
                     while let Some(path) = job {
                         let mut skipped = 0;
-                        let result =
-                            engine::scan_file(backend, &path, options, &authorize, &mut skipped)
-                                .map(|hits| (hits, skipped));
+                        let result = engine::scan_file(
+                            backend,
+                            &path,
+                            options,
+                            expression,
+                            &authorize,
+                            &mut skipped,
+                        )
+                        .map(|hits| (hits, skipped));
                         if sender.send(Event::Completed(result)).is_err() {
                             break;
                         }
@@ -144,6 +152,14 @@ pub(super) fn scan(
                     Ok((hits, skipped)) if failure.is_none() => {
                         if let Err(error) = authorize() {
                             failure = Some(error);
+                            done = true;
+                            continue;
+                        }
+                        // Work already in flight may finish after the shared deadline.
+                        // Keep previously published hits but never claim late results
+                        // were delivered within the search time budget.
+                        if Instant::now() > deadline {
+                            outcome.stop(StopReason::Time);
                             done = true;
                             continue;
                         }
