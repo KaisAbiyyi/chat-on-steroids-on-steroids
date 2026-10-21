@@ -31,6 +31,7 @@ internal sealed class ProbeForm : Form
     private readonly string _assets;
     private readonly string _extension;
     private readonly string _receipt;
+    private readonly bool _batch;
     private readonly List<string> _trace = new();
 
     public ProbeForm(string[] args)
@@ -42,6 +43,7 @@ internal sealed class ProbeForm : Form
         _extension = Path.GetFullPath(options.GetValueOrDefault("--extension") ??
             Path.Combine(AppContext.BaseDirectory, "extension"));
         _receipt = Path.Combine(_root, "receipt.json");
+        _batch = options.ContainsKey("--batch");
         Text = "CoSoS 7P-B / isolated WebView2 browser capability probe — NOT production";
         Width = 1300;
         Height = 800;
@@ -56,11 +58,16 @@ internal sealed class ProbeForm : Form
     private static Dictionary<string, string> Parse(string[] args)
     {
         var parsed = new Dictionary<string, string>(StringComparer.Ordinal);
-        for (var i = 0; i < args.Length; i += 2)
+        for (var i = 0; i < args.Length; i++)
         {
+            if (args[i] == "--batch")
+            {
+                parsed.Add("--batch", "true");
+                continue;
+            }
             if (i + 1 >= args.Length || args[i] is not ("--out" or "--assets" or "--extension"))
                 throw new ArgumentException("Expected --out, --assets or --extension with value");
-            parsed.Add(args[i], args[i + 1]);
+            parsed.Add(args[i], args[++i]);
         }
         return parsed;
     }
@@ -171,6 +178,12 @@ internal sealed class ProbeForm : Form
             };
             File.WriteAllText(_receipt, JsonSerializer.Serialize(receipt, new JsonSerializerOptions { WriteIndented = true }));
             Text += " | Receipt: " + _receipt;
+            if (_batch)
+            {
+                Environment.ExitCode = _checks.Values.Any(v =>
+                    JsonSerializer.Serialize(v).Contains("\\\"FAIL\\\"")) ? 1 : 0;
+                BeginInvoke(new Action(Close));
+            }
         }
     }
 
