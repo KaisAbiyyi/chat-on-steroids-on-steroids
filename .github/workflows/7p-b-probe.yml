@@ -1,0 +1,97 @@
+name: 7P-B Synthetic Browser Probe CI
+
+on:
+  push:
+    branches: ["work/7p-b-*"]
+    paths:
+      - "probes/7p-b/**"
+      - ".github/workflows/7p-b-probe.yml"
+  pull_request:
+    paths:
+      - "probes/7p-b/**"
+      - ".github/workflows/7p-b-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run headless target authorization regressions
+        run: dotnet run --project probes/7p-b/PolicyTests/PolicyTests.csproj --configuration Release
+      - name: Validate manifest, forbidden capability claims and renderer contract
+        run: node probes/7p-b/tools/check_contract.mjs
+      - name: Install actual renderer libraries
+        working-directory: probes/7p-b/renderer
+        run: npm install --no-audit --no-fund
+      - name: Compile real renderer bundle
+        working-directory: probes/7p-b/renderer
+        run: npm run build
+
+  windows-webview2-compile:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile real WinForms WebView2 adapter
+        run: dotnet build probes/7p-b/WindowsHost/WindowsHost.csproj --configuration Release -warnaserror
+      - name: Native gate expressly separate
+        shell: pwsh
+        run: |
+          Write-Output '7P-B compile PASS is NOT actual WebView2 runtime, MV3, chrome.debugger or physical Windows 7P-L1 acceptance.'
+
+  windows-ephemeral-runtime:
+    # An ephemeral GitHub-hosted session is useful evidence if its GUI exists,
+    # but it cannot qualify a physical 7P-L1 desktop.
+    runs-on: windows-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install renderer in native working directory
+        working-directory: probes/7p-b/renderer
+        run: npm install --no-audit --no-fund
+      - name: Build renderer bundle
+        working-directory: probes/7p-b/renderer
+        run: npm run build
+      - name: Compile synthetic WebView2 GUI host
+        run: dotnet build probes/7p-b/WindowsHost/WindowsHost.csproj --configuration Release
+      - name: Try actual isolated WebView2 on hosted Windows (no real profiles)
+        shell: pwsh
+        timeout-minutes: 3
+        run: |
+          $outDir = Join-Path $env:RUNNER_TEMP 'cos-7p-b'
+          $assets = Join-Path $env:GITHUB_WORKSPACE 'probes\7p-b\renderer\dist'
+          $ext = Join-Path $env:GITHUB_WORKSPACE 'probes\7p-b\extension'
+          dotnet run --project probes/7p-b/WindowsHost/WindowsHost.csproj --configuration Release --no-build -- --batch --out "$outDir" --assets "$assets" --extension "$ext"
+          if (Test-Path (Join-Path $outDir 'receipt.json')) {
+            Get-Content (Join-Path $outDir 'receipt.json')
+          } else {
+            throw 'No GUI probe receipt: runner not a qualified browser host'
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 7p-b-hosted-windows-runtime-receipt
+          path: ${{ runner.temp }}/cos-7p-b/receipt.json
+          if-no-files-found: warn

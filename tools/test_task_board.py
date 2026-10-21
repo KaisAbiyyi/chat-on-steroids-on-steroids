@@ -55,7 +55,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_accepted_browser_architecture_unlocks_only_the_cloud_host_probe(self):
+    def test_accepted_cloud_browser_probe_unlocks_only_native_windows_gate(self):
         ready, _ = board.readiness(self.data)
         ready_ids = {task["id"] for task in ready}
         for task in ready:
@@ -69,17 +69,24 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(self.tasks["7P-A"]["status"], "done")
         self.assertEqual(self.tasks["7P-A"]["kind"], "C")
         self.assertNotIn("7P-A", ready_ids)
-        self.assertIn("7P-B", ready_ids)
+        self.assertNotIn("7P-B", ready_ids)
         self.assertEqual(self.tasks["7P-B"]["kind"], "C")
-        self.assertNotIn("7P-L1", ready_ids)
+        self.assertEqual(self.tasks["7P-B"]["status"], "done")
+        self.assertIn("7P-L1", ready_ids)
+        self.assertEqual(self.tasks["7P-L1"]["kind"], "L")
+        self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7P-L1"]))
         self.assertNotIn("7A", ready_ids)
-        # Reopening a decision must immediately revoke its dependent host unit.
+        # Reopening architecture must also reopen downstream browser probe;
+        # the local gate can never be offered before both are accepted.
         hypothetical = copy.deepcopy(self.data)
-        next(t for t in hypothetical["tasks"] if t["id"] == "7P-A")["status"] = "todo"
+        for task in hypothetical["tasks"]:
+            if task["id"] in ("7P-A", "7P-B"):
+                task["status"] = "todo"
         gated, _ = board.readiness(hypothetical)
         gated_ids = {t["id"] for t in gated}
         self.assertIn("7P-A", gated_ids)
         self.assertNotIn("7P-B", gated_ids)
+        self.assertNotIn("7P-L1", gated_ids)
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
@@ -115,7 +122,7 @@ class TaskBoardTests(unittest.TestCase):
         # A synthetic rollback of CL-L6 must also roll back its already
         # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A"):
+            if task["id"] in ("CL-L6", "7P-A", "7P-B"):
                 task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]

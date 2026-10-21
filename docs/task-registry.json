@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
   "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed.",
-  "task_status_source": "2026-10-22: 7P-A cloud architecture preflight ACCEPTED: PR #40 exact head abdd8cb7 Windows/Ubuntu Task DAG run 39645008280 and Rust run 39645008311 PASS; internal source review; squash merged main SHA 9c20086389fcb820bc3d8c6751576b8bd8f8694e. 12-gate provisional Windows WebView2 + Rust + JS/TS hybrid contract accepted, but real embedded browser/native runtime remains NOT VERIFIED. 7P-A claim released, 7P-B cloud READY_CANDIDATE (unclaimed), 7P-L1 local Windows blocked until 7P-B and before 7A.",
+  "task_status_source": "2026-10-22: 7P-B cloud synthetic WebView2/MV3/UI probe implementation in PR #41, reviewer-qualified merge required to accept this registry transition. Windows hosted WebView2 154.0.4258.62 probe executable source 5c859abf: synthetic extension enable/disable, MAIN/ISOLATED script isolation, same-tab chrome.debugger attach/Runtime event/evaluate/detach, host CDP lease fencing, separate profiles, navigation refusal and real four-engine renderer PASS; source-bound receipt GitHub Actions run 39651659120. All 7P-B exact-head CI, Task DAG and Rust checks must PASS before PR #41 merges. Physical Windows native 7P-L1 remains NOT_RUN; only after merge does 7P-L1 become a local Windows READY_CANDIDATE, never auto-accepted; 7A stays blocked.",
   "tasks": [
     {
       "id": "CL-01",
@@ -347,7 +347,7 @@
       ],
       "phase": "7",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "7P-L1",
