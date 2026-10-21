@@ -112,7 +112,11 @@ class TaskBoardTests(unittest.TestCase):
         # A completed gate is excluded from forecasts. In a hypothetical
         # reopened native gate, every downstream phase must retain its order.
         future = copy.deepcopy(self.data)
-        next(task for task in future["tasks"] if task["id"] == "CL-L6")["status"] = "todo"
+        # A synthetic rollback of CL-L6 must also roll back its already
+        # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
+        for task in future["tasks"]:
+            if task["id"] in ("CL-L6", "7P-A"):
+                task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
