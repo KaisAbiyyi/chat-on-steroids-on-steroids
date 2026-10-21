@@ -47,3 +47,9 @@ The existing CL-04B, CL-04C, CL-L2, CL-L3, CL-L4, and CL-L5 DAG prerequisites ar
 - Claim: [docs/claims/CL-10.md](../claims/CL-10.md)
 - Final PR/CI: capture exact final PR head SHA, GitHub Actions Rust Windows/Ubuntu and Task DAG links, failures/retries and any reviewer/owner decision in the PR and Notion record **after they have actually completed**.
 - After accepted merge: make an atomic DAG/board/status change to `done`, release the claim, move Notion current focus to CL-L6. **Do not claim CL-L6 completed without separate native Windows evidence.**
+
+### Hosted CI timing regression discovered during independent audit
+
+- Multiple Ubuntu matrix runs failed `crates/cos-mcp/tests/code.rs` nondeterministically. Immediate synthetic nested calls could race script completion, and parallel tests competed for the deliberate process-wide four-code-run limit. The branch serializes this **test binary only** and explicitly waits for its delayed synthetic side effect to settle. No production admission cap or JS sandbox allowance was enlarged.
+- Ubuntu also exposed a stale assumption in `crates/cos-mcp/tests/kernel.rs::exec_text_contains_continuation_and_completion_metadata`: a real shell command may legitimately return a **running** session on a contended host, not an immediate completed session. The regression now inspects launch output privacy, polls its returned session ID through the real `write_stdin` tool, and asserts actual completion and exit code. The production process semantics were not changed.
+- The audit retains these initial failing CI attempts as negative evidence. Status must remain **Review** until the *new exact-head* cloud Windows and Ubuntu full matrix passes.
