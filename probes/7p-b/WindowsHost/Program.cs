@@ -82,14 +82,20 @@ internal sealed class ProbeForm : Form
             Mark("extension_install", "PASS", "Unpacked extension installed in both synthetic profiles.");
 
             // Fail-closed negative feature toggle: a new independent environment with extensions off.
+            // Environment creation MUST succeed first. Only the extension-install API
+            // throwing its documented COM failure can pass this negative assertion.
+            await SetupAsync(_negative, "disabled", enabled: false, install: false);
             try
             {
-                await SetupAsync(_negative, "disabled", enabled: false, install: true);
+                await _negative.CoreWebView2.Profile.AddBrowserExtensionAsync(_extension);
                 Mark("extension_disabled_refusal", "FAIL", "Unpacked extension unexpectedly installed with feature disabled.");
             }
-            catch (Exception ex)
+            catch (COMException ex)
             {
-                Mark("extension_disabled_refusal", "PASS", "Disabled environment refused install: " + ex.GetType().Name);
+                var installed = await _negative.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+                Mark("extension_disabled_refusal", installed.Count == 0 ? "PASS" : "FAIL",
+                    "Disabled extension add raised COM HRESULT " + ex.HResult.ToString("X8")
+                    + "; installed_count=" + installed.Count);
             }
 
             _a.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
@@ -117,9 +123,12 @@ internal sealed class ProbeForm : Form
             var hostCdp = await CdpTitleAsync(_a, own, "A", "tab-A");
             var hostCdpB = await CdpTitleAsync(_b, other, "B", "tab-B");
             var stale = _leases.Elect("A", "tab-A");
-            var staleRefused = ! _leases.Allows(own, "A", "tab-A");
-            Mark("debugger_target", hostCdp == "7P-B Synthetic" && hostCdpB == hostCdp && staleRefused
-                ? "PASS" : "FAIL", "Host CDP titles and stale logical lease rejection. This is NOT extension chrome.debugger.");
+            var staleRefused = !_leases.Allows(own, "A", "tab-A");
+            var staleCdpDenied = false;
+            try { await CdpTitleAsync(_a, own, "A", "tab-A"); }
+            catch (UnauthorizedAccessException) { staleCdpDenied = true; }
+            Mark("debugger_target", hostCdp == "7P-B Synthetic" && hostCdpB == hostCdp && staleRefused && staleCdpDenied
+                ? "PASS" : "FAIL", "Host CDP titles and actual stale CDP method denial. This is NOT extension chrome.debugger.");
             _leases.Close(stale);
             _leases.Close(other);
 
@@ -127,6 +136,15 @@ internal sealed class ProbeForm : Form
             var cross = await EvaluateStringAsync(_b, "localStorage.getItem('cos7pb') ?? 'none'");
             Mark("tab_profile_isolation", cross == "none" ? "PASS" : "FAIL",
                 "Synthetic profile B cannot read profile A storage. Physical device repetition pending.");
+
+            // Refuse externally addressed navigation; no external request may be sent.
+            var priorBlocked = _trace.Count;
+            _a.CoreWebView2.Navigate("https://external.example.org/should-not-load");
+            await Task.Delay(300);
+            Mark("browser_navigation",
+                _trace.Count > priorBlocked && _a.CoreWebView2.Source.StartsWith("https://synthetic.cos.test/", StringComparison.Ordinal)
+                    ? "PASS" : "FAIL",
+                "Attempted non-synthetic target canceled by NavigationStarting allowlist.");
 
             var components = await EvaluateStringAsync(_a, "document.documentElement.dataset.componentResults");
             Mark("pdf_math_terminal", components == "ready" ? "PASS" : "FAIL",
