@@ -125,8 +125,10 @@ internal sealed class ProbeForm : Form
             var worker = await WaitForAsync(_a, "document.documentElement.dataset.cosWorkerAck");
             var debugger = await WaitForAsync(_a, "document.documentElement.dataset.cosDebugger");
             Mark("worker_message", worker == "ok" ? "PASS" : "FAIL", "Content -> MV3 worker -> content ACK=" + worker);
-            Mark("extension_debugger_api", debugger == "available" ? "OBSERVED_ONLY" : "UNVERIFIED",
-                "chrome.debugger.getTargets result=" + debugger + "; does NOT prove attach/detach parity.");
+            Mark("extension_debugger_api",
+                debugger == "roundtrip-event-detached" ? "PASS" : "UNVERIFIED",
+                "Synthetic chrome.debugger attach/evaluate/event/detach=" + debugger
+                + "; physical WebView2/worker-target parity remains a separate 7P-L1 gate.");
 
             // Host CDP and target-ownership are separate from chrome.debugger and must never be conflated.
             var own = _leases.Elect("A", "tab-A");

@@ -14,8 +14,16 @@ assert.equal(manifest.content_scripts.length, 2);
 assert.deepEqual(manifest.content_scripts.map(x => x.world).sort(), ["ISOLATED", "MAIN"]);
 assert.ok(!manifest.permissions.includes("cookies"));
 assert.ok(!manifest.permissions.includes("nativeMessaging"));
-assert.ok(read("extension/sw.js").includes("chrome.debugger.getTargets"));
-assert.ok(!read("extension/sw.js").includes("chrome.debugger.attach("), "no unauthorized attach");
+const worker = read("extension/sw.js");
+assert.ok(worker.includes("chrome.debugger.getTargets"));
+assert.ok(worker.includes("sender.tab") && worker.includes("senderUrl.startsWith(SYNTHETIC_ORIGIN)"),
+  "debugger must be bound to its own synthetic sender");
+assert.ok(worker.includes("t.tabId === tabId") && worker.includes("t.url.startsWith(SYNTHETIC_ORIGIN)"),
+  "never attach a target without exact synthetic-origin ownership");
+assert.ok(worker.includes("chrome.debugger.attach(") && worker.includes("chrome.debugger.detach("),
+  "synthetic debugger must test both attach and detach");
+assert.ok(worker.includes("Runtime.consoleAPICalled"),
+  "synthetic debugger must check event arrival, not only API existence");
 assert.ok(read("WindowsHost/Program.cs").includes("AllowSingleSignOnUsingOSPrimaryAccount = false"));
 assert.ok(read("WindowsHost/Program.cs").includes("AreBrowserExtensionsEnabled = enabled"));
 assert.ok(read("WindowsHost/Program.cs").includes("native7PL1Accepted = false"));
