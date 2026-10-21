@@ -1,0 +1,61 @@
+{
+  "unit": "CL-L5",
+  "date": "2026-10-21",
+  "status": "PASS",
+  "github_sha_under_test": "bc4ba8657ed8f084894cc859ad6a4a3a7fbb48b4",
+  "prerequisites": {
+    "CL-09B": "GitHub PR #30 merged",
+    "CL-09C": "GitHub PR #31 merged"
+  },
+  "host": {
+    "os": "Windows 11 x64, NT build 26300.9711",
+    "filesystem": "D: NTFS",
+    "worktree": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l5\\worktree",
+    "test_temp": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l5\\tmp",
+    "cargo_home": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\cargo-home",
+    "target": "D:\\projects\\CoS-Rust\\target"
+  },
+  "native_tests": {
+    "cos_mcp": {
+      "passed": 55,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "log_stdout_sha256": "84e62dbcae5f655ed58c5cc374c9c0f5ace9e6748d11dd21eedf8b97165b99a6",
+      "log_stderr_sha256": "fb73d3730f7b62ba82bc0e85b184dc5b87c4096bbc1e4ea58389619eac6d3f75"
+    },
+    "rustfmt": {"status": "PASS", "exit_code": 0, "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+    "strict_clippy": {"status": "PASS", "exit_code": 0, "stderr_sha256": "e1c8ebeff322cdcdf090af20515c57d11091170115ffd724369c202a5e9c9ccd"},
+    "release_build": {"status": "PASS", "exit_code": 0, "stderr_sha256": "43d6eadf6ee0ebf666b0bbc96d05f7d498be8373ca511ea3148fe75b468233a2"},
+    "external_native_harness": {
+      "passed": 15,
+      "failed": 0,
+      "exit_code": 0,
+      "synthetic_only": true,
+      "receipt_sha256": "1fb4bb1102109be4bc7d1da743d7d3dd6142e07f69d72b9c5d871689a3e58ba6",
+      "script_sha256": "212861137839b69fe7d8817a910690cd14fce141f1c5370f8c0bd4545c152f85"
+    }
+  },
+  "release_executable": {
+    "bytes": 12853760,
+    "sha256": "76b03ea16a767171941044a638b51212d1bda159ad6c6c2338135cd736e18d11"
+  },
+  "harness_history": {
+    "first_trial_status": "FAIL: incorrect expected status for empty JSON-RPC request to new endpoint",
+    "first_trial_receipt_sha256": "1192d1a1240d8ede4c2f39bfd18e5d7c9f7ff276e658a509255046341ee6d603",
+    "second_trial_status": "FAIL: incorrect expected old endpoint port to remain accepting after cold restart",
+    "second_trial_receipt_sha256": "28a41d9fc1b1e2658f96257fa40dd7463814aee8f34ff1eb2a64bb4c64889eea",
+    "corrected_third_trial_status": "PASS: 15 checks, new fresh synthetic profile",
+    "initial_cargo_capture": "PowerShell merged stderr pipeline returned wrapper exit 1; a separate explicit-exit-code rerun returned Cargo 0 and 55 PASS"
+  },
+  "local_evidence_directory": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l5\\evidence",
+  "privacy": "No real provider profiles, user tokens, tunnels, or external hosts; raw bearer tokens and MCP capability URLs were never persisted to evidence",
+  "limits": [
+    "Headless service only, not native desktop/browser/installer acceptance",
+    "External tunnel/proxy, real cloud control-plane and provider sign-in NOT RUN",
+    "No matched resource baseline or performance improvement claim",
+    "15 external runtime checks are synthetic client scenarios, not production authentication or remote-host qualification"
+  ],
+  "you_required": "NO",
+  "next": "CL-10 cloud independent backend closure review, then CL-L6 Windows integrated release"
+}

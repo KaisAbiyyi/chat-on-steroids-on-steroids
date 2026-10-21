@@ -6,6 +6,8 @@
 
 **CL-L4 local update (2026-10-21):** Native Windows startup/config/DPAPI/diagnostics/shutdown **DONE / PASS** at exact main `048e327`; [receipt](../audit/2026-10-21/cl-l4-048e327-receipt.json), [native details](implementation-summary/2026-10-21-cl-l4-native-windows-qualification.md). `CL-08B` [PR #29](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/29) merged; only `CL-L5` remains an outstanding native prerequisite of `CL-10`. The earlier snapshot immediately above is historical.
 
+**CL-L5 local update (2026-10-21):** Live native Windows loopback MCP/control/code-worker gate **DONE / PASS** on exact merged main `bc4ba86`: `cos-mcp` 55/55 PASS and external native scenarios 15/15 PASS. See [source-bound receipt](../audit/2026-10-21/cl-l5-bc4ba86-receipt.json) and [implementation summary](implementation-summary/2026-10-21-cl-l5-native-windows-qualification.md). `CL-10` integrated backend/cloud independent review is the next **READY CANDIDATE**, pending live CI/claims/review. `CL-L6` native release remains blocked by `CL-10`. All earlier progress paragraphs above are historical.
+
 ## Claim syntax / authority
 
 Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspect the latest claim/PR registry and state `CLAIM <ID>, owner session, base SHA, resource lock(s), branch, planned test` before editing. Claims are **not preassigned** to ChatGPT or Codex. Without an atomic controller, a single coordinator serializes write conflicts. Report-only inspections do not acquire write ownership; continuation after interrupted browser/quota requires fenced transfer and reconciliation with last remote checkpoint.
@@ -45,8 +47,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `CL-09A` | MCP schema/errors/permission conformance | `CL-L1` | `mcp-protocol` | C (cloud) | DONE |
 | `CL-09B` | Connection retries/proxy/health/tunnel teardown | `CL-09A` | `mcp-transport` | C (cloud) | DONE |
 | `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | DONE |
-| `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | **READY · PARALLEL** |
-| `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | BLOCKED |
+| `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | DONE |
+| `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | **READY · PARALLEL** |
 | `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | BLOCKED |
 | `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | BLOCKED |
 | `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | BLOCKED |
