@@ -1,5 +1,13 @@
 # Current CoS-Rust work state
 
+## CL-L2 native Windows qualification PASS — 2026-10-21
+
+- **LOCAL ACCEPTED:** `CL-L2` native Windows pipes, ConPTY, CMD/PowerShell shells, live output and process custody plus client OpenSSH over an isolated loopback SSH server. Exact qualifying GitHub `main` SHA: `ea8ab7a18c3f783eaaaf88310a9c2df5f29ea337` (contains merged [CL-05B PR #26](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/26)). Exact SHA GitHub Windows/Linux Rust and DAG CI succeeded.
+- **NATIVE CHECKS:** Windows 11 x64 build 26300; all 29 `cos-exec` tests PASS, 2 ephemeral additional Rust native SSH tests PASS, `cargo fmt --all --check` and strict `cargo clippy -p cos-exec --all-targets` PASS. SSH client used `C:\Windows\System32\OpenSSH\ssh.exe` with an isolated ephemeral 127.0.0.1:32222 fixture: success/remote exit 7, changed host key and unauthorized key refused, cross-owner control denied, owned termination and retirement PASS.
+- **RECEIPTS:** [dated local gate report](implementation-summary/2026-10-21-cl-l2-native-windows-qualification.md), [exact-SHA JSON receipt](../audit/2026-10-21/cl-l2-ea8ab7a-receipt.json). Full local logs and one-off test sources stay ignored under `D:\projects\CoS-Rust\.test-tmp\cl-l2\evidence`; synthetic SSH server was shut down. Original eight dirty local paths preserved.
+- **LIMITS:** The server is a synthetic SSH2 loopback fixture, not an actual external OpenSSH server. The native client and Rust process manager are real. Disposable real SFTP and filesystem transport are separately in `CL-L3`; no private profiles, human accounts, Docker/WSL or production host were accessed. No performance improvement claimed; all broader browser/desktop/installer acceptance remains open.
+- **NEXT:** `CL-L5` can run on the Windows host independently; `CL-L3` and `CL-L4` depend on their merged source units. `CL-10` remains blocked until `CL-L3`, `CL-L4`, and `CL-L5` all PASS. **YOU REQUIRED:** NO for CL-L2.
+
 ## CL B-unit merge receipts and two active repairs — 2026-10-21
 
 - **MERGED / cloud scope Done:** CL-05B [PR #26](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/26) merge `e5ad3754`; CL-06B [PR #27](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/27) merge `6856491d`; CL-09B [PR #30](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/30) merge `5b8c6d80`; CL-09C [PR #31](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/31) merge `28afd9ed`. All four final PR heads passed GitHub Windows/Ubuntu Rust matrix and Task DAG checks. Original source PR claims are released for their scoped cloud implementations.

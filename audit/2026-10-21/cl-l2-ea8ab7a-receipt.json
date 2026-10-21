@@ -1,0 +1,77 @@
+{
+  "unit": "CL-L2",
+  "date": "2026-10-21",
+  "timezone": "Asia/Jakarta",
+  "status": "PASS",
+  "source_git_sha": "ea8ab7a18c3f783eaaaf88310a9c2df5f29ea337",
+  "prerequisite": {
+    "unit": "CL-05B",
+    "merge_sha": "e5ad3754c08c0c4edcd57ffa20ac875ce5b740fb",
+    "pull_request": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/26"
+  },
+  "cloud_ci": {
+    "windows_linux_rust": "PASS https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39532713363",
+    "task_dag": "PASS https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39532713391"
+  },
+  "host": {
+    "os": "Microsoft Windows 11 Home Single Language",
+    "build": "26300",
+    "architecture": "x64",
+    "cargo": "1.91.1",
+    "target_drive": "D:",
+    "qualification_checkout": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l2\\checkout",
+    "client_ssh": "C:\\Windows\\System32\\OpenSSH\\ssh.exe"
+  },
+  "native_test_runs": [
+    {
+      "name": "cos-exec Windows library and integration",
+      "command": "cargo test -p cos-exec --locked --offline -j 4 -- --test-threads=2",
+      "passed": 29,
+      "failed": 0,
+      "ignored": 0,
+      "local_log": ".test-tmp/cl-l2/evidence/cos-exec.log",
+      "sha256_log": "fdbfe80f212547080fba8046fb8e31fbb2858e5910b6b44c2d53198bc385698f"
+    },
+    {
+      "name": "ephemeral Rust process manager with real Windows OpenSSH client",
+      "command": "cargo test -p cos-exec --locked --offline -j 4 --test cl_l2_native_ssh -- --nocapture --test-threads=1",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "local_log": ".test-tmp/cl-l2/evidence/native-ssh.log",
+      "sha256_log": "087d78e2e2f7bb0f72dd074ffe7c82c8dafbbdce0d947857bf916a244315974b",
+      "local_test_source": ".test-tmp/cl-l2/evidence/cl_l2_native_ssh.rs",
+      "sha256_test_source": "05876e50ac3002adb2d84dee598786c34aeaf58203d5ff3daff50c800b1b687eb"
+    },
+    {
+      "name": "cargo fmt --all --check",
+      "status": "PASS"
+    },
+    {
+      "name": "cargo clippy -p cos-exec --all-targets --locked --offline -j 4 -- -D warnings",
+      "status": "PASS"
+    }
+  ],
+  "observed_native_checks": [
+    "CMD pipes and exit 7 with verbatim PTY quoting",
+    "PowerShell ConPTY input, resize, interrupt, output replay and backpressure",
+    "owner-bound process lifecycle, revoked/foreign custody refused, correct completion",
+    "native OpenSSH public-key login and remote exit 7",
+    "changed host key refused (255), unauthorized key refused (255)",
+    "SSH foreign owner denied poll and terminate, owned termination and retirement",
+    "SSH fixture process stopped and loopback listener closed"
+  ],
+  "fixture": {
+    "server": "synthetic Node ssh2 1.17.0 SSH service; 127.0.0.1:32222 only",
+    "keys": "ephemeral test-only D: keys, never committed",
+    "personal_credentials_used": false,
+    "external_openssh_server": "NOT RUN",
+    "native_sftp": "NOT RUN; assigned to CL-L3",
+    "docker_wsl": "NOT RUN due to unverified Windows backing disk",
+    "stopped": true
+  },
+  "local_previous_work_preserved": true,
+  "performance": "NOT MEASURED",
+  "manual_user_action": "NO",
+  "next": ["CL-L5", "CL-L3", "CL-L4", "CL-10 after all native prerequisites"]
+}
