@@ -161,6 +161,10 @@ fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
         &tools(),
         Arc::new(move |_, _| {
             observed.fetch_add(1, Ordering::AcqRel);
+            // Preserve a genuinely in-flight mutation when the unawaited
+            // script completes. An instant callback races the JS completion
+            // job and does not test the unsettled-call contract reliably.
+            std::thread::sleep(std::time::Duration::from_millis(50));
             json!({"content":[]})
         }),
         Limits::default(),
