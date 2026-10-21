@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
   "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed.",
-  "task_status_source": "2026-10-22: 7P-A provisional browser architecture decision (Windows WebView2 Rust host + explicit JS/TS hybrid renderer), fail-closed 12-capability preflight contract and cloud Windows/Ubuntu regressions, reviewed in PR #40. Once accepted/merged on main, 7P-B is the next cloud READY_CANDIDATE; 7P-L1 physical Windows viability remains untested and blocks 7A. CL-L6 previously accepted via PR #39. Live claims/CI/merge receipt still required before using snapshot.",
+  "task_status_source": "2026-10-22: 7P-A cloud architecture preflight ACCEPTED: PR #40 exact head abdd8cb7 Windows/Ubuntu Task DAG run 39645008280 and Rust run 39645008311 PASS; internal source review; squash merged main SHA 9c20086389fcb820bc3d8c6751576b8bd8f8694e. 12-gate provisional Windows WebView2 + Rust + JS/TS hybrid contract accepted, but real embedded browser/native runtime remains NOT VERIFIED. 7P-A claim released, 7P-B cloud READY_CANDIDATE (unclaimed), 7P-L1 local Windows blocked until 7P-B and before 7A.",
   "tasks": [
     {
       "id": "CL-01",
