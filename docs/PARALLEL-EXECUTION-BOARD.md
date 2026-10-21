@@ -2,7 +2,7 @@
 
 **Current execution board:** 2026-10-21; canonical DAG in [`docs/task-registry.json`](task-registry.json). Historical phase plans remain reference material, not live eligibility. This board indexes **existing** detailed task contracts in [the CL/phase unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and [the BIG plan](BIG-IMPLEMENTATION-PLAN.md). See [current phase](CURRENT-PHASE.md) for live status and [orchestration policy](AGENT-ORCHESTRATION.md) for claims. This is a planning overlay, not evidence that any future unit passed.
 
-**Latest native receipt (2026-10-21):** `CL-L2` Windows process/ConPTY/OpenSSH client **DONE / PASS** on merged main SHA `ea8ab7a18c3f783eaaaf88310a9c2df5f29ea337`; details in [qualification evidence](implementation-summary/2026-10-21-cl-l2-native-windows-qualification.md). `CL-L5` is a distinct ready local gate; `CL-L3` and `CL-L4` require separate native qualification. Earlier dated progress below is retained as a snapshot.
+**Latest native receipt (2026-10-21):** `CL-L3` NTFS, watcher, file panel/search and real OpenSSH SFTP server **DONE / PASS** on merged main SHA `ce7d2ef0df3e1b62a98664fade70a825d6f9d72e`; see [qualification evidence](implementation-summary/2026-10-21-cl-l3-native-windows-qualification.md). `CL-L2` was previously accepted on `ea8ab7a`; `CL-L4` and `CL-L5` remain separate native gates, and `CL-10` awaits both. Earlier dated progress below is a historical snapshot.
 
 ## Claim syntax / authority
 
@@ -35,8 +35,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `CL-06A` | Git/project/file-panel/watcher parity | `CL-L1` | `project-files` | C (cloud) | DONE |
 | `CL-06B` | SFTP authorization/containment/native errors | `CL-06A` | `sftp` | C (cloud) | DONE |
 | `CL-07A` | Search/patch traversal and transactional parity | `CL-L1` | `search-patch` | C (cloud) | DONE |
-| `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | BLOCKED |
-| `CL-L3` | NTFS file-panel/search + native SFTP proof | `CL-06B`, `CL-07B` | `windows-files` | L (Windows) | BLOCKED |
+| `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | DONE |
+| `CL-L3` | NTFS file-panel/search + native SFTP proof | `CL-06B`, `CL-07B` | `windows-files` | L (Windows) | DONE |
 | `CL-08A` | Windows startup/config/secret-store integration | `CL-L1` | `runtime-secrets` | C (cloud) | DONE |
 | `CL-08B` | Diagnostics/logging/awake/shutdown bounded behavior | `CL-08A` | `runtime-diagnostics` | C (cloud) | BLOCKED |
 | `CL-L4` | Native startup/secret/diagnostics resource proof | `CL-08B` | `windows-startup` | L (Windows) | BLOCKED |

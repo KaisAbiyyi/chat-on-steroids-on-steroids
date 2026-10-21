@@ -1,0 +1,61 @@
+{
+  "unit": "CL-L3",
+  "status": "PASS",
+  "date": "2026-10-21",
+  "github_sha_under_test": "ce7d2ef0df3e1b62a98664fade70a825d6f9d72e",
+  "prerequisites": {
+    "CL-06B": "PR #27 merged as 6856491deddfecbf6e0897f4dccb418040cb06d6",
+    "CL-07B": "PR #28 merged as 7b876894f80865d4723960bbfd5e0d16e167d482"
+  },
+  "github_ci": {
+    "rust_windows_linux": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39545344458",
+    "task_dag": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39545344361",
+    "status": "PASS"
+  },
+  "host": {
+    "os": "Windows 11 x64, NT build 26300",
+    "filesystem": "D: NTFS",
+    "worktree": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\worktree",
+    "test_temp": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\tmp",
+    "cargo_home": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\cargo-home",
+    "target": "D:\\projects\\CoS-Rust\\target"
+  },
+  "native_tests": {
+    "command": "cargo test -p cos-tools --tests --locked --offline -j 4 -- --test-threads=2",
+    "exit_code": 0,
+    "result_groups": 24,
+    "passed": 95,
+    "failed": 0,
+    "ignored": 0,
+    "scope": [
+      "NTFS junction traversal refusal and file transaction rollback",
+      "project file-panel listing, preview, save/revision and junction containment",
+      "native Git watch rebind, stale events and ref-directory recreation within debounce",
+      "search root containment, native traversal ordering, regex and deadline cases",
+      "real OpenSSH sftp-server.exe v3 subsystem round-trip over process pipes",
+      "SFTP staging, permission revocation, read/write/rename/patch and malformed path handling"
+    ],
+    "raw_log_sha256": "5fb9a69b8c120a70f87b2f64661c121a14859ad489ff8e5bbb9746d048948746"
+  },
+  "clippy": {
+    "command": "cargo clippy -p cos-tools --all-targets --locked --offline -j 4 -- -D warnings",
+    "exit_code": 0,
+    "raw_log_sha256": "0452c03b4af3e537d7d398b070c980a52036c5cbf2726c512dfba44629ad054b"
+  },
+  "rustfmt": {
+    "command": "cargo fmt --all --check",
+    "exit_code": 0,
+    "raw_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "qualification_script_sha256": "d199730c0b3da3843d120012608fa84bc66272bc61fab68596a52408cbdadf7e",
+  "local_evidence_directory": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\evidence",
+  "leftover_sftp_server_processes": 0,
+  "performance": "NOT MEASURED; test duration and fixture size do not prove a performance improvement",
+  "limitations": [
+    "SFTP server is the real installed Git for Windows OpenSSH sftp-server.exe driven over process pipes; no external SSH daemon or network SFTP host was qualified",
+    "No hostile remote server, private user SSH credentials, Docker/WSL, browser or installed desktop tested",
+    "Historical local dirty recorder/caption files were preserved"
+  ],
+  "you_required": "NO",
+  "next": "CL-L4 and CL-L5 remain separate; CL-10 requires their native PASS and accepted evidence"
+}
