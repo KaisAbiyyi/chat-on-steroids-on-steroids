@@ -33,34 +33,62 @@ pub fn redact(text: &str) -> String {
     }
     out
 }
+const MAX_DIAGNOSTIC_BYTES: usize = 4 * 1024 * 1024;
+#[derive(Default)]
+struct LogEntries {
+    rows: VecDeque<(Value, usize)>,
+    total_bytes: usize,
+}
 pub struct DiagnosticLog {
     capacity: usize,
-    entries: Mutex<VecDeque<Value>>,
+    entries: Mutex<LogEntries>,
 }
 impl DiagnosticLog {
     pub fn new(capacity: usize) -> Self {
         Self {
             capacity: capacity.clamp(1, 10000),
-            entries: Mutex::new(VecDeque::new()),
+            entries: Mutex::new(LogEntries::default()),
         }
     }
     pub fn push(&self, level: &str, message: &str) {
-        let mut entries = self.entries.lock().expect("diagnostic owner");
-        let clean = redact(message);
+        // Reject an oversized diagnostic in full, not a prefix of a credential.
+        const MAX_INPUT_BYTES: usize = 1024 * 1024;
+        let level = match level {
+            "trace" | "debug" | "info" | "warn" | "error" => level,
+            _ => "unknown",
+        };
+        let clean = if message.len() > MAX_INPUT_BYTES {
+            "[diagnostic omitted: size limit]".to_owned()
+        } else {
+            redact(message)
+        };
         let bounded: String = clean.chars().take(16000).collect();
-        entries.push_back(
-            json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded}),
-        );
-        while entries.len() > self.capacity {
-            entries.pop_front();
+        let mut entries = self
+            .entries
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let record =
+            json!({"time":chrono::Utc::now().timestamp_millis(),"level":level,"message":bounded});
+        // Count encoded bytes rather than only entries so a large ring never
+        // becomes an unbounded RAM report under repeated long diagnostics.
+        let bytes = serde_json::to_vec(&record)
+            .expect("bounded diagnostic JSON")
+            .len();
+        entries.total_bytes += bytes;
+        entries.rows.push_back((record, bytes));
+        while entries.rows.len() > self.capacity || entries.total_bytes > MAX_DIAGNOSTIC_BYTES {
+            if let Some((_, old_bytes)) = entries.rows.pop_front() {
+                entries.total_bytes -= old_bytes;
+            }
         }
     }
     pub fn snapshot(&self) -> Vec<Value> {
         self.entries
             .lock()
-            .expect("diagnostic owner")
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .rows
             .iter()
-            .cloned()
+            .map(|(entry, _)| entry.clone())
             .collect()
     }
     pub fn export(&self) -> String {

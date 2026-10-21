@@ -92,10 +92,19 @@ pub struct AwakeGuard(std::marker::PhantomData<std::rc::Rc<()>>);
 #[cfg(windows)]
 impl AwakeGuard {
     pub fn acquire() -> io::Result<Self> {
+        Self::acquire_with_screen(false)
+    }
+
+    /// The guard remains on the acquiring thread for its entire lifetime.
+    pub fn acquire_with_screen(keep_screen_on: bool) -> io::Result<Self> {
         use windows_sys::Win32::System::Power::{
-            ES_CONTINUOUS, ES_SYSTEM_REQUIRED, SetThreadExecutionState,
+            ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED, SetThreadExecutionState,
         };
-        if unsafe { SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED) } == 0 {
+        let mut state = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
+        if keep_screen_on {
+            state |= ES_DISPLAY_REQUIRED;
+        }
+        if unsafe { SetThreadExecutionState(state) } == 0 {
             Err(io::Error::last_os_error())
         } else {
             Ok(Self(std::marker::PhantomData))
