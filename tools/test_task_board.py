@@ -55,15 +55,29 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_candidates_are_native_host_gates(self):
+    def test_current_ready_candidates_respect_all_gates_and_unlock_backend_review(self):
         ready, _ = board.readiness(self.data)
         ready_ids = {task["id"] for task in ready}
-        self.assertTrue(ready_ids)
-        self.assertTrue(ready_ids.issubset({"CL-L2", "CL-L3", "CL-L4", "CL-L5"}))
-        if self.tasks["CL-L2"]["status"] == "done":
-            self.assertNotIn("CL-L2", ready_ids)
-        self.assertTrue(all(task["kind"] == "L" for task in ready))
-        self.assertTrue(all("physical-windows-host" in board.effective_locks(t) for t in ready))
+        for task in ready:
+            self.assertEqual(task["status"], "todo")
+            self.assertTrue(all(self.tasks[dep]["status"] == "done" for dep in task["depends_on"]))
+            if task["kind"] == "L":
+                self.assertIn("physical-windows-host", board.effective_locks(task))
+            if task["kind"] == "U":
+                self.assertIn("human-owner", board.effective_locks(task))
+        self.assertEqual(self.tasks["CL-L5"]["status"], "done")
+        self.assertNotIn("CL-L5", ready_ids)
+        self.assertIn("CL-10", ready_ids)
+        self.assertEqual(self.tasks["CL-10"]["kind"], "C")
+        self.assertNotIn("CL-L6", ready_ids)
+        # Reopening the local gate must block the cloud review, proving the
+        # transition uses actual accepted prerequisite state.
+        hypothetical = copy.deepcopy(self.data)
+        next(t for t in hypothetical["tasks"] if t["id"] == "CL-L5")["status"] = "todo"
+        gated, _ = board.readiness(hypothetical)
+        gated_ids = {t["id"] for t in gated}
+        self.assertIn("CL-L5", gated_ids)
+        self.assertNotIn("CL-10", gated_ids)
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
