@@ -93,21 +93,47 @@ internal sealed class ProbeForm : Form
             Mark("extension_install", "PASS", "Unpacked extension installed in both synthetic profiles.");
 
             // Fail-closed negative feature toggle: a new independent environment with extensions off.
-            // Environment creation MUST succeed first. Only the extension-install API
-            // throwing its documented COM failure can pass this negative assertion.
+            // The SDK explicitly permits enumerating previously installed extensions
+            // while disabled: refusal and non-execution, NOT empty inventory, are the contract.
             await SetupAsync(_negative, "disabled", enabled: false, install: false);
+            var beforeDisabled = await _negative.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            var beforeIds = beforeDisabled.Select(e => e.Id).OrderBy(id => id).ToArray();
+            var refused = false;
+            var disabledError = "none";
             try
             {
                 await _negative.CoreWebView2.Profile.AddBrowserExtensionAsync(_extension);
-                Mark("extension_disabled_refusal", "FAIL", "Unpacked extension unexpectedly installed with feature disabled.");
             }
             catch (COMException ex)
             {
-                var installed = await _negative.CoreWebView2.Profile.GetBrowserExtensionsAsync();
-                Mark("extension_disabled_refusal", installed.Count == 0 ? "PASS" : "FAIL",
-                    "Disabled extension add raised COM HRESULT " + ex.HResult.ToString("X8")
-                    + "; installed_count=" + installed.Count);
+                disabledError = ex.HResult.ToString("X8");
+                refused = ex.HResult == unchecked((int)0x80070032); // ERROR_NOT_SUPPORTED
             }
+            var afterDisabled = await _negative.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            var afterIds = afterDisabled.Select(e => e.Id).OrderBy(id => id).ToArray();
+            _negative.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
+            var disabledTitle = await WaitForAsync(_negative, "document.title");
+            var disabledMain = await EvaluateStringAsync(_negative, "typeof window.__cosMain");
+            var disabledIsolated = await EvaluateStringAsync(_negative,
+                "document.documentElement.dataset.cosIsolated ?? 'none'");
+            Mark("extension_disabled_refusal",
+                refused && beforeIds.SequenceEqual(afterIds)
+                    && disabledTitle == "7P-B Synthetic" && disabledMain == "undefined"
+                    && disabledIsolated == "none" ? "PASS" : "FAIL",
+                "HRESULT " + disabledError + ", before=" + beforeIds.Length
+                + ", after=" + afterIds.Length + ", MAIN=" + disabledMain
+                + ", ISOLATED=" + disabledIsolated
+                + "; installed inventory may persist but disabled extensions must not execute.");
+
+            var pathA = Path.GetFullPath(_a.CoreWebView2.Profile.ProfilePath);
+            var pathB = Path.GetFullPath(_b.CoreWebView2.Profile.ProfilePath);
+            var pathDisabled = Path.GetFullPath(_negative.CoreWebView2.Profile.ProfilePath);
+            Mark("profile_directories",
+                !string.Equals(pathA, pathB, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(pathA, pathDisabled, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(pathB, pathDisabled, StringComparison.OrdinalIgnoreCase)
+                  ? "PASS" : "FAIL",
+                "Physical profile paths: A=" + pathA + ", B=" + pathB + ", disabled=" + pathDisabled);
 
             _a.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
             _b.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
