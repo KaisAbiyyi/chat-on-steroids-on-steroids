@@ -63,6 +63,9 @@ pub fn run(
     invoke: Invoke,
     limits: Limits,
 ) -> Value {
+    if !limits.valid() || code.trim().is_empty() || cos_core::config::js_len(code) > 64_000 {
+        return crate::code::error("RESOURCE_LIMIT");
+    }
     if ACTIVE
         .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
             if n < 4 { Some(n + 1) } else { None }
@@ -138,6 +141,8 @@ pub fn run(
         .collect::<std::collections::BTreeSet<_>>();
     let pending = Arc::new(AtomicUsize::new(0));
     let mut calls = 0;
+    let mut seen_ids = std::collections::BTreeSet::new();
+    let nested_bytes = Arc::new(AtomicUsize::new(0));
     let mut emissions = vec![];
     let mut bytes = 0;
     let result = loop {
@@ -153,7 +158,12 @@ pub fn run(
                 let Some(name) = frame["name"].as_str() else {
                     break crate::code::error("BRIDGE_ERROR");
                 };
-                if !allowed.contains(name)
+                let Some(id) = frame["id"].as_u64().filter(|id| *id > 0) else {
+                    break crate::code::error("BRIDGE_ERROR");
+                };
+                if !seen_ids.insert(id)
+                    || !frame["args"].is_object()
+                    || !allowed.contains(name)
                     || matches!(name, "exec" | "session_finish")
                     || calls >= 32
                     || pending.load(Ordering::Acquire) >= 8
@@ -166,19 +176,27 @@ pub fn run(
                 let work = invoke.clone();
                 let name = name.to_string();
                 let args = frame["args"].clone();
-                let id = frame["id"].clone();
                 let writer = input.clone();
                 let pending = pending.clone();
                 let active = permit.clone();
+                let nested_bytes = nested_bytes.clone();
                 std::thread::spawn(move || {
                     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         work(&name, args)
                     }))
                     .unwrap_or_else(|_| crate::code::error("TOOL_ERROR"));
-                    let result = if result.to_string().len() > 12 * 1024 * 1024 {
-                        crate::code::error("RESULT_LIMIT")
-                    } else {
+                    let len = result.to_string().len();
+                    let admitted = len <= 12 * 1024 * 1024
+                        && nested_bytes
+                            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                                n.checked_add(len)
+                                    .filter(|total| *total <= 32 * 1024 * 1024)
+                            })
+                            .is_ok();
+                    let result = if admitted {
                         result
+                    } else {
+                        crate::code::error("RESULT_LIMIT")
                     };
                     let _ = write_frame(
                         &mut *writer.lock().unwrap(),
@@ -196,7 +214,12 @@ pub fn run(
                 }
                 emissions.push(item);
             }
-            Some("done") => break frame["result"].clone(),
+            Some("done") => {
+                if pending.load(Ordering::Acquire) != 0 {
+                    break crate::code::error("UNAWAITED_CALLS");
+                }
+                break frame["result"].clone();
+            }
             _ => break crate::code::error("BRIDGE_ERROR"),
         }
     };
