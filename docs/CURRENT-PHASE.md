@@ -1,5 +1,11 @@
 # Current CoS-Rust work state
 
+## CL-10 cloud integrated backend audit — ACTIVE (2026-10-21)
+
+- **CLOUD-ONLY CLAIM:** `CL-10`, owner session `chatgpt-20261021-cl10-01`, resource lock `backend-closure`; branch `work/cl-10-integrated-backend-20261021`; [draft PR #37](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/37). Accepted baseline GitHub `main` `d46c5cc98a87223ddacda8957a23b6714cb58061`.
+- **SCOPE:** bounded integrated Rust backend/service review for phase 1–6, cross-boundary regression tests (revoked capability/root, MCP surfaces, patch evidence, cold replay, sensitive recorder args), explicit [audit matrix](implementation-review/2026-10-21-cl10-integrated-backend-audit.md). All work via GitHub API and hosted Windows/Ubuntu CI. **No local file access or new native test.**
+- **CURRENT GATE:** independent sign-off and final-head Windows/Ubuntu format, Clippy, workspace tests, release and DAG verification. CI results are not accepted until exact PR head passes; CL-L6 stays blocked until reviewed/merged CL-10. Browser/desktop/installer and external accounts/hosts remain unqualified. **YOU REQUIRED: NO** for this cloud implementation.
+
 ## CL-L5 native Windows MCP and code-worker qualification PASS — 2026-10-21
 
 - **LOCAL ACCEPTED:** `CL-L5` ran on Windows 11 x64 build 26300.9711 / D: NTFS against merged GitHub `main` source `bc4ba8657ed8f084894cc859ad6a4a3a7fbb48b4` with prerequisites `CL-09B` [#30](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/30) and `CL-09C` [#31](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/31) merged. Checkout is the isolated `D:\projects\CoS-Rust\.test-tmp\cl-l5\worktree`; original eight recorder/caption WIP paths were untouched.
