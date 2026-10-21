@@ -1,6 +1,8 @@
 # CoSoS — full phase task dependency / parallel board
 
-**Current execution board:** 2026-10-21; canonical DAG in [`docs/task-registry.json`](task-registry.json). Historical phase plans remain reference material, not live eligibility. This board indexes **existing** detailed task contracts in [the CL/phase unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and [the BIG plan](BIG-IMPLEMENTATION-PLAN.md). See [current phase](CURRENT-PHASE.md) for live status and [orchestration policy](AGENT-ORCHESTRATION.md) for claims. This is a planning overlay, not evidence that any future unit passed.
+**Current execution board:** 2026-10-22; canonical DAG in [`docs/task-registry.json`](task-registry.json). Historical phase plans remain reference material, not live eligibility. This board indexes **existing** detailed task contracts in [the CL/phase unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and [the BIG plan](BIG-IMPLEMENTATION-PLAN.md). See [current phase](CURRENT-PHASE.md) for live status and [orchestration policy](AGENT-ORCHESTRATION.md) for claims. This is a planning overlay, not evidence that any future unit passed.
+
+**7P-A cloud architecture acceptance (2026-10-22; effective once PR #40 is merged):** Provisional Windows WebView2 + Rust host + explicit JS/TS renderer/extension glue; 12 fail-closed critical probes and a Windows/Ubuntu CI validator. [Decision](architecture/7p-a-browser-architecture.md), [contract](architecture/7p-a-feasibility-gates.json), [PR #40](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/40). Browser/native runtime remains **NOT RUN**; `7P-B` becomes cloud READY CANDIDATE, `7P-L1` stays blocked until 7P-B then requires a real Windows test. No 7A bridge eligibility. Earlier dated snapshots below are historical.
 
 **CL-L6 native release qualification (2026-10-21):** **PASS** at exact source `b85471c`: 312 Windows workspace tests, 17 live native service checks, fmt/Clippy/release, startup and RAM samples. [Local receipt](../audit/2026-10-21/cl-l6-b85471c-receipt.json) and [native gate report](implementation-summary/2026-10-21-cl-l6-native-windows-backend-qualification.md). `7P-A` is the next cloud **READY CANDIDATE**; `7P-B` remains blocked by 7P-A. This does not accept browser/UI architecture. Earlier dated snapshots below are historical.
 
@@ -52,8 +54,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | DONE |
 | `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | DONE |
 | `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | DONE |
-| `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | **READY · PARALLEL** |
-| `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | BLOCKED |
+| `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | DONE |
+| `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | **READY · PARALLEL** |
 | `7P-L1` | Real Windows embedded browser feasibility gate | `7P-B` | `windows-browser` | L (Windows) | BLOCKED |
 | `7A` | Browser bridge protocol 14/identity contract | `7P-L1` | `browser-protocol` | C (cloud) | BLOCKED |
 | `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | BLOCKED |
