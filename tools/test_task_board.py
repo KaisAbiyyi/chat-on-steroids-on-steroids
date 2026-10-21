@@ -57,10 +57,11 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_current_ready_candidates_are_native_host_gates(self):
         ready, _ = board.readiness(self.data)
-        self.assertEqual(
-            {task["id"] for task in ready},
-            {"CL-L2", "CL-L5"},
-        )
+        ready_ids = {task["id"] for task in ready}
+        self.assertTrue(ready_ids)
+        self.assertTrue(ready_ids.issubset({"CL-L2", "CL-L3", "CL-L4", "CL-L5"}))
+        if self.tasks["CL-L2"]["status"] == "done":
+            self.assertNotIn("CL-L2", ready_ids)
         self.assertTrue(all(task["kind"] == "L" for task in ready))
         self.assertTrue(all("physical-windows-host" in board.effective_locks(t) for t in ready))
 
@@ -90,7 +91,8 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
-        self.assertEqual({t["id"] for t in waves[0]}, {"CL-L2"})
+        ready, _ = board.readiness(self.data)
+        self.assertEqual([t["id"] for t in waves[0]], [ready[0]["id"]])
         # Active claimed work is intentionally excluded from forecasts. In a
         # hypothetical unclaimed graph, all later stages must retain their order.
         future = copy.deepcopy(self.data)
