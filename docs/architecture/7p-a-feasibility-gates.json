@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "task_id": "7P-A",
+  "decision": "PROVISIONAL",
+  "selected_architecture": "windows-webview2-rust-host-hybrid-renderer",
+  "selection_reason": "Shared Evergreen WebView2 runtime, browser-extension install and CDP host API are documented; real CoSoS extension parity is unverified and mandatory.",
+  "supported_for_probe": [
+    "windows-x64"
+  ],
+  "deferred_targets": [
+    "macos",
+    "linux"
+  ],
+  "source_baseline": "39cfa042478e33acfff41e27f3a41428042f0c03",
+  "prereq": "CL-L6",
+  "followup": [
+    "7P-B",
+    "7P-L1"
+  ],
+  "phase7_bridge_guard": "7P-L1",
+  "policy": {
+    "native_review_required": true,
+    "prevent_cloud_pass": true,
+    "allow_user_private_profiles": false,
+    "allow_automatic_send": false,
+    "extension_glue_language": "javascript-required; Rust/Wasm optional after direct proof",
+    "renderer_language": "TypeScript/JavaScript; accepted explicit hybrid exception"
+  },
+  "options": [
+    {
+      "id": "windows-webview2-rust-host-hybrid-renderer",
+      "status": "PROVISIONAL",
+      "tradeoff": "Small app distribution using shared Evergreen runtime; API/extension incompatibilities may block."
+    },
+    {
+      "id": "embedded-cef-chromium-host",
+      "status": "FALLBACK_UNVERIFIED",
+      "tradeoff": "Higher browser surface potential but nontrivial runtime distribution and API adapter; no size claim until measured."
+    },
+    {
+      "id": "external-browser-only",
+      "status": "REJECTED_AS_PARITY_REPLACEMENT",
+      "tradeoff": "Cannot silently replace required built-in browser tabs/profiles/sign-in workflows."
+    },
+    {
+      "id": "native-rust-ui-without-web-engine",
+      "status": "REJECTED_AS_BROWSER_REPLACEMENT",
+      "tradeoff": "Cannot host provider pages or required JS/DOM extension worlds."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "extension_install",
+      "owner": "browser-host",
+      "probe": "Enable browser extensions explicitly; install unpacked synthetic MV3 extension, read installed state, restart process; repeat with extensions disabled and verify fail-closed.",
+      "first_probe": "7P-B",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile7?view=webview2-1.0.4258.31",
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions6?view=webview2-1.0.2849.39"
+      ]
+    },
+    {
+      "id": "extension_worlds",
+      "owner": "extension",
+      "probe": "Run isolated content script and MAIN-world probe under a local CSP fixture; verify no privilege crossing.",
+      "first_probe": "7P-B",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle",
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+      ]
+    },
+    {
+      "id": "mv3_lifecycle",
+      "owner": "extension",
+      "probe": "Exercise service-worker termination/resume and no duplicated command/Send after restart.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle",
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+      ]
+    },
+    {
+      "id": "debugger_target",
+      "owner": "browser-host",
+      "probe": "Attach, detach and reattach debugger to correct tab/frame/worker; CDP error routing and target ID isolation.",
+      "first_probe": "7P-B",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2?view=webview2-1.0.2651.64",
+        "https://developer.chrome.com/docs/extensions/reference/api/debugger"
+      ]
+    },
+    {
+      "id": "extension_debugger_parity",
+      "owner": "extension",
+      "probe": "Verify exact chrome.debugger availability and authorized attach, or explicitly prove host adapter parity without silently changing semantics.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://developer.chrome.com/docs/extensions/reference/api/debugger",
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/browser-features"
+      ]
+    },
+    {
+      "id": "tab_profile_isolation",
+      "owner": "browser-host",
+      "probe": "Prove two tabs share intended profile, separate profiles do not share cookies/storage, and stale tab handle cannot act.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile7?view=webview2-1.0.4258.31",
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+      ]
+    },
+    {
+      "id": "browser_navigation",
+      "owner": "browser-host",
+      "probe": "Open/close/select/restart navigations using synthetic pages; forbidden schemes and user-closed tab reopening refused.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/browser-features",
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+      ]
+    },
+    {
+      "id": "bridge_auth_identity",
+      "owner": "bridge",
+      "probe": "Use local synthetic origin/nonce/session/document epoch and refuse cross-profile cross-tab stale epoch commands; observe-only.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+      ]
+    },
+    {
+      "id": "sign_in_constraints",
+      "owner": "browser-host",
+      "probe": "Document embedded sign-in/OAuth provider restrictions using synthetic flow; real provider/account stays U gate.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/browser-features"
+      ]
+    },
+    {
+      "id": "rich_editor",
+      "owner": "renderer",
+      "probe": "Render editable rich text and code editor with IME, selection, copy/paste, undo and keyboard accessibility fixture.",
+      "first_probe": "7P-B",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md",
+        "https://v2.tauri.app/reference/config/"
+      ]
+    },
+    {
+      "id": "pdf_math_terminal",
+      "owner": "renderer",
+      "probe": "Render selectable/searchable PDF, copyable KaTeX/math and interactive xterm/ANSI/resize fixtures; no static substitutes.",
+      "first_probe": "7P-B",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md",
+        "https://v2.tauri.app/reference/config/"
+      ]
+    },
+    {
+      "id": "distribution_budgets",
+      "owner": "release",
+      "probe": "Measure runtime installation mode, app/installer bytes and cold/warm memory with pinned fixtures; no improvement claimed from API docs.",
+      "first_probe": "7P-L1",
+      "hard_blocker": true,
+      "verification": "UNVERIFIED",
+      "sources": [
+        "https://v2.tauri.app/reference/config/",
+        "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+      ]
+    }
+  ],
+  "must_not_claim": [
+    "Full Chromium extension compatibility",
+    "Native Windows host verified",
+    "Rust-only end-to-end implementation",
+    "Browser/provider sign-in supported",
+    "Installed app <=80 MiB or payload <=200 MiB",
+    "macOS/Linux browser parity",
+    "Phase 7 bridge ready before 7P-L1 PASS"
+  ],
+  "references": {
+    "webview_extensions": "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile7?view=webview2-1.0.4258.31",
+    "webview_options": "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions6?view=webview2-1.0.2849.39",
+    "webview_cdp": "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2?view=webview2-1.0.2651.64",
+    "webview_limits": "https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/browser-features",
+    "chrome_debugger": "https://developer.chrome.com/docs/extensions/reference/api/debugger",
+    "chrome_mv3": "https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle",
+    "tauri_webview": "https://v2.tauri.app/reference/config/",
+    "upstream_parity": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/blob/39cfa042478e33acfff41e27f3a41428042f0c03/docs/research/2026-10-16-chat-on-steroids-deep-scan-v1.0.md"
+  }
+}

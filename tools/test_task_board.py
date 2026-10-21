@@ -55,7 +55,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_candidates_advance_to_browser_architecture_preflight(self):
+    def test_accepted_browser_architecture_unlocks_only_the_cloud_host_probe(self):
         ready, _ = board.readiness(self.data)
         ready_ids = {task["id"] for task in ready}
         for task in ready:
@@ -65,25 +65,21 @@ class TaskBoardTests(unittest.TestCase):
                 self.assertIn("physical-windows-host", board.effective_locks(task))
             if task["kind"] == "U":
                 self.assertIn("human-owner", board.effective_locks(task))
-        self.assertEqual(self.tasks["CL-L5"]["status"], "done")
-        self.assertNotIn("CL-L5", ready_ids)
-        self.assertEqual(self.tasks["CL-10"]["status"], "done")
-        self.assertNotIn("CL-10", ready_ids)
-        self.assertEqual(self.tasks["CL-10"]["kind"], "C")
         self.assertEqual(self.tasks["CL-L6"]["status"], "done")
-        self.assertNotIn("CL-L6", ready_ids)
-        self.assertEqual(self.tasks["CL-L6"]["kind"], "L")
-        self.assertIn("7P-A", ready_ids)
-        self.assertNotIn("7P-B", ready_ids)
+        self.assertEqual(self.tasks["7P-A"]["status"], "done")
         self.assertEqual(self.tasks["7P-A"]["kind"], "C")
-        # Reopening the native gate must revoke 7P-A readiness, proving the
-        # browser architecture work depends on accepted Windows qualification.
+        self.assertNotIn("7P-A", ready_ids)
+        self.assertIn("7P-B", ready_ids)
+        self.assertEqual(self.tasks["7P-B"]["kind"], "C")
+        self.assertNotIn("7P-L1", ready_ids)
+        self.assertNotIn("7A", ready_ids)
+        # Reopening a decision must immediately revoke its dependent host unit.
         hypothetical = copy.deepcopy(self.data)
-        next(t for t in hypothetical["tasks"] if t["id"] == "CL-L6")["status"] = "todo"
+        next(t for t in hypothetical["tasks"] if t["id"] == "7P-A")["status"] = "todo"
         gated, _ = board.readiness(hypothetical)
         gated_ids = {t["id"] for t in gated}
-        self.assertIn("CL-L6", gated_ids)
-        self.assertNotIn("7P-A", gated_ids)
+        self.assertIn("7P-A", gated_ids)
+        self.assertNotIn("7P-B", gated_ids)
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
@@ -116,7 +112,11 @@ class TaskBoardTests(unittest.TestCase):
         # A completed gate is excluded from forecasts. In a hypothetical
         # reopened native gate, every downstream phase must retain its order.
         future = copy.deepcopy(self.data)
-        next(task for task in future["tasks"] if task["id"] == "CL-L6")["status"] = "todo"
+        # A synthetic rollback of CL-L6 must also roll back its already
+        # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
+        for task in future["tasks"]:
+            if task["id"] in ("CL-L6", "7P-A"):
+                task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))

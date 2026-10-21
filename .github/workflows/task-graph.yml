@@ -17,5 +17,9 @@ jobs:
         run: python tools/task_board.py check
       - name: Validate readiness and phase sequencing regressions
         run: python -m unittest discover -s tools -p test_task_board.py -v
+      - name: Check browser architecture fail-closed preflight
+        run: python tools/check_browser_feasibility.py --json
+      - name: Test browser architecture guardrails
+        run: python -m unittest discover -s tools -p test_browser_feasibility.py -v
       - name: Publish readiness projection
         run: python tools/task_board.py ready --json
