@@ -34,7 +34,9 @@ fn diagnostic_secrets_and_size_are_bounded() {
 #[test]
 fn total_diagnostic_size_stays_bounded_with_many_long_entries() {
     let log = DiagnosticLog::new(10_000);
-    let long = "v".repeat(16_000);
+    // Keep diagnostic content long after credential redaction: a single 16k
+    // alphanumeric run is intentionally redacted to a short marker.
+    let long = format!("{} ", "v".repeat(32)).repeat(485);
     for _ in 0..350 {
         log.push("info", &long);
     }
