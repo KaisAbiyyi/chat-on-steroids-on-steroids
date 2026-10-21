@@ -60,7 +60,6 @@ jobs:
     # but it cannot qualify a physical 7P-L1 desktop.
     runs-on: windows-latest
     timeout-minutes: 6
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

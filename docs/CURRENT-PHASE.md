@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-B CLOUD SYNTHETIC WEBVIEW2/MV3/RENDERER PROBE — REVIEW TO MERGE 2026-10-22
+
+- **SCOPE:** executable isolated Windows WebView2 host capability adapter + synthetic unpacked MV3 extension with genuine MAIN/ISOLATED worlds, Chrome debugger attach/evaluate/event/detach, host CDP target fencing, synthetic per-profile storage and disabled-extension execution refusal. Real bundled CodeMirror, pdf.js, KaTeX, xterm.js; no production Rust browser bridge or real account access.
+- **WINDOWS CLOUD RUNTIME EVIDENCE:** [GitHub Actions probe and archived JSON receipt](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39651659120), executable commit `5c859abfc9fc3f3f35d72f4e508c638188f849fe`, WebView2 `154.0.4258.62`. Synthetic runtime checks passed for disabled-extension nonexecution, profile paths, debugger, renderer, navigation and storage. The prior failing negative-inventory expectation was corrected and its failure receipt preserved in an earlier run.
+- **REVIEW GATE:** [PR #41](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/41) must pass its final exact-head Windows/Ubuntu 7P-B, Task DAG and Rust CI and be reviewed before accepted merge. No independent third-party signoff claimed.
+- **NEXT:** After accepted merge, set `7P-B` Done/Last Done and move `7P-L1` into Now as an explicitly **LOCAL WINDOWS** gate, not a cloud PASS. `7A` remains blocked until physical `7P-L1` PASS. Real-profile/user sign-in, native-worker restart/IME/UI acceptance and installer budgets remain NOT RUN. Cloud-only: no personal/local files or local MCP touched.
+
 ## 7P-A CLOUD BROWSER ARCHITECTURE PREFLIGHT ACCEPTED — 2026-10-22
 
 - **CLOUD DESIGN DECISION (accepted and merged [PR #40](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/40), squash SHA `9c20086389fcb820bc3d8c6751576b8bd8f8694e`):** A provisional Windows-first Rust host + system WebView2 and explicitly hybrid JavaScript/TypeScript renderer/extension glue. [Architecture and source links](architecture/7p-a-browser-architecture.md) and [12-capability fail-closed probe matrix](architecture/7p-a-feasibility-gates.json). Real extension/CDP/MV3/profile/renderer parity remains **UNVERIFIED**.
