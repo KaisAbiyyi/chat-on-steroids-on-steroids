@@ -9,10 +9,10 @@
 - **Dependency:** CL-L6 — accepted on merged PR #39 / main `39cfa042`
 - **Exclusive logical lock:** `browser-architecture`
 - **Claim generation:** 1 (coordination record, not an atomic lock)
-- **Status:** REVIEW (exclusive claim remains active until PR #40 is merged; RELEASED only upon verified merge)
-- **Claim owner:** ChatGPT cloud session 2026-10-22
+- **Status:** DONE — PR #40 squash merged at `9c20086389fcb820bc3d8c6751576b8bd8f8694e`; `browser-architecture` claim RELEASED
+- **Claim owner:** NONE (released after verified merge; historical implementer ChatGPT cloud session 2026-10-22)
 - **Last activity:** 2026-10-22
-- **Checkpoint:** branch commits through provisional architecture, 12-capability manifest, adversarial tests, CI, DAG transition and decision documentation; PR #40 is the durable review reference
+- **Checkpoint:** PR #40 accepted on exact head `abdd8cb716688099cca02e0446d62b9cbe606040` and squash-merged to `main` `9c20086389fcb820bc3d8c6751576b8bd8f8694e`; GitHub Windows/Ubuntu Task DAG run `39645008280` PASS and Windows/Ubuntu Rust run `39645008311` PASS after Windows rerun. Internal source/diff review completed (not third-party signoff). 7P-B is the next cloud READY_CANDIDATE; real 7P-L1 browser qualification remains NOT RUN.
 - **Scope:** bounded evidence-based selection and executable/probe contract for embedded browser host, extension, debugger, renderer; non-Rust dependencies/deviation and risk register; deterministic cloud validation and Phase 7P-B / 7P-L1 gates. NO real Windows claims.
 - **Tests planned:** contract/decision regression tests (cloud); repo task DAG; CI on exact PR head.
 - **Other live work:** PR #37 (historical CL-10 variant) does not own `browser-architecture`; avoid overlap with backend.
