@@ -1,0 +1,12 @@
+body{font:14px system-ui;margin:20px;background:#f7f8fa;color:#171b25}
+.columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+section{background:white;min-height:230px;padding:14px;border:1px solid #dde2eb;border-radius:8px;overflow:hidden}
+#editor{height:180px;overflow:auto;border:1px solid #ccc}
+#math{min-height:80px;display:flex;align-items:center}
+#terminal{height:150px;background:black}
+.pdf{position:relative;width:100%;max-width:420px;min-height:260px;overflow:auto}
+#pdf-canvas{display:block}
+.textLayer{position:absolute;top:0;left:0;overflow:hidden;line-height:1;text-align:initial}
+.textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.textLayer ::selection{background:rgba(0,110,255,.3)}
+button{margin-top:8px;padding:5px 10px}

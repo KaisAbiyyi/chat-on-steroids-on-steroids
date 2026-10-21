@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; worker-src 'self' blob:; font-src 'self' data:; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>7P-B Synthetic</title>
+</head>
+<body>
+  <h1>CoSoS 7P-B / Synthetic browser &amp; renderer probe</h1>
+  <p>Local fixture only. No account, network, provider, or real Send.</p>
+  <div class="columns">
+    <section><h2>Rich code editor / selection, IME, undo</h2><div id="editor"></div></section>
+    <section><h2>KaTeX / selectable math</h2><div id="math"></div><button id="copy-math">Copy formula</button></section>
+    <section><h2>pdf.js / selectable text</h2><div class="pdf" id="pdf"><canvas id="pdf-canvas"></canvas><div id="pdf-text-layer" class="textLayer"></div></div><button id="search-pdf">Search fixture phrase</button></section>
+    <section><h2>xterm.js / ANSI and resize</h2><div id="terminal"></div><button id="resize-terminal">Resize 90x12</button></section>
+  </div>
+  <p id="result" role="status">Renderer starting…</p>
+  <script type="module" src="/src.js"></script>
+</body>
+</html>

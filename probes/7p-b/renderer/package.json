@@ -1,0 +1,21 @@
+{
+  "name": "cosos-7p-b-synthetic-renderer",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "node ../tools/check_contract.mjs"
+  },
+  "dependencies": {
+    "@codemirror/lang-javascript": "6.2.2",
+    "@xterm/xterm": "5.5.0",
+    "codemirror": "6.0.1",
+    "katex": "0.16.11",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38"
+  },
+  "devDependencies": {
+    "vite": "5.4.12"
+  }
+}
