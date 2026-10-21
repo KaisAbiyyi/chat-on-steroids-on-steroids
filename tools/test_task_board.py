@@ -55,7 +55,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_current_ready_candidates_respect_all_gates_and_unlock_backend_review(self):
+    def test_current_ready_candidates_advance_to_native_backend_release_gate(self):
         ready, _ = board.readiness(self.data)
         ready_ids = {task["id"] for task in ready}
         for task in ready:
@@ -67,9 +67,11 @@ class TaskBoardTests(unittest.TestCase):
                 self.assertIn("human-owner", board.effective_locks(task))
         self.assertEqual(self.tasks["CL-L5"]["status"], "done")
         self.assertNotIn("CL-L5", ready_ids)
-        self.assertIn("CL-10", ready_ids)
+        self.assertEqual(self.tasks["CL-10"]["status"], "done")
+        self.assertNotIn("CL-10", ready_ids)
         self.assertEqual(self.tasks["CL-10"]["kind"], "C")
-        self.assertNotIn("CL-L6", ready_ids)
+        self.assertIn("CL-L6", ready_ids)
+        self.assertEqual(self.tasks["CL-L6"]["kind"], "L")
         # Reopening the local gate must block the cloud review, proving the
         # transition uses actual accepted prerequisite state.
         hypothetical = copy.deepcopy(self.data)

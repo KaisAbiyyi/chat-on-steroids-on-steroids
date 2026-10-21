@@ -48,8 +48,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `CL-09B` | Connection retries/proxy/health/tunnel teardown | `CL-09A` | `mcp-transport` | C (cloud) | DONE |
 | `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | DONE |
 | `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | DONE |
-| `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | **READY · PARALLEL** |
-| `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | BLOCKED |
+| `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | DONE |
+| `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | **READY · PARALLEL** |
 | `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | BLOCKED |
 | `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | BLOCKED |
 | `7P-L1` | Real Windows embedded browser feasibility gate | `7P-B` | `windows-browser` | L (Windows) | BLOCKED |
