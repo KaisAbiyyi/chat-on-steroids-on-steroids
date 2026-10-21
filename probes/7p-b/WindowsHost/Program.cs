@@ -32,6 +32,7 @@ internal sealed class ProbeForm : Form
     private readonly string _extension;
     private readonly string _receipt;
     private readonly bool _batch;
+    private bool _failed;
     private readonly List<string> _trace = new();
 
     public ProbeForm(string[] args)
@@ -73,7 +74,10 @@ internal sealed class ProbeForm : Form
     }
 
     private void Mark(string gate, string status, string evidence)
-        => _checks[gate] = new { status, evidence };
+    {
+        _checks[gate] = new { status, evidence };
+        if (status == "FAIL") _failed = true;
+    }
 
     private async Task ProbeAndRecordAsync()
     {
@@ -180,8 +184,7 @@ internal sealed class ProbeForm : Form
             Text += " | Receipt: " + _receipt;
             if (_batch)
             {
-                Environment.ExitCode = _checks.Values.Any(v =>
-                    JsonSerializer.Serialize(v).Contains("\\\"FAIL\\\"")) ? 1 : 0;
+                Environment.ExitCode = _failed ? 1 : 0;
                 BeginInvoke(new Action(Close));
             }
         }
