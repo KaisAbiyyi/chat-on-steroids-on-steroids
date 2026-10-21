@@ -26,3 +26,5 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
       - run: cargo build --release --locked
+      - name: CL-10 isolated release-service integration proof
+        run: python tools/cl10_backend_smoke.py
