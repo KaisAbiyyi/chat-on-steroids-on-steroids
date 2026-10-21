@@ -1,5 +1,12 @@
 # Current CoS-Rust work state
 
+## CL-L3 native Windows qualification PASS — 2026-10-21
+
+- **LOCAL ACCEPTED:** `CL-L3` physical Windows NTFS file-panel/search, junction containment, Git watcher races and real installed OpenSSH SFTP v3 subsystem proof. Exact merged `main` SHA `ce7d2ef0df3e1b62a98664fade70a825d6f9d72e` includes `CL-06B` PR #27 and `CL-07B` PR #28; both exact-SHA [Rust Windows/Linux CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39545344458) and [task DAG](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39545344361) succeeded.
+- **NATIVE TESTS:** `cos-tools` 95 PASS, 0 failed/ignored; strict Clippy and rustfmt PASS. `mklink /J` escape, file-panel preview/save/revocation, native search, ref watcher churn, OpenSSH SFTP realpath/read/write/rename/patch, denied operations and commit-time revocation validated on Windows 11 x64 build 26300, D: NTFS.
+- **EVIDENCE:** [dated implementation summary](implementation-summary/2026-10-21-cl-l3-native-windows-qualification.md), [SHA-bound receipt](../audit/2026-10-21/cl-l3-ce7d2ef-receipt.json). Raw hashed logs and disposable fixtures on D:; original eight dirty recorder/caption files remain protected.
+- **LIMITS / NEXT:** real installed SFTP server uses local process pipes; external network SSH daemon is NOT RUN. No browser/desktop/installer or performance acceptance implied. `CL-L4` and `CL-L5` are separate native gates; `CL-10` remains blocked on their acceptance. **YOU REQUIRED: NO**.
+
 ## CL-L2 native Windows qualification PASS — 2026-10-21
 
 - **LOCAL ACCEPTED:** `CL-L2` native Windows pipes, ConPTY, CMD/PowerShell shells, live output and process custody plus client OpenSSH over an isolated loopback SSH server. Exact qualifying GitHub `main` SHA: `ea8ab7a18c3f783eaaaf88310a9c2df5f29ea337` (contains merged [CL-05B PR #26](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/26)). Exact SHA GitHub Windows/Linux Rust and DAG CI succeeded.
