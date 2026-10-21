@@ -11,4 +11,12 @@
     <ProjectReference Include="../ProbePolicy/ProbePolicy.csproj" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
   </ItemGroup>
+  <!-- WebView2 NuGet imports the WPF wrapper even for a WinForms-only target.
+       Avoid unresolved WindowsBase 4 vs 5 in strict builds; this project never uses WPF. -->
+  <Target Name="ExcludeUnusedWebView2Wpf" BeforeTargets="ResolveAssemblyReferences"
+          Condition="'$(UseWPF)' != 'true'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
 </Project>
