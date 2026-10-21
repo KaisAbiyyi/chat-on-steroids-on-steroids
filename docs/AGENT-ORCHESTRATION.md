@@ -49,6 +49,12 @@ Use `UNCLAIMED → CLAIMED → RUNNING → CHECKPOINTED → REVIEW → MERGED �
 
 Each handoff must give: `PROJECT, REPO(S), TASK_ID, CLAIM_STATUS/OWNER/GENERATION, ROLE, BASE_SHA, BRANCH, CHECKPOINT_SHA, PR, IMPLEMENTED, TESTS/CI, LIMITATIONS, LOCAL_REQUIRED (L-ID or NONE), HUMAN_REQUIRED (U-ID or NO), NEXT, RECOVERY_INSTRUCTIONS`. On failure report what is **not** saved remotely. Agent reviewers cannot mark device/browser/SketchUp/account/UI gates passed from cloud-only simulation. The human receives consolidated decisions and qualified test instructions, not continuous micro-approval requests.
 
+## Mandatory Notion synchronization at accepted handoff
+
+- **No completion handoff is finished until Notion is updated and read back.** Once PR acceptance/merge evidence is verified, immediately set the task database `Status = Done` and clear its active claim; record merged SHA, exact-head CI, reviewer and known limits. If not accepted, keep `Review` or `Blocked` with the real reason—never announce completion from tests alone.
+- Maintain the Project Hub's **00 · Current State** by updating the actual database `Focus Lane` fields: up to five last `Done` tasks, only currently eligible nonconflicting `Now` tasks, and the single next eligible dependency wave as `Up Next` (which may remain blocked). A native `L` gate becomes `Local Gate` only when prerequisites are accepted, never `Done` from cloud CI.
+- Verify the displayed Notion board after updates; cite the task page/PR and state any connector failure plainly in the same response. **Do not end a coding turn with a completed GitHub merge and a stale Notion `Now` record.** Avoid another manually maintained status snapshot in the Project Hub page body.
+
 ## Repository-specific qualification boundary
 
 CL-L1 and CL-04A/B/C have now passed their recorded qualified gates; the next proposed independent cloud wave is CL-05A, CL-06A, CL-07A, CL-08A and CL-09A after live checks. Protect historical uncommitted D: WIP; phases 1–6 remain partially accepted.
