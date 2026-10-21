@@ -1,5 +1,11 @@
 # CoS-Rust current backend checkpoint
 
+## CL-L6 NATIVE WINDOWS BACKEND ACCEPTED — 2026-10-21
+
+- **LOCAL GATE PASS:** integrated Rust backend/source parity, release and native resource receipt on exact merged `main` source `b85471c9bce70842fd84242d4c2f72fe31df5532` (descendant of accepted [CL-10 PR #38](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/38)).
+- **PROOF:** 312 Windows Rust workspace tests PASS, fmt and strict Clippy PASS, release build PASS, 17 external Windows headless runtime checks PASS. Release 12,853,760 bytes; five cold and five warm startup/memory samples captured. [Source-bound receipt](../audit/2026-10-21/cl-l6-b85471c-receipt.json) and [native review report](implementation-summary/2026-10-21-cl-l6-native-windows-backend-qualification.md). Original local recorder WIP untouched.
+- **CURRENT FLOW:** `CL-L6` Done / Last Done; `7P-A` READY / Now; `7P-B` blocked / Up Next. `7P-L1` must follow 7P-A and 7P-B before any Phase 7 browser bridge implementation. The full original Phase 1/desktop/browser/installer scope remains unaccepted. **YOU REQUIRED: NO**.
+
 ## CL-10 CLOUD ACCEPTED / MERGED — 2026-10-21
 
 - **ACCEPTED:** integrated backend phase 1–6 cloud closure, [PR #38](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/38), final audited head `c0b4887d`, merged main `6fe62bdddff4f1d272ec7620fe0e03c1ce6be277`. Exclusive `backend-closure` claim released.
