@@ -26,12 +26,40 @@ fn exec_text_contains_continuation_and_completion_metadata() {
     })
     .unwrap();
     let kernel = Kernel::new(conf).unwrap();
-    let result=kernel.invoke(Surface::Core,"public-response","exec_command",json!({"cmd":"echo public-result","shell":if cfg!(windows){"cmd"}else{"sh"},"max_output_tokens":0}));
+    let launched = kernel.invoke(
+        Surface::Core,
+        "public-response",
+        "exec_command",
+        json!({"cmd":"echo public-result","shell":if cfg!(windows){"cmd"}else{"sh"},"max_output_tokens":0}),
+    );
+    // With process scheduling on shared cloud runners, launch may return a
+    // running session. That is not an error or a completed-process receipt.
+    // Assert the original 0-token launch never leaks output independently.
+    assert!(
+        !launched["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("public-result")
+    );
+    let mut result = launched;
+    if let Some(session) = result["structuredContent"]["session_id"].as_i64() {
+        for _ in 0..20 {
+            result = kernel.invoke(
+                Surface::Core,
+                "public-response",
+                "write_stdin",
+                json!({"session_id":session,"yield_time_ms":250}),
+            );
+            if result["structuredContent"]["exit_code"].as_i64().is_some() {
+                break;
+            }
+        }
+    }
     let text = result["content"][0]["text"].as_str().unwrap();
+    assert_eq!(result["structuredContent"]["exit_code"], 0, "{result}");
     assert!(text.contains("Process exited with code 0"), "{result}");
-    assert!(text.contains("Completed session ID:"));
-    assert!(text.contains("Output:"));
-    assert!(!text.contains("public-result"));
+    assert!(text.contains("Completed session ID:"), "{result}");
+    assert!(text.contains("Output:"), "{result}");
 }
 #[test]
 fn removing_a_root_revokes_its_watch() {
