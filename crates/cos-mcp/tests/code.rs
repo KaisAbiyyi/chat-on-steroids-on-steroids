@@ -1,9 +1,12 @@
 use cos_mcp::code::{self, Limits};
 use serde_json::{Value, json};
 use std::sync::{
-    Arc,
+    Arc, Mutex,
     atomic::{AtomicUsize, Ordering},
 };
+// The embedded engine has a deliberate process-wide four-run admission cap.
+// A parallel integration-test harness must not consume unrelated tests\' permits.
+static CODE_TEST_MUTEX: Mutex<()> = Mutex::new(());
 fn invoke() -> code::Invoke {
     Arc::new(
         |name, args| json!({"content":[{"type":"text","text":format!("{name}:{}",args["text"].as_str().unwrap_or(""))}]}),
@@ -14,6 +17,7 @@ fn tools() -> Vec<Value> {
 }
 #[test]
 fn explicit_outputs_only_fresh_globals() {
+    let _serial = CODE_TEST_MUTEX.lock().unwrap();
     let result = code::run(
         "const r=await tools.read({text:'hello'}); text(r.content[0].text); globalThis.secret=123;",
         &tools(),
@@ -42,6 +46,7 @@ fn explicit_outputs_only_fresh_globals() {
 }
 #[test]
 fn no_node_network_or_cross_surface_tools() {
+    let _serial = CODE_TEST_MUTEX.lock().unwrap();
     let r = code::run(
         "text([typeof process,typeof require,typeof fetch,typeof console,typeof setTimeout,typeof tools.computer]);",
         &tools(),
@@ -62,6 +67,7 @@ fn no_node_network_or_cross_surface_tools() {
 }
 #[test]
 fn cpu_memory_calls_and_text_limits() {
+    let _serial = CODE_TEST_MUTEX.lock().unwrap();
     let limits = Limits {
         cpu_ms: 30,
         wall_ms: 150,
@@ -88,6 +94,7 @@ fn cpu_memory_calls_and_text_limits() {
 }
 #[test]
 fn accepted_side_effect_survives_timeout() {
+    let _serial = CODE_TEST_MUTEX.lock().unwrap();
     let calls = Arc::new(AtomicUsize::new(0));
     let c = calls.clone();
     let r = code::run(
@@ -109,6 +116,7 @@ fn accepted_side_effect_survives_timeout() {
 
 #[test]
 fn rejects_invalid_resource_admission_before_invoking_tools() {
+    let _serial = CODE_TEST_MUTEX.lock().unwrap();
     let calls = Arc::new(AtomicUsize::new(0));
     for limits in [
         Limits {
@@ -154,17 +162,18 @@ fn rejects_invalid_resource_admission_before_invoking_tools() {
 
 #[test]
 fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
+    let _serial = CODE_TEST_MUTEX.lock().unwrap();
     let seen = Arc::new(AtomicUsize::new(0));
     let observed = seen.clone();
     let unawaited = code::run(
         "tools.read({text:'accepted'});",
         &tools(),
         Arc::new(move |_, _| {
-            observed.fetch_add(1, Ordering::AcqRel);
             // Preserve a genuinely in-flight mutation when the unawaited
             // script completes. An instant callback races the JS completion
             // job and does not test the unsettled-call contract reliably.
             std::thread::sleep(std::time::Duration::from_millis(50));
+            observed.fetch_add(1, Ordering::AcqRel);
             json!({"content":[]})
         }),
         Limits::default(),
@@ -184,4 +193,13 @@ fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
         Limits::default(),
     );
     assert_eq!(overflow["isError"], true);
+    // The admitted external mutation may outlive the unawaited script.
+    // Do not release this test's global admission lock until that worker
+    // finishes and releases its process-wide permit.
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
+    while seen.load(Ordering::Acquire) == 0 {
+        assert!(std::time::Instant::now() < deadline, "nested fixture did not settle");
+        std::thread::sleep(std::time::Duration::from_millis(2));
+    }
+    std::thread::sleep(std::time::Duration::from_millis(15));
 }
