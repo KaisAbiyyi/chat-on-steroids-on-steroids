@@ -152,7 +152,7 @@ internal sealed class ProbeForm : Form
             var debugger = await WaitForAsync(_a, "document.documentElement.dataset.cosDebugger");
             Mark("worker_message", worker == "ok" ? "PASS" : "FAIL", "Content -> MV3 worker -> content ACK=" + worker);
             Mark("extension_debugger_api",
-                debugger == "roundtrip-event-detached" ? "PASS" : "UNVERIFIED",
+                debugger == "roundtrip-event-detached" ? "PASS" : "FAIL",
                 "Synthetic chrome.debugger attach/evaluate/event/detach=" + debugger
                 + "; physical WebView2/worker-target parity remains a separate 7P-L1 gate.");
 
