@@ -118,6 +118,9 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_done_cannot_depend_on_unfinished_task(self):
         data = copy.deepcopy(self.data)
+        # Explicitly break the prerequisite regardless of the live acceptance
+        # snapshot: CL-L3 and CL-07B can both legitimately become done.
+        next(t for t in data["tasks"] if t["id"] == "CL-07B")["status"] = "todo"
         next(t for t in data["tasks"] if t["id"] == "CL-L3")["status"] = "done"
         self.assertTrue(any("cannot be done" in e for e in board.validate(data)))
 
