@@ -1,0 +1,54 @@
+name: 7P-B Synthetic Browser Probe CI
+
+on:
+  push:
+    branches: ["work/7p-b-*"]
+    paths:
+      - "probes/7p-b/**"
+      - ".github/workflows/7p-b-probe.yml"
+  pull_request:
+    paths:
+      - "probes/7p-b/**"
+      - ".github/workflows/7p-b-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run headless target authorization regressions
+        run: dotnet run --project probes/7p-b/PolicyTests/PolicyTests.csproj --configuration Release
+      - name: Validate manifest, forbidden capability claims and renderer contract
+        run: node probes/7p-b/tools/check_contract.mjs
+      - name: Install actual renderer libraries
+        run: npm install --prefix probes/7p-b/renderer --no-audit --no-fund
+      - name: Compile real renderer bundle
+        run: npm run build --prefix probes/7p-b/renderer
+
+  windows-webview2-compile:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile real WinForms WebView2 adapter
+        run: dotnet build probes/7p-b/WindowsHost/WindowsHost.csproj --configuration Release -warnaserror
+      - name: Native gate expressly separate
+        shell: pwsh
+        run: |
+          Write-Output '7P-B compile PASS is NOT actual WebView2 runtime, MV3, chrome.debugger or physical Windows 7P-L1 acceptance.'
