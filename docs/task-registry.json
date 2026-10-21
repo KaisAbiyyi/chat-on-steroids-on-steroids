@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
   "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed.",
-  "task_status_source": "GitHub main / docs/CURRENT-PHASE.md as of 2026-10-20, refresh before starting next unit",
+  "task_status_source": "GitHub main accepted PR #26/#27/#30/#31 on 2026-10-21; CL-07B/#28 and CL-08B/#29 remain active claims pending latest CI/review. Native CL-L2/3/4/5 untested.",
   "tasks": [
     {
       "id": "CL-01",
@@ -118,7 +118,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "CL-L2",
@@ -157,7 +157,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "CL-07A",
@@ -183,7 +183,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "claimed"
     },
     {
       "id": "CL-L3",
@@ -223,7 +223,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "claimed"
     },
     {
       "id": "CL-L4",
@@ -262,7 +262,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "CL-09C",
@@ -276,7 +276,7 @@
       ],
       "phase": "1-6",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "CL-L5",

@@ -1,5 +1,15 @@
 # Current CoS-Rust work state
 
+## CL B-unit merge receipts and two active repairs — 2026-10-21
+
+- **MERGED / cloud scope Done:** CL-05B [PR #26](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/26) merge `e5ad3754`; CL-06B [PR #27](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/27) merge `6856491d`; CL-09B [PR #30](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/30) merge `5b8c6d80`; CL-09C [PR #31](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/31) merge `28afd9ed`. All four final PR heads passed GitHub Windows/Ubuntu Rust matrix and Task DAG checks. Original source PR claims are released for their scoped cloud implementations.
+- **Explicit qualification caveat:** independent third-party reviews were not evidenced for these four PRs; owner directed merge. Do not represent these merges as security audit or Windows native acceptance.
+- **CL-07B ACTIVE / claimed:** [PR #28](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/28), corrected Rust formatting in deadline regression on head `f0631b2c`; exact new head CI and review required before merge. Native CL-L3 also requires CL-06B and CL-07B.
+- **CL-08B ACTIVE / claimed:** [PR #29](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/29), corrected diagnostic byte-cap regression fixture after redaction on head `2745fa01`; exact new head CI and review required before merge.
+- **NATIVE / NOT RUN:** CL-L2 (requires merged CL-05B) and CL-L5 (requires merged CL-09B/09C) are now eligible for physical Windows host assignment; CL-L3 awaits CL-07B and CL-L4 awaits CL-08B. CL-10 independent integrated backend audit, CL-L6 and later phases remain blocked. Never infer host qualification from cloud green checks.
+- **Coordination:** canonical 115-node DAG + Markdown parallel board + Notion Execution Tasks synchronized for accepted cloud units. Active CL-07B/08B PR/locks remain reserved; user's physical D: checkout untouched. Older progress sections below are historical.
+
+
 ## CL A-units accepted and integrated — 2026-10-21
 
 - **CL-05A Done:** [PR #18](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/18), accepted code merge `b35ba3892345712ff4c481b6339e9b6bfd873790`, reconciled exact head `3adb8527a8d5d0a835a35c5374a528455aab0dba`, [Windows/Ubuntu CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39476380751) PASS; logical lock `process-supervisor` released.

@@ -6,7 +6,7 @@
 
 Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspect the latest claim/PR registry and state `CLAIM <ID>, owner session, base SHA, resource lock(s), branch, planned test` before editing. Claims are **not preassigned** to ChatGPT or Codex. Without an atomic controller, a single coordinator serializes write conflicts. Report-only inspections do not acquire write ownership; continuation after interrupted browser/quota requires fenced transfer and reconciliation with last remote checkpoint.
 
-`CL-01` through `CL-04C`, `CL-L1`, and the five A-unit cloud closures (`CL-05A`, `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A`) have accepted scoped merges. **READY CANDIDATES NOW:** `CL-05B`, `CL-06B`, `CL-07B`, `CL-08B`, `CL-09B`, `CL-09C` (unclaimed until live claim check). The five streams have disjoint stated resource locks, but actual source/authority overlaps still require pre-claim checking. Backend phases 1–6 remain PARTIAL. Sequence remains `CL-L6 → Phase 7 preflight 7P-A/7P-B/7P-L1 → Phase 7 browser bridge → Phase 8 embedded browser`.
+Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-09B` PR #30, `CL-09C` PR #31. Claims for these four are released; exact-head PR Windows/Ubuntu and Task DAG CI passed. `CL-07B` PR #28 and `CL-08B` PR #29 remain claimed on separate cloud branches, repaired commits pending final CI/review. **Native READY CANDIDATES:** `CL-L2` and `CL-L5` (physical Windows host needed; cannot run in cloud). `CL-L3` waits for CL-07B; `CL-L4` waits for CL-08B. `CL-10` and full backend parity still blocked. Independent third-party PR review for merged B units was not evidenced; merged under explicit owner instruction.
 
 ## Live prerequisites and executable readiness
 
@@ -28,20 +28,20 @@ Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspe
 | `CL-04B` | History retention/replay crash limits | `CL-04A` | `session-store` | C (cloud) | DONE |
 | `CL-04C` | Unpaired UTF-16/JSON source edge representation | `CL-03` | `unicode-boundary` | C (cloud) | DONE |
 | `CL-05A` | Child ownership, cancellation and output custody | `CL-L1` | `process-supervisor` | C (cloud) | DONE |
-| `CL-05B` | PTY/shell/SSH native process semantics | `CL-05A` | `process-pty` | C (cloud) | **READY · PARALLEL** |
-| `CL-L2` | Native Windows pipe/ConPTY/shell/SSH proof | `CL-05B` | `windows-pty` | L (Windows) | BLOCKED |
+| `CL-05B` | PTY/shell/SSH native process semantics | `CL-05A` | `process-pty` | C (cloud) | DONE |
+| `CL-L2` | Native Windows pipe/ConPTY/shell/SSH proof | `CL-05B` | `windows-pty` | L (Windows) | **READY · PARALLEL** |
 | `CL-06A` | Git/project/file-panel/watcher parity | `CL-L1` | `project-files` | C (cloud) | DONE |
-| `CL-06B` | SFTP authorization/containment/native errors | `CL-06A` | `sftp` | C (cloud) | **READY · PARALLEL** |
+| `CL-06B` | SFTP authorization/containment/native errors | `CL-06A` | `sftp` | C (cloud) | DONE |
 | `CL-07A` | Search/patch traversal and transactional parity | `CL-L1` | `search-patch` | C (cloud) | DONE |
-| `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | **READY · PARALLEL** |
+| `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | BLOCKED |
 | `CL-L3` | NTFS file-panel/search + native SFTP proof | `CL-06B`, `CL-07B` | `windows-files` | L (Windows) | BLOCKED |
 | `CL-08A` | Windows startup/config/secret-store integration | `CL-L1` | `runtime-secrets` | C (cloud) | DONE |
-| `CL-08B` | Diagnostics/logging/awake/shutdown bounded behavior | `CL-08A` | `runtime-diagnostics` | C (cloud) | **READY · PARALLEL** |
+| `CL-08B` | Diagnostics/logging/awake/shutdown bounded behavior | `CL-08A` | `runtime-diagnostics` | C (cloud) | BLOCKED |
 | `CL-L4` | Native startup/secret/diagnostics resource proof | `CL-08B` | `windows-startup` | L (Windows) | BLOCKED |
 | `CL-09A` | MCP schema/errors/permission conformance | `CL-L1` | `mcp-protocol` | C (cloud) | DONE |
-| `CL-09B` | Connection retries/proxy/health/tunnel teardown | `CL-09A` | `mcp-transport` | C (cloud) | **READY · PARALLEL** |
-| `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | **READY · PARALLEL** |
-| `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | BLOCKED |
+| `CL-09B` | Connection retries/proxy/health/tunnel teardown | `CL-09A` | `mcp-transport` | C (cloud) | DONE |
+| `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | DONE |
+| `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | **READY · PARALLEL** |
 | `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | BLOCKED |
 | `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | BLOCKED |
 | `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | BLOCKED |
