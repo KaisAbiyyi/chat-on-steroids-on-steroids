@@ -6,6 +6,7 @@ No real user profiles, external tunnel, credentials, browser, or local workspace
 """
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import subprocess
@@ -88,15 +89,61 @@ def verify() -> dict[str, object]:
         assert sentinel.read_bytes() == b"source-stays-unchanged"
         assert not (unmarked / "cos-rust-profile.json").exists()
 
-        # Real launch/stop of the integrated HTTP + control + kernel service on
-        # an ephemeral loopback port; no tunnel, token or production session.
-        served = invoke("serve", "--port", "0", "--duration-ms", "200", data_dir=profile)
-        ready = [json.loads(line) for line in served.stdout.splitlines()
-                 if line.lstrip().startswith("{") and '"event":"ready"' in line]
-        assert len(ready) == 1, "one ready event per service process"
-        assert isinstance(ready[0]["port"], int) and ready[0]["port"] > 0
-        assert ready[0]["fullApplicationReady"] is False
-        assert ready[0]["profile"] == str(profile.resolve())
+        # Live integrated transport checks: MCP bearer path, hostile Host/Origin,
+        # control bearer, disabled writes; then graceful shutdown/restart.
+        response("config", "set", "controlApi.enabled", "true", data_dir=profile)
+        service = subprocess.Popen(
+            [str(EXE), "--data-dir", str(profile), "serve", "--port", "0",
+             "--duration-ms", "3500"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        )
+        try:
+            assert service.stdout is not None
+            event = json.loads(service.stdout.readline())
+            assert event["event"] == "ready" and event["fullApplicationReady"] is False
+            assert event["profile"] == str(profile.resolve())
+            port = event["port"]
+            control = event["controlPort"]
+            assert isinstance(port, int) and port > 0
+            assert isinstance(control, int) and control > 0
+            from urllib.parse import urlsplit
+            path = urlsplit(event["urls"]["core"]).path
+
+            def check_http(port: int, method: str, path: str, headers: dict[str, str],
+                           expected: int, body: str | None = None) -> dict:
+                client = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
+                try:
+                    client.request(method, path, body=body, headers=headers)
+                    result = client.getresponse()
+                    payload = json.loads(result.read())
+                    assert result.status == expected, (method, path, result.status, payload)
+                    assert result.getheader("cache-control") == "no-store"
+                    return payload
+                finally:
+                    client.close()
+
+            check_http(port, "POST", path, {"Host": "evil.example"}, 403, "{}")
+            check_http(port, "POST", path, {"Origin": "https://evil.example"}, 403, "{}")
+            check_http(port, "GET", "/mcp/core/not-a-token", {}, 404)
+            check_http(control, "GET", "/v1/health", {}, 401)
+            bearer = (profile / "control-api" / "token").read_text(encoding="utf-8")
+            health = check_http(control, "GET", "/v1/health",
+                                {"Authorization": f"Bearer {bearer}"}, 200)
+            assert health["ok"] is True
+            assert health["actions"]["enabled"] is False
+            check_http(control, "POST", "/v1/inputs",
+                       {"Authorization": f"Bearer {bearer}",
+                        "Content-Type": "application/json"}, 403, "{}")
+            service.wait(timeout=20)
+            assert service.returncode == 0, "integrated service exited abnormally"
+        finally:
+            if service.poll() is None:
+                service.kill()
+                service.wait(timeout=10)
+            if service.stdout:
+                service.stdout.close()
+            if service.stderr:
+                service.stderr.close()
 
         # A clean post-service restart must retain the earlier durable record.
         again = response("history", session, data_dir=profile)
@@ -106,7 +153,7 @@ def verify() -> dict[str, object]:
     return {
         "scope": "cloud isolated profile, release CLI/process + durable recorder/history, "
                  "model authorization, startup/shutdown",
-        "checks": 12,
+        "checks": 18,
         "status": "PASS",
         "platform": os.name,
         "limits": "no local Windows native L6, browser, desktop, installer, "
