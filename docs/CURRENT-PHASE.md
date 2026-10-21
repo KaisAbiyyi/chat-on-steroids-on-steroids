@@ -1,4 +1,12 @@
-# Current CoS-Rust work state
+# CoS-Rust current backend checkpoint
+
+## CL-10 CLOUD ACCEPTED / MERGED — 2026-10-21
+
+- **ACCEPTED:** integrated backend phase 1–6 cloud closure, [PR #38](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/38), final audited head `c0b4887d`, merged main `6fe62bdddff4f1d272ec7620fe0e03c1ce6be277`. Exclusive `backend-closure` claim released.
+- **EXACT-HEAD CI:** [Rust Windows/Ubuntu run 39603152946](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39603152946) and [Task DAG run 39603160877](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39603160877) PASS. Real release-binary synthetic cloud service smoke exercises profile persistence, restart, MCP/control and security refusals. Tests also correct timing assumptions in code-mode admission and running command polling.
+- **EVIDENCE:** [CL-10 integrated audit](implementation-summary/2026-10-21-cl-10-integrated-backend-audit.md), [claim receipt](claims/CL-10.md). Review is internal/source-derived; no separate third-party security sign-off claimed.
+- **NOW:** `CL-L6` eligible for **LOCAL WINDOWS** integrated backend release qualification against merged SHA; native Windows host testing remains NOT RUN for L6. **UP NEXT AFTER CL-L6:** Phase 7 preflight `7P-A → 7P-B → 7P-L1`. No GUI, browser, installer, external tunnel/SSH or real signed-in account qualification is implied.
+- **NOTION:** [CL-10 Done](https://app.notion.com/p/400c4a6aaf7381a7bc5ef93ded0e536b), [CL-L6 Local Gate / Now](https://app.notion.com/p/400c4a6aaf7381c18d2ff167463b019f). No local D:/C: files touched by CL-10 cloud implementation.
 
 ## CL-L5 native Windows MCP and code-worker qualification PASS — 2026-10-21
 
