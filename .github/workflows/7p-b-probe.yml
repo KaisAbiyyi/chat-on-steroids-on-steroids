@@ -35,9 +35,11 @@ jobs:
       - name: Validate manifest, forbidden capability claims and renderer contract
         run: node probes/7p-b/tools/check_contract.mjs
       - name: Install actual renderer libraries
-        run: npm install --prefix probes/7p-b/renderer --no-audit --no-fund
+        working-directory: probes/7p-b/renderer
+        run: npm install --no-audit --no-fund
       - name: Compile real renderer bundle
-        run: npm run build --prefix probes/7p-b/renderer
+        working-directory: probes/7p-b/renderer
+        run: npm run build
 
   windows-webview2-compile:
     runs-on: windows-latest
@@ -67,10 +69,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install renderer in native working directory
+        working-directory: probes/7p-b/renderer
+        run: npm install --no-audit --no-fund
       - name: Build renderer bundle
-        run: |
-          npm install --prefix probes/7p-b/renderer --no-audit --no-fund
-          npm run build --prefix probes/7p-b/renderer
+        working-directory: probes/7p-b/renderer
+        run: npm run build
       - name: Compile synthetic WebView2 GUI host
         run: dotnet build probes/7p-b/WindowsHost/WindowsHost.csproj --configuration Release
       - name: Try actual isolated WebView2 on hosted Windows (no real profiles)
