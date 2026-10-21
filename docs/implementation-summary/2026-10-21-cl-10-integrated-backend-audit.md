@@ -31,6 +31,7 @@ The existing CL-04B, CL-04C, CL-L2, CL-L3, CL-L4, and CL-L5 DAG prerequisites ar
 - Negative: missing profile selection, non-Rust unmarked directory preservation, unattributed model invocation, bearer-path mismatch, hostile MCP Host/Origin, unauthenticated control health, and denied action POST.
 - `.github/workflows/ci.yml` runs this after `cargo fmt --all --check`, strict all-target Clippy, all workspace tests, and release build, on **windows-latest and ubuntu-latest**. Tests emit no bearer tokens or personal data.
 - If the smoke fails, the PR **must not** be accepted. No silent skipping for platform flakes; repair or document a real scoped blocker.
+- An earlier Ubuntu hosted run on the draft branch failed the **existing** `nested_call_admission_blocks_unawaited_and_excessive_calls` test before release smoke. Independent audit traced a timing race in the test callback: an immediate result could settle before JS completion. Commit `2cb5926e` makes the test keep the mutation in-flight for 50 ms, testing the *actual pending-call refusal* without changing production runtime, wall limits or the expected error. The failing run is preserved, and final-head CI must still pass before acceptance.
 
 ## Security review and residual hazards
 
