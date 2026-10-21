@@ -32,6 +32,7 @@ internal sealed class ProbeForm : Form
     private readonly string _extension;
     private readonly string _receipt;
     private readonly bool _batch;
+    private readonly bool _nativeIdle;
     private bool _failed;
     private readonly List<string> _trace = new();
 
@@ -45,6 +46,7 @@ internal sealed class ProbeForm : Form
             Path.Combine(AppContext.BaseDirectory, "extension"));
         _receipt = Path.Combine(_root, "receipt.json");
         _batch = options.ContainsKey("--batch");
+        _nativeIdle = options.ContainsKey("--native-idle");
         Text = "CoSoS 7P-B / isolated WebView2 browser capability probe — NOT production";
         Width = 1300;
         Height = 800;
@@ -61,9 +63,9 @@ internal sealed class ProbeForm : Form
         var parsed = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] == "--batch")
+            if (args[i] is "--batch" or "--native-idle")
             {
-                parsed.Add("--batch", "true");
+                parsed.Add(args[i], "true");
                 continue;
             }
             if (i + 1 >= args.Length || args[i] is not ("--out" or "--assets" or "--extension"))
@@ -188,6 +190,63 @@ internal sealed class ProbeForm : Form
             var components = await EvaluateStringAsync(_a, "document.documentElement.dataset.componentResults");
             Mark("pdf_math_terminal", components == "ready" ? "PASS" : "FAIL",
                 "Real CodeMirror/KaTeX/pdf.js/xterm fixture initialized. PDF selection, IME and resize manual gate remains.");
+
+            if (_nativeIdle)
+            {
+            // 7P-L1 automated Windows interactions against the real embedded renderer.
+            // DOM actions prove WebView2 integration; they do not prove OS IME/clipboard UX.
+            var pdfSearch = await EvaluateStringAsync(_a,
+                "(() => { document.querySelector('#search-pdf').click(); return document.querySelector('#result').textContent; })()");
+            var terminalRows = await EvaluateStringAsync(_a,
+                "(() => { document.querySelector('#resize-terminal').click(); return String(document.querySelectorAll('.xterm-rows > div').length); })()");
+            var mathText = await EvaluateStringAsync(_a,
+                "document.querySelector('.katex-mathml')?.textContent ?? 'missing'");
+            var pdfText = await EvaluateStringAsync(_a,
+                "document.querySelector('#pdf-text-layer')?.textContent ?? 'missing'");
+            Mark("native_renderer_dom_interactions",
+                pdfSearch == "PDF search: matched" && terminalRows == "12"
+                && mathText.Contains("a2") && pdfText.Contains("searchable synthetic") ? "PASS" : "FAIL",
+                $"Real WebView2 DOM search={pdfSearch}, xterm rows={terminalRows}, KaTeX accessible math={mathText.Length} chars, PDF text layer={pdfText.Length} chars; OS keyboard/IME/UIA pending.");
+
+            var firstWorker = await EvaluateStringAsync(_a,
+                "document.documentElement.dataset.cosWorkerInstance ?? 'missing'");
+            var browserExtension = (await _a.CoreWebView2.Profile.GetBrowserExtensionsAsync())
+                .Single(e => e.Name == "CoSoS 7P-B Synthetic Only");
+            await browserExtension.EnableAsync(false);
+            await ReloadObservedAsync(_a);
+            var disabledMainAfterReload = await EvaluateStringAsync(_a, "typeof window.__cosMain");
+            var disabledWorkerAfterReload = await EvaluateStringAsync(_a,
+                "document.documentElement.dataset.cosWorkerInstance ?? 'missing'");
+            await browserExtension.EnableAsync(true);
+            await ReloadObservedAsync(_a);
+            var secondWorker = await WaitForAsync(_a,
+                "document.documentElement.dataset.cosWorkerInstance");
+            var secondDebugger = await WaitForAsync(_a,
+                "document.documentElement.dataset.cosDebugger");
+            Mark("native_forced_mv3_retirement",
+                firstWorker != "missing" && secondWorker != "missing"
+                && firstWorker != secondWorker && disabledMainAfterReload == "undefined"
+                && disabledWorkerAfterReload == "missing" ? "PASS" : "FAIL",
+                $"Disable/re-enable extension caused new worker instance={firstWorker != secondWorker}; disabled MAIN={disabledMainAfterReload}, disabled worker={disabledWorkerAfterReload}. Natural idle suspension is a separate gate.");
+            Mark("native_debugger_reattach",
+                secondDebugger == "roundtrip-event-detached" ? "PASS" : "FAIL",
+                $"After forced MV3 retirement/restart, synthetic chrome.debugger reattach/evaluate/event/detach={secondDebugger}.");
+                // No extension messages, probes or debugger attachments during idle.
+                // Verify real automatic MV3 eviction independently from forced disabling.
+                await Task.Delay(TimeSpan.FromSeconds(65));
+                await ReloadObservedAsync(_a);
+                var afterIdleWorker = await WaitForAsync(_a,
+                    "document.documentElement.dataset.cosWorkerInstance");
+                var afterIdleDebugger = await WaitForAsync(_a,
+                    "document.documentElement.dataset.cosDebugger");
+                Mark("mv3_lifecycle",
+                    afterIdleWorker != "missing" && afterIdleWorker != secondWorker
+                        ? "PASS" : "UNVERIFIED",
+                    $"65-second real idle: worker instance changed={afterIdleWorker != secondWorker}; reboot debugger={afterIdleDebugger}. Natural suspend is only demonstrated if worker generation changes.");
+                Mark("native_debugger_after_idle",
+                    afterIdleDebugger == "roundtrip-event-detached" ? "PASS" : "FAIL",
+                    "Synthetic chrome.debugger reattach/evaluate/event/detach after 65-second idle and same-profile reload.");
+            }
         }
         catch (Exception ex)
         {
@@ -196,7 +255,8 @@ internal sealed class ProbeForm : Form
         finally
         {
             // Deliberately never turn cloud checks into native PASS or invoke real browser/provider sign-in.
-            Mark("mv3_lifecycle", "UNVERIFIED", "Worker suspension/restart requires 7P-L1 manual physical Windows reproduction.");
+            if (!_checks.ContainsKey("mv3_lifecycle"))
+                Mark("mv3_lifecycle", "UNVERIFIED", "Natural MV3 worker idle suspension not yet observed; pass --native-idle for physical Windows proof.");
             Mark("sign_in_constraints", "UNVERIFIED", "No real provider or authenticated account used.");
             Mark("native_windows_gate", "NOT_RUN", "7P-L1 separate owner-operated physical Windows gate.");
             Mark("distribution_budgets", "NOT_RUN", "No installer size/RAM baselines.");
@@ -277,5 +337,27 @@ internal sealed class ProbeForm : Form
             await Task.Delay(250);
         }
         return "timeout";
+    }
+
+    private static async Task ReloadObservedAsync(WebView2 view)
+    {
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        EventHandler<CoreWebView2NavigationCompletedEventArgs>? handler = null;
+        handler = (_, args) =>
+        {
+            view.CoreWebView2.NavigationCompleted -= handler;
+            completion.TrySetResult(args.IsSuccess);
+        };
+        view.CoreWebView2.NavigationCompleted += handler;
+        try
+        {
+            view.CoreWebView2.Reload();
+            var loaded = await completion.Task.WaitAsync(TimeSpan.FromSeconds(15));
+            if (!loaded) throw new InvalidOperationException("Synthetic reload failed");
+        }
+        finally
+        {
+            view.CoreWebView2.NavigationCompleted -= handler;
+        }
     }
 }
