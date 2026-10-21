@@ -16,7 +16,9 @@ struct Slow {
 }
 impl Backend for Slow {
     fn fork_reader(&self) -> Option<Box<dyn Backend>> {
-        Some(Box::new(Self { read_calls: self.read_calls.clone() }))
+        Some(Box::new(Self {
+            read_calls: self.read_calls.clone(),
+        }))
     }
     fn metadata(&mut self, path: &str) -> io::Result<Metadata> {
         Ok(Metadata {
