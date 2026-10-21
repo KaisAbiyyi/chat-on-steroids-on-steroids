@@ -45,7 +45,7 @@ def verify() -> dict[str, object]:
         assert isinstance(info, dict)
         assert info["fullApplicationReady"] is False
         assert info["bridgeProtocol"] == 14
-        assert Path(info["dataDirectory"]).resolve() == profile.resolve()
+        assert Path(info["dataDirectory"]).samefile(profile)
         assert (profile / "cos-rust-profile.json").exists()
 
         # Across independent processes: recorder -> durable session -> history,
@@ -101,7 +101,7 @@ def verify() -> dict[str, object]:
             assert service.stdout is not None
             event = json.loads(service.stdout.readline())
             assert event["event"] == "ready" and event["fullApplicationReady"] is False
-            assert event["profile"] == str(profile.resolve())
+            assert Path(event["profile"]).samefile(profile)
             port = event["port"]
             control = event["controlPort"]
             assert isinstance(port, int) and port > 0
