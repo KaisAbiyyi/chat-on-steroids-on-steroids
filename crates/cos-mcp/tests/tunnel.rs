@@ -124,3 +124,41 @@ fn stopped_sidecars_do_not_exhaust_process_capacity() {
     }
     assert_eq!(tunnel.status()["state"], "stopped");
 }
+
+#[test]
+fn proxy_fallback_and_loopback_bypass_are_fail_closed() {
+    use cos_mcp::tunnel::proxy_environment;
+    use std::collections::BTreeMap;
+    let vars = BTreeMap::from([
+        ("ALL_PROXY".into(), "socks5://example.invalid:1080".into()),
+        ("NO_PROXY".into(), "internal.example,localhost".into()),
+    ]);
+    let env = proxy_environment(&vars);
+    assert_eq!(env["HTTPS_PROXY"], "socks5://example.invalid:1080");
+    assert!(env["NO_PROXY"].contains("internal.example"));
+    for local in ["localhost", "127.0.0.1", "::1", "[::1]"] {
+        assert!(env["NO_PROXY"].split(',').any(|host| host == local));
+    }
+    let explicit = BTreeMap::from([
+        ("HTTPS_PROXY".into(), "https://explicit.example:443".into()),
+        ("ALL_PROXY".into(), "socks5://ignored.example:1080".into()),
+    ]);
+    let env = proxy_environment(&explicit);
+    assert!(!env.contains_key("HTTPS_PROXY"));
+    assert!(env["NO_PROXY"].contains("127.0.0.1"));
+    let rejected = BTreeMap::from([("ALL_PROXY".into(), "socks5://host\r\nBAD:1".into())]);
+    assert!(!proxy_environment(&rejected).contains_key("HTTPS_PROXY"));
+}
+
+#[test]
+fn reconnect_budget_is_capped_and_stale_stop_clears_health() {
+    use cos_mcp::tunnel::retry_delay;
+    assert_eq!(retry_delay(0), Duration::from_millis(500));
+    assert_eq!(retry_delay(1), Duration::from_millis(1000));
+    assert_eq!(retry_delay(10), Duration::from_secs(30));
+    assert_eq!(retry_delay(u32::MAX), Duration::from_secs(30));
+    let tunnel = Supervisor::default();
+    tunnel.stop().unwrap();
+    assert_eq!(tunnel.status()["retryCount"], 0);
+    assert!(tunnel.status()["health"].is_null());
+}
