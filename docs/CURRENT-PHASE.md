@@ -1,5 +1,13 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-A CLOUD BROWSER ARCHITECTURE PREFLIGHT — 2026-10-22
+
+- **CLOUD DESIGN DECISION (effective on accepted [PR #40](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/40) merge):** A provisional Windows-first Rust host + system WebView2 and explicitly hybrid JavaScript/TypeScript renderer/extension glue. [Architecture and source links](architecture/7p-a-browser-architecture.md) and [12-capability fail-closed probe matrix](architecture/7p-a-feasibility-gates.json). Real extension/CDP/MV3/profile/renderer parity remains **UNVERIFIED**.
+- **CONTRACT IMPLEMENTED:** machine-checked Python validator + 16 adversarial tests in GitHub Task DAG workflow on Windows and Ubuntu. These checks accept an architecture contract, **not the native browser**. No real Windows host, personal profile, login, automatic Send, external browser fallback or Phase 7 bridge has been run or accepted.
+- **DEPENDENCIES:** CL-L6 qualified and merged in PR #39. After PR #40 CI/review and merge, `7P-A` Done / Last Done; `7P-B` READY / Now for bounded cloud host/extension/debugger/renderer probes; `7P-L1` remains blocked / Up Next until 7P-B. `7A` and Phase 8 remain blocked by the physical Windows browser feasibility gate. **YOU REQUIRED:** NO for cloud 7P-A or 7P-B; the user initiates the later distinct local `7P-L1` only after 7P-B.
+- **SCOPE / REVIEW:** source-derived internal review and exact PR-head Windows/Ubuntu Rust + Task DAG CI required before merge. No independently accredited third-party reviewer or platform viability PASS is implied.
+- **GITHUB ONLY:** no local checkout, C:/D:, private browser data or local MCP accessed by 7P-A.
+
 ## CL-L6 NATIVE WINDOWS BACKEND ACCEPTED — 2026-10-21
 
 - **LOCAL GATE PASS:** integrated Rust backend/source parity, release and native resource receipt on exact merged `main` source `b85471c9bce70842fd84242d4c2f72fe31df5532` (descendant of accepted [CL-10 PR #38](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/38)).
