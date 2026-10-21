@@ -2,6 +2,8 @@
 
 **Current execution board:** 2026-10-21; canonical DAG in [`docs/task-registry.json`](task-registry.json). Historical phase plans remain reference material, not live eligibility. This board indexes **existing** detailed task contracts in [the CL/phase unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and [the BIG plan](BIG-IMPLEMENTATION-PLAN.md). See [current phase](CURRENT-PHASE.md) for live status and [orchestration policy](AGENT-ORCHESTRATION.md) for claims. This is a planning overlay, not evidence that any future unit passed.
 
+**CL-L6 native release qualification (2026-10-21):** **PASS** at exact source `b85471c`: 312 Windows workspace tests, 17 live native service checks, fmt/Clippy/release, startup and RAM samples. [Local receipt](../audit/2026-10-21/cl-l6-b85471c-receipt.json) and [native gate report](implementation-summary/2026-10-21-cl-l6-native-windows-backend-qualification.md). `7P-A` is the next cloud **READY CANDIDATE**; `7P-B` remains blocked by 7P-A. This does not accept browser/UI architecture. Earlier dated snapshots below are historical.
+
 **Latest native receipt (2026-10-21):** `CL-L3` NTFS, watcher, file panel/search and real OpenSSH SFTP server **DONE / PASS** on merged main SHA `ce7d2ef0df3e1b62a98664fade70a825d6f9d72e`; see [qualification evidence](implementation-summary/2026-10-21-cl-l3-native-windows-qualification.md). `CL-L2` was previously accepted on `ea8ab7a`; `CL-L4` and `CL-L5` remain separate native gates, and `CL-10` awaits both. Earlier dated progress below is a historical snapshot.
 
 **CL-L4 local update (2026-10-21):** Native Windows startup/config/DPAPI/diagnostics/shutdown **DONE / PASS** at exact main `048e327`; [receipt](../audit/2026-10-21/cl-l4-048e327-receipt.json), [native details](implementation-summary/2026-10-21-cl-l4-native-windows-qualification.md). `CL-08B` [PR #29](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/29) merged; only `CL-L5` remains an outstanding native prerequisite of `CL-10`. The earlier snapshot immediately above is historical.
@@ -49,8 +51,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | DONE |
 | `CL-L5` | Live loopback MCP/code-worker native proof | `CL-09B`, `CL-09C` | `windows-mcp` | L (Windows) | DONE |
 | `CL-10` | Integrated backend parity and independent audit | `CL-04B`, `CL-04C`, `CL-L2`, `CL-L3`, `CL-L4`, `CL-L5` | `backend-closure` | C (cloud) | DONE |
-| `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | **READY · PARALLEL** |
-| `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | BLOCKED |
+| `CL-L6` | Native Windows integrated backend release receipt | `CL-10` | `windows-backend` | L (Windows) | DONE |
+| `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | **READY · PARALLEL** |
 | `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | BLOCKED |
 | `7P-L1` | Real Windows embedded browser feasibility gate | `7P-B` | `windows-browser` | L (Windows) | BLOCKED |
 | `7A` | Browser bridge protocol 14/identity contract | `7P-L1` | `browser-protocol` | C (cloud) | BLOCKED |

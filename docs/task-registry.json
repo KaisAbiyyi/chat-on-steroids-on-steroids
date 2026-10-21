@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
   "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed.",
-  "task_status_source": "2026-10-21: CL-L5 native Windows PASS at main bc4ba8657ed8f084894cc859ad6a4a3a7fbb48b4 (audit/2026-10-21/cl-l5-bc4ba86-receipt.json); CL-L1/L2/L3/L4 previously accepted. CL-10 is the next cloud READY_CANDIDATE, subject to live PR/CI/lock checks and independent backend review; CL-L6 follows accepted CL-10. Recheck live main, claims and CI before relying on this snapshot.",
+  "task_status_source": "2026-10-21: CL-L6 native Windows integrated Rust backend PASS at source b85471c9bce70842fd84242d4c2f72fe31df5532 (audit/2026-10-21/cl-l6-b85471c-receipt.json), after accepted CL-10 PR #38. CL-L1–L5 and cloud backend CL-01–CL-10 were accepted for the bounded headless service. 7P-A is now the next cloud READY_CANDIDATE, with 7P-B dependent on it. Recheck live main, claims and CI before relying on this snapshot.",
   "tasks": [
     {
       "id": "CL-01",
@@ -321,7 +321,7 @@
       ],
       "phase": "1-6",
       "kind": "L",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "7P-A",

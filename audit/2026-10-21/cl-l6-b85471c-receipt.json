@@ -1,0 +1,121 @@
+{
+    "unit":  "CL-L6",
+    "date":  "2026-10-21",
+    "status":  "PASS",
+    "source_sha_under_test":  "b85471c9bce70842fd84242d4c2f72fe31df5532",
+    "prereq":  "CL-10 merged PR #38 at 6fe62bdddff4f1d272ec7620fe0e03c1ce6be277",
+    "host":  {
+                 "os":  "Windows 11 x64 NT 10.0.26300",
+                 "filesystem":  "NTFS",
+                 "workspace":  "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l6\\worktree",
+                 "cargo_home":  "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\cargo-home",
+                 "cargo_target":  "D:\\projects\\CoS-Rust\\target",
+                 "temp":  "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l6\\tmp",
+                 "cargo":  "cargo 1.91.1 (ea2d97820 2025-10-10)",
+                 "rustc":  "rustc 1.91.1 (ed61e7d7e 2025-11-07)"
+             },
+    "checks":  {
+                   "rustfmt":  {
+                                   "exit_code":  0,
+                                   "elapsed_ms":  745,
+                                   "stdout_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                                   "stderr_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                               },
+                   "strict_clippy":  {
+                                         "exit_code":  0,
+                                         "elapsed_ms":  9086,
+                                         "stdout_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                                         "stderr_sha256":  "7d87a6ac3f00567a7123a8ddd960752281f7f576f1e953ae4b16a5a6746f65db"
+                                     },
+                   "workspace_tests":  {
+                                           "passed":  312,
+                                           "failed":  0,
+                                           "ignored":  0,
+                                           "suites":  80,
+                                           "exit_code":  0,
+                                           "logs":  {
+                                                        "exit_code":  0,
+                                                        "elapsed_ms":  170604.3,
+                                                        "stdout_sha256":  "49be49cf0de73235ad1fead7725313e46ac729beb29dc87b9a8817df2b96a202",
+                                                        "stderr_sha256":  "d4eaefd41e692f39bfdbb6a41e204872760607044c8b77b8aa2cda118616b3b7"
+                                                    }
+                                       },
+                   "release_build":  {
+                                         "exit_code":  0,
+                                         "elapsed_ms":  77489.3,
+                                         "stdout_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                                         "stderr_sha256":  "e83116f94f8e8b09628a5cf4e15f7b1bae9674752b7c6e74e740a4a6943f1a05"
+                                     },
+                   "native":  {
+                                  "passed":  17,
+                                  "failed":  0,
+                                  "exit_code":  0,
+                                  "report_sha256":  "93a489bdccefde16b49943d207cede5dcd97e1d5b1b8c087415dac5f9fdffe05",
+                                  "harness_sha256":  "a9bda2700e0f68b8a037eecc569f494e6e43388bd6ac2197b6281b39c71d7a35",
+                                  "first_fixture_failure_sha256":  "5635519da8f5b82d9842d12b3012bdeb0bffc79afef01797a7f9483e51c876a3"
+                              }
+               },
+    "release_binary":  {
+                           "path":  "D:\\projects\\CoS-Rust\\target\\release\\cos-rust.exe",
+                           "sha256":  "456fbbe5f0303ed0367d32cf048d28b08a9ef4c5e076f17b36fb5ae5012f8275",
+                           "bytes":  12853760
+                       },
+    "resources":  {
+                      "startup_ms":  {
+                                         "cold":  {
+                                                      "samples":  [
+                                                                      25.31,
+                                                                      23.55,
+                                                                      20.75,
+                                                                      25.7,
+                                                                      20.26
+                                                                  ],
+                                                      "median":  23.55,
+                                                      "p95":  25.7
+                                                  },
+                                         "warm":  {
+                                                      "samples":  [
+                                                                      28.57,
+                                                                      28.12,
+                                                                      38.48,
+                                                                      33.97,
+                                                                      35.17
+                                                                  ],
+                                                      "median":  33.97,
+                                                      "p95":  38.48
+                                                  }
+                                     },
+                      "working_set_bytes":  {
+                                                "samples":  [
+                                                                6975488,
+                                                                6971392,
+                                                                6983680,
+                                                                6959104,
+                                                                7004160,
+                                                                7745536,
+                                                                7716864,
+                                                                7720960,
+                                                                7720960,
+                                                                7749632
+                                                            ],
+                                                "p95":  7749632,
+                                                "integrated_sample":  10661888
+                                            },
+                      "profile_marker_bytes":  110
+                  },
+    "trace":  {
+                  "cargo_runner_sha256":  "acc87381c7dd408e625f8a2b54ac3fecd4fcaffd6e008eb28e185519629d3933",
+                  "build_report_sha256":  "f4fb391fba5a3625c43b8fb7668ed5b70a3fc72c0197742cdf7abee3b99a8dfd",
+                  "native_run_id":  "01f36d88cb",
+                  "raw_logs":  "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l6\\evidence"
+              },
+    "review":  "CL-10 independent backend cloud audit accepted; CL-L6 physical Windows execution + result inspection. No independent third-party security reviewer attested.",
+    "limits":  [
+                   "Headless Rust service only: no desktop/browser/installer acceptance",
+                   "No real accounts, private profiles, external proxy/tunnel or SSH host",
+                   "Point-in-time Windows process working set, 5 cold and 5 warm samples; no matched performance baseline",
+                   "Earlier failed native harness fixture was preserved, not relabeled"
+               ],
+    "you_required":  "NO",
+    "next":  "7P-A cloud embedded-browser architecture feasibility"
+}
