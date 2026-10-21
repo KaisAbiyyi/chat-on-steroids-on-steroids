@@ -3,7 +3,7 @@ use crate::tree::Tree;
 use portable_pty::{Child, MasterPty, PtySize};
 use serde_json::{Value, json};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     io::{self, Read, Write},
     path::PathBuf,
     sync::{Arc, Condvar, Mutex},
@@ -31,6 +31,8 @@ struct Entry {
     project: Option<String>,
     launch: Launch,
     flow: Mutex<Flow>,
+    // Serializes operations against close and rechecks live grants at use.
+    operation: Mutex<()>,
     wake: Condvar,
     writer: Mutex<Option<Box<dyn Write + Send>>>,
     master: Mutex<Option<Box<dyn MasterPty + Send>>>,
@@ -40,6 +42,8 @@ struct State {
     live: bool,
     pending: HashMap<String, uuid::Uuid>,
     entries: HashMap<String, Arc<Entry>>,
+    // A retiring terminal must not reuse an ID until its final exit event.
+    closing: HashSet<String>,
     owed: usize,
 }
 struct Inner {
@@ -72,6 +76,7 @@ impl Terminals {
                 live: true,
                 pending: HashMap::new(),
                 entries: HashMap::new(),
+                closing: HashSet::new(),
                 owed: 0,
             }),
             wake: Condvar::new(),
@@ -88,6 +93,12 @@ impl Terminals {
         cols: u16,
         rows: u16,
     ) -> io::Result<Value> {
+        if !(1..=1000).contains(&cols) || !(1..=500).contains(&rows) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid terminal dimensions",
+            ));
+        }
         if id.is_empty() || id.len() > 200 || !(self.0.allowed)() {
             return Err(denied());
         }
@@ -97,7 +108,8 @@ impl Terminals {
             if !state.live
                 || state.pending.contains_key(id)
                 || state.entries.contains_key(id)
-                || state.entries.len() + state.pending.len() >= 8
+                || state.closing.contains(id)
+                || state.entries.len() + state.pending.len() + state.closing.len() >= 8
             {
                 return Err(io::Error::other(
                     "Terminal limit reached or ID already open",
@@ -171,20 +183,33 @@ impl Terminals {
                 let mut command = CommandBuilder::new(&launch.program);
                 command.args(&launch.args);
                 command.cwd(&launch.cwd);
+                for (key, _) in std::env::vars_os() {
+                    if crate::process::secret_environment(&key.to_string_lossy()) {
+                        command.env_remove(key);
+                    }
+                }
                 command.env_remove("ELECTRON_RUN_AS_NODE");
                 command.env("TERM", "xterm-256color");
                 let reader = pair.master.try_clone_reader().map_err(io::Error::other)?;
                 let writer = pair.master.take_writer().map_err(io::Error::other)?;
-                let child = pair
+                let mut child = pair
                     .slave
                     .spawn_command(command)
                     .map_err(io::Error::other)?;
-                let tree = Tree::attach(
-                    child
-                        .process_id()
-                        .ok_or_else(|| io::Error::other("Missing terminal PID"))?,
-                    false,
-                )?;
+                let pid = match child.process_id() {
+                    Some(pid) => pid,
+                    None => {
+                        let _ = child.kill();
+                        return Err(io::Error::other("Missing terminal PID"));
+                    }
+                };
+                let tree = match Tree::attach(pid, false) {
+                    Ok(tree) => tree,
+                    Err(error) => {
+                        let _ = child.kill();
+                        return Err(error);
+                    }
+                };
                 drop(pair.slave);
                 (child, reader, writer, pair.master, tree)
             }
@@ -197,6 +222,7 @@ impl Terminals {
                 unacked: 0,
                 paused: false,
             }),
+            operation: Mutex::new(()),
             wake: Condvar::new(),
             writer: Mutex::new(Some(writer)),
             master: Mutex::new(Some(master)),
@@ -265,11 +291,13 @@ impl Terminals {
                     .is_some_and(|e| Arc::ptr_eq(e, &entry))
                 {
                     state.entries.remove(&terminal);
+                    state.closing.insert(terminal.clone());
                 }
             }
             (owner.emit)(json!({"id": terminal, "exitCode": code}));
             {
                 let mut state = owner.state.lock().unwrap();
+                state.closing.remove(&terminal);
                 state.owed = state.owed.saturating_sub(1);
                 owner.wake.notify_all();
             }
@@ -290,6 +318,8 @@ impl Terminals {
     }
     pub fn write(&self, id: &str, data: &str) -> io::Result<()> {
         let entry = self.entry(id)?;
+        // No stale entry may write after a concurrent close has completed.
+        let _operation = entry.operation.lock().unwrap();
         if !(self.0.allowed)()
             || !(self.0.validate)(entry.project.as_deref(), &entry.launch)?
             || !entry.flow.lock().unwrap().live
@@ -314,7 +344,20 @@ impl Terminals {
         }
     }
     pub fn resize(&self, id: &str, cols: u16, rows: u16) -> io::Result<()> {
+        if !(1..=1000).contains(&cols) || !(1..=500).contains(&rows) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid terminal dimensions",
+            ));
+        }
         let entry = self.entry(id)?;
+        let _operation = entry.operation.lock().unwrap();
+        if !(self.0.allowed)()
+            || !(self.0.validate)(entry.project.as_deref(), &entry.launch)?
+            || !entry.flow.lock().unwrap().live
+        {
+            return Err(denied());
+        }
         if let Some(master) = entry.master.lock().unwrap().as_ref() {
             master.resize(size(cols, rows)).map_err(io::Error::other)?;
         }
@@ -324,9 +367,15 @@ impl Terminals {
         let entry = {
             let mut state = self.0.state.lock().unwrap();
             state.pending.remove(id);
-            state.entries.remove(id)
+            let entry = state.entries.remove(id);
+            if entry.is_some() {
+                state.closing.insert(id.to_owned());
+            }
+            entry
         };
         if let Some(entry) = entry {
+            // Wait for any accepted in-flight write/resize before retirement.
+            let _operation = entry.operation.lock().unwrap();
             let mut flow = entry.flow.lock().unwrap();
             flow.live = false;
             flow.paused = false;

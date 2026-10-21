@@ -241,12 +241,11 @@ pub fn spawn(
     cwd.push(0);
     let mut env = BTreeMap::<String, (OsString, OsString)>::new();
     for (key, value) in std::env::vars_os() {
-        if if deterministic {
-            !secret_environment(&key.to_string_lossy())
-        } else {
-            !key.to_string_lossy()
+        if !secret_environment(&key.to_string_lossy())
+            && !key
+                .to_string_lossy()
                 .eq_ignore_ascii_case("ELECTRON_RUN_AS_NODE")
-        } {
+        {
             env.insert(key.to_string_lossy().to_uppercase(), (key, value));
         }
     }
@@ -319,11 +318,29 @@ pub fn spawn(
             pixel_height: 0,
         }),
     });
-    let reader = master.try_clone_reader().map_err(io::Error::other)?;
-    let writer = master.take_writer().map_err(io::Error::other)?;
+    // Each failure after suspended CreateProcessW must explicitly kill the
+    // child; dropping an OwnedHandle does not terminate its Windows process.
+    let reader = match master.try_clone_reader() {
+        Ok(reader) => reader,
+        Err(error) => {
+            tree.terminate();
+            let _ = child.kill();
+            return Err(io::Error::other(error));
+        }
+    };
+    let writer = match master.take_writer() {
+        Ok(writer) => writer,
+        Err(error) => {
+            tree.terminate();
+            let _ = child.kill();
+            return Err(io::Error::other(error));
+        }
+    };
     if unsafe { ResumeThread(thread.as_raw_handle()) } == u32::MAX {
+        let error = io::Error::last_os_error();
+        tree.terminate();
         let _ = child.kill();
-        return Err(io::Error::last_os_error());
+        return Err(error);
     }
     drop(thread);
     Ok(Spawn {
