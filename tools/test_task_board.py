@@ -91,6 +91,13 @@ class TaskBoardTests(unittest.TestCase):
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
         self.assertEqual({t["id"] for t in waves[0]}, {"CL-L2"})
+        # Active claimed work is intentionally excluded from forecasts. In a
+        # hypothetical unclaimed graph, all later stages must retain their order.
+        future = copy.deepcopy(self.data)
+        for task in future["tasks"]:
+            if task["id"] in {"CL-07B", "CL-08B"}:
+                task["status"] = "todo"
+        waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
         self.assertLess(flat.index("7P-L1"), flat.index("7A"))
@@ -109,7 +116,7 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_done_cannot_depend_on_unfinished_task(self):
         data = copy.deepcopy(self.data)
-        next(t for t in data["tasks"] if t["id"] == "CL-L2")["status"] = "done"
+        next(t for t in data["tasks"] if t["id"] == "CL-L3")["status"] = "done"
         self.assertTrue(any("cannot be done" in e for e in board.validate(data)))
 
     def test_legacy_phase_ordering_cannot_regress(self):
