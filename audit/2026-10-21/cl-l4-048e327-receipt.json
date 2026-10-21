@@ -1,0 +1,67 @@
+{
+  "unit": "CL-L4",
+  "status": "PASS",
+  "date": "2026-10-21",
+  "github_sha_under_test": "048e327587edf738d1bbd0e7ecc73b0f758596d7",
+  "prerequisites": {
+    "CL-08A": "PR #23 merged",
+    "CL-08B": "PR #29 merged as ea8ab7a18c3f783eaaaf88310a9c2df5f29ea337"
+  },
+  "github_ci": {
+    "rust_windows_linux": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39584693596",
+    "task_dag": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39584693801",
+    "status": "PASS"
+  },
+  "host": {
+    "os": "Windows 11 x64, NT build 26300",
+    "filesystem": "D: NTFS",
+    "worktree": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l4\\worktree",
+    "profiles": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l4\\profiles-v2",
+    "test_temp": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l4\\tmp",
+    "cargo_home": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l3\\cargo-home",
+    "target": "D:\\projects\\CoS-Rust\\target"
+  },
+  "native_tests": {
+    "cos_core": {"passed": 32, "failed": 0, "ignored": 0, "log_sha256": "1e30ccf86b0aa4bbf3a9f36836b45d696812b8322b0a6a83ce71501d0dd43f8b"},
+    "cos_app": {"passed": 11, "failed": 0, "ignored": 0, "log_sha256": "c837736438b8e289b532677e76664b87502cb6734a0efc13a92bf474dec8cee0"},
+    "strict_clippy": {"status": "PASS", "log_sha256": "9e9b4cdc4ec20f40feb7d703fd1de713cf77168efa824b8b8c57b09c05f2bc42"},
+    "rustfmt": {"status": "PASS", "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+    "release_build": {"status": "PASS", "log_sha256": "d938ddf98a602dcfc4a4a08073bb36d378a0630abd3e9604f059b312f19a6a35"},
+    "native_runtime": {
+      "passed": 7,
+      "failed": 0,
+      "synthetic_only": true,
+      "scope": ["config persistence", "native Windows DPAPI availability", "keyless encrypted vault refusal without replacement", "config read I/O failure", "malformed JSON recovery", "awake-enabled runtime shutdown and listener closure", "five cold starts and five same-profile restarts"],
+      "receipt_sha256": "78ca55f117a632254c671eca208741a3c14360a08194f91cac405edb4841b918"
+    }
+  },
+  "release_executable": {
+    "bytes": 12853760,
+    "sha256": "53d98c10cf2f131b2d88b7479f784f7e8efef1a38b837508596716929d943a1a"
+  },
+  "resource_measurements": {
+    "samples_per_class": 5,
+    "cold_ready_ms": {"median": 47.4495, "p95": 62.637},
+    "restart_ready_ms": {"median": 33.1742, "p95": 42.077},
+    "cold_working_set_bytes": {"median": 7057408, "p95": 7069696},
+    "restart_working_set_bytes": {"median": 6995968, "p95": 7036928},
+    "cold_private_bytes": {"median": 1224704, "p95": 1241088},
+    "restart_private_bytes": {"median": 1212416, "p95": 1241088},
+    "synthetic_profiles_total_bytes": 17839,
+    "method": "Spawn isolated release service; monotonic wall-clock from process start to ready JSON event; point-in-time Windows process working set/private bytes; stop and check loopback port refused. p95 is largest of five samples."
+  },
+  "evidence": {
+    "build_script_sha256": "14824ef593390396dc851545bed6a791818fc7ee25a4c6d102b2a4c59cb8eaf1",
+    "native_script_sha256": "f302ef00e595dcf4b71fe90c7f9b6eae67311307a69c151f684c109a91af4d8d",
+    "local_evidence_directory": "D:\\projects\\CoS-Rust\\.test-tmp\\cl-l4\\evidence",
+    "note": "First native harness receipt FAIL was a test fixture error (fresh info does not create config.json); corrected harness and separate profiles-v2 rerun PASS. Original evidence retained."
+  },
+  "limits": [
+    "Only the Rust headless Windows service; no Electron/desktop/installer/provider-profile acceptance",
+    "Working set and private bytes were sampled once per run, not maximum memory; five samples are directional and do not establish long-run or p99 performance",
+    "No comparable same-fixture historical baseline or performance improvement claim",
+    "Windows DPAPI native unit regression and CLI store availability checked; no private or third-party credentials used"
+  ],
+  "you_required": "NO",
+  "next": "CL-L5 independent native MCP gate; CL-10 after CL-L5 accepted; later CL-L6 integrated backend release"
+}

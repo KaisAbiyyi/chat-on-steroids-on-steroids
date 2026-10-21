@@ -4,6 +4,8 @@
 
 **Latest native receipt (2026-10-21):** `CL-L3` NTFS, watcher, file panel/search and real OpenSSH SFTP server **DONE / PASS** on merged main SHA `ce7d2ef0df3e1b62a98664fade70a825d6f9d72e`; see [qualification evidence](implementation-summary/2026-10-21-cl-l3-native-windows-qualification.md). `CL-L2` was previously accepted on `ea8ab7a`; `CL-L4` and `CL-L5` remain separate native gates, and `CL-10` awaits both. Earlier dated progress below is a historical snapshot.
 
+**CL-L4 local update (2026-10-21):** Native Windows startup/config/DPAPI/diagnostics/shutdown **DONE / PASS** at exact main `048e327`; [receipt](../audit/2026-10-21/cl-l4-048e327-receipt.json), [native details](implementation-summary/2026-10-21-cl-l4-native-windows-qualification.md). `CL-08B` [PR #29](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/29) merged; only `CL-L5` remains an outstanding native prerequisite of `CL-10`. The earlier snapshot immediately above is historical.
+
 ## Claim syntax / authority
 
 Ask `ambil CL-05A` or `ambil 11C` in a CoSoS conversation. The worker must inspect the latest claim/PR registry and state `CLAIM <ID>, owner session, base SHA, resource lock(s), branch, planned test` before editing. Claims are **not preassigned** to ChatGPT or Codex. Without an atomic controller, a single coordinator serializes write conflicts. Report-only inspections do not acquire write ownership; continuation after interrupted browser/quota requires fenced transfer and reconciliation with last remote checkpoint.
@@ -38,8 +40,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `CL-07B` | Ripgrep/JS regex streamed search exactness | `CL-07A` | `search-stream` | C (cloud) | DONE |
 | `CL-L3` | NTFS file-panel/search + native SFTP proof | `CL-06B`, `CL-07B` | `windows-files` | L (Windows) | DONE |
 | `CL-08A` | Windows startup/config/secret-store integration | `CL-L1` | `runtime-secrets` | C (cloud) | DONE |
-| `CL-08B` | Diagnostics/logging/awake/shutdown bounded behavior | `CL-08A` | `runtime-diagnostics` | C (cloud) | BLOCKED |
-| `CL-L4` | Native startup/secret/diagnostics resource proof | `CL-08B` | `windows-startup` | L (Windows) | BLOCKED |
+| `CL-08B` | Diagnostics/logging/awake/shutdown bounded behavior | `CL-08A` | `runtime-diagnostics` | C (cloud) | DONE |
+| `CL-L4` | Native startup/secret/diagnostics resource proof | `CL-08B` | `windows-startup` | L (Windows) | DONE |
 | `CL-09A` | MCP schema/errors/permission conformance | `CL-L1` | `mcp-protocol` | C (cloud) | DONE |
 | `CL-09B` | Connection retries/proxy/health/tunnel teardown | `CL-09A` | `mcp-transport` | C (cloud) | DONE |
 | `CL-09C` | Code-engine and nested execution limits | `CL-09A`, `CL-05A` | `code-engine` | C (cloud) | DONE |

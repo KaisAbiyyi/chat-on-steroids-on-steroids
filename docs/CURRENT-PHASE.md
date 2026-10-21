@@ -1,5 +1,12 @@
 # Current CoS-Rust work state
 
+## CL-L4 native Windows qualification PASS — 2026-10-21
+
+- **LOCAL ACCEPTED:** `CL-L4` physical Windows config, DPAPI secret-store, runtime startup/shutdown, and disk/RAM sample measurements on exact merged `main` SHA `048e327587edf738d1bbd0e7ecc73b0f758596d7`. Prerequisite `CL-08B` [PR #29](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/29) merged as `ea8ab7a`. Exact SHA [Windows/Linux Rust CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39584693596) and [Task DAG](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39584693801) PASS.
+- **NATIVE TESTS:** `cos-core` 32 PASS, `cos-app` 11 PASS; rustfmt/strict Clippy/release PASS. Seven CLI native checks PASS, including Windows DPAPI vault refusal, config failure/recovery, awake-enabled clean exit and 5 cold plus 5 restart samples. Median cold ready 47.45 ms; p95 62.64 ms. Point-in-time cold working set p95 6.74 MiB. No comparable baseline or desktop acceptance.
+- **EVIDENCE:** [native report](implementation-summary/2026-10-21-cl-l4-native-windows-qualification.md), [SHA-bound JSON receipt](../audit/2026-10-21/cl-l4-048e327-receipt.json); scripts and raw hashed logs on D:. The initial fixture-only harness error and corrected PASS rerun both remain recorded.
+- **NEXT:** `CL-L5` live Windows MCP/code-worker native session remains required; then `CL-10` integrated backend review and `CL-L6`. Original eight local WIP files remain untouched. **YOU REQUIRED: NO**.
+
 ## CL-L3 native Windows qualification PASS — 2026-10-21
 
 - **LOCAL ACCEPTED:** `CL-L3` physical Windows NTFS file-panel/search, junction containment, Git watcher races and real installed OpenSSH SFTP v3 subsystem proof. Exact merged `main` SHA `ce7d2ef0df3e1b62a98664fade70a825d6f9d72e` includes `CL-06B` PR #27 and `CL-07B` PR #28; both exact-SHA [Rust Windows/Linux CI](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39545344458) and [task DAG](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39545344361) succeeded.
