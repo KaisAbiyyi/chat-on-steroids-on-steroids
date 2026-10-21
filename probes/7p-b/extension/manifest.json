@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "CoSoS 7P-B Synthetic Only",
+  "version": "0.0.1",
+  "description": "No network or real provider actions. Never ship as product companion.",
+  "permissions": [
+    "debugger",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://synthetic.cos.test/*"
+  ],
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://synthetic.cos.test/*"
+      ],
+      "js": [
+        "main.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://synthetic.cos.test/*"
+      ],
+      "js": [
+        "isolated.js"
+      ],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    }
+  ]
+}
