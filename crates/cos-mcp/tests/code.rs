@@ -198,7 +198,10 @@ fn nested_call_admission_blocks_unawaited_and_excessive_calls() {
     // finishes and releases its process-wide permit.
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
     while seen.load(Ordering::Acquire) == 0 {
-        assert!(std::time::Instant::now() < deadline, "nested fixture did not settle");
+        assert!(
+            std::time::Instant::now() < deadline,
+            "nested fixture did not settle"
+        );
         std::thread::sleep(std::time::Duration::from_millis(2));
     }
     std::thread::sleep(std::time::Duration::from_millis(15));
