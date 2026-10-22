@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## OWNER-APPROVED PHASE 7 RESEQUENCING — 2026-10-22
+
+- **LAST DONE:** `7P-B` (accepted PR #41). **NOW:** `7A` Cloud implementation READY CANDIDATE (unclaimed). **UP NEXT:** `7B` (blocked until 7A).
+- **HOLD:** `7P-L1` physical Windows native browser feasibility; [draft PR #42](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/42) is partial, 18 PASS / 2 UNVERIFIED / 2 NOT RUN / 0 FAIL. Claim and Windows host gate are paused; status is NOT Done. No local/user profile touched by this plan update.
+- **POLICY:** Owner permits bounded cloud `7A` protocol/identity contract to proceed based on accepted `7P-B`. Deferred `7P-L1` remains a hard prerequisite of native `7L1` before real browser acceptance, not a waived requirement; signed-in/provider interactions still require separate owner gate. IME/language deferral does not certify keyboard, clipboard, a11y, browser lifetime, security or product distribution.
+- **CLAIM:** `7A` is on Now but not yet claimed or implemented by this status-only change; the next implementer must check live claims/CI and follow the cloud-only protocol.
+
 ## 7P-B CLOUD SYNTHETIC WEBVIEW2/MV3/RENDERER PROBE ACCEPTED / MERGED — 2026-10-22
 
 - **SCOPE:** executable isolated Windows WebView2 host capability adapter + synthetic unpacked MV3 extension with genuine MAIN/ISOLATED worlds, Chrome debugger attach/evaluate/event/detach, host CDP target fencing, synthetic per-profile storage and disabled-extension execution refusal. Real bundled CodeMirror, pdf.js, KaTeX, xterm.js; no production Rust browser bridge or real account access.
