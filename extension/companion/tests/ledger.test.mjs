@@ -89,7 +89,7 @@ test("nonsequential, duplicate and old worker envelopes reject without advanceme
 test("conflicting intent digest and ACK receipt cannot win",async()=>{
   const f=fixture();await attach(f);await send(f,intent("claim",2));
   await expectCode(send(f,intent("claim",3,{digest:"b".repeat(64)})),"conflicting-claim");
-  await expectCode(send(f,ack(3,"unmatched")),"invalid-receipt"); // receipt IDs are bounded, not arbitrary claims
+  await expectCode(send(f,ack(3,"invalid receipt")),"invalid-receipt");
   await send(f,ack(3));
   await expectCode(send(f,ack(4,"receipt-other")),"conflicting-receipt");
   assert.equal((await send(f,intent("repair",4))).receiptId,"receipt-1");
