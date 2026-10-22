@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
   "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed. Owner-approved 2026-10-22 deferral: 7P-L1 is HOLD, not accepted or a ready candidate; cloud 7A may begin after accepted 7P-B; native 7P-L1 qualification is a hard AND prerequisite before 7L1 and subsequent real-browser acceptance.",
-  "task_status_source": "PROPOSED ACCEPTANCE ON MERGE OF 7B PR #45 ONLY: 7A was accepted PR #44 (main 505a5c9d). 7B native Rust authentication/generation-fenced normalized bridge channel, deterministic adversarial tests, exact-head Windows/Ubuntu CI and source review require PASS before PR #45 merges and this 7B DONE registry projection becomes authoritative. 7P-L1 stays HOLD (not accepted); native 7L1 still requires BOTH accepted 7C and 7P-L1. 7C is the next Cloud READY CANDIDATE only after 7B merge. Earlier status projections and source evidence are retained in Git history.",
+  "task_status_source": "7C PR #46 post-merge projection: accepted only AFTER exact-head Windows+Ubuntu 7C Node companion contract, Rust workspace CI, Task DAG and source review PASS and PR #46 merges into main. 7C is bounded MV3 companion claim/ACK/repair state machine with native-attested adapter requirement; no actual native 7B transport integration/browser or physical Windows testing. 7P-L1 remains HOLD and unaccepted; native 7L1 requires BOTH accepted 7C AND 7P-L1; 7D blocked until BOTH 7C and 7L1. Do not conflate this DAG status staged in an unmerged PR with accepted Notion status.",
   "tasks": [
     {
       "id": "CL-01",
@@ -399,7 +399,7 @@
       ],
       "phase": "7",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "7L1",
