@@ -126,6 +126,8 @@ test("generation cannot rollback or replace channel without advance",async()=>{
   await expectCode(send(f,msg("attach",1)),"sequence");
   const equal=fixture(context({channelId:6}),store);
   await expectCode(send(equal,msg("attach",1)),"generation-not-advanced");
+  const unchangedHost=fixture(context({workerGeneration:2,channelId:6}),store);
+  await expectCode(send(unchangedHost,msg("attach",1)),"generation-not-advanced");
   const stale=fixture(context({hostGeneration:0}),store);
   await expectCode(send(stale,msg("attach",1)),"host-generation");
 });
