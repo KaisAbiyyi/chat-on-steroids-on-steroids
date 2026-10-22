@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 7C CLOUD CLAIM / EXTENSION COMPANION ACK/REPAIR — 2026-10-22
+
+- **CLAIM:** `7C` CLAIMED by ChatGPT GPT-6 Cloud, exclusive `browser-extension`, branch `work/7c-extension-companion-20261022`, [PR #46](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/46), from accepted 7B main `e68067cd263f8eef9948ac8d59a35d9ec95a8c7d`. Notion status remains Claimed until CI and merge are verified.
+- **SOURCE CHECKPOINT:** extension-side synthetic ES module 14 ledger for native-attested scope/session events, serialized persistent claim-before-ACK, read-only repair, exactly fenced worker/channel generation, old-generation rejection after retire, conflicting claim/receipt denial. Worker adapter exposes no untrusted content-script ingress or automatic Send/input action.
+- **ACCEPTANCE:** exact-head Windows+Ubuntu Node companion security/lifecycle regression, Rust workspace fmt/Clippy/tests/release, Task DAG and internal diff/security review, then merge; no native browser/real MV3 process/7P-L1 acceptance implied.
+- **BOARD AFTER ACCEPTED MERGE:** 7C Done / Last Done; 7P-L1 Hold / Now (still unaccepted); 7L1 Blocked / Up Next until BOTH accepted 7C and physical 7P-L1. 7D also remains blocked. No fabricated Ready Cloud successor.
+
 ## 7B CLOUD CLAIM / AUTHENTICATED NATIVE AUTHORITY REVIEW — 2026-10-22
 
 - **CLAIM:** `7B` CLAIMED — ChatGPT GPT-6, GitHub Cloud only, exclusive `browser-bridge`; branch `work/7b-authenticated-bridge-20261022`, [PR #45](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/45), base accepted main `505a5c9d7c1851e4e2e4182ac2c8521c5a58f968`. Notion 7B Claim Owner matches. `7P-L1` HOLD / Now stays visible. `7C` blocked / Up Next until 7B acceptance.
