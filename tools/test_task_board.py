@@ -80,7 +80,8 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("7A", ready_ids)
         self.assertEqual(self.tasks["7B"]["status"], "done")
         self.assertNotIn("7B", ready_ids)
-        self.assertIn("7C", ready_ids)
+        self.assertEqual(self.tasks["7C"]["status"], "done")
+        self.assertNotIn("7C", ready_ids)
         candidate = copy.deepcopy(self.data)
         for task in candidate["tasks"]:
             if task["id"] in ("7A", "7B"):
