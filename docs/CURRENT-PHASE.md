@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 7B CLOUD CLAIM / AUTHENTICATED NATIVE AUTHORITY REVIEW — 2026-10-22
+
+- **CLAIM:** `7B` CLAIMED — ChatGPT GPT-6, GitHub Cloud only, exclusive `browser-bridge`; branch `work/7b-authenticated-bridge-20261022`, [PR #45](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/45), base accepted main `505a5c9d7c1851e4e2e4182ac2c8521c5a58f968`. Notion 7B Claim Owner matches. `7P-L1` HOLD / Now stays visible. `7C` blocked / Up Next until 7B acceptance.
+- **SOURCE CHECKPOINT:** Native Rust host-scope evidence, HTTPS origin and monotonic generation bound channel; per-channel random key and challenge, HMAC-SHA256 handshake, domain-separated observation/admission signatures and strictly monotonic sequence. Full equality to privileged host evidence is required BEFORE invoking 7A first-proof fence. Unauthenticated, stale-generation and replayed envelopes are denied.
+- **NON-CLAIMS:** no actual upstream extension v14 parser, WebView2 product transport, MV3 lifecycle, CDP integration, native physical Windows proof, account sign-in or automatic Send. Cloud CI is not `7P-L1` or `7L1` acceptance. `7L1` requires BOTH 7C and accepted 7P-L1.
+- **ACCEPTANCE GATE:** new Rust adversarial regressions + exact-PR-head Windows/Ubuntu fmt/Clippy/workspace tests + task DAG + reviewer before merge. Never mark 7B Done until that evidence is accepted and PR merged.
+
 ## 7A MERGE-QUALIFIED HANDOFF (conditional) — 2026-10-22
 
 - **AFTER PR #44 passes exact-head Windows/Ubuntu Rust and Task DAG, reviews, and merges:** `7A` DONE / Last Done. `7B` Ready / Now (unclaimed), alongside `7P-L1` Hold / Now for visibility. `7C` is Up Next blocked until 7B. Do not interpret this proposed post-merge state as already accepted while PR #44 is open.
