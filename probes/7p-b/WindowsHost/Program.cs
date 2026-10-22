@@ -335,6 +335,7 @@ internal sealed class ProbeForm : Form
                 Mark("native_debugger_after_idle",
                     afterIdleDebugger == "roundtrip-event-detached" ? "PASS" : "FAIL",
                     "Synthetic chrome.debugger reattach/evaluate/event/detach after 65-second idle and same-profile reload.");
+                await VerifyTabCloseReopenAsync();
             }
         }
         catch (Exception ex)
@@ -395,6 +396,81 @@ internal sealed class ProbeForm : Form
                 throw new InvalidOperationException("MV3 extension not installed and enabled");
             _trace.Add("synthetic extension installed for " + profile);
         }
+    }
+
+    // A real WebView2 controller must be destroyed and recreated in the same
+    // isolated profile. LeaseBook-only tests cannot prove browser tab lifetime.
+    private async Task VerifyTabCloseReopenAsync()
+    {
+        var oldProfile = Path.GetFullPath(_a.CoreWebView2.Profile.ProfilePath);
+        var oldLease = _leases.Elect("A", "tab-close-reopen");
+        var oldTargets = await ReadSyntheticTargetIdsAsync(_a);
+        await _a.CoreWebView2.ExecuteScriptAsync(
+            "localStorage.setItem('cos7pl1-tab-reopen','owned-A')");
+        var panel = _a.Parent ?? throw new InvalidOperationException("Synthetic A panel not available");
+        _a.Dispose();
+
+        var replacement = new WebView2 { Dock = DockStyle.Fill };
+        panel.Controls.Add(replacement);
+        await SetupAsync(replacement, "A", enabled: true, install: false);
+        var freshProfile = Path.GetFullPath(replacement.CoreWebView2.Profile.ProfilePath);
+        var currentLease = _leases.Elect("A", "tab-close-reopen");
+        bool revoked = !_leases.Allows(oldLease, "A", "tab-close-reopen");
+        bool deniedByCdp = false;
+        try { await CdpTitleAsync(replacement, oldLease, "A", "tab-close-reopen"); }
+        catch (UnauthorizedAccessException) { deniedByCdp = true; }
+
+        replacement.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
+        var ready = await WaitForAsync(replacement, "document.documentElement.dataset.rendererReady");
+        var debuggerAck = await WaitForAsync(replacement, "document.documentElement.dataset.cosDebugger");
+        var stored = await EvaluateStringAsync(replacement,
+            "localStorage.getItem('cos7pl1-tab-reopen') ?? 'missing'");
+        var newTitle = await CdpTitleAsync(replacement, currentLease, "A", "tab-close-reopen");
+        var newTargets = await ReadSyntheticTargetIdsAsync(replacement);
+        var isolatedB = await EvaluateStringAsync(_b,
+            "localStorage.getItem('cos7pl1-tab-reopen') ?? 'missing'");
+        bool sameProfile = string.Equals(oldProfile, freshProfile, StringComparison.OrdinalIgnoreCase);
+        bool corePassed = revoked && deniedByCdp && sameProfile && ready == "ready"
+            && debuggerAck == "roundtrip-event-detached" && stored == "owned-A"
+            && isolatedB == "missing" && newTitle == "7P-B Synthetic";
+        Mark("native_tab_close_reopen", corePassed ? "PASS" : "FAIL",
+            $"Disposed actual WebView2 controller and recreated same profile={sameProfile}; "
+            + $"old CDP lease denied={deniedByCdp}, revoked={revoked}, new CDP={newTitle}, "
+            + $"MV3 debugger={debuggerAck}, persisted storage={stored}, profile B isolated={isolatedB}.");
+
+        // Target.getTargets is a browser-CDP capability and may be unavailable
+        // through the page-scoped WebView2 CDP adapter. Never call that PASS
+        // unless both source-bound native target IDs were actually observable.
+        bool targetIdsObserved = oldTargets.Count > 0 && newTargets.Count > 0;
+        bool changed = !oldTargets.Overlaps(newTargets);
+        Mark("native_cdp_target_recreation",
+            !targetIdsObserved ? "UNVERIFIED" : changed && corePassed ? "PASS" : "FAIL",
+            $"Source-observed CDP page target IDs: before={oldTargets.Count}, after={newTargets.Count}, "
+            + $"disjoint={changed}; no inferred target identity from lease epochs.");
+        _leases.Close(currentLease);
+    }
+
+    private static async Task<HashSet<string>> ReadSyntheticTargetIdsAsync(WebView2 view)
+    {
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        try
+        {
+            var raw = await view.CoreWebView2.CallDevToolsProtocolMethodAsync("Target.getTargets", "{}");
+            using var response = JsonDocument.Parse(raw);
+            if (!response.RootElement.TryGetProperty("targetInfos", out var targets)) return ids;
+            foreach (var target in targets.EnumerateArray())
+            {
+                if (target.TryGetProperty("type", out var type)
+                    && type.GetString() == "page"
+                    && target.TryGetProperty("url", out var url)
+                    && url.GetString()?.StartsWith("https://synthetic.cos.test/", StringComparison.Ordinal) == true
+                    && target.TryGetProperty("targetId", out var id)
+                    && id.GetString() is { Length: > 0 } value)
+                    ids.Add(value);
+            }
+        }
+        catch (COMException) { /* Unsupported browser CDP scope: remains UNVERIFIED. */ }
+        return ids;
     }
 
     private async Task<string> CdpTitleAsync(WebView2 view, TabLease lease, string profile, string tab)
