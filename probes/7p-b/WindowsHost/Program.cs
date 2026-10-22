@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using CoSoS.Probe7PB;
 using Microsoft.Web.WebView2.Core;
@@ -30,6 +31,13 @@ internal sealed class ProbeForm : Form
     private readonly WebView2 _b = new() { Dock = DockStyle.Fill };
     private readonly WebView2 _negative = new() { Width = 2, Height = 2 };
     private readonly LeaseBook _leases = new();
+    private sealed class NativeController
+    {
+        public required string Profile { get; init; }
+        public required string ProfilePath { get; init; }
+        public TabLease? Lease { get; set; }
+    }
+    private readonly Dictionary<WebView2, NativeController> _controllers = new(ReferenceEqualityComparer.Instance);
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root;
     private readonly string _assets;
@@ -165,19 +173,24 @@ internal sealed class ProbeForm : Form
                 + "; physical WebView2/worker-target parity remains a separate 7P-L1 gate.");
 
             // Host CDP and target-ownership are separate from chrome.debugger and must never be conflated.
-            var own = _leases.Elect("A", "tab-A");
-            var other = _leases.Elect("B", "tab-B");
+            var own = ElectController(_a, "A", "tab-A");
+            var other = ElectController(_b, "B", "tab-B");
             var hostCdp = await CdpTitleAsync(_a, own, "A", "tab-A");
             var hostCdpB = await CdpTitleAsync(_b, other, "B", "tab-B");
-            var stale = _leases.Elect("A", "tab-A");
+            bool borrowedACdpDenied = false;
+            try { await CdpTitleAsync(_b, own, "A", "tab-A"); }
+            catch (UnauthorizedAccessException) { borrowedACdpDenied = true; }
+            Mark("native_cross_profile_cdp_denial", borrowedACdpDenied ? "PASS" : "FAIL",
+                $"Using A's valid lease and labels against the actual B WebView2 controller denied={borrowedACdpDenied}.");
+            var stale = ElectController(_a, "A", "tab-A");
             var staleRefused = !_leases.Allows(own, "A", "tab-A");
             var staleCdpDenied = false;
             try { await CdpTitleAsync(_a, own, "A", "tab-A"); }
             catch (UnauthorizedAccessException) { staleCdpDenied = true; }
             Mark("debugger_target", hostCdp == "7P-B Synthetic" && hostCdpB == hostCdp && staleRefused && staleCdpDenied
                 ? "PASS" : "FAIL", "Host CDP titles and actual stale CDP method denial. This is NOT extension chrome.debugger.");
-            _leases.Close(stale);
-            _leases.Close(other);
+            RetireControllerLease(_a);
+            RetireControllerLease(_b);
 
             await _a.CoreWebView2.ExecuteScriptAsync("localStorage.setItem('cos7pb','A')");
             var cross = await EvaluateStringAsync(_b, "localStorage.getItem('cos7pb') ?? 'none'");
@@ -354,6 +367,11 @@ internal sealed class ProbeForm : Form
             {
                 task = "7P-B", source = "synthetic WebView2 WinForms adapter spike (NOT production Rust host)",
                 utc = DateTimeOffset.UtcNow, runtime = Environment.OSVersion.ToString(),
+                executableVersion = typeof(ProbeForm).Assembly.GetCustomAttributes(
+                    typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+                    .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+                    .FirstOrDefault()?.InformationalVersion ?? "unavailable",
+                executableSha256 = HashCurrentExecutable(),
                 // A is deliberately disposed during tab-recreation qualification.
                 // B stays live and uses the same installed Evergreen WebView2 runtime.
                 webviewRuntime = _b.CoreWebView2?.Environment.BrowserVersionString ?? "unavailable",
@@ -380,8 +398,16 @@ internal sealed class ProbeForm : Form
                 AllowSingleSignOnUsingOSPrimaryAccount = false
             });
         await view.EnsureCoreWebView2Async(env);
+        var actualProfile = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
+        var expectedProfile = Path.GetFullPath(profileRoot) + Path.DirectorySeparatorChar;
+        if (!actualProfile.StartsWith(expectedProfile, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("WebView2 actual profile escaped the host-owned profile root");
+        _controllers.Add(view, new NativeController { Profile = profile, ProfilePath = actualProfile });
         view.CoreWebView2.NavigationStarting += (_, e) =>
         {
+            // A document navigation ends authorization for the previous document,
+            // including allowed same-origin navigation and denied external attempts.
+            RetireControllerLease(view);
             if (!Uri.TryCreate(e.Uri, UriKind.Absolute, out var u) ||
                 u.Scheme != "https" || u.Host != "synthetic.cos.test")
             {
@@ -400,84 +426,142 @@ internal sealed class ProbeForm : Form
         }
     }
 
+    private TabLease ElectController(WebView2 view, string profile, string tab)
+    {
+        if (view.IsDisposed || !_controllers.TryGetValue(view, out var owner)
+            || owner.Profile != profile || !IsNativeControllerCurrent(view, owner))
+            throw new UnauthorizedAccessException("Cannot elect CDP for an unowned native controller");
+        RetireControllerLease(view);
+        var lease = _leases.Elect(profile, tab);
+        owner.Lease = lease;
+        return lease;
+    }
+
+    private static bool IsNativeControllerCurrent(WebView2 view, NativeController owner)
+        => !view.IsDisposed && view.CoreWebView2 is not null
+           && string.Equals(Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath),
+               owner.ProfilePath, StringComparison.OrdinalIgnoreCase);
+
+    private static string HashCurrentExecutable()
+    {
+        try
+        {
+            if (Environment.ProcessPath is not string path) return "unavailable";
+            using var stream = File.OpenRead(path);
+            return Convert.ToHexString(SHA256.HashData(stream));
+        }
+        catch (IOException) { return "unavailable"; }
+        catch (UnauthorizedAccessException) { return "unavailable"; }
+    }
+
+    private void RetireControllerLease(WebView2 view)
+    {
+        if (_controllers.TryGetValue(view, out var owner) && owner.Lease is { } lease)
+        {
+            // Retire the authority before disposing or replacing the controller.
+            owner.Lease = null;
+            _leases.Close(lease);
+        }
+    }
+
+    private void RetireController(WebView2 view)
+    {
+        RetireControllerLease(view);
+        _controllers.Remove(view);
+    }
+
     // A real WebView2 controller must be destroyed and recreated in the same
     // isolated profile. LeaseBook-only tests cannot prove browser tab lifetime.
     private async Task VerifyTabCloseReopenAsync()
     {
         var oldProfile = Path.GetFullPath(_a.CoreWebView2.Profile.ProfilePath);
-        var oldLease = _leases.Elect("A", "tab-close-reopen");
-        var oldTargets = await ReadSyntheticTargetIdsAsync(_a);
+        var oldLease = ElectController(_a, "A", "tab-close-reopen");
+        var oldTarget = await ReadOwnedTargetIdAsync(_a);
         await _a.CoreWebView2.ExecuteScriptAsync(
             "localStorage.setItem('cos7pl1-tab-reopen','owned-A')");
         var panel = _a.Parent ?? throw new InvalidOperationException("Synthetic A panel not available");
+        RetireController(_a);
         _a.Dispose();
+        bool revokedOnClose = !_leases.Allows(oldLease, "A", "tab-close-reopen");
 
         var replacement = new WebView2 { Dock = DockStyle.Fill };
-        panel.Controls.Add(replacement);
-        await SetupAsync(replacement, "A", enabled: true, install: false);
-        var freshProfile = Path.GetFullPath(replacement.CoreWebView2.Profile.ProfilePath);
-        var currentLease = _leases.Elect("A", "tab-close-reopen");
-        bool revoked = !_leases.Allows(oldLease, "A", "tab-close-reopen");
-        bool deniedByCdp = false;
-        try { await CdpTitleAsync(replacement, oldLease, "A", "tab-close-reopen"); }
-        catch (UnauthorizedAccessException) { deniedByCdp = true; }
-
-        replacement.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
-        var ready = await WaitForAsync(replacement, "document.documentElement.dataset.rendererReady");
-        var debuggerAck = await WaitForAsync(replacement, "document.documentElement.dataset.cosDebugger");
-        var stored = await EvaluateStringAsync(replacement,
-            "localStorage.getItem('cos7pl1-tab-reopen') ?? 'missing'");
-        var newTitle = await CdpTitleAsync(replacement, currentLease, "A", "tab-close-reopen");
-        var newTargets = await ReadSyntheticTargetIdsAsync(replacement);
-        var isolatedB = await EvaluateStringAsync(_b,
-            "localStorage.getItem('cos7pl1-tab-reopen') ?? 'missing'");
-        bool sameProfile = string.Equals(oldProfile, freshProfile, StringComparison.OrdinalIgnoreCase);
-        bool corePassed = revoked && deniedByCdp && sameProfile && ready == "ready"
-            && debuggerAck == "roundtrip-event-detached" && stored == "owned-A"
-            && isolatedB == "missing" && newTitle == "7P-B Synthetic";
-        Mark("native_tab_close_reopen", corePassed ? "PASS" : "FAIL",
-            $"Disposed actual WebView2 controller and recreated same profile={sameProfile}; "
-            + $"old CDP lease denied={deniedByCdp}, revoked={revoked}, new CDP={newTitle}, "
-            + $"MV3 debugger={debuggerAck}, persisted storage={stored}, profile B isolated={isolatedB}.");
-
-        // Target.getTargets is a browser-CDP capability and may be unavailable
-        // through the page-scoped WebView2 CDP adapter. Never call that PASS
-        // unless both source-bound native target IDs were actually observable.
-        bool targetIdsObserved = oldTargets.Count > 0 && newTargets.Count > 0;
-        bool changed = !oldTargets.Overlaps(newTargets);
-        Mark("native_cdp_target_recreation",
-            !targetIdsObserved ? "UNVERIFIED" : changed && corePassed ? "PASS" : "FAIL",
-            $"Source-observed CDP page target IDs: before={oldTargets.Count}, after={newTargets.Count}, "
-            + $"disjoint={changed}; no inferred target identity from lease epochs.");
-        _leases.Close(currentLease);
-    }
-
-    private static async Task<HashSet<string>> ReadSyntheticTargetIdsAsync(WebView2 view)
-    {
-        var ids = new HashSet<string>(StringComparer.Ordinal);
         try
         {
-            var raw = await view.CoreWebView2.CallDevToolsProtocolMethodAsync("Target.getTargets", "{}");
-            using var response = JsonDocument.Parse(raw);
-            if (!response.RootElement.TryGetProperty("targetInfos", out var targets)) return ids;
-            foreach (var target in targets.EnumerateArray())
-            {
-                if (target.TryGetProperty("type", out var type)
-                    && type.GetString() == "page"
-                    && target.TryGetProperty("url", out var url)
-                    && url.GetString()?.StartsWith("https://synthetic.cos.test/", StringComparison.Ordinal) == true
-                    && target.TryGetProperty("targetId", out var id)
-                    && id.GetString() is { Length: > 0 } value)
-                    ids.Add(value);
-            }
+            panel.Controls.Add(replacement);
+            await SetupAsync(replacement, "A", enabled: true, install: false);
+            var freshProfile = Path.GetFullPath(replacement.CoreWebView2.Profile.ProfilePath);
+            bool deniedByCdp = false;
+            try { await CdpTitleAsync(replacement, oldLease, "A", "tab-close-reopen"); }
+            catch (UnauthorizedAccessException) { deniedByCdp = true; }
+
+            replacement.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
+            var ready = await WaitForAsync(replacement, "document.documentElement.dataset.rendererReady");
+            var debuggerAck = await WaitForAsync(replacement, "document.documentElement.dataset.cosDebugger");
+            var stored = await EvaluateStringAsync(replacement,
+                "localStorage.getItem('cos7pl1-tab-reopen') ?? 'missing'");
+            var currentLease = ElectController(replacement, "A", "tab-close-reopen");
+            var newTitle = await CdpTitleAsync(replacement, currentLease, "A", "tab-close-reopen");
+            var newTarget = await ReadOwnedTargetIdAsync(replacement);
+            var isolatedB = await EvaluateStringAsync(_b,
+                "localStorage.getItem('cos7pl1-tab-reopen') ?? 'missing'");
+            bool sameProfile = string.Equals(oldProfile, freshProfile, StringComparison.OrdinalIgnoreCase);
+            bool corePassed = revokedOnClose && deniedByCdp && sameProfile && ready == "ready"
+                && debuggerAck == "roundtrip-event-detached" && stored == "owned-A"
+                && isolatedB == "missing" && newTitle == "7P-B Synthetic";
+            Mark("native_tab_close_reopen", corePassed ? "PASS" : "FAIL",
+                $"Disposed real controller, revoked before replacement={revokedOnClose}, "
+                + $"same profile={sameProfile}, old CDP denied={deniedByCdp}, new CDP={newTitle}, "
+                + $"MV3 debugger={debuggerAck}, persisted storage={stored}, B isolated={isolatedB}.");
+
+            // Target.getTargetInfo with no targetId refers to the invoking CDP
+            // session's target. Enumerating all same-origin targets is NOT proof
+            // that a target belongs to this specific WebView2 controller.
+            bool targetIdsObserved = oldTarget is not null && newTarget is not null;
+            bool changed = oldTarget != newTarget;
+            Mark("native_cdp_target_recreation",
+                !targetIdsObserved ? "UNVERIFIED" : changed && corePassed ? "PASS" : "FAIL",
+                $"Per-controller CDP target identity observed before={oldTarget is not null}, "
+                + $"after={newTarget is not null}, changed={changed}.");
+            await ReloadObservedAsync(replacement);
+            bool oldDocumentLeaseDenied = false;
+            try { await CdpTitleAsync(replacement, currentLease, "A", "tab-close-reopen"); }
+            catch (UnauthorizedAccessException) { oldDocumentLeaseDenied = true; }
+            var afterNavigationLease = ElectController(replacement, "A", "tab-close-reopen");
+            var afterNavigationTitle = await CdpTitleAsync(
+                replacement, afterNavigationLease, "A", "tab-close-reopen");
+            Mark("native_navigation_cdp_revocation",
+                oldDocumentLeaseDenied && afterNavigationTitle == "7P-B Synthetic" ? "PASS" : "FAIL",
+                $"Same-origin navigation revoked old document CDP lease={oldDocumentLeaseDenied}; "
+                + $"new lease title={afterNavigationTitle}.");
         }
-        catch (COMException) { /* Unsupported browser CDP scope: remains UNVERIFIED. */ }
-        return ids;
+        finally
+        {
+            RetireController(replacement);
+            replacement.Dispose();
+        }
+    }
+
+    private static async Task<string?> ReadOwnedTargetIdAsync(WebView2 view)
+    {
+        try
+        {
+            var raw = await view.CoreWebView2.CallDevToolsProtocolMethodAsync("Target.getTargetInfo", "{}");
+            using var response = JsonDocument.Parse(raw);
+            if (!response.RootElement.TryGetProperty("targetInfo", out var target)
+                || target.GetProperty("type").GetString() != "page"
+                || target.GetProperty("url").GetString()?.StartsWith(
+                    "https://synthetic.cos.test/", StringComparison.Ordinal) != true)
+                return null;
+            return target.GetProperty("targetId").GetString();
+        }
+        catch (COMException) { return null; /* Unsupported scope stays UNVERIFIED. */ }
     }
 
     private async Task<string> CdpTitleAsync(WebView2 view, TabLease lease, string profile, string tab)
     {
-        if (!_leases.Allows(lease, profile, tab))
+        if (!_leases.Allows(lease, profile, tab)
+            || !_controllers.TryGetValue(view, out var owner) || owner.Profile != profile
+            || owner.Lease != lease || !IsNativeControllerCurrent(view, owner))
             throw new UnauthorizedAccessException("Stale or cross-profile CDP lease");
         var result = await view.CoreWebView2.CallDevToolsProtocolMethodAsync(
             "Runtime.evaluate", "{\"expression\":\"document.title\",\"returnByValue\":true}");
