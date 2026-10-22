@@ -166,7 +166,24 @@ impl IdentityFence {
         self.current.len()
     }
 
-    pub fn observe_verified(
+    /// Public ingress requires a versioned frame even after host authentication.
+    pub fn observe_frame(
+        &mut self,
+        frame: NormalizedIdentityFrame,
+    ) -> Result<Observation, BridgeContractError> {
+        frame.validate()?;
+        self.observe_verified(frame.identity)
+    }
+
+    pub fn require_current_frame(
+        &self,
+        frame: &NormalizedIdentityFrame,
+    ) -> Result<(), BridgeContractError> {
+        frame.validate()?;
+        self.require_current(&frame.identity)
+    }
+
+    fn observe_verified(
         &mut self,
         incoming: DocumentIdentity,
     ) -> Result<Observation, BridgeContractError> {
@@ -214,7 +231,7 @@ impl IdentityFence {
 
     /// Admission requires an *exact* current identity, not just a matching
     /// session, URL, tab, or increasing client-provided counter.
-    pub fn require_current(&self, identity: &DocumentIdentity) -> Result<(), BridgeContractError> {
+    fn require_current(&self, identity: &DocumentIdentity) -> Result<(), BridgeContractError> {
         identity.validate()?;
         if self.current.get(&identity.scope()) == Some(identity)
             && self.first_proof.get(&identity.session()) == Some(&identity.scope())
@@ -268,6 +285,34 @@ mod tests {
             Err(BridgeContractError::Frame)
         );
         assert!(NormalizedIdentityFrame::parse(b"{").is_err());
+    }
+
+    #[test]
+    fn public_ingress_requires_version_before_it_can_claim_a_scope() {
+        let mut fence = IdentityFence::new();
+        let stale = NormalizedIdentityFrame {
+            protocol: 13,
+            identity: identity(),
+        };
+        assert_eq!(
+            fence.observe_frame(stale),
+            Err(BridgeContractError::Version)
+        );
+        assert_eq!(fence.active_scopes(), 0);
+        let good = NormalizedIdentityFrame {
+            protocol: PROTOCOL_VERSION,
+            identity: identity(),
+        };
+        assert_eq!(
+            fence.observe_frame(good.clone()),
+            Ok(Observation::FirstProof)
+        );
+        assert!(fence.require_current_frame(&good).is_ok());
+        let wrong = NormalizedIdentityFrame { protocol: 15, ..good };
+        assert_eq!(
+            fence.require_current_frame(&wrong),
+            Err(BridgeContractError::Version)
+        );
     }
 
     #[test]
