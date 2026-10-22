@@ -14,6 +14,30 @@ Windows x64 is the **primary shipped and native-qualification focus**, including
 
 ## Cloud development and handoff
 
+### Owner-directed IME deferral — 2026-10-22
+
+The owner explicitly directed skipping further OS IME qualification now and
+carrying it in the roadmap. Track **`IME-DEFER-20261022`: HOLD / UNVERIFIED**.
+Native automated keyboard input, selection, undo/redo and Unicode have scoped
+PASS evidence in the [7P-L1 follow-up](implementation-summary/2026-10-22-7p-l1-keyboard-ime-native.md).
+Real Windows IME preedit, candidate selection, commit/cancel and undo have not
+been proven. Unicode insertion and Chromium CDP IME simulation do not prove them.
+
+This is a scheduling exception for the **OS IME portion only** of `rich_editor`:
+do not repeat it or treat it alone as an immediate development prerequisite.
+Other 7P-L1 requirements and the explicit review/acceptance of that unit remain;
+this exception does not mark 7P-L1 PASS or automatically unblock 7A. Preserve the
+original feasibility matrix and historical receipts rather than rewriting them.
+
+Carry the gap to **8L1**, using the representative embedded browser/editor, and
+retain any remaining gap for **Phase 15 native editor/user acceptance before
+claiming full multilingual editor parity**. The exit criterion is a source- and
+binary-bound real Windows IME test of preedit, candidate conversion, commit,
+cancel, selection and undo without duplicated/lost text, including focus changes.
+Do not mark it PASS until evidence exists or silently drop it from release scope.
+No further local IME installation or testing is assigned now. This does not waive
+screen-reader, clipboard, distribution or other outstanding acceptance gates.
+
 ```text
 reviewed GitHub bootstrap -> named cloud unit / topic branch
        -> implement + RED/GREEN + Windows/Linux CI + security review

@@ -1,5 +1,23 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-L1 Keyboard PASS; OS IME deferred by owner — 2026-10-22
+
+- **Scoped evidence:** native Windows automation into packaged synthetic CodeMirror
+  passed 17 exact value/selection assertions, including ASCII, Unicode, selection,
+  undo/redo and unchanged independent profile B. Tested code `6555032`; no product
+  implementation changed. Human physical-keyboard usability is not claimed.
+- **Owner decision:** skip further real OS IME work now. `IME-DEFER-20261022` is
+  **HOLD / UNVERIFIED**, carried to 8L1 and Phase 15 final multilingual editor
+  acceptance in the [roadmap](BIG-IMPLEMENTATION-PLAN.md#owner-directed-ime-deferral--2026-10-22).
+  This scoped scheduling override is not an IME PASS or full 7P-L1 acceptance;
+  remaining gates and 7A's dependency still require review.
+- **Cleanup:** original language tags/order/input tips, empty default override and
+  nonlegacy language bar restored and read back; owned synthetic probe processes
+  stopped. The previously approved Windows system-component installation is not
+  uninstalled; its servicing completion is not claimed as IME qualification.
+- **Evidence / next:** [implementation summary](implementation-summary/2026-10-22-7p-l1-keyboard-ime-native.md).
+  No more local IME work now; review other outstanding 7P-L1 gates separately.
+
 ## 7P-B CLOUD SYNTHETIC WEBVIEW2/MV3/RENDERER PROBE ACCEPTED / MERGED — 2026-10-22
 
 - **SCOPE:** executable isolated Windows WebView2 host capability adapter + synthetic unpacked MV3 extension with genuine MAIN/ISOLATED worlds, Chrome debugger attach/evaluate/event/detach, host CDP target fencing, synthetic per-profile storage and disabled-extension execution refusal. Real bundled CodeMirror, pdf.js, KaTeX, xterm.js; no production Rust browser bridge or real account access.
