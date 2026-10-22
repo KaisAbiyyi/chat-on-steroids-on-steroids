@@ -106,8 +106,15 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertEqual(tasks["7P-A"]["depends_on"], ["CL-L6"])
         self.assertEqual(tasks["7P-B"]["depends_on"], ["7P-A"])
         self.assertEqual(tasks["7P-L1"]["depends_on"], ["7P-B"])
-        self.assertEqual(tasks["7A"]["depends_on"], ["7P-L1"])
-        self.assertNotEqual(tasks["7P-L1"]["status"], "done")
+        self.assertEqual(tasks["7P-L1"]["status"], "hold")
+        self.assertEqual(tasks["7A"]["depends_on"], ["7P-B"])
+        self.assertEqual(tasks["7L1"]["depends_on"], ["7C", "7P-L1"])
+        ready, _ = task_board.readiness(graph)
+        ready_ids = {task["id"] for task in ready}
+        self.assertIn("7A", ready_ids)
+        self.assertNotIn("7P-L1", ready_ids)
+        self.assertNotIn("7L1", ready_ids)
+        # Cloud implementation may proceed; native runtime still cannot skip L1.
 
 
 if __name__ == "__main__":

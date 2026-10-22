@@ -15,7 +15,7 @@ from pathlib import Path
 
 REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
 EXPECTED = {"C": 72, "L": 28, "U": 15}
-STATUSES = {"done", "todo", "claimed", "blocked"}
+STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
 PHASES = {"1-6", *(str(n) for n in range(7, 17))}
 NOTICE = (
     "READY_CANDIDATE ONLY. Check live GitHub main CI, open PRs/claims, "
@@ -90,7 +90,7 @@ def validate(data: dict) -> list[str]:
             problems.append(f"Obsolete runtime task id: {obsolete}")
     expected_edges = {
         "7P-A": ["CL-L6"], "7P-B": ["7P-A"], "7P-L1": ["7P-B"],
-        "7A": ["7P-L1"], "8A": ["7E"], "8B": ["8A"], "8C": ["8B"],
+        "7A": ["7P-B"], "7L1": ["7C", "7P-L1"], "8A": ["7E"], "8B": ["8A"], "8C": ["8B"],
         "8L1": ["8C"], "8U1": ["8L1"],
         "CL-09C": ["CL-09A", "CL-05A"],
         "CL-L3": ["CL-06B", "CL-07B"],
@@ -146,6 +146,7 @@ def explain(data: dict, task_id: str) -> dict:
     return {
         **task,
         "state": "DONE" if task["status"] == "done" else
+                 "HOLD" if task["status"] == "hold" else
                  "READY_CANDIDATE" if task["status"] == "todo" and not missing_direct else
                  "BLOCKED",
         "missing_direct": missing_direct,

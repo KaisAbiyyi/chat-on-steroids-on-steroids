@@ -15,7 +15,7 @@ The [machine-readable task registry](task-registry.json) and [parallel board](PA
 
 Confirm current default branch SHA/CI, PRs, claim ledger, actual files and logical contract overlap and all L/U evidence **after** offline resolution and **before** recording a claim. Single-writer per lock; independent resource strings are not conclusive if both tasks edit the same interface, shared files or dependency contract. Every accepted unit must advance the registry's `status` with durable proof (PR/merged SHA, L receipt or explicit U consent), and every dependent unit must re-run readiness on the updated `main`. An L unit always requires the appropriate local native Windows proof, and overlapping use of one Windows machine should be serialized.
 
-**Linear canonical phase boundary:** `CL-L6 → 7P-A → 7P-B → 7P-L1 → 7A–7E → 8A–8C → 8L1 → 8U1`. The Phase 7 preflight tests the original Phase 1 browser feasibility requirement. Historical plans calling it “early Phase 8” are superseded, not a mandate to perform Phase 8 before Phase 7.
+**Owner-approved Phase 7 sequencing (2026-10-22):** `CL-L6 → 7P-A → 7P-B → 7A → 7B → 7C`; native `7P-L1` remains HOLD and mandatory before `7L1`, followed by `7D → 7E → 8A–8C → 8L1 → 8U1`. This allows bounded Cloud implementation, not acceptance of native/browser/user-account tests. The Phase 7 preflight tests the original Phase 1 browser feasibility requirement. Historical plans calling it “early Phase 8” are superseded, not a mandate to perform Phase 8 before Phase 7.
 
 ## Neutral roadmaps and work units
 

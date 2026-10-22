@@ -34,11 +34,11 @@ class TaskBoardTests(unittest.TestCase):
             dependencies = [token.strip("`") for token in cols[2].split(", ")] if cols[2] != "NONE" else []
             self.assertEqual(dependencies, task["depends_on"], task_id)
             self.assertEqual(cols[3], "`" + task["resource_locks"][0] + "`", task_id)
-            desired = "DONE" if task["status"] == "done" else (
+            desired = "DONE" if task["status"] == "done" else ("HOLD" if task["status"] == "hold" else (
                 "**READY · PARALLEL**" if not any(
                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
                 ) and task["status"] == "todo" else "BLOCKED"
-            )
+            ))
             self.assertEqual(cols[5], desired, task_id)
 
     def test_historical_aliases_are_explicit_and_never_reused_as_current_preflight(self):
@@ -55,7 +55,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_accepted_cloud_browser_probe_unlocks_only_native_windows_gate(self):
+    def test_owner_deferral_unblocks_cloud_7a_not_native_gate(self):
         ready, _ = board.readiness(self.data)
         ready_ids = {task["id"] for task in ready}
         for task in ready:
@@ -72,10 +72,12 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("7P-B", ready_ids)
         self.assertEqual(self.tasks["7P-B"]["kind"], "C")
         self.assertEqual(self.tasks["7P-B"]["status"], "done")
-        self.assertIn("7P-L1", ready_ids)
-        self.assertEqual(self.tasks["7P-L1"]["kind"], "L")
+        self.assertEqual(self.tasks["7P-L1"]["status"], "hold")
+        self.assertNotIn("7P-L1", ready_ids)
+        self.assertEqual(board.explain(self.data, "7P-L1")["state"], "HOLD")
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7P-L1"]))
-        self.assertNotIn("7A", ready_ids)
+        self.assertIn("7A", ready_ids)
+        self.assertNotIn("7L1", ready_ids)
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
         hypothetical = copy.deepcopy(self.data)
@@ -100,7 +102,8 @@ class TaskBoardTests(unittest.TestCase):
         for task_id in ("7P-A", "7P-B", "7P-L1"):
             self.assertEqual(self.tasks[task_id]["phase"], "7")
         self.assertEqual(self.tasks["7P-A"]["depends_on"], ["CL-L6"])
-        self.assertEqual(self.tasks["7A"]["depends_on"], ["7P-L1"])
+        self.assertEqual(self.tasks["7A"]["depends_on"], ["7P-B"])
+        self.assertEqual(self.tasks["7L1"]["depends_on"], ["7C", "7P-L1"])
         self.assertEqual(self.tasks["8A"]["depends_on"], ["7E"])
         self.assertEqual(self.tasks["8L1"]["depends_on"], ["8C"])
         self.assertEqual(self.tasks["8U1"]["depends_on"], ["8L1"])
@@ -122,12 +125,13 @@ class TaskBoardTests(unittest.TestCase):
         # A synthetic rollback of CL-L6 must also roll back its already
         # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A", "7P-B"):
+            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1"):
                 task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
-        self.assertLess(flat.index("7P-L1"), flat.index("7A"))
+        self.assertLess(flat.index("7P-B"), flat.index("7A"))
+        self.assertLess(flat.index("7P-L1"), flat.index("7L1"))
         self.assertLess(flat.index("7E"), flat.index("8A"))
         self.assertLess(flat.index("8U1"), flat.index("9A"))
 
