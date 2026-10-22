@@ -111,7 +111,7 @@ function attach(state, trusted, event) {
       deny("generation-not-advanced");
     if (event.sequence !== 1) deny("sequence");
   } else if (event.sequence !== 1) deny("sequence");
-  if (!previous && Object.keys(state.channels).length >= MAX_CLAIMS) deny("capacity");
+  if (!state.channels[key] && Object.keys(state.channels).length >= MAX_CLAIMS) deny("capacity");
   state.sessions[sessionKey(trusted)] = key;
   delete state.tombstones[key];
   state.channels[key] = {
