@@ -22,6 +22,10 @@ internal static class Program
 /// </summary>
 internal sealed class ProbeForm : Form
 {
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hwnd);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
     private readonly WebView2 _a = new() { Dock = DockStyle.Fill };
     private readonly WebView2 _b = new() { Dock = DockStyle.Fill };
     private readonly WebView2 _negative = new() { Width = 2, Height = 2 };
@@ -33,6 +37,7 @@ internal sealed class ProbeForm : Form
     private readonly string _receipt;
     private readonly bool _batch;
     private readonly bool _nativeIdle;
+    private readonly bool _nativeKeys;
     private bool _failed;
     private readonly List<string> _trace = new();
 
@@ -47,6 +52,7 @@ internal sealed class ProbeForm : Form
         _receipt = Path.Combine(_root, "receipt.json");
         _batch = options.ContainsKey("--batch");
         _nativeIdle = options.ContainsKey("--native-idle");
+        _nativeKeys = options.ContainsKey("--native-keys");
         Text = "CoSoS 7P-B / isolated WebView2 browser capability probe — NOT production";
         Width = 1300;
         Height = 800;
@@ -63,7 +69,7 @@ internal sealed class ProbeForm : Form
         var parsed = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--batch" or "--native-idle")
+            if (args[i] is "--batch" or "--native-idle" or "--native-keys")
             {
                 parsed.Add(args[i], "true");
                 continue;
@@ -190,6 +196,89 @@ internal sealed class ProbeForm : Form
             var components = await EvaluateStringAsync(_a, "document.documentElement.dataset.componentResults");
             Mark("pdf_math_terminal", components == "ready" ? "PASS" : "FAIL",
                 "Real CodeMirror/KaTeX/pdf.js/xterm fixture initialized. PDF selection, IME and resize manual gate remains.");
+
+            if (_nativeKeys)
+            {
+                // Chromium CDP dispatch exercises the embedded editor's native
+                // input path without taking focus from another user's app.
+                // It is NOT evidence of physical Windows keyboard or OS IME.
+                await _a.CoreWebView2.ExecuteScriptAsync("document.querySelector('.cm-content').focus()");
+                await _a.CoreWebView2.CallDevToolsProtocolMethodAsync("Input.insertText",
+                    JsonSerializer.Serialize(new { text = "CDP_TYPED_PROBE" }));
+                await Task.Delay(100);
+                var cdpTyped = await EvaluateStringAsync(_a,
+                    "document.querySelector('.cm-content').textContent");
+                Mark("native_cdp_input",
+                    cdpTyped.Contains("CDP_TYPED_PROBE") ? "PASS" : "UNVERIFIED",
+                    $"Chromium CDP Input.insertText into actual embedded CodeMirror={cdpTyped.Contains("CDP_TYPED_PROBE")}; does not imply OS keyboard/IME.");
+                var imeResult = "UNVERIFIED";
+                var imeEvidence = "Chrome CDP composition not performed.";
+                try
+                {
+                    await _a.CoreWebView2.CallDevToolsProtocolMethodAsync("Input.imeSetComposition",
+                        JsonSerializer.Serialize(new { text = "にほん", selectionStart = 3, selectionEnd = 3 }));
+                    await _a.CoreWebView2.CallDevToolsProtocolMethodAsync("Input.insertText",
+                        JsonSerializer.Serialize(new { text = "日本" }));
+                    await Task.Delay(100);
+                    var afterComposition = await EvaluateStringAsync(_a,
+                        "document.querySelector('.cm-content').textContent");
+                    imeResult = afterComposition.Contains("日本") ? "PASS" : "UNVERIFIED";
+                    imeEvidence = "Chromium CDP simulated IME composition/commit to embedded CodeMirror="
+                        + afterComposition.Contains("日本") + "; not a real OS input method test.";
+                }
+                catch (Exception error)
+                {
+                    imeEvidence = "CDP composition did not complete: " + error.GetType().Name
+                        + "; real OS IME remains unsupported on this layout.";
+                }
+                Mark("native_cdp_ime_simulation", imeResult, imeEvidence);
+                // SendKeys routes through the Windows keyboard queue; unlike
+                // ExecuteScriptAsync it does not set the editor DOM value directly.
+                // Only target this task-owned synthetic window, never other apps.
+                SetForegroundWindow(Handle);
+                await Task.Delay(150);
+                var foreground = GetForegroundWindow() == Handle;
+                if (!foreground)
+                {
+                    Mark("native_keyboard_editor", "UNVERIFIED",
+                        "Windows refused focus to the probe window; did not inject keyboard input.");
+                }
+                else
+                {
+                    _a.Focus();
+                    await _a.CoreWebView2.ExecuteScriptAsync("document.querySelector('.cm-content').focus()");
+                    await Task.Delay(150);
+                    var before = await EvaluateStringAsync(_a,
+                        "document.querySelector('.cm-content').textContent");
+                    SendKeys.SendWait("^a");
+                    await Task.Delay(80);
+                    SendKeys.SendWait("NativeKeyboard42");
+                    await Task.Delay(150);
+                    var typed = await EvaluateStringAsync(_a,
+                        "document.querySelector('.cm-content').textContent");
+                    SendKeys.SendWait("^z");
+                    await Task.Delay(200);
+                    var restored = await EvaluateStringAsync(_a,
+                        "document.querySelector('.cm-content').textContent");
+                    SendKeys.SendWait("^a");
+                    await Task.Delay(100);
+                    var selected = await EvaluateStringAsync(_a,
+                        "String(document.querySelector('.cm-content').getAttribute('aria-selected') ?? '') + '|' + String(window.getSelection()?.toString()?.length ?? 0)");
+                    var selectionLength = int.TryParse(selected.Split('|').Last(), out var length) ? length : 0;
+                    Mark("native_keyboard_editor",
+                        before.Contains("const synthetic") && typed.Contains("NativeKeyboard42")
+                        && restored.Contains("const synthetic") && selectionLength > 0 ? "PASS" : "FAIL",
+                        $"Windows SendKeys to focused CodeMirror: injected text={typed.Contains("NativeKeyboard42")}, undo restored={restored.Contains("const synthetic")}, selected text chars={selectionLength}; no JS mutation used.");
+                    // Unicode character input checks text dispatch, NOT real IME composition.
+                    SendKeys.SendWait("é");
+                    await Task.Delay(120);
+                    var unicode = await EvaluateStringAsync(_a,
+                        "document.querySelector('.cm-content').textContent");
+                    Mark("native_unicode_keyboard",
+                        unicode.Contains("é") ? "PASS" : "UNVERIFIED",
+                        $"OS keyboard Unicode dispatch reached CodeMirror={unicode.Contains("é")}; not evidence of CJK IME preedit/candidate/commit.");
+                }
+            }
 
             if (_nativeIdle)
             {
