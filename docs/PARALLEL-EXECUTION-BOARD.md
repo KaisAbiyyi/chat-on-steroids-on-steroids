@@ -66,8 +66,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | DONE |
 | `7P-L1` | Real Windows embedded browser feasibility gate | `7P-B` | `windows-browser` | L (Windows) | HOLD |
 | `7A` | Browser bridge protocol 14/identity contract | `7P-B` | `browser-protocol` | C (cloud) | DONE |
-| `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | **READY · PARALLEL** |
-| `7C` | Extension companion ACK/repair/MV3 lifecycle | `7B` | `browser-extension` | C (cloud) | BLOCKED |
+| `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | DONE (PR #45 merge projection; exact-head CI required) |
+| `7C` | Extension companion ACK/repair/MV3 lifecycle | `7B` | `browser-extension` | C (cloud) | READY after accepted 7B / PR #45 merge |
 | `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | BLOCKED |
 | `7D` | Direct browser tools/debugger/frame ownership | `7C`, `7L1` | `browser-tools` | C (cloud) | BLOCKED |
 | `7E` | Differential transport fuzz/error/reconnect review | `7D` | `browser-qualification` | C (cloud) | BLOCKED |
