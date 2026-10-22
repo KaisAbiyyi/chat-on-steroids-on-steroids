@@ -54,4 +54,4 @@ Use [docs/task-registry.json](docs/task-registry.json) as the canonical **115-ta
 
 **Owner-approved sequencing (2026-10-22):** after accepted `7P-A → 7P-B`, Cloud `7A → 7B → 7C` can proceed; `7P-L1` is HOLD (not accepted) and remains a required gate together with `7C` before native `7L1`, then `7D–7E`. Phase 8 then runs **`8A → 8B → 8C → 8L1 → 8U1`**. Earlier plans mentioning an “early Phase 8” use **obsolete IDs** and must not be used as current claims. The former `8A / 8B / 8L1` preflight is now `7P-A / 7P-B / 7P-L1`; former `8C / 8D / 8E / 8L2` is now `8A / 8B / 8C / 8L1`. Historical acceptance receipts and frozen plans must not be rewritten.
 
-**Ready cloud candidates as of the current acceptance ledger:** `CL-05A`, `CL-06A`, `CL-07A`, `CL-08A`, `CL-09A`. These five may run in parallel **only if** their live claimed write sets/contracts are disjoint.
+**Current Cloud handoff (2026-10-22):** `7A` Ready / Now (unclaimed), `7B` Blocked / Up Next, and `7P-L1` Hold. Always revalidate live GitHub claims, tests, and same-file conflicts before acquiring `browser-protocol`; no task is preassigned.
