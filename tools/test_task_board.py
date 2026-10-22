@@ -76,8 +76,9 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("7P-L1", ready_ids)
         self.assertEqual(board.explain(self.data, "7P-L1")["state"], "HOLD")
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7P-L1"]))
-        self.assertEqual(self.tasks["7A"]["status"], "claimed")
+        self.assertEqual(self.tasks["7A"]["status"], "done")
         self.assertNotIn("7A", ready_ids)
+        self.assertIn("7B", ready_ids)
         candidate = copy.deepcopy(self.data)
         next(t for t in candidate["tasks"] if t["id"] == "7A")["status"] = "todo"
         eligible, _ = board.readiness(candidate)
