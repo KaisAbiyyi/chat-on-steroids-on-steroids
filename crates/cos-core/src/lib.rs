@@ -5,6 +5,7 @@ pub const BRIDGE_PROTOCOL: u32 = 14;
 pub mod browser_protocol;
 pub mod config;
 pub mod logging;
+pub mod native_browser_bridge;
 pub mod persistence;
 pub mod runtime;
 pub mod sandbox;

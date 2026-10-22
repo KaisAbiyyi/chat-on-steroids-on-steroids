@@ -1,5 +1,7 @@
 # CoSoS — full phase task dependency / parallel board
 
+**7B CLOUD CLAIM (2026-10-22):** `7B` **CLAIMED / NOW** by ChatGPT GPT-6, exclusive `browser-bridge` on [PR #45](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/45). `7A` accepted [PR #44](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/44), merged main `505a5c9d`; `7P-L1` remains HOLD / Now (native). `7C` UP NEXT blocked until accepted 7B. Rust authenticated authority is cloud-only and NOT physical browser/native gate PASS; merge only after CI and review.
+
 **Current execution board:** 2026-10-22; canonical DAG in [`docs/task-registry.json`](task-registry.json). Historical phase plans remain reference material, not live eligibility. This board indexes **existing** detailed task contracts in [the CL/phase unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and [the BIG plan](BIG-IMPLEMENTATION-PLAN.md). See [current phase](CURRENT-PHASE.md) for live status and [orchestration policy](AGENT-ORCHESTRATION.md) for claims. This is a planning overlay, not evidence that any future unit passed.
 
 **7A MERGE-CANDIDATE (2026-10-22):** `7A` contract implementation and review in [PR #44](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/44); mark DONE only after exact-head CI PASS and merge. `7P-L1` remains HOLD and visible in Now; `7B` becomes Ready / Now after acceptance. Browser-native gates stay unverified.
@@ -64,8 +66,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | DONE |
 | `7P-L1` | Real Windows embedded browser feasibility gate | `7P-B` | `windows-browser` | L (Windows) | HOLD |
 | `7A` | Browser bridge protocol 14/identity contract | `7P-B` | `browser-protocol` | C (cloud) | DONE |
-| `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | **READY · PARALLEL** |
-| `7C` | Extension companion ACK/repair/MV3 lifecycle | `7B` | `browser-extension` | C (cloud) | BLOCKED |
+| `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | DONE |
+| `7C` | Extension companion ACK/repair/MV3 lifecycle | `7B` | `browser-extension` | C (cloud) | **READY · PARALLEL** |
 | `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | BLOCKED |
 | `7D` | Direct browser tools/debugger/frame ownership | `7C`, `7L1` | `browser-tools` | C (cloud) | BLOCKED |
 | `7E` | Differential transport fuzz/error/reconnect review | `7D` | `browser-qualification` | C (cloud) | BLOCKED |
