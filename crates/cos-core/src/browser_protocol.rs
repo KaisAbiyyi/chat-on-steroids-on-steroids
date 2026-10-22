@@ -147,7 +147,7 @@ pub enum Observation {
 ///
 /// Only a *trusted adapter* that has already authenticated the host, checked
 /// origin/profile/tab ownership and obtained a real navigation/document proof
-/// may call `observe_verified`. This API alone does not authenticate a source.
+/// may call the public `observe_frame`. This API alone does not authenticate a source.
 ///
 /// No claim can move to another tab/frame/profile or another session merely
 /// because a later event arrives. Intent claims/ACK/retry belong to 7B/7C.
