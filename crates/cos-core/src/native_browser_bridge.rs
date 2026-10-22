@@ -57,7 +57,7 @@ impl TrustedHostEvidence {
         let authority = self.origin.strip_prefix("https://").ok_or(NativeBridgeError::Host)?;
         if authority.is_empty()
             || authority.bytes().any(|b| b <= 0x20 || b == 0x7f)
-            || authority.contains(['/', '?', '#', '@', '\\'])
+            || authority.chars().any(|c| matches!(c, '/' | '?' | '#' | '@' | '\\'))
             || authority.starts_with('.')
             || authority.ends_with('.')
             || self.origin.len() > 512
