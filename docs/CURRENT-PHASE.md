@@ -1,5 +1,11 @@
 # CoS-Rust current backend checkpoint
 
+## 7A CLOUD CLAIM / TWO NOW CARDS — 2026-10-22
+
+- **NOW:** `7A` CLAIMED (ChatGPT GPT-6 Cloud; exclusive `browser-protocol`; source branch `work/7a-browser-protocol-20261022`) **AND** `7P-L1` HOLD (native Windows, draft PR #42, unaccepted). Both remain visible in Notion Now. The 7A claim is not runtime acceptance.
+- **UP NEXT:** `7B` blocked until 7A accepted. Native `7L1` separately requires `7C` and `7P-L1` Done.
+- **7A scope:** Rust normalized protocol 14 identity contract + epoch/first-proof fence with deterministic regressions; upstream wire mapping/authenticated transport, browser UI and real-provider actions are not included.
+
 ## OWNER-APPROVED PHASE 7 RESEQUENCING — 2026-10-22
 
 - **LAST DONE:** `7P-B` (accepted PR #41). **NOW:** `7A` Cloud implementation READY CANDIDATE (unclaimed). **UP NEXT:** `7B` (blocked until 7A).

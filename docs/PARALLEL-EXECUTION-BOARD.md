@@ -2,6 +2,8 @@
 
 **Current execution board:** 2026-10-22; canonical DAG in [`docs/task-registry.json`](task-registry.json). Historical phase plans remain reference material, not live eligibility. This board indexes **existing** detailed task contracts in [the CL/phase unit matrix](implementation-plan/2026-10-18-cloud-first-units.md) and [the BIG plan](BIG-IMPLEMENTATION-PLAN.md). See [current phase](CURRENT-PHASE.md) for live status and [orchestration policy](AGENT-ORCHESTRATION.md) for claims. This is a planning overlay, not evidence that any future unit passed.
 
+**7A CLOUD CLAIM (2026-10-22):** `7A` is CLAIMED by ChatGPT GPT-6 Cloud in `work/7a-browser-protocol-20261022`, lock `browser-protocol`; `7P-L1` remains HOLD and *visible in Now*. `7B` remains blocked / Up Next. The claim is not acceptance.
+
 **Owner sequencing override (2026-10-22):** `7P-L1` **HOLD** (PR #42 remains draft, native gate unaccepted); `7A` **READY / NOW** for bounded GitHub-cloud bridge protocol work because `7P-B` is accepted; `7B` **UP NEXT / BLOCKED** until 7A. `7P-L1` is **not waived**: native 7L1 requires both `7C` and completed `7P-L1`. All native keyboard/IME/accessibility/clipboard/sign-in/distribution gates remain outstanding. Older snapshots below are historical.
 
 **7P-B cloud synthetic host probe ACCEPTED (2026-10-22, PR #41 merged as baf9461e):** Executable isolated Windows WebView2 synthetic host (temporary C# interop adapter, NOT product Rust GUI) plus synthetic MV3 debugger/MAIN/ISOLATED worlds, per-profile storage and target fences, actual CodeMirror/pdf.js/KaTeX/xterm renderer, dedicated Windows/Ubuntu CI. [Source and native handoff](../probes/7p-b/README.md). Hosted Windows WebView2 154.0.4258.62 synthetic [runtime receipt](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/39651659120) on executable head `5c859abf`: all executed probe checks PASS; native MV3 suspension, real profile/IME UX, installer size and sign-in UNVERIFIED. **Accepted:** final head `2ce27dc8` Windows/Ubuntu 7P-B + Task DAG + Rust CI PASS; internal review #5604321981. `7P-L1` now LOCAL Windows READY CANDIDATE (unclaimed, native proof NOT RUN), `7A` BLOCKED. Earlier snapshots below are historical.
@@ -61,7 +63,7 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7P-A` | Early embedded-browser architecture feasibility | `CL-L6` | `browser-architecture` | C (cloud) | DONE |
 | `7P-B` | Embedded host, extension, debugger, UI renderer probe | `7P-A` | `browser-host` | C (cloud) | DONE |
 | `7P-L1` | Real Windows embedded browser feasibility gate | `7P-B` | `windows-browser` | L (Windows) | HOLD |
-| `7A` | Browser bridge protocol 14/identity contract | `7P-B` | `browser-protocol` | C (cloud) | **READY · PARALLEL** |
+| `7A` | Browser bridge protocol 14/identity contract | `7P-B` | `browser-protocol` | C (cloud) | CLAIMED |
 | `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | BLOCKED |
 | `7C` | Extension companion ACK/repair/MV3 lifecycle | `7B` | `browser-extension` | C (cloud) | BLOCKED |
 | `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | BLOCKED |
