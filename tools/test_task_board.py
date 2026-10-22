@@ -34,11 +34,11 @@ class TaskBoardTests(unittest.TestCase):
             dependencies = [token.strip("`") for token in cols[2].split(", ")] if cols[2] != "NONE" else []
             self.assertEqual(dependencies, task["depends_on"], task_id)
             self.assertEqual(cols[3], "`" + task["resource_locks"][0] + "`", task_id)
-            desired = "DONE" if task["status"] == "done" else ("HOLD" if task["status"] == "hold" else (
+            desired = "DONE" if task["status"] == "done" else ("HOLD" if task["status"] == "hold" else ("CLAIMED" if task["status"] == "claimed" else (
                 "**READY · PARALLEL**" if not any(
                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
                 ) and task["status"] == "todo" else "BLOCKED"
-            ))
+            )))
             self.assertEqual(cols[5], desired, task_id)
 
     def test_historical_aliases_are_explicit_and_never_reused_as_current_preflight(self):
@@ -76,7 +76,13 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("7P-L1", ready_ids)
         self.assertEqual(board.explain(self.data, "7P-L1")["state"], "HOLD")
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7P-L1"]))
-        self.assertIn("7A", ready_ids)
+        self.assertEqual(self.tasks["7A"]["status"], "done")
+        self.assertNotIn("7A", ready_ids)
+        self.assertIn("7B", ready_ids)
+        candidate = copy.deepcopy(self.data)
+        next(t for t in candidate["tasks"] if t["id"] == "7A")["status"] = "todo"
+        eligible, _ = board.readiness(candidate)
+        self.assertIn("7A", {t["id"] for t in eligible})
         self.assertNotIn("7L1", ready_ids)
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
@@ -118,14 +124,16 @@ class TaskBoardTests(unittest.TestCase):
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
         ready, _ = board.readiness(self.data)
-        self.assertEqual([t["id"] for t in waves[0]], [ready[0]["id"]])
+        self.assertEqual(bool(waves), bool(ready))
+        if ready:
+            self.assertEqual([t["id"] for t in waves[0]], [ready[0]["id"]])
         # A completed gate is excluded from forecasts. In a hypothetical
         # reopened native gate, every downstream phase must retain its order.
         future = copy.deepcopy(self.data)
         # A synthetic rollback of CL-L6 must also roll back its already
         # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1"):
+            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A"):
                 task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]

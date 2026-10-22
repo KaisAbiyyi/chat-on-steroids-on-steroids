@@ -147,6 +147,7 @@ def explain(data: dict, task_id: str) -> dict:
         **task,
         "state": "DONE" if task["status"] == "done" else
                  "HOLD" if task["status"] == "hold" else
+                 "CLAIMED" if task["status"] == "claimed" else
                  "READY_CANDIDATE" if task["status"] == "todo" and not missing_direct else
                  "BLOCKED",
         "missing_direct": missing_direct,

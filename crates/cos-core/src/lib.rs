@@ -2,6 +2,7 @@
 pub const UPSTREAM_COMMIT: &str = "024731d8083d92c46e8248d64e7e0b36ab0a470f";
 pub const APP_VERSION: &str = "2.1.39";
 pub const BRIDGE_PROTOCOL: u32 = 14;
+pub mod browser_protocol;
 pub mod config;
 pub mod logging;
 pub mod persistence;
