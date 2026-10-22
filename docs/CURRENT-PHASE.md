@@ -1,5 +1,10 @@
 # CoS-Rust current backend checkpoint
 
+## 7A MERGE-QUALIFIED HANDOFF (conditional) — 2026-10-22
+
+- **AFTER PR #44 passes exact-head Windows/Ubuntu Rust and Task DAG, reviews, and merges:** `7A` DONE / Last Done. `7B` Ready / Now (unclaimed), alongside `7P-L1` Hold / Now for visibility. `7C` is Up Next blocked until 7B. Do not interpret this proposed post-merge state as already accepted while PR #44 is open.
+- **BOUNDARY:** Only the normalized Rust protocol 14 / document-session identity contract is accepted by this unit; upstream byte-level wire adapter, authenticated browser transport, real extension lifecycle and physical Windows evidence are separate future gates.
+
 ## 7A CLOUD CLAIM / TWO NOW CARDS — 2026-10-22
 
 - **NOW:** `7A` CLAIMED (ChatGPT GPT-6 Cloud; exclusive `browser-protocol`; source branch `work/7a-browser-protocol-20261022`) **AND** `7P-L1` HOLD (native Windows, draft PR #42, unaccepted). Both remain visible in Notion Now. The 7A claim is not runtime acceptance.
