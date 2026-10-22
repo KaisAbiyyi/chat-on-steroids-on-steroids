@@ -138,7 +138,7 @@ function process(state, trusted, event) {
     if (Object.keys(state.intents).length >= MAX_CLAIMS) deny("capacity");
     state.intents[intentId] = {
       owner: scopeKey(trusted), session: sessionKey(trusted),
-      digest, status: "claimed", receiptId: null
+      identity: identityKey(trusted), digest, status: "claimed", receiptId: null
     };
     slot.nextSequence++;
     return { kind: "claim", status: "claimed", duplicate: false };
@@ -149,6 +149,7 @@ function process(state, trusted, event) {
   // A changed document, worker or channel is not allowed to ACK a claim
   // from the previous incarnation: it must be reconciled by the native host.
   if (event.kind === "ack") {
+    if (existing.identity !== identityKey(trusted)) deny("stale-claim-generation");
     if (existing.status === "acked") {
       if (existing.receiptId !== event.receiptId) deny("conflicting-receipt");
       slot.nextSequence++;
