@@ -354,7 +354,9 @@ internal sealed class ProbeForm : Form
             {
                 task = "7P-B", source = "synthetic WebView2 WinForms adapter spike (NOT production Rust host)",
                 utc = DateTimeOffset.UtcNow, runtime = Environment.OSVersion.ToString(),
-                webviewRuntime = _a.CoreWebView2?.Environment.BrowserVersionString ?? "unavailable",
+                // A is deliberately disposed during tab-recreation qualification.
+                // B stays live and uses the same installed Evergreen WebView2 runtime.
+                webviewRuntime = _b.CoreWebView2?.Environment.BrowserVersionString ?? "unavailable",
                 profileRoot = _root, syntheticOnly = true, noRealProfilesOrAccounts = true,
                 native7PL1Accepted = false, checks = _checks, trace = _trace
             };
