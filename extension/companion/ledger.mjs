@@ -40,14 +40,15 @@ const identityKey = (c) => JSON.stringify([
   c.profileId, c.tabId, c.frameId, c.documentId, c.navigationEpoch,
   c.sessionId, c.sessionEpoch, c.workerGeneration, c.hostGeneration, c.channelId
 ]);
-const emptyState = () => ({ format: 1, channels: {}, sessions: {}, intents: {} });
+const emptyState = () => ({ format: 1, channels: {}, tombstones: {}, sessions: {}, intents: {} });
 
 function validateState(state) {
   if (!state || typeof state !== "object" || Array.isArray(state) ||
-      state.format !== 1 || !state.channels || !state.sessions || !state.intents ||
-      [state.channels, state.sessions, state.intents].some(x =>
+      state.format !== 1 || !state.channels || !state.tombstones || !state.sessions || !state.intents ||
+      [state.channels, state.tombstones, state.sessions, state.intents].some(x =>
         typeof x !== "object" || x === null || Array.isArray(x))) deny("corrupt-ledger");
   if (Object.keys(state.channels).length > MAX_CLAIMS ||
+      Object.keys(state.tombstones).length > MAX_CLAIMS ||
       Object.keys(state.sessions).length > MAX_CLAIMS ||
       Object.keys(state.intents).length > MAX_CLAIMS) deny("capacity");
   return state;
@@ -87,7 +88,8 @@ function attach(state, trusted, event) {
   const key = scopeKey(trusted);
   const owner = state.sessions[sessionKey(trusted)];
   if (owner && owner !== key) deny("session-already-owned");
-  const previous = state.channels[key];
+  const previous = state.channels[key] ?? state.tombstones[key];
+  const isRetired = !state.channels[key] && !!previous;
   if (previous) {
     if (trusted.sessionId !== previous.context.sessionId ||
         trusted.sessionEpoch !== previous.context.sessionEpoch) deny("session-rebind");
@@ -96,7 +98,7 @@ function attach(state, trusted, event) {
         trusted.hostGeneration < previous.context.hostGeneration) deny("stale-generation");
     if (trusted.navigationEpoch === previous.context.navigationEpoch &&
         trusted.documentId !== previous.context.documentId) deny("document-rebind");
-    if (same(trusted, previous.context)) {
+    if (!isRetired && same(trusted, previous.context)) {
       if (event.sequence !== previous.nextSequence) deny("sequence");
       previous.nextSequence++;
       return { kind: "attached", replay: false };
@@ -110,6 +112,7 @@ function attach(state, trusted, event) {
   } else if (event.sequence !== 1) deny("sequence");
   if (!previous && Object.keys(state.channels).length >= MAX_CLAIMS) deny("capacity");
   state.sessions[sessionKey(trusted)] = key;
+  delete state.tombstones[key];
   state.channels[key] = {
     context: trusted, identity: identityKey(trusted), channel: channelKey(trusted),
     nextSequence: event.sequence + 1
@@ -122,6 +125,7 @@ function process(state, trusted, event) {
   const slot = locate(state, trusted);
   if (event.sequence !== slot.nextSequence) deny("sequence");
   if (event.kind === "retire") {
+    state.tombstones[scopeKey(trusted)] = { context: trusted };
     delete state.channels[scopeKey(trusted)];
     // First-proof session attribution is deliberately never released by an
     // extension-generated event; a separate native 7B handoff must approve it.
