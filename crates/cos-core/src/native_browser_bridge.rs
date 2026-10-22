@@ -54,10 +54,15 @@ impl TrustedHostEvidence {
         self.identity.validate()?;
         // Fail closed: there is no custom-scheme, file, blank or opaque origin
         // admission in this bounded cloud unit. Product allowlist is future work.
-        let authority = self.origin.strip_prefix("https://").ok_or(NativeBridgeError::Host)?;
+        let authority = self
+            .origin
+            .strip_prefix("https://")
+            .ok_or(NativeBridgeError::Host)?;
         if authority.is_empty()
             || authority.bytes().any(|b| b <= 0x20 || b == 0x7f)
-            || authority.chars().any(|c| matches!(c, '/' | '?' | '#' | '@' | '\\'))
+            || authority
+                .chars()
+                .any(|c| matches!(c, '/' | '?' | '#' | '@' | '\\'))
             || authority.starts_with('.')
             || authority.ends_with('.')
             || self.origin.len() > 512
@@ -161,7 +166,10 @@ impl NativeBrowserBridge {
         } else if self.channels.len() >= MAX_ACTIVE_DOCUMENTS {
             return Err(NativeBridgeError::Capacity);
         }
-        let channel_id = self.next_channel_id.checked_add(1).ok_or(NativeBridgeError::Capacity)?;
+        let channel_id = self
+            .next_channel_id
+            .checked_add(1)
+            .ok_or(NativeBridgeError::Capacity)?;
         if channel_id > MAX_SAFE_JS_INTEGER {
             return Err(NativeBridgeError::Capacity);
         }
@@ -219,7 +227,10 @@ impl NativeBrowserBridge {
         if !constant_time_equal(&expected, proof) {
             return Err(NativeBridgeError::Authentication);
         }
-        self.channels.get_mut(&channel_id).ok_or(NativeBridgeError::Channel)?.authenticated = true;
+        self.channels
+            .get_mut(&channel_id)
+            .ok_or(NativeBridgeError::Channel)?
+            .authenticated = true;
         Ok(())
     }
 
@@ -234,13 +245,24 @@ impl NativeBrowserBridge {
         payload: &[u8],
         mac: &[u8; KEY_BYTES],
     ) -> Result<Observation, NativeBridgeError> {
-        self.check_message(trusted, channel_id, generation, sequence, OBSERVATION, payload, mac)?;
+        self.check_message(
+            trusted,
+            channel_id,
+            generation,
+            sequence,
+            OBSERVATION,
+            payload,
+            mac,
+        )?;
         let frame = NormalizedIdentityFrame::parse(payload)?;
         if frame.identity != trusted.identity {
             return Err(NativeBridgeError::Host);
         }
         let observation = self.fence.observe_frame(frame)?;
-        self.channels.get_mut(&channel_id).ok_or(NativeBridgeError::Channel)?.last_sequence = sequence;
+        self.channels
+            .get_mut(&channel_id)
+            .ok_or(NativeBridgeError::Channel)?
+            .last_sequence = sequence;
         Ok(observation)
     }
 
@@ -255,13 +277,24 @@ impl NativeBrowserBridge {
         payload: &[u8],
         mac: &[u8; KEY_BYTES],
     ) -> Result<(), NativeBridgeError> {
-        self.check_message(trusted, channel_id, generation, sequence, AUTHORIZATION, payload, mac)?;
+        self.check_message(
+            trusted,
+            channel_id,
+            generation,
+            sequence,
+            AUTHORIZATION,
+            payload,
+            mac,
+        )?;
         let frame = NormalizedIdentityFrame::parse(payload)?;
         if frame.identity != trusted.identity {
             return Err(NativeBridgeError::Host);
         }
         self.fence.require_current_frame(&frame)?;
-        self.channels.get_mut(&channel_id).ok_or(NativeBridgeError::Channel)?.last_sequence = sequence;
+        self.channels
+            .get_mut(&channel_id)
+            .ok_or(NativeBridgeError::Channel)?
+            .last_sequence = sequence;
         Ok(())
     }
 
@@ -272,7 +305,10 @@ impl NativeBrowserBridge {
         generation: u64,
     ) -> Result<&Channel, NativeBridgeError> {
         trusted.validate()?;
-        let channel = self.channels.get(&channel_id).ok_or(NativeBridgeError::Channel)?;
+        let channel = self
+            .channels
+            .get(&channel_id)
+            .ok_or(NativeBridgeError::Channel)?;
         if self.owners.get(&trusted.scope()) != Some(&channel_id)
             || channel.evidence != *trusted
             || generation != channel.evidence.host_generation
@@ -296,7 +332,10 @@ impl NativeBrowserBridge {
         if !channel.authenticated {
             return Err(NativeBridgeError::Handshake);
         }
-        let next = channel.last_sequence.checked_add(1).ok_or(NativeBridgeError::Sequence)?;
+        let next = channel
+            .last_sequence
+            .checked_add(1)
+            .ok_or(NativeBridgeError::Sequence)?;
         if sequence != next || sequence > MAX_SAFE_JS_INTEGER {
             return Err(NativeBridgeError::Sequence);
         }
@@ -383,7 +422,14 @@ mod tests {
         let mut bridge = NativeBrowserBridge::new();
         let e = evidence();
         let bootstrap = bridge.register_host(e.clone()).unwrap();
-        bridge.complete_handshake(&e, bootstrap.channel_id, bootstrap.host_generation, &bootstrap.handshake_proof()).unwrap();
+        bridge
+            .complete_handshake(
+                &e,
+                bootstrap.channel_id,
+                bootstrap.host_generation,
+                &bootstrap.handshake_proof(),
+            )
+            .unwrap();
         (bridge, e, bootstrap)
     }
 
@@ -392,11 +438,25 @@ mod tests {
         let (mut bridge, host, b) = authenticated();
         let frame = bytes(&host);
         assert_eq!(
-            bridge.observe(&host, b.channel_id, 1, 1, &frame, &b.observation_mac(1, &frame)),
+            bridge.observe(
+                &host,
+                b.channel_id,
+                1,
+                1,
+                &frame,
+                &b.observation_mac(1, &frame)
+            ),
             Ok(Observation::FirstProof)
         );
         assert_eq!(
-            bridge.authorize_current(&host, b.channel_id, 1, 2, &frame, &b.authorization_mac(2, &frame)),
+            bridge.authorize_current(
+                &host,
+                b.channel_id,
+                1,
+                2,
+                &frame,
+                &b.authorization_mac(2, &frame)
+            ),
             Ok(())
         );
         assert_eq!(bridge.active_channels(), 1);
@@ -409,11 +469,25 @@ mod tests {
         let b = bridge.register_host(e.clone()).unwrap();
         let frame = bytes(&e);
         let mac = b.observation_mac(1, &frame);
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &mac), Err(NativeBridgeError::Handshake));
-        assert_eq!(bridge.complete_handshake(&e, b.channel_id, 1, &[0;32]), Err(NativeBridgeError::Authentication));
-        bridge.complete_handshake(&e, b.channel_id, 1, &b.handshake_proof()).unwrap();
-        assert_eq!(bridge.complete_handshake(&e, b.channel_id, 1, &b.handshake_proof()), Err(NativeBridgeError::Handshake));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &mac), Ok(Observation::FirstProof));
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 1, &frame, &mac),
+            Err(NativeBridgeError::Handshake)
+        );
+        assert_eq!(
+            bridge.complete_handshake(&e, b.channel_id, 1, &[0; 32]),
+            Err(NativeBridgeError::Authentication)
+        );
+        bridge
+            .complete_handshake(&e, b.channel_id, 1, &b.handshake_proof())
+            .unwrap();
+        assert_eq!(
+            bridge.complete_handshake(&e, b.channel_id, 1, &b.handshake_proof()),
+            Err(NativeBridgeError::Handshake)
+        );
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 1, &frame, &mac),
+            Ok(Observation::FirstProof)
+        );
     }
 
     #[test]
@@ -421,15 +495,66 @@ mod tests {
         let (mut bridge, e, b) = authenticated();
         let frame = bytes(&e);
         for hostile in [
-            TrustedHostEvidence { origin: "https://evil.example".into(), ..e.clone() },
-            TrustedHostEvidence { identity: DocumentIdentity { tab_id: 2, ..e.identity.clone() }, ..e.clone() },
-            TrustedHostEvidence { identity: DocumentIdentity { frame_id: 1, ..e.identity.clone() }, ..e.clone() },
-            TrustedHostEvidence { identity: DocumentIdentity { profile_id: "different".into(), ..e.identity.clone() }, ..e.clone() },
+            TrustedHostEvidence {
+                origin: "https://evil.example".into(),
+                ..e.clone()
+            },
+            TrustedHostEvidence {
+                identity: DocumentIdentity {
+                    tab_id: 2,
+                    ..e.identity.clone()
+                },
+                ..e.clone()
+            },
+            TrustedHostEvidence {
+                identity: DocumentIdentity {
+                    frame_id: 1,
+                    ..e.identity.clone()
+                },
+                ..e.clone()
+            },
+            TrustedHostEvidence {
+                identity: DocumentIdentity {
+                    profile_id: "different".into(),
+                    ..e.identity.clone()
+                },
+                ..e.clone()
+            },
         ] {
-            assert_eq!(bridge.observe(&hostile, b.channel_id, 1, 1, &frame, &b.observation_mac(1,&frame)), Err(NativeBridgeError::Channel));
+            assert_eq!(
+                bridge.observe(
+                    &hostile,
+                    b.channel_id,
+                    1,
+                    1,
+                    &frame,
+                    &b.observation_mac(1, &frame)
+                ),
+                Err(NativeBridgeError::Channel)
+            );
         }
-        assert_eq!(bridge.observe(&e, b.channel_id, 2, 1, &frame, &b.observation_mac(1,&frame)), Err(NativeBridgeError::Channel));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &b.observation_mac(1,&frame)), Ok(Observation::FirstProof));
+        assert_eq!(
+            bridge.observe(
+                &e,
+                b.channel_id,
+                2,
+                1,
+                &frame,
+                &b.observation_mac(1, &frame)
+            ),
+            Err(NativeBridgeError::Channel)
+        );
+        assert_eq!(
+            bridge.observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &frame,
+                &b.observation_mac(1, &frame)
+            ),
+            Ok(Observation::FirstProof)
+        );
     }
 
     #[test]
@@ -437,12 +562,37 @@ mod tests {
         let (mut bridge, e, b) = authenticated();
         let frame = bytes(&e);
         let sign = |sequence| b.observation_mac(sequence, &frame);
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 2, &frame, &sign(2)), Err(NativeBridgeError::Sequence));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &b.authorization_mac(1, &frame)), Err(NativeBridgeError::Authentication));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &[0;32]), Err(NativeBridgeError::Authentication));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &sign(1)), Ok(Observation::FirstProof));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &sign(1)), Err(NativeBridgeError::Sequence));
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 2, &frame, &sign(2)), Ok(Observation::Idempotent));
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 2, &frame, &sign(2)),
+            Err(NativeBridgeError::Sequence)
+        );
+        assert_eq!(
+            bridge.observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &frame,
+                &b.authorization_mac(1, &frame)
+            ),
+            Err(NativeBridgeError::Authentication)
+        );
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 1, &frame, &[0; 32]),
+            Err(NativeBridgeError::Authentication)
+        );
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 1, &frame, &sign(1)),
+            Ok(Observation::FirstProof)
+        );
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 1, &frame, &sign(1)),
+            Err(NativeBridgeError::Sequence)
+        );
+        assert_eq!(
+            bridge.observe(&e, b.channel_id, 1, 2, &frame, &sign(2)),
+            Ok(Observation::Idempotent)
+        );
     }
 
     #[test]
@@ -451,33 +601,133 @@ mod tests {
         let mut spoof = e.clone();
         spoof.identity.document_id = "untrusted".into();
         let frame = bytes(&spoof);
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &frame, &b.observation_mac(1,&frame)), Err(NativeBridgeError::Host));
-        let wrong_version = serde_json::to_vec(&json!({"protocol":13,"identity":e.identity})).unwrap();
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &wrong_version, &b.observation_mac(1,&wrong_version)), Err(NativeBridgeError::Contract(BridgeContractError::Version)));
+        assert_eq!(
+            bridge.observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &frame,
+                &b.observation_mac(1, &frame)
+            ),
+            Err(NativeBridgeError::Host)
+        );
+        let wrong_version =
+            serde_json::to_vec(&json!({"protocol":13,"identity":e.identity})).unwrap();
+        assert_eq!(
+            bridge.observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &wrong_version,
+                &b.observation_mac(1, &wrong_version)
+            ),
+            Err(NativeBridgeError::Contract(BridgeContractError::Version))
+        );
         let valid = bytes(&e);
-        assert_eq!(bridge.observe(&e, b.channel_id, 1, 1, &valid, &b.observation_mac(1,&valid)), Ok(Observation::FirstProof));
+        assert_eq!(
+            bridge.observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &valid,
+                &b.observation_mac(1, &valid)
+            ),
+            Ok(Observation::FirstProof)
+        );
     }
 
     #[test]
     fn host_reregistration_retains_first_proof_and_fences_old_channel() {
         let (mut bridge, e, b) = authenticated();
         let frame = bytes(&e);
-        bridge.observe(&e, b.channel_id, 1, 1, &frame, &b.observation_mac(1,&frame)).unwrap();
+        bridge
+            .observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &frame,
+                &b.observation_mac(1, &frame),
+            )
+            .unwrap();
         let mut newer = e.clone();
         newer.host_generation = 2;
         newer.identity.navigation_epoch = 2;
         newer.identity.document_id = "doc-B".into();
         newer.identity.worker_generation = 2;
-        assert!(matches!(bridge.register_host(e.clone()), Err(NativeBridgeError::Generation)));
+        assert!(matches!(
+            bridge.register_host(e.clone()),
+            Err(NativeBridgeError::Generation)
+        ));
         let replacement = bridge.register_host(newer.clone()).unwrap();
         assert!(!bridge.retire_host(b.channel_id));
-        assert_eq!(bridge.authorize_current(&e, b.channel_id, 1, 2, &frame, &b.authorization_mac(2,&frame)), Err(NativeBridgeError::Channel));
+        assert_eq!(
+            bridge.authorize_current(
+                &e,
+                b.channel_id,
+                1,
+                2,
+                &frame,
+                &b.authorization_mac(2, &frame)
+            ),
+            Err(NativeBridgeError::Channel)
+        );
         let next = bytes(&newer);
-        assert_eq!(bridge.observe(&newer, replacement.channel_id, 2, 1, &next, &replacement.observation_mac(1,&next)), Err(NativeBridgeError::Handshake));
-        bridge.complete_handshake(&newer, replacement.channel_id, 2, &replacement.handshake_proof()).unwrap();
-        assert_eq!(bridge.observe(&newer, replacement.channel_id, 2, 1, &next, &replacement.observation_mac(1,&next)), Ok(Observation::Advanced));
-        assert_eq!(bridge.authorize_current(&newer, replacement.channel_id, 2, 2, &frame, &replacement.authorization_mac(2,&frame)), Err(NativeBridgeError::Host));
-        assert_eq!(bridge.authorize_current(&newer, replacement.channel_id, 2, 2, &next, &replacement.authorization_mac(2,&next)), Ok(()));
+        assert_eq!(
+            bridge.observe(
+                &newer,
+                replacement.channel_id,
+                2,
+                1,
+                &next,
+                &replacement.observation_mac(1, &next)
+            ),
+            Err(NativeBridgeError::Handshake)
+        );
+        bridge
+            .complete_handshake(
+                &newer,
+                replacement.channel_id,
+                2,
+                &replacement.handshake_proof(),
+            )
+            .unwrap();
+        assert_eq!(
+            bridge.observe(
+                &newer,
+                replacement.channel_id,
+                2,
+                1,
+                &next,
+                &replacement.observation_mac(1, &next)
+            ),
+            Ok(Observation::Advanced)
+        );
+        assert_eq!(
+            bridge.authorize_current(
+                &newer,
+                replacement.channel_id,
+                2,
+                2,
+                &frame,
+                &replacement.authorization_mac(2, &frame)
+            ),
+            Err(NativeBridgeError::Host)
+        );
+        assert_eq!(
+            bridge.authorize_current(
+                &newer,
+                replacement.channel_id,
+                2,
+                2,
+                &next,
+                &replacement.authorization_mac(2, &next)
+            ),
+            Ok(())
+        );
         assert!(bridge.retire_host(replacement.channel_id));
         assert!(!bridge.retire_host(replacement.channel_id));
     }
@@ -486,27 +736,75 @@ mod tests {
     fn cross_scope_session_theft_is_rejected_even_with_new_valid_mac() {
         let (mut bridge, e, b) = authenticated();
         let frame = bytes(&e);
-        bridge.observe(&e, b.channel_id, 1, 1, &frame, &b.observation_mac(1,&frame)).unwrap();
+        bridge
+            .observe(
+                &e,
+                b.channel_id,
+                1,
+                1,
+                &frame,
+                &b.observation_mac(1, &frame),
+            )
+            .unwrap();
         let mut thief = evidence();
         thief.identity.tab_id = 40;
         let t = bridge.register_host(thief.clone()).unwrap();
-        bridge.complete_handshake(&thief, t.channel_id, 1, &t.handshake_proof()).unwrap();
+        bridge
+            .complete_handshake(&thief, t.channel_id, 1, &t.handshake_proof())
+            .unwrap();
         let bytes = bytes(&thief);
-        assert_eq!(bridge.observe(&thief, t.channel_id, 1, 1, &bytes, &t.observation_mac(1,&bytes)), Err(NativeBridgeError::Contract(BridgeContractError::ConflictingAttribution)));
-        assert_eq!(bridge.authorize_current(&e, b.channel_id, 1, 2, &frame, &b.authorization_mac(2,&frame)), Ok(()));
+        assert_eq!(
+            bridge.observe(
+                &thief,
+                t.channel_id,
+                1,
+                1,
+                &bytes,
+                &t.observation_mac(1, &bytes)
+            ),
+            Err(NativeBridgeError::Contract(
+                BridgeContractError::ConflictingAttribution
+            ))
+        );
+        assert_eq!(
+            bridge.authorize_current(
+                &e,
+                b.channel_id,
+                1,
+                2,
+                &frame,
+                &b.authorization_mac(2, &frame)
+            ),
+            Ok(())
+        );
     }
 
     #[test]
     fn unsafe_origins_and_exhausted_epoch_are_not_admitted() {
         let mut bridge = NativeBrowserBridge::new();
-        for origin in ["http://localhost", "file:///a", "https://evil/a", "https://user@host", "https://host?query", "https://host#fragment", "https://", ""] {
+        for origin in [
+            "http://localhost",
+            "file:///a",
+            "https://evil/a",
+            "https://user@host",
+            "https://host?query",
+            "https://host#fragment",
+            "https://",
+            "",
+        ] {
             let mut host = evidence();
             host.origin = origin.into();
-            assert!(matches!(bridge.register_host(host), Err(NativeBridgeError::Host)));
+            assert!(matches!(
+                bridge.register_host(host),
+                Err(NativeBridgeError::Host)
+            ));
         }
         let mut host = evidence();
         host.host_generation = MAX_SAFE_JS_INTEGER + 1;
-        assert_eq!(bridge.register_host(host), Err(NativeBridgeError::Generation));
+        assert_eq!(
+            bridge.register_host(host),
+            Err(NativeBridgeError::Generation)
+        );
         assert_eq!(bridge.active_channels(), 0);
     }
 }
