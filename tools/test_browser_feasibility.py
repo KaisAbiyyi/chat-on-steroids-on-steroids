@@ -113,7 +113,9 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         ready_ids = {task["id"] for task in ready}
         self.assertEqual(tasks["7A"]["status"], "done")
         self.assertNotIn("7A", ready_ids)
-        self.assertIn("7B", ready_ids)
+        self.assertEqual(tasks["7B"]["status"], "done")
+        self.assertNotIn("7B", ready_ids)
+        self.assertIn("7C", ready_ids)
         self.assertNotIn("7P-L1", ready_ids)
         self.assertNotIn("7L1", ready_ids)
         # Cloud implementation may proceed; native runtime still cannot skip L1.
