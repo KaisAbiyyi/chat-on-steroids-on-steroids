@@ -1,0 +1,32 @@
+name: 7C MV3 companion cloud contract
+on:
+  pull_request:
+    paths:
+      - 'extension/companion/**'
+      - '.github/workflows/7c-companion.yml'
+      - 'docs/task-registry.json'
+      - 'tools/test_browser_feasibility.py'
+      - 'tools/test_task_board.py'
+  push:
+    paths:
+      - 'extension/companion/**'
+      - '.github/workflows/7c-companion.yml'
+permissions:
+  contents: read
+jobs:
+  companion:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Check Node runtime
+        run: node --version
+      - name: Syntax-check privileged worker module
+        run: |
+          node --check extension/companion/ledger.mjs
+          node --check extension/companion/worker.mjs
+      - name: Run deterministic companion security/lifecycle tests
+        run: node --test extension/companion/tests/ledger.test.mjs
