@@ -796,10 +796,10 @@ mod tests {
         }
         let mut host = evidence();
         host.host_generation = MAX_SAFE_JS_INTEGER + 1;
-        assert_eq!(
+        assert!(matches!(
             bridge.register_host(host),
             Err(NativeBridgeError::Generation)
-        );
+        ));
         assert_eq!(bridge.active_channels(), 0);
     }
 }
