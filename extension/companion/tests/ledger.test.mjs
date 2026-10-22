@@ -142,6 +142,9 @@ test("retire cannot free first-proof session for a different scope",async()=>{
   const store=storage(),f=fixture(context(),store);await attach(f);
   assert.deepEqual(await send(f,msg("retire",2)),{kind:"retired"});
   await expectCode(send(f,intent("claim",3)),"stale-channel");
+  await expectCode(send(f,msg("attach",1)),"generation-not-advanced");
+  const restarted=fixture(context({hostGeneration:2,workerGeneration:2,channelId:6}),store);
+  assert.equal((await send(restarted,msg("attach",1))).kind,"attached");
   const thief=fixture(context({tabId:9}),store);
   await expectCode(send(thief,msg("attach",1)),"session-already-owned");
 });
