@@ -250,9 +250,7 @@ impl NativeBrowserBridge {
             channel_id,
             generation,
             sequence,
-            OBSERVATION,
-            payload,
-            mac,
+            (OBSERVATION, payload, mac),
         )?;
         let frame = NormalizedIdentityFrame::parse(payload)?;
         if frame.identity != trusted.identity {
@@ -282,9 +280,7 @@ impl NativeBrowserBridge {
             channel_id,
             generation,
             sequence,
-            AUTHORIZATION,
-            payload,
-            mac,
+            (AUTHORIZATION, payload, mac),
         )?;
         let frame = NormalizedIdentityFrame::parse(payload)?;
         if frame.identity != trusted.identity {
@@ -324,10 +320,9 @@ impl NativeBrowserBridge {
         channel_id: u64,
         generation: u64,
         sequence: u64,
-        domain: &[u8],
-        payload: &[u8],
-        mac: &[u8; KEY_BYTES],
+        signed: (&[u8], &[u8], &[u8; KEY_BYTES]),
     ) -> Result<(), NativeBridgeError> {
+        let (domain, payload, mac) = signed;
         let channel = self.current_channel(trusted, channel_id, generation)?;
         if !channel.authenticated {
             return Err(NativeBridgeError::Handshake);
