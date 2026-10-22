@@ -308,7 +308,10 @@ mod tests {
             Ok(Observation::FirstProof)
         );
         assert!(fence.require_current_frame(&good).is_ok());
-        let wrong = NormalizedIdentityFrame { protocol: 15, ..good };
+        let wrong = NormalizedIdentityFrame {
+            protocol: 15,
+            ..good
+        };
         assert_eq!(
             fence.require_current_frame(&wrong),
             Err(BridgeContractError::Version)
