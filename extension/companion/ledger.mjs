@@ -105,8 +105,9 @@ function attach(state, trusted, event) {
     }
     // A worker/channel recovery MUST advance host or worker generation and
     // never implicitly reassign an outstanding intent or make it executable.
-    if (trusted.hostGeneration <= previous.context.hostGeneration &&
-        trusted.workerGeneration <= previous.context.workerGeneration)
+    // Native 7B replacement always requires a STRICT host-generation bump.
+    // Worker-only increments cannot impersonate a fresh authenticated channel.
+    if (trusted.hostGeneration <= previous.context.hostGeneration)
       deny("generation-not-advanced");
     if (event.sequence !== 1) deny("sequence");
   } else if (event.sequence !== 1) deny("sequence");
