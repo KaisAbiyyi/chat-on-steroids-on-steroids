@@ -55,7 +55,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
         self.assertEqual(len(self.tasks), 115)
 
-    def test_owner_deferral_unblocks_cloud_7a_not_native_gate(self):
+    def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
         ready, _ = board.readiness(self.data)
         ready_ids = {task["id"] for task in ready}
         for task in ready:
@@ -72,9 +72,9 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("7P-B", ready_ids)
         self.assertEqual(self.tasks["7P-B"]["kind"], "C")
         self.assertEqual(self.tasks["7P-B"]["status"], "done")
-        self.assertEqual(self.tasks["7P-L1"]["status"], "hold")
+        self.assertEqual(self.tasks["7P-L1"]["status"], "done")
         self.assertNotIn("7P-L1", ready_ids)
-        self.assertEqual(board.explain(self.data, "7P-L1")["state"], "HOLD")
+        self.assertEqual(board.explain(self.data, "7P-L1")["state"], "DONE")
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7P-L1"]))
         self.assertEqual(self.tasks["7A"]["status"], "done")
         self.assertNotIn("7A", ready_ids)
@@ -88,18 +88,22 @@ class TaskBoardTests(unittest.TestCase):
                 task["status"] = "todo"
         eligible, _ = board.readiness(candidate)
         self.assertIn("7A", {t["id"] for t in eligible})
-        self.assertNotIn("7L1", ready_ids)
+        self.assertIn("7L1", ready_ids)
+        self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7L1"]))
+        self.assertNotIn("7D", ready_ids)
+        self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
         hypothetical = copy.deepcopy(self.data)
         for task in hypothetical["tasks"]:
-            if task["id"] in ("7P-A", "7P-B"):
+            if task["id"] in ("7P-A", "7P-B", "7P-L1"):
                 task["status"] = "todo"
         gated, _ = board.readiness(hypothetical)
         gated_ids = {t["id"] for t in gated}
         self.assertIn("7P-A", gated_ids)
         self.assertNotIn("7P-B", gated_ids)
         self.assertNotIn("7P-L1", gated_ids)
+        self.assertNotIn("7L1", gated_ids)
 
     def test_prerequisite_explanation_is_transitive(self):
         item = board.explain(self.data, "CL-09C")
