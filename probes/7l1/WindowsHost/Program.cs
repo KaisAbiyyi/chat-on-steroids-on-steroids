@@ -690,6 +690,39 @@ internal sealed class GateForm : Form
                 revoked && retired.GetProperty("retired").GetBoolean(),
                 "Native event revokes controller before further privileged CDP or Rust channel use");
 
+            // Close the ACTUAL second WebView2 controller while a correctly
+            // signed 7C event is prepared but has not been admitted. Reusing
+            // its old frame/worker signature after physical disposal must
+            // fail at both the native session and Rust authority boundaries.
+            _b.CoreWebView2.Navigate(StartUrl);
+            await WaitPageAsync(b);
+            await BindAsync(b, "7l1-tab-close-session");
+            var closeFirst = await ObserveAsync(b);
+            var signedBeforeClose = await WorkerAsync(b,
+                "globalThis.__cos7l1Native.prepare(" +
+                JsonSerializer.Serialize(new { protocol = 14, kind = "attach", sequence = 1 }) +
+                ",2)");
+            var closeHost = Host(b);
+            var closeChannel = b.ChannelId;
+            var closeGeneration = b.HostGeneration;
+            _b.Dispose();
+            var disposedRefused = await ThrowsAsync(async () =>
+                await WorkerAsync(b, "globalThis.__cos7l1Native.workerInstance"));
+            var retiredAfterClose = await RustAllowAsync(new
+                { op = "retire", channelId = closeChannel });
+            var lateEventDenied = await RustDeniedAsync(new
+            {
+                op = "authorize", host = closeHost, channelId = closeChannel,
+                generation = closeGeneration, sequence = 2,
+                payload = signedBeforeClose.GetProperty("payload").GetString(),
+                mac = signedBeforeClose.GetProperty("mac").GetString()
+            });
+            Mark("native_tab_close_revocation",
+                closeFirst.GetProperty("ok").GetBoolean() &&
+                b.Revoked && b.View.IsDisposed && disposedRefused &&
+                retiredAfterClose.GetProperty("retired").GetBoolean() && lateEventDenied,
+                "Physical WebView2 tab/controller disposal, stale CDP denial and Rust rejection of a pre-signed late ledger event");
+
             var required = new[]
             {
                 "source_artifact_provenance",
@@ -699,6 +732,7 @@ internal sealed class GateForm : Form
                 "cross_profile_recovery", "page_cdp_fallback_refused",
                 "real_mv3_persisted_claim", "real_mv3_ack_persisted",
                 "separate_profile_ledger", "navigation_revocation",
+                "native_tab_close_revocation",
                 "real_mv3_idle_or_forced_restart", "restart_repair_no_duplicate",
                 "restart_positive_ack_recovery", "cross_generation_ack_refused"
             };
