@@ -447,6 +447,48 @@
         "receiptId": "receipt-1"
       },
       "accepted": false
+    },
+    {
+      "id": "valid-prototype-key",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "__proto__",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-constructor-key",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "constructor",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-toString-key",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "toString",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": true
     }
   ]
 }
