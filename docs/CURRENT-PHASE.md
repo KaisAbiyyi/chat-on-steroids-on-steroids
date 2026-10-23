@@ -1,5 +1,45 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-L1 final reviewed source proof — native synthetic PASS, product gate PARTIAL — 2026-10-23
+
+- **Reviewed repair SHA:** `53164da79b32b4a4cacb433678a94ec13de57888`: actual B WebView2 controller/current profile/exact callback URL independently proven before profile A grant denial; installer, uninstall and builder reject pre-existing junction/reparse ancestors; hashed package-directory ownership removes only owned empty directories.
+- **Native installed WebView2:** 26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN, process exit 0. Six installed 3-cold/3-warm synthetic complete-batch benchmarks PASS; median **3,992.6/3,571.4 ms**. Unsigned probe setup **68,009,984 B**, 84 files, hash/install/clean uninstall PASS.
+- **Review:** independent read-only check found no remaining proven P1/P2 in the audited scope. Actual source merge must retain `native7PL1Accepted=false`; real CoSoS desktop product `distribution_budgets` and aggregate `native_windows_gate` NOT RUN. Owner-deferred IME and real account OAuth remain outside scope; 7P-L1 PARTIAL and 7L1 BLOCKED.
+- **Evidence:** [exact-source report](implementation-summary/2026-10-23-7p-l1-final-security-native-checkpoint.md) and [normalized receipt](../audit/2026-10-23/7p-l1-53164da-final-synthetic-native-receipt.json).
+
+## 7P-L1 security review RED → GREEN; synthetic native PASS, release gate PARTIAL — 2026-10-23
+
+- **Review findings resolved:** `mock_oauth_profile_isolation` now checks the actual live B WebView2 controller before A consumes its pending grant. D:-only synthetic setup and uninstaller refuse existing junction/reparse ancestors. A hashed package-owned directory manifest enables complete clean uninstall while retaining unknown and modified files.
+- **Native exact-source:** tested `8f0bc630d399ee79e18950d056da3bffa0a20860` on installed WebView2 155.0.4283.62: **26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN** with real MV3 idle and OAuth synthetic interaction combined, exit 0.
+- **Distribution:** unsigned synthetic setup **68,009,984 bytes**, 84 packaged files, D: install and clean uninstall PASS, reparse-negative and unowned-file preservation PASS. Six cold/warm full-batch benchmark passes, p50 **3,242.9 / 3,158.5 ms**; not the final product time-to-interactive or unique/private RAM.
+- **Remaining:** product `distribution_budgets` and aggregate `native_windows_gate` NOT RUN; owner OS IME remains deferred. Full 7P-L1 PARTIAL, `native7PL1Accepted=false`, native 7L1 blocked independently of a source-only PR merge.
+- **Evidence:** [read-only review remediation report](implementation-summary/2026-10-23-7p-l1-security-review-remediation.md), [machine-readable receipt](../audit/2026-10-23/7p-l1-8f0bc63-native-security-retest.json).
+
+## 7P-L1 merged-main synthetic Windows benchmark PASS; product native gate PARTIAL — 2026-10-23
+
+- **Native exact-source:** `c1d6234b21fc794ecefb36244caa73b0d55ae465` after reconciling `main` at `d9a56ef`. Installed Win11 WebView2 155.0.4283.62 `--native-auth --native-idle` completed exit 0: **26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN**. Synthetic OAuth consent/redirect, MV3 idle, debugger ownership, tab recreation, and profile fences all PASS.
+- **RED / GREEN:** merged probe initially failed four callback/consent tests because the consent page title preceded installation of JS handlers. Native host now waits for script readiness; three standalone retests and combined rerun PASS. Preserve failed and successful raw receipts.
+- **Probe distribution:** rebuilt unsigned offline synthetic setup **68,008,448 bytes**, 82 files; D: install, version-verified installed run, and owned uninstall PASS. Six cold/warm profile batch runs PASS; p50 full-batch wall runtime **2,817.3 ms cold / 2,649.4 ms warm**. These measurements do not establish product cold-start-to-interactive or unique/private WebView2 RAM.
+- **Still open:** `distribution_budgets` and aggregate `native_windows_gate` remain `NOT_RUN` for product-level budgets; product GUI/signing and real account acceptance belong to later gates. `native7PL1Accepted=false`, 7P-L1 **PARTIAL**, PR #42 stays draft pending gate review, 7L1 blocked. Owner OS IME deferral remains in force.
+- **Evidence:** [distribution and integration qualification](implementation-summary/2026-10-23-7p-l1-distribution-and-merge.md) and [normalized source-bound receipt](../audit/2026-10-23/7p-l1-windows-distribution-after-merge.json).
+
+## 7P-L1 Keyboard PASS; OS IME deferred by owner — 2026-10-22
+
+- **Scoped evidence:** native Windows automation into packaged synthetic CodeMirror
+  passed 17 exact value/selection assertions, including ASCII, Unicode, selection,
+  undo/redo and unchanged independent profile B. Tested code `6555032`; no product
+  implementation changed. Human physical-keyboard usability is not claimed.
+- **Owner decision:** skip further real OS IME work now. `IME-DEFER-20261022` is
+  **HOLD / UNVERIFIED**, carried to 8L1 and Phase 15 final multilingual editor
+  acceptance in the [roadmap](BIG-IMPLEMENTATION-PLAN.md#owner-directed-ime-deferral--2026-10-22).
+  This scoped scheduling override is not an IME PASS or full 7P-L1 acceptance;
+  remaining gates and 7A's dependency still require review.
+- **Cleanup:** original language tags/order/input tips, empty default override and
+  nonlegacy language bar restored and read back; owned synthetic probe processes
+  stopped. The previously approved Windows system-component installation is not
+  uninstalled; its servicing completion is not claimed as IME qualification.
+- **Evidence / next:** [implementation summary](implementation-summary/2026-10-22-7p-l1-keyboard-ime-native.md).
+  No more local IME work now; review other outstanding 7P-L1 gates separately.
 ## 7C CLOUD CLAIM / EXTENSION COMPANION ACK/REPAIR — 2026-10-22
 
 - **CLAIM:** `7C` CLAIMED by ChatGPT GPT-6 Cloud, exclusive `browser-extension`, branch `work/7c-extension-companion-20261022`, [PR #46](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/46), from accepted 7B main `e68067cd263f8eef9948ac8d59a35d9ec95a8c7d`. Notion status remains Claimed until CI and merge are verified.

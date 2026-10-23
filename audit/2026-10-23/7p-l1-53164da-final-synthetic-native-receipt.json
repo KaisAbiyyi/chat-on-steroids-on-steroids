@@ -1,0 +1,42 @@
+{
+  "task": "7P-L1",
+  "code_sha": "53164da79b32b4a4cacb433678a94ec13de57888",
+  "scope": "Physical Windows synthetic WebView2 adapter and packaged test installer only; NOT full CoSoS product acceptance",
+  "webview2_runtime": "155.0.4283.62",
+  "native": {
+    "raw_path_beneath_D_task_root": "combined-native-53164da/receipt.json",
+    "receipt_sha256": "544A830C6A8F2F87C432E19B6D6DBC7C5BECE549244D59EA1326274D61F5388E",
+    "installed_executable_sha256": "1E972C70DDC74200896EB2E5C607094E2892FDA4DF0C6CCACA63870E1DB3A02C",
+    "exit_code": 0,
+    "pass": 26,
+    "fail": 0,
+    "unverified": 0,
+    "not_run": ["distribution_budgets", "native_windows_gate"],
+    "oauth_b_controller_positive_proof": "PASS: actual profile B controller, current identity and exact callback Source established before refusing pending profile A grant",
+    "mv3_idle_and_tab_recreation": "PASS"
+  },
+  "distribution": {
+    "installer_bytes": 68009984,
+    "installer_sha256": "90CB1FAB5436BCDA01F431A1E998692634DD90BC2EDA1DC450465C4A62295C34",
+    "installed_file_bytes": 167789479,
+    "packaged_file_count": 84,
+    "verified_install_and_clean_uninstall": "PASS",
+    "reparse_ancestor_refusal_exe_installer_uninstaller_and_builder": "PASS on controlled D-only junction negative fixture",
+    "preserve_unowned_or_modified_files": "PASS on independently installed fixture",
+    "known_limitation": "Existing reparse-point ancestors are refused; no race-free pinned NTFS handle spanning concurrent path swaps"
+  },
+  "performance": {
+    "raw_path_beneath_D_task_root": "benchmark-53164da/measurements.json",
+    "receipt_sha256": "5F4C92A964900EFF0871D317CA277292B9AEB1D2023FADD805AFDB01894B85C2",
+    "cold_runs": 3,
+    "warm_runs": 3,
+    "all_six_runs_nofail": true,
+    "cold_complete_batch_median_ms": 3992.6,
+    "warm_complete_batch_median_ms": 3571.4,
+    "host_max_sampled_working_set_bytes": 67379200,
+    "known_limitation": "Batch wall-time includes fixture tests and shutdown; sampled working sets do not measure unique private RAM or startup-to-interactive"
+  },
+  "independent_read_only_review": "No remaining proven P1/P2 or false-positive for controller-bound OAuth, D: reparse containment and hashed packaged-directory cleanup at code SHA 53164da; not accredited third-party review",
+  "product_gates": "Final production installer/signing, product private RAM/time-to-interactive and native7PL1Accepted gate NOT RUN",
+  "native7PL1Accepted": false
+}

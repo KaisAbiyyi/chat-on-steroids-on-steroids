@@ -1,0 +1,63 @@
+{
+  "unit": "7P-L1",
+  "date": "2026-10-22 Asia/Jakarta",
+  "testedCode": "6555032738ab4ef0272129f35ca23ede3c77f3d5",
+  "binarySha256": "287e84c686df5b8b64a3f67d98bd449cd3dee7764bcd60c5f5d889947b3e77e0",
+  "keyboard": "PASS: native Windows automation, 17 assertions",
+  "humanPhysicalKeyboard": "NOT RUN",
+  "osIme": "HOLD / UNVERIFIED by explicit user deferral",
+  "roadmapGap": "IME-DEFER-20261022",
+  "returnGate": "8L1; Phase 15 before full multilingual editor parity",
+  "screenReader": "NOT RUN",
+  "native7PL1Accepted": false,
+  "packageFixtureFilesMatched": 67,
+  "cleanup": {
+    "status": "PASS",
+    "languagesRestored": true,
+    "defaultOverrideRestored": true,
+    "languageBarRestored": true,
+    "ownedProbeProcessesStopped": true,
+    "imeTest": "HOLD by user request",
+    "systemComponent": "Install requested earlier; not uninstalled; no Windows servicing process stopped",
+    "utc": "2026-10-22T08:08:32.2612995+07:00"
+  },
+  "rawEvidenceRoot": "D:\\projects\\CoS-Rust\\.test-tmp\\7p-l1\\keyboard-ime-20261022",
+  "evidence": [
+    {
+      "file": "observations.json",
+      "bytes": 250389,
+      "sha256": "0c25f8a3f9513e0f0b122012b30bffa8ce69f9579fcbd055e57bb109f0c868fc"
+    },
+    {
+      "file": "verify-keyboard.mjs",
+      "bytes": 2093,
+      "sha256": "e76bfa9945fc144d00a1a62ebf33f030a474b07fcc206240fa5b2ca7e0b07787"
+    },
+    {
+      "file": "keyboard-verification.json",
+      "bytes": 595,
+      "sha256": "3d517bdd4b85b442c05d16f5c125ddbd245db07e4b3d5bf3852ac1cd2d947050"
+    },
+    {
+      "file": "package-fixture-identity.json",
+      "bytes": 12464,
+      "sha256": "2ec96a5b2e1817ab50a13c2aecd2b2c43e32bf5ad837874745fb3e9571c4c2ae"
+    },
+    {
+      "file": "input-languages-before.json",
+      "bytes": 232,
+      "sha256": "7df8507ad0c6761dc36584ba97ac5c2359a02be0b6d734a9149023b210738b98"
+    },
+    {
+      "file": "input-languages-after.json",
+      "bytes": 232,
+      "sha256": "7df8507ad0c6761dc36584ba97ac5c2359a02be0b6d734a9149023b210738b98"
+    },
+    {
+      "file": "cleanup-receipt.json",
+      "bytes": 354,
+      "sha256": "f192bf472f9ecc52bfe7106cc8ab2f987b6a24b47ea565cc0da4d2d18d761313"
+    }
+  ],
+  "productCodeChanged": false
+}

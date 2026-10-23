@@ -1,0 +1,50 @@
+{
+  "task": "7P-L1",
+  "scope": "Native Windows WebView2 synthetic feasibility security regression and packaged probe lifecycle; not final CoSoS desktop acceptance",
+  "tested_code_sha": "8f0bc630d399ee79e18950d056da3bffa0a20860",
+  "webview2_runtime": "155.0.4283.62",
+  "installed_executable_sha256": "434CE7BC783AC2623C15D67735145913E8B549C3CC6E69449F7B4E0EB4A98F77",
+  "installer": {
+    "bytes": 68009984,
+    "sha256": "9A1187C7E5FE91B3F9C0A7A88E4F9D93C4F97424831C88553EB1170CB67498BC",
+    "packaged_file_count": 84,
+    "installed_files_bytes": 167789479,
+    "payload_verified": true,
+    "owned_root_removed_by_uninstall": true,
+    "unowned_and_modified_files_preserved": true,
+    "preexisting_junction_rejected_by_exe": true,
+    "preexisting_junction_rejected_by_powershell_install_uninstall": true,
+    "path_proof_scope": "Explicit detection of existing reparse-point ancestors; no race-free NTFS handle pinning across long install transactions"
+  },
+  "combined_native_probe": {
+    "raw_path_relative_to_task_root": "combined-native-8f0bc63/receipt.json",
+    "sha256": "CE0D6F80AC9E056808DCC1C2F6F9AF6FF5AD93A14925E0BD6EDE90D3919CBAAF",
+    "exit_code": 0,
+    "pass": 26,
+    "fail": 0,
+    "unverified": 0,
+    "not_run": ["distribution_budgets", "native_windows_gate"],
+    "oauth_profile_isolation": "PASS: attempted completion of pending A grant using B's actual live WebView2 controller and host-derived profile denied",
+    "mv3_idle_and_tab_recreation": "PASS"
+  },
+  "installed_benchmark": {
+    "raw_path_relative_to_task_root": "benchmark-8f0bc63/measurements.json",
+    "sha256": "C8AB5ABA3574A59292FDA55F0D7A816B86F58A8749ABD0151E6E4A1562434CED",
+    "cold_runs": 3,
+    "warm_runs": 3,
+    "cold_full_batch_median_ms": 3242.9,
+    "warm_full_batch_median_ms": 3158.5,
+    "all_six_receipts_no_fail": true,
+    "host_peak_sampled_working_set_bytes": 68300800,
+    "limitations": "Full-batch runtime is not time-to-interactive; host working set and summed WebView2 process working sets are not unique/private memory"
+  },
+  "cloud_validation_local": [
+    "PolicyTests: 15 PASS",
+    "synthetic contract validator: PASS",
+    "companion ledger: 16 PASS",
+    "WindowsHost .NET build: 0 errors and 0 warnings",
+    "git diff --check: PASS"
+  ],
+  "task_acceptance": "PARTIAL: production app distribution budgets and aggregate native Windows acceptance NOT_RUN; real provider and OS IME deferred",
+  "native7PL1Accepted": false
+}

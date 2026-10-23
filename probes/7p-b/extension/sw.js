@@ -1,5 +1,8 @@
 // Synthetic same-tab browser debugger roundtrip ONLY. No user or provider tabs.
 const SYNTHETIC_ORIGIN = "https://synthetic.cos.test/";
+// Ephemeral worker-instance marker for 7P-L1 forced retirement/restart proof.
+// It is never persisted and is not a token, permission or user identifier.
+const WORKER_INSTANCE = crypto.randomUUID();
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || message.kind !== "synthetic-check") return false;
   const tabId = sender.tab && sender.tab.id;
@@ -17,7 +20,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const answer = (value) => {
     if (responded) return;
     responded = true;
-    sendResponse({ kind: "ack", debuggerApi: value });
+    sendResponse({ kind: "ack", debuggerApi: value, workerInstance: WORKER_INSTANCE });
   };
   chrome.debugger.getTargets((targets) => {
     if (chrome.runtime.lastError || !Array.isArray(targets)) {

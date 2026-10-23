@@ -1,0 +1,30 @@
+{
+  "unit": "7P-L1",
+  "scope": "physical Windows WebView2 synthetic consent/callback only",
+  "source_code_sha": "f68d186de39194b56f34bb75d79f03526f5ead3e",
+  "executable_version": "1.0.0+f68d186de39194b56f34bb75d79f03526f5ead3e",
+  "executable_sha256": "93C82D11DD9E47BADC0EF8E42FA4C4F20133E71D973D9FF2516A5EC11396C0DB",
+  "webview2_runtime": "155.0.4283.62",
+  "raw_receipt_relative_to_task_root": "mock-oauth-f68d186-exact/receipt.json",
+  "raw_receipt_sha256": "3025ECAC0651D1554A6992B3F2F0DE53D572FFA2A0FEDF0BCCF8199CED4FB3B3",
+  "command_flags": ["--batch", "--native-auth"],
+  "result": { "pass": 18, "fail": 0, "unverified": 1, "not_run": 2 },
+  "synthetic_sign_in_constraints": "PASS",
+  "checks": {
+    "mock_oauth_consent_page": "PASS",
+    "mock_oauth_callback": "PASS",
+    "mock_oauth_forgery": "PASS",
+    "mock_oauth_profile_isolation": "PASS",
+    "mock_oauth_consent_denial": "PASS"
+  },
+  "not_in_this_run": {
+    "mv3_idle_suspension": "UNVERIFIED; previously proven in separate --native-idle receipts",
+    "distribution_budgets": "NOT_RUN",
+    "native_windows_gate": "NOT_RUN"
+  },
+  "provider_accounts": "NONE",
+  "real_oauth_token_exchange": "NOT_RUN",
+  "real_provider_oauth_constraints": "NOT_VERIFIED",
+  "native7PL1Accepted": false,
+  "known_limits": "This proves only fixture consent navigation/callback and host-side state checks, not third-party sign-in, refresh tokens, cookie policies, PKCE, OAuth consent or product parity."
+}

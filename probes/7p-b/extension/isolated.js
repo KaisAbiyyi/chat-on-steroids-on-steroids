@@ -10,6 +10,7 @@ try {
     }
     document.documentElement.dataset.cosWorkerAck = "ok";
     document.documentElement.dataset.cosDebugger = reply.debuggerApi;
+    document.documentElement.dataset.cosWorkerInstance = reply.workerInstance || "missing";
   });
 } catch (_) {
   document.documentElement.dataset.cosWorkerAck = "error";
