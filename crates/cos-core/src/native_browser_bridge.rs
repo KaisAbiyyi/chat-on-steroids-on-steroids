@@ -459,7 +459,14 @@ impl NativeBrowserBridge {
         let required: &[&str] = match request.event.kind.as_str() {
             "attach" | "retire" => &["protocol", "kind", "sequence"],
             "claim" | "repair" => &["protocol", "kind", "sequence", "intentId", "digest"],
-            "ack" => &["protocol", "kind", "sequence", "intentId", "digest", "receiptId"],
+            "ack" => &[
+                "protocol",
+                "kind",
+                "sequence",
+                "intentId",
+                "digest",
+                "receiptId",
+            ],
             _ => return Err(BridgeContractError::Frame.into()),
         };
         if fields.len() != required.len() || required.iter().any(|key| !fields.contains_key(*key)) {
