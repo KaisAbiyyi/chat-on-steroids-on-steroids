@@ -47,6 +47,8 @@ internal sealed class GateForm : Form
         public string SessionId { get; set; } = "";
         public ulong BoundNavigation { get; set; }
         public bool Revoked { get; set; }
+        public int InFlightLedgerWrites { get; set; }
+        public int RefusedOrigins { get; set; }
     }
 
     public GateForm(string[] args)
@@ -133,6 +135,15 @@ internal sealed class GateForm : Form
         {
             if (!Uri.TryCreate(e.Uri, UriKind.Absolute, out var url) ||
                 !string.Equals(url.GetLeftPart(UriPartial.Authority), Origin, StringComparison.Ordinal))
+            {
+                browser.RefusedOrigins++;
+                e.Cancel = true;
+                return;
+            }
+            // Ledger mutation is a bounded authenticated transaction. Refuse
+            // navigation until its storage write settles, so the document
+            // cannot be revoked half-way through a valid native commit.
+            if (browser.InFlightLedgerWrites != 0)
             {
                 e.Cancel = true;
                 return;
@@ -221,6 +232,9 @@ internal sealed class GateForm : Form
             workerInfo.GetProperty("url").GetString() !=
                 $"chrome-extension://{b.ExtensionId}/sw.mjs")
             throw new UnauthorizedAccessException("foreign/replaced MV3 worker target");
+        if (b.View.IsDisposed || b.Revoked || b.NavigationEpoch != b.BoundNavigation ||
+            !string.Equals(b.View.CoreWebView2.Source, StartUrl, StringComparison.Ordinal))
+            throw new UnauthorizedAccessException("controller revoked during asynchronous target verification");
     }
 
     private async Task AttachWorkerAsync(Browser b)
@@ -361,9 +375,18 @@ internal sealed class GateForm : Form
             payload = signed.GetProperty("payload").GetString(),
             mac = signed.GetProperty("mac").GetString()
         });
-        return await WorkerAsync(b, "globalThis.__cos7l1Native.accept(" +
-            JsonSerializer.Serialize(ev) + "," + sequence + "," +
-            JsonSerializer.Serialize(authorized.GetProperty("receipt").GetString()) + ")");
+        b.InFlightLedgerWrites++;
+        try
+        {
+            await AssertOwnedAsync(b);
+            return await WorkerAsync(b, "globalThis.__cos7l1Native.accept(" +
+                JsonSerializer.Serialize(ev) + "," + sequence + "," +
+                JsonSerializer.Serialize(authorized.GetProperty("receipt").GetString()) + ")");
+        }
+        finally
+        {
+            b.InFlightLedgerWrites--;
+        }
     }
 
     private async Task<bool> RustDeniedAsync(object command)
@@ -429,6 +452,13 @@ internal sealed class GateForm : Form
                 await _b.CoreWebView2.ExecuteScriptAsync("typeof chrome.runtime.sendMessage") ==
                     "\"undefined\"",
                 "MAIN world cannot reach MV3 native adapter; extension has no page listener");
+            var originDenialBefore = a.RefusedOrigins;
+            _a.CoreWebView2.Navigate("https://other.synthetic.invalid/foreign-document");
+            await Task.Delay(250);
+            Mark("false_origin_denial",
+                a.RefusedOrigins == originDenialBefore + 1 &&
+                _a.CoreWebView2.Source == StartUrl,
+                "Attempted foreign-origin navigation canceled synchronously at live WebView2 controller");
             await BindAsync(a, "7l1-shared-session");
             var aFirst = await ObserveAsync(a);
             Mark("native_7b_mv3_7c_handshake",
@@ -467,6 +497,18 @@ internal sealed class GateForm : Form
                 !repair.GetProperty("resendAllowed").GetBoolean(),
                 "7C chrome.storage.session claim and repair returned after actual worker mutation");
 
+            var completedClaim = await LedgerEventAsync(a, "claim", 4, "intent-acked", digest);
+            var acked = await LedgerEventAsync(a, "ack", 5, "intent-acked", digest, "receipt-verified");
+            var ackRecovered = await LedgerEventAsync(a, "repair", 6, "intent-acked", digest);
+            Mark("real_mv3_ack_persisted",
+                completedClaim.GetProperty("status").GetString() == "claimed" &&
+                acked.GetProperty("status").GetString() == "acked" &&
+                !acked.GetProperty("duplicate").GetBoolean() &&
+                ackRecovered.GetProperty("status").GetString() == "acked" &&
+                ackRecovered.GetProperty("receiptId").GetString() == "receipt-verified" &&
+                !ackRecovered.GetProperty("resendAllowed").GetBoolean(),
+                "Positive real Rust-approved MV3 claim/ACK committed and recovered from storage.session");
+
             var bAttached = await LedgerEventAsync(b, "attach", 1);
             Mark("separate_profile_ledger", bAttached.GetProperty("kind").GetString() == "attached",
                 "Different WebView2 profile has independent MV3 storage.session");
@@ -474,17 +516,47 @@ internal sealed class GateForm : Form
             var before = a.WorkerInstance;
             if (_idle)
             {
-                // No extension disable: disable/re-enable clears chrome.storage.session.
-                await Task.Delay(TimeSpan.FromSeconds(65));
-                _a.CoreWebView2.Reload();
-                await WaitPageAsync(a);
+                // An attached debugger can keep a worker awake. Detach first,
+                // observe whether it ACTUALLY disappears before triggering a
+                // new browser event, then force-stop only if idle cannot be shown.
+                var sessionToRelease = a.WorkerSession;
+                if (string.IsNullOrWhiteSpace(sessionToRelease))
+                    throw new InvalidOperationException("missing worker session to detach");
+                await CdpAsync(a, "Target.detachFromTarget", new { sessionId = sessionToRelease });
                 a.WorkerSession = null;
                 a.WorkerTargetId = null;
+                await Task.Delay(TimeSpan.FromSeconds(65));
+                var targetsAfterIdle = await CdpAsync(a, "Target.getTargets", new { });
+                var expectedWorkerUrl = $"chrome-extension://{a.ExtensionId}/sw.mjs";
+                var activeWorkers = Field(targetsAfterIdle, "targetInfos").EnumerateArray()
+                    .Where(t => t.GetProperty("type").GetString() == "service_worker" &&
+                        t.GetProperty("url").GetString() == expectedWorkerUrl)
+                    .ToArray();
+                var naturalIdle = activeWorkers.Length == 0;
+                if (naturalIdle)
+                    Mark("native_mv3_natural_idle", true,
+                        "Service worker target absent BEFORE page reload or forced stop");
+                else
+                {
+                    Pending("native_mv3_natural_idle",
+                        "Worker target remained live after 65s of detached idle; exercise forced stop");
+                    foreach (var target in activeWorkers)
+                    {
+                        var targetId = target.GetProperty("targetId").GetString();
+                        var closed = await CdpAsync(a, "Target.closeTarget", new { targetId });
+                        if (!closed.GetProperty("success").GetBoolean())
+                            throw new InvalidOperationException("real worker stop refused");
+                    }
+                }
+                _a.CoreWebView2.Reload();
+                await WaitPageAsync(a);
                 await AttachWorkerAsync(a);
                 var after = await WorkerAsync(a, "globalThis.__cos7l1Native.workerInstance");
                 var changed = after.GetString() != before;
-                Mark("real_mv3_idle_new_worker", changed,
-                    "65 seconds idle with extension enabled; new service_worker incarnation="+changed);
+                Mark("real_mv3_idle_or_forced_restart", changed,
+                    "65s detached idle, actual new MV3 instance=" + changed +
+                    ", naturalIdleObserved=" + naturalIdle +
+                    ", forcedWorkerTargetStop=" + !naturalIdle);
                 if (changed)
                 {
                     // New channel and worker generation; the 7C ledger remains
@@ -497,16 +569,24 @@ internal sealed class GateForm : Form
                         pending.GetProperty("status").GetString() == "claimed" &&
                         !pending.GetProperty("resendAllowed").GetBoolean(),
                         "Persisted 7C claim repaired after real worker restart, resend forbidden");
+                    var priorAck = await LedgerEventAsync(a, "repair", 3, "intent-acked", digest);
+                    Mark("restart_positive_ack_recovery",
+                        priorAck.GetProperty("status").GetString() == "acked" &&
+                        priorAck.GetProperty("receiptId").GetString() == "receipt-verified" &&
+                        !priorAck.GetProperty("resendAllowed").GetBoolean(),
+                        "Committed positive ACK remains queryable across real MV3 incarnation restart");
                     var staleAckRefused = await ThrowsAsync(async () =>
-                        await LedgerEventAsync(a, "ack", 3, "intent-7l1", digest, "receipt-stale"));
+                        await LedgerEventAsync(a, "ack", 4, "intent-7l1", digest, "receipt-stale"));
                     Mark("cross_generation_ack_refused", staleAckRefused,
                         "New worker cannot ACK the prior worker incarnation's ambiguous claim");
                 }
             }
             else
             {
-                Pending("real_mv3_idle_new_worker", "Run with --native-idle for real 65-second worker retirement");
+                Pending("native_mv3_natural_idle", "Run with --native-idle for 65-second observation");
+                Pending("real_mv3_idle_or_forced_restart", "Run with --native-idle for actual worker retirement");
                 Pending("restart_repair_no_duplicate", "Requires worker restart while extension remains enabled");
+                Pending("restart_positive_ack_recovery", "Requires worker restart while extension remains enabled");
                 Pending("cross_generation_ack_refused", "Requires new authenticated worker generation");
             }
 
@@ -522,11 +602,13 @@ internal sealed class GateForm : Form
             var required = new[]
             {
                 "distinct_native_profiles", "page_message_spoof_denied",
+                "false_origin_denial",
                 "native_7b_mv3_7c_handshake", "competing_tab_first_proof",
                 "cross_profile_recovery", "page_cdp_fallback_refused",
-                "real_mv3_persisted_claim", "separate_profile_ledger",
-                "navigation_revocation", "real_mv3_idle_new_worker",
-                "restart_repair_no_duplicate", "cross_generation_ack_refused"
+                "real_mv3_persisted_claim", "real_mv3_ack_persisted",
+                "separate_profile_ledger", "navigation_revocation",
+                "real_mv3_idle_or_forced_restart", "restart_repair_no_duplicate",
+                "restart_positive_ack_recovery", "cross_generation_ack_refused"
             };
             // A missing test cannot turn into a synthetic or reported PASS.
             var everyPassed = required.All(k =>

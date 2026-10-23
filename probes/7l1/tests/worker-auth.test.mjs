@@ -84,14 +84,28 @@ test("only exact native acceptance receipts persist claim and refuse resend",asy
   assert.equal(writes,3);
 });
 
+test("positive authenticated ACK survives real 7C ledger write and repair",async()=>{
+  const digest="a".repeat(64);
+  const claim=await accepted("claim",4,{intentId:"intent-acked",digest});
+  const ack=await accepted("ack",5,{intentId:"intent-acked",digest,receiptId:"receipt-A"});
+  const repair=await accepted("repair",6,{intentId:"intent-acked",digest});
+  assert.equal(claim.status,"claimed");
+  assert.equal(ack.status,"acked");
+  assert.equal(ack.duplicate,false);
+  assert.equal(repair.status,"acked");
+  assert.equal(repair.receiptId,"receipt-A");
+  assert.equal(repair.resendAllowed,false);
+  assert.equal(writes,6);
+});
+
 test("event replacement and forged receipt cannot write storage.session",async()=>{
-  const e=event("ack",4,{intentId:"intent-A",digest:"a".repeat(64),receiptId:"receipt-A"});
-  const signed=await adapter.prepare(e,5);
+  const e=event("ack",7,{intentId:"intent-A",digest:"a".repeat(64),receiptId:"receipt-A"});
+  const signed=await adapter.prepare(e,8);
   const payload=decodePayload(signed.payload);
   const before=writes;
-  await assert.rejects(() => adapter.accept({...e,digest:"b".repeat(64)},5,
-    proof("CoSoS/7L1/companion-receipt/v1",5,payload)),/unverified-native-event/);
-  await assert.rejects(() => adapter.accept(e,5,"0".repeat(64)),/invalid-native-receipt/);
+  await assert.rejects(() => adapter.accept({...e,digest:"b".repeat(64)},8,
+    proof("CoSoS/7L1/companion-receipt/v1",8,payload)),/unverified-native-event/);
+  await assert.rejects(() => adapter.accept(e,8,"0".repeat(64)),/invalid-native-receipt/);
   assert.equal(writes,before);
   assert.ok(records.size > 0);
 });
