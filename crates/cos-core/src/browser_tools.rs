@@ -38,8 +38,12 @@ pub struct ToolAuthorization<'a> {
 impl ToolAuthorization<'_> {
     fn verify(&self, bridge: &mut NativeBrowserBridge) -> Result<(), NativeBridgeError> {
         bridge.authorize_current(
-            self.trusted, self.channel_id, self.generation, self.sequence,
-            self.signed_frame, &self.mac,
+            self.trusted,
+            self.channel_id,
+            self.generation,
+            self.sequence,
+            self.signed_frame,
+            &self.mac,
         )
     }
 }
@@ -392,14 +396,15 @@ mod tests {
         let b = registered(&mut bridge, &e);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let f = signed(&e);
-        let handle = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
-            .unwrap();
-        let result = tools.snapshot(&mut bridge, auth(&e, &b, 3, &f), handle)
+        let handle = tools.attach(&mut bridge, auth(&e, &b, 2, &f)).unwrap();
+        let result = tools
+            .snapshot(&mut bridge, auth(&e, &b, 3, &f), handle)
             .unwrap();
         assert_eq!(result.text, "visible text");
         assert_eq!(result.identity, e.identity);
         assert_eq!(tools.active_leases(), 1);
-        tools.detach(&mut bridge, auth(&e, &b, 4, &f), handle)
+        tools
+            .detach(&mut bridge, auth(&e, &b, 4, &f), handle)
             .unwrap();
         assert_eq!(tools.active_leases(), 0);
         assert_eq!(tools.runtime.detaches, 1);
@@ -418,8 +423,7 @@ mod tests {
         let bd = registered(&mut bridge, &d);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let fa = signed(&a);
-        let handle = tools.attach(&mut bridge, auth(&a, &ba, 2, &fa))
-            .unwrap();
+        let handle = tools.attach(&mut bridge, auth(&a, &ba, 2, &fa)).unwrap();
         for (e, proof) in [(&b, &bb), (&c, &bc), (&d, &bd)] {
             let f = signed(e);
             assert_eq!(
@@ -442,8 +446,7 @@ mod tests {
         let b = registered(&mut bridge, &e);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let f = signed(&e);
-        let handle = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
-            .unwrap();
+        let handle = tools.attach(&mut bridge, auth(&e, &b, 2, &f)).unwrap();
         assert!(matches!(
             tools.snapshot(&mut bridge, auth(&e, &b, 2, &f), handle),
             Err(BrowserToolError::Bridge(_))
@@ -472,8 +475,7 @@ mod tests {
             };
             let mut tools = DirectBrowserTools::new(runtime);
             let f = signed(&e);
-            let h = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
-                .unwrap();
+            let h = tools.attach(&mut bridge, auth(&e, &b, 2, &f)).unwrap();
             assert_eq!(
                 tools.snapshot(&mut bridge, auth(&e, &b, 3, &f), h),
                 Err(BrowserToolError::Snapshot)
@@ -490,8 +492,7 @@ mod tests {
         let b = registered(&mut bridge, &e);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let f = signed(&e);
-        let h = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
-            .unwrap();
+        let h = tools.attach(&mut bridge, auth(&e, &b, 2, &f)).unwrap();
         assert!(!tools.retire_from_native(&e, b.channel_id + 1, 1));
         assert!(!tools.retire_from_native(&e, b.channel_id, 2));
         assert_eq!(tools.active_leases(), 1);
@@ -501,7 +502,8 @@ mod tests {
         let replacement = host("a", 1, 0, 2);
         let br = registered(&mut bridge, &replacement);
         let next = signed(&replacement);
-        let h2 = tools.attach(&mut bridge, auth(&replacement, &br, 2, &next))
+        let h2 = tools
+            .attach(&mut bridge, auth(&replacement, &br, 2, &next))
             .unwrap();
         assert_ne!(h, h2);
         assert!(!tools.retire_from_native(&e, b.channel_id, 1));
@@ -551,8 +553,7 @@ mod tests {
         ));
         assert_eq!(tools.active_leases(), 0);
         tools.runtime.fail_attach = false;
-        let h = tools.attach(&mut bridge, auth(&e, &b, 3, &f))
-            .unwrap();
+        let h = tools.attach(&mut bridge, auth(&e, &b, 3, &f)).unwrap();
         assert_eq!(
             tools.attach(&mut bridge, auth(&e, &b, 4, &f)),
             Err(BrowserToolError::Busy)
