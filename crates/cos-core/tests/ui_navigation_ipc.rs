@@ -1,7 +1,7 @@
 //! Phase 15A cloud-only contract tests. No renderer, native window or user data.
 use cos_core::ui_contract::{
-    MAX_JS_SAFE_INTEGER, MAX_UI_IPC_BYTES, UI_PROTOCOL_VERSION, UiCommand, UiError,
-    UiNavigation, UiRequest, UiRoute,
+    MAX_JS_SAFE_INTEGER, MAX_UI_IPC_BYTES, UI_PROTOCOL_VERSION, UiCommand, UiError, UiNavigation,
+    UiRequest, UiRoute,
 };
 use serde_json::{Value, json};
 
@@ -53,9 +53,12 @@ fn navigation_roundtrip_is_revision_checked_and_idempotent() {
         .unwrap();
     assert!(sidebar.state.sidebar_open);
     assert_eq!(sidebar.state.revision, 3);
-    assert_eq!(shell.snapshot().route, UiRoute::Conversation {
-        session_id: "conv-a1".to_string(),
-    });
+    assert_eq!(
+        shell.snapshot().route,
+        UiRoute::Conversation {
+            session_id: "conv-a1".to_string(),
+        }
+    );
 }
 
 #[test]
@@ -69,7 +72,8 @@ fn stale_or_replayed_mutations_are_rejected_without_state_changes() {
     shell.dispatch_json(&first).unwrap();
     assert_eq!(shell.dispatch_json(&first).unwrap_err(), UiError::Sequence);
     assert_eq!(
-        shell.dispatch_json(&frame(2, 3, json!({"action":"snapshot"})))
+        shell
+            .dispatch_json(&frame(2, 3, json!({"action":"snapshot"})))
             .unwrap_err(),
         UiError::Sequence
     );
@@ -83,11 +87,13 @@ fn stale_or_replayed_mutations_are_rejected_without_state_changes() {
     assert_eq!(shell.snapshot(), before);
     // Rejected commands still consume the sequence.
     assert_eq!(
-        shell.dispatch_json(&frame(2, 2, json!({"action":"snapshot"})))
+        shell
+            .dispatch_json(&frame(2, 2, json!({"action":"snapshot"})))
             .unwrap_err(),
         UiError::Sequence
     );
-    shell.dispatch_json(&frame(2, 3, json!({"action":"snapshot"})))
+    shell
+        .dispatch_json(&frame(2, 3, json!({"action":"snapshot"})))
         .unwrap();
 }
 
@@ -110,7 +116,8 @@ fn rebind_retires_old_epoch_and_does_not_resurrect_selected_session() {
     assert_eq!(shell.snapshot().route, UiRoute::Home);
     assert_eq!(shell.snapshot().revision, 3);
     assert_eq!(
-        shell.dispatch_json(&frame(10, 2, json!({"action":"snapshot"})))
+        shell
+            .dispatch_json(&frame(10, 2, json!({"action":"snapshot"})))
             .unwrap_err(),
         UiError::Epoch
     );
@@ -176,7 +183,10 @@ fn malformed_oversized_or_unknown_messages_do_not_advance_sequence() {
         b"{",
     ];
     for payload in negative {
-        assert_eq!(shell.dispatch_json(payload).unwrap_err(), UiError::Malformed);
+        assert_eq!(
+            shell.dispatch_json(payload).unwrap_err(),
+            UiError::Malformed
+        );
     }
     assert_eq!(
         shell
@@ -214,8 +224,5 @@ fn protocol_epoch_and_js_integer_boundaries_fail_closed() {
     request.sequence = 1;
     shell.dispatch(request).unwrap();
     assert_eq!(shell.rebind(MAX_JS_SAFE_INTEGER), Err(UiError::Epoch));
-    assert_eq!(
-        shell.rebind(MAX_JS_SAFE_INTEGER + 1),
-        Err(UiError::Epoch)
-    );
+    assert_eq!(shell.rebind(MAX_JS_SAFE_INTEGER + 1), Err(UiError::Epoch));
 }
