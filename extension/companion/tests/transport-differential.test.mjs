@@ -60,6 +60,17 @@ test("7E source-wire corpus: same allow/deny as Rust signed receipt gate", async
   }
 });
 
+test("7E prototype-colliding IDs remain own durable claims, never prototype setters",async()=>{
+  const f=fixture();await f.dispatch(event("attach",1));
+  for(const [i,intentId] of ["__proto__","constructor","toString"].entries()){
+    assert.equal((await f.dispatch(claim("claim",2+i,{intentId}))).status,"claimed");
+    const persisted=f.store.snapshot()[STORAGE_KEY].intents;
+    assert.ok(Object.prototype.hasOwnProperty.call(persisted,intentId));
+    assert.equal(persisted[intentId].status,"claimed");
+    assert.equal(Object.getPrototypeOf(persisted),Object.prototype);
+  }
+});
+
 test("7E bounded event fuzzer denies malformed input without ledger mutation",async()=>{
   for(let i=0;i<224;i++){
     const f=fixture();await f.dispatch(event("attach",1));
