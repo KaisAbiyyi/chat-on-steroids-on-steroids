@@ -38,8 +38,11 @@ function harness(options={}) {
       assert.equal(args.tabId,7);
       assert.equal(args.frameId,0);
       assert.equal(typeof args.documentId,"string");
-      const value={documentId:page.documentId,url:page.frameUrl,
-        documentLifecycle:page.documentLifecycle};
+      const value=(args.frameId !== page.frameId ||
+        args.documentId !== page.documentId) ? null : {
+          documentId:page.documentId,url:page.frameUrl,
+          documentLifecycle:page.documentLifecycle
+        };
       if(options.promises) return Promise.resolve(value);
       cb(value);
     }},
