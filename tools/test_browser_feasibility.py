@@ -118,19 +118,20 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertEqual(tasks["7C"]["status"], "done")
         self.assertNotIn("7C", ready_ids)
         self.assertNotIn("7P-L1", ready_ids)
-        self.assertEqual(tasks["7L1"]["status"], "blocked")
+        self.assertEqual(tasks["7L1"]["status"], "done")
         self.assertNotIn("7L1", ready_ids)
-        # A reviewed future cloud/native integration fix can make the local
-        # gate eligible again, without retroactively accepting its execution.
+        # A reopened integration gate must remain distinct from completed
+        # 7P-L1 preflight and re-block its cloud successor.
         retest = copy.deepcopy(graph)
         next(t for t in retest["tasks"] if t["id"] == "7L1")["status"] = "todo"
         retest_ready, _ = task_board.readiness(retest)
         self.assertIn("7L1", {t["id"] for t in retest_ready})
-        self.assertNotIn("7D", ready_ids)
+        self.assertNotIn("7D", {t["id"] for t in retest_ready})
+        self.assertIn("7D", ready_ids)
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
         self.assertEqual(tasks["16L3"]["status"], "todo")
-        # Scoped 7P-L1 physical Windows feasibility is proven, while actual
-        # integrated Rust bridge / MV3 restart and final release are separate.
+        # Scoped 7P-L1 physical feasibility and 7L1 integrated Rust/MV3
+        # acceptance are separately proven; full product release is pending.
 
 
 if __name__ == "__main__":
