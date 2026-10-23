@@ -1,0 +1,36 @@
+name: 8B Isolated Profile and Session
+on:
+  pull_request:
+    paths:
+      - 'extension/adapter/**'
+      - '.github/workflows/8b-profile-session.yml'
+      - 'docs/task-registry.json'
+  push:
+    paths:
+      - 'extension/adapter/**'
+      - '.github/workflows/8b-profile-session.yml'
+permissions:
+  contents: read
+jobs:
+  profile-session:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: |
+          node --check extension/adapter/profile-session.mjs
+          node --check extension/adapter/tests/profile-session.test.mjs
+      - name: Isolated-profile and one-use handoff regression
+        run: node --test extension/adapter/tests/profile-session.test.mjs
+      - name: Phase 8A and 7C regression
+        run: |
+          node --test extension/adapter/tests/chrome-worker.test.mjs
+          node --test extension/companion/tests/ledger.test.mjs
+          node --test extension/companion/tests/transport-differential.test.mjs

@@ -102,8 +102,12 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(board.explain(self.data, "7D")["state"], "DONE")
         self.assertNotIn("7E", ready_ids)
         self.assertEqual(board.explain(self.data, "7E")["state"], "DONE")
-        self.assertIn("8A", ready_ids)
-        self.assertEqual(board.explain(self.data, "8A")["state"], "READY_CANDIDATE")
+        self.assertEqual(self.tasks["8A"]["status"], "done")
+        self.assertNotIn("8A", ready_ids)
+        self.assertEqual(board.explain(self.data, "8A")["state"], "DONE")
+        self.assertIn("8B", ready_ids)
+        self.assertEqual(board.explain(self.data, "8B")["state"], "READY_CANDIDATE")
+        self.assertNotIn("8C", ready_ids)
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
@@ -163,7 +167,7 @@ class TaskBoardTests(unittest.TestCase):
         # A synthetic rollback of CL-L6 must also roll back its already
         # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A", "7L1", "7E"):
+            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A", "7L1", "7E", "8A"):
                 task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]

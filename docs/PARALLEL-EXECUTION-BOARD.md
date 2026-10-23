@@ -1,5 +1,7 @@
 # CoSoS — full phase task dependency / parallel board
 
+**2026-10-23 8B Cloud code — Review:** `8A` PR #59 accepted at `eb91712d3c92c74f8714ef5f573939ad4fb19575`. **Now:** `8B` claimed by ChatGPT GPT-6 Cloud (gen 1), exclusive `browser-profiles`, [issue #60](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/60), draft [PR #61](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/61), hosted exact-head CI/self-review pending; `7L2` native Windows separately ready and not run in this cloud task. **Up Next:** `8C` blocked until accepted 8B. No local files/provider sign-in/owner account accessed. Older entries are historical.
+
 **2026-10-23 8A Cloud implementation — In Review:** 7E [PR #57](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/57) merged to main `f5b27921` with exact-head CI. **Now:** `8A` claimed by ChatGPT GPT-6 Cloud (gen 1), exclusive `embedded-adapter`, [issue #58](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/58), draft [PR #59](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/59) with Node Windows/Ubuntu security regressions. `7L2` Local Windows separately ready and compatible for parallel work but NOT_RUN by this 8A cloud agent. **Up Next:** `8B` blocked pending accepted 8A; owner 7U1 blocked pending real native 7L2. Exact-head CI and implementor self-review required before merge; prior snapshots below are historical.
 
 **2026-10-23 7E cloud claim / In Review:** 7D source merged [PR #56](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/56), main `a80d504`. **Now:** 7E (Cloud) claimed by ChatGPT GPT-6, lock `browser-qualification`, branch `work/7e-transport-differential-20261023`; self-review and exact-head Windows/Ubuntu CI outstanding. **Up Next:** 7L2 (Local Windows) and 8A (Cloud) both blocked until accepted 7E. No local 7L2 proof or owner action claimed. Prior snapshots below are historical.
@@ -85,8 +87,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7E` | Differential transport fuzz/error/reconnect review | `7D` | `browser-qualification` | C (cloud) | DONE |
 | `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | **READY · PARALLEL** |
 | `7U1` | Owner real signed-in observe-only browser test | `7L2` | `human-provider` | U (owner) | BLOCKED |
-| `8A` | Chrome API/extension adapter and worker world | `7E` | `embedded-adapter` | C (cloud) | **READY · PARALLEL** |
-| `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | BLOCKED |
+| `8A` | Chrome API/extension adapter and worker world | `7E` | `embedded-adapter` | C (cloud) | DONE |
+| `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | **READY · PARALLEL** |
 | `8C` | Native browser lifecycle and permission hardening | `8B` | `browser-lifecycle` | C (cloud) | BLOCKED |
 | `8L1` | Native embedded restart/multi-tab/profile behavior | `8C` | `windows-embedded` | L (Windows) | BLOCKED |
 | `8U1` | Owner provider sign-in and profile UX | `8L1` | `human-provider` | U (owner) | BLOCKED |
