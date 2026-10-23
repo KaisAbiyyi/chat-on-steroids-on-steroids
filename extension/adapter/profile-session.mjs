@@ -118,6 +118,9 @@ export function createProfileSessionController({
           outcome.started !== true) fail("sign-in-unconfirmed");
       const after = await probe(nativeProof);
       if (after.context.profileId !== before.context.profileId ||
+          after.context.origin !== providers.get(providerId) ||
+          after.context.sessionId !== before.context.sessionId ||
+          after.context.sessionEpoch !== before.context.sessionEpoch ||
           after.partition.partitionId !== before.partition.partitionId ||
           after.partition.isolationGeneration !== before.partition.isolationGeneration ||
           after.context.hostGeneration < before.context.hostGeneration)
