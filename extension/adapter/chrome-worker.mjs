@@ -90,13 +90,18 @@ export function createChromeWorkerAdapter({
   async function inspect(current) {
     const [tab, frame] = await Promise.all([
       chromeCall(chromeApi.tabs, "get", current.tabId, chromeApi.runtime),
-      chromeCall(chromeApi.webNavigation, "getFrame",
-        {tabId:current.tabId,frameId:current.frameId}, chromeApi.runtime)
+      chromeCall(chromeApi.webNavigation, "getFrame", {
+        tabId:current.tabId, frameId:current.frameId,
+        documentId:current.documentId
+      }, chromeApi.runtime)
     ]);
+    // getFrame's RESPONSE has documentId, url and documentLifecycle, but
+    // does not guarantee frameId; Chrome validates the supplied frameId and
+    // documentId together. Never trust a synthetic frameId response field.
     if (!tab || tab.id !== current.tabId ||
         originOf(tab.url) !== current.origin ||
-        !frame || frame.frameId !== current.frameId ||
-        frame.documentId !== current.documentId ||
+        !frame || frame.documentId !== current.documentId ||
+        frame.documentLifecycle !== "active" ||
         originOf(frame.url) !== current.origin) fail("navigation-or-origin");
   }
 
