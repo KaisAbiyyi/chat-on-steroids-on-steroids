@@ -79,6 +79,11 @@ internal sealed class GateForm : Form
         split.Panel1.Controls.Add(_a);
         split.Panel2.Controls.Add(_b);
         Controls.Add(split);
+        FormClosing += (_, e) =>
+        {
+            if (_browsers.Values.Any(b => b.InFlightLedgerWrites > 0))
+                e.Cancel = true;
+        };
         Shown += async (_, _) => await ExecuteAsync();
     }
 
@@ -449,9 +454,10 @@ internal sealed class GateForm : Form
             Mark("page_message_spoof_denied",
                 await _a.CoreWebView2.ExecuteScriptAsync("typeof globalThis.__cos7l1Native") ==
                     "\"undefined\"" &&
-                await _b.CoreWebView2.ExecuteScriptAsync("typeof chrome.runtime.sendMessage") ==
+                await _b.CoreWebView2.ExecuteScriptAsync(
+                    "(() => { window.postMessage({op:'register',channelId:1,kind:'ack'}, '*'); return typeof globalThis.__cos7l1Native; })()") ==
                     "\"undefined\"",
-                "MAIN world cannot reach MV3 native adapter; extension has no page listener");
+                "MAIN world and posted spoof event cannot reach the worker's CDP-only native adapter");
             var originDenialBefore = a.RefusedOrigins;
             _a.CoreWebView2.Navigate("https://other.synthetic.invalid/foreign-document");
             await Task.Delay(250);

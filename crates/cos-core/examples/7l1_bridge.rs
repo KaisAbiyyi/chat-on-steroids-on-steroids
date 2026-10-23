@@ -25,7 +25,12 @@ impl From<HostWire> for TrustedHostEvidence {
 }
 
 #[derive(Deserialize)]
-#[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
+#[serde(
+    tag = "op",
+    rename_all = "snake_case",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 enum Request {
     Register {
         host: HostWire,
@@ -175,5 +180,43 @@ fn main() {
         if writeln!(output, "{reply}").is_err() || output.flush().is_err() {
             break;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn host_wire_uses_exact_camel_case_for_channel_and_generation() {
+        let value = json!({
+            "op":"handshake",
+            "host":{
+                "identity":{
+                    "profileId":"7l1-A", "tabId":1, "frameId":0,
+                    "documentId":"doc-A", "navigationEpoch":1,
+                    "sessionId":"session-A", "sessionEpoch":1,
+                    "workerGeneration":1
+                },
+                "origin":"https://synthetic.cos.test",
+                "hostGeneration":1
+            },
+            "channelId":17,
+            "generation":1,
+            "proof":"0".repeat(64)
+        });
+        assert!(matches!(
+            serde_json::from_value::<Request>(value),
+            Ok(Request::Handshake {
+                channel_id: 17,
+                generation: 1,
+                ..
+            })
+        ));
+        assert!(matches!(
+            serde_json::from_value::<Request>(json!({"op":"retire","channelId":17})),
+            Ok(Request::Retire { channel_id: 17 })
+        ));
+        assert!(serde_json::from_value::<Request>(json!({"op":"retire","channel_id":17})).is_err());
     }
 }
