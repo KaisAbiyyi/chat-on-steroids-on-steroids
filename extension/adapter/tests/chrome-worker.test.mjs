@@ -15,7 +15,7 @@ const event = (kind,sequence,extra={}) => ({kind,protocol:14,sequence,...extra})
 function harness(options={}) {
   let context = initial(), page = {tabId:7,frameId:0,documentId:"doc-A",
     tabUrl:"https://synthetic.cos.test/home",
-    frameUrl:"https://synthetic.cos.test/frame"};
+    frameUrl:"https://synthetic.cos.test/frame",documentLifecycle:"active"};
   let authorized = true, onExecute = null, getNativeEvents;
   let reads = 0, writes = 0, calls = [], storage = {}, runtimeMessages = 0;
   const proof = Object.freeze({secret:Symbol("native-handle")});
@@ -35,7 +35,11 @@ function harness(options={}) {
       cb(value);
     }},
     webNavigation:{getFrame(args, cb) {
-      const value={frameId:page.frameId,documentId:page.documentId,url:page.frameUrl};
+      assert.equal(args.tabId,7);
+      assert.equal(args.frameId,0);
+      assert.equal(typeof args.documentId,"string");
+      const value={documentId:page.documentId,url:page.frameUrl,
+        documentLifecycle:page.documentLifecycle};
       if(options.promises) return Promise.resolve(value);
       cb(value);
     }},
@@ -127,13 +131,18 @@ test("URL, frame and tab identity MUST match native authority",async()=>{
   for(const change of [
     {tabUrl:"https://attacker.example/"},{frameUrl:"https://evil.invalid/"},
     {frameUrl:"data:text/html,hi"},{documentId:"doc-B"},{frameId:42},
-    {tabId:8}
+    {tabId:8},{documentLifecycle:"prerender"}
   ]) {
     const f=harness();f.browser(change);
     await assert.rejects(f.adapter.inject({nativeProof:f.proof,world:"ISOLATED"}),
       fail("navigation-or-origin"));
     assert.equal(f.calls().length,0);
   }
+});
+
+test("getFrame response does not supply frameId (real Chromium schema)",async()=>{
+  const f=harness();
+  assert.equal((await f.adapter.inject({nativeProof:f.proof,world:"ISOLATED"})).frameId,0);
 });
 
 test("malformed or extra native fields never reach chrome.scripting",async()=>{
