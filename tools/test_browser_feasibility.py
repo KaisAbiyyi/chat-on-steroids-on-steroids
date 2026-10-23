@@ -99,14 +99,14 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         next(x for x in d["options"] if x["id"] == "external-browser-only")["status"] = "PROVISIONAL"
         self.assert_rejected(d, "silent external-only browser fallback")
 
-    def test_dag_retains_native_blocker(self):
+    def test_completed_preflight_retains_distinct_native_bridge_gate(self):
         import task_board
         graph = task_board.load()
         tasks = task_board.index(graph)
         self.assertEqual(tasks["7P-A"]["depends_on"], ["CL-L6"])
         self.assertEqual(tasks["7P-B"]["depends_on"], ["7P-A"])
         self.assertEqual(tasks["7P-L1"]["depends_on"], ["7P-B"])
-        self.assertEqual(tasks["7P-L1"]["status"], "hold")
+        self.assertEqual(tasks["7P-L1"]["status"], "done")
         self.assertEqual(tasks["7A"]["depends_on"], ["7P-B"])
         self.assertEqual(tasks["7L1"]["depends_on"], ["7C", "7P-L1"])
         ready, _ = task_board.readiness(graph)
@@ -118,8 +118,12 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertEqual(tasks["7C"]["status"], "done")
         self.assertNotIn("7C", ready_ids)
         self.assertNotIn("7P-L1", ready_ids)
-        self.assertNotIn("7L1", ready_ids)
-        # Cloud implementation may proceed; native runtime still cannot skip L1.
+        self.assertIn("7L1", ready_ids)
+        self.assertNotIn("7D", ready_ids)
+        self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
+        self.assertEqual(tasks["16L3"]["status"], "todo")
+        # Scoped 7P-L1 physical Windows feasibility is proven, while actual
+        # integrated Rust bridge / MV3 restart and final release are separate.
 
 
 if __name__ == "__main__":
