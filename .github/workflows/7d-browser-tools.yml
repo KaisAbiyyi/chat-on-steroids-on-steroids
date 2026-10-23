@@ -1,0 +1,29 @@
+name: 7D direct browser tools cloud contract
+on:
+  pull_request:
+    paths:
+      - 'crates/cos-core/**'
+      - '.github/workflows/7d-browser-tools.yml'
+      - 'docs/task-registry.json'
+  push:
+    paths:
+      - 'crates/cos-core/**'
+      - '.github/workflows/7d-browser-tools.yml'
+permissions:
+  contents: read
+jobs:
+  browser-tools:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+          components: rustfmt, clippy
+      - run: cargo fmt --all --check
+      - run: cargo clippy -p cos-core --all-targets --locked -- -D warnings
+      - run: cargo test -p cos-core browser_tools --locked
