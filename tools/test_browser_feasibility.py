@@ -129,12 +129,15 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertNotIn("7D", {t["id"] for t in retest_ready})
         self.assertNotIn("7D", ready_ids)
         self.assertEqual(tasks["7D"]["status"], "done")
-        # 7E is accepted; native 7L2 and cloud 8A are independently
-        # eligible. Do not reopen a completed 7E as a "Ready" candidate.
+        # Both 7E and 8A are now accepted. Native 7L2 and cloud 8B
+        # are independently eligible, while 8C stays gated behind 8B.
         self.assertEqual(tasks["7E"]["status"], "done")
         self.assertNotIn("7E", ready_ids)
+        self.assertEqual(tasks["8A"]["status"], "done")
+        self.assertNotIn("8A", ready_ids)
         self.assertIn("7L2", ready_ids)
-        self.assertIn("8A", ready_ids)
+        self.assertIn("8B", ready_ids)
+        self.assertNotIn("8C", ready_ids)
         self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
         self.assertEqual(tasks["16L3"]["status"], "todo")
