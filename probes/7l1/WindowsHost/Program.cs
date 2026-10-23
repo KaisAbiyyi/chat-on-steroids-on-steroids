@@ -21,12 +21,14 @@ internal sealed class GateForm : Form
     private const string Origin = "https://synthetic.cos.test";
     private const string StartUrl = Origin + "/index.html";
     private readonly WebView2 _a = new() { Dock = DockStyle.Fill };
+    private readonly WebView2 _sameProfileTab = new() { Dock = DockStyle.Fill };
     private readonly WebView2 _b = new() { Dock = DockStyle.Fill };
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
     private readonly string? _artifactRoot;
     private readonly bool _idle, _cdpPreflight;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
+    private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
     private bool _failed;
     private string? _verifiedSourceSha;
@@ -51,6 +53,8 @@ internal sealed class GateForm : Form
         public bool Revoked { get; set; }
         public int InFlightLedgerWrites { get; set; }
         public int RefusedOrigins { get; set; }
+        public bool RetireScheduled { get; set; }
+        public Task<bool>? RetirementTask { get; set; }
     }
 
     public GateForm(string[] args)
@@ -77,6 +81,10 @@ internal sealed class GateForm : Form
         if (!_cdpPreflight &&
             (_artifactRoot is null || !IsUnderProject(_artifactRoot)))
             throw new UnauthorizedAccessException("Integrated 7L1 requires verified D: artifact root");
+        foreach (var path in new[] { _root, _repo, _bridgePath })
+            RejectReparseAncestors(path);
+        if (_artifactRoot is not null)
+            RejectReparseAncestors(_artifactRoot);
         Text = "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
         Height = 720;
@@ -84,6 +92,7 @@ internal sealed class GateForm : Form
         {
             Dock = DockStyle.Fill, Orientation = Orientation.Vertical, SplitterDistance = 590
         };
+        split.Panel1.Controls.Add(_sameProfileTab);
         split.Panel1.Controls.Add(_a);
         split.Panel2.Controls.Add(_b);
         Controls.Add(split);
@@ -98,8 +107,26 @@ internal sealed class GateForm : Form
     private static bool IsUnderProject(string path) =>
         path.StartsWith(@"D:\projects\CoS-Rust\", StringComparison.OrdinalIgnoreCase);
 
-    private static string HashFile(string file) =>
-        Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(file))).ToLowerInvariant();
+    private static void RejectReparseAncestors(string path)
+    {
+        var current = Path.GetFullPath(path);
+        while (current.StartsWith(@"D:\projects\CoS-Rust", StringComparison.OrdinalIgnoreCase))
+        {
+            if ((File.Exists(current) || Directory.Exists(current)) &&
+                (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                throw new UnauthorizedAccessException("reparse/junction ancestor refused");
+            var parent = Path.GetDirectoryName(current);
+            if (parent is null || string.Equals(current, parent, StringComparison.OrdinalIgnoreCase))
+                break;
+            current = parent;
+        }
+    }
+
+    private static string HashFile(string file)
+    {
+        using var input = File.OpenRead(file);
+        return Convert.ToHexString(SHA256.HashData(input)).ToLowerInvariant();
+    }
 
     private static string GitOutput(string repo, params string[] args)
     {
@@ -142,9 +169,10 @@ internal sealed class GateForm : Form
                 StringComparison.OrdinalIgnoreCase))
             throw new UnauthorizedAccessException("native source SHA mismatch");
         var dirty = GitOutput(_repo, "status", "--porcelain", "--",
-            "probes/7l1/extension", "extension/companion/worker.mjs",
+            "probes/7l1/extension", "probes/7l1/assets", "probes/7l1/WindowsHost",
+            "extension/companion/worker.mjs",
             "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
-            "crates/cos-core/examples/7l1_bridge.rs", "probes/7l1/WindowsHost/Program.cs");
+            "crates/cos-core/examples/7l1_bridge.rs");
         if (dirty.Length != 0)
             throw new UnauthorizedAccessException("dirty native/extension source");
         using var json = JsonDocument.Parse(File.ReadAllBytes(manifestPath));
@@ -171,6 +199,34 @@ internal sealed class GateForm : Form
         foreach (var required in new[] {"7l1_bridge.exe", "host/WindowsHost.dll", "source.sha"})
             if (!seen.Contains(required))
                 throw new UnauthorizedAccessException("incomplete artifact manifest");
+        // The listed hashes are insufficient unless every loadable file is
+        // listed. Traverse explicitly so a junction cannot redirect a DLL
+        // to an unverified dependency outside the source-pinned artifact.
+        var remaining = new HashSet<string>(seen, StringComparer.Ordinal);
+        var directories = new Stack<string>();
+        directories.Push(_artifactRoot);
+        while (directories.Count != 0)
+        {
+            var directory = directories.Pop();
+            foreach (var child in Directory.EnumerateFileSystemEntries(directory))
+            {
+                var attributes = File.GetAttributes(child);
+                if ((attributes & FileAttributes.ReparsePoint) != 0)
+                    throw new UnauthorizedAccessException("reparse path inside native artifact");
+                if ((attributes & FileAttributes.Directory) != 0)
+                {
+                    directories.Push(child);
+                    continue;
+                }
+                var relative = Path.GetRelativePath(_artifactRoot, child)
+                    .Replace(Path.DirectorySeparatorChar, '/');
+                if (relative == "hashes.json") continue;
+                if (!remaining.Remove(relative))
+                    throw new UnauthorizedAccessException("unmanifested native executable/dependency");
+            }
+        }
+        if (remaining.Count != 0)
+            throw new UnauthorizedAccessException("manifest lists missing native files");
         _verifiedSourceSha = sha;
         Mark("source_artifact_provenance", true,
             "In-host checked Git HEAD, clean authority files and all " +
@@ -200,16 +256,21 @@ internal sealed class GateForm : Form
             File.Copy(Path.Combine(from, file), Path.Combine(destination, file), overwrite: true);
     }
 
-    private async Task<Browser> SetupAsync(WebView2 view, string label, uint tabId)
+    private async Task<Browser> SetupAsync(
+        WebView2 view, string label, uint tabId,
+        CoreWebView2Environment? sharedEnvironment = null, string? installedExtensionId = null)
     {
         var profileRoot = Path.Combine(_root, "profile-" + label);
-        var env = await CoreWebView2Environment.CreateAsync(null, profileRoot,
-            new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
+        var env = sharedEnvironment ??
+            await CoreWebView2Environment.CreateAsync(null, profileRoot,
+                new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
         await view.EnsureCoreWebView2Async(env);
         var profilePath = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
         if (!IsUnderProject(profilePath)) throw new UnauthorizedAccessException("unsafe WebView2 profile");
-        var extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(
-            Path.Combine(_root, "extension"));
+        var extension = installedExtensionId is null
+            ? await view.CoreWebView2.Profile.AddBrowserExtensionAsync(Path.Combine(_root, "extension"))
+            : (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
+                .Single(x => x.Id == installedExtensionId);
         if (!extension.IsEnabled) throw new InvalidOperationException("extension disabled");
         var browser = new Browser
         {
@@ -237,12 +298,12 @@ internal sealed class GateForm : Form
                 e.Cancel = true;
                 return;
             }
-            browser.Revoked = true; // synchronous fail-close before CDP/ledger awaits
+            RevokeAndRetire(browser); // synchronous fence before CDP/ledger awaits
             browser.NavigationEpoch++;
             browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
         };
-        view.CoreWebView2.ProcessFailed += (_, _) => browser.Revoked = true;
-        view.Disposed += (_, _) => browser.Revoked = true;
+        view.CoreWebView2.ProcessFailed += (_, _) => RevokeAndRetire(browser);
+        view.Disposed += (_, _) => RevokeAndRetire(browser);
         view.CoreWebView2.Navigate(StartUrl);
         await WaitPageAsync(browser);
         return browser;
@@ -378,17 +439,60 @@ internal sealed class GateForm : Form
         hostGeneration = b.HostGeneration
     };
 
+    private void RevokeAndRetire(Browser browser)
+    {
+        // Runs synchronously from WebView2 lifetime events, so the stale
+        // channel cannot start another privileged evaluation.
+        browser.Revoked = true;
+        if (browser.ChannelId != 0 && !browser.RetireScheduled)
+        {
+            browser.RetireScheduled = true;
+            browser.RetirementTask = RetireAsync(browser.ChannelId);
+        }
+    }
+
+    private async Task<bool> RetireAsync(ulong channelId)
+    {
+        try
+        {
+            var response = await RustAsync(new { op = "retire", channelId });
+            return response.GetProperty("ok").GetBoolean() &&
+                response.GetProperty("value").GetProperty("retired").GetBoolean();
+        }
+        catch
+        {
+            return false; // Never silently revive after uncertain retirement.
+        }
+    }
+
+    private static async Task RequireRetirementAsync(Browser browser)
+    {
+        if (browser.RetirementTask is null || !await browser.RetirementTask)
+            throw new UnauthorizedAccessException("Rust channel retirement not confirmed");
+        browser.ChannelId = 0;
+        browser.RetirementTask = null;
+        browser.RetireScheduled = false;
+    }
+
     private async Task<JsonElement> RustAsync(object command)
     {
-        if (_bridge is null || _bridge.HasExited)
-            throw new InvalidOperationException("Rust authority process unavailable");
-        await _bridge.StandardInput.WriteLineAsync(JsonSerializer.Serialize(command));
-        await _bridge.StandardInput.FlushAsync();
-        var response = await _bridge.StandardOutput.ReadLineAsync()
-            .WaitAsync(TimeSpan.FromSeconds(10));
-        if (response is null) throw new IOException("Rust authority exited without reply");
-        using var data = JsonDocument.Parse(response);
-        return data.RootElement.Clone();
+        await _rustIo.WaitAsync();
+        try
+        {
+            if (_bridge is null || _bridge.HasExited)
+                throw new InvalidOperationException("Rust authority process unavailable");
+            await _bridge.StandardInput.WriteLineAsync(JsonSerializer.Serialize(command));
+            await _bridge.StandardInput.FlushAsync();
+            var response = await _bridge.StandardOutput.ReadLineAsync()
+                .WaitAsync(TimeSpan.FromSeconds(10));
+            if (response is null) throw new IOException("Rust authority exited without reply");
+            using var data = JsonDocument.Parse(response);
+            return data.RootElement.Clone();
+        }
+        finally
+        {
+            _rustIo.Release();
+        }
     }
 
     private static JsonElement RequireSuccess(JsonElement reply)
@@ -404,6 +508,10 @@ internal sealed class GateForm : Form
 
     private async Task BindAsync(Browser b, string sessionId)
     {
+        if (b.ChannelId != 0 && !b.RetireScheduled)
+            RevokeAndRetire(b);
+        if (b.RetireScheduled)
+            await RequireRetirementAsync(b);
         b.SessionId = sessionId;
         b.HostGeneration++;
         b.WorkerGeneration++;
@@ -557,11 +665,35 @@ internal sealed class GateForm : Form
                 aFirst.GetProperty("value").GetProperty("observation").GetString() == "FirstProof",
                 "Actual service_worker target signed Rust handshake + 7B first-proof observation");
 
+            // Two real controllers under the SAME WebView2 profile share one
+            // MV3 worker. A rival tab must never rebootstrap the active worker
+            // or steal A's first-proven session. This is distinct from B's
+            // cross-profile conflict below.
+            var rival = await SetupAsync(_sameProfileTab, "A", 3,
+                _a.CoreWebView2.Environment, a.ExtensionId);
+            var realSameProfile = rival.ProfilePath == a.ProfilePath &&
+                rival.ExtensionId == a.ExtensionId &&
+                rival.TabId != a.TabId &&
+                rival.View.CoreWebView2 != a.View.CoreWebView2;
+            var rivalDenied = await ThrowsAsync(async () =>
+            {
+                await BindAsync(rival, "7l1-shared-session");
+                var contender = await ObserveAsync(rival);
+                if (!contender.GetProperty("ok").GetBoolean())
+                    throw new UnauthorizedAccessException("session first proof denied");
+            });
+            _sameProfileTab.Dispose();
+            var rivalRetired = rival.RetirementTask is not null &&
+                await rival.RetirementTask;
+            Mark("same_profile_competing_tab",
+                realSameProfile && rivalDenied && rivalRetired,
+                "Second physical WebView2 tab in A's actual profile refused shared worker/session takeover; Rust rival channel auto-retired");
+
             await BindAsync(b, "7l1-shared-session");
             var competing = await ObserveAsync(b);
-            Mark("competing_tab_first_proof",
+            Mark("cross_profile_session_conflict",
                 !competing.GetProperty("ok").GetBoolean(),
-                "Different physical WebView2 controller cannot elect same session in Rust 7B");
+                "Separate physical WebView2 profile cannot elect A's already-proven session in Rust 7B");
             await BindAsync(b, "7l1-independent-session");
             var bFirst = await ObserveAsync(b);
             Mark("cross_profile_recovery",
@@ -685,10 +817,10 @@ internal sealed class GateForm : Form
             _b.CoreWebView2.Navigate(StartUrl + "?other-document=1");
             await Task.Delay(300);
             var revoked = await ThrowsAsync(async () => await WorkerAsync(b, "1+1"));
-            var retired = await RustAllowAsync(new { op = "retire", channelId = b.ChannelId });
+            var retired = b.RetirementTask is not null && await b.RetirementTask;
             Mark("navigation_revocation",
-                revoked && retired.GetProperty("retired").GetBoolean(),
-                "Native event revokes controller before further privileged CDP or Rust channel use");
+                revoked && retired,
+                "Native navigation event automatically retired Rust channel and revoked privileged CDP access");
 
             // Close the ACTUAL second WebView2 controller while a correctly
             // signed 7C event is prepared but has not been admitted. Reusing
@@ -708,8 +840,8 @@ internal sealed class GateForm : Form
             _b.Dispose();
             var disposedRefused = await ThrowsAsync(async () =>
                 await WorkerAsync(b, "globalThis.__cos7l1Native.workerInstance"));
-            var retiredAfterClose = await RustAllowAsync(new
-                { op = "retire", channelId = closeChannel });
+            var retiredAfterClose = b.RetirementTask is not null &&
+                await b.RetirementTask;
             var lateEventDenied = await RustDeniedAsync(new
             {
                 op = "authorize", host = closeHost, channelId = closeChannel,
@@ -720,15 +852,16 @@ internal sealed class GateForm : Form
             Mark("native_tab_close_revocation",
                 closeFirst.GetProperty("ok").GetBoolean() &&
                 b.Revoked && b.View.IsDisposed && disposedRefused &&
-                retiredAfterClose.GetProperty("retired").GetBoolean() && lateEventDenied,
-                "Physical WebView2 tab/controller disposal, stale CDP denial and Rust rejection of a pre-signed late ledger event");
+                retiredAfterClose && lateEventDenied,
+                "Physical WebView2 controller disposal automatically retires Rust channel; stale CDP and pre-signed late ledger event rejected");
 
             var required = new[]
             {
                 "source_artifact_provenance",
                 "distinct_native_profiles", "page_message_spoof_denied",
                 "false_origin_denial",
-                "native_7b_mv3_7c_handshake", "competing_tab_first_proof",
+                "native_7b_mv3_7c_handshake", "same_profile_competing_tab",
+                "cross_profile_session_conflict",
                 "cross_profile_recovery", "page_cdp_fallback_refused",
                 "real_mv3_persisted_claim", "real_mv3_ack_persisted",
                 "separate_profile_ledger", "navigation_revocation",

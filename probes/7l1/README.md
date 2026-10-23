@@ -13,7 +13,9 @@ and exact extension service-worker targets. It attaches via
 `CallDevToolsProtocolMethodForSessionAsync` only after proving a nonempty
 extension-worker CDP session. It refuses missing, foreign or stale sessions and
 checks controller, profile, page target and worker target again after async
-calls. Navigation/disposal invalidates the authority.
+calls. Navigation, controller disposal and WebView2 process failure revoke
+privileged access synchronously and enqueue serialized Rust channel retirement.
+An unconfirmed retirement prohibits binding a replacement channel.
 
 The native process is a private Rust child using JSON lines over stdin/stdout,
 not a page message or HTTP server. It invokes the actual
@@ -49,7 +51,11 @@ mode proves only live WebView2 extension worker discovery; its receipt
 explicitly reports the actual integrated native gate as NOT_RUN.
 The WindowsHost executable also independently checks the exact HEAD SHA,
 clean native/extension source files, pinned Rust/host binary locations and
-every SHA256 manifest entry before any integrated 7L1 check may PASS.
+every SHA256 manifest entry before any integrated 7L1 check may PASS. It
+also rejects unlisted dependency files and junction/reparse ancestors.
+Required native checks include a second physical tab in the same profile
+attempting takeover, a distinct profile conflict, actual controller disposal,
+and rejection of a previously signed event after automatic Rust retirement.
 
 `--native-idle` waits 65 seconds with the extension **enabled**, so actual
 worker retirement/recreation may occur while `chrome.storage.session`
