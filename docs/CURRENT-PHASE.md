@@ -1,5 +1,11 @@
 # CoS-Rust current backend checkpoint
 
+## 8A cloud Chrome worker adapter — CLAIMED / in CI self-review, 2026-10-23
+
+- 7E accepted [PR #57](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/57), main `f5b27921d54c005cd027f3afdb8af9e11d736557`.
+- 8A ChatGPT GPT-6 Cloud claim generation 1: `work/8a-chrome-extension-adapter-20261023`, [issue #58](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/58), draft [PR #59](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/59), lock `embedded-adapter`. Real native/browser and owner tests NOT_RUN; no local files touched.
+- Synthetic static MAIN/ISOLATED Chrome world injection + native proof/browser document/origin rechecks, existing 7C MV3 ledger, and Windows/Ubuntu CI. **Review** while exact-head Actions or self-review is incomplete; do not merge with unresolved check failures. 7L2 separately runnable on native Windows, 8B blocked until accepted 8A.
+
 ## 7E cloud transport differential — claimed / GitHub CI pending, 2026-10-23
 
 - **Prerequisite:** 7D [PR #56](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/56) accepted on main `a80d504af6ace64e5d03d5723faf241d1507ed1a`; canonical registry reconciles 7D `done` from stale `todo`.
