@@ -24,6 +24,26 @@ pub struct BrowserSnapshot {
     pub text: String,
 }
 
+/// Callers supply all full 7B signed evidence in one request. Constructing
+/// this value does not confer trust; verification is enforced on every use.
+pub struct ToolAuthorization<'a> {
+    pub trusted: &'a TrustedHostEvidence,
+    pub channel_id: u64,
+    pub generation: u64,
+    pub sequence: u64,
+    pub signed_frame: &'a [u8],
+    pub mac: [u8; 32],
+}
+
+impl ToolAuthorization<'_> {
+    fn verify(&self, bridge: &mut NativeBrowserBridge) -> Result<(), NativeBridgeError> {
+        bridge.authorize_current(
+            self.trusted, self.channel_id, self.generation, self.sequence,
+            self.signed_frame, &self.mac,
+        )
+    }
+}
+
 /// Only privileged native browser integration should implement this trait.
 /// All inputs carry the current native evidence, including exact frame identity.
 /// No arbitrary JS execution, clicks, text input, or network requests permitted.
@@ -101,14 +121,12 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
     pub fn attach(
         &mut self,
         bridge: &mut NativeBrowserBridge,
-        trusted: &TrustedHostEvidence,
-        channel_id: u64,
-        generation: u64,
-        sequence: u64,
-        signed_frame: &[u8],
-        mac: &[u8; 32],
+        authorization: ToolAuthorization<'_>,
     ) -> Result<u64, BrowserToolError> {
-        bridge.authorize_current(trusted, channel_id, generation, sequence, signed_frame, mac)?;
+        authorization.verify(bridge)?;
+        let trusted = authorization.trusted;
+        let channel_id = authorization.channel_id;
+        let generation = authorization.generation;
         let key = TabKey::new(trusted);
         if self.leases.contains_key(&key) {
             return Err(BrowserToolError::Busy);
@@ -149,15 +167,13 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
     pub fn snapshot(
         &mut self,
         bridge: &mut NativeBrowserBridge,
-        trusted: &TrustedHostEvidence,
-        channel_id: u64,
-        generation: u64,
-        sequence: u64,
-        signed_frame: &[u8],
-        mac: &[u8; 32],
+        authorization: ToolAuthorization<'_>,
         handle: u64,
     ) -> Result<BrowserSnapshot, BrowserToolError> {
-        bridge.authorize_current(trusted, channel_id, generation, sequence, signed_frame, mac)?;
+        authorization.verify(bridge)?;
+        let trusted = authorization.trusted;
+        let channel_id = authorization.channel_id;
+        let generation = authorization.generation;
         self.require_lease(trusted, channel_id, generation, handle)?;
         let data = self
             .runtime
@@ -182,15 +198,13 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
     pub fn detach(
         &mut self,
         bridge: &mut NativeBrowserBridge,
-        trusted: &TrustedHostEvidence,
-        channel_id: u64,
-        generation: u64,
-        sequence: u64,
-        signed_frame: &[u8],
-        mac: &[u8; 32],
+        authorization: ToolAuthorization<'_>,
         handle: u64,
     ) -> Result<(), BrowserToolError> {
-        bridge.authorize_current(trusted, channel_id, generation, sequence, signed_frame, mac)?;
+        authorization.verify(bridge)?;
+        let trusted = authorization.trusted;
+        let channel_id = authorization.channel_id;
+        let generation = authorization.generation;
         self.require_lease(trusted, channel_id, generation, handle)?;
         // On detach failure, retain the lease (never silently grant a competing
         // controller while the native debugger may still be attached).
@@ -336,6 +350,22 @@ mod tests {
         .unwrap()
     }
 
+    fn auth<'a>(
+        trusted: &'a TrustedHostEvidence,
+        bootstrap: &BridgeBootstrap,
+        sequence: u64,
+        frame: &'a [u8],
+    ) -> ToolAuthorization<'a> {
+        ToolAuthorization {
+            trusted,
+            channel_id: bootstrap.channel_id,
+            generation: trusted.host_generation,
+            sequence,
+            signed_frame: frame,
+            mac: bootstrap.authorization_mac(sequence, frame),
+        }
+    }
+
     fn registered(bridge: &mut NativeBrowserBridge, e: &TrustedHostEvidence) -> BridgeBootstrap {
         let b = bridge.register_host(e.clone()).unwrap();
         bridge
@@ -362,43 +392,14 @@ mod tests {
         let b = registered(&mut bridge, &e);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let f = signed(&e);
-        let handle = tools
-            .attach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                2,
-                &f,
-                &b.authorization_mac(2, &f),
-            )
+        let handle = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
             .unwrap();
-        let result = tools
-            .snapshot(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                3,
-                &f,
-                &b.authorization_mac(3, &f),
-                handle,
-            )
+        let result = tools.snapshot(&mut bridge, auth(&e, &b, 3, &f), handle)
             .unwrap();
         assert_eq!(result.text, "visible text");
         assert_eq!(result.identity, e.identity);
         assert_eq!(tools.active_leases(), 1);
-        tools
-            .detach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                4,
-                &f,
-                &b.authorization_mac(4, &f),
-                handle,
-            )
+        tools.detach(&mut bridge, auth(&e, &b, 4, &f), handle)
             .unwrap();
         assert_eq!(tools.active_leases(), 0);
         assert_eq!(tools.runtime.detaches, 1);
@@ -417,45 +418,18 @@ mod tests {
         let bd = registered(&mut bridge, &d);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let fa = signed(&a);
-        let handle = tools
-            .attach(
-                &mut bridge,
-                &a,
-                ba.channel_id,
-                1,
-                2,
-                &fa,
-                &ba.authorization_mac(2, &fa),
-            )
+        let handle = tools.attach(&mut bridge, auth(&a, &ba, 2, &fa))
             .unwrap();
         for (e, proof) in [(&b, &bb), (&c, &bc), (&d, &bd)] {
             let f = signed(e);
             assert_eq!(
-                tools.snapshot(
-                    &mut bridge,
-                    e,
-                    proof.channel_id,
-                    1,
-                    2,
-                    &f,
-                    &proof.authorization_mac(2, &f),
-                    handle
-                ),
+                tools.snapshot(&mut bridge, auth(e, &proof, 2, &f), handle),
                 Err(BrowserToolError::Lease)
             );
         }
         let f = signed(&a);
         assert_eq!(
-            tools.snapshot(
-                &mut bridge,
-                &a,
-                ba.channel_id,
-                1,
-                3,
-                &f,
-                &ba.authorization_mac(3, &f),
-                handle + 1
-            ),
+            tools.snapshot(&mut bridge, auth(&a, &ba, 3, &f), handle + 1),
             Err(BrowserToolError::Lease)
         );
         assert_eq!(tools.active_leases(), 1);
@@ -468,44 +442,17 @@ mod tests {
         let b = registered(&mut bridge, &e);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let f = signed(&e);
-        let handle = tools
-            .attach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                2,
-                &f,
-                &b.authorization_mac(2, &f),
-            )
+        let handle = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
             .unwrap();
         assert!(matches!(
-            tools.snapshot(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                2,
-                &f,
-                &b.authorization_mac(2, &f),
-                handle
-            ),
+            tools.snapshot(&mut bridge, auth(&e, &b, 2, &f), handle),
             Err(BrowserToolError::Bridge(_))
         ));
         let wrong = host("a", 1, 0, 1);
         let mut fake = wrong;
         fake.origin = "https://attacker.test".into();
         assert!(matches!(
-            tools.snapshot(
-                &mut bridge,
-                &fake,
-                b.channel_id,
-                1,
-                3,
-                &f,
-                &b.authorization_mac(3, &f),
-                handle
-            ),
+            tools.snapshot(&mut bridge, auth(&fake, &b, 3, &f), handle),
             Err(BrowserToolError::Bridge(_))
         ));
         assert_eq!(tools.runtime.attaches, 1);
@@ -525,28 +472,10 @@ mod tests {
             };
             let mut tools = DirectBrowserTools::new(runtime);
             let f = signed(&e);
-            let h = tools
-                .attach(
-                    &mut bridge,
-                    &e,
-                    b.channel_id,
-                    1,
-                    2,
-                    &f,
-                    &b.authorization_mac(2, &f),
-                )
+            let h = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
                 .unwrap();
             assert_eq!(
-                tools.snapshot(
-                    &mut bridge,
-                    &e,
-                    b.channel_id,
-                    1,
-                    3,
-                    &f,
-                    &b.authorization_mac(3, &f),
-                    h
-                ),
+                tools.snapshot(&mut bridge, auth(&e, &b, 3, &f), h),
                 Err(BrowserToolError::Snapshot)
             );
             assert_eq!(tools.active_leases(), 0);
@@ -561,16 +490,7 @@ mod tests {
         let b = registered(&mut bridge, &e);
         let mut tools = DirectBrowserTools::new(FakeDebugger::default());
         let f = signed(&e);
-        let h = tools
-            .attach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                2,
-                &f,
-                &b.authorization_mac(2, &f),
-            )
+        let h = tools.attach(&mut bridge, auth(&e, &b, 2, &f))
             .unwrap();
         assert!(!tools.retire_from_native(&e, b.channel_id + 1, 1));
         assert!(!tools.retire_from_native(&e, b.channel_id, 2));
@@ -581,16 +501,7 @@ mod tests {
         let replacement = host("a", 1, 0, 2);
         let br = registered(&mut bridge, &replacement);
         let next = signed(&replacement);
-        let h2 = tools
-            .attach(
-                &mut bridge,
-                &replacement,
-                br.channel_id,
-                2,
-                2,
-                &next,
-                &br.authorization_mac(2, &next),
-            )
+        let h2 = tools.attach(&mut bridge, auth(&replacement, &br, 2, &next))
             .unwrap();
         assert_ne!(h, h2);
         assert!(!tools.retire_from_native(&e, b.channel_id, 1));
@@ -609,28 +520,19 @@ mod tests {
         });
         let f = signed(&e);
         assert!(matches!(
-            tools.attach(
-                &mut bridge, &e, b.channel_id, 1, 2,
-                &f, &b.authorization_mac(2, &f)
-            ),
+            tools.attach(&mut bridge, auth(&e, &b, 2, &f)),
             Err(BrowserToolError::Runtime(_))
         ));
         assert_eq!(tools.active_leases(), 1);
         tools.runtime.fail_attach = false;
         assert_eq!(
-            tools.attach(
-                &mut bridge, &e, b.channel_id, 1, 3,
-                &f, &b.authorization_mac(3, &f)
-            ),
+            tools.attach(&mut bridge, auth(&e, &b, 3, &f)),
             Err(BrowserToolError::Busy)
         );
         tools.runtime.fail_detach = false;
         assert!(tools.retire_from_native(&e, b.channel_id, 1));
         assert_eq!(tools.active_leases(), 0);
-        assert!(tools.attach(
-            &mut bridge, &e, b.channel_id, 1, 4,
-            &f, &b.authorization_mac(4, &f)
-        ).is_ok());
+        assert!(tools.attach(&mut bridge, auth(&e, &b, 4, &f)).is_ok());
     }
 
     #[test]
@@ -644,54 +546,20 @@ mod tests {
         });
         let f = signed(&e);
         assert!(matches!(
-            tools.attach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                2,
-                &f,
-                &b.authorization_mac(2, &f)
-            ),
+            tools.attach(&mut bridge, auth(&e, &b, 2, &f)),
             Err(BrowserToolError::Runtime(_))
         ));
         assert_eq!(tools.active_leases(), 0);
         tools.runtime.fail_attach = false;
-        let h = tools
-            .attach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                3,
-                &f,
-                &b.authorization_mac(3, &f),
-            )
+        let h = tools.attach(&mut bridge, auth(&e, &b, 3, &f))
             .unwrap();
         assert_eq!(
-            tools.attach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                4,
-                &f,
-                &b.authorization_mac(4, &f)
-            ),
+            tools.attach(&mut bridge, auth(&e, &b, 4, &f)),
             Err(BrowserToolError::Busy)
         );
         tools.runtime.fail_detach = true;
         assert!(matches!(
-            tools.detach(
-                &mut bridge,
-                &e,
-                b.channel_id,
-                1,
-                5,
-                &f,
-                &b.authorization_mac(5, &f),
-                h
-            ),
+            tools.detach(&mut bridge, auth(&e, &b, 5, &f), h),
             Err(BrowserToolError::Runtime(_))
         ));
         assert_eq!(tools.active_leases(), 1);
