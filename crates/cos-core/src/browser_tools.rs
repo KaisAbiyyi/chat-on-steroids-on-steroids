@@ -121,11 +121,11 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
             .checked_add(1)
             .filter(|x| *x <= MAX_SAFE_JS_INTEGER)
             .ok_or(BrowserToolError::Handle)?;
-        self.runtime
-            .attach(trusted)
-            .map_err(BrowserToolError::Runtime)?;
+        // Reserve before invoking native code: an attach error may mean the
+        // debugger attached but its success reply was lost. Never expose that
+        // uncertain target to a second contender without verified cleanup.
         self.leases.insert(
-            key,
+            key.clone(),
             Lease {
                 evidence: trusted.clone(),
                 channel_id,
@@ -134,6 +134,12 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
             },
         );
         self.next_handle = next;
+        if let Err(error) = self.runtime.attach(trusted) {
+            if self.runtime.detach(trusted).is_ok() {
+                self.leases.remove(&key);
+            }
+            return Err(BrowserToolError::Runtime(error));
+        }
         Ok(next)
     }
 
@@ -589,6 +595,42 @@ mod tests {
         assert_ne!(h, h2);
         assert!(!tools.retire_from_native(&e, b.channel_id, 1));
         assert_eq!(tools.active_leases(), 1);
+    }
+
+    #[test]
+    fn ambiguous_attach_retains_lease_until_cleanup_succeeds() {
+        let mut bridge = NativeBrowserBridge::new();
+        let e = host("a", 1, 0, 1);
+        let b = registered(&mut bridge, &e);
+        let mut tools = DirectBrowserTools::new(FakeDebugger {
+            fail_attach: true,
+            fail_detach: true,
+            ..Default::default()
+        });
+        let f = signed(&e);
+        assert!(matches!(
+            tools.attach(
+                &mut bridge, &e, b.channel_id, 1, 2,
+                &f, &b.authorization_mac(2, &f)
+            ),
+            Err(BrowserToolError::Runtime(_))
+        ));
+        assert_eq!(tools.active_leases(), 1);
+        tools.runtime.fail_attach = false;
+        assert_eq!(
+            tools.attach(
+                &mut bridge, &e, b.channel_id, 1, 3,
+                &f, &b.authorization_mac(3, &f)
+            ),
+            Err(BrowserToolError::Busy)
+        );
+        tools.runtime.fail_detach = false;
+        assert!(tools.retire_from_native(&e, b.channel_id, 1));
+        assert_eq!(tools.active_leases(), 0);
+        assert!(tools.attach(
+            &mut bridge, &e, b.channel_id, 1, 4,
+            &f, &b.authorization_mac(4, &f)
+        ).is_ok());
     }
 
     #[test]
