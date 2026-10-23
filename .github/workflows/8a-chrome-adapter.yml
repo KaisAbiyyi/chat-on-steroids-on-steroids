@@ -1,0 +1,38 @@
+name: 8A Chrome Worker Adapter
+on:
+  pull_request:
+    paths:
+      - 'extension/adapter/**'
+      - 'extension/companion/**'
+      - '.github/workflows/8a-chrome-adapter.yml'
+      - 'docs/task-registry.json'
+  push:
+    paths:
+      - 'extension/adapter/**'
+      - 'extension/companion/**'
+      - '.github/workflows/8a-chrome-adapter.yml'
+permissions:
+  contents: read
+jobs:
+  adapter:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check and static-world boundaries
+        run: |
+          node --check extension/adapter/chrome-worker.mjs
+          node --check extension/adapter/world/main.js
+          node --check extension/adapter/world/isolated.js
+      - name: Chrome adapter security and race regression
+        run: node --test extension/adapter/tests/chrome-worker.test.mjs
+      - name: Existing verified MV3 claim and transport regressions
+        run: |
+          node --test extension/companion/tests/ledger.test.mjs
+          node --test extension/companion/tests/transport-differential.test.mjs

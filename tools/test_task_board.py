@@ -100,8 +100,10 @@ class TaskBoardTests(unittest.TestCase):
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7L1"]))
         self.assertNotIn("7D", ready_ids)
         self.assertEqual(board.explain(self.data, "7D")["state"], "DONE")
-        self.assertIn("7E", ready_ids)
-        self.assertEqual(board.explain(self.data, "7E")["state"], "READY_CANDIDATE")
+        self.assertNotIn("7E", ready_ids)
+        self.assertEqual(board.explain(self.data, "7E")["state"], "DONE")
+        self.assertIn("8A", ready_ids)
+        self.assertEqual(board.explain(self.data, "8A")["state"], "READY_CANDIDATE")
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
@@ -146,14 +148,22 @@ class TaskBoardTests(unittest.TestCase):
         ready, _ = board.readiness(self.data)
         self.assertEqual(bool(waves), bool(ready))
         if ready:
-            self.assertEqual([t["id"] for t in waves[0]], [ready[0]["id"]])
+            # Eligible Cloud and Local tasks may be in the same future wave
+            # when logical resource locks are disjoint (owner parallel rule).
+            candidates = {task["id"] for task in ready}
+            self.assertTrue({task["id"] for task in waves[0]} <= candidates)
+            for a, first in enumerate(waves[0]):
+                for second in waves[0][a+1:]:
+                    self.assertFalse(
+                        set(board.effective_locks(first)) & set(board.effective_locks(second))
+                    )
         # A completed gate is excluded from forecasts. In a hypothetical
         # reopened native gate, every downstream phase must retain its order.
         future = copy.deepcopy(self.data)
         # A synthetic rollback of CL-L6 must also roll back its already
         # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A", "7L1"):
+            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A", "7L1", "7E"):
                 task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
