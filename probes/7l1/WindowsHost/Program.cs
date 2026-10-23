@@ -506,7 +506,7 @@ internal sealed class GateForm : Form
     private async Task<JsonElement> RustAllowAsync(object command) =>
         RequireSuccess(await RustAsync(command));
 
-    private async Task BindAsync(Browser b, string sessionId)
+    private async Task<JsonElement> BindAsync(Browser b, string sessionId)
     {
         if (b.ChannelId != 0 && !b.RetireScheduled)
             RevokeAndRetire(b);
@@ -529,7 +529,7 @@ internal sealed class GateForm : Form
         // service_worker CDP session, never to ExecuteScript/page/WebMessage.
         var worker = await WorkerAsync(b, Js("bootstrap", spec));
         b.WorkerInstance = worker.GetProperty("workerInstance").GetString();
-        await RustAllowAsync(new
+        return await RustAllowAsync(new
         {
             op = "handshake", host = Host(b), channelId = b.ChannelId,
             generation = b.HostGeneration, proof = worker.GetProperty("proof").GetString()
@@ -553,7 +553,7 @@ internal sealed class GateForm : Form
 
     private async Task<JsonElement> LedgerEventAsync(Browser b, string kind,
         ulong ledgerSequence, string? intentId = null, string? digest = null,
-        string? receiptId = null)
+        string? receiptId = null, bool captureLedgerRejection = false)
     {
         var ev = new Dictionary<string, object>
         {
@@ -576,9 +576,13 @@ internal sealed class GateForm : Form
         try
         {
             await AssertOwnedAsync(b);
-            return await WorkerAsync(b, "globalThis.__cos7l1Native.accept(" +
+            var expression = "globalThis.__cos7l1Native.accept(" +
                 JsonSerializer.Serialize(ev) + "," + sequence + "," +
-                JsonSerializer.Serialize(authorized.GetProperty("receipt").GetString()) + ")");
+                JsonSerializer.Serialize(authorized.GetProperty("receipt").GetString()) + ")";
+            if (captureLedgerRejection)
+                expression += ".then(value => ({accepted:true,value}), " +
+                    "error => ({accepted:false,name:error.name,code:error.code}))";
+            return await WorkerAsync(b, expression);
         }
         finally
         {
@@ -675,15 +679,18 @@ internal sealed class GateForm : Form
                 rival.TabId != a.TabId &&
                 rival.View.CoreWebView2 != a.View.CoreWebView2;
             rival.HostGeneration = a.HostGeneration;
-            await BindAsync(rival, "7l1-shared-session");
+            var rivalHandshake = await BindAsync(rival, "7l1-shared-session");
             var contender = await ObserveAsync(rival);
-            var rivalDeniedByRust = !contender.GetProperty("ok").GetBoolean();
+            var rivalDeniedByFirstProof = !contender.GetProperty("ok").GetBoolean() &&
+                contender.GetProperty("error").GetString() ==
+                    "a session is already attributed to another browser scope";
             _sameProfileTab.Dispose();
             var rivalRetired = rival.RetirementTask is not null &&
                 await rival.RetirementTask;
             Mark("same_profile_competing_tab",
-                realSameProfile && rivalDeniedByRust && rivalRetired,
-                "Second physical tab completed native handshake on A's MV3 worker; Rust 7A first-proof refused competing session and automatically retired rival channel");
+                realSameProfile && rivalHandshake.GetProperty("authenticated").GetBoolean() &&
+                rivalDeniedByFirstProof && rivalRetired,
+                "Second physical tab authenticated with Rust and signed a valid observation; Rust returned exact 7A ConflictingAttribution and retired rival channel");
             a.HostGeneration = Math.Max(a.HostGeneration, rival.HostGeneration);
             await BindAsync(a, "7l1-shared-session");
             var originalRestored = await ObserveAsync(a);
@@ -693,11 +700,14 @@ internal sealed class GateForm : Form
                     "Advanced",
                 "Original verified owner reauthenticated at higher generation after Rust rejected same-profile contender");
 
-            await BindAsync(b, "7l1-shared-session");
+            var crossProfileHandshake = await BindAsync(b, "7l1-shared-session");
             var competing = await ObserveAsync(b);
             Mark("cross_profile_session_conflict",
-                !competing.GetProperty("ok").GetBoolean(),
-                "Separate physical WebView2 profile cannot elect A's already-proven session in Rust 7B");
+                crossProfileHandshake.GetProperty("authenticated").GetBoolean() &&
+                !competing.GetProperty("ok").GetBoolean() &&
+                competing.GetProperty("error").GetString() ==
+                    "a session is already attributed to another browser scope",
+                "Separate physical WebView2 profile authenticated with Rust; exact 7A ConflictingAttribution refused first-proof takeover");
             await BindAsync(b, "7l1-independent-session");
             var bFirst = await ObserveAsync(b);
             Mark("cross_profile_recovery",
@@ -802,10 +812,25 @@ internal sealed class GateForm : Form
                         priorAck.GetProperty("receiptId").GetString() == "receipt-verified" &&
                         !priorAck.GetProperty("resendAllowed").GetBoolean(),
                         "Committed positive ACK remains queryable across real MV3 incarnation restart");
-                    var staleAckRefused = await ThrowsAsync(async () =>
-                        await LedgerEventAsync(a, "ack", 4, "intent-7l1", digest, "receipt-stale"));
-                    Mark("cross_generation_ack_refused", staleAckRefused,
-                        "New worker cannot ACK the prior worker incarnation's ambiguous claim");
+                    var storageBefore = await WorkerAsync(a,
+                        "chrome.storage.session.get('cosos7cLedgerV1').then(x => x.cosos7cLedgerV1)");
+                    var claimedBefore = storageBefore.GetProperty("intents")
+                        .GetProperty("intent-7l1");
+                    // The helper performs a fresh signed worker event and
+                    // successful Rust authorization before returning a caught
+                    // CompanionError from the actual 7C ledger dispatch.
+                    var ackOutcome = await LedgerEventAsync(a, "ack", 4,
+                        "intent-7l1", digest, "receipt-stale", captureLedgerRejection: true);
+                    var storageAfter = await WorkerAsync(a,
+                        "chrome.storage.session.get('cosos7cLedgerV1').then(x => x.cosos7cLedgerV1)");
+                    Mark("cross_generation_ack_refused",
+                        !ackOutcome.GetProperty("accepted").GetBoolean() &&
+                        ackOutcome.GetProperty("name").GetString() == "CompanionError" &&
+                        ackOutcome.GetProperty("code").GetString() == "stale-claim-generation" &&
+                        claimedBefore.GetProperty("status").GetString() == "claimed" &&
+                        claimedBefore.GetProperty("receiptId").ValueKind == JsonValueKind.Null &&
+                        storageBefore.GetRawText() == storageAfter.GetRawText(),
+                        "Rust authorized exact signed ACK; 7C rejected stale-claim-generation and persisted storage.session remained byte-for-byte unchanged");
                 }
             }
             else
