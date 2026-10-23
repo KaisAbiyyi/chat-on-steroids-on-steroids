@@ -1,0 +1,101 @@
+{
+  "scope": "7L1 Rust-to-WebView2 CDP extension service_worker; synthetic D: only",
+  "preflightOnly": false,
+  "dateUtc": "2026-10-23T12:13:45.5730494+00:00",
+  "sourceSha": "2590decb7c618ace066795c2aeb6b4e5e2612405",
+  "hostBinarySha256": "84b4c810caa96a2435041bbcc294b21098a7e8a2062d83f4131d8891d1b0b27d",
+  "rustBinarySha256": "a6c2874d0a83d061f7992f434e233fee1053b6165911afb02b2eaa880c572fd9",
+  "extensionWorkerSha256": "cbee24836ae7d6a9d1b3ca36a73fb0c69fc1408a020d73cba8e38872de1aac40",
+  "native7L1Accepted": true,
+  "rustProcessExit": 0,
+  "checks": {
+    "cross_generation_ack_refused": {
+      "status": "PASS",
+      "evidence": "Rust authorized exact signed ACK; 7C rejected stale-claim-generation and persisted storage.session remained byte-for-byte unchanged"
+    },
+    "cross_profile_recovery": {
+      "status": "PASS",
+      "evidence": "Second profile can elect its independently bound session after refused competition"
+    },
+    "cross_profile_session_conflict": {
+      "status": "PASS",
+      "evidence": "Separate physical WebView2 profile authenticated with Rust; exact 7A ConflictingAttribution refused first-proof takeover"
+    },
+    "distinct_native_profiles": {
+      "status": "PASS",
+      "evidence": "Two actual independently installed WebView2 profiles with browser extension IDs"
+    },
+    "false_origin_denial": {
+      "status": "PASS",
+      "evidence": "Attempted foreign-origin navigation canceled synchronously at live WebView2 controller"
+    },
+    "integrated_native_7l1_gate": {
+      "status": "PASS",
+      "evidence": "Physical 7B Rust process \u002B actual WebView2 7C MV3 worker; all required gates must execute"
+    },
+    "native_7b_mv3_7c_handshake": {
+      "status": "PASS",
+      "evidence": "Actual service_worker target signed Rust handshake \u002B 7B first-proof observation"
+    },
+    "native_mv3_natural_idle": {
+      "status": "NOT_RUN",
+      "evidence": "Worker target remained live after 65s of detached idle; exercise forced stop"
+    },
+    "native_tab_close_revocation": {
+      "status": "PASS",
+      "evidence": "Physical WebView2 controller disposal automatically retires Rust channel; stale CDP and pre-signed late ledger event rejected"
+    },
+    "navigation_revocation": {
+      "status": "PASS",
+      "evidence": "Native navigation event automatically retired Rust channel and revoked privileged CDP access"
+    },
+    "page_cdp_fallback_refused": {
+      "status": "PASS",
+      "evidence": "An empty CDP session is refused before WebView2 can route to the top-level page"
+    },
+    "page_message_spoof_denied": {
+      "status": "PASS",
+      "evidence": "MAIN world and posted spoof event cannot reach the worker\u0027s CDP-only native adapter"
+    },
+    "real_mv3_ack_persisted": {
+      "status": "PASS",
+      "evidence": "Positive real Rust-approved MV3 claim/ACK committed and recovered from storage.session"
+    },
+    "real_mv3_idle_or_forced_restart": {
+      "status": "PASS",
+      "evidence": "65s detached idle, actual new MV3 instance=True, naturalIdleObserved=False, forcedWorkerTargetStop=True"
+    },
+    "real_mv3_persisted_claim": {
+      "status": "PASS",
+      "evidence": "7C chrome.storage.session claim and repair returned after actual worker mutation"
+    },
+    "restart_positive_ack_recovery": {
+      "status": "PASS",
+      "evidence": "Committed positive ACK remains queryable across real MV3 incarnation restart"
+    },
+    "restart_repair_no_duplicate": {
+      "status": "PASS",
+      "evidence": "Persisted 7C claim repaired after real worker restart, resend forbidden"
+    },
+    "rust_process_exit": {
+      "status": "PASS",
+      "evidence": "Real child process exit=0"
+    },
+    "same_profile_competing_tab": {
+      "status": "PASS",
+      "evidence": "Second physical tab authenticated with Rust and signed a valid observation; Rust returned exact 7A ConflictingAttribution and retired rival channel"
+    },
+    "same_profile_original_restored": {
+      "status": "PASS",
+      "evidence": "Original verified owner reauthenticated at higher generation after Rust rejected same-profile contender"
+    },
+    "separate_profile_ledger": {
+      "status": "PASS",
+      "evidence": "Different WebView2 profile has independent MV3 storage.session"
+    },
+    "source_artifact_provenance": {
+      "status": "PASS",
+      "evidence": "In-host checked Git HEAD, clean authority files and all 14 SHA256 manifests: 2590decb7c618ace066795c2aeb6b4e5e2612405"
+    }
+  }
+}
