@@ -14,16 +14,16 @@ pub const MAX_JS_SAFE_INTEGER: u64 = 9_007_199_254_740_991;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "view", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum UiRoute {
-    Home,
+    Home {},
     Conversation { session_id: String },
-    Projects,
+    Projects {},
     Project { project_id: String },
     Files { project_id: String },
-    Agents,
-    Skills,
-    Plugins,
-    Settings,
-    Activity,
+    Agents {},
+    Skills {},
+    Plugins {},
+    Settings {},
+    Activity {},
 }
 
 impl UiRoute {
@@ -55,7 +55,7 @@ fn valid_route_id(id: &str) -> Result<(), UiError> {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "action", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum UiCommand {
-    Snapshot,
+    Snapshot {},
     Navigate {
         route: UiRoute,
         expected_revision: u64,
@@ -146,7 +146,7 @@ impl UiNavigation {
             state: UiSnapshot {
                 host_epoch,
                 revision: 1,
-                route: UiRoute::Home,
+                route: UiRoute::Home {},
                 sidebar_open: false,
             },
             last_sequence: 0,
@@ -169,7 +169,7 @@ impl UiNavigation {
         self.state = UiSnapshot {
             host_epoch: new_host_epoch,
             revision,
-            route: UiRoute::Home,
+            route: UiRoute::Home {},
             sidebar_open: false,
         };
         self.last_sequence = 0;
@@ -202,7 +202,7 @@ impl UiNavigation {
         // a rejected old revision cannot later be replayed as a fresh action.
         self.last_sequence = request.sequence;
         match request.command {
-            UiCommand::Snapshot => {}
+            UiCommand::Snapshot {} => {}
             UiCommand::Navigate {
                 route,
                 expected_revision,
