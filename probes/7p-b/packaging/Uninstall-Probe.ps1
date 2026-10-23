@@ -20,6 +20,22 @@ foreach ($line in $lines) {
     Assert-SafeDDrivePath $full
     $files += [pscustomobject]@{Path=$full;Hash=$parts[0].ToUpperInvariant()}
 }
+$dirsManifest = Join-Path $Destination 'probe-dirs.txt'
+Assert-SafeDDrivePath $dirsManifest
+$dirsEntry = @($files | Where-Object { $_.Path -ieq $dirsManifest })
+if ($dirsEntry.Count -ne 1 -or !(Test-Path -LiteralPath $dirsManifest -PathType Leaf) -or
+    (Get-FileHash -LiteralPath $dirsManifest -Algorithm SHA256).Hash -ne $dirsEntry[0].Hash) {
+    throw 'Missing or modified packaged directory ownership manifest; refusing uninstall.'
+}
+$ownedDirs = @()
+foreach ($relative in @(Get-Content -LiteralPath $dirsManifest | Where-Object { $_.Trim().Length -gt 0 })) {
+    $directory = [IO.Path]::GetFullPath((Join-Path $Destination ($relative.Trim().Replace('/','\'))))
+    if (!$directory.StartsWith($Destination + '\',[StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Packaged directory manifest escaped installation root.'
+    }
+    Assert-SafeDDrivePath $directory
+    $ownedDirs += $directory
+}
 # Delete only packaged, unmodified files. Preserve unknown files, user data,
 # modified files and profile roots.
 $preservedModified = 0
@@ -35,7 +51,7 @@ Assert-SafeDDrivePath $manifest
 Remove-Item -LiteralPath $manifest -Force
 # Only consider manifest-owned directories. Traversing unknown recursive trees
 # could follow an unowned junction added inside the installation.
-$dirs = @($files | ForEach-Object { Split-Path $_.Path -Parent } | Sort-Object -Unique)
+$dirs = @($ownedDirs + @($files | ForEach-Object { Split-Path $_.Path -Parent }) | Sort-Object -Unique)
 $dirs = @($dirs | Where-Object { $_.StartsWith($Destination + '\',[StringComparison]::OrdinalIgnoreCase) } | Sort-Object Length -Descending)
 foreach ($dir in $dirs) {
     Assert-SafeDDrivePath $dir

@@ -30,6 +30,15 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Uninstall-Probe.ps1') -Destinat
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Assert-SafeDDrivePath.ps1') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'uninstall.cmd') -Destination $stage
 
+# A file-only SHA manifest cannot own empty directories shipped by .NET publish.
+# Preserve a hashed list of packaged directories so uninstall can safely remove
+# those only when empty, without traversing or deleting unowned directories.
+$packagedDirs = @(Get-ChildItem -LiteralPath $stage -Directory -Recurse -Force |
+    Sort-Object FullName | ForEach-Object {
+        $_.FullName.Substring($stage.Length + 1).Replace('\','/')
+    })
+[IO.File]::WriteAllLines((Join-Path $stage 'probe-dirs.txt'),$packagedDirs,[Text.UTF8Encoding]::new($false))
+
 $lines = @(Get-ChildItem -LiteralPath $stage -File -Recurse | Sort-Object FullName | ForEach-Object {
     $rel = $_.FullName.Substring($stage.Length + 1).Replace('\','/')
     "$( (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash ) $rel"
