@@ -316,11 +316,21 @@ internal sealed class GateForm : Form
             if (browser.View.CoreWebView2.Source == StartUrl)
             {
                 var value = await browser.View.CoreWebView2.ExecuteScriptAsync("document.title");
-                if (value == "\"7L1 Isolated Native Authority\"") return;
+                if (value == "\"7L1 Isolated Native Authority\"")
+                {
+                    // WebView2 Source/title can settle before the CDP page
+                    // target catches up, particularly after cancelled
+                    // navigation. Native ownership requires all three.
+                    var page = await CdpAsync(browser, "Target.getTargetInfo", new { });
+                    var info = Field(page, "targetInfo");
+                    if (info.GetProperty("type").GetString() == "page" &&
+                        info.GetProperty("url").GetString() == StartUrl)
+                        return;
+                }
             }
             await Task.Delay(100);
         }
-        throw new InvalidOperationException("navigation failed");
+        throw new InvalidOperationException("WebView2 source/title/CDP page target did not stabilize");
     }
 
     private static JsonElement Field(JsonElement root, params string[] names)
@@ -662,6 +672,7 @@ internal sealed class GateForm : Form
                 a.RefusedOrigins == originDenialBefore + 1 &&
                 _a.CoreWebView2.Source == StartUrl,
                 "Attempted foreign-origin navigation canceled synchronously at live WebView2 controller");
+            await WaitPageAsync(a);
             await BindAsync(a, "7l1-shared-session");
             var aFirst = await ObserveAsync(a);
             Mark("native_7b_mv3_7c_handshake",
