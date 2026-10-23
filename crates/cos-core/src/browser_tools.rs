@@ -5,7 +5,7 @@
 //! authorization for EACH tool operation. This does not implement an arbitrary
 //! CDP evaluator, provider Send, or user input. Platform integrations implement
 //! BrowserDebugger only with a privileged browser-owned transport.
-use crate::browser_protocol::{DocumentIdentity, MAX_SAFE_JS_INTEGER, NormalizedIdentityFrame};
+use crate::browser_protocol::{DocumentIdentity, MAX_SAFE_JS_INTEGER};
 use crate::native_browser_bridge::{NativeBridgeError, NativeBrowserBridge, TrustedHostEvidence};
 use std::collections::HashMap;
 
@@ -207,7 +207,7 @@ fn url_belongs_to_origin(url: &str, origin: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::browser_protocol::{Observation, PROTOCOL_VERSION};
+    use crate::browser_protocol::{NormalizedIdentityFrame, Observation, PROTOCOL_VERSION};
     use crate::native_browser_bridge::BridgeBootstrap;
 
     #[derive(Default)]
