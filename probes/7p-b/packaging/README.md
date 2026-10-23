@@ -27,7 +27,11 @@ user-added and modified packaged files remain untouched. Do not bundle developme
 browser profile data, machine credentials, or user local files.
 
 **Acceptance:** install/smoke/uninstall and hashes must be recorded separately
-from native UI and IME proof. The sample installer cannot certify product MSI,
-code signing, corporate policy, browser runtime installation or 7P-L1 overall.
+from native UI and IME proof. The sample installer **alone** cannot certify
+the 7P-L1 physical-Windows browser-feasibility gate; the distinct native
+qualifier must verify a fresh installed host, complete WebView2 checks and
+source-bound size/resource measurements together. The combined synthetic
+feasibility receipt still cannot certify product MSI, signing, corporate
+policy, production startup/private RAM or browser runtime installation.
 Use a new `-OutputRoot D:\...` for every packaging run, since the builder refuses
 to overwrite existing output.

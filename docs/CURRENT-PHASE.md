@@ -1,5 +1,11 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-L1 physical Windows browser feasibility — scoped closure proposal, 2026-10-23
+
+- **Owner instruction:** execute the two omitted `distribution_budgets` and `native_windows_gate` checks. The raw 7P-B synthetic host deliberately emits `NOT_RUN` for both umbrella gates; an independently executable native L-gate runner now measures/evaluates them. It **launches the actual installed offline synthetic probe** on a fresh D: profile, checks the observed child process exit code, all 26 hard browser/extension/OAuth synthetic checks and exact source/installer/benchmark hashes.
+- **Result:** scoped physical Windows WebView2 feasibility `distribution_budgets=PASS` and `native_windows_gate=PASS`. Tested code `53164da79b32b4a4cacb433678a94ec13de57888`, already merged in [PR #42](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/42) at main `ae14311c`. Installer 68,009,984 bytes, manifested 84 files and actual installed payload 167,789,479 bytes; 3 cold/3 warm source-bound measured synthetic full-batch runs in the pinned historical ledger. Source/probe WebView2 tests remain 26 PASS/0 FAIL. A new native receipt and [closure summary](implementation-summary/2026-10-23-7p-l1-scoped-feasibility-acceptance.md) are included with the runner.
+- **Gate boundary:** `7P-L1` is the **browser feasibility** preflight before native `7L1`. Real production desktop installer, signing, time-to-interactive and unique/private RSS are explicitly **NOT RUN until 16L3**, genuine provider login is at 7U1/8U1, and owner-deferred physical OS IME is HOLD at 8L1/Phase 15. Neither the raw synthetic host's `native7PL1Accepted=false` nor an unmerged acceptance-branch registry change is the final gate decision. Update Notion to Done and unblock native 7L1 **only after** qualifier source review, exact-head CI and merge.
+
 ## 7P-L1 final reviewed source proof — native synthetic PASS, product gate PARTIAL — 2026-10-23
 
 - **Reviewed repair SHA:** `53164da79b32b4a4cacb433678a94ec13de57888`: actual B WebView2 controller/current profile/exact callback URL independently proven before profile A grant denial; installer, uninstall and builder reject pre-existing junction/reparse ancestors; hashed package-directory ownership removes only owned empty directories.
