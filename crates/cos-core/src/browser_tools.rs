@@ -427,7 +427,7 @@ mod tests {
         for (e, proof) in [(&b, &bb), (&c, &bc), (&d, &bd)] {
             let f = signed(e);
             assert_eq!(
-                tools.snapshot(&mut bridge, auth(e, &proof, 2, &f), handle),
+                tools.snapshot(&mut bridge, auth(e, proof, 2, &f), handle),
                 Err(BrowserToolError::Lease)
             );
         }
