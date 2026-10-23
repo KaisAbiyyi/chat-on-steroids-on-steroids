@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 7L2 physical Windows native browser tools — BLOCKED, 2026-10-23
+
+- **Local gate claim:** ChatGPT GPT-6, `windows-browser-tools`, exact clean GitHub `main` SHA `eb91712d3c92c74f8714ef5f573939ad4fb19575` (7E merged PR #57 ancestor). Isolated D: checkout; eight unrelated historical local WIP files remain untouched.
+- **Source blocker:** `DirectBrowserTools<BrowserDebugger>` 7D exists only as a Rust contract; `BrowserDebugger` has only `FakeDebugger` test implementations and there is no real WebView2-native owner that calls its attach/snapshot/detach and retirement boundaries. Physical 7L2 actual direct-tool lifecycle is **NOT_RUN/BLOCKED**. No source-only 7D/7E CI or earlier bridge proof substitutes for this required gate.
+- **Supporting native evidence:** on Windows 10.0.26300, two WebView2 MV3 worker targets discovered via physical CDP (PASS, preflight only). Pinned historical 7L1 host/Rust SHA `2590decb7c618ace066795c2aeb6b4e5e2612405` rerun with `--native-idle`: **21 PASS, 0 FAIL, 1 NOT_RUN** (natural idle), Rust exit 0, signed claim/ACK persistence, forced restart, no repeat, stale ACK refusal. Its accepted 7L1 scope does **not** exercise 7D. Raw local D: receipts and reproducible audit are listed in [7L2 claim](claims/7L2.md).
+- **Disposition:** [GitHub issue #62](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/62) requires an authenticated privileged WebView2 `BrowserDebugger` implementation plus a source/binary-pinned Windows integration runner and self-review/CI; only then can 7L2 be requalified and 7U1 unlocked. Release `windows-browser-tools` local test ownership while cloud fix is outstanding. `7L2 = blocked` in the registry, **not Done**.
+
 ## 8A cloud Chrome worker adapter — CLAIMED / in CI self-review, 2026-10-23
 
 - 7E accepted [PR #57](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/57), main `f5b27921d54c005cd027f3afdb8af9e11d736557`.

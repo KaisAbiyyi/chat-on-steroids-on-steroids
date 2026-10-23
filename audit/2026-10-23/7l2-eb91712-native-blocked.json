@@ -1,0 +1,62 @@
+{
+  "unit": "7L2",
+  "date": "2026-10-23",
+  "status": "BLOCKED",
+  "native_acceptance": false,
+  "source_sha": "eb91712d3c92c74f8714ef5f573939ad4fb19575",
+  "source_clean": true,
+  "prerequisite_7e_sha": "f5b27921d54c005cd027f3afdb8af9e11d736557",
+  "environment": {
+    "os": "Windows NT 10.0.26300.0",
+    "storage": "D: NTFS; isolated synthetic profiles",
+    "dotnet_sdk": "10.0.201"
+  },
+  "rust_browser_tools_source_sha256": "b37c26ac7182bd96a3fd605a577f931891d181d8c37b3f271a72c68dc5c1f518",
+  "checks": [
+    {
+      "name": "current_source_7d_privileged_browser_debugger",
+      "status": "BLOCKED",
+      "evidence": "Only FakeDebugger implements BrowserDebugger in crates/cos-core/src/browser_tools.rs:295; all DirectBrowserTools constructors are test-only, and no actual WebView2 native integration calls DirectBrowserTools."
+    },
+    {
+      "name": "physical_webview2_mv3_cdp_discovery",
+      "status": "PASS",
+      "tested_source_sha": "2590decb7c618ace066795c2aeb6b4e5e2612405",
+      "evidence": "Two physical isolated WebView2 MV3 extension service-worker targets discovered by CDP; process exit 0; preflight only."
+    },
+    {
+      "name": "physical_7l1_rust_mv3_integrated_baseline",
+      "status": "PASS",
+      "tested_source_sha": "2590decb7c618ace066795c2aeb6b4e5e2612405",
+      "pass": 21,
+      "fail": 0,
+      "not_run": 1,
+      "rust_exit_code": 0,
+      "native_7l1_accepted": true,
+      "evidence": "Historical 7L1 signed handshake, ACK persistence, MV3 forced restart, no-resend repair, stale-generation ACK refusal and tab revocation. Natural idle NOT_RUN; forced stop was accepted alternative."
+    },
+    {
+      "name": "physical_7l2_direct_tools_attach_snapshot_detach",
+      "status": "NOT_RUN",
+      "evidence": "No production WebView2 BrowserDebugger, 7D native executable helper or source-bound 7L2 Windows runner exists at source SHA."
+    },
+    {
+      "name": "physical_7l2_duplicate_input_and_reconnect_fencing",
+      "status": "NOT_RUN",
+      "evidence": "7L1 prevents duplicate 7C ledger actions; actual 7D direct-tool lifecycle has not been exercised on real hardware."
+    },
+    {
+      "name": "owner_7u1_signed_in_observation",
+      "status": "BLOCKED",
+      "evidence": "Depends on accepted physical 7L2; no private account, real user profile, Send or OAuth were accessed."
+    }
+  ],
+  "cloud_fix_issue": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/62",
+  "local_raw_receipts": [
+    ".test-tmp/7l2/cdp-preflight-20261023/receipt.json",
+    ".test-tmp/7l2/integrated-7l1-baseline-20261023/receipt.json",
+    ".test-tmp/7l2/integrated-7l1-native-idle-20261023/receipt.json",
+    ".test-tmp/7l2/receipt-7l2-preflight-20261023.json"
+  ],
+  "acceptance_next": "Add a privileged WebView2 BrowserDebugger implementation, source-pinned real native runner and strict cloud CI. Retest all 7L2 native gates on D: after reviewed fix merge."
+}
