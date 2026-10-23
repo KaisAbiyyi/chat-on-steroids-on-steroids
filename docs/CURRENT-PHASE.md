@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 7L1 real native Rust↔MV3 bridge — BLOCKED with exact-source Windows evidence, 2026-10-23
+
+- **Prerequisites:** 7C and scoped 7P-L1 both accepted on [PR #48](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/48), merged `8d1f4c5a3fbdb7e5dec1cdf02a9ef4e25077c0b4`. Windows 7L1 claimed under `windows-bridge` and exercised in isolated D: worktree.
+- **Observed native tests:** Rust 7B 8 PASS; JS 7C 16 PASS; C# synthetic policy 15 PASS; WebView2 Windows host build PASS; physical 65-second MV3 idle/forced retirement, debugger/tab recreation native 26 PASS/0 FAIL/2 NOT_RUN at exact compiled source; second process-wait batch 18 PASS/1 UNVERIFIED/2 NOT_RUN with observed exit code 0. All raw receipts retained and checks scoped.
+- **Blocker:** No physical native 7B→7C integrated handshake can execute. `NativeBrowserBridge` has only unit-test callers; `installVerifiedCompanion` only has test callers and requires injected `subscribeVerifiedNativeEvent` and independently verified host event. The 7P-B extension is a separate synthetic debugger fixture. **7L1 BLOCKED, 7D BLOCKED**; never reinterpret a 7P-B synthetic worker ACK as an authenticated 7C ACK.
+- **Next:** [GitHub issue #49](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/49) cloud adapter/transport fix, exact-SHA Windows requalification of actual integrated 7B/7C and independent review. See [receipt and reproduction](implementation-summary/2026-10-23-7l1-native-windows-blocker.md). No user account or private profile used.
+
 ## 7P-L1 physical Windows browser feasibility — scoped closure proposal, 2026-10-23
 
 - **Owner instruction:** execute the two omitted `distribution_budgets` and `native_windows_gate` checks. The raw 7P-B synthetic host deliberately emits `NOT_RUN` for both umbrella gates; an independently executable native L-gate runner now measures/evaluates them. It **launches the actual installed offline synthetic probe** on a fresh D: profile, checks the observed child process exit code, all 26 hard browser/extension/OAuth synthetic checks and exact source/installer/benchmark hashes.

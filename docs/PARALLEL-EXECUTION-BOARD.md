@@ -1,5 +1,7 @@
 # CoSoS — full phase task dependency / parallel board
 
+**2026-10-23 native 7L1 attempt, BLOCKED / Now:** After accepted PR #48, 7L1 was claimed and tested on physical Windows at exact main `8d1f4c5`. Rust 7B (8 tests), JS 7C (16 tests), synthetic host policy (15) and real WebView2 host (26 PASS/0 FAIL/2 NOT_RUN including real MV3 idle restart) passed their separate scopes. No production WebView2 adapter actually wires the 7B authenticated native bridge to the 7C companion, so integrated 7L1 handshake/tab election/ACK repair cannot run. [Issue #49](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/49) tracks that cloud fix; [native receipt](implementation-summary/2026-10-23-7l1-native-windows-blocker.md) is evidence. **Now:** 7L1 BLOCKED awaiting cloud integration; **Up Next:** 7D BLOCKED pending native retest. Do not mark 7L1 DONE from prior 7P-L1 synthetic checks.
+
 **2026-10-23 Windows preflight evidence and revised gate boundary (pending review/merge):** Owner requested actually executing both missing tests. The separate Windows `7P-L1` native qualifier installed the exact SHA-pinned synthetic WebView2 probe and executed `distribution_budgets=PASS` and `native_windows_gate=PASS` for **physical Windows browser feasibility**. Full product installer/private RAM/startup remains `NOT_RUN` at 16L3. Owner-deferred OS IME and signed-in provider U gates remain future work. After the reviewed gate contract and receipt are merged, `7P-L1` moves to Last Done and native `7L1` becomes Ready / Now (unclaimed). Do not mark 7L1 Done or launch 7D before native 7L1. Older paragraphs below describe historical checkpoints.
 
 **7C CLOUD REVIEW CANDIDATE (2026-10-22):** `7C` claimed by ChatGPT GPT-6 on [PR #46](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/46), isolated `browser-extension` lock. Post-merge DAG row below projects 7C DONE only on exact-head Windows/Ubuntu 7C/Task DAG/Rust PASS, source review and merge. Native `7P-L1` stays HOLD / Now; `7L1` remains BLOCKED / Up Next until physical native 7P-L1 and 7C are BOTH accepted. Extension module is synthetic and host-authenticated adapter-only, NOT real browser/WebView2 acceptance.
@@ -72,7 +74,7 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7A` | Browser bridge protocol 14/identity contract | `7P-B` | `browser-protocol` | C (cloud) | DONE |
 | `7B` | Native authenticated bridge and generation fencing | `7A` | `browser-bridge` | C (cloud) | DONE |
 | `7C` | Extension companion ACK/repair/MV3 lifecycle | `7B` | `browser-extension` | C (cloud) | DONE |
-| `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | **READY · PARALLEL** |
+| `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | BLOCKED |
 | `7D` | Direct browser tools/debugger/frame ownership | `7C`, `7L1` | `browser-tools` | C (cloud) | BLOCKED |
 | `7E` | Differential transport fuzz/error/reconnect review | `7D` | `browser-qualification` | C (cloud) | BLOCKED |
 | `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | BLOCKED |

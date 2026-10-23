@@ -118,7 +118,14 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertEqual(tasks["7C"]["status"], "done")
         self.assertNotIn("7C", ready_ids)
         self.assertNotIn("7P-L1", ready_ids)
-        self.assertIn("7L1", ready_ids)
+        self.assertEqual(tasks["7L1"]["status"], "blocked")
+        self.assertNotIn("7L1", ready_ids)
+        # A reviewed future cloud/native integration fix can make the local
+        # gate eligible again, without retroactively accepting its execution.
+        retest = copy.deepcopy(graph)
+        next(t for t in retest["tasks"] if t["id"] == "7L1")["status"] = "todo"
+        retest_ready, _ = task_board.readiness(retest)
+        self.assertIn("7L1", {t["id"] for t in retest_ready})
         self.assertNotIn("7D", ready_ids)
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
         self.assertEqual(tasks["16L3"]["status"], "todo")

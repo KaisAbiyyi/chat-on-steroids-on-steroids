@@ -88,7 +88,15 @@ class TaskBoardTests(unittest.TestCase):
                 task["status"] = "todo"
         eligible, _ = board.readiness(candidate)
         self.assertIn("7A", {t["id"] for t in eligible})
-        self.assertIn("7L1", ready_ids)
+        # Native integration was attempted and found blocked despite both
+        # prerequisites being done; merely satisfying DAG edges is not PASS.
+        self.assertEqual(self.tasks["7L1"]["status"], "blocked")
+        self.assertNotIn("7L1", ready_ids)
+        self.assertEqual(board.explain(self.data, "7L1")["state"], "BLOCKED")
+        reopened = copy.deepcopy(self.data)
+        next(t for t in reopened["tasks"] if t["id"] == "7L1")["status"] = "todo"
+        eligible_after_fix, _ = board.readiness(reopened)
+        self.assertIn("7L1", {t["id"] for t in eligible_after_fix})
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7L1"]))
         self.assertNotIn("7D", ready_ids)
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
@@ -142,7 +150,7 @@ class TaskBoardTests(unittest.TestCase):
         # A synthetic rollback of CL-L6 must also roll back its already
         # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A"):
+            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A", "7L1"):
                 task["status"] = "todo"
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
