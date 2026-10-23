@@ -136,6 +136,25 @@ test("sign-in cannot jump providers or claim a cross-origin context",async()=>{
     fail("sign-in-origin"));
 });
 
+test("sign-in cannot report navigation success if provider or session silently changes",async()=>{
+  const h=harness();
+  const rogue=createProfileSessionController({...h.native,
+    beginNativeSignIn:async args=>{
+      h.profiles.get(h.proofs[0]).identity.origin=secondOrigin;
+      return {started:true};
+    },allowedProviders:[{id:"synthetic",origin:hostOrigin},{id:"other",origin:secondOrigin}]});
+  await assert.rejects(rogue.startSignIn({nativeProof:h.proofs[0],
+    providerId:"synthetic",consentProof:h.approvals[0]}),fail("sign-in-context-changed"));
+  const g=harness();
+  const swapped=createProfileSessionController({...g.native,
+    beginNativeSignIn:async()=>{
+      g.profiles.get(g.proofs[0]).identity.sessionId="unrelated-session";
+      return {started:true};
+    },allowedProviders:[{id:"synthetic",origin:hostOrigin}]});
+  await assert.rejects(swapped.startSignIn({nativeProof:g.proofs[0],
+    providerId:"synthetic",consentProof:g.approvals[0]}),fail("sign-in-context-changed"));
+});
+
 test("atomic explicit logical handoff moves attribution, never browser credentials",async()=>{
   const h=harness();
   const result=await h.controller.handoff({
