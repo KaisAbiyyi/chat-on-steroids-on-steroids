@@ -470,7 +470,11 @@ internal sealed class ProbeForm : Form
             "document.title === '7P-L1 Mock Callback' ? 'ready' : ''");
         // Derive both identities from the actual live WebView2 controllers, not
         // an attacker-controlled profile string supplied by the caller.
-        var wrongProfileDenied = bCallbackReady == "ready"
+        var bActualIdentityProven = bCallbackReady == "ready"
+            && _controllers.TryGetValue(_b, out var bOwner)
+            && bOwner.Profile == "B" && IsNativeControllerCurrent(_b, bOwner)
+            && string.Equals(_b.CoreWebView2.Source, callbackUrl, StringComparison.Ordinal);
+        var wrongProfileDenied = bActualIdentityProven
             && !CompleteOwnedConsent(_b, accepted, callbackUrl, approved: true);
         var firstAccepted = callbackReady == "ready"
             && CompleteOwnedConsent(_a, accepted, callbackUrl, approved: true);
@@ -480,8 +484,8 @@ internal sealed class ProbeForm : Form
         Mark("mock_oauth_forgery", forgedDenied ? "PASS" : "FAIL",
             $"Forged state/origin/error callback rejected={forgedDenied} before valid completion.");
         Mark("mock_oauth_profile_isolation",
-            bCallbackReady == "ready" && wrongProfileDenied ? "PASS" : "FAIL",
-            $"Profile B native controller loaded callback={bCallbackReady == "ready"}; pending A grant rejected when checked against B's actual profile={wrongProfileDenied}.");
+            bActualIdentityProven && wrongProfileDenied ? "PASS" : "FAIL",
+            $"Profile B controller/currentness/actual URL proven={bActualIdentityProven}; pending A grant rejected by verified B controller={wrongProfileDenied}.");
 
         var denied = new SyntheticConsentGrant("A", RandomNumberGenerator.GetHexString(16));
         _a.CoreWebView2.Navigate(denied.AuthorizationUrl);

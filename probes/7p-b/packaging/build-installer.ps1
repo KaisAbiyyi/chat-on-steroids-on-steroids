@@ -3,10 +3,12 @@ param(
     [string]$OutputRoot = 'D:\projects\CoS-Rust\.test-tmp\7p-l1\installer\release-v2'
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Assert-SafeDDrivePath.ps1')
 $PublishedRoot = [IO.Path]::GetFullPath($PublishedRoot)
 $OutputRoot = [IO.Path]::GetFullPath($OutputRoot)
 foreach ($path in @($PublishedRoot,$OutputRoot)) {
     if ([IO.Path]::GetPathRoot($path) -ne 'D:\') { throw "D: path required: $path" }
+    Assert-SafeDDrivePath $path
 }
 $base = Split-Path $PSScriptRoot -Parent
 $renderer = Join-Path $base 'renderer\dist'
@@ -18,8 +20,10 @@ if (!(Test-Path -LiteralPath (Join-Path $PublishedRoot 'WindowsHost.exe')) -or
 }
 $work = Join-Path $OutputRoot 'build'
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
+Assert-SafeDDrivePath $OutputRoot
 if (Test-Path $work) { throw "Build directory already exists: $work. Use a new OutputRoot." }
 New-Item -ItemType Directory -Force -Path $work | Out-Null
+Assert-SafeDDrivePath $work
 $stage = Join-Path $work 'stage'
 $extract = Join-Path $work 'iexpress-source'
 New-Item -ItemType Directory -Force -Path $stage,$extract | Out-Null
