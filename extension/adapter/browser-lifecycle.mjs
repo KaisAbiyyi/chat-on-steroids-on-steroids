@@ -79,6 +79,7 @@ export function createNativeBrowserLifecycleController({
   const partitionOwners = new Map();
   const profilePartitions = new Map();
   const permissionBusy = new Set();
+  const transitionBusy = new Set();
 
   // The caller supplies an opaque NATIVE proof, never page-derived identifiers.
   // Attestation and storage partition are independently rechecked.
@@ -128,7 +129,10 @@ export function createNativeBrowserLifecycleController({
     const entry = entries.get(key);
     if (!entry || !equal(entry.context, before) ||
         event.sequence <= entry.sequence) fail("stale-event");
-
+    if (transitionBusy.has(key)) fail("transition-busy");
+    transitionBusy.add(key);
+    const version = entry.version;
+    try {
     if (event.kind === "host-restarted") {
       if (nativeProof !== undefined) fail("unexpected-after-proof");
       // Fail closed for every tab, not just the tab that reported restart.
@@ -164,6 +168,11 @@ export function createNativeBrowserLifecycleController({
     const confirmed = await attest(nativeProof);
     if (!equal(after, confirmed.context) ||
         !samePartition(checked.partition, confirmed.partition)) fail("rebind-race");
+    if (entry.version !== version || !equal(entry.context, before) ||
+        event.sequence <= entry.sequence || entry.phase !==
+          (event.kind === "navigated" ? "active" : "suspended") &&
+          !(event.kind === "rebound" && entry.phase === "closed"))
+      fail("transition-race");
     // Preserve the exact entry object so in-flight permission requests can
     // detect its version increment and never return a stale grant.
     entry.context = after;
@@ -171,6 +180,7 @@ export function createNativeBrowserLifecycleController({
     entry.sequence = event.sequence;
     entry.version++;
     return view(entry);
+    } finally { transitionBusy.delete(key); }
   }
 
   // The native callback must atomically consume fresh user approval and
