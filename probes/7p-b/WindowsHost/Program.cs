@@ -459,26 +459,29 @@ internal sealed class ProbeForm : Form
         var callbackReady = await WaitForAsync(_a,
             "document.title === '7P-L1 Mock Callback' ? 'ready' : ''");
         var callbackUrl = _a.CoreWebView2.Source;
-        var wrongProfileDenied = !accepted.Complete("B", callbackUrl, approved: true);
         var modifiedStateUrl = callbackUrl.Replace("state=", "state=forged", StringComparison.Ordinal);
         var forgedDenied = !accepted.Complete("A", modifiedStateUrl, approved: true)
             && !accepted.Complete("A", "https://external.example.org/oauth-callback.html?state=forged&code=synthetic-code-only", approved: true)
             && !accepted.Complete("A", "https://synthetic.cos.test/oauth-callback.html?state=forged&error=access_denied", approved: true);
-        var firstAccepted = callbackReady == "ready" && accepted.Complete("A", callbackUrl, approved: true);
-        var replayDenied = !accepted.Complete("A", callbackUrl, approved: true);
-        Mark("mock_oauth_callback", firstAccepted && replayDenied ? "PASS" : "FAIL",
-            $"Real WebView2 consent redirect reached callback={callbackReady == "ready"}; host state/code validated={firstAccepted}; replay rejected={replayDenied}.");
-        Mark("mock_oauth_forgery", wrongProfileDenied && forgedDenied ? "PASS" : "FAIL",
-            $"Wrong profile={wrongProfileDenied}, forged state/origin/error={forgedDenied}; checks run before any valid completion.");
-
         // The same callback URL is navigable in profile B as a public synthetic
         // document; it must never authorize B using A's host-owned grant.
         _b.CoreWebView2.Navigate(callbackUrl);
         var bCallbackReady = await WaitForAsync(_b,
             "document.title === '7P-L1 Mock Callback' ? 'ready' : ''");
+        // Derive both identities from the actual live WebView2 controllers, not
+        // an attacker-controlled profile string supplied by the caller.
+        var wrongProfileDenied = bCallbackReady == "ready"
+            && !CompleteOwnedConsent(_b, accepted, callbackUrl, approved: true);
+        var firstAccepted = callbackReady == "ready"
+            && CompleteOwnedConsent(_a, accepted, callbackUrl, approved: true);
+        var replayDenied = !CompleteOwnedConsent(_a, accepted, callbackUrl, approved: true);
+        Mark("mock_oauth_callback", firstAccepted && replayDenied ? "PASS" : "FAIL",
+            $"Native profile A consent redirect verified={firstAccepted}, one-shot replay refused={replayDenied}.");
+        Mark("mock_oauth_forgery", forgedDenied ? "PASS" : "FAIL",
+            $"Forged state/origin/error callback rejected={forgedDenied} before valid completion.");
         Mark("mock_oauth_profile_isolation",
             bCallbackReady == "ready" && wrongProfileDenied ? "PASS" : "FAIL",
-            $"Profile B WebView2 loaded harmless fixture callback={bCallbackReady == "ready"}, A's grant denied for B={wrongProfileDenied}.");
+            $"Profile B native controller loaded callback={bCallbackReady == "ready"}; pending A grant rejected when checked against B's actual profile={wrongProfileDenied}.");
 
         var denied = new SyntheticConsentGrant("A", RandomNumberGenerator.GetHexString(16));
         _a.CoreWebView2.Navigate(denied.AuthorizationUrl);
@@ -489,8 +492,9 @@ internal sealed class ProbeForm : Form
         var denyCallbackReady = denyReady == "ready" && await WaitForAsync(_a,
             "document.title === '7P-L1 Mock Callback' ? 'ready' : ''") == "ready";
         var deniedUrl = _a.CoreWebView2.Source;
-        var denialRecognized = denyCallbackReady && denied.Complete("A", deniedUrl, approved: false);
-        var denialNoGrant = !denied.Complete("A", deniedUrl, approved: true);
+        var denialRecognized = denyCallbackReady
+            && CompleteOwnedConsent(_a, denied, deniedUrl, approved: false);
+        var denialNoGrant = !CompleteOwnedConsent(_a, denied, deniedUrl, approved: true);
         Mark("mock_oauth_consent_denial", denialRecognized && denialNoGrant ? "PASS" : "FAIL",
             $"Consent denial callback={denyCallbackReady}, access_denied verified={denialRecognized}, no grant issued={denialNoGrant}.");
 
@@ -505,6 +509,16 @@ internal sealed class ProbeForm : Form
         Mark("sign_in_constraints", all ? "PASS" : "FAIL",
             "Synthetic-only WebView2 consent/callback/state/replay/denial/profile checks; "
             + "real provider OAuth, account sign-in, OS SSO and token exchange remain future user gates.");
+    }
+
+    private bool CompleteOwnedConsent(WebView2 view, SyntheticConsentGrant grant,
+        string callbackUrl, bool approved)
+    {
+        if (view.IsDisposed || !_controllers.TryGetValue(view, out var owner)
+            || !IsNativeControllerCurrent(view, owner)
+            || !string.Equals(view.CoreWebView2.Source, callbackUrl, StringComparison.Ordinal))
+            return false;
+        return grant.Complete(owner.Profile, callbackUrl, approved);
     }
 
     private TabLease ElectController(WebView2 view, string profile, string tab)

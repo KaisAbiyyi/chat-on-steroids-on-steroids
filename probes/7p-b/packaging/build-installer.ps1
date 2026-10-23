@@ -27,6 +27,7 @@ Copy-Item -Path (Join-Path $PublishedRoot '*') -Destination $stage -Recurse -For
 Copy-Item -LiteralPath $renderer -Destination (Join-Path $stage 'renderer') -Recurse
 Copy-Item -LiteralPath $extension -Destination (Join-Path $stage 'extension') -Recurse
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Uninstall-Probe.ps1') -Destination $stage
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Assert-SafeDDrivePath.ps1') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'uninstall.cmd') -Destination $stage
 
 $lines = @(Get-ChildItem -LiteralPath $stage -File -Recurse | Sort-Object FullName | ForEach-Object {

@@ -17,6 +17,28 @@ internal static class SyntheticProbeInstaller
         return BitConverter.ToString(bytes).Replace("-", "");
     }
 
+    // Reject existing junction/symlink ancestors before writing to an alleged
+    // D: destination. Pure lexical GetFullPath checks do not enforce volume
+    // containment when a pre-existing reparse point points outside the drive.
+    private static void RequireSafeDDriveAncestors(string path)
+    {
+        string full = Path.GetFullPath(path);
+        if (!string.Equals(Path.GetPathRoot(full), @"D:\", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Install destination MUST be on D: drive.");
+        string cursor = @"D:\";
+        foreach (string component in full.Substring(cursor.Length).Split(
+            new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+            StringSplitOptions.RemoveEmptyEntries))
+        {
+            cursor = Path.Combine(cursor, component);
+            if (Directory.Exists(cursor) || File.Exists(cursor))
+            {
+                if ((File.GetAttributes(cursor) & FileAttributes.ReparsePoint) != 0)
+                    throw new InvalidOperationException("Existing reparse-point ancestor forbidden: " + cursor);
+            }
+        }
+    }
+
     private static int Main(string[] args)
     {
         try
@@ -30,6 +52,7 @@ internal static class SyntheticProbeInstaller
             if (!string.Equals(Path.GetPathRoot(destination), @"D:\", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Install destination MUST be on D: drive.");
             if (!Directory.Exists(@"D:\")) throw new InvalidOperationException("D: volume not mounted.");
+            RequireSafeDDriveAncestors(destination);
 
             Assembly self = Assembly.GetExecutingAssembly();
             using (Stream payload = self.GetManifestResourceStream(PayloadResource))
@@ -50,6 +73,7 @@ internal static class SyntheticProbeInstaller
 
                 string parent = Path.GetDirectoryName(destination);
                 Directory.CreateDirectory(parent);
+                RequireSafeDDriveAncestors(parent);
                 string staging = Path.Combine(parent, "7PL1-Stage-" + Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(staging);
                 bool installed = false;
@@ -91,6 +115,7 @@ internal static class SyntheticProbeInstaller
                         if (separator != 64) throw new InvalidDataException("Malformed SHA256 manifest entry.");
                         string relative = line.Substring(separator + 1).Trim().Replace('/', Path.DirectorySeparatorChar);
                         string full = Path.GetFullPath(Path.Combine(staging, relative));
+                        RequireSafeDDriveAncestors(full);
                         if (!full.StartsWith(staging + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
                             || !File.Exists(full)) throw new InvalidDataException("Missing or escaping manifest file: " + relative);
                         using (SHA256 sha = SHA256.Create())
@@ -99,6 +124,7 @@ internal static class SyntheticProbeInstaller
                                 throw new InvalidDataException("Payload file SHA256 mismatch: " + relative);
                         count++;
                     }
+                    RequireSafeDDriveAncestors(destination);
                     Directory.Move(staging, destination);
                     installed = true;
                     Console.WriteLine("INSTALLED=" + destination + " VERIFIED_FILES=" + count);
