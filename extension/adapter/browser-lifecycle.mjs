@@ -162,6 +162,7 @@ export function createNativeBrowserLifecycleController({
         after.documentId === before.documentId ||
         after.navigationEpoch <= before.navigationEpoch ||
         after.hostGeneration < before.hostGeneration ||
+        after.workerGeneration < before.workerGeneration ||
         (event.kind === "rebound" && after.hostGeneration <= before.hostGeneration))
       fail("unsafe-rebind");
     // A further authoritative recheck closes the async event/attest gap.
