@@ -85,7 +85,7 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | DONE |
 | `7D` | Direct browser tools/debugger/frame ownership | `7C`, `7L1` | `browser-tools` | C (cloud) | DONE |
 | `7E` | Differential transport fuzz/error/reconnect review | `7D` | `browser-qualification` | C (cloud) | DONE |
-| `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | **READY · PARALLEL** |
+| `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | BLOCKED |
 | `7U1` | Owner real signed-in observe-only browser test | `7L2` | `human-provider` | U (owner) | BLOCKED |
 | `8A` | Chrome API/extension adapter and worker world | `7E` | `embedded-adapter` | C (cloud) | **READY · PARALLEL** |
 | `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | BLOCKED |
