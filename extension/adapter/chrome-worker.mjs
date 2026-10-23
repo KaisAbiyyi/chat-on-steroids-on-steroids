@@ -8,6 +8,7 @@ const WORLDS = Object.freeze({
   ISOLATED: "adapter/world/isolated.js",
   MAIN: "adapter/world/main.js"
 });
+const MAX_FRAME_SCOPES = 512;
 const HOST_KEYS = [
   "profileId", "tabId", "frameId", "documentId", "navigationEpoch",
   "sessionId", "sessionEpoch", "workerGeneration", "hostGeneration",
@@ -118,6 +119,7 @@ export function createChromeWorkerAdapter({
     active.add(scope);
     try {
       const prior = fences.get(scope);
+      if (!prior && fences.size >= MAX_FRAME_SCOPES) fail("frame-capacity");
       if (prior && (current.hostGeneration < prior.hostGeneration ||
           current.navigationEpoch < prior.navigationEpoch ||
           (current.documentId !== prior.documentId &&
