@@ -1,0 +1,45 @@
+name: 7E Rust-JS Transport Differential Qualification
+on:
+  pull_request:
+    paths:
+      - 'crates/cos-core/**'
+      - 'extension/companion/**'
+      - 'fixtures/phase7/7e-wire-corpus.json'
+      - '.github/workflows/7e-transport-differential.yml'
+      - 'docs/task-registry.json'
+  push:
+    paths:
+      - 'crates/cos-core/**'
+      - 'extension/companion/**'
+      - 'fixtures/phase7/7e-wire-corpus.json'
+      - '.github/workflows/7e-transport-differential.yml'
+permissions:
+  contents: read
+jobs:
+  differential:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+          components: rustfmt, clippy
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Rust formatting
+        run: cargo fmt --all --check
+      - name: Strict Rust lint
+        run: cargo clippy -p cos-core --all-targets --locked -- -D warnings
+      - name: Rust source-wire transport regression corpus
+        run: cargo test -p cos-core --test phase7_7e_transport --locked
+      - name: JS source-wire transport regression corpus
+        run: node --test extension/companion/tests/transport-differential.test.mjs
+      - name: Existing authenticated Rust bridge tests
+        run: cargo test -p cos-core --lib native_browser_bridge --locked
+      - name: Existing JS companion ledger tests
+        run: node --test extension/companion/tests/ledger.test.mjs

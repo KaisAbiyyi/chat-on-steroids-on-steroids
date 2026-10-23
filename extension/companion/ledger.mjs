@@ -133,7 +133,11 @@ function process(state, trusted, event) {
     return { kind: "retired" };
   }
   const { intentId, digest } = parseIntent(event);
-  const existing = state.intents[intentId];
+  // Intent IDs are untrusted even after host authentication. Plain objects
+  // inherit keys such as "__proto__", "constructor" and "toString"; treating
+  // an inherited property as a ledger claim (or assigning to __proto__) can
+  // corrupt ownership or silently lose an acknowledged claim.
+  const existing = own(state.intents, intentId) ? state.intents[intentId] : undefined;
   if (event.kind === "claim") {
     if (existing) {
       if (existing.owner !== scopeKey(trusted) || existing.digest !== digest) deny("conflicting-claim");
@@ -141,10 +145,13 @@ function process(state, trusted, event) {
       return { kind: "claim", status: existing.status, duplicate: true };
     }
     if (Object.keys(state.intents).length >= MAX_CLAIMS) deny("capacity");
-    state.intents[intentId] = {
-      owner: scopeKey(trusted), session: sessionKey(trusted),
-      identity: identityKey(trusted), digest, status: "claimed", receiptId: null
-    };
+    Object.defineProperty(state.intents, intentId, {
+      value: {
+        owner: scopeKey(trusted), session: sessionKey(trusted),
+        identity: identityKey(trusted), digest, status: "claimed", receiptId: null
+      },
+      enumerable: true, writable: true, configurable: true
+    });
     slot.nextSequence++;
     return { kind: "claim", status: "claimed", duplicate: false };
   }

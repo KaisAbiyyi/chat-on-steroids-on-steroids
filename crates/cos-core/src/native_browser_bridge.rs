@@ -446,6 +446,32 @@ impl NativeBrowserBridge {
             serde_json::from_slice(payload).map_err(|_| BridgeContractError::Frame)?;
         request.frame.validate()?;
         request.event.validate()?;
+        // serde Option<T> accepts an explicit JSON null as None. The 7C
+        // extension rejects extra keys even when null, so enforce the exact
+        // signed event key set before granting a native receipt. A MAC alone
+        // does not make a widened payload schema safe.
+        let raw: serde_json::Value =
+            serde_json::from_slice(payload).map_err(|_| BridgeContractError::Frame)?;
+        let fields = raw
+            .get("event")
+            .and_then(serde_json::Value::as_object)
+            .ok_or(BridgeContractError::Frame)?;
+        let required: &[&str] = match request.event.kind.as_str() {
+            "attach" | "retire" => &["protocol", "kind", "sequence"],
+            "claim" | "repair" => &["protocol", "kind", "sequence", "intentId", "digest"],
+            "ack" => &[
+                "protocol",
+                "kind",
+                "sequence",
+                "intentId",
+                "digest",
+                "receiptId",
+            ],
+            _ => return Err(BridgeContractError::Frame.into()),
+        };
+        if fields.len() != required.len() || required.iter().any(|key| !fields.contains_key(*key)) {
+            return Err(BridgeContractError::Frame.into());
+        }
         if request.frame.identity != trusted.identity {
             return Err(NativeBridgeError::Host);
         }

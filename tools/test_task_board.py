@@ -98,8 +98,10 @@ class TaskBoardTests(unittest.TestCase):
         eligible_after_fix, _ = board.readiness(reopened)
         self.assertIn("7L1", {t["id"] for t in eligible_after_fix})
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7L1"]))
-        self.assertIn("7D", ready_ids)
-        self.assertEqual(board.explain(self.data, "7D")["state"], "READY_CANDIDATE")
+        self.assertNotIn("7D", ready_ids)
+        self.assertEqual(board.explain(self.data, "7D")["state"], "DONE")
+        self.assertIn("7E", ready_ids)
+        self.assertEqual(board.explain(self.data, "7E")["state"], "READY_CANDIDATE")
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
