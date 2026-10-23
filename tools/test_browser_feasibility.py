@@ -129,11 +129,22 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertNotIn("7D", {t["id"] for t in retest_ready})
         self.assertNotIn("7D", ready_ids)
         self.assertEqual(tasks["7D"]["status"], "done")
-        # 7E is accepted; native 7L2 and cloud 8A are independently
-        # eligible. Do not reopen a completed 7E as a "Ready" candidate.
+        # 7E is accepted, but the real Windows 7L2 tool integration has
+        # a separately proven blocker. An accepted 7E does not clear it.
         self.assertEqual(tasks["7E"]["status"], "done")
         self.assertNotIn("7E", ready_ids)
-        self.assertIn("7L2", ready_ids)
+        self.assertEqual(tasks["7L2"]["depends_on"], ["7E"])
+        self.assertEqual(tasks["7L2"]["status"], "blocked")
+        self.assertNotIn("7L2", ready_ids)
+        self.assertNotIn("7U1", ready_ids)
+        # Once an actual source-bound 7D native adapter is merged and this
+        # blocker is intentionally released, the dependency graph would make
+        # 7L2 eligible for a fresh Windows gate, while 7U1 remains gated.
+        available = copy.deepcopy(graph)
+        next(t for t in available["tasks"] if t["id"] == "7L2")["status"] = "todo"
+        available_ready, _ = task_board.readiness(available)
+        self.assertIn("7L2", {t["id"] for t in available_ready})
+        self.assertNotIn("7U1", {t["id"] for t in available_ready})
         self.assertIn("8A", ready_ids)
         self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
