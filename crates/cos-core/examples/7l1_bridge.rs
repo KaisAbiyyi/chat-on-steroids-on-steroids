@@ -75,8 +75,8 @@ fn unhex(input: &str) -> Result<Vec<u8>, String> {
         .as_bytes()
         .chunks_exact(2)
         .map(|pair| {
-            let text = std::str::from_utf8(pair).map_err(|_| "hex encoding")?;
-            u8::from_str_radix(text, 16).map_err(|_| "invalid hex digit")
+            let text = std::str::from_utf8(pair).map_err(|_| "hex encoding".to_string())?;
+            u8::from_str_radix(text, 16).map_err(|_| "invalid hex digit".to_string())
         })
         .collect()
 }
@@ -90,7 +90,9 @@ fn digest(input: &str) -> Result<[u8; 32], String> {
 fn apply(bridge: &mut NativeBrowserBridge, req: Request) -> Result<Value, String> {
     match req {
         Request::Register { host } => {
-            let boot = bridge.register_host(host.into()).map_err(|e| e.to_string())?;
+            let boot = bridge
+                .register_host(host.into())
+                .map_err(|e| e.to_string())?;
             // The key only traverses this dedicated native-to-native private
             // stdio pipe, then an extension-ID-checked CDP worker session.
             Ok(json!({
@@ -101,7 +103,10 @@ fn apply(bridge: &mut NativeBrowserBridge, req: Request) -> Result<Value, String
             }))
         }
         Request::Handshake {
-            host, channel_id, generation, proof,
+            host,
+            channel_id,
+            generation,
+            proof,
         } => {
             bridge
                 .complete_handshake(&host.into(), channel_id, generation, &digest(&proof)?)
@@ -109,23 +114,41 @@ fn apply(bridge: &mut NativeBrowserBridge, req: Request) -> Result<Value, String
             Ok(json!({"authenticated":true}))
         }
         Request::Observe {
-            host, channel_id, generation, sequence, payload, mac,
+            host,
+            channel_id,
+            generation,
+            sequence,
+            payload,
+            mac,
         } => {
             let observation = bridge
                 .observe(
-                    &host.into(), channel_id, generation, sequence,
-                    &unhex(&payload)?, &digest(&mac)?
+                    &host.into(),
+                    channel_id,
+                    generation,
+                    sequence,
+                    &unhex(&payload)?,
+                    &digest(&mac)?,
                 )
                 .map_err(|e| e.to_string())?;
             Ok(json!({"observation":format!("{observation:?}")}))
         }
         Request::Authorize {
-            host, channel_id, generation, sequence, payload, mac,
+            host,
+            channel_id,
+            generation,
+            sequence,
+            payload,
+            mac,
         } => {
             let receipt = bridge
                 .authorize_companion_event(
-                    &host.into(), channel_id, generation, sequence,
-                    &unhex(&payload)?, &digest(&mac)?
+                    &host.into(),
+                    channel_id,
+                    generation,
+                    sequence,
+                    &unhex(&payload)?,
+                    &digest(&mac)?,
                 )
                 .map_err(|e| e.to_string())?;
             Ok(json!({"receipt":hex(&receipt)}))
@@ -140,11 +163,9 @@ fn main() {
     let mut output = io::BufWriter::new(io::stdout().lock());
     for line in input.lock().lines() {
         let response = match line {
-            Ok(line) if line.len() <= 32768 => {
-                serde_json::from_str::<Request>(&line)
-                    .map_err(|_| "invalid request schema".to_string())
-                    .and_then(|request| apply(&mut bridge, request))
-            }
+            Ok(line) if line.len() <= 32768 => serde_json::from_str::<Request>(&line)
+                .map_err(|_| "invalid request schema".to_string())
+                .and_then(|request| apply(&mut bridge, request)),
             _ => Err("input unavailable or too large".into()),
         };
         let reply = match response {

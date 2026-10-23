@@ -8,8 +8,8 @@ use crate::browser_protocol::{
     BridgeContractError, DocumentIdentity, IdentityFence, MAX_ACTIVE_DOCUMENTS,
     MAX_NORMALIZED_FRAME_BYTES, MAX_SAFE_JS_INTEGER, NormalizedIdentityFrame, Observation,
 };
-use sha2::{Digest, Sha256};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 
 const KEY_BYTES: usize = 32;
@@ -162,13 +162,17 @@ impl CompanionEvent {
         fn valid_id(text: &str) -> bool {
             !text.is_empty()
                 && text.len() <= 128
-                && text.bytes().all(|b| b.is_ascii_alphanumeric() || b"._:-".contains(&b))
+                && text
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b"._:-".contains(&b))
         }
         let intent = || {
             self.intent_id.as_ref().is_some_and(|s| valid_id(s))
                 && self.digest.as_ref().is_some_and(|s| {
-                s.len() == 64 && s.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
-            })
+                    s.len() == 64
+                        && s.bytes()
+                            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+                })
         };
         if self.protocol != crate::BRIDGE_PROTOCOL
             || self.sequence == 0
@@ -547,22 +551,25 @@ mod tests {
         let identity = bytes(&host);
         bridge
             .observe(
-                &host, bootstrap.channel_id, 1, 1, &identity,
-                &bootstrap.observation_mac(1, &identity)
+                &host,
+                bootstrap.channel_id,
+                1,
+                1,
+                &identity,
+                &bootstrap.observation_mac(1, &identity),
             )
             .unwrap();
         let attach = serde_json::to_vec(&json!({
             "frame": {"protocol": 14, "identity": host.identity},
             "event": {"protocol": 14, "kind": "attach", "sequence": 1}
-        })).unwrap();
+        }))
+        .unwrap();
         let mac = bootstrap.companion_event_mac(2, &attach);
         let mut substituted = attach.clone();
         let target = substituted.windows(6).position(|v| v == b"attach").unwrap();
-        substituted[target..target+6].copy_from_slice(b"retire");
+        substituted[target..target + 6].copy_from_slice(b"retire");
         assert_eq!(
-            bridge.authorize_companion_event(
-                &host, bootstrap.channel_id, 1, 2, &substituted, &mac
-            ),
+            bridge.authorize_companion_event(&host, bootstrap.channel_id, 1, 2, &substituted, &mac),
             Err(NativeBridgeError::Authentication)
         );
         let accepted = bridge
@@ -570,19 +577,22 @@ mod tests {
             .unwrap();
         assert_eq!(accepted, bootstrap.companion_receipt_mac(2, &attach));
         assert_eq!(
-            bridge.authorize_companion_event(
-                &host, bootstrap.channel_id, 1, 2, &attach, &mac
-            ),
+            bridge.authorize_companion_event(&host, bootstrap.channel_id, 1, 2, &attach, &mac),
             Err(NativeBridgeError::Sequence)
         );
         let unknown = serde_json::to_vec(&json!({
             "frame":{"protocol":14,"identity":host.identity},
             "event":{"protocol":14,"kind":"claim","sequence":2,
                      "intentId":"intent-1","digest":"A".repeat(64)}
-        })).unwrap();
+        }))
+        .unwrap();
         assert!(matches!(
             bridge.authorize_companion_event(
-                &host, bootstrap.channel_id, 1, 3, &unknown,
+                &host,
+                bootstrap.channel_id,
+                1,
+                3,
+                &unknown,
                 &bootstrap.companion_event_mac(3, &unknown)
             ),
             Err(NativeBridgeError::Contract(BridgeContractError::Frame))
