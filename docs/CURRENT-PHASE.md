@@ -1,5 +1,20 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-L1 final reviewed source proof — native synthetic PASS, product gate PARTIAL — 2026-10-23
+
+- **Reviewed repair SHA:** `53164da79b32b4a4cacb433678a94ec13de57888`: actual B WebView2 controller/current profile/exact callback URL independently proven before profile A grant denial; installer, uninstall and builder reject pre-existing junction/reparse ancestors; hashed package-directory ownership removes only owned empty directories.
+- **Native installed WebView2:** 26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN, process exit 0. Six installed 3-cold/3-warm synthetic complete-batch benchmarks PASS; median **3,992.6/3,571.4 ms**. Unsigned probe setup **68,009,984 B**, 84 files, hash/install/clean uninstall PASS.
+- **Review:** independent read-only check found no remaining proven P1/P2 in the audited scope. Actual source merge must retain `native7PL1Accepted=false`; real CoSoS desktop product `distribution_budgets` and aggregate `native_windows_gate` NOT RUN. Owner-deferred IME and real account OAuth remain outside scope; 7P-L1 PARTIAL and 7L1 BLOCKED.
+- **Evidence:** [exact-source report](implementation-summary/2026-10-23-7p-l1-final-security-native-checkpoint.md) and [normalized receipt](../audit/2026-10-23/7p-l1-53164da-final-synthetic-native-receipt.json).
+
+## 7P-L1 security review RED → GREEN; synthetic native PASS, release gate PARTIAL — 2026-10-23
+
+- **Review findings resolved:** `mock_oauth_profile_isolation` now checks the actual live B WebView2 controller before A consumes its pending grant. D:-only synthetic setup and uninstaller refuse existing junction/reparse ancestors. A hashed package-owned directory manifest enables complete clean uninstall while retaining unknown and modified files.
+- **Native exact-source:** tested `8f0bc630d399ee79e18950d056da3bffa0a20860` on installed WebView2 155.0.4283.62: **26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN** with real MV3 idle and OAuth synthetic interaction combined, exit 0.
+- **Distribution:** unsigned synthetic setup **68,009,984 bytes**, 84 packaged files, D: install and clean uninstall PASS, reparse-negative and unowned-file preservation PASS. Six cold/warm full-batch benchmark passes, p50 **3,242.9 / 3,158.5 ms**; not the final product time-to-interactive or unique/private RAM.
+- **Remaining:** product `distribution_budgets` and aggregate `native_windows_gate` NOT RUN; owner OS IME remains deferred. Full 7P-L1 PARTIAL, `native7PL1Accepted=false`, native 7L1 blocked independently of a source-only PR merge.
+- **Evidence:** [read-only review remediation report](implementation-summary/2026-10-23-7p-l1-security-review-remediation.md), [machine-readable receipt](../audit/2026-10-23/7p-l1-8f0bc63-native-security-retest.json).
+
 ## 7P-L1 merged-main synthetic Windows benchmark PASS; product native gate PARTIAL — 2026-10-23
 
 - **Native exact-source:** `c1d6234b21fc794ecefb36244caa73b0d55ae465` after reconciling `main` at `d9a56ef`. Installed Win11 WebView2 155.0.4283.62 `--native-auth --native-idle` completed exit 0: **26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN**. Synthetic OAuth consent/redirect, MV3 idle, debugger ownership, tab recreation, and profile fences all PASS.
