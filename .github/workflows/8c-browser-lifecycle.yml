@@ -1,0 +1,37 @@
+name: 8C Native Browser Lifecycle Contract
+on:
+  pull_request:
+    paths:
+      - 'extension/adapter/**'
+      - '.github/workflows/8c-browser-lifecycle.yml'
+      - 'docs/task-registry.json'
+  push:
+    paths:
+      - 'extension/adapter/**'
+      - '.github/workflows/8c-browser-lifecycle.yml'
+permissions:
+  contents: read
+jobs:
+  browser-lifecycle:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 8C source and regression syntax
+        run: |
+          node --check extension/adapter/browser-lifecycle.mjs
+          node --check extension/adapter/tests/browser-lifecycle.test.mjs
+      - name: 8C native lifecycle and permissions negative regression
+        run: node --test extension/adapter/tests/browser-lifecycle.test.mjs
+      - name: 8B, 8A and 7C companion baseline regressions
+        run: |
+          node --test extension/adapter/tests/profile-session.test.mjs
+          node --test extension/adapter/tests/chrome-worker.test.mjs
+          node --test extension/companion/tests/ledger.test.mjs
+          node --test extension/companion/tests/transport-differential.test.mjs
