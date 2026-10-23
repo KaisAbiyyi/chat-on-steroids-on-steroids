@@ -3,7 +3,7 @@
 ## 7E cloud transport differential — claimed / GitHub CI pending, 2026-10-23
 
 - **Prerequisite:** 7D [PR #56](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/56) accepted on main `a80d504af6ace64e5d03d5723faf241d1507ed1a`; canonical registry reconciles 7D `done` from stale `todo`.
-- **7E:** ChatGPT GPT-6 Cloud claims `browser-qualification` on `work/7e-transport-differential-20261023`; 34-case source-wire Rust↔JS corpus, bounded denial/replay/reconnect fuzz and proof-bound signed-event schema fix. The host/browser adapter in this corpus is synthetic; physical 7L2 and owner 7U1 remain unrun.
+- **7E:** ChatGPT GPT-6 Cloud claims `browser-qualification` on `work/7e-transport-differential-20261023`; 37-case source-wire Rust↔JS corpus, bounded denial/replay/reconnect fuzz and proof-bound signed-event schema fix. The host/browser adapter in this corpus is synthetic; physical 7L2 and owner 7U1 remain unrun.
 - **Status:** Review while PR self-review and exact-head Windows/Ubuntu Rust/JS/Task DAG workflows run. Only accept after all required GitHub checks pass, direct self-review and eligible merge. [Qualification matrix](implementation-summary/2026-10-23-7e-cloud-transport-differential.md).
 
 ## 7L1 integrated physical Windows Rust ↔ WebView2 ↔ MV3 — ACCEPTED, 2026-10-23
