@@ -1,6 +1,6 @@
 //! 7E source-wire differential qualification. Synthetic fixtures only:
- //! Rust 7B receipt admission must agree with 7C JS event parser for the
- //! shared corpus. Neither harness is a real browser/owner qualification.
+//! Rust 7B receipt admission must agree with 7C JS event parser for the
+//! shared corpus. Neither harness is a real browser/owner qualification.
 use cos_core::browser_protocol::{DocumentIdentity, MAX_NORMALIZED_FRAME_BYTES};
 use cos_core::native_browser_bridge::{BridgeBootstrap, NativeBrowserBridge, TrustedHostEvidence};
 use serde::Deserialize;
@@ -109,8 +109,14 @@ fn deterministic_transport_mutations_fail_closed_without_consuming_sequence() {
         let mut spoof = host.clone();
         match seed % 7 {
             0 | 1 => {}
-            2 => signed[seed as usize % signed.len()] ^= 1,
-            3 => mutated[seed as usize % mutated.len()] ^= 1, // MAC mismatch
+            2 => {
+                let index = seed as usize % signed.len();
+                signed[index] ^= 1;
+            },
+            3 => {
+                let index = seed as usize % mutated.len();
+                mutated[index] ^= 1; // MAC mismatch
+            },
             4 => spoof.identity.tab_id = 4,                  // host attestation
             5 => {
                 mutated = vec![b' '; MAX_NORMALIZED_FRAME_BYTES + 1];
