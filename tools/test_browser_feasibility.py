@@ -127,7 +127,10 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         retest_ready, _ = task_board.readiness(retest)
         self.assertIn("7L1", {t["id"] for t in retest_ready})
         self.assertNotIn("7D", {t["id"] for t in retest_ready})
-        self.assertIn("7D", ready_ids)
+        self.assertNotIn("7D", ready_ids)
+        self.assertEqual(tasks["7D"]["status"], "done")
+        self.assertIn("7E", ready_ids)
+        self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
         self.assertEqual(tasks["16L3"]["status"], "todo")
         # Scoped 7P-L1 physical feasibility and 7L1 integrated Rust/MV3
