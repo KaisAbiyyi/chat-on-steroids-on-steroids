@@ -2,8 +2,8 @@
   "schema_version": 1,
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
-  "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed.",
-  "task_status_source": "2026-10-22: 7P-B cloud synthetic WebView2/MV3/renderer feasibility probe ACCEPTED after internal source review #5604321981, PR #41 exact head 2ce27dc8e3a50e8d713120e5fdebbb275cd17bcb PASS on 7P-B Windows/Ubuntu + Windows ephemeral runtime run 39652357241, Task DAG Windows/Ubuntu run 39652357135, Rust Windows/Ubuntu run 39652357188. Squash merged main baf9461eac0eacb1804ccaf33ff4c2fb70e3fea1; browser-host claim released. Windows cloud WebView2 155.0.4283.62 synthetic API/extension debugger, profile isolation, renderer evidence PASS, artifact in 39652357241. Native physical Windows 7P-L1 is local READY_CANDIDATE NOT_RUN and not claimed; worker suspension, actual interactive UX, installer budget and real accounts remain unverified; 7A BLOCKED until 7P-L1 PASS.",
+  "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed. Owner-approved 2026-10-22 deferral: 7P-L1 is HOLD, not accepted or a ready candidate; cloud 7A may begin after accepted 7P-B; native 7P-L1 qualification is a hard AND prerequisite before 7L1 and subsequent real-browser acceptance.",
+  "task_status_source": "7C PR #46 post-merge projection: accepted only AFTER exact-head Windows+Ubuntu 7C Node companion contract, Rust workspace CI, Task DAG and source review PASS and PR #46 merges into main. 7C is bounded MV3 companion claim/ACK/repair state machine with native-attested adapter requirement; no actual native 7B transport integration/browser or physical Windows testing. 7P-L1 remains HOLD and unaccepted; native 7L1 requires BOTH accepted 7C AND 7P-L1; 7D blocked until BOTH 7C and 7L1. Do not conflate this DAG status staged in an unmerged PR with accepted Notion status.",
   "tasks": [
     {
       "id": "CL-01",
@@ -360,20 +360,20 @@
       ],
       "phase": "7",
       "kind": "L",
-      "status": "todo"
+      "status": "hold"
     },
     {
       "id": "7A",
       "title": "Browser bridge protocol 14/identity contract",
       "depends_on": [
-        "7P-L1"
+        "7P-B"
       ],
       "resource_locks": [
         "browser-protocol"
       ],
       "phase": "7",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "7B",
@@ -386,7 +386,7 @@
       ],
       "phase": "7",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "7C",
@@ -399,13 +399,14 @@
       ],
       "phase": "7",
       "kind": "C",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "7L1",
       "title": "Real extension handshake/MV3 restart",
       "depends_on": [
-        "7C"
+        "7C",
+        "7P-L1"
       ],
       "resource_locks": [
         "windows-bridge"

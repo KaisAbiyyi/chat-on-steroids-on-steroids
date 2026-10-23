@@ -17,6 +17,37 @@
   uninstalled; its servicing completion is not claimed as IME qualification.
 - **Evidence / next:** [implementation summary](implementation-summary/2026-10-22-7p-l1-keyboard-ime-native.md).
   No more local IME work now; review other outstanding 7P-L1 gates separately.
+## 7C CLOUD CLAIM / EXTENSION COMPANION ACK/REPAIR — 2026-10-22
+
+- **CLAIM:** `7C` CLAIMED by ChatGPT GPT-6 Cloud, exclusive `browser-extension`, branch `work/7c-extension-companion-20261022`, [PR #46](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/46), from accepted 7B main `e68067cd263f8eef9948ac8d59a35d9ec95a8c7d`. Notion status remains Claimed until CI and merge are verified.
+- **SOURCE CHECKPOINT:** extension-side synthetic ES module 14 ledger for native-attested scope/session events, serialized persistent claim-before-ACK, read-only repair, exactly fenced worker/channel generation, old-generation rejection after retire, conflicting claim/receipt denial. Worker adapter exposes no untrusted content-script ingress or automatic Send/input action.
+- **ACCEPTANCE:** exact-head Windows+Ubuntu Node companion security/lifecycle regression, Rust workspace fmt/Clippy/tests/release, Task DAG and internal diff/security review, then merge; no native browser/real MV3 process/7P-L1 acceptance implied.
+- **BOARD AFTER ACCEPTED MERGE:** 7C Done / Last Done; 7P-L1 Hold / Now (still unaccepted); 7L1 Blocked / Up Next until BOTH accepted 7C and physical 7P-L1. 7D also remains blocked. No fabricated Ready Cloud successor.
+
+## 7B CLOUD CLAIM / AUTHENTICATED NATIVE AUTHORITY REVIEW — 2026-10-22
+
+- **CLAIM:** `7B` CLAIMED — ChatGPT GPT-6, GitHub Cloud only, exclusive `browser-bridge`; branch `work/7b-authenticated-bridge-20261022`, [PR #45](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/45), base accepted main `505a5c9d7c1851e4e2e4182ac2c8521c5a58f968`. Notion 7B Claim Owner matches. `7P-L1` HOLD / Now stays visible. `7C` blocked / Up Next until 7B acceptance.
+- **SOURCE CHECKPOINT:** Native Rust host-scope evidence, HTTPS origin and monotonic generation bound channel; per-channel random key and challenge, HMAC-SHA256 handshake, domain-separated observation/admission signatures and strictly monotonic sequence. Full equality to privileged host evidence is required BEFORE invoking 7A first-proof fence. Unauthenticated, stale-generation and replayed envelopes are denied.
+- **NON-CLAIMS:** no actual upstream extension v14 parser, WebView2 product transport, MV3 lifecycle, CDP integration, native physical Windows proof, account sign-in or automatic Send. Cloud CI is not `7P-L1` or `7L1` acceptance. `7L1` requires BOTH 7C and accepted 7P-L1.
+- **ACCEPTANCE GATE:** new Rust adversarial regressions + exact-PR-head Windows/Ubuntu fmt/Clippy/workspace tests + task DAG + reviewer before merge. Never mark 7B Done until that evidence is accepted and PR merged.
+
+## 7A MERGE-QUALIFIED HANDOFF (conditional) — 2026-10-22
+
+- **AFTER PR #44 passes exact-head Windows/Ubuntu Rust and Task DAG, reviews, and merges:** `7A` DONE / Last Done. `7B` Ready / Now (unclaimed), alongside `7P-L1` Hold / Now for visibility. `7C` is Up Next blocked until 7B. Do not interpret this proposed post-merge state as already accepted while PR #44 is open.
+- **BOUNDARY:** Only the normalized Rust protocol 14 / document-session identity contract is accepted by this unit; upstream byte-level wire adapter, authenticated browser transport, real extension lifecycle and physical Windows evidence are separate future gates.
+
+## 7A CLOUD CLAIM / TWO NOW CARDS — 2026-10-22
+
+- **NOW:** `7A` CLAIMED (ChatGPT GPT-6 Cloud; exclusive `browser-protocol`; source branch `work/7a-browser-protocol-20261022`) **AND** `7P-L1` HOLD (native Windows, draft PR #42, unaccepted). Both remain visible in Notion Now. The 7A claim is not runtime acceptance.
+- **UP NEXT:** `7B` blocked until 7A accepted. Native `7L1` separately requires `7C` and `7P-L1` Done.
+- **7A scope:** Rust normalized protocol 14 identity contract + epoch/first-proof fence with deterministic regressions; upstream wire mapping/authenticated transport, browser UI and real-provider actions are not included.
+
+## OWNER-APPROVED PHASE 7 RESEQUENCING — 2026-10-22
+
+- **LAST DONE:** `7P-B` (accepted PR #41). **NOW:** `7A` Cloud implementation READY CANDIDATE (unclaimed). **UP NEXT:** `7B` (blocked until 7A).
+- **HOLD:** `7P-L1` physical Windows native browser feasibility; [draft PR #42](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/42) is partial, 18 PASS / 2 UNVERIFIED / 2 NOT RUN / 0 FAIL. Claim and Windows host gate are paused; status is NOT Done. No local/user profile touched by this plan update.
+- **POLICY:** Owner permits bounded cloud `7A` protocol/identity contract to proceed based on accepted `7P-B`. Deferred `7P-L1` remains a hard prerequisite of native `7L1` before real browser acceptance, not a waived requirement; signed-in/provider interactions still require separate owner gate. IME/language deferral does not certify keyboard, clipboard, a11y, browser lifetime, security or product distribution.
+- **CLAIM:** `7A` is on Now but not yet claimed or implemented by this status-only change; the next implementer must check live claims/CI and follow the cloud-only protocol.
 
 ## 7P-B CLOUD SYNTHETIC WEBVIEW2/MV3/RENDERER PROBE ACCEPTED / MERGED — 2026-10-22
 
