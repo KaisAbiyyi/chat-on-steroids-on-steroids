@@ -46,6 +46,7 @@ internal sealed class ProbeForm : Form
     private readonly bool _batch;
     private readonly bool _nativeIdle;
     private readonly bool _nativeKeys;
+    private readonly bool _nativeAuth;
     private bool _failed;
     private readonly List<string> _trace = new();
 
@@ -61,6 +62,7 @@ internal sealed class ProbeForm : Form
         _batch = options.ContainsKey("--batch");
         _nativeIdle = options.ContainsKey("--native-idle");
         _nativeKeys = options.ContainsKey("--native-keys");
+        _nativeAuth = options.ContainsKey("--native-auth");
         Text = "CoSoS 7P-B / isolated WebView2 browser capability probe — NOT production";
         Width = 1300;
         Height = 800;
@@ -77,7 +79,7 @@ internal sealed class ProbeForm : Form
         var parsed = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--batch" or "--native-idle" or "--native-keys")
+            if (args[i] is "--batch" or "--native-idle" or "--native-keys" or "--native-auth")
             {
                 parsed.Add(args[i], "true");
                 continue;
@@ -293,6 +295,9 @@ internal sealed class ProbeForm : Form
                 }
             }
 
+            if (_nativeAuth)
+                await VerifySyntheticAuthAsync();
+
             if (_nativeIdle)
             {
             // 7P-L1 automated Windows interactions against the real embedded renderer.
@@ -360,7 +365,8 @@ internal sealed class ProbeForm : Form
             // Deliberately never turn cloud checks into native PASS or invoke real browser/provider sign-in.
             if (!_checks.ContainsKey("mv3_lifecycle"))
                 Mark("mv3_lifecycle", "UNVERIFIED", "Natural MV3 worker idle suspension not yet observed; pass --native-idle for physical Windows proof.");
-            Mark("sign_in_constraints", "UNVERIFIED", "No real provider or authenticated account used.");
+            if (!_checks.ContainsKey("sign_in_constraints"))
+                Mark("sign_in_constraints", "UNVERIFIED", "Synthetic consent flow was not run; no real provider/account used.");
             Mark("native_windows_gate", "NOT_RUN", "7P-L1 separate owner-operated physical Windows gate.");
             Mark("distribution_budgets", "NOT_RUN", "No installer size/RAM baselines.");
             var receipt = new
@@ -409,7 +415,9 @@ internal sealed class ProbeForm : Form
             // including allowed same-origin navigation and denied external attempts.
             RetireControllerLease(view);
             if (!Uri.TryCreate(e.Uri, UriKind.Absolute, out var u) ||
-                u.Scheme != "https" || u.Host != "synthetic.cos.test")
+                u.Scheme != "https" || u.UserInfo.Length != 0 || u.Port != 443 ||
+                !(u.Host == "synthetic.cos.test" ||
+                  (u.Host == "login.synthetic.cos.test" && u.AbsolutePath == "/oauth-consent.html")))
             {
                 e.Cancel = true;
                 _trace.Add("blocked navigation to non-synthetic URL");
@@ -417,6 +425,15 @@ internal sealed class ProbeForm : Form
         };
         view.CoreWebView2.SetVirtualHostNameToFolderMapping("synthetic.cos.test", _assets,
             CoreWebView2HostResourceAccessKind.DenyCors);
+        view.CoreWebView2.SetVirtualHostNameToFolderMapping("login.synthetic.cos.test", _assets,
+            CoreWebView2HostResourceAccessKind.DenyCors);
+        view.CoreWebView2.NewWindowRequested += (_, e) =>
+        {
+            // OAuth popup windows must be assigned an owned profile explicitly
+            // by a future product adapter. This probe refuses all unowned popups.
+            e.Handled = true;
+            _trace.Add("blocked unowned popup");
+        };
         if (install)
         {
             var extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(_extension);
@@ -424,6 +441,70 @@ internal sealed class ProbeForm : Form
                 throw new InvalidOperationException("MV3 extension not installed and enabled");
             _trace.Add("synthetic extension installed for " + profile);
         }
+    }
+
+    private async Task VerifySyntheticAuthAsync()
+    {
+        // Every URL below is a local virtual host mapped to the checked fixture.
+        // State belongs to this host-only probe, never to page JavaScript.
+        var accepted = new SyntheticConsentGrant("A", RandomNumberGenerator.GetHexString(16));
+        _a.CoreWebView2.Navigate(accepted.AuthorizationUrl);
+        var consentReady = await WaitForAsync(_a,
+            "document.title === '7P-L1 Mock Consent' ? 'ready' : ''");
+        Mark("mock_oauth_consent_page", consentReady == "ready" ? "PASS" : "FAIL",
+            "Mapped login.synthetic.cos.test consent fixture loaded in actual WebView2 profile A.");
+        if (consentReady != "ready") return;
+
+        await _a.CoreWebView2.ExecuteScriptAsync("document.querySelector('#approve').click()");
+        var callbackReady = await WaitForAsync(_a,
+            "document.title === '7P-L1 Mock Callback' ? 'ready' : ''");
+        var callbackUrl = _a.CoreWebView2.Source;
+        var wrongProfileDenied = !accepted.Complete("B", callbackUrl, approved: true);
+        var modifiedStateUrl = callbackUrl.Replace("state=", "state=forged", StringComparison.Ordinal);
+        var forgedDenied = !accepted.Complete("A", modifiedStateUrl, approved: true)
+            && !accepted.Complete("A", "https://external.example.org/oauth-callback.html?state=forged&code=synthetic-code-only", approved: true)
+            && !accepted.Complete("A", "https://synthetic.cos.test/oauth-callback.html?state=forged&error=access_denied", approved: true);
+        var firstAccepted = callbackReady == "ready" && accepted.Complete("A", callbackUrl, approved: true);
+        var replayDenied = !accepted.Complete("A", callbackUrl, approved: true);
+        Mark("mock_oauth_callback", firstAccepted && replayDenied ? "PASS" : "FAIL",
+            $"Real WebView2 consent redirect reached callback={callbackReady == "ready"}; host state/code validated={firstAccepted}; replay rejected={replayDenied}.");
+        Mark("mock_oauth_forgery", wrongProfileDenied && forgedDenied ? "PASS" : "FAIL",
+            $"Wrong profile={wrongProfileDenied}, forged state/origin/error={forgedDenied}; checks run before any valid completion.");
+
+        // The same callback URL is navigable in profile B as a public synthetic
+        // document; it must never authorize B using A's host-owned grant.
+        _b.CoreWebView2.Navigate(callbackUrl);
+        var bCallbackReady = await WaitForAsync(_b,
+            "document.title === '7P-L1 Mock Callback' ? 'ready' : ''");
+        Mark("mock_oauth_profile_isolation",
+            bCallbackReady == "ready" && wrongProfileDenied ? "PASS" : "FAIL",
+            $"Profile B WebView2 loaded harmless fixture callback={bCallbackReady == "ready"}, A's grant denied for B={wrongProfileDenied}.");
+
+        var denied = new SyntheticConsentGrant("A", RandomNumberGenerator.GetHexString(16));
+        _a.CoreWebView2.Navigate(denied.AuthorizationUrl);
+        var denyReady = await WaitForAsync(_a,
+            "document.title === '7P-L1 Mock Consent' ? 'ready' : ''");
+        if (denyReady == "ready")
+            await _a.CoreWebView2.ExecuteScriptAsync("document.querySelector('#deny').click()");
+        var denyCallbackReady = denyReady == "ready" && await WaitForAsync(_a,
+            "document.title === '7P-L1 Mock Callback' ? 'ready' : ''") == "ready";
+        var deniedUrl = _a.CoreWebView2.Source;
+        var denialRecognized = denyCallbackReady && denied.Complete("A", deniedUrl, approved: false);
+        var denialNoGrant = !denied.Complete("A", deniedUrl, approved: true);
+        Mark("mock_oauth_consent_denial", denialRecognized && denialNoGrant ? "PASS" : "FAIL",
+            $"Consent denial callback={denyCallbackReady}, access_denied verified={denialRecognized}, no grant issued={denialNoGrant}.");
+
+        // Keep the test's primary renderer visible for manual follow-up.
+        _a.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
+        _b.CoreWebView2.Navigate("https://synthetic.cos.test/index.html");
+        var restored = await WaitForAsync(_a,
+            "document.documentElement.dataset.rendererReady ?? ''");
+        var all = firstAccepted && replayDenied && wrongProfileDenied && forgedDenied
+            && bCallbackReady == "ready" && denialRecognized && denialNoGrant
+            && consentReady == "ready" && restored == "ready";
+        Mark("sign_in_constraints", all ? "PASS" : "FAIL",
+            "Synthetic-only WebView2 consent/callback/state/replay/denial/profile checks; "
+            + "real provider OAuth, account sign-in, OS SSO and token exchange remain future user gates.");
     }
 
     private TabLease ElectController(WebView2 view, string profile, string tab)

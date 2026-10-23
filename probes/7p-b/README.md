@@ -15,6 +15,23 @@ Prerequisite: accepted 7P-A PR #40, provisional WebView2 + Rust host + JS/TS ren
 
 ## Separate isolated physical Windows gate 7P-L1
 
+The optional `--batch --native-auth` flag runs a **synthetic consent and callback**
+flow in actual WebView2 on Windows. Build the renderer first: Vite copies the
+`renderer/public/oauth-*` fixture files to `renderer/dist`. The probe maps
+`login.synthetic.cos.test` and `synthetic.cos.test` to that local directory,
+disables OS account single sign-on, and denies unowned popup windows. It tests
+an approve/deny choice, host-validated state and callback URL, one-time use,
+forged callback/origin rejection and authorization separation across A/B profiles.
+The receipt's `sign_in_constraints=PASS` proves **only those synthetic checks**.
+No authentic provider login, third-party cookies, PKCE/token exchange, actual
+provider OAuth restrictions, consent to a real account or product implementation
+is exercised. Keep those at 7U1/8U1 and related feature gates.
+
+For an already built host, run `WindowsHost.exe --batch --native-auth --out
+D:\\projects\\CoS-Rust\\.test-tmp\\7p-l1\\<new-test-folder> --assets
+<absolute-renderer-dist> --extension <absolute-synthetic-extension>` with
+`TEMP`, `TMP`, `.NET` cache/home and NuGet output pointing to D:.
+
 On an authorized isolated Windows desktop, after building renderer and host, run with explicit paths to renderer/dist and the unpacked synthetic extension. Example:
 
     dotnet run --project probes/7p-b/WindowsHost -- --out D:\CoSoSProbe7PB --assets D:\...\probes\7p-b\renderer\dist --extension D:\...\probes\7p-b\extension
