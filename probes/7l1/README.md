@@ -40,13 +40,16 @@ Use the artifact from the *same source SHA* as the checked-out code. Verify
 Choose a fresh output directory on D: inside the CoS-Rust workspace.
 
 ```powershell
-dotnet D:\path\to\gate\host\WindowsHost.dll --repo D:\projects\CoS-Rust\.test-tmp\issue49-integration --bridge D:\path\to\gate\7l1_bridge.exe --out D:\projects\CoS-Rust\.test-tmp\issue49-native-run01 --native-idle
+dotnet D:\path\to\gate\host\WindowsHost.dll --repo D:\projects\CoS-Rust\.test-tmp\issue49-integration --bridge D:\path\to\gate\7l1_bridge.exe --artifact-root D:\path\to\gate --out D:\projects\CoS-Rust\.test-tmp\issue49-native-run01 --native-idle
 ```
 
 Inspect the process exit and the full `receipt.json` (including failures,
 NOT_RUN checks, hashes and `native7L1Accepted`). The `--cdp-preflight`
 mode proves only live WebView2 extension worker discovery; its receipt
 explicitly reports the actual integrated native gate as NOT_RUN.
+The WindowsHost executable also independently checks the exact HEAD SHA,
+clean native/extension source files, pinned Rust/host binary locations and
+every SHA256 manifest entry before any integrated 7L1 check may PASS.
 
 `--native-idle` waits 65 seconds with the extension **enabled**, so actual
 worker retirement/recreation may occur while `chrome.storage.session`

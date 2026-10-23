@@ -24,10 +24,12 @@ internal sealed class GateForm : Form
     private readonly WebView2 _b = new() { Dock = DockStyle.Fill };
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
+    private readonly string? _artifactRoot;
     private readonly bool _idle, _cdpPreflight;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private Process? _bridge;
     private bool _failed;
+    private string? _verifiedSourceSha;
 
     private sealed class Browser
     {
@@ -57,18 +59,24 @@ internal sealed class GateForm : Form
         for (var i = 0; i < args.Length; i++)
         {
             if (args[i] is "--native-idle" or "--cdp-preflight") { options.Add(args[i], "true"); continue; }
-            if (args[i] is not ("--out" or "--repo" or "--bridge") || i + 1 == args.Length)
-                throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... [--native-idle]");
+            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root") ||
+                i + 1 == args.Length)
+                throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
             options.Add(args[i], args[++i]);
         }
         _root = Path.GetFullPath(options["--out"]);
         _repo = Path.GetFullPath(options["--repo"]);
         _bridgePath = Path.GetFullPath(options.GetValueOrDefault("--bridge") ??
             Path.Combine(_root, "not-run-rust-bridge.exe"));
+        _artifactRoot = options.TryGetValue("--artifact-root", out var artifact)
+            ? Path.GetFullPath(artifact) : null;
         if (!IsUnderProject(_root) || !IsUnderProject(_repo) || !IsUnderProject(_bridgePath))
             throw new UnauthorizedAccessException("7L1 requires D: under projects/CoS-Rust");
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
+        if (!_cdpPreflight &&
+            (_artifactRoot is null || !IsUnderProject(_artifactRoot)))
+            throw new UnauthorizedAccessException("Integrated 7L1 requires verified D: artifact root");
         Text = "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
         Height = 720;
@@ -92,6 +100,82 @@ internal sealed class GateForm : Form
 
     private static string HashFile(string file) =>
         Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(file))).ToLowerInvariant();
+
+    private static string GitOutput(string repo, params string[] args)
+    {
+        var info = new ProcessStartInfo("git")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = repo
+        };
+        info.ArgumentList.Add("-C");
+        info.ArgumentList.Add(repo);
+        foreach (var arg in args) info.ArgumentList.Add(arg);
+        using var process = Process.Start(info) ??
+            throw new InvalidOperationException("Git source attestor missing");
+        var response = process.StandardOutput.ReadToEnd();
+        if (!process.WaitForExit(5000) || process.ExitCode != 0)
+        {
+            if (!process.HasExited) process.Kill();
+            throw new InvalidOperationException("Git source attestor rejected checkout");
+        }
+        return response.Trim();
+    }
+
+    private void VerifySourceArtifact()
+    {
+        if (_artifactRoot is null) throw new UnauthorizedAccessException("missing native artifact");
+        var manifestPath = Path.Combine(_artifactRoot, "hashes.json");
+        var sourcePath = Path.Combine(_artifactRoot, "source.sha");
+        var expectedRust = Path.GetFullPath(Path.Combine(_artifactRoot, "7l1_bridge.exe"));
+        var expectedHost = Path.GetFullPath(Path.Combine(_artifactRoot, "host", "WindowsHost.dll"));
+        if (!string.Equals(_bridgePath, expectedRust, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(Path.GetFullPath(typeof(GateForm).Assembly.Location), expectedHost,
+                StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("unowned native executables");
+        var sha = File.ReadAllText(sourcePath).Trim();
+        if (sha.Length != 40 || !sha.All(Uri.IsHexDigit) ||
+            !string.Equals(sha, GitOutput(_repo, "rev-parse", "HEAD"),
+                StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("native source SHA mismatch");
+        var dirty = GitOutput(_repo, "status", "--porcelain", "--",
+            "probes/7l1/extension", "extension/companion/worker.mjs",
+            "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
+            "crates/cos-core/examples/7l1_bridge.rs", "probes/7l1/WindowsHost/Program.cs");
+        if (dirty.Length != 0)
+            throw new UnauthorizedAccessException("dirty native/extension source");
+        using var json = JsonDocument.Parse(File.ReadAllBytes(manifestPath));
+        if (json.RootElement.ValueKind != JsonValueKind.Array)
+            throw new UnauthorizedAccessException("invalid artifact manifest");
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var rootPrefix = _artifactRoot.TrimEnd(Path.DirectorySeparatorChar) +
+            Path.DirectorySeparatorChar;
+        foreach (var entry in json.RootElement.EnumerateArray())
+        {
+            var relative = entry.GetProperty("path").GetString() ??
+                throw new UnauthorizedAccessException("missing artifact path");
+            if (relative.Length == 0 || Path.IsPathRooted(relative) ||
+                relative.Contains("..", StringComparison.Ordinal) || !seen.Add(relative))
+                throw new UnauthorizedAccessException("unsafe or duplicate artifact path");
+            var owned = Path.GetFullPath(Path.Combine(_artifactRoot,
+                relative.Replace('/', Path.DirectorySeparatorChar)));
+            if (!owned.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase) ||
+                !File.Exists(owned) ||
+                !string.Equals(HashFile(owned), entry.GetProperty("sha256").GetString(),
+                    StringComparison.OrdinalIgnoreCase))
+                throw new UnauthorizedAccessException("artifact hash or path mismatch");
+        }
+        foreach (var required in new[] {"7l1_bridge.exe", "host/WindowsHost.dll", "source.sha"})
+            if (!seen.Contains(required))
+                throw new UnauthorizedAccessException("incomplete artifact manifest");
+        _verifiedSourceSha = sha;
+        Mark("source_artifact_provenance", true,
+            "In-host checked Git HEAD, clean authority files and all " +
+            seen.Count + " SHA256 manifests: " + sha);
+    }
 
     private void Mark(string name, bool passed, string evidence)
     {
@@ -416,6 +500,7 @@ internal sealed class GateForm : Form
             if (Directory.Exists(_root) && Directory.EnumerateFileSystemEntries(_root).Any())
                 throw new IOException("7L1 requires a fresh, empty D: output directory");
             Directory.CreateDirectory(_root);
+            if (!_cdpPreflight) VerifySourceArtifact();
             BuildExtension();
             if (_cdpPreflight)
             {
@@ -607,6 +692,7 @@ internal sealed class GateForm : Form
 
             var required = new[]
             {
+                "source_artifact_provenance",
                 "distinct_native_profiles", "page_message_spoof_denied",
                 "false_origin_denial",
                 "native_7b_mv3_7c_handshake", "competing_tab_first_proof",
@@ -660,7 +746,8 @@ internal sealed class GateForm : Form
                 scope = "7L1 Rust-to-WebView2 CDP extension service_worker; synthetic D: only",
                 preflightOnly = _cdpPreflight,
                 dateUtc = DateTimeOffset.UtcNow,
-                hostBinarySha256 = HashFile(Environment.ProcessPath!),
+                sourceSha = _verifiedSourceSha ?? "NOT_RUN",
+                hostBinarySha256 = HashFile(typeof(GateForm).Assembly.Location),
                 rustBinarySha256 = File.Exists(_bridgePath) ? HashFile(_bridgePath) : "missing",
                 extensionWorkerSha256 = File.Exists(Path.Combine(_repo,"probes","7l1","extension","sw.mjs"))
                     ? HashFile(Path.Combine(_repo,"probes","7l1","extension","sw.mjs")) : "missing",
