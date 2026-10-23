@@ -450,7 +450,7 @@ internal sealed class ProbeForm : Form
         var accepted = new SyntheticConsentGrant("A", RandomNumberGenerator.GetHexString(16));
         _a.CoreWebView2.Navigate(accepted.AuthorizationUrl);
         var consentReady = await WaitForAsync(_a,
-            "document.title === '7P-L1 Mock Consent' ? 'ready' : ''");
+            "document.title === '7P-L1 Mock Consent' ? (document.documentElement.dataset.mockConsentReady ?? '') : ''");
         Mark("mock_oauth_consent_page", consentReady == "ready" ? "PASS" : "FAIL",
             "Mapped login.synthetic.cos.test consent fixture loaded in actual WebView2 profile A.");
         if (consentReady != "ready") return;
@@ -483,7 +483,7 @@ internal sealed class ProbeForm : Form
         var denied = new SyntheticConsentGrant("A", RandomNumberGenerator.GetHexString(16));
         _a.CoreWebView2.Navigate(denied.AuthorizationUrl);
         var denyReady = await WaitForAsync(_a,
-            "document.title === '7P-L1 Mock Consent' ? 'ready' : ''");
+            "document.title === '7P-L1 Mock Consent' ? (document.documentElement.dataset.mockConsentReady ?? '') : ''");
         if (denyReady == "ready")
             await _a.CoreWebView2.ExecuteScriptAsync("document.querySelector('#deny').click()");
         var denyCallbackReady = denyReady == "ready" && await WaitForAsync(_a,

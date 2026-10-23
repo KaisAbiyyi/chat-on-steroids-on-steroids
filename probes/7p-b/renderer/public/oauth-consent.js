@@ -16,4 +16,7 @@ if (redirect !== acceptedRedirect || !state || state.length > 128) {
       location.assign(callback.href);
     });
   }
+  // Page title can be observed before this deferred external script has wired
+  // its click handlers. The native probe must wait for this readiness signal.
+  document.documentElement.dataset.mockConsentReady = 'ready';
 }
