@@ -110,7 +110,7 @@ internal sealed class GateForm : Form
     private static void RejectReparseAncestors(string path)
     {
         var current = Path.GetFullPath(path);
-        while (current.StartsWith(@"D:\projects\CoS-Rust", StringComparison.OrdinalIgnoreCase))
+        while (true)
         {
             if ((File.Exists(current) || Directory.Exists(current)) &&
                 (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
@@ -665,29 +665,33 @@ internal sealed class GateForm : Form
                 aFirst.GetProperty("value").GetProperty("observation").GetString() == "FirstProof",
                 "Actual service_worker target signed Rust handshake + 7B first-proof observation");
 
-            // Two real controllers under the SAME WebView2 profile share one
-            // MV3 worker. A rival tab must never rebootstrap the active worker
-            // or steal A's first-proven session. This is distinct from B's
-            // cross-profile conflict below.
+            // Two physical controllers in the SAME profile share one worker.
+            // Give the challenger a NEWER worker generation so it can complete
+            // actual handshake; only Rust 7A first-proof arbitration may deny.
             var rival = await SetupAsync(_sameProfileTab, "A", 3,
                 _a.CoreWebView2.Environment, a.ExtensionId);
             var realSameProfile = rival.ProfilePath == a.ProfilePath &&
                 rival.ExtensionId == a.ExtensionId &&
                 rival.TabId != a.TabId &&
                 rival.View.CoreWebView2 != a.View.CoreWebView2;
-            var rivalDenied = await ThrowsAsync(async () =>
-            {
-                await BindAsync(rival, "7l1-shared-session");
-                var contender = await ObserveAsync(rival);
-                if (!contender.GetProperty("ok").GetBoolean())
-                    throw new UnauthorizedAccessException("session first proof denied");
-            });
+            rival.HostGeneration = a.HostGeneration;
+            await BindAsync(rival, "7l1-shared-session");
+            var contender = await ObserveAsync(rival);
+            var rivalDeniedByRust = !contender.GetProperty("ok").GetBoolean();
             _sameProfileTab.Dispose();
             var rivalRetired = rival.RetirementTask is not null &&
                 await rival.RetirementTask;
             Mark("same_profile_competing_tab",
-                realSameProfile && rivalDenied && rivalRetired,
-                "Second physical WebView2 tab in A's actual profile refused shared worker/session takeover; Rust rival channel auto-retired");
+                realSameProfile && rivalDeniedByRust && rivalRetired,
+                "Second physical tab completed native handshake on A's MV3 worker; Rust 7A first-proof refused competing session and automatically retired rival channel");
+            a.HostGeneration = Math.Max(a.HostGeneration, rival.HostGeneration);
+            await BindAsync(a, "7l1-shared-session");
+            var originalRestored = await ObserveAsync(a);
+            Mark("same_profile_original_restored",
+                originalRestored.GetProperty("ok").GetBoolean() &&
+                originalRestored.GetProperty("value").GetProperty("observation").GetString() ==
+                    "Advanced",
+                "Original verified owner reauthenticated at higher generation after Rust rejected same-profile contender");
 
             await BindAsync(b, "7l1-shared-session");
             var competing = await ObserveAsync(b);
@@ -861,6 +865,7 @@ internal sealed class GateForm : Form
                 "distinct_native_profiles", "page_message_spoof_denied",
                 "false_origin_denial",
                 "native_7b_mv3_7c_handshake", "same_profile_competing_tab",
+                "same_profile_original_restored",
                 "cross_profile_session_conflict",
                 "cross_profile_recovery", "page_cdp_fallback_refused",
                 "real_mv3_persisted_claim", "real_mv3_ack_persisted",
