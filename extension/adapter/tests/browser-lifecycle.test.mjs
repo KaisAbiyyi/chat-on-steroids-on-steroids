@@ -225,7 +225,8 @@ test("navigation must keep trusted origin/session and unique document", async ()
     {documentId:"doc1",navigationEpoch:2},
     {documentId:"doc-next",navigationEpoch:1},
     {documentId:"doc-next",navigationEpoch:2,sessionId:"other"},
-    {documentId:"doc-next",navigationEpoch:2,hostGeneration:0}
+    {documentId:"doc-next",navigationEpoch:2,hostGeneration:0},
+    {documentId:"doc-next",navigationEpoch:2,workerGeneration:0}
   ]) {
     h.bindings.get("first").context = context(changes);
     await assert.rejects(h.controller.transition({
