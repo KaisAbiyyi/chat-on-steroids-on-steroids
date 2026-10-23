@@ -113,7 +113,7 @@ fn rebind_retires_old_epoch_and_does_not_resurrect_selected_session() {
     assert_eq!(shell.rebind(9), Err(UiError::Epoch));
     assert_eq!(shell.snapshot(), old);
     shell.rebind(11).unwrap();
-    assert_eq!(shell.snapshot().route, UiRoute::Home);
+    assert_eq!(shell.snapshot().route, UiRoute::Home {});
     assert_eq!(shell.snapshot().revision, 3);
     assert_eq!(
         shell
@@ -150,7 +150,7 @@ fn route_keys_never_act_as_paths_urls_or_commands() {
                 "route":{"view":"project","project_id":id}}),
         ));
         assert_eq!(result.unwrap_err(), UiError::Route, "{id}");
-        assert_eq!(shell.snapshot().route, UiRoute::Home);
+        assert_eq!(shell.snapshot().route, UiRoute::Home {});
         assert_eq!(shell.snapshot().revision, 1);
     }
     assert_eq!(
@@ -212,7 +212,7 @@ fn protocol_epoch_and_js_integer_boundaries_fail_closed() {
         protocol: 777,
         host_epoch: MAX_JS_SAFE_INTEGER,
         sequence: 1,
-        command: UiCommand::Snapshot,
+        command: UiCommand::Snapshot {},
     };
     assert_eq!(shell.dispatch(request.clone()), Err(UiError::Protocol));
     request.protocol = UI_PROTOCOL_VERSION;
