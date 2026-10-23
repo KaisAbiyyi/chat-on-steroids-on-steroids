@@ -1,0 +1,74 @@
+{
+    "task":  "7P-L1",
+    "sourceSha":  "53164da79b32b4a4cacb433678a94ec13de57888",
+    "capturedUtc":  "2026-10-23T09:17:02.2952839+00:00",
+    "scope":  "Native Windows embedded WebView2 synthetic FEASIBILITY; not released Rust desktop",
+    "nativeStartedUtc":  "2026-10-23T09:15:49.6805345+00:00",
+    "observedNativeProcessExitCode":  0,
+    "nativeReceiptSha256":  "AAE99B56DDF1A6D33656CA0CABC3E281E2911139A8C0D0496FA8CE4A8DC68E28",
+    "publishedExecutableSha256":  "1E972C70DDC74200896EB2E5C607094E2892FDA4DF0C6CCACA63870E1DB3A02C",
+    "actualInstalledExecutableSha256":  "1E972C70DDC74200896EB2E5C607094E2892FDA4DF0C6CCACA63870E1DB3A02C",
+    "actualInstalledFileBytes":  167789479,
+    "installedManifestFileCount":  84,
+    "installerSha256":  "90CB1FAB5436BCDA01F431A1E998692634DD90BC2EDA1DC450465C4A62295C34",
+    "benchmarkReceiptSha256":  "5F4C92A964900EFF0871D317CA277292B9AEB1D2023FADD805AFDB01894B85C2",
+    "syntheticSource":  "synthetic WebView2 WinForms adapter spike (NOT production Rust host)",
+    "noRealProfilesOrAccounts":  true,
+    "rawHostNotRun":  [
+                          "distribution_budgets",
+                          "native_windows_gate"
+                      ],
+    "rawHostUnexpectedChecks":  [
+
+                                ],
+    "checks":  {
+                   "distribution_budgets":  {
+                                                "status":  "PASS",
+                                                "scope":  "FEASIBILITY_PROBE_ONLY",
+                                                "candidateInstallerLimitBytes":  83886080,
+                                                "candidatePayloadLimitBytes":  209715200,
+                                                "installerBytes":  68009984,
+                                                "installedFileBytes":  167789479,
+                                                "coldBatchMedianMs":  3992.6,
+                                                "warmBatchMedianMs":  3571.4,
+                                                "peakHostWorkingSetBytes":  67379200,
+                                                "sampleWebView2WorkingSetIsNotPrivateRam":  true,
+                                                "exitCodesForSixHistoricalBenchmarksUnavailable":  true,
+                                                "evidence":  "Real SHA-checked probe installer/payload and six measured Windows full synthetic batches; candidate size caps, no product claim."
+                                            },
+                   "native_windows_gate":  {
+                                               "status":  "PASS",
+                                               "scope":  "PHYSICAL_WINDOWS_BROWSER_FEASIBILITY",
+                                               "observedNativeWebviewRuntime":  "155.0.4283.62",
+                                               "requiredChecks":  26,
+                                               "missingOrFailedChecks":  [
+
+                                                                         ],
+                                               "unexpectedNotRun":  [
+
+                                                                    ],
+                                               "evidence":  "Separately executes L-gate aggregation over SHA-bound real Windows WebView2 receipt and measured distribution; later product and owner gates remain separate."
+                                           },
+                   "production_release_budgets_16L3":  {
+                                                           "status":  "NOT_RUN",
+                                                           "evidence":  "Actual Rust desktop package/signature, release startup-to-interactive, unique/private RSS and approved product budgets require Phase 16 production build."
+                                                       },
+                   "owner_provider_login_7U1_8U1":  {
+                                                        "status":  "HOLD",
+                                                        "evidence":  "Real provider OAuth/account consent requires later owner gate; no accounts accessed."
+                                                    },
+                   "owner_deferred_os_ime":  {
+                                                 "status":  "HOLD",
+                                                 "evidence":  "Explicit owner IME-DEFER-20261022 remains scheduled at 8L1/Phase15."
+                                             }
+               },
+    "native7PL1FeasibilityAccepted":  true,
+    "native7PL1Accepted":  true,
+    "productionDesktopAccepted":  false,
+    "limitations":  [
+                        "Original host intentionally leaves umbrella flags NOT_RUN; this is the separately required native L-gate receipt.",
+                        "Published executable is synthetic .NET WebView2 adapter, not Rust GUI.",
+                        "Synthetic batch runtimes include tests/teardown; no time-to-interactive or private/unique RSS qualification.",
+                        "Six earlier benchmark exit codes are unavailable; their immutable SHA-256 ledger is pinned and the newly installed native full probe exit was directly observed."
+                    ]
+}

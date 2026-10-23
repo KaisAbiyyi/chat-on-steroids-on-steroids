@@ -51,13 +51,32 @@ distinct from host CDP and are restricted to `synthetic.cos.test`.
 
 The extra checks are synthetic security/compatibility evidence, not OS keyboard,
 IME composition, native accessibility/clipboard, provider sign-in or production
-installer acceptance. They cannot change `native7PL1Accepted` to true; those
-additional gate decisions must be recorded in a separate, source-bound native
-qualification receipt.
+installer acceptance. The raw host always reports `native7PL1Accepted=false`;
+it cannot accept the separate physical-Windows L gate by itself.
+
+The Windows L-gate agent must execute `tools/qualify-native-7pl1.ps1` with a
+**new** D: `-NativeOutputRoot` and `-InstallRoot`, the exact built `-PublishedExe`, `-Installer`,
+`-DistributionReceipt`, `-BenchmarkReceipt`, and an unused D:
+`-OutputReceipt`. This command launches the real installed WebView2 probe,
+observes its actual exit code, installs the reviewed offline setup into a new
+D: root and verifies the installed binary/84-file manifest, **uses the packaged
+renderer and extension from that install root**, validates all 26
+critical checks and the pinned SHA-bound release/probe benchmarks, then executes the two missing umbrella
+checks in its separate receipt. The script rejects unexpected host NOT_RUN
+checks, missing/failed native evidence, wrong source/executable identity,
+oversized synthetic probe distribution and invalid benchmark measurements.
+It records `distribution_budgets` and `native_windows_gate` only with
+the explicit **synthetic WebView2 Windows feasibility** scope.
+
+Real CoSoS desktop installer/signing, product startup-to-interactive,
+private/unique RSS and final approved budgets remain `NOT_RUN` at
+`16L3`; provider accounts belong to the later user gates and owner-deferred
+OS IME remains HOLD. Do not equate this native preflight with full product
+release acceptance or overwrite old probe receipts.
 
 **Host CDP is not equivalent to chrome.debugger extension semantics.** Extension debugger API presence gives OBSERVED_ONLY evidence. Attach/detach/reattach and worker event ordering must be tested separately at 7P-L1. Any FAIL, NOT_RUN or UNVERIFIED hard blocker keeps 7P-L1 blocked or failed. Never assume an extension compatibility API by name.
 
-Record size, cold/warm startup and RAM on D:, tied to exact pinned SHA. No signed-in real accounts, browser profile copies, auto Send or personal provider access without a separate U gate. If any hard browser invariant fails, stop Phase 7A and reassess an embedded CEF or another proven adapter, not an unapproved external-browser shortcut.
+Record size, cold/warm full-batch runtime and sampled working set on D:, tied to exact pinned SHA. Do not call full-batch runtime startup-to-interactive or sampled working set unique/private RAM. No signed-in real accounts, browser profile copies, auto Send or personal provider access without a separate U gate. If any hard browser invariant fails, stop native Phase 7 integration and reassess an embedded CEF or another proven adapter, not an unapproved external-browser shortcut.
 
 Receipts are confined to the isolated output root; D: is required when present. The JSON always has native7PL1Accepted false. Synthetic navigation is allowlisted to synthetic.cos.test virtual host; OS single sign-on is disabled. Windows cloud compilation does not certify native Windows, macOS/Linux parity, provider OAuth or installer budgets.
 

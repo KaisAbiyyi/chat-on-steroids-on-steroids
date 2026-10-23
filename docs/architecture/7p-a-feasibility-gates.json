@@ -182,7 +182,7 @@
     {
       "id": "distribution_budgets",
       "owner": "release",
-      "probe": "Measure runtime installation mode, app/installer bytes and cold/warm memory with pinned fixtures; no improvement claimed from API docs.",
+      "probe": "At 7P-L1 measure the actual physical-Windows WebView2 feasibility probe runtime, unsigned probe installer/payload bytes, cold/warm full-batch timing and sampled host/WebView2 working sets with exact-SHA native receipts. Evaluate candidate probe size limits. Final CoSoS product installer/signing, time-to-interactive, private RSS and approved release budgets are separate NOT_RUN until 16L3; no product improvement claimed from the synthetic probe.",
       "first_probe": "7P-L1",
       "hard_blocker": true,
       "verification": "UNVERIFIED",

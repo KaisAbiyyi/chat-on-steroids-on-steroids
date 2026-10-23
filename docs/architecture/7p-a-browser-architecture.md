@@ -44,9 +44,9 @@ Every matrix capability is intentionally `UNVERIFIED` with an explicit observer 
 - Probe two named synthetic profiles, duplicate tab election and stale-target rejection, and build renderer interaction fixtures for editor/PDF/math/terminal.
 - Produce run receipts and a crisp READY/STOP verdict for isolated real Windows `7P-L1`.
 
-**7P-L1 native handoff:** user-initiated separate local gate; no real signed-in account or private profile. Verify installed host API/runtime, MV3 lifecycle, CDP ownership, restart/tab/profile separation, refusal cases, renderer quality, and measured size/RAM on D: only. Output `PASS/FAIL/BLOCKED` for each critical gate. Cloud CI must never mark this native gate PASS.
+**7P-L1 native handoff:** user-initiated separate local gate; no real signed-in account or private profile. Verify installed host API/runtime, MV3 lifecycle, CDP ownership, restart/tab/profile separation, refusal cases, renderer quality, and measured synthetic-probe installer/payload, cold/warm full-batch runtime and sampled RAM on D: only. Output `PASS/FAIL/BLOCKED` for each critical gate with the separate native qualifier receipt; a raw synthetic host's `NOT_RUN` umbrella flags do not themselves decide physical acceptance. Cloud CI must never mark this native gate PASS. Candidate probe size limits are feasibility targets, not approved production app budgets.
 
-**Excluded until future gates:** signed-in provider authentication (`7U1` and `8U1` as scheduled), real-account consent, automatic Send, complete Phase 7 protocol 14 bridge, Phase 8 tab/profile product parity, packaged installer size qualification and macOS/Linux native acceptance.
+**Excluded until future gates:** signed-in provider authentication (`7U1` and `8U1` as scheduled), real-account consent, automatic Send, complete Phase 7 protocol 14 bridge, Phase 8 tab/profile product parity, **production** packaged installer/signing, cold-start-to-interactive and private-memory release qualification (`16L3`) and macOS/Linux native acceptance.
 
 ## Cloud review checklist
 
