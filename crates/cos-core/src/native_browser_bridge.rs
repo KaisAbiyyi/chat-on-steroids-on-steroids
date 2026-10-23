@@ -8,6 +8,7 @@ use crate::browser_protocol::{
     BridgeContractError, DocumentIdentity, IdentityFence, MAX_ACTIVE_DOCUMENTS,
     MAX_NORMALIZED_FRAME_BYTES, MAX_SAFE_JS_INTEGER, NormalizedIdentityFrame, Observation,
 };
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 
@@ -16,6 +17,8 @@ const HMAC_BLOCK: usize = 64;
 const HANDSHAKE: &[u8] = b"CoSoS/7B/handshake/v1";
 const OBSERVATION: &[u8] = b"CoSoS/7B/observation/v1";
 const AUTHORIZATION: &[u8] = b"CoSoS/7B/authorization/v1";
+const COMPANION_EVENT: &[u8] = b"CoSoS/7L1/companion-event/v1";
+const COMPANION_RECEIPT: &[u8] = b"CoSoS/7L1/companion-receipt/v1";
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum NativeBridgeError {
@@ -96,6 +99,12 @@ pub struct BridgeBootstrap {
 }
 
 impl BridgeBootstrap {
+    /// Only a privileged browser-host adapter may deliver this one-use secret
+    /// directly to an attached, extension-ID-verified MV3 worker target.
+    /// Never pass it through WebMessageReceived, pages, storage or logs.
+    pub fn isolated_worker_key(&self) -> [u8; KEY_BYTES] {
+        self.key
+    }
     pub fn handshake_proof(&self) -> [u8; KEY_BYTES] {
         self.mac(HANDSHAKE, 0, &[])
     }
@@ -106,6 +115,17 @@ impl BridgeBootstrap {
 
     pub fn authorization_mac(&self, sequence: u64, bytes: &[u8]) -> [u8; KEY_BYTES] {
         self.mac(AUTHORIZATION, sequence, bytes)
+    }
+
+    /// Only the isolated MV3 worker uses this to sign the exact 7C event.
+    pub fn companion_event_mac(&self, sequence: u64, bytes: &[u8]) -> [u8; KEY_BYTES] {
+        self.mac(COMPANION_EVENT, sequence, bytes)
+    }
+
+    /// Worker checks the host's successful authorization receipt prior to
+    /// dispatching the corresponding 7C event.
+    pub fn companion_receipt_mac(&self, sequence: u64, bytes: &[u8]) -> [u8; KEY_BYTES] {
+        self.mac(COMPANION_RECEIPT, sequence, bytes)
     }
 
     fn mac(&self, domain: &[u8], sequence: u64, bytes: &[u8]) -> [u8; KEY_BYTES] {
@@ -119,6 +139,64 @@ impl BridgeBootstrap {
             bytes,
         )
     }
+}
+
+/// Authenticated 7C mutation. The event itself is included in the 7B MAC;
+/// authorization of an identity frame alone never authorizes a ledger write.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CompanionEvent {
+    pub protocol: u32,
+    pub kind: String,
+    pub sequence: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub intent_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub digest: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub receipt_id: Option<String>,
+}
+
+impl CompanionEvent {
+    fn validate(&self) -> Result<(), NativeBridgeError> {
+        fn valid_id(text: &str) -> bool {
+            !text.is_empty()
+                && text.len() <= 128
+                && text
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b"._:-".contains(&b))
+        }
+        let intent = || {
+            self.intent_id.as_ref().is_some_and(|s| valid_id(s))
+                && self.digest.as_ref().is_some_and(|s| {
+                    s.len() == 64
+                        && s.bytes()
+                            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+                })
+        };
+        if self.protocol != crate::BRIDGE_PROTOCOL
+            || self.sequence == 0
+            || self.sequence > MAX_SAFE_JS_INTEGER
+            || !match self.kind.as_str() {
+                "attach" | "retire" => {
+                    self.intent_id.is_none() && self.digest.is_none() && self.receipt_id.is_none()
+                }
+                "claim" | "repair" => intent() && self.receipt_id.is_none(),
+                "ack" => intent() && self.receipt_id.as_ref().is_some_and(|s| valid_id(s)),
+                _ => false,
+            }
+        {
+            return Err(NativeBridgeError::Contract(BridgeContractError::Frame));
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CompanionSignedPayload {
+    pub frame: NormalizedIdentityFrame,
+    pub event: CompanionEvent,
 }
 
 struct Channel {
@@ -343,6 +421,45 @@ impl NativeBrowserBridge {
         }
         Ok(())
     }
+
+    /// Authorize exactly one signed ledger event, then issue a signed receipt
+    /// to the isolated worker. The worker MUST verify the receipt over the
+    /// identical event bytes before mutating its chrome.storage.session ledger.
+    /// 7B's sequence is separate from the 7C event.sequence field.
+    pub fn authorize_companion_event(
+        &mut self,
+        trusted: &TrustedHostEvidence,
+        channel_id: u64,
+        generation: u64,
+        bridge_sequence: u64,
+        payload: &[u8],
+        mac: &[u8; KEY_BYTES],
+    ) -> Result<[u8; KEY_BYTES], NativeBridgeError> {
+        self.check_message(
+            trusted,
+            channel_id,
+            generation,
+            bridge_sequence,
+            (COMPANION_EVENT, payload, mac),
+        )?;
+        let request: CompanionSignedPayload =
+            serde_json::from_slice(payload).map_err(|_| BridgeContractError::Frame)?;
+        request.frame.validate()?;
+        request.event.validate()?;
+        if request.frame.identity != trusted.identity {
+            return Err(NativeBridgeError::Host);
+        }
+        self.fence.require_current_frame(&request.frame)?;
+        let receipt = self
+            .current_channel(trusted, channel_id, generation)?
+            .bootstrap
+            .mac(COMPANION_RECEIPT, bridge_sequence, payload);
+        self.channels
+            .get_mut(&channel_id)
+            .ok_or(NativeBridgeError::Channel)?
+            .last_sequence = bridge_sequence;
+        Ok(receipt)
+    }
 }
 
 fn constant_time_equal(expected: &[u8; KEY_BYTES], actual: &[u8; KEY_BYTES]) -> bool {
@@ -426,6 +543,60 @@ mod tests {
             )
             .unwrap();
         (bridge, e, bootstrap)
+    }
+
+    #[test]
+    fn companion_event_must_bind_exact_kind_digest_receipt_and_fresh_sequence() {
+        let (mut bridge, host, bootstrap) = authenticated();
+        let identity = bytes(&host);
+        bridge
+            .observe(
+                &host,
+                bootstrap.channel_id,
+                1,
+                1,
+                &identity,
+                &bootstrap.observation_mac(1, &identity),
+            )
+            .unwrap();
+        let attach = serde_json::to_vec(&json!({
+            "frame": {"protocol": 14, "identity": host.identity},
+            "event": {"protocol": 14, "kind": "attach", "sequence": 1}
+        }))
+        .unwrap();
+        let mac = bootstrap.companion_event_mac(2, &attach);
+        let mut substituted = attach.clone();
+        let target = substituted.windows(6).position(|v| v == b"attach").unwrap();
+        substituted[target..target + 6].copy_from_slice(b"retire");
+        assert_eq!(
+            bridge.authorize_companion_event(&host, bootstrap.channel_id, 1, 2, &substituted, &mac),
+            Err(NativeBridgeError::Authentication)
+        );
+        let accepted = bridge
+            .authorize_companion_event(&host, bootstrap.channel_id, 1, 2, &attach, &mac)
+            .unwrap();
+        assert_eq!(accepted, bootstrap.companion_receipt_mac(2, &attach));
+        assert_eq!(
+            bridge.authorize_companion_event(&host, bootstrap.channel_id, 1, 2, &attach, &mac),
+            Err(NativeBridgeError::Sequence)
+        );
+        let unknown = serde_json::to_vec(&json!({
+            "frame":{"protocol":14,"identity":host.identity},
+            "event":{"protocol":14,"kind":"claim","sequence":2,
+                     "intentId":"intent-1","digest":"A".repeat(64)}
+        }))
+        .unwrap();
+        assert!(matches!(
+            bridge.authorize_companion_event(
+                &host,
+                bootstrap.channel_id,
+                1,
+                3,
+                &unknown,
+                &bootstrap.companion_event_mac(3, &unknown)
+            ),
+            Err(NativeBridgeError::Contract(BridgeContractError::Frame))
+        ));
     }
 
     #[test]
