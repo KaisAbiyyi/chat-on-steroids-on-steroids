@@ -88,23 +88,24 @@ class TaskBoardTests(unittest.TestCase):
                 task["status"] = "todo"
         eligible, _ = board.readiness(candidate)
         self.assertIn("7A", {t["id"] for t in eligible})
-        # Native integration was attempted and found blocked despite both
-        # prerequisites being done; merely satisfying DAG edges is not PASS.
-        self.assertEqual(self.tasks["7L1"]["status"], "blocked")
+        # Native integration reached the independent physical Windows gate.
+        # Status is accepted only from its exact-source receipt and review.
+        self.assertEqual(self.tasks["7L1"]["status"], "done")
         self.assertNotIn("7L1", ready_ids)
-        self.assertEqual(board.explain(self.data, "7L1")["state"], "BLOCKED")
+        self.assertEqual(board.explain(self.data, "7L1")["state"], "DONE")
         reopened = copy.deepcopy(self.data)
         next(t for t in reopened["tasks"] if t["id"] == "7L1")["status"] = "todo"
         eligible_after_fix, _ = board.readiness(reopened)
         self.assertIn("7L1", {t["id"] for t in eligible_after_fix})
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["7L1"]))
-        self.assertNotIn("7D", ready_ids)
+        self.assertIn("7D", ready_ids)
+        self.assertEqual(board.explain(self.data, "7D")["state"], "READY_CANDIDATE")
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
         hypothetical = copy.deepcopy(self.data)
         for task in hypothetical["tasks"]:
-            if task["id"] in ("7P-A", "7P-B", "7P-L1"):
+            if task["id"] in ("7P-A", "7P-B", "7P-L1", "7L1"):
                 task["status"] = "todo"
         gated, _ = board.readiness(hypothetical)
         gated_ids = {t["id"] for t in gated}

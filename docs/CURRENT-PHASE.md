@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 7L1 integrated physical Windows Rust ↔ WebView2 ↔ MV3 — ACCEPTED, 2026-10-23
+
+- **Exact source:** `2590decb7c618ace066795c2aeb6b4e5e2612405` ([PR #51](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/51)); reviewed and run on isolated native Windows D: using the GitHub `push` artifact pinned to that same SHA and full SHA256 manifest.
+- **Observed result:** `native7L1Accepted=true`, **21 PASS / 0 FAIL**, Rust exit 0. True Rust-signed MV3 worker handshake, competing physical tab and cross-profile first-proof denial, claim/ACK/repair persistence, spoof/fallback denial, restart repair and stale-ACK generation refusal, physical navigation/tab close revocation. The service worker remained live after 65 seconds detached; forced-stop-and-restart PASS is the accepted alternative, and `native_mv3_natural_idle` remains accurately `NOT_RUN`.
+- **Security / self-review:** exact 7A `ConflictingAttribution` required following authenticated rival handshake; 7C must reject stale ACK as `CompanionError:stale-claim-generation` after Rust authorization and without altering stored ledger. Build, required CI, source integrity and race/fencing self-review completed on the tested code. Real provider login, full desktop installer and owner gates are separate future work.
+- **Next:** `7L1` **Done** / Last Done, release `windows-bridge` lock; `7D` Cloud **Ready** / Now (unclaimed) with `7E` Up Next/Blocked. [Native receipt](../audit/2026-10-23/7l1-2590dec-integrated-native.json), [acceptance report](implementation-summary/2026-10-23-7l1-integrated-native-acceptance.md). Historical BLOCKED snapshots below remain unchanged.
+
 ## 7L1 real native Rust↔MV3 bridge — BLOCKED with exact-source Windows evidence, 2026-10-23
 
 - **Prerequisites:** 7C and scoped 7P-L1 both accepted on [PR #48](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/48), merged `8d1f4c5a3fbdb7e5dec1cdf02a9ef4e25077c0b4`. Windows 7L1 claimed under `windows-bridge` and exercised in isolated D: worktree.
