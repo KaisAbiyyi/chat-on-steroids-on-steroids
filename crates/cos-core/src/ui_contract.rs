@@ -30,9 +30,7 @@ impl UiRoute {
     fn validate(&self) -> Result<(), UiError> {
         match self {
             Self::Conversation { session_id } => valid_route_id(session_id),
-            Self::Project { project_id } | Self::Files { project_id } => {
-                valid_route_id(project_id)
-            }
+            Self::Project { project_id } | Self::Files { project_id } => valid_route_id(project_id),
             _ => Ok(()),
         }
     }
@@ -184,8 +182,7 @@ impl UiNavigation {
         if bytes.len() > MAX_UI_IPC_BYTES {
             return Err(UiError::Oversize);
         }
-        let request: UiRequest =
-            serde_json::from_slice(bytes).map_err(|_| UiError::Malformed)?;
+        let request: UiRequest = serde_json::from_slice(bytes).map_err(|_| UiError::Malformed)?;
         self.dispatch(request)
     }
 
