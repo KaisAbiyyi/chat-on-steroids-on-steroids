@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase canonical execution DAG; status is a committed snapshot and never substitutes live claims/CI/local consent verification.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16",
   "readiness_policy": "An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed. Owner resumed physical 7P-L1 on 2026-10-23: the real Windows embedded browser feasibility gate can be accepted through the separate SHA-bound native qualifier after all required synthetic browser/ownership, installed-package, candidate distribution and resource measurements pass. Real product release acceptance remains at 16L3, signed-in accounts at 7U1/8U1 and OS IME is separately owner-deferred. Native 7L1 still requires both accepted 7C and accepted 7P-L1; it must independently qualify real extension bridge integration.",
-  "task_status_source": "2026-10-23: 7A/7B/7C cloud units previously merged and accepted. The 7P-L1 native physical-Windows browser feasibility qualification uses exact installed source 53164da from PR #42 (merged ae14311c), checks 26 real WebView2 invariants and the separately run distribution_budgets/native_windows_gate with pinned D-only receipts. Mark native 7P-L1 Done ONLY after its scoped qualifier evidence/review and this registry update are merged. 7L1 is the next unclaimed READY_CANDIDATE after that point; downstream 7D stays blocked pending 7L1. Full CoSoS GUI release/signing/private RSS/TTI remains NOT RUN at 16L3; real account U and deferred OS IME are not waived.",
+  "task_status_source": "2026-10-23: 7A/7B/7C and the scoped physical-Windows 7P-L1 feasibility gate are accepted at main 8d1f4c5 (PR #48). Native 7L1 was claimed and exercised on that exact source: independent 7B Rust (8 PASS), 7C companion JS (16 PASS), host policy (15 PASS), WebView2 native synthetic (26 PASS/2 NOT_RUN), and compiled Windows host all passed their own scopes. The integrated 7B->7C WebView2 handshake/identity and actual 7C MV3 restart remain BLOCKED because no privileged native transport/runtime caller exists; GitHub issue #49 tracks the required cloud integration fix. Keep 7L1 blocked until physical integrated proof and review; 7D stays blocked. See docs/implementation-summary/2026-10-23-7l1-native-windows-blocker.md. Full production release at 16L3, owner OAuth and OS IME remain separate gates.",
   "tasks": [
     {
       "id": "CL-01",
@@ -413,7 +413,7 @@
       ],
       "phase": "7",
       "kind": "L",
-      "status": "todo"
+      "status": "blocked"
     },
     {
       "id": "7D",

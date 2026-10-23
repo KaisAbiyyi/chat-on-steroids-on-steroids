@@ -1,0 +1,104 @@
+{
+  "task": "7P-B",
+  "source": "synthetic WebView2 WinForms adapter spike (NOT production Rust host)",
+  "utc": "2026-10-23T09:53:59.1893033+00:00",
+  "runtime": "Microsoft Windows NT 10.0.26300.0",
+  "executableVersion": "1.0.0\u002B8d1f4c5a3fbdb7e5dec1cdf02a9ef4e25077c0b4",
+  "executableSha256": "32D994C0DFB34FA9F25A217AB691C2789F09D01609D7CAFEED28C20014B9EFB0",
+  "webviewRuntime": "155.0.4283.62",
+  "profileRoot": "D:\\projects\\CoS-Rust\\.test-tmp\\7l1\\native-exit-proof-20261023",
+  "syntheticOnly": true,
+  "noRealProfilesOrAccounts": true,
+  "native7PL1Accepted": false,
+  "checks": {
+    "browser_navigation": {
+      "status": "PASS",
+      "evidence": "Attempted non-synthetic target canceled by NavigationStarting allowlist."
+    },
+    "debugger_target": {
+      "status": "PASS",
+      "evidence": "Host CDP titles and actual stale CDP method denial. This is NOT extension chrome.debugger."
+    },
+    "distribution_budgets": {
+      "status": "NOT_RUN",
+      "evidence": "No installer size/RAM baselines."
+    },
+    "extension_debugger_api": {
+      "status": "PASS",
+      "evidence": "Synthetic chrome.debugger attach/evaluate/event/detach=roundtrip-event-detached; physical WebView2/worker-target parity remains a separate 7P-L1 gate."
+    },
+    "extension_disabled_refusal": {
+      "status": "PASS",
+      "evidence": "HRESULT 80070032, before=2, after=2, MAIN=undefined, ISOLATED=none; installed inventory may persist but disabled extensions must not execute."
+    },
+    "extension_install": {
+      "status": "PASS",
+      "evidence": "Unpacked extension installed in both synthetic profiles."
+    },
+    "extension_worlds": {
+      "status": "PASS",
+      "evidence": "MAIN=yes, ISOLATED=yes, private=undefined, mainGlobal=string"
+    },
+    "mock_oauth_callback": {
+      "status": "PASS",
+      "evidence": "Native profile A consent redirect verified=True, one-shot replay refused=True."
+    },
+    "mock_oauth_consent_denial": {
+      "status": "PASS",
+      "evidence": "Consent denial callback=True, access_denied verified=True, no grant issued=True."
+    },
+    "mock_oauth_consent_page": {
+      "status": "PASS",
+      "evidence": "Mapped login.synthetic.cos.test consent fixture loaded in actual WebView2 profile A."
+    },
+    "mock_oauth_forgery": {
+      "status": "PASS",
+      "evidence": "Forged state/origin/error callback rejected=True before valid completion."
+    },
+    "mock_oauth_profile_isolation": {
+      "status": "PASS",
+      "evidence": "Profile B controller/currentness/actual URL proven=True; pending A grant rejected by verified B controller=True."
+    },
+    "mv3_lifecycle": {
+      "status": "UNVERIFIED",
+      "evidence": "Natural MV3 worker idle suspension not yet observed; pass --native-idle for physical Windows proof."
+    },
+    "native_cross_profile_cdp_denial": {
+      "status": "PASS",
+      "evidence": "Using A\u0027s valid lease and labels against the actual B WebView2 controller denied=True."
+    },
+    "native_windows_gate": {
+      "status": "NOT_RUN",
+      "evidence": "7P-L1 separate owner-operated physical Windows gate."
+    },
+    "pdf_math_terminal": {
+      "status": "PASS",
+      "evidence": "Real CodeMirror/KaTeX/pdf.js/xterm fixture initialized. PDF selection, IME and resize manual gate remains."
+    },
+    "profile_directories": {
+      "status": "PASS",
+      "evidence": "Physical profile paths: A=D:\\projects\\CoS-Rust\\.test-tmp\\7l1\\native-exit-proof-20261023\\isolated-A\\EBWebView\\Default, B=D:\\projects\\CoS-Rust\\.test-tmp\\7l1\\native-exit-proof-20261023\\isolated-B\\EBWebView\\Default, disabled=D:\\projects\\CoS-Rust\\.test-tmp\\7l1\\native-exit-proof-20261023\\isolated-disabled\\EBWebView\\Default"
+    },
+    "rich_editor": {
+      "status": "PASS",
+      "evidence": "Runtime renderer DOM readiness: A=ready, B=ready; manual IME/keyboard inspection still required."
+    },
+    "sign_in_constraints": {
+      "status": "PASS",
+      "evidence": "Synthetic-only WebView2 consent/callback/state/replay/denial/profile checks; real provider OAuth, account sign-in, OS SSO and token exchange remain future user gates."
+    },
+    "tab_profile_isolation": {
+      "status": "PASS",
+      "evidence": "Synthetic profile B cannot read profile A storage. Physical device repetition pending."
+    },
+    "worker_message": {
+      "status": "PASS",
+      "evidence": "Content -\u003E MV3 worker -\u003E content ACK=ok"
+    }
+  },
+  "trace": [
+    "synthetic extension installed for A",
+    "synthetic extension installed for B",
+    "blocked navigation to non-synthetic URL"
+  ]
+}
