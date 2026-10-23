@@ -1,0 +1,452 @@
+{
+  "schema": 1,
+  "description": "7E synthetic-only parity corpus: independently evaluated by authenticated Rust 7B wire validator and JS 7C ledger parser, no real provider or native 7L2 proof",
+  "cases": [
+    {
+      "id": "valid-attach",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": 1
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-retire",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "retire",
+        "sequence": 2
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-claim",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-ack",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "receipt-1"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-repair",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "repair",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-ack-after-repair",
+      "prep": [
+        "attach",
+        "claim",
+        "repair"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 4,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "receipt-1"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-id-128",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": true
+    },
+    {
+      "id": "valid-receipt-128",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+      },
+      "accepted": true
+    },
+    {
+      "id": "attach-extra-null",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": 1,
+        "intentId": null
+      },
+      "accepted": false
+    },
+    {
+      "id": "retire-extra-null",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "retire",
+        "sequence": 2,
+        "receiptId": null
+      },
+      "accepted": false
+    },
+    {
+      "id": "claim-extra-null",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": null
+      },
+      "accepted": false
+    },
+    {
+      "id": "repair-extra-null",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "repair",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": null
+      },
+      "accepted": false
+    },
+    {
+      "id": "attach-extra-property",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": 1,
+        "token": "page-token"
+      },
+      "accepted": false
+    },
+    {
+      "id": "wrong-protocol",
+      "prep": [],
+      "event": {
+        "protocol": 13,
+        "kind": "attach",
+        "sequence": 1
+      },
+      "accepted": false
+    },
+    {
+      "id": "missing-protocol",
+      "prep": [],
+      "event": {
+        "kind": "attach",
+        "sequence": 1
+      },
+      "accepted": false
+    },
+    {
+      "id": "unknown-kind",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "send",
+        "sequence": 1
+      },
+      "accepted": false
+    },
+    {
+      "id": "zero-sequence",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": 0
+      },
+      "accepted": false
+    },
+    {
+      "id": "negative-sequence",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": -1
+      },
+      "accepted": false
+    },
+    {
+      "id": "fractional-sequence",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": 1.5
+      },
+      "accepted": false
+    },
+    {
+      "id": "unsafe-js-sequence",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": 9007199254740992
+      },
+      "accepted": false
+    },
+    {
+      "id": "string-sequence",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach",
+        "sequence": "1"
+      },
+      "accepted": false
+    },
+    {
+      "id": "missing-sequence",
+      "prep": [],
+      "event": {
+        "protocol": 14,
+        "kind": "attach"
+      },
+      "accepted": false
+    },
+    {
+      "id": "bad-intent-path",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "../escape",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": false
+    },
+    {
+      "id": "bad-intent-too-long",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": false
+    },
+    {
+      "id": "bad-intent-null",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": null,
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": false
+    },
+    {
+      "id": "bad-digest-uppercase",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "intent-1",
+        "digest": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "accepted": false
+    },
+    {
+      "id": "bad-digest-length",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": false
+    },
+    {
+      "id": "bad-digest-type",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "intent-1",
+        "digest": 17
+      },
+      "accepted": false
+    },
+    {
+      "id": "ack-missing-receipt",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "accepted": false
+    },
+    {
+      "id": "ack-null-receipt",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": null
+      },
+      "accepted": false
+    },
+    {
+      "id": "ack-receipt-too-long",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+      },
+      "accepted": false
+    },
+    {
+      "id": "ack-invalid-receipt",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "ack",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "bad receipt"
+      },
+      "accepted": false
+    },
+    {
+      "id": "claim-with-unknown-side-effect",
+      "prep": [
+        "attach"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "claim",
+        "sequence": 2,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "send": true
+      },
+      "accepted": false
+    },
+    {
+      "id": "repair-with-fake-ack",
+      "prep": [
+        "attach",
+        "claim"
+      ],
+      "event": {
+        "protocol": 14,
+        "kind": "repair",
+        "sequence": 3,
+        "intentId": "intent-1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "receipt-1"
+      },
+      "accepted": false
+    }
+  ]
+}
