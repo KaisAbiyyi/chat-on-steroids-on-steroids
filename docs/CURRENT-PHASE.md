@@ -1,5 +1,13 @@
 # CoS-Rust current backend checkpoint
 
+## 7P-L1 merged-main synthetic Windows benchmark PASS; product native gate PARTIAL — 2026-10-23
+
+- **Native exact-source:** `c1d6234b21fc794ecefb36244caa73b0d55ae465` after reconciling `main` at `d9a56ef`. Installed Win11 WebView2 155.0.4283.62 `--native-auth --native-idle` completed exit 0: **26 PASS / 0 FAIL / 0 UNVERIFIED / 2 NOT RUN**. Synthetic OAuth consent/redirect, MV3 idle, debugger ownership, tab recreation, and profile fences all PASS.
+- **RED / GREEN:** merged probe initially failed four callback/consent tests because the consent page title preceded installation of JS handlers. Native host now waits for script readiness; three standalone retests and combined rerun PASS. Preserve failed and successful raw receipts.
+- **Probe distribution:** rebuilt unsigned offline synthetic setup **68,008,448 bytes**, 82 files; D: install, version-verified installed run, and owned uninstall PASS. Six cold/warm profile batch runs PASS; p50 full-batch wall runtime **2,817.3 ms cold / 2,649.4 ms warm**. These measurements do not establish product cold-start-to-interactive or unique/private WebView2 RAM.
+- **Still open:** `distribution_budgets` and aggregate `native_windows_gate` remain `NOT_RUN` for product-level budgets; product GUI/signing and real account acceptance belong to later gates. `native7PL1Accepted=false`, 7P-L1 **PARTIAL**, PR #42 stays draft pending gate review, 7L1 blocked. Owner OS IME deferral remains in force.
+- **Evidence:** [distribution and integration qualification](implementation-summary/2026-10-23-7p-l1-distribution-and-merge.md) and [normalized source-bound receipt](../audit/2026-10-23/7p-l1-windows-distribution-after-merge.json).
+
 ## 7P-L1 Keyboard PASS; OS IME deferred by owner — 2026-10-22
 
 - **Scoped evidence:** native Windows automation into packaged synthetic CodeMirror

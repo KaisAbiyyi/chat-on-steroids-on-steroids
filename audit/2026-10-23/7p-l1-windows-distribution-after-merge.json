@@ -1,0 +1,46 @@
+{
+  "unit": "7P-L1",
+  "scope": "Windows synthetic WebView2 feasibility probe; not production CoSoS desktop",
+  "merge_base_main_sha": "d9a56ef93546b42e9043fc72f918ffcb1c983b62",
+  "tested_source_sha": "c1d6234b21fc794ecefb36244caa73b0d55ae465",
+  "windows_webview2_version": "155.0.4283.62",
+  "installer": {
+    "format": "unsigned offline self-extracting EXE requiring installed Evergreen WebView2",
+    "bytes": 68008448,
+    "sha256": "BEAE09729D16FA667816908F7EA82A909B128156B50BF457D148159F52D58997",
+    "manifested_files": 82,
+    "published_files_bytes": 163427892,
+    "installed_files_bytes": 167787649,
+    "executable_sha256": "DBE969C34B898595B31266950738B10D365F3D44392AC1659641BA84FAFE9886",
+    "verification": "PASS: embedded payload hash, D: installation, exact-source runtime, and verified owned-file uninstall"
+  },
+  "baseline": {
+    "source_sha": "d370d6daba4a2011531e9f23811dec2c8776f8d2",
+    "synthetic_benchmark_receipt_sha256": "8C4A3D32AD9D9F46DDF63DE25FE4B19A052C3D65D540D449529A08959D657C91",
+    "combined_run": "RED: 22 PASS, 4 FAIL, 0 UNVERIFIED, 2 NOT RUN; consent script handlers were not ready before the native click"
+  },
+  "final_benchmark": {
+    "raw_path_under_task_root": "benchmark-c1d6234/measurements.json",
+    "sha256": "A61F018836EC4EC9E3EC3E511FD69B295F63BAE8C8A31676B008EFC497C7E273",
+    "cold_runs": 3,
+    "warm_runs": 3,
+    "all_no_fail": true,
+    "cold_batch_runtime_median_ms": 2817.3,
+    "warm_batch_runtime_median_ms": 2649.4,
+    "host_max_sampled_working_set_bytes": 68444160,
+    "sampling_limit": "Working sets are not private RSS, and sampled WebView2 subprocess working-set sums of approximately 1.175-1.245 GB are not unique or peak RAM. Runtime is full synthetic probe lifecycle, not time to interactive."
+  },
+  "combined_windows_native": {
+    "raw_path_under_task_root": "combined-native-c1d6234/receipt.json",
+    "sha256": "0C4AEB04CCDB53E9E9A37102F6A9D242674D09110BF4A58166D8583AE7480205",
+    "pass": 26,
+    "fail": 0,
+    "unverified": 0,
+    "not_run": ["distribution_budgets", "native_windows_gate"],
+    "mv3_natural_idle": "PASS",
+    "synthetic_sign_in_constraints": "PASS",
+    "tab_recreation_and_scope": "PASS"
+  },
+  "acceptance": "PARTIAL: production installer, product RAM/time-to-interactive/size thresholds and aggregate native acceptance remain NOT RUN. Real provider sign-in and OS IME remain separate deferred gates.",
+  "native7PL1Accepted": false
+}
