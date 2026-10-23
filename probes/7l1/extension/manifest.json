@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "CoSoS 7L1 Verified Native Companion Probe",
+  "version": "0.0.1",
+  "description": "Isolated WebView2/Rust 7B and MV3 7C integration gate. No provider input.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["https://synthetic.cos.test/*"],
+  "background": {
+    "service_worker": "sw.mjs",
+    "type": "module"
+  }
+}

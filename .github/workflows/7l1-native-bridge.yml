@@ -1,0 +1,88 @@
+name: 7L1 Rust-MV3 Native Integration
+
+on:
+  push:
+    branches: ["fix/49-*"]
+    paths:
+      - ".github/workflows/7l1-native-bridge.yml"
+      - "crates/cos-core/**"
+      - "extension/companion/**"
+      - "probes/7l1/**"
+  pull_request:
+    paths:
+      - ".github/workflows/7l1-native-bridge.yml"
+      - "crates/cos-core/**"
+      - "extension/companion/**"
+      - "probes/7l1/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  signed-event-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+          components: rustfmt, clippy
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Rust signed exact-event tests
+        run: cargo test --locked -p cos-core --lib native_browser_bridge
+      - name: Compile and lint privileged stdio adapter
+        run: cargo clippy --locked -p cos-core --example 7l1_bridge -- -D warnings
+      - name: MV3 worker HMAC/ledger security tests
+        env:
+          COS_TEST_TMP: ${{ runner.temp }}
+        run: node --test probes/7l1/tests/worker-auth.test.mjs
+      - name: Existing 7C ledger regressions
+        run: node --test extension/companion/tests/ledger.test.mjs
+      - name: Native source contract
+        run: node --check probes/7l1/extension/sw.mjs
+
+  windows-native-artifact:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Compile native Rust 7B bridge executable
+        run: cargo build --locked -p cos-core --example 7l1_bridge --release
+      - name: Compile WebView2 host gate with warnings as errors
+        run: dotnet build probes/7l1/WindowsHost/WindowsHost.csproj --configuration Release -warnaserror
+      - name: Assemble source-pinned native gate
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path gate/host | Out-Null
+          Copy-Item target/release/examples/7l1_bridge.exe gate/7l1_bridge.exe
+          Copy-Item probes/7l1/WindowsHost/bin/Release/net8.0-windows/* gate/host/ -Recurse
+          (git rev-parse HEAD).Trim() | Set-Content gate/source.sha -NoNewline
+          $entries = @(Get-ChildItem gate -Recurse -File | Where-Object { $_.Name -ne 'hashes.json' } | ForEach-Object {
+            [pscustomobject]@{
+              path = $_.FullName.Substring((Resolve-Path gate).Path.Length + 1).Replace('\','/')
+              sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            }
+          })
+          $entries | ConvertTo-Json -Depth 4 | Set-Content gate/hashes.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cos-7l1-windows-native-${{ github.sha }}
+          path: gate/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Gate boundary
+        shell: pwsh
+        run: |
+          Write-Output 'Windows CI compilation is only CLOUD PASS. Physical WebView2 CDP/real MV3 restart/7L1 remain NOT RUN until source-SHA-pinned D: execution.'
