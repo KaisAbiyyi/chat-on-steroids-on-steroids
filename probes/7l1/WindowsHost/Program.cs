@@ -857,8 +857,13 @@ internal sealed class GateForm : Form
             // fail at both the native session and Rust authority boundaries.
             _b.CoreWebView2.Navigate(StartUrl);
             await WaitPageAsync(b);
-            await BindAsync(b, "7l1-tab-close-session");
-            var closeFirst = await ObserveAsync(b);
+            // Navigation advances the document identity, but 7A never
+            // implicitly rebinds this physical tab to a different session.
+            // Preserve the already proven owner when testing real tab close.
+            await BindAsync(b, b.SessionId);
+            var closeFirst = RequireSuccess(await ObserveAsync(b));
+            if (closeFirst.GetProperty("observation").GetString() != "Advanced")
+                throw new InvalidOperationException("tab-close prerequisite did not advance the verified owner");
             var signedBeforeClose = await WorkerAsync(b,
                 "globalThis.__cos7l1Native.prepare(" +
                 JsonSerializer.Serialize(new { protocol = 14, kind = "attach", sequence = 1 }) +
@@ -879,7 +884,7 @@ internal sealed class GateForm : Form
                 mac = signedBeforeClose.GetProperty("mac").GetString()
             });
             Mark("native_tab_close_revocation",
-                closeFirst.GetProperty("ok").GetBoolean() &&
+                closeFirst.GetProperty("observation").GetString() == "Advanced" &&
                 b.Revoked && b.View.IsDisposed && disposedRefused &&
                 retiredAfterClose && lateEventDenied,
                 "Physical WebView2 controller disposal automatically retires Rust channel; stale CDP and pre-signed late ledger event rejected");
