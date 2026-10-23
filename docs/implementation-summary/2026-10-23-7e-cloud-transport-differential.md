@@ -4,11 +4,15 @@
 
 - Unit **7E**; owner **ChatGPT GPT-6 Cloud**, branch `work/7e-transport-differential-20261023`, exclusive `browser-qualification` lock, base main `a80d504af6ace64e5d03d5723faf241d1507ed1a` (7D PR #56 accepted).
 - Synthetic-only Rust 7B native signed companion-event receipt gate + JS 7C durable ledger. **Neither exercises a real WebView2 debugger, physical browser lifecycle, user credentials, provider Send or installed desktop**; those belong to 7L2/7U1.
-- A shared 34-case event corpus checks exact allow/deny parity between authenticated Rust event admission and a trusted synthetic JS host adapter; Rust also checks MAC-bound receipts, no denied-message sequence advancement, deterministic 224-case authenticated bad transport mutation, replay and reconnect generation fencing. JS exercises 224 deterministic malformed ledger attempts, ambiguous persistent-store commits and cold MV3 restart with stale ACK rejection.
+- A shared 37-case event corpus checks exact allow/deny parity between authenticated Rust event admission and a trusted synthetic JS host adapter; Rust also checks MAC-bound receipts, no denied-message sequence advancement, deterministic 224-case authenticated bad transport mutation, replay and reconnect generation fencing. JS exercises 224 deterministic malformed ledger attempts, ambiguous persistent-store commits and cold MV3 restart with stale ACK rejection.
 
 ## Proven source gap and repair
 
 Rust `CompanionEvent` used `Option<T>` for optional keys. Serde treats an explicit `null` in `receiptId`/`intentId`/`digest` as absent, so 7B could sign a payload that 7C strictly rejected for extra keys. Fixed by enforcing per-kind exact signed `event` keys **after** serde validation and **before** receipt issuance; negative cases `attach-extra-null`, `retire-extra-null`, `claim-extra-null`, and `repair-extra-null` protect against regression. MAC correctness alone does not authorize a widened schema.
+
+## Additional self-review security repair
+
+- The 7C `intents` map was a plain JavaScript object. Untrusted-but-valid intent IDs `__proto__`, `constructor` and `toString` could collide with inherited keys; assigning `__proto__` also mutates the object prototype instead of inserting an owned ledger record. Explicit own-key lookup plus `Object.defineProperty` for new claims keeps each intent as an enumerable own data key, never a setter or inherited claim. Three shared corpus vectors and a durable storage regression protect this boundary. Synthetic corpus now has **37 cases**.
 
 ## Validation / honest acceptance
 
