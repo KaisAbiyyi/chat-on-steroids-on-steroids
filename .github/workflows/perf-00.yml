@@ -1,0 +1,44 @@
+name: PERF-00 synthetic measurement contracts
+on:
+  pull_request:
+    paths:
+      - 'tools/perf_00.py'
+      - 'tools/test_perf_00.py'
+      - 'fixtures/perf-00/**'
+      - 'docs/implementation-summary/*perf-00*'
+      - '.github/workflows/perf-00.yml'
+  push:
+    paths:
+      - 'tools/perf_00.py'
+      - 'tools/test_perf_00.py'
+      - 'fixtures/perf-00/**'
+      - 'docs/implementation-summary/*perf-00*'
+      - '.github/workflows/perf-00.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Verify fixture provenance and process-tree accounting
+        run: python -m unittest discover -s tools -p test_perf_00.py -v
+      - name: Verify CLI matrix
+        run: python tools/perf_00.py matrix
+      - name: Verify synthetic reporting remains NOT_RUN
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import sys
+          p = subprocess.run([sys.executable, 'tools/perf_00.py', 'summarize',
+                              '--input', 'fixtures/perf-00/synthetic-trace.json'],
+                             check=True, capture_output=True, text=True)
+          result = json.loads(p.stdout)
+          assert result['classification'] == 'synthetic-fixture'
+          assert result['native_product_acceptance'] == 'NOT_RUN'
+          assert result['whole_tree_peak_rss_bytes'] == 248 * 1048576
