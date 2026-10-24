@@ -29,6 +29,7 @@ Consequently, native clean start/restart, multi-tab/profile preservation, crash/
 | --- | --- |
 | JS 8A/8B/8C + 7C/7E regressions | **56 PASS, 0 FAIL, 0 skipped**, Node 24.21.0 on physical Windows; synthetic callbacks only |
 | Task-board unit regressions | **15 PASS** after reconciliation; `python -m unittest discover -s tools -p test_task_board.py`. Original-source baseline was 14 PASS. |
+| Browser architecture guardrails | **16 PASS**, validator exit 0; provisional architecture/source contract only, no native acceptance |
 | DAG consistency | **PASS**, 115 tasks / 72 C / 28 L / 15 U, no cyclic or dangling edges |
 | Rust formatting | **PASS**, `cargo fmt --all --check` on the source under test |
 | Local `cos-core` regressions | **63 PASS, 0 FAIL, 0 ignored**; `cargo test -p cos-core --locked`. Full workspace strict check still running |
@@ -43,6 +44,8 @@ The [machine-readable receipt](../../audit/2026-10-24/8l1-native-integration-blo
 Cloud prerequisite checks observed through GitHub: PR #61 18/18 successful checks, PR #65 22/22, PR #67 19/19. A successful main Rust run on the SHA under test is [40053693894](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40053693894). Later same-SHA reruns were still running at first inspection; no unfinished check is called PASS. The new receipt PR requires its own exact-head CI and direct self-review before merge.
 
 The initial receipt checkpoint's DAG CI correctly failed after status reconciliation: two tests still expected 8B to be unaccepted and every future native gate to be forecastable, and the board used a different candidate label. Local reproduction recorded **2 failures / 1 error**. The repair updates the accepted-snapshot assertions to the verified merged units, uses a separately reopened valid hypothetical graph to preserve the complete native/owner ordering test, restores the board's prescribed label, and adds an explicit regression that live blocked 8L1/8U1/9A never enter a forecast while 15B remains independently eligible. **15 tests pass**, with no changed resolver, removed assertion, skipped gate or altered acceptance threshold. RED and GREEN logs are retained under `.test-tmp/8l1/evidence`.
+
+The subsequent CI step exposed the same stale 8B-ready expectation in `test_browser_feasibility.py`; local reproduction was **1 failure / 16 tests**. Its accepted-cloud assertions now match the verified snapshot while explicitly requiring blocked 8L1 and missing 8L1 prerequisite at 8U1. All **16 guardrail tests and the fail-closed architecture validator pass**. Historical failed GitHub runs and new local RED logs remain preserved.
 
 ## Direct self-review and handoff
 

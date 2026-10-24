@@ -129,15 +129,21 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertNotIn("7D", {t["id"] for t in retest_ready})
         self.assertNotIn("7D", ready_ids)
         self.assertEqual(tasks["7D"]["status"], "done")
-        # Both 7E and 8A are now accepted. Native 7L2 and cloud 8B
-        # are independently eligible, while 8C stays gated behind 8B.
+        # Cloud 8B/8C and 15A are accepted. That does not supply the
+        # missing physical 8L1 adapter or waive the owner sign-in gate.
         self.assertEqual(tasks["7E"]["status"], "done")
         self.assertNotIn("7E", ready_ids)
         self.assertEqual(tasks["8A"]["status"], "done")
         self.assertNotIn("8A", ready_ids)
         self.assertIn("7L2", ready_ids)
-        self.assertIn("8B", ready_ids)
-        self.assertNotIn("8C", ready_ids)
+        for accepted in ("8B", "8C", "15A"):
+            self.assertEqual(tasks[accepted]["status"], "done")
+            self.assertNotIn(accepted, ready_ids)
+        self.assertEqual(tasks["8L1"]["status"], "blocked")
+        self.assertNotIn("8L1", ready_ids)
+        self.assertNotIn("8U1", ready_ids)
+        self.assertEqual(task_board.explain(graph, "8U1")["missing_direct"], ["8L1"])
+        self.assertIn("15B", ready_ids)
         self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
         self.assertEqual(tasks["16L3"]["status"], "todo")
