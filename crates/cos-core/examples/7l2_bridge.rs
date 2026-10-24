@@ -358,16 +358,15 @@ impl State {
                 let was_owned = self.owned.get(&channel_id);
                 // If physical detach fails, retain the Rust lease: never grant
                 // a new contender an ambiguously live debugger.
-                if let Some(host) = was_owned {
-                    if self
+                if let Some(host) = was_owned
+                    && self
                         .tools
                         .has_lease_for(host, channel_id, host.host_generation)
-                        && !self
-                            .tools
-                            .retire_from_native(host, channel_id, host.host_generation)
-                    {
-                        return Err("native debugger detach unresolved".into());
-                    }
+                    && !self
+                        .tools
+                        .retire_from_native(host, channel_id, host.host_generation)
+                {
+                    return Err("native debugger detach unresolved".into());
                 }
                 self.owned.remove(&channel_id);
                 Ok(json!({"retired":self.bridge.retire_host(channel_id)}))
