@@ -135,7 +135,9 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertNotIn("7E", ready_ids)
         self.assertEqual(tasks["8A"]["status"], "done")
         self.assertNotIn("8A", ready_ids)
-        self.assertIn("7L2", ready_ids)
+        self.assertNotIn("7L2", ready_ids)  # accepted physical Windows source 74d4460
+        self.assertEqual(tasks["7L2"]["status"], "done")
+        self.assertIn("7U1-PREP", ready_ids)  # real provider owner runner still unclaimed
         for accepted in ("8B", "8C", "15A"):
             self.assertEqual(tasks[accepted]["status"], "done")
             self.assertNotIn(accepted, ready_ids)
@@ -143,7 +145,9 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertNotIn("8L1", ready_ids)
         self.assertNotIn("8U1", ready_ids)
         self.assertEqual(task_board.explain(graph, "8U1")["missing_direct"], ["8L1"])
-        self.assertIn("15B", ready_ids)
+        self.assertNotIn("15B", ready_ids)  # 15B cloud implementation accepted
+        self.assertEqual(tasks["15B"]["status"], "done")
+        self.assertIn("PERF-00", ready_ids)  # P0 methodology first
         self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
         self.assertEqual(tasks["16L3"]["status"], "todo")
