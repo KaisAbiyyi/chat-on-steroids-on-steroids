@@ -1,0 +1,45 @@
+name: PERF-02 browser-mode synthetic authority and lifecycle
+on:
+  pull_request:
+    paths:
+      - 'tools/perf_02.py'
+      - 'tools/test_perf_02.py'
+      - 'docs/claims/PERF-02.md'
+      - 'docs/implementation-summary/*perf-02*'
+      - '.github/workflows/perf-02.yml'
+  push:
+    paths:
+      - 'tools/perf_02.py'
+      - 'tools/test_perf_02.py'
+      - 'docs/claims/PERF-02.md'
+      - 'docs/implementation-summary/*perf-02*'
+      - '.github/workflows/perf-02.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-browser-mode:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Run browser-mode consent, lifecycle, privacy and accounting tests
+        run: python -m unittest discover -s tools -p test_perf_02.py -v
+      - name: Probe requires physical evidence to decide a performance winner
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import sys
+          p = subprocess.run([sys.executable, 'tools/perf_02.py', 'smoke'],
+                             capture_output=True, text=True, check=True)
+          r = json.loads(p.stdout)
+          assert r['classification'] == 'synthetic-architecture-only'
+          assert r['performance_winner'] == 'UNDETERMINED'
+          assert r['native_product_acceptance'] == 'NOT_RUN'
+          assert r['provider_account_acceptance'] == 'NOT_RUN'
+          assert r['state']['mode'] == 'closed'
+          assert r['state']['external_lease_requests'] == 1
+          assert r['state']['embedded_create_requests'] == 1
