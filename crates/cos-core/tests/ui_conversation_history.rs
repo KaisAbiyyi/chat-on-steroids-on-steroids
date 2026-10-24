@@ -99,7 +99,7 @@ fn page_integrity_and_atomic_rejections() {
     let wrong = [
         page(0, 100, 0),
         page(99, 100, 2),
-        page(1, 100, 1),
+        page(101, 100, 0),
         page(0, 100, (MAX_CONVERSATION_PAGE_ITEMS + 1) as u64),
         page(0, 0, 1),
     ];
@@ -133,8 +133,9 @@ fn page_integrity_and_atomic_rejections() {
 #[test]
 fn unsafe_ids_and_untrusted_text_fail_closed() {
     let mut model = UiConversation::new(7).unwrap();
+    let oversized = "a".repeat(129);
     for key in ["", "../secrets", "/private", "https://evil", "<img>", "x y",
-        ".hidden", "a\\b", "é", "a".repeat(129).as_str()] {
+        ".hidden", "a\\b", "é", oversized.as_str()] {
         assert_eq!(model.open_from_host(key), Err(ConversationError::Key));
     }
     let ticket = model.open_from_host("session-1").unwrap();
@@ -225,8 +226,9 @@ fn thousand_page_windows_keep_memory_bounded() {
         assert_eq!(page.start, start);
     }
     assert_eq!(model.snapshot().page.unwrap().start, 0);
+    let revision = model.snapshot().revision;
     assert_eq!(request(&mut model, 3, 1000, json!({
-        "action":"load-older", "expected_revision":model.snapshot().revision
+        "action":"load-older", "expected_revision":revision
     })), Err(ConversationError::Boundary));
 }
 
