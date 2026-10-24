@@ -1,5 +1,6 @@
 import hashlib
 import json
+import platform
 import tempfile
 import unittest
 from pathlib import Path
@@ -95,6 +96,18 @@ class ReleasePreflightTests(unittest.TestCase):
         with mock.patch.object(release.platform, "system", return_value="Linux"):
             with self.assertRaisesRegex(release.Refused, "Windows Authenticode"):
                 release.inspect(self.root, SHA, "0.1.0", CERT)
+
+    def test_signing_time_mutation_refused(self):
+        def mutation(path):
+            path.write_bytes(b"changed while checking the signature")
+            return CERT
+        with self.assertRaisesRegex(release.Refused, "signed bytes changed"):
+            self.inspect(checker=mutation)
+
+    @unittest.skipUnless(platform.system() == "Windows", "native Authenticode only on Windows")
+    def test_real_windows_unsigned_synthetic_refused(self):
+        with self.assertRaises(release.Refused):
+            release.inspect(self.root, SHA, "0.1.0", CERT)
 
     def test_no_executable_refused(self):
         self.payload.rename(self.root / "LICENSE.txt")
