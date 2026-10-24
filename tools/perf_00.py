@@ -215,9 +215,8 @@ def summarize(trace: dict) -> dict:
         entry["collector_ms"] = point["collector_ms"]
         entry["cpu_percent_of_machine_lower_bound"] = None
         current_cpu = entry.pop("identity_cpu_seconds")
-        entry["handle_count"] = (sum(entry.pop("identity_handles").values())
-                                 if all(p.get("handles") is not None for p in point["processes"])
-                                 else None)
+        handles = entry.pop("identity_handles")
+        entry["handle_count"] = sum(handles.values()) if all(v is not None for v in handles.values()) else None
         if previous_cpu is not None and entry["complete"] and previous_ms is not None:
             elapsed = (point["elapsed_ms"] - previous_ms) / 1000
             if elapsed > 0:
@@ -254,6 +253,10 @@ def summarize(trace: dict) -> dict:
         "whole_tree_peak_rss_bytes": max(rss),
         "whole_tree_median_rss_bytes": statistics.median(rss),
         "whole_tree_final_rss_bytes": rss[-1],
+        "whole_tree_delta_rss_bytes": rss[-1] - rss[0],
+        "observation_duration_ms": samples[-1]["elapsed_ms"] - samples[0]["elapsed_ms"],
+        "max_owned_process_count": max(s["owned_process_count"] for s in complete),
+        "max_external_process_count": max(s["external_process_count"] for s in complete),
         "whole_tree_median_private_bytes": statistics.median(private) if all(p is not None for p in private) else None,
         "cpu_p50_percent_machine_lower_bound": percentile(cpu, .5),
         "cpu_p95_percent_machine_lower_bound": percentile(cpu, .95),
@@ -281,6 +284,11 @@ def compare(baseline: dict, candidate: dict) -> dict:
             "incomplete process trees")
     require(baseline["sample_count"] >= 2 and candidate["sample_count"] >= 2,
             "comparison requires multiple samples")
+    first_duration = baseline["observation_duration_ms"]
+    second_duration = candidate["observation_duration_ms"]
+    require(first_duration > 0 and second_duration > 0 and
+            abs(first_duration - second_duration) <= .1 * max(first_duration, second_duration),
+            "sampling duration mismatch")
     old, new = baseline["whole_tree_median_rss_bytes"], candidate["whole_tree_median_rss_bytes"]
     require(old > 0, "baseline RSS is zero")
     return {
@@ -436,7 +444,9 @@ def write_json(path: str, data: dict) -> None:
     destination = Path(path)
     require(not destination.is_symlink(), "refuse symlink output")
     require(destination.parent.exists(), "output directory must already exist")
-    destination.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # Do not overwrite an existing report/trace, including through a symlink race.
+    with destination.open("x", encoding="utf-8") as handle:
+        handle.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
 def read_json(path: str) -> dict:
