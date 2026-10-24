@@ -10,7 +10,8 @@ param(
 $ErrorActionPreference = 'Stop'
 function Check-IsolatedD([string]$path) {
     $full = [IO.Path]::GetFullPath($path)
-    if (-not $full.StartsWith('D:\projects\CoS-Rust\', [StringComparison]::OrdinalIgnoreCase)) {
+    if (-not ($full.Equals('D:\projects\CoS-Rust', [StringComparison]::OrdinalIgnoreCase) -or
+              $full.StartsWith('D:\projects\CoS-Rust\', [StringComparison]::OrdinalIgnoreCase))) {
         throw 'Only isolated paths below D:\projects\CoS-Rust are allowed'
     }
     $part = $full
