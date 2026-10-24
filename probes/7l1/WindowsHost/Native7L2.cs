@@ -299,7 +299,7 @@ internal sealed partial class GateForm
             var retired = a.RetirementTask is not null && await a.RetirementTask;
             var stale = await RustDeniedAsync(new {
                 op = "tool_snapshot", host = staleHost, channelId = staleChannel,
-                generation = staleGeneration, sequence = 10,
+                generation = staleGeneration, sequence = 14,
                 payload = oldSigned.GetProperty("payload").GetString(),
                 mac = oldSigned.GetProperty("mac").GetString(), handle = newHandle
             });
