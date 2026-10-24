@@ -183,7 +183,32 @@ def inventory(metadata, lockfile, project_license=None):
                 raise Refused("workspace license text unavailable")
             text = "=== PROJECT LICENSE ===\\n" + Path(project_license).read_text("utf-8")
         else:
-            text = read_notice(directory, p.get("license_file"))
+            try:
+                text = read_notice(directory, p.get("license_file"))
+            except Refused as err:
+                if "missing license text for dependency" not in str(err) or not p.get("repository"):
+                    raise
+                # Cargo workspaces sometimes publish sibling crates without
+                # COPYING while their sibling package carries the exact
+                # upstream LICENSE. Require same upstream, version AND SPDX.
+                mirrors = sorted((other for other in metadata["packages"]
+                                  if other is not p
+                                  and other.get("repository") == p.get("repository")
+                                  and other.get("version") == ver
+                                  and other.get("license") == license_id
+                                  and other.get("source") == source),
+                                 key=lambda q: q["name"])
+                text = None
+                for other in mirrors:
+                    mirror_dir = Path(other["manifest_path"]).parent
+                    try:
+                        notice = read_notice(mirror_dir, other.get("license_file"))
+                    except Refused:
+                        continue
+                    text = "=== Same-upstream license source: " + other["name"] + "@" + ver + " ===\\n" + notice
+                    break
+                if text is None:
+                    raise err
         notices.append("## " + name + " " + ver + " [" + license_id + "]\n" + text)
         result.append(entry)
     if not result:
