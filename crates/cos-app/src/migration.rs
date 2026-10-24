@@ -191,7 +191,7 @@ pub fn restore(backup: &Path, target: &Path, expected_manifest_sha256: &str) -> 
     }
     // import itself re-inventories the source, hashes each copied file,
     // validates the synthetic copied session/config and atomically publishes.
-    let mut receipt = profile::import(&source, &target)?;
+    let mut receipt = profile::import_expected(&source, &target, Some(&actual))?;
     receipt["restoredFromBackup"] = json!(true);
     receipt["backupSchemaVersion"] = json!(SCHEMA_VERSION);
     receipt["manifestSha256"] = json!(expected_manifest_sha256.to_ascii_lowercase());
@@ -285,6 +285,17 @@ mod tests {
         let existing = home.path().join("existing");
         fs::create_dir_all(&existing)?;
         assert!(backup(&source, &existing).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn verified_import_refuses_replaced_snapshot_even_if_self_consistent() -> io::Result<()> {
+        let (home, source) = fixture()?;
+        let before = profile::inventory(&source)?;
+        fs::write(source.join("config.json"), b"{\"changed\":true}")?;
+        let target = home.path().join("restored");
+        assert!(profile::import_expected(&source, &target, Some(&before)).is_err());
+        assert!(!target.exists());
         Ok(())
     }
 
