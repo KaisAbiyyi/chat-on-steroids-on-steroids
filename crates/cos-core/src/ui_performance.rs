@@ -204,6 +204,7 @@ impl UiFrameCache {
     /// changes even when all presentation revisions happen to stay identical.
     pub fn clear(&mut self) {
         self.version = None;
+        self.frame.fill(0);
         self.frame.clear();
         self.frame.shrink_to_fit();
     }
@@ -220,16 +221,33 @@ impl UiFrameCache {
         conversation: &ConversationSnapshot,
         groups: Option<&ChatGroupCatalog>,
     ) -> Result<Option<&[u8]>, UiPerformanceError> {
+        let show_panel = matches!(
+            nav.route,
+            UiRoute::Projects {}
+                | UiRoute::Files { .. }
+                | UiRoute::Agents {}
+                | UiRoute::Skills {}
+                | UiRoute::Plugins {}
+                | UiRoute::Settings {}
+        );
+        let show_rich = matches!(
+            nav.route,
+            UiRoute::Conversation { .. }
+                | UiRoute::Project { .. }
+                | UiRoute::Files { .. }
+                | UiRoute::Activity {}
+        );
+        let show_conversation = matches!(nav.route, UiRoute::Conversation { .. });
         let show_groups = matches!(nav.route, UiRoute::Home {}) && nav.sidebar_open;
         let groups = if show_groups { groups } else { None };
         let key = FrameVersion {
             host_epoch: nav.host_epoch,
             nav: nav.revision,
             focus: focus.revision,
-            panels: panels.revision,
-            rich: rich.revision,
-            conversation: conversation.revision,
-            session_generation: conversation.session_generation,
+            panels: if show_panel { panels.revision } else { 0 },
+            rich: if show_rich { rich.revision } else { 0 },
+            conversation: if show_conversation { conversation.revision } else { 0 },
+            session_generation: if show_conversation { conversation.session_generation } else { 0 },
             group: groups.map_or(0, |g| g.revision),
             route: nav.route.clone(),
         };
@@ -250,22 +268,6 @@ impl UiFrameCache {
         if let Some(group) = groups {
             group.validate(nav.host_epoch)?;
         }
-        let show_panel = matches!(
-            nav.route,
-            UiRoute::Projects {}
-                | UiRoute::Files { .. }
-                | UiRoute::Agents {}
-                | UiRoute::Skills {}
-                | UiRoute::Plugins {}
-                | UiRoute::Settings {}
-        );
-        let show_rich = matches!(
-            nav.route,
-            UiRoute::Conversation { .. }
-                | UiRoute::Project { .. }
-                | UiRoute::Files { .. }
-                | UiRoute::Activity {}
-        );
         let active_rich = if show_rich {
             rich.active_key
                 .as_ref()
@@ -278,7 +280,7 @@ impl UiFrameCache {
             focus,
             panel: show_panel.then(|| VisiblePanel::from_snapshot(panels)),
             rich: active_rich,
-            conversation: matches!(nav.route, UiRoute::Conversation { .. }).then_some(conversation),
+            conversation: show_conversation.then_some(conversation),
             groups,
         };
         let bytes = serde_json::to_vec(&wire).map_err(|_| UiPerformanceError::Inconsistent)?;
