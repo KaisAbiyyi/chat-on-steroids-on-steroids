@@ -11,6 +11,7 @@ pub mod persistence;
 pub mod runtime;
 pub mod sandbox;
 pub mod secrets;
+pub mod ui_contract;
 
 pub fn fresh_config(platform: &str) -> serde_json::Value {
     let defaults: serde_json::Value = serde_json::from_str(include_str!(
