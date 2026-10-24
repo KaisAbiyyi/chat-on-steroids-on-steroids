@@ -33,32 +33,67 @@ class Refused(ValueError):
 def licenses(expr):
     if not isinstance(expr, str) or not expr.strip():
         raise Refused("missing SPDX license identifier")
-    # Only the LLVM exception applied to Apache-2.0 is approved explicitly.
-    # All OR/AND alternatives are still audited, never silently dropped.
-    # Some legacy Cargo crates use this pre-SPDX dual-license shorthand.
-    normalized = re.sub(r"[()]", " ", expr)
-    normalized = normalized.replace("MIT/Apache-2.0", "MIT OR Apache-2.0")
-    normalized = normalized.replace("Apache-2.0/MIT", "Apache-2.0 OR MIT")
-    tokens = normalized.split()
-    if (not tokens or
-            re.sub(r"\\s+", " ", normalized).strip() != " ".join(tokens)):
+    # Parse SPDX AND/OR (AND binds tighter). An OR branch with an approved
+    # permissive choice is acceptable; AND needs all components approved.
+    # Unknown WITH exceptions never get silent fallback through OR.
+    # Legacy slash spellings are limited to explicit known dual-license pairs.
+    normalized = expr
+    for old, new in (
+        ("MIT/Apache-2.0", "MIT OR Apache-2.0"),
+        ("Apache-2.0/MIT", "Apache-2.0 OR MIT"),
+        ("Unlicense/MIT", "Unlicense OR MIT"),
+        ("MIT/Unlicense", "MIT OR Unlicense"),
+    ):
+        normalized = normalized.replace(old, new)
+    tokens = normalized.replace("(", " ( ").replace(")", " ) ").split()
+    if not tokens:
         raise Refused("malformed SPDX license expression")
-    i = 0
-    while i < len(tokens):
-        token = tokens[i]
-        if token in ("AND", "OR"):
-            i += 1
-            continue
-        if token not in APPROVED:
-            raise Refused("unsupported/unknown SPDX license: " + expr)
-        if i + 1 < len(tokens) and tokens[i + 1] == "WITH":
-            if i + 2 >= len(tokens) or (token, tokens[i + 2]) != ("Apache-2.0", "LLVM-exception"):
+    pos = 0
+
+    def primary():
+        nonlocal pos
+        if pos >= len(tokens):
+            raise Refused("incomplete SPDX license expression")
+        tok = tokens[pos]
+        pos += 1
+        if tok == "(":
+            value = either()
+            if pos >= len(tokens) or tokens[pos] != ")":
+                raise Refused("unclosed SPDX parentheses")
+            pos += 1
+            return value
+        if not re.fullmatch("[A-Za-z0-9.+-]+", tok) or tok in ("AND", "OR", "WITH"):
+            raise Refused("invalid SPDX token: " + tok)
+        if pos < len(tokens) and tokens[pos] == "WITH":
+            pos += 1
+            if pos >= len(tokens) or (tok, tokens[pos]) != ("Apache-2.0", "LLVM-exception"):
                 raise Refused("unapproved license exception: " + expr)
-            i += 3
-        else:
-            i += 1
-    if tokens[0] in ("AND", "OR") or tokens[-1] in ("AND", "OR"):
-        raise Refused("malformed SPDX conjunction")
+            pos += 1
+        return tok in APPROVED
+
+    def together():
+        nonlocal pos
+        result = primary()
+        while pos < len(tokens) and tokens[pos] == "AND":
+            pos += 1
+            rhs = primary()
+            result = result and rhs
+        return result
+
+    def either():
+        nonlocal pos
+        result = together()
+        while pos < len(tokens) and tokens[pos] == "OR":
+            pos += 1
+            rhs = together()
+            result = result or rhs
+        return result
+
+    approved = either()
+    if pos != len(tokens):
+        raise Refused("unexpected SPDX operator or token: " + tokens[pos])
+    if not approved:
+        raise Refused("unsupported/unknown SPDX license: " + expr)
     return expr
 
 def read_notice(folder, explicit=None):
