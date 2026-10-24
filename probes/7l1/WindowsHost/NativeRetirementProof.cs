@@ -12,7 +12,8 @@ internal static class NativeRetirementProof
         if (string.IsNullOrWhiteSpace(expectedTargetId) ||
             response.ValueKind != JsonValueKind.Object ||
             !response.TryGetProperty("targetInfos", out var targets) ||
-            targets.ValueKind != JsonValueKind.Array)
+            targets.ValueKind != JsonValueKind.Array ||
+            targets.GetArrayLength() == 0)
             return false;
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var target in targets.EnumerateArray())
@@ -58,6 +59,7 @@ internal static class NativeRetirementProof
         using var present = JsonDocument.Parse(
             """{"targetInfos":[{"targetId":"old-worker","type":"service_worker","url":"chrome-extension://synthetic/sw.mjs"}]}""");
         using var malformed = JsonDocument.Parse("""{"targetInfos":null}""");
+        using var empty = JsonDocument.Parse("""{"targetInfos":[]}""");
         using var duplicate = JsonDocument.Parse(
             """{"targetInfos":[{"targetId":"x","type":"page","url":"https://synthetic.cos.test/"},{"targetId":"x","type":"page","url":"https://synthetic.cos.test/"}]}""");
 
@@ -85,6 +87,8 @@ internal static class NativeRetirementProof
         Must(!Gate(true, verifiedMissing, channel: 100), "changed Rust channel");
         Must(!ExactTargetAbsent(malformed.RootElement, "old-worker"),
             "malformed native CDP response");
+        Must(!ExactTargetAbsent(empty.RootElement, "old-worker"),
+            "empty inventory cannot attest target disappearance");
         Must(!ExactTargetAbsent(duplicate.RootElement, "old-worker"),
             "duplicate target IDs");
         Must(!ExactTargetAbsent(absent.RootElement, ""), "missing exact target ID");
