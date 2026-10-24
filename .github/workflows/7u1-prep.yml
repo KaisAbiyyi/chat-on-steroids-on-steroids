@@ -1,0 +1,70 @@
+name: 7U1-PREP fail-closed security (not owner acceptance)
+
+on:
+  pull_request:
+    paths:
+      - "probes/7u1/**"
+      - ".github/workflows/7u1-prep.yml"
+  push:
+    branches: ["work/7u1-prep-*"]
+    paths:
+      - "probes/7u1/**"
+      - ".github/workflows/7u1-prep.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu-negative-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v6
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s probes/7u1/tests -p 'test_*.py' -v
+      - run: python -m py_compile probes/7u1/preflight.py
+
+  windows-negative-contract:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v6
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s probes/7u1/tests -p "test_*.py" -v
+      - run: python -m py_compile probes/7u1/preflight.py
+
+  windows-powershell-runner-syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Parse owner preflight without executing local actions
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'probes/7u1/run-preflight.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { throw ($errors | Out-String) }
+
+  windows-source-build-not-owner-gate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Build existing native synthetic bridge (explicitly NOT product acceptance)
+        run: cargo build --locked -p cos-core --example 7l2_bridge --release
+      - name: Build existing synthetic WebView2 host
+        run: dotnet build probes/7l1/WindowsHost/WindowsHost.csproj --configuration Release -warnaserror
+      - name: Verify synthetic native binaries exist; keep 7U1 NOT_RUN
+        shell: pwsh
+        run: |
+          if (-not (Test-Path target/release/examples/7l2_bridge.exe)) { throw 'Rust bridge build absent' }
+          if (-not (Test-Path probes/7l1/WindowsHost/bin/Release/net8.0-windows/WindowsHost.dll)) { throw 'WebView2 host build absent' }
+          Write-Host 'Source-owned SYNTHETIC native binaries only; 8L1 product adapter BLOCKED; signed-in 7U1 NOT_RUN.'
