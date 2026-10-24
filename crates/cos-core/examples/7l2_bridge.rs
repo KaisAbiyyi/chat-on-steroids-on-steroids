@@ -58,6 +58,15 @@ enum Request {
         payload: String,
         mac: String,
     },
+    // 7C persisted-ledger events use a separate signed MAC domain from tools.
+    Authorize {
+        host: HostWire,
+        channel_id: u64,
+        generation: u64,
+        sequence: u64,
+        payload: String,
+        mac: String,
+    },
     ToolAttach {
         host: HostWire,
         channel_id: u64,
@@ -272,6 +281,30 @@ impl State {
                     .map_err(|e| e.to_string())?;
                 Ok(json!({"observation":format!("{result:?}")}))
             }
+            Request::Authorize {
+                host,
+                channel_id,
+                generation,
+                sequence,
+                payload,
+                mac,
+            } => {
+                // Never treat a ledger authorization as a generic tool command.
+                // The bridge verifies host identity, current frame, 7B sequence,
+                // companion-event MAC domain, exact event shape and receipt.
+                let receipt = self
+                    .bridge
+                    .authorize_companion_event(
+                        &host.into(),
+                        channel_id,
+                        generation,
+                        sequence,
+                        &unhex(&payload)?,
+                        &digest(&mac)?,
+                    )
+                    .map_err(|e| e.to_string())?;
+                Ok(json!({"receipt":hex(&receipt)}))
+            }
             Request::ToolAttach {
                 host,
                 channel_id,
@@ -420,4 +453,139 @@ mod tests {
         assert!(serde_json::from_value::<Request>(bad).is_err());
         assert!(serde_json::from_value::<Request>(json!({"op":"tool_send"})).is_err());
     }
+
+    #[test]
+    fn private_wire_accepts_only_exact_signed_ledger_authorize() {
+        let valid = json!({
+            "op": "authorize",
+            "host": {
+                "identity": {
+                    "profileId": "a", "tabId": 1, "frameId": 0,
+                    "documentId": "d", "navigationEpoch": 1,
+                    "sessionId": "s", "sessionEpoch": 1, "workerGeneration": 1
+                },
+                "origin": "https://synthetic.cos.test", "hostGeneration": 1
+            },
+            "channelId": 1, "generation": 1, "sequence": 2,
+            "payload": "00", "mac": "00".repeat(32)
+        });
+        assert!(matches!(
+            serde_json::from_value::<Request>(valid.clone()),
+            Ok(Request::Authorize {
+                channel_id: 1,
+                generation: 1,
+                sequence: 2,
+                ..
+            })
+        ));
+        let mut missing_mac = valid.clone();
+        missing_mac.as_object_mut().unwrap().remove("mac");
+        assert!(serde_json::from_value::<Request>(missing_mac).is_err());
+        let mut extra = valid.clone();
+        extra["command"] = json!("Runtime.evaluate");
+        assert!(serde_json::from_value::<Request>(extra).is_err());
+        let mut host_extra = valid.clone();
+        host_extra["host"]["ownerOverride"] = json!(true);
+        assert!(serde_json::from_value::<Request>(host_extra).is_err());
+        let mut wrong_case = valid.clone();
+        wrong_case.as_object_mut().unwrap().remove("channelId");
+        wrong_case["channel_id"] = json!(1);
+        assert!(serde_json::from_value::<Request>(wrong_case).is_err());
+        let mut unknown_op = valid;
+        unknown_op["op"] = json!("authorize_current");
+        assert!(serde_json::from_value::<Request>(unknown_op).is_err());
+    }
+
+    #[test]
+    fn signed_ledger_wire_yields_mac_receipt_and_denies_replay_and_forgery() {
+        let host: HostWire = serde_json::from_value(json!({
+            "identity": {
+                "profileId": "a", "tabId": 1, "frameId": 0,
+                "documentId": "d", "navigationEpoch": 1,
+                "sessionId": "s", "sessionEpoch": 1, "workerGeneration": 1
+            },
+            "origin": "https://synthetic.cos.test", "hostGeneration": 1
+        }))
+        .unwrap();
+        let trusted: TrustedHostEvidence = host.clone().into();
+        let pipe = Rc::new(RefCell::new(NativePipe {
+            input: io::stdin(),
+            output: io::BufWriter::new(io::stdout()),
+        }));
+        let mut state = State {
+            bridge: NativeBrowserBridge::new(),
+            tools: DirectBrowserTools::new(WebView2Debugger { pipe }),
+            owned: HashMap::new(),
+        };
+        let boot = state.bridge.register_host(trusted.clone()).unwrap();
+        state
+            .bridge
+            .complete_handshake(
+                &trusted,
+                boot.channel_id,
+                boot.host_generation,
+                &boot.handshake_proof(),
+            )
+            .unwrap();
+        let observation = serde_json::to_vec(&json!({
+            "protocol": 14, "identity": &trusted.identity
+        }))
+        .unwrap();
+        state
+            .bridge
+            .observe(
+                &trusted,
+                boot.channel_id,
+                boot.host_generation,
+                1,
+                &observation,
+                &boot.observation_mac(1, &observation),
+            )
+            .unwrap();
+        let payload = serde_json::to_vec(&json!({
+            "frame": {"protocol": 14, "identity": &trusted.identity},
+            "event": {"protocol": 14, "kind": "attach", "sequence": 1}
+        }))
+        .unwrap();
+        let good_mac = boot.companion_event_mac(2, &payload);
+        let command = json!({
+            "op": "authorize", "host": host,
+            "channelId": boot.channel_id,
+            "generation": boot.host_generation,
+            "sequence": 2,
+            "payload": hex(&payload),
+            "mac": hex(&good_mac)
+        });
+        let mut invalid_mac = command.clone();
+        invalid_mac["mac"] = json!(hex(&[0u8; 32]));
+        assert!(state
+            .apply(serde_json::from_value(invalid_mac).unwrap())
+            .is_err());
+        let signed = state
+            .apply(serde_json::from_value(command.clone()).unwrap())
+            .unwrap();
+        assert_eq!(
+            signed["receipt"],
+            json!(hex(&boot.companion_receipt_mac(2, &payload)))
+        );
+        // A successful receipt consumes the signed 7B sequence exactly once.
+        assert!(state
+            .apply(serde_json::from_value(command).unwrap())
+            .is_err());
+        // Reusing the observed sequence for a ledger write is also forbidden.
+        let prior_sequence = json!({
+            "op": "authorize", "host": {
+                "identity": &trusted.identity,
+                "origin": &trusted.origin,
+                "hostGeneration": trusted.host_generation
+            },
+            "channelId": boot.channel_id, "generation": boot.host_generation,
+            "sequence": 1, "payload": hex(&payload),
+            "mac": hex(&boot.companion_event_mac(1, &payload))
+        });
+        assert!(state
+            .apply(serde_json::from_value(prior_sequence).unwrap())
+            .is_err());
+    }
+
 }
