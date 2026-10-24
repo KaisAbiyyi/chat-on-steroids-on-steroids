@@ -328,9 +328,14 @@ internal sealed partial class GateForm : Form
                 try
                 {
                     using var report = JsonDocument.Parse(evt.ParameterObjectAsJson);
-                    if (report.RootElement.TryGetProperty("targetId", out var target) &&
-                        target.ValueKind == JsonValueKind.String &&
-                        !string.IsNullOrWhiteSpace(browser.WorkerTargetId) &&
+                    if (!report.RootElement.TryGetProperty("targetId", out var target) ||
+                        target.ValueKind != JsonValueKind.String ||
+                        string.IsNullOrWhiteSpace(target.GetString()))
+                    {
+                        RevokeAndRetire(browser); // malformed native event fails closed
+                        return;
+                    }
+                    if (!string.IsNullOrWhiteSpace(browser.WorkerTargetId) &&
                         string.Equals(target.GetString(), browser.WorkerTargetId,
                             StringComparison.Ordinal))
                     {
@@ -340,7 +345,7 @@ internal sealed partial class GateForm : Form
                         RevokeAndRetire(browser);
                     }
                 }
-                catch (JsonException)
+                catch (Exception ex) when (ex is JsonException or InvalidOperationException)
                 {
                     RevokeAndRetire(browser); // invalid native lifecycle report fails closed
                 }
