@@ -220,7 +220,7 @@ def inventory(metadata, lockfile, project_license=None):
                         raise Refused("missing pinned upstream Tree-sitter notice")
                     raw = pinned.read_bytes()
                     actual = hashlib.sha1(
-                        b"blob " + str(len(raw)).encode("ascii") + b"\\x00" + raw
+                        b"blob " + str(len(raw)).encode("ascii") + b"\x00" + raw
                     ).hexdigest()
                     if actual != "451fe1d26ee6043ac94f6c8a81a6143f17748b4d":
                         raise Refused("pinned Tree-sitter source notice altered")
