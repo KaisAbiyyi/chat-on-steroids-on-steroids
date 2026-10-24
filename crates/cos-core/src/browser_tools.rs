@@ -123,7 +123,10 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
     /// Native lifecycle helper: distinguish a missing/stale lease from a
     /// failed detach of this exact channel. Never unlock other tab owners.
     pub fn has_lease_for(
-        &self, trusted: &TrustedHostEvidence, channel_id: u64, generation: u64,
+        &self,
+        trusted: &TrustedHostEvidence,
+        channel_id: u64,
+        generation: u64,
     ) -> bool {
         self.leases.get(&TabKey::new(trusted)).is_some_and(|lease| {
             lease.evidence == *trusted
