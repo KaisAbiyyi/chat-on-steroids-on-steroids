@@ -1,7 +1,7 @@
 use cos_core::ui_rich::{
-    RichDeck, RichError, RichPanel, RichReply, MAX_RICH_FRAME_BYTES, MAX_RICH_PANELS,
+    MAX_RICH_FRAME_BYTES, MAX_RICH_PANELS, RichDeck, RichError, RichPanel, RichReply,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 fn request(deck: &mut RichDeck, sequence: u64, command: Value) -> Result<RichReply, RichError> {
     let bytes = serde_json::to_vec(&json!({
@@ -107,8 +107,16 @@ fn host_publishes_all_five_surfaces_and_renderer_can_only_change_editable_data()
         RichError::Forbidden
     );
     assert_eq!(deck.snapshot(), state);
-    assert_eq!(request(&mut deck, 5, json!({"action":"snapshot"})).unwrap_err(), RichError::Sequence);
-    assert_eq!(request(&mut deck, 6, json!({"action":"snapshot"})).unwrap().state, state);
+    assert_eq!(
+        request(&mut deck, 5, json!({"action":"snapshot"})).unwrap_err(),
+        RichError::Sequence
+    );
+    assert_eq!(
+        request(&mut deck, 6, json!({"action":"snapshot"}))
+            .unwrap()
+            .state,
+        state
+    );
 }
 
 #[test]
@@ -139,7 +147,10 @@ fn renderer_must_not_modify_read_only_code_or_terminal_or_invent_permissions() {
         "command":{"action":"run-terminal","key":"readonly","command":"id"}
     }))
     .unwrap();
-    assert_eq!(deck.dispatch_renderer_json(&bytes).unwrap_err(), RichError::Malformed);
+    assert_eq!(
+        deck.dispatch_renderer_json(&bytes).unwrap_err(),
+        RichError::Malformed
+    );
     assert_eq!(deck.snapshot().revision, revision);
 }
 
@@ -155,20 +166,28 @@ fn malformed_stale_and_oversized_frames_are_rejected_without_side_effects() {
     ];
     for payload in invalid {
         let bytes = serde_json::to_vec(&payload).unwrap();
-        assert_eq!(deck.dispatch_renderer_json(&bytes).unwrap_err(), RichError::Malformed);
+        assert_eq!(
+            deck.dispatch_renderer_json(&bytes).unwrap_err(),
+            RichError::Malformed
+        );
     }
     assert_eq!(
-        deck.dispatch_renderer_json(&vec![b'x'; MAX_RICH_FRAME_BYTES + 1]).unwrap_err(),
+        deck.dispatch_renderer_json(&vec![b'x'; MAX_RICH_FRAME_BYTES + 1])
+            .unwrap_err(),
         RichError::Oversize
     );
-    let wrong_protocol = json!({"protocol":2,"hostEpoch":7,"sequence":1,"command":{"action":"snapshot"}});
+    let wrong_protocol =
+        json!({"protocol":2,"hostEpoch":7,"sequence":1,"command":{"action":"snapshot"}});
     assert_eq!(
-        deck.dispatch_renderer_json(&serde_json::to_vec(&wrong_protocol).unwrap()).unwrap_err(),
+        deck.dispatch_renderer_json(&serde_json::to_vec(&wrong_protocol).unwrap())
+            .unwrap_err(),
         RichError::Protocol
     );
-    let stale_epoch = json!({"protocol":1,"hostEpoch":6,"sequence":1,"command":{"action":"snapshot"}});
+    let stale_epoch =
+        json!({"protocol":1,"hostEpoch":6,"sequence":1,"command":{"action":"snapshot"}});
     assert_eq!(
-        deck.dispatch_renderer_json(&serde_json::to_vec(&stale_epoch).unwrap()).unwrap_err(),
+        deck.dispatch_renderer_json(&serde_json::to_vec(&stale_epoch).unwrap())
+            .unwrap_err(),
         RichError::Epoch
     );
     assert_eq!(
@@ -184,7 +203,10 @@ fn malformed_stale_and_oversized_frames_are_rejected_without_side_effects() {
         .unwrap_err(),
         RichError::Revision
     );
-    assert_eq!(request(&mut deck, 1, json!({"action":"snapshot"})).unwrap_err(), RichError::Sequence);
+    assert_eq!(
+        request(&mut deck, 1, json!({"action":"snapshot"})).unwrap_err(),
+        RichError::Sequence
+    );
     assert_eq!(deck.snapshot(), state);
 }
 
@@ -193,7 +215,8 @@ fn unsafe_ids_content_pdf_pages_and_capacity_are_refused_atomically() {
     let mut deck = RichDeck::new(7).unwrap();
     let state = deck.snapshot();
     assert_eq!(
-        deck.publish_from_host(editor("../root", false)).unwrap_err(),
+        deck.publish_from_host(editor("../root", false))
+            .unwrap_err(),
         RichError::Key
     );
     assert_eq!(
@@ -286,7 +309,10 @@ fn pdf_page_boundaries_snapshot_quota_and_rebind_fence() {
         request(&mut deck, 3, json!({"action":"snapshot"})).unwrap_err(),
         RichError::Epoch
     );
-    assert_eq!(deck.remove_from_host("pdf").unwrap_err(), RichError::NotFound);
+    assert_eq!(
+        deck.remove_from_host("pdf").unwrap_err(),
+        RichError::NotFound
+    );
 
     let mut bounded = RichDeck::new(11).unwrap();
     for i in 0..7 {
@@ -295,7 +321,7 @@ fn pdf_page_boundaries_snapshot_quota_and_rebind_fence() {
                 key: format!("code-{i}"),
                 title: "Preview".into(),
                 language: "text".into(),
-                text: "x".repeat(4_000),
+                text: "x".repeat(4_200),
             })
             .unwrap();
     }
@@ -306,7 +332,7 @@ fn pdf_page_boundaries_snapshot_quota_and_rebind_fence() {
                 key: "code-7".into(),
                 title: "Preview".into(),
                 language: "text".into(),
-                text: "x".repeat(4_000),
+                text: "x".repeat(4_200),
             })
             .unwrap_err(),
         RichError::Oversize
