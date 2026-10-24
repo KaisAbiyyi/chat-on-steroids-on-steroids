@@ -28,7 +28,7 @@ Consequently, native clean start/restart, multi-tab/profile preservation, crash/
 | Check | Result and boundary |
 | --- | --- |
 | JS 8A/8B/8C + 7C/7E regressions | **56 PASS, 0 FAIL, 0 skipped**, Node 24.21.0 on physical Windows; synthetic callbacks only |
-| Task-board unit regressions | **14 PASS**; `python -m unittest discover -s tools -p test_task_board.py` |
+| Task-board unit regressions | **15 PASS** after reconciliation; `python -m unittest discover -s tools -p test_task_board.py`. Original-source baseline was 14 PASS. |
 | DAG consistency | **PASS**, 115 tasks / 72 C / 28 L / 15 U, no cyclic or dangling edges |
 | Rust formatting | **PASS**, `cargo fmt --all --check` on the source under test |
 | Local `cos-core` regressions | **63 PASS, 0 FAIL, 0 ignored**; `cargo test -p cos-core --locked`. Full workspace strict check still running |
@@ -41,6 +41,8 @@ Consequently, native clean start/restart, multi-tab/profile preservation, crash/
 The [machine-readable receipt](../../audit/2026-10-24/8l1-native-integration-blocked.json) embeds the **unchanged** raw preflight receipt. Its `sourceSha` remains `NOT_RUN`, `preflightOnly=true`, and `native7L1Accepted=false`. The enclosing receipt identifies this session's local source/build hashes as supplemental provenance; it does not pretend the preflight ran the integrated source-attestation gate or 8L1. Local raw logs and fresh synthetic profiles are retained under `.test-tmp/8l1`; their hashes are recorded.
 
 Cloud prerequisite checks observed through GitHub: PR #61 18/18 successful checks, PR #65 22/22, PR #67 19/19. A successful main Rust run on the SHA under test is [40053693894](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40053693894). Later same-SHA reruns were still running at first inspection; no unfinished check is called PASS. The new receipt PR requires its own exact-head CI and direct self-review before merge.
+
+The initial receipt checkpoint's DAG CI correctly failed after status reconciliation: two tests still expected 8B to be unaccepted and every future native gate to be forecastable, and the board used a different candidate label. Local reproduction recorded **2 failures / 1 error**. The repair updates the accepted-snapshot assertions to the verified merged units, uses a separately reopened valid hypothetical graph to preserve the complete native/owner ordering test, restores the board's prescribed label, and adds an explicit regression that live blocked 8L1/8U1/9A never enter a forecast while 15B remains independently eligible. **15 tests pass**, with no changed resolver, removed assertion, skipped gate or altered acceptance threshold. RED and GREEN logs are retained under `.test-tmp/8l1/evidence`.
 
 ## Direct self-review and handoff
 

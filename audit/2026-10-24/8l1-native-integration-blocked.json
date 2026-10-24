@@ -131,8 +131,9 @@
     },
     "taskBoard": {
       "status": "PASS",
-      "tests": 14,
-      "command": "python -m unittest discover -s tools -p test_task_board.py"
+      "tests": 15,
+      "command": "python -m unittest discover -s tools -p test_task_board.py",
+      "baselineTests": 14
     },
     "rustfmt": {
       "status": "PASS",
@@ -244,7 +245,9 @@
     "host-build.log": "68d60286f09a1b5663b12c6c57e48e4ed188fcf0b1bcc596c05ddcf0c26cc0e7",
     "rustfmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "synthetic-node.log": "72065cd2c093881b126aa7eb930ec8156a0ffdb977e3d7bab10ca5d5e75d9a61",
-    "task-board-tests.log": "93c8dadc5c7604a90b2ce8da0da354eff0e566676d47cea621cd711b1842d2a7"
+    "task-board-tests.log": "93c8dadc5c7604a90b2ce8da0da354eff0e566676d47cea621cd711b1842d2a7",
+    "task-board-reconciliation-red.log": "ba3268447f9dd9b8088f0f7d6e52222c5f21b82739794e9dc1aae148ce9749ae",
+    "task-board-reconciliation-green.log": "5e57969abd011360b849fa1252e6724905b4f663708de5f6bf0ab9679b9d3c8d"
   },
   "cloudPrerequisites": {
     "61": {
@@ -261,6 +264,20 @@
       "head": "5e1e6364c2725bb110eb7c97e17ad273baec41fc",
       "successfulChecks": 19,
       "status": "MERGED"
+    }
+  },
+  "dagReconciliation": {
+    "RED": {
+      "failures": 2,
+      "errors": 1,
+      "cause": "Stale accepted-status and forecast fixture assertions plus candidate board label after truthful registry advancement"
+    },
+    "GREEN": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "regression": "test_blocked_native_gate_never_enters_forecast",
+      "scope": "Snapshot assertions and separate valid hypothetical forecast; resolver and acceptance thresholds unchanged"
     }
   }
 }
