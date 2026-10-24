@@ -8,7 +8,7 @@ metrics and caller-supplied non-secret provenance; never command lines/titles.
 from __future__ import annotations
 
 import argparse
-import hashlib
+import re
 import json
 import math
 import os
@@ -35,6 +35,9 @@ WORKLOADS = {
     "recovery": {"chats": 1, "browser": "required", "history": "small", "activity": "restart-recover", "thermal": "warm"},
 }
 ALLOWED_ROLES = {"owned", "external"}
+TOP_FIELDS = {"schema_version", "provenance", "workload_id", "workload_params", "samples", "events"}
+PROVENANCE_FIELDS = {"app", "source_sha", "binary_sha256", "host_id", "os", "power_mode", "profile_class", "build_id", "logical_cpus", "synthetic"}
+PROCESS_FIELDS = {"pid", "ppid", "identity", "rss_bytes", "private_bytes", "peak_rss_bytes", "cpu_seconds", "handles"}
 
 
 class TraceError(ValueError):
@@ -65,7 +68,7 @@ def percentile(numbers: list[float], percent: float) -> float | None:
 
 
 def _process(p: dict) -> None:
-    require(isinstance(p, dict), "invalid process record")
+    require(isinstance(p, dict) and not (set(p) - PROCESS_FIELDS), "invalid/unsafe process fields")
     for k in ("pid", "ppid"):
         require(type(p.get(k)) is int and p[k] >= 0, "invalid " + k)
     require(p["pid"] > 0 and isinstance(p.get("identity"), str)
@@ -78,11 +81,16 @@ def _process(p: dict) -> None:
 
 def validate_trace(trace: dict) -> None:
     require(isinstance(trace, dict) and trace.get("schema_version") == SCHEMA_VERSION, "unsupported schema")
+    require(not (set(trace) - TOP_FIELDS), "unrecognized trace fields; privacy boundary")
     provenance = trace.get("provenance")
-    require(isinstance(provenance, dict), "missing provenance")
+    require(isinstance(provenance, dict) and not (set(provenance) - PROVENANCE_FIELDS),
+            "unrecognized provenance fields; privacy boundary")
     for k in ("app", "source_sha", "host_id", "os", "power_mode", "profile_class", "build_id"):
         require(isinstance(provenance.get(k), str) and 0 < len(provenance[k]) <= 128,
                 "missing/invalid provenance " + k)
+        if k != "source_sha":
+            require(re.fullmatch(r"[A-Za-z0-9_.-]+", provenance[k]) is not None,
+                    "non-anonymous provenance characters in " + k)
     require(provenance["app"] in ("cos-original", "cosos"), "unknown application kind")
     require(provenance["source_sha"] == "SYNTHETIC" or
             (len(provenance["source_sha"]) == 40 and all(ch in "0123456789abcdef"
@@ -112,6 +120,8 @@ def validate_trace(trace: dict) -> None:
         nonnegative(sample.get("collector_ms"), "collector_ms")
         processes, roots = sample.get("processes"), sample.get("roots")
         require(isinstance(processes, list) and len(processes) <= 10000, "invalid process count")
+        require(not (set(sample) - {"elapsed_ms", "collector_ms", "processes", "roots"}),
+                "unrecognized sample fields; privacy boundary")
         require(isinstance(roots, list) and 1 <= len(roots) <= 128, "invalid root count")
         by_pid: dict[int, dict] = {}
         for p in processes:
@@ -120,13 +130,15 @@ def validate_trace(trace: dict) -> None:
             by_pid[p["pid"]] = p
         seen_root_ids = set()
         for root in roots:
-            require(isinstance(root, dict) and type(root.get("pid")) is int
+            require(isinstance(root, dict) and not (set(root) - {"pid", "identity", "role"})
+                    and type(root.get("pid")) is int
                     and root["pid"] > 0 and isinstance(root.get("identity"), str)
                     and root.get("role") in ALLOWED_ROLES, "invalid root")
             require(root["pid"] not in seen_root_ids, "duplicate root pid")
             seen_root_ids.add(root["pid"])
     events = trace.get("events", {})
-    require(isinstance(events, dict), "invalid events")
+    require(isinstance(events, dict) and not (set(events) - {"startup_ms", "tool_latencies_ms"}),
+            "unrecognized events fields; privacy boundary")
     nonnegative(events.get("startup_ms"), "startup_ms", optional=True)
     latencies = events.get("tool_latencies_ms", [])
     require(isinstance(latencies, list) and len(latencies) <= 20000, "invalid latencies")
@@ -187,8 +199,18 @@ def summarize(trace: dict) -> dict:
     previous_cpu = None
     previous_ms = None
     warnings = []
+    expected_root_identities = {}
     for point in trace["samples"]:
         entry = sample_tree(point)
+        current_by_pid = {p["pid"]: p for p in point["processes"]}
+        for root in point["roots"]:
+            pid = root["pid"]
+            actual = current_by_pid.get(pid)
+            if actual is not None and pid not in expected_root_identities:
+                expected_root_identities[pid] = actual["identity"]
+            if actual is not None and expected_root_identities.get(pid) != actual["identity"]:
+                entry["complete"] = False
+                entry["missing_root_pids"] = sorted(set(entry["missing_root_pids"] + [pid]))
         entry["elapsed_ms"] = point["elapsed_ms"]
         entry["collector_ms"] = point["collector_ms"]
         entry["cpu_percent_of_machine_lower_bound"] = None
@@ -199,8 +221,9 @@ def summarize(trace: dict) -> dict:
         if previous_cpu is not None and entry["complete"] and previous_ms is not None:
             elapsed = (point["elapsed_ms"] - previous_ms) / 1000
             if elapsed > 0:
-                cpu_delta = sum(max(0, value - previous_cpu.get(identity, 0))
-                                for identity, value in current_cpu.items() if value is not None)
+                cpu_delta = sum(max(0, value - previous_cpu[identity])
+                                for identity, value in current_cpu.items()
+                                if value is not None and previous_cpu.get(identity) is not None)
                 entry["cpu_percent_of_machine_lower_bound"] = round(
                     100 * cpu_delta / (elapsed * trace["provenance"]["logical_cpus"]), 3)
         if not entry["complete"]:
@@ -322,7 +345,7 @@ $rows = @(
           rss_bytes=[long]$_.WorkingSet64
           private_bytes=[long]$_.PrivateMemorySize64
           peak_rss_bytes=[long]$_.PeakWorkingSet64
-          cpu_seconds=if ($null -ne $_.CPU) { [double]$_.CPU } else { $null }
+          cpu_seconds=$(if ($null -ne $_.CPU) { [double]$_.CPU } else { $null })
           handles=[long]$_.HandleCount
         }
       } catch { }
