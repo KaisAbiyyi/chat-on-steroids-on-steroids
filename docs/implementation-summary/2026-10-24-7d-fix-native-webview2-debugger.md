@@ -31,7 +31,9 @@ The runner emits `receipt.json` with source SHA, host/Rust binary SHA256, per-ch
 
 `.github/workflows/7d-fix-native-debugger.yml` runs Ubuntu/Windows Rust fmt, strict Clippy, source-aware 7B/7D tests, MV3 worker/ledger regressions, and hosted Windows release compilation of Rust helper and .NET8 WinForms WebView2 host. Artifact `cos-7d-fix-7l2-windows-<exact-git-sha>` contains both native binaries, `source.sha` and `hashes.json` with SHA256 of each file.
 
-Only when cloud PR is accepted and merged, run `probes/7l2/run-native.ps1` on a separately authorized isolated Windows D: checkout with that **same merged SHA**:
+On PRs, GitHub Actions checks out a synthetic merge-ref: its artifact SHA may not equal the PR branch HEAD. After the PR is merged, the **push-to-main** workflow builds the actual merged source, emits a new artifact named with that real `main` commit SHA, and records that same SHA in `source.sha`. **Use only that post-merge main artifact**, not the older PR merge-ref artifact, for physical 7L2 acceptance.
+
+Only when cloud PR is accepted and merged, run `probes/7l2/run-native.ps1` on a separately authorized isolated Windows D: checkout with the **same real merged main SHA** as the post-merge artifact:
 
 ```powershell
 pwsh -File probes/7l2/run-native.ps1 -Repo D:\projects\CoS-Rust\verified -ArtifactRoot D:\projects\CoS-Rust\artifacts\7l2 -Out D:\projects\CoS-Rust\.test-tmp\7l2\new-run
