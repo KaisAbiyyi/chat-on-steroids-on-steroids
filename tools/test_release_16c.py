@@ -60,6 +60,22 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(bundle.Refused, "SPDX"):
             self.build()
 
+    def test_approved_llvm_exception_is_explicit(self):
+        self.meta["packages"][0]["license"] = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+        self.assertEqual(self.build()["status"], "PASS")
+
+    def test_unreviewed_exception_refused(self):
+        self.meta["packages"][0]["license"] = "Apache-2.0 WITH Unknown-exception OR MIT"
+        with self.assertRaisesRegex(bundle.Refused, "unapproved"):
+            self.build()
+
+    def test_workspace_uses_root_license(self):
+        self.meta["packages"][0]["source"] = None
+        self.lock["package"][0]["source"] = None
+        self.lock["package"][0].pop("checksum")
+        (self.pkg / "LICENSE-MIT").unlink()
+        self.assertEqual(self.build()["status"], "PASS")
+
     def test_missing_license_text_refused(self):
         (self.pkg / "LICENSE-MIT").unlink()
         with self.assertRaisesRegex(bundle.Refused, "missing license"):
