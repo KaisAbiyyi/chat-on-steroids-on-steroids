@@ -107,6 +107,14 @@ def read_notice(folder, explicit=None):
         paths.append(candidate)
     paths.extend(p for p in sorted(folder.iterdir())
                  if p.is_file() and p.name.upper().startswith(LICENSE_NAMES))
+    # r-efi publishes full original MIT/Apache/LGPL license and copyright
+    # notices in AUTHORS rather than a LICENSE-prefixed file.
+    if folder.name.startswith("r-efi-"):
+        authors = folder / "AUTHORS"
+        if authors.is_file() and not authors.is_symlink():
+            text = authors.read_text("utf-8")
+            if "LICENSE:" in text and "Permission is hereby granted" in text and "COPYRIGHT:" in text:
+                paths.append(authors)
     seen = set()
     chunks = []
     for path in paths:
