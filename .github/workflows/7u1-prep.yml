@@ -36,6 +36,18 @@ jobs:
       - run: python -m unittest discover -s probes/7u1/tests -p "test_*.py" -v
       - run: python -m py_compile probes/7u1/preflight.py
 
+  windows-powershell-runner-syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Parse owner preflight without executing local actions
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'probes/7u1/run-preflight.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { throw ($errors | Out-String) }
+
   windows-source-build-not-owner-gate:
     runs-on: windows-latest
     steps:
