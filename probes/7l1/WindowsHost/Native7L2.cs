@@ -319,22 +319,95 @@ internal sealed partial class GateForm
             var workerStopGeneration = a.HostGeneration;
             var workerTarget = a.WorkerTargetId ??
                 throw new InvalidOperationException("missing source-owned MV3 worker");
-            var stoppedWorker = await CdpAsync(a,"Target.closeTarget",new {targetId=workerTarget});
-            // The WebView2 Target.targetDestroyed event must synchronously revoke
-            // the trusted worker generation, even if a signed frame is in flight.
-            for (var attempts = 0; attempts < 30 && !a.Revoked; attempts++)
+            var stopWorkerGeneration = a.WorkerGeneration;
+            // A hash identifies the exact synthetic CDP target without exposing
+            // a live target/session identifier in the persisted physical receipt.
+            var targetFingerprint = Convert.ToHexString(
+                System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(workerTarget)))
+                .ToLowerInvariant()[..12];
+            var proofId = "synthetic-worker-target-sha256=" + targetFingerprint +
+                ", hostGeneration=" + workerStopGeneration +
+                ", workerGeneration=" + stopWorkerGeneration +
+                ", channel=" + workerStopChannel;
+            bool closeTargetSuccess = false;
+            string closeError = "none";
+            try
+            {
+                var close = await CdpAsync(a, "Target.closeTarget",
+                    new { targetId = workerTarget });
+                closeTargetSuccess = close.TryGetProperty("success", out var success) &&
+                    success.ValueKind == JsonValueKind.True;
+            }
+            catch (Exception ex) when (ex is JsonException or InvalidOperationException or
+                System.Runtime.InteropServices.COMException)
+            {
+                closeError = ex.GetType().Name;
+                // An error or unacknowledged close NEVER constitutes retirement.
+            }
+            Mark("mv3_close_target_success", closeTargetSuccess,
+                proofId + ", browserCloseError=" + closeError);
+
+            // WebView2 can deliver Target.targetDestroyed late or not at all.
+            // Poll the real controller's native CDP inventory; a closeTarget ACK
+            // by itself, a timeout or a guessed worker target cannot revoke.
+            bool verifiedExactAbsence = false;
+            string inventoryError = "none";
+            for (var attempts = 0; attempts < 30; attempts++)
+            {
+                if (a.View.IsDisposed) break;
+                try
+                {
+                    var inventory = await CdpAsync(a, "Target.getTargets", new { });
+                    var absent = NativeRetirementProof.ExactTargetAbsent(inventory, workerTarget);
+                    if (NativeRetirementProof.MayRetireAfterInventory(
+                        closeTargetSuccess, absent, workerTarget, a.WorkerTargetId,
+                        workerStopGeneration, a.HostGeneration,
+                        stopWorkerGeneration, a.WorkerGeneration,
+                        workerStopChannel, a.ChannelId))
+                    {
+                        verifiedExactAbsence = true;
+                        // Source-attested absence, NOT closeTarget success, can
+                        // trigger the same synchronous fence as a native event.
+                        if (!a.Revoked) RevokeAndRetire(a);
+                        break;
+                    }
+                }
+                catch (Exception ex) when (ex is JsonException or InvalidOperationException or
+                    System.Runtime.InteropServices.COMException)
+                {
+                    inventoryError = ex.GetType().Name;
+                    // Retry only within the bounded observation window.
+                }
                 await Task.Delay(100);
-            var workerRetired = a.RetirementTask is not null && await a.RetirementTask;
+            }
+            _checks["mv3_destroyed_event_observation"] = new
+            {
+                status = a.WorkerDestroyedEventObserved ? "PASS" : "NOT_OBSERVED",
+                observed = a.WorkerDestroyedEventObserved,
+                evidence = proofId + ", native Target.targetDestroyed event (not required when exact native inventory proves absence)"
+            };
+            Mark("mv3_exact_target_absent", verifiedExactAbsence,
+                proofId + ", native Target.getTargets verified exact target absent; inventoryError=" + inventoryError);
+            Mark("mv3_generation_revoked", a.Revoked,
+                proofId + ", fail-closed native controller generation fence");
+            var retirementTask = a.RetirementTask;
+            Mark("mv3_retirement_task_observed", retirementTask is not null,
+                proofId + ", native initiated exact Rust channel retirement");
+            var workerRetired = retirementTask is not null && await retirementTask;
+            Mark("mv3_rust_retired", workerRetired,
+                proofId + ", Rust confirmed retirement of original channel");
             var staleWorker = await RustDeniedAsync(new {
                 op = "tool_snapshot",host = workerStopHost,channelId = workerStopChannel,
                 generation = workerStopGeneration,sequence = 3,
                 payload = signedBeforeWorkerStop.GetProperty("payload").GetString(),
                 mac = signedBeforeWorkerStop.GetProperty("mac").GetString(), handle = workerHandle
             });
-            Mark("mv3_worker_retirement",Ok(workerAttach) &&
-                stoppedWorker.GetProperty("success").GetBoolean() &&
-                workerRetired && staleWorker,
-                "Real service_worker target destroyed, generation revoked and pre-signed snapshot rejected");
+            Mark("mv3_stale_snapshot_denied", staleWorker,
+                proofId + ", pre-signed stale generation denied by Rust after native lifecycle proof");
+            Mark("mv3_worker_retirement", Ok(workerAttach) &&
+                closeTargetSuccess && verifiedExactAbsence &&
+                a.Revoked && retirementTask is not null && workerRetired && staleWorker,
+                proofId + ", real exact-target native CDP absence, fence, Rust retire and stale denial");
             // This test must fail closed if native debugger detach was ambiguous.
             var required = new[] {
                 "source_artifact_provenance","actual_independent_webview2",
@@ -348,7 +421,10 @@ internal sealed partial class GateForm
                 "actual_debugger_detach","verified_reattach",
                 "detach_failure_retains_lease","reattach_after_verified_cleanup",
                 "navigation_worker_channel_retirement",
-                "rebind_after_navigation","mv3_worker_retirement"
+                "rebind_after_navigation","mv3_close_target_success",
+                "mv3_exact_target_absent","mv3_generation_revoked",
+                "mv3_retirement_task_observed","mv3_rust_retired",
+                "mv3_stale_snapshot_denied","mv3_worker_retirement"
             };
             var passed = required.All(k=>_checks.TryGetValue(k,out var value) &&
                 JsonSerializer.Serialize(value).Contains("\"status\":\"PASS\"",StringComparison.Ordinal));
