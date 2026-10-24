@@ -33,7 +33,7 @@ pub fn ensure_marked(directory: &Path) -> io::Result<()> {
     }
     atomic_write(&path, &serde_json::to_vec_pretty(&marker())?)
 }
-fn digest(path: &Path) -> io::Result<String> {
+pub(super) fn digest(path: &Path) -> io::Result<String> {
     let mut file = fs::File::open(path)?;
     let mut hash = Sha256::new();
     let mut buffer = [0; 64 * 1024];
@@ -46,7 +46,7 @@ fn digest(path: &Path) -> io::Result<String> {
     }
     Ok(format!("{:x}", hash.finalize()))
 }
-fn inventory(root: &Path) -> io::Result<BTreeMap<PathBuf, (u64, String)>> {
+pub(super) fn inventory(root: &Path) -> io::Result<BTreeMap<PathBuf, (u64, String)>> {
     let mut files = BTreeMap::new();
     fn walk(
         root: &Path,
