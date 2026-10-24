@@ -563,9 +563,11 @@ mod tests {
         });
         let mut invalid_mac = command.clone();
         invalid_mac["mac"] = json!(hex(&[0u8; 32]));
-        assert!(state
-            .apply(serde_json::from_value(invalid_mac).unwrap())
-            .is_err());
+        assert!(
+            state
+                .apply(serde_json::from_value(invalid_mac).unwrap())
+                .is_err()
+        );
         let signed = state
             .apply(serde_json::from_value(command.clone()).unwrap())
             .unwrap();
@@ -574,9 +576,11 @@ mod tests {
             json!(hex(&boot.companion_receipt_mac(2, &payload)))
         );
         // A successful receipt consumes the signed 7B sequence exactly once.
-        assert!(state
-            .apply(serde_json::from_value(command).unwrap())
-            .is_err());
+        assert!(
+            state
+                .apply(serde_json::from_value(command).unwrap())
+                .is_err()
+        );
         // Reusing the observed sequence for a ledger write is also forbidden.
         let prior_sequence = json!({
             "op": "authorize", "host": {
@@ -588,9 +592,10 @@ mod tests {
             "sequence": 1, "payload": hex(&payload),
             "mac": hex(&boot.companion_event_mac(1, &payload))
         });
-        assert!(state
-            .apply(serde_json::from_value(prior_sequence).unwrap())
-            .is_err());
+        assert!(
+            state
+                .apply(serde_json::from_value(prior_sequence).unwrap())
+                .is_err()
+        );
     }
-
 }
