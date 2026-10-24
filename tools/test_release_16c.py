@@ -55,6 +55,30 @@ class BundleTests(unittest.TestCase):
         self.build()
         self.assertEqual(hashlib.sha256(self.out.read_bytes()).hexdigest(), previous_digest)
 
+    def test_runtime_dependency_graph_excludes_dev_only(self):
+        pkgs = [
+            {"id": "app", "name": "cos-app", "source": None},
+            {"id": "runtime", "name": "runtime-dep", "source": "registry+ok"},
+            {"id": "dev", "name": "dev-dep", "source": "registry+ok"}
+        ]
+        metadata = {"packages": pkgs, "resolve": {"nodes": [
+            {"id": "app", "deps": [
+                {"pkg": "runtime", "dep_kinds": [{"kind": None}]},
+                {"pkg": "dev", "dep_kinds": [{"kind": "dev"}]}
+            ]},
+            {"id": "runtime", "deps": []},
+            {"id": "dev", "deps": []}
+        ]}}
+        selected = bundle.selected_runtime_packages(metadata)
+        self.assertEqual([p["name"] for p in selected], ["cos-app", "runtime-dep"])
+
+    def test_missing_application_root_refused(self):
+        with self.assertRaisesRegex(bundle.Refused, "application root"):
+            bundle.selected_runtime_packages({
+                "packages": [{"id": "other", "name": "other", "source": None}],
+                "resolve": {"nodes": [{"id": "other", "deps": []}]}
+            })
+
     def test_unknown_license_refused(self):
         self.meta["packages"][0]["license"] = "GPL-3.0"
         with self.assertRaisesRegex(bundle.Refused, "SPDX"):
