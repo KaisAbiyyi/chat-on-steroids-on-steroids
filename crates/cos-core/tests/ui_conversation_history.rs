@@ -10,7 +10,7 @@ fn entry(position: u64) -> ConversationEntry {
         position,
         message_id: format!("message-{position}"),
         turn_id: Some("turn-1".into()),
-        role: if position % 2 == 0 {
+        role: if position.is_multiple_of(2) {
             ConversationRole::User
         } else {
             ConversationRole::Assistant
