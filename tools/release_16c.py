@@ -134,13 +134,47 @@ def read_notice(folder, explicit=None):
     return "\n\n".join(chunks)
 
 
+def selected_runtime_packages(metadata):
+    packages = metadata["packages"]
+    resolution = metadata.get("resolve")
+    if resolution is None:
+        return packages  # Only small synthetic tests omit Cargo's resolve graph.
+    nodes = {node["id"]: node for node in resolution.get("nodes", [])}
+    roots = [pkg["id"] for pkg in packages
+             if pkg.get("name") == "cos-app" and pkg.get("source") is None]
+    if len(roots) != 1 or roots[0] not in nodes:
+        raise Refused("missing unique Cargo application root in lock graph")
+    visited, pending = set(), roots[:]
+    while pending:
+        key = pending.pop()
+        if key in visited:
+            continue
+        visited.add(key)
+        node = nodes.get(key)
+        if node is None:
+            raise Refused("unresolved Cargo runtime dependency node")
+        for dep in node.get("deps", []):
+            kinds = dep.get("dep_kinds", [])
+            if not isinstance(kinds, list):
+                raise Refused("invalid Cargo dependency kind declaration")
+            # Build-time macro dependencies are part of the resulting binary
+            # provenance. Dev-only test crates are not shipped.
+            if not kinds or any(k.get("kind") != "dev" for k in kinds):
+                pending.append(dep["pkg"])
+    subset = [pkg for pkg in packages if pkg.get("id") in visited]
+    if len(subset) != len(visited):
+        raise Refused("Cargo package set and resolved graph disagree")
+    return subset
+
+
 def inventory(metadata, lockfile, project_license=None):
     if (not isinstance(metadata, dict) or
             not isinstance(metadata.get("packages"), list) or
             not isinstance(lockfile, dict) or not isinstance(lockfile.get("package"), list)):
         raise Refused("invalid cargo metadata or lockfile")
+    packages = selected_runtime_packages(metadata)
     license_errors = []
-    for pkg in metadata["packages"]:
+    for pkg in packages:
         try:
             licenses(pkg.get("license"))
         except Refused as ex:
@@ -152,7 +186,7 @@ def inventory(metadata, lockfile, project_license=None):
     if len(locked) != len(lockfile["package"]):
         raise Refused("ambiguous lockfile packages")
     result, notices, seen = [], [], set()
-    for p in metadata["packages"]:
+    for p in packages:
         if not isinstance(p, dict):
             raise Refused("invalid cargo package")
         name, ver, source = p.get("name"), p.get("version"), p.get("source")
@@ -191,7 +225,7 @@ def inventory(metadata, lockfile, project_license=None):
                 # Cargo workspaces sometimes publish sibling crates without
                 # COPYING while their sibling package carries the exact
                 # upstream LICENSE. Require same upstream, version AND SPDX.
-                mirrors = sorted((other for other in metadata["packages"]
+                mirrors = sorted((other for other in packages
                                   if other is not p
                                   and other.get("repository") == p.get("repository")
                                   and other.get("version") == ver
