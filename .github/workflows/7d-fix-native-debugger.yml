@@ -38,6 +38,8 @@ jobs:
       - name: Existing MV3 ledger test
         run: node --test extension/companion/tests/ledger.test.mjs
       - name: Source-owned MV3 auth test
+        env:
+          COS_TEST_TMP: ${{ runner.temp }}
         run: node --test probes/7l1/tests/worker-auth.test.mjs
       - name: JavaScript native worker syntax
         run: node --check probes/7l1/extension/sw.mjs
