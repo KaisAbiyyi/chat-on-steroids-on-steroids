@@ -85,8 +85,7 @@ impl ChatGroupCatalog {
                 || group.title.is_empty()
                 || group.title.len() > 128
                 || group.title.chars().any(|c| {
-                    c.is_control()
-                        || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
+                    c.is_control() || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
                 })
             {
                 return Err(UiPerformanceError::InvalidGroups);
@@ -246,15 +245,28 @@ impl UiFrameCache {
             focus: focus.revision,
             panels: if show_panel { panels.revision } else { 0 },
             rich: if show_rich { rich.revision } else { 0 },
-            conversation: if show_conversation { conversation.revision } else { 0 },
-            session_generation: if show_conversation { conversation.session_generation } else { 0 },
+            conversation: if show_conversation {
+                conversation.revision
+            } else {
+                0
+            },
+            session_generation: if show_conversation {
+                conversation.session_generation
+            } else {
+                0
+            },
             group: groups.map_or(0, |g| g.revision),
             route: nav.route.clone(),
         };
         // Cheap consistency fences even on the idle fast path.
-        if [focus.host_epoch, panels.host_epoch, rich.host_epoch, conversation.host_epoch]
-            .iter()
-            .any(|epoch| *epoch != nav.host_epoch)
+        if [
+            focus.host_epoch,
+            panels.host_epoch,
+            rich.host_epoch,
+            conversation.host_epoch,
+        ]
+        .iter()
+        .any(|epoch| *epoch != nav.host_epoch)
         {
             self.clear();
             return Err(UiPerformanceError::Inconsistent);
