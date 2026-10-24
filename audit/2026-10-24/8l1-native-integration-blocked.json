@@ -1,0 +1,266 @@
+{
+  "unit": "8L1",
+  "session": "COS-8L1-20261024",
+  "claimIssue": 71,
+  "capturedUtc": "2026-10-24T03:06:07.853674+00:00",
+  "githubShaUnderTest": "eb9f3dc9684fe97017dcc3a57ae63553d2118547",
+  "branch": "feature/8l1-native-20261024",
+  "machine": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "drive": "D:",
+    "filesystem": "NTFS",
+    "qualificationRoot": "D:\\projects\\CoS-Rust\\.test-tmp\\8l1"
+  },
+  "status": "BLOCKED",
+  "native8L1Accepted": false,
+  "blocker": "No executable native host integration/callers for the 8A/8B/8C controllers; callbacks are supplied only by synthetic tests. No native 8L1 runner exists.",
+  "sourceReferences": {
+    "createProfileSessionController": [
+      {
+        "path": "extension/adapter/profile-session.mjs",
+        "line": 51,
+        "kind": "definition"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 3,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 65,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 141,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 149,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 203,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 217,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/profile-session.test.mjs",
+        "line": 237,
+        "kind": "synthetic-test"
+      }
+    ],
+    "createNativeBrowserLifecycleController": [
+      {
+        "path": "extension/adapter/browser-lifecycle.mjs",
+        "line": 65,
+        "kind": "definition"
+      },
+      {
+        "path": "extension/adapter/tests/browser-lifecycle.test.mjs",
+        "line": 3,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/browser-lifecycle.test.mjs",
+        "line": 45,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/browser-lifecycle.test.mjs",
+        "line": 56,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/browser-lifecycle.test.mjs",
+        "line": 68,
+        "kind": "synthetic-test"
+      }
+    ],
+    "createChromeWorkerAdapter": [
+      {
+        "path": "extension/adapter/chrome-worker.mjs",
+        "line": 66,
+        "kind": "definition"
+      },
+      {
+        "path": "extension/adapter/tests/chrome-worker.test.mjs",
+        "line": 3,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/chrome-worker.test.mjs",
+        "line": 79,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/chrome-worker.test.mjs",
+        "line": 101,
+        "kind": "synthetic-test"
+      },
+      {
+        "path": "extension/adapter/tests/chrome-worker.test.mjs",
+        "line": 103,
+        "kind": "synthetic-test"
+      }
+    ]
+  },
+  "sourceSha256": {
+    "extension/adapter/profile-session.mjs": "3dca093adaa4a4376deaf63413f8fdd08f9e6c956be906019a2d6b4dbc8d2f2f",
+    "extension/adapter/browser-lifecycle.mjs": "3dee85f1d8a9ac398a0b21e83a63703c71833f8f28c91b42c762813dcf54b243",
+    "extension/adapter/chrome-worker.mjs": "669311ce30dd44bcb44f49ee6fee80740f885e4c79d54f2d888060b02a532c11",
+    "extension/adapter/BROWSER-LIFECYCLE.md": "4348624d082e2c3d2aa45fe25ecfe435db930120e6cbfd8227907f49855b3e8c",
+    "extension/adapter/PROFILE-SESSION.md": "c10c9347fbd70c8952bf66799e4db3d2414cf1e116e99c2aec4a0f470a3f8714",
+    "probes/7l1/WindowsHost/Program.cs": "b58d647ac276dc285d1f9890ef4fb33d809a09a70f823fc1e24f0bda27d20b2a",
+    "probes/7p-b/WindowsHost/Program.cs": "5cfb1b9e1aee3a59894b9de6e14613884c08e7e2b90ece6c647c03bc7ec899b5"
+  },
+  "syntheticChecks": {
+    "node": {
+      "status": "PASS",
+      "tests": 56,
+      "failed": 0,
+      "skipped": 0,
+      "command": "node --test extension/adapter/tests/browser-lifecycle.test.mjs extension/adapter/tests/profile-session.test.mjs extension/adapter/tests/chrome-worker.test.mjs extension/companion/tests/ledger.test.mjs extension/companion/tests/transport-differential.test.mjs"
+    },
+    "taskBoard": {
+      "status": "PASS",
+      "tests": 14,
+      "command": "python -m unittest discover -s tools -p test_task_board.py"
+    },
+    "rustfmt": {
+      "status": "PASS",
+      "command": "cargo fmt --all --check"
+    },
+    "cosCore": {
+      "status": "PASS",
+      "tests": 63,
+      "failed": 0,
+      "ignored": 0,
+      "command": "cargo test -p cos-core --locked"
+    },
+    "workspaceStrict": {
+      "status": "RUNNING",
+      "command": "python tools/check-workspace.py --strict"
+    }
+  },
+  "nativePreflight": {
+    "scope": "Existing 7L1 WebView2 MV3 discovery only; NOT an 8L1 test",
+    "build": {
+      "status": "PASS",
+      "warnings": 0,
+      "errors": 0,
+      "command": "dotnet build probes/7l1/WindowsHost/WindowsHost.csproj -c Release -warnaserror -p:BaseIntermediateOutputPath=D:/projects/CoS-Rust/.test-tmp/8l1/obj/ -o D:/projects/CoS-Rust/.test-tmp/8l1/host"
+    },
+    "command": "D:/projects/CoS-Rust/.test-tmp/8l1/host/WindowsHost.exe --out D:/projects/CoS-Rust/.test-tmp/8l1/native-preflight --repo D:/projects/CoS-Rust/.test-tmp/8l1/worktree --cdp-preflight",
+    "processExit": 0,
+    "rawReceipt": {
+      "scope": "7L1 Rust-to-WebView2 CDP extension service_worker; synthetic D: only",
+      "preflightOnly": true,
+      "dateUtc": "2026-10-24T03:04:05.8634337+00:00",
+      "sourceSha": "NOT_RUN",
+      "hostBinarySha256": "1caf871152a73039006ec7949cc5dc86182f82ede21d02259d84b07492fbc221",
+      "rustBinarySha256": "missing",
+      "extensionWorkerSha256": "cbee24836ae7d6a9d1b3ca36a73fb0c69fc1408a020d73cba8e38872de1aac40",
+      "native7L1Accepted": false,
+      "rustProcessExit": -1,
+      "checks": {
+        "actual_mv3_cdp_discovery": {
+          "status": "PASS",
+          "evidence": "Installed independent WebView2 MV3 service_worker target sessions; no Rust gate run"
+        },
+        "native_7b_7c_integration": {
+          "status": "NOT_RUN",
+          "evidence": "CDP discovery preflight only"
+        },
+        "rust_process_exit": {
+          "status": "NOT_RUN",
+          "evidence": "CDP preflight did not start Rust"
+        }
+      }
+    },
+    "sourceAttestationLimit": "Raw preflight sourceSha remains NOT_RUN. This session locally built the unchanged 7L1 host from the checked-out SHA; source and binary hashes are supplemental provenance, not the integrated artifact attestation or 8L1 acceptance.",
+    "hostFilesSha256": {
+      "Microsoft.Web.WebView2.Core.dll": "4b50632e5ddfb83b185ebddeb5e1fb233a05aeeda9cfdec96bee269e11c5b49d",
+      "Microsoft.Web.WebView2.Core.xml": "d2e44139c2e8e30fecb99112516964143be130c58960a2c65cabc6a2a7c35ca0",
+      "Microsoft.Web.WebView2.WinForms.dll": "e78c6602f92e09441e000e69fdbe2d947bfa9a9d39c5926e609d540dc7840363",
+      "Microsoft.Web.WebView2.WinForms.xml": "96e468637ee3322db9851e38c0a3d7c32f0d11f60566b47ace2c91ec66179ac8",
+      "runtimes\\win-arm64\\native\\WebView2Loader.dll": "a0de1844933a10c898f833771a85f0ab9a0e3c745d4715f63d2d9730f9416025",
+      "runtimes\\win-x64\\native\\WebView2Loader.dll": "86545b66cdb0603bc26b626fb9ad610cb6e71f28d468f5ea66df23b03dda96d5",
+      "runtimes\\win-x86\\native\\WebView2Loader.dll": "161dc6673084a31f64670ace8e61cb0e1b55af815b6c7c8217a0cdd8503454e2",
+      "WindowsHost.deps.json": "44501e67446cbf8311b8b3df14896a96a353a8960662af08d6edf3be6587133b",
+      "WindowsHost.dll": "1caf871152a73039006ec7949cc5dc86182f82ede21d02259d84b07492fbc221",
+      "WindowsHost.exe": "10e6138ed983708434009979ba6788221d8ccc6e3c7a7ce9b4a5ce84eea1af7f",
+      "WindowsHost.pdb": "f2f8a62e784d5c3c15335d01b31152afb22d2eaa78216b8e689945db1809a239",
+      "WindowsHost.runtimeconfig.json": "73b37384bb001e78db2014d328750eb2990393712fd63cd00c0f41965b3dbe96"
+    }
+  },
+  "nativeRequired": {
+    "8B-native-storage-partition-and-consent": "BLOCKED / NOT_RUN",
+    "8C-native-lifecycle-event-authority": "BLOCKED / NOT_RUN",
+    "8C-native-atomic-permission-handler": "BLOCKED / NOT_RUN",
+    "8L1-clean-start-restart": "BLOCKED / NOT_RUN",
+    "8L1-multi-tab-profile-preservation": "BLOCKED / NOT_RUN",
+    "8L1-crash-rebind-and-stale-proof-denial": "BLOCKED / NOT_RUN"
+  },
+  "otherGates": {
+    "8U1-provider-sign-in": "NOT_RUN",
+    "OS-IME": "HOLD / UNVERIFIED; owner deferral retained",
+    "15B": "NOT_STARTED; owner continuation condition requires completed 8L1, not a blocked native gate",
+    "localLinux": "NOT_RUN; Docker/WSL storage not verified"
+  },
+  "performance": "NOT MEASURED; no product implementation or performance improvement claimed",
+  "protectedWip": {
+    "rootBranch": "feat/close-phase1-6-partials",
+    "status": [
+      "M crates/cos-store/src/lib.rs",
+      " M crates/cos-store/src/recorder.rs",
+      "?? crates/cos-mcp/tests/recording_evidence.rs",
+      "?? crates/cos-store/src/caption.rs",
+      "?? crates/cos-store/src/redaction.rs",
+      "?? crates/cos-store/tests/captions.rs",
+      "?? fixtures/upstream/phase1-6-closure/recording-redaction.json",
+      "?? tools/capture-recording-redaction.mjs"
+    ],
+    "sha256": {
+      "crates/cos-store/src/lib.rs": "a538deb325a9872121aa8500e2b3b64971021c25dc7e719a536ee08a09b99414",
+      "crates/cos-store/src/recorder.rs": "3ab82399299593bda8e0a49f5f109f30c012608143f0c5210d3b5afa0586fdad",
+      "crates/cos-mcp/tests/recording_evidence.rs": "8554c86b1a73deea6964b8e845c300373f7a6323c204acbf25227e5ab289bfb4",
+      "crates/cos-store/src/caption.rs": "6f893a1e1f582fefa1d931f897f55c88d029bc4adb94e704873cfb27d1575550",
+      "crates/cos-store/src/redaction.rs": "4a30ea29f536d9c36aed3142aee29f1e6a7a1bff99bba4ecdb7a0dd6a0fdfab4",
+      "crates/cos-store/tests/captions.rs": "88a355e5472af03af475fe7bb82ef9cc9ec0986607f31d7e0ee4c40bd44ccef6",
+      "fixtures/upstream/phase1-6-closure/recording-redaction.json": "58a705b43b213f970591b591b15bb777637b67b70552af8a63287ae069f4b16b",
+      "tools/capture-recording-redaction.mjs": "a2502d14548266e20ff26e2721b1b9c20e80d37b33a35c0830d886b2b2ad74b6"
+    }
+  },
+  "localLogsSha256": {
+    "cos-core-tests.log": "e7bcee8f6922670373f3a022487e63d59444a756318cd5551efa9eaf9daaed47",
+    "host-build.log": "68d60286f09a1b5663b12c6c57e48e4ed188fcf0b1bcc596c05ddcf0c26cc0e7",
+    "rustfmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic-node.log": "72065cd2c093881b126aa7eb930ec8156a0ffdb977e3d7bab10ca5d5e75d9a61",
+    "task-board-tests.log": "93c8dadc5c7604a90b2ce8da0da354eff0e566676d47cea621cd711b1842d2a7"
+  },
+  "cloudPrerequisites": {
+    "61": {
+      "head": "a11fd03edc125abeb0e7977c6c24796d81b4c929",
+      "successfulChecks": 18,
+      "status": "MERGED"
+    },
+    "65": {
+      "head": "e27098e7c0c5ee37e56357df569f09baaadfe460",
+      "successfulChecks": 22,
+      "status": "MERGED"
+    },
+    "67": {
+      "head": "5e1e6364c2725bb110eb7c97e17ad273baec41fc",
+      "successfulChecks": 19,
+      "status": "MERGED"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 # CoSoS — full phase task dependency / parallel board
 
+**2026-10-24 8L1 physical Windows — BLOCKED:** accepted cloud 8B #61, 8C #65 and 15A #67 are reconciled from live GitHub; native 8L1 cannot run because the 8A/8B/8C controllers have no privileged native host callers or executable gate. [Blocked native receipt and repair handoff](implementation-summary/2026-10-24-8l1-native-integration-blocker.md), issue #71. 8U1 remains blocked. 15B/15C/15D/15E are cloud prerequisite-ready candidates; check live ownership and overlapping files before claiming. No native completion or new 15B claim is implied. Earlier dated entries below are historical.
+
 **2026-10-23 8B Cloud code — Review:** `8A` PR #59 accepted at `eb91712d3c92c74f8714ef5f573939ad4fb19575`. **Now:** `8B` claimed by ChatGPT GPT-6 Cloud (gen 1), exclusive `browser-profiles`, [issue #60](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/60), draft [PR #61](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/61), hosted exact-head CI/self-review pending; `7L2` native Windows separately ready and not run in this cloud task. **Up Next:** `8C` blocked until accepted 8B. No local files/provider sign-in/owner account accessed. Older entries are historical.
 
 **2026-10-23 8A Cloud implementation — In Review:** 7E [PR #57](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/57) merged to main `f5b27921` with exact-head CI. **Now:** `8A` claimed by ChatGPT GPT-6 Cloud (gen 1), exclusive `embedded-adapter`, [issue #58](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/58), draft [PR #59](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/59) with Node Windows/Ubuntu security regressions. `7L2` Local Windows separately ready and compatible for parallel work but NOT_RUN by this 8A cloud agent. **Up Next:** `8B` blocked pending accepted 8A; owner 7U1 blocked pending real native 7L2. Exact-head CI and implementor self-review required before merge; prior snapshots below are historical.
@@ -88,8 +90,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | **READY · PARALLEL** |
 | `7U1` | Owner real signed-in observe-only browser test | `7L2` | `human-provider` | U (owner) | BLOCKED |
 | `8A` | Chrome API/extension adapter and worker world | `7E` | `embedded-adapter` | C (cloud) | DONE |
-| `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | **READY · PARALLEL** |
-| `8C` | Native browser lifecycle and permission hardening | `8B` | `browser-lifecycle` | C (cloud) | BLOCKED |
+| `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | DONE |
+| `8C` | Native browser lifecycle and permission hardening | `8B` | `browser-lifecycle` | C (cloud) | DONE |
 | `8L1` | Native embedded restart/multi-tab/profile behavior | `8C` | `windows-embedded` | L (Windows) | BLOCKED |
 | `8U1` | Owner provider sign-in and profile UX | `8L1` | `human-provider` | U (owner) | BLOCKED |
 | `9A` | Durable outbox attachment ownership | `8U1` | `outbox-schema` | C (cloud) | BLOCKED |
@@ -143,12 +145,12 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `14F` | Pet overlay/native lifecycle/security | `14D`, `14E` | `desktop-overlay` | C (cloud) | BLOCKED |
 | `14L3` | Native dictation/pet lifecycle proof | `14F` | `windows-pet` | L (Windows) | BLOCKED |
 | `14U2` | Owner dictation, overlay privacy acceptance | `14L3` | `human-desktop` | U (owner) | BLOCKED |
-| `15A` | UI navigation and IPC contracts | `8C` | `ui-architecture` | C (cloud) | BLOCKED |
-| `15B` | Conversation rendering and large history | `15A` | `ui-conversation` | C (cloud) | BLOCKED |
-| `15C` | Rich editor/terminal/code/PDF/math panels | `15A` | `ui-rich` | C (cloud) | BLOCKED |
+| `15A` | UI navigation and IPC contracts | `8C` | `ui-architecture` | C (cloud) | DONE |
+| `15B` | Conversation rendering and large history | `15A` | `ui-conversation` | C (cloud) | READY_CANDIDATE |
+| `15C` | Rich editor/terminal/code/PDF/math panels | `15A` | `ui-rich` | C (cloud) | READY_CANDIDATE |
 | `15L1` | Native editor/terminal/PDF/math proof | `15C` | `windows-ui-rich` | L (Windows) | BLOCKED |
-| `15D` | Projects/files/agents/plugins settings | `15A` | `ui-settings` | C (cloud) | BLOCKED |
-| `15E` | 13 locales, accessiblity and focus keyboard | `15A` | `ui-i18n` | C (cloud) | BLOCKED |
+| `15D` | Projects/files/agents/plugins settings | `15A` | `ui-settings` | C (cloud) | READY_CANDIDATE |
+| `15E` | 13 locales, accessiblity and focus keyboard | `15A` | `ui-i18n` | C (cloud) | READY_CANDIDATE |
 | `15F` | Screenshot/regression fixed DPI/themes | `15B`, `15C`, `15D`, `15E` | `ui-snapshots` | C (cloud) | BLOCKED |
 | `15L2` | Native 13-locale/DPI interaction matrices | `15F` | `windows-ui-i18n` | L (Windows) | BLOCKED |
 | `15G` | Full desktop integration/performance review | `15F` | `ui-integration` | C (cloud) | BLOCKED |
