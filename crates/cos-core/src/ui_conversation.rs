@@ -86,8 +86,7 @@ impl ConversationPage {
         let mut ids = HashSet::new();
         for (offset, item) in self.entries.iter().enumerate() {
             item.validate()?;
-            if item.position != self.start + offset as u64
-                || !ids.insert(item.message_id.as_str())
+            if item.position != self.start + offset as u64 || !ids.insert(item.message_id.as_str())
             {
                 return Err(ConversationError::InvalidPage);
             }
@@ -414,7 +413,11 @@ impl UiConversation {
         if self.state.pending.is_some() {
             return Err(ConversationError::Pending);
         }
-        let page = self.state.page.as_ref().ok_or(ConversationError::Boundary)?;
+        let page = self
+            .state
+            .page
+            .as_ref()
+            .ok_or(ConversationError::Boundary)?;
         match direction {
             PageDirection::Older if page.start == 0 => return Err(ConversationError::Boundary),
             PageDirection::Newer if page.end() == page.total => {
