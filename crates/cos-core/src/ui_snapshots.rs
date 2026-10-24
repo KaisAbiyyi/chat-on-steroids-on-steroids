@@ -243,7 +243,13 @@ impl CaptureConfig {
         {
             return Err(CaptureError::InvalidConfig);
         }
-        let config = Self { logical_width, logical_height, dpi, theme, language };
+        let config = Self {
+            logical_width,
+            logical_height,
+            dpi,
+            theme,
+            language,
+        };
         config.rgba_bytes()?;
         Ok(config)
     }
@@ -297,17 +303,20 @@ impl CaptureDescriptor {
         if UiLanguage::select(Some(&preferences.locale)) != config.language {
             return Err(CaptureError::InvalidConfig);
         }
-        let projection = VisualProjection::from_hosts(
-            navigation, focus, panels, rich, conversation,
-        )?;
+        let projection =
+            VisualProjection::from_hosts(navigation, focus, panels, rich, conversation)?;
         let valid_surface = match surface {
             CaptureSurface::Shell => true,
             CaptureSurface::Conversation => projection.route == RouteKind::Conversation,
             CaptureSurface::Rich => projection.rich_active.is_some(),
             CaptureSurface::Panels => matches!(
                 projection.route,
-                RouteKind::Projects | RouteKind::Project | RouteKind::Files
-                    | RouteKind::Agents | RouteKind::Skills | RouteKind::Plugins
+                RouteKind::Projects
+                    | RouteKind::Project
+                    | RouteKind::Files
+                    | RouteKind::Agents
+                    | RouteKind::Skills
+                    | RouteKind::Plugins
                     | RouteKind::Settings
             ),
             CaptureSurface::Modal => projection.dialog_open,
@@ -315,7 +324,12 @@ impl CaptureDescriptor {
         if !valid_surface {
             return Err(CaptureError::WrongSurface);
         }
-        Ok(Self { version: UI_CAPTURE_VERSION, config, surface, projection })
+        Ok(Self {
+            version: UI_CAPTURE_VERSION,
+            config,
+            surface,
+            projection,
+        })
     }
 
     /// Trusted native/fixture host supplies tightly packed, opaque sRGB RGBA8
@@ -324,7 +338,8 @@ impl CaptureDescriptor {
     /// screenshots. No captured pixels leave this call.
     pub fn fingerprint(&self, rgba: &[u8]) -> Result<CaptureProof, CaptureError> {
         if self.version != UI_CAPTURE_VERSION
-            || !FIXED_CAPTURE_VIEWPORTS.contains(&(self.config.logical_width, self.config.logical_height))
+            || !FIXED_CAPTURE_VIEWPORTS
+                .contains(&(self.config.logical_width, self.config.logical_height))
             || !FIXED_CAPTURE_DPI.contains(&self.config.dpi)
             || matches!(self.config.theme, Theme::System)
             || rgba.len() != self.config.rgba_bytes()?
