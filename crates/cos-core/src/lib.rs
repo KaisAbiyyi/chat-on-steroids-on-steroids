@@ -14,6 +14,8 @@ pub mod secrets;
 pub mod ui_contract;
 pub mod ui_focus;
 pub mod ui_localization;
+pub mod ui_panels;
+pub mod ui_rich;
 
 pub fn fresh_config(platform: &str) -> serde_json::Value {
     let defaults: serde_json::Value = serde_json::from_str(include_str!(
