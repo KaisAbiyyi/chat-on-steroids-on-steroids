@@ -21,6 +21,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
         with:
           toolchain: 1.91.0
@@ -48,6 +50,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
         with:
           toolchain: 1.91.0
@@ -75,7 +79,7 @@ jobs:
           $entries | ConvertTo-Json -Depth 4 | Set-Content gate/hashes.json
       - uses: actions/upload-artifact@v4
         with:
-          name: cos-7d-fix-7l2-windows-${{ github.sha }}
+          name: cos-7d-fix-7l2-windows-${{ github.event.pull_request.head.sha || github.sha }}
           path: gate/
           if-no-files-found: error
           retention-days: 14
