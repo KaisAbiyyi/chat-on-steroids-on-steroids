@@ -125,7 +125,9 @@ pub fn backup(source: &Path, target: &Path) -> io::Result<Value> {
     let total = copy_verified(&source, stage.path(), &original)?;
     let manifest_bytes = serde_json::to_vec_pretty(&manifest(&original)?)?;
     if manifest_bytes.len() > 32 * 1024 * 1024 {
-        return Err(invalid("Backup manifest exceeds 32 MiB; snapshot not published"));
+        return Err(invalid(
+            "Backup manifest exceeds 32 MiB; snapshot not published",
+        ));
     }
     atomic_write(&stage.path().join(MANIFEST), &manifest_bytes)?;
     // A final snapshot verification prevents publishing copies damaged after write.
