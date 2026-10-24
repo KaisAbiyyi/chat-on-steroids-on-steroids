@@ -114,6 +114,23 @@ class TestOwnerPreflight(unittest.TestCase):
         (self.art / "hashes.json").unlink()
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
 
+    def test_manifest_traversal_and_unknown_fields_denied(self):
+        path = self.art / "hashes.json"
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries[0]["path"] = "../outside.exe"
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries[0]["extra"] = "untrusted"
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
+    def test_extra_product_declaration_fields_denied(self):
+        self.contract["unsafeOverride"] = True
+        self.save()
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
     def test_symlink_artifact_denied(self):
         p = self.art / "host" / "CoSoSProductBrowser.dll"
         p.unlink()
