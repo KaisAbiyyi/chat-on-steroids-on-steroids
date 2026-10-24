@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -120,6 +121,53 @@ class PerfMeasurementTests(unittest.TestCase):
         self.trace["workload_params"]["chats"] = 1000
         with self.assertRaisesRegex(perf.TraceError, "workload definition changed"):
             perf.validate_trace(self.trace)
+
+    def test_privacy_allowlist_rejects_sensitive_extra_metadata(self):
+        for scope, name in (("provenance", "email"), ("events", "prompt")):
+            bad = copy.deepcopy(self.trace)
+            bad[scope][name] = "never-serialize-this"
+            with self.subTest(scope=scope), self.assertRaisesRegex(perf.TraceError, "privacy boundary"):
+                perf.validate_trace(bad)
+        bad = copy.deepcopy(self.trace)
+        bad["samples"][0]["processes"][0]["command_line"] = "private prompt"
+        with self.assertRaisesRegex(perf.TraceError, "unsafe process fields"):
+            perf.validate_trace(bad)
+        bad = copy.deepcopy(self.trace)
+        bad["provenance"]["host_id"] = "C:/Users/private"
+        with self.assertRaisesRegex(perf.TraceError, "non-anonymous provenance"):
+            perf.validate_trace(bad)
+
+    def test_pid_recycling_between_samples_does_not_rebind_root(self):
+        observed = copy.deepcopy(self.trace)
+        observed["samples"][1]["processes"][0]["identity"] = "new-born-process"
+        observed["samples"][1]["roots"][0]["identity"] = "new-born-process"
+        result = perf.summarize(observed)
+        self.assertFalse(result["all_roots_observed"])
+        self.assertTrue(any("PID identity" in warning for warning in result["warnings"]))
+
+    def test_matched_comparison_requires_same_observation_duration(self):
+        a, b = copy.deepcopy(self.trace), copy.deepcopy(self.trace)
+        for trace, app in ((a, "cos-original"), (b, "cosos")):
+            trace["provenance"]["app"] = app
+            trace["provenance"]["synthetic"] = False
+            trace["provenance"]["source_sha"] = "a" * 40
+            trace["provenance"]["binary_sha256"] = "b" * 64
+        b["samples"][1]["elapsed_ms"] = 2000
+        with self.assertRaisesRegex(perf.TraceError, "duration mismatch"):
+            perf.compare(perf.summarize(a), perf.summarize(b))
+
+    def test_hosted_runner_numeric_collector_smoke(self):
+        # Collect only the isolated runner's own test PID, not a user account.
+        if sys.platform != "win32" and not sys.platform.startswith("linux"):
+            self.skipTest("Windows/Linux-only supported")
+        sample = perf.collect_sample([os.getpid()], [], 0)
+        self.assertEqual(len(sample["roots"]), 1)
+        self.assertEqual(sample["roots"][0]["role"], "owned")
+        summary = perf.sample_tree(sample)
+        self.assertTrue(summary["complete"], "collector lost its own hosted CI PID")
+        self.assertGreater(summary["total_rss_bytes"], 0)
+        for p in sample["processes"]:
+            self.assertFalse(set(p) - perf.PROCESS_FIELDS)
 
     def test_cli_matrix_and_fixture_summary_are_portable(self):
         run = subprocess.run([sys.executable, str(ROOT / "tools" / "perf_00.py"),
