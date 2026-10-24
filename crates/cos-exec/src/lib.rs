@@ -1,6 +1,7 @@
 //! Host execution owner. Command policy is a launch filter, not an OS sandbox.
 pub mod batch;
 pub mod buffer;
+mod idle;
 pub mod policy;
 pub mod process;
 pub mod shell;

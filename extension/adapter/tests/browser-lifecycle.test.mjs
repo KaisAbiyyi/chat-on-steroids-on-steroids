@@ -234,3 +234,39 @@ test("navigation must keep trusted origin/session and unique document", async ()
     }), /unsafe-rebind|context/);
   }
 });
+
+test("privileged host disposal releases scopes and denies future tracking", async () => {
+  const h = harness();
+  await h.controller.track({nativeProof:"first"});
+  await h.controller.track({nativeProof:"second"});
+  h.controller.dispose();
+  h.controller.dispose(); // idempotent
+  await assert.rejects(
+    h.controller.track({nativeProof:"first"}), /controller-disposed/
+  );
+  await assert.rejects(
+    h.controller.requestPermission({
+      nativeProof:"first",capability:"camera",consentProof:"previous-consent"
+    }), /controller-disposed/
+  );
+  assert.equal(h.calls.length,0);
+});
+
+test("disposing while native permission is pending never returns a stale grant", async () => {
+  const h = harness();
+  await h.controller.track({nativeProof:"first"});
+  let entered;
+  const started = new Promise(resolve => { entered = resolve; });
+  let grant;
+  h.setPermission(() => {
+    entered();
+    return new Promise(resolve => { grant = resolve; });
+  });
+  const pending = h.controller.requestPermission({
+    nativeProof:"first",capability:"camera",consentProof:"one-use"
+  });
+  await started;
+  h.controller.dispose();
+  grant({granted:true});
+  await assert.rejects(pending, /controller-disposed|permission-postcondition/);
+});

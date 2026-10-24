@@ -80,13 +80,16 @@ export function createNativeBrowserLifecycleController({
   const profilePartitions = new Map();
   const permissionBusy = new Set();
   const transitionBusy = new Set();
+  let disposed = false;
 
   // The caller supplies an opaque NATIVE proof, never page-derived identifiers.
   // Attestation and storage partition are independently rechecked.
   async function attest(nativeProof) {
+    if (disposed) fail("controller-disposed");
     const first = checkedContext(await authorizeNativeTarget(nativeProof), origins);
     const p = checkedPartition(await resolveNativePartition(nativeProof), first.profileId);
     const second = checkedContext(await authorizeNativeTarget(nativeProof), origins);
+    if (disposed) fail("controller-disposed");
     if (!equal(first, second)) fail("attestation-race");
     const prior = profilePartitions.get(first.profileId);
     if (prior && !samePartition(prior, p)) fail("partition-rebound");
@@ -225,5 +228,21 @@ export function createNativeBrowserLifecycleController({
       permissionBusy.delete(key);
     }
   }
-  return Object.freeze({track, transition, requestPermission});
+  // Only the privileged owning host can dispose this controller. All cached
+  // tab/partition metadata is released on host shutdown. In-flight permission
+  // grants observe the version bump and cannot succeed after retirement.
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    for (const entry of entries.values()) {
+      entry.phase = "closed";
+      entry.version++;
+    }
+    entries.clear();
+    partitionOwners.clear();
+    profilePartitions.clear();
+    permissionBusy.clear();
+    transitionBusy.clear();
+  }
+  return Object.freeze({track, transition, requestPermission, dispose});
 }

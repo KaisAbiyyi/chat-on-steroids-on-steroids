@@ -199,3 +199,28 @@ test("no privileged adapter, no worker listener, and suspend does not flush",asy
   assert.equal(typeof worker.dispatch,"function");
   assert.equal(suspend(),undefined);
 });
+
+test("explicit worker retirement unsubscribes without erasing durable receipts", async () => {
+  let handler, unsubscribed = 0;
+  const store = storage();
+  const worker = installVerifiedCompanion({
+    chromeApi:{storage:{session:store}},
+    verifyHostEvent:async () => context(),
+    subscribeVerifiedNativeEvent(fn) {
+      handler = fn;
+      return () => { unsubscribed++; };
+    }
+  });
+  const pending = handler(msg("attach",1),{});
+  worker.dispose();
+  worker.dispose();
+  assert.equal(unsubscribed,1);
+  assert.deepEqual(await pending,{kind:"attached",replay:false});
+  assert.ok(store.snapshot()[STORAGE_KEY].channels);
+  await assert.rejects(
+    handler(msg("claim",2),{}), /7C:worker-disposed/
+  );
+  await assert.rejects(
+    worker.dispatch(msg("claim",2),{}), /7C:worker-disposed/
+  );
+});
