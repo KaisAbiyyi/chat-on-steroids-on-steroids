@@ -83,10 +83,12 @@ export function createChromeWorkerAdapter({
   });
   const active = new Set();
   const fences = new Map();
+  let disposed = false;
 
   async function reauthorize(proof, expected) {
+    if (disposed) fail("adapter-disposed");
     const current = verifiedContext(await authorizeNativeTarget(proof), origins);
-    if (HOST_KEYS.some(k => current[k] !== expected[k])) fail("native-target-changed");
+    if (disposed || HOST_KEYS.some(k => current[k] !== expected[k])) fail("native-target-changed");
   }
   async function inspect(current) {
     const [tab, frame] = await Promise.all([
@@ -111,6 +113,7 @@ export function createChromeWorkerAdapter({
   // A script can execute before a navigation race is observed post-injection:
   // these fixed scripts are strictly inert and MUST NOT perform user actions.
   async function inject({nativeProof, world}) {
+    if (disposed) fail("adapter-disposed");
     if (!Object.hasOwn(WORLDS, world)) fail("world-denied");
     const current = verifiedContext(
       await authorizeNativeTarget(nativeProof), origins);
@@ -150,5 +153,14 @@ export function createChromeWorkerAdapter({
       active.delete(scope);
     }
   }
-  return Object.freeze({inject, companion});
+  // Privileged host shutdown: release cached frame fences and stop further
+  // native event subscription; the persisted 7C intent ledger is untouched.
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    companion.dispose();
+    active.clear();
+    fences.clear();
+  }
+  return Object.freeze({inject, companion, dispose});
 }
