@@ -64,6 +64,10 @@ class BundleTests(unittest.TestCase):
         self.meta["packages"][0]["license"] = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
         self.assertEqual(self.build()["status"], "PASS")
 
+    def test_explicit_legacy_spdx_dual_license(self):
+        self.meta["packages"][0]["license"] = "MIT/Apache-2.0"
+        self.assertEqual(self.build()["status"], "PASS")
+
     def test_unreviewed_exception_refused(self):
         self.meta["packages"][0]["license"] = "Apache-2.0 WITH Unknown-exception OR MIT"
         with self.assertRaisesRegex(bundle.Refused, "unapproved"):
