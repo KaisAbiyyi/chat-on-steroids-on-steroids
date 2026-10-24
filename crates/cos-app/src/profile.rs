@@ -133,6 +133,16 @@ pub(super) fn publish_new(_stage: &Path, _destination: &Path) -> io::Result<()> 
 }
 
 pub fn import(source: &Path, target: &Path) -> io::Result<Value> {
+    import_expected(source, target, None)
+}
+
+// A verified restore supplies the trusted backup inventory, not a fresh
+// inventory re-derived from potentially replaced source data.
+pub(super) fn import_expected(
+    source: &Path,
+    target: &Path,
+    expected: Option<&BTreeMap<PathBuf, (u64, String)>>,
+) -> io::Result<Value> {
     if !source.is_absolute() || !target.is_absolute() {
         return Err(invalid("Import paths must be absolute"));
     }
@@ -155,6 +165,9 @@ pub fn import(source: &Path, target: &Path) -> io::Result<Value> {
         ));
     }
     let original = inventory(&source)?;
+    if expected.is_some_and(|verified| verified != &original) {
+        return Err(invalid("Trusted backup inventory changed before import"));
+    }
     let staging = tempfile::Builder::new()
         .prefix(".cos-rust-import-")
         .tempdir_in(&parent)?;
