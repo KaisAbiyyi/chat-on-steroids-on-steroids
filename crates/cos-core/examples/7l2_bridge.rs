@@ -549,7 +549,12 @@ mod tests {
         .unwrap();
         let good_mac = boot.companion_event_mac(2, &payload);
         let command = json!({
-            "op": "authorize", "host": host,
+            "op": "authorize",
+            "host": {
+                "identity": &trusted.identity,
+                "origin": &trusted.origin,
+                "hostGeneration": trusted.host_generation
+            },
             "channelId": boot.channel_id,
             "generation": boot.host_generation,
             "sequence": 2,
