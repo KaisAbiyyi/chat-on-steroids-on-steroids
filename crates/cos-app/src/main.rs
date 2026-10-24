@@ -1,3 +1,4 @@
+mod migration;
 mod profile;
 use cos_core::{
     config,
@@ -23,7 +24,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create/rename/clear-name | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--scope session/answer --turn id] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
+const HELP: &str = "CoS-Rust 0.1 — Rust services, phases 1–6\nUse: cos-rust --data-dir <absolute directory> <command>\nServices: serve [--trust-ssh-server-paths] [--port N] [--duration-ms N] [--tunnel openai/cloudflared] [--tunnel-binary path] | tools list/call | projects list/add/add-ssh/color/remove/git/review/diff/files/preview/create-entry/rename-entry/save-file/bind | files read/save/patch\nCommands: info | self-test | config show/validate/set | sessions list/create/rename/clear-name | history <id> | append <id> <json-file> | message <id> <json-file> | observe <conversation> <json-file> | correlate <json-file> | record-call <json-file> | rebind <id> <from> <to> [handoff] | search <query> | find <id> <query> | export <id> [--format json/md] [--scope session/answer --turn id] [--output path] | usage | provider-usage --codex-home path --claude-home path | policy trust/untrust/block/release <ids> | plan <id> <conversation> <json-file> | trace <id> <turn> <json-file> | secrets-status | import --source <original profile> | backup --source <profile> | restore --backup <backup directory> --manifest-sha256 <receipt hash>\nProfiles must be new/marked; import copies a legacy profile into a new directory. serve opens loopback listeners; SSH and public tunnels run only when explicitly requested. No signed-in provider is selected automatically. SSH path access through tools/terminals is off by default; --trust-ssh-server-paths opts in for this runtime and requires a trusted server filesystem.\n";
 fn platform() -> &'static str {
     if cfg!(windows) {
         "win32"
@@ -691,7 +692,28 @@ fn run() -> io::Result<Value> {
     if args.first().is_some_and(|a| a == "import") {
         let source = take_option(&mut args, "--source")?
             .ok_or_else(|| invalid("Import requires --source"))?;
+        if args != ["import"] {
+            return Err(invalid("Unknown import options"));
+        }
         return profile::import(Path::new(&source), directory);
+    }
+    if args.first().is_some_and(|a| a == "backup") {
+        let source = take_option(&mut args, "--source")?
+            .ok_or_else(|| invalid("Backup requires --source"))?;
+        if args != ["backup"] {
+            return Err(invalid("Unknown backup options"));
+        }
+        return migration::backup(Path::new(&source), directory);
+    }
+    if args.first().is_some_and(|a| a == "restore") {
+        let source = take_option(&mut args, "--backup")?
+            .ok_or_else(|| invalid("Restore requires --backup"))?;
+        let digest = take_option(&mut args, "--manifest-sha256")?
+            .ok_or_else(|| invalid("Restore requires --manifest-sha256 from backup receipt"))?;
+        if args != ["restore"] {
+            return Err(invalid("Unknown restore options"));
+        }
+        return migration::restore(Path::new(&source), directory, &digest);
     }
     if args.is_empty() {
         return Err(invalid("Missing command"));
