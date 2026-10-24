@@ -17,6 +17,7 @@ pub mod ui_focus;
 pub mod ui_integration;
 pub mod ui_localization;
 pub mod ui_panels;
+pub mod ui_performance;
 pub mod ui_rich;
 pub mod ui_snapshots;
 
