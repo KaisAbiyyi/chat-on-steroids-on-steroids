@@ -11,6 +11,7 @@ namespace CoSoS.Probe7L1.WindowsHost;
 internal sealed partial class GateForm
 {
     private sealed record PageDebuggerLease(string HostJson, string? SessionId);
+    private bool _faultNextDebuggerDetach;
     private readonly Dictionary<Browser, PageDebuggerLease> _pageDebuggers =
         new(ReferenceEqualityComparer.Instance);
 
@@ -62,6 +63,13 @@ internal sealed partial class GateForm
                 !string.Equals(lease.HostJson, proof, StringComparison.Ordinal) ||
                 string.IsNullOrWhiteSpace(lease.SessionId) || b.View.IsDisposed)
                 throw new UnauthorizedAccessException("ambiguous debugger detach");
+            if (_faultNextDebuggerDetach)
+            {
+                _faultNextDebuggerDetach = false;
+                // Native-only deterministic fault injection: exercise Rust's
+                // fail-closed ambiguous detach lease instead of lying about release.
+                throw new UnauthorizedAccessException("injected native debugger detach refusal");
+            }
             await CdpAsync(b, "Target.detachFromTarget", new { sessionId = lease.SessionId });
             _pageDebuggers.Remove(b);
             return new { detached = true };
@@ -226,6 +234,20 @@ internal sealed partial class GateForm
             var bDetach = await ToolAsync(b,"detach",8,bHandle);
             Mark("second_profile_detach",Ok(bDetach),
                 "WebView2 Target.detachFromTarget released second native session");
+            var signedBeforeClose = await WorkerAsync(b,Js("authorizeTool",9));
+            var closedHost = Host(b);
+            var closedChannel = b.ChannelId;
+            var closedGeneration = b.HostGeneration;
+            _b.Dispose();
+            var closedRetired = b.RetirementTask is not null && await b.RetirementTask;
+            var closedStale = await RustDeniedAsync(new {
+                op = "tool_snapshot", host = closedHost, channelId = closedChannel,
+                generation = closedGeneration, sequence = 9,
+                payload = signedBeforeClose.GetProperty("payload").GetString(),
+                mac = signedBeforeClose.GetProperty("mac").GetString(), handle = bHandle
+            });
+            Mark("native_tab_close_revocation",closedRetired && closedStale && b.View.IsDisposed,
+                "Disposed real WebView2 controller retires 7B channel and denies stale signed tools");
             // Cross-frame spoof: a valid signed frame for frame 0 must not authorize
             // a host object claiming frame 1 (no real frame 1 controller exists).
             var signed = await WorkerAsync(a,Js("authorizeTool",7));
@@ -256,10 +278,22 @@ internal sealed partial class GateForm
                 reattach.GetProperty("value").GetProperty("handle").GetUInt64() : 0;
             Mark("verified_reattach",Ok(reattach) && newHandle != handle,
                 "Detached WebView2 page can be attached with fresh Rust handle");
+            _faultNextDebuggerDetach = true;
+            var failedDetach = await ToolAsync(a,"detach",10,newHandle);
+            var competingAfterFailure = await ToolAsync(a,"attach",11);
+            var successfulCleanup = await ToolAsync(a,"detach",12,newHandle);
+            Mark("detach_failure_retains_lease",!Ok(failedDetach) &&
+                !Ok(competingAfterFailure) && Ok(successfulCleanup),
+                "Injected actual host CDP refusal retains Rust lease until confirmed native detach");
+            var afterFailure = await ToolAsync(a,"attach",13);
+            newHandle = Ok(afterFailure) ?
+                afterFailure.GetProperty("value").GetProperty("handle").GetUInt64() : 0;
+            Mark("reattach_after_verified_cleanup",Ok(afterFailure) && newHandle > 0,
+                "New native debugger lease admitted only after genuine detach succeeds");
             var staleHost = Host(a);
             var staleChannel = a.ChannelId;
             var staleGeneration = a.HostGeneration;
-            var oldSigned = await WorkerAsync(a,Js("authorizeTool",10));
+            var oldSigned = await WorkerAsync(a,Js("authorizeTool",14));
             _a.CoreWebView2.Navigate(StartUrl + "?native-retire=1");
             await Task.Delay(350);
             var retired = a.RetirementTask is not null && await a.RetirementTask;
@@ -271,6 +305,36 @@ internal sealed partial class GateForm
             });
             Mark("navigation_worker_channel_retirement",retired && stale,
                 "Real navigation retires the signed Rust channel and WebView2 session");
+            _a.CoreWebView2.Navigate(StartUrl);
+            await WaitPageAsync(a);
+            await BindAsync(a,"7l2-session-a");
+            Mark("rebind_after_navigation",
+                Ok(await ObserveAsync(a)),"Rebound actual MV3 worker and new authenticated generation");
+            var workerAttach = await ToolAsync(a,"attach",2);
+            var workerHandle = Ok(workerAttach) ?
+                workerAttach.GetProperty("value").GetProperty("handle").GetUInt64() : 0;
+            var signedBeforeWorkerStop = await WorkerAsync(a,Js("authorizeTool",3));
+            var workerStopHost = Host(a);
+            var workerStopChannel = a.ChannelId;
+            var workerStopGeneration = a.HostGeneration;
+            var workerTarget = a.WorkerTargetId ??
+                throw new InvalidOperationException("missing source-owned MV3 worker");
+            var stoppedWorker = await CdpAsync(a,"Target.closeTarget",new {targetId=workerTarget});
+            // The WebView2 Target.targetDestroyed event must synchronously revoke
+            // the trusted worker generation, even if a signed frame is in flight.
+            for (var attempts = 0; attempts < 30 && !a.Revoked; attempts++)
+                await Task.Delay(100);
+            var workerRetired = a.RetirementTask is not null && await a.RetirementTask;
+            var staleWorker = await RustDeniedAsync(new {
+                op = "tool_snapshot",host = workerStopHost,channelId = workerStopChannel,
+                generation = workerStopGeneration,sequence = 3,
+                payload = signedBeforeWorkerStop.GetProperty("payload").GetString(),
+                mac = signedBeforeWorkerStop.GetProperty("mac").GetString(), handle = workerHandle
+            });
+            Mark("mv3_worker_retirement",Ok(workerAttach) &&
+                stoppedWorker.GetProperty("success").GetBoolean() &&
+                workerRetired && staleWorker,
+                "Real service_worker target destroyed, generation revoked and pre-signed snapshot rejected");
             // This test must fail closed if native debugger detach was ambiguous.
             var required = new[] {
                 "source_artifact_provenance","actual_independent_webview2",
@@ -279,9 +343,12 @@ internal sealed partial class GateForm
                 "guessed_handle_denied","invalid_mac_replay_denied",
                 "second_profile_7b_handshake","persisted_ambiguous_ack_no_send",
                 "cross_profile_tab_denied","independent_profile_snapshot",
-                "second_profile_detach","cross_frame_spoof_denied",
+                "second_profile_detach","native_tab_close_revocation",
+                "cross_frame_spoof_denied",
                 "actual_debugger_detach","verified_reattach",
-                "navigation_worker_channel_retirement"
+                "detach_failure_retains_lease","reattach_after_verified_cleanup",
+                "navigation_worker_channel_retirement",
+                "rebind_after_navigation","mv3_worker_retirement"
             };
             var passed = required.All(k=>_checks.TryGetValue(k,out var value) &&
                 JsonSerializer.Serialize(value).Contains("\"status\":\"PASS\"",StringComparison.Ordinal));
