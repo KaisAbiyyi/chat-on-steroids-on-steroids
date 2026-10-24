@@ -137,7 +137,7 @@ The original 16-phase dependency map is authoritative: browser capability must b
 | --- | ---: | ---: | ---: |
 | GitHub bootstrap | 0 | 1 | 1 |
 | Remaining phases 1–6 `CL` | 18 | 6 | 0 |
-| Phase 7 — preflight + bridge | 7 | 3 | 1 |
+| Phase 7 — preflight + bridge plus owner runner prep | 8 | 3 | 1 |
 | Phase 8 — embedded browser | 3 | 1 | 1 |
 | Phase 9 — outbox/uploads | 5 | 2 | 1 |
 | Phase 10 — Compact & Resume | 5 | 2 | 1 |
@@ -146,17 +146,18 @@ The original 16-phase dependency map is authoritative: browser capability must b
 | Phase 13 — plugins/Skills/OAuth | 6 | 2 | 2 |
 | Phase 14 — native desktop | 6 | 3 | 2 |
 | Phase 15 — desktop UI | 7 | 3 | 3 |
-| Phase 16 — migration/release | 6 | 3 | 2 |
-| **Remaining development** | **72** | **28** | **15** |
-| **With bootstrap** | **72** | **29** | **16** |
+| Phase 16 — migration/release (legacy units) | 6 | 3 | 2 |
+| **P0 PERF-00–06 cross-cutting (early)** | **5** | **2** | **0** |
+| **Full DAG unit inventory (includes accepted historical units)** | **78** | **30** | **15** |
+| **With historical bootstrap** | **78** | **31** | **16** |
 
-`C` means a GitHub/CI cloud agent run, `L` means a local Windows agent session (the user triggers the handoff; the agent executes tests), and `U` means **the user personally needs to act**. These are base handoff counts; failure/retry units are separate. `U0` for the backend closure means no manual UX/account test is planned. Each cloud handoff tells the user explicitly whether to do anything **right now**, later at the phase local gate, or not at all.
+`C` means a GitHub/CI cloud agent run, `L` means a local Windows agent session (the user triggers the handoff; the agent executes tests), and `U` means **the user personally needs to act**. These are total canonical task IDs, **not** all unfinished work or all mandatory feature commitments under the new owner decision. The old 72/28/15 full-parity tally was superseded by 7U1-PREP plus PERF-00–06; failure/retry units are separate. `U0` for the backend closure means no manual UX/account test is planned. Each cloud handoff tells the user explicitly whether to do anything **right now**, later at the phase local gate, or not at all.
 
 ## Quality and release gates
 
 For every cloud Rust implementation unit use an actual observable RED→GREEN regression, focused tests, `cargo fmt --all --check`, strict Clippy and appropriate Windows/Linux GitHub Actions CI. Local qualification uses `python tools/check-workspace.py --strict`, `tools/qualify-session.py`, `qualify-search.py`, native SSH/process tests or GUI/browser scripts **only when named by an L gate**. Always run with isolated synthetic profiles. A release-affecting unit records executable size/runtime cost, and the later local release gate verifies actual packaged size separately.
 
-Security gate: no credential leakage into args/results/assets/captions, no stale authority, no unsafe filesystem escape or unclear side-effect retry. Performance gate: baseline/candidate with exact commit, fixture, units and comparable setup; actual p95/timing/RSS/size evidence if the unit changes critical latency or memory. Review gate: independent Critical/Important inspection for permissions, durability, concurrency, protocol and native boundary changes.
+Security gate: no credential leakage into args/results/assets/captions, no stale authority, no unsafe filesystem escape or unclear side-effect retry. Performance gate: baseline/candidate with exact commit, fixture, units and comparable setup; actual p95/timing/RSS/size evidence if the unit changes critical latency or memory. Review gate: direct critical implementor **self-review** of exact SHA/diff, permissions, durability, concurrency, protocol and native boundaries; independent feedback is optional and not a merge gate.
 
 Record one of `PASS`, `FAIL`, `PARTIAL`, `BLOCKED`, `NOT RUN`, `HOLD` for each gate. Historical failing receipts remain available. Never claim `READY` for the full product based solely on unit tests or a headless service release.
 
