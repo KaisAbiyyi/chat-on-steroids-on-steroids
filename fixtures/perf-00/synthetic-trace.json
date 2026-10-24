@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "app": "cosos",
+    "source_sha": "SYNTHETIC",
+    "build_id": "synthetic-test-only",
+    "host_id": "synthetic-host",
+    "os": "Synthetic",
+    "power_mode": "synthetic",
+    "profile_class": "synthetic-no-account",
+    "logical_cpus": 8,
+    "synthetic": true
+  },
+  "workload_id": "coding_terminal",
+  "workload_params": {
+    "chats": 1,
+    "browser": "required",
+    "history": "small",
+    "activity": "tool-edit-build",
+    "thermal": "warm"
+  },
+  "samples": [
+    {
+      "elapsed_ms": 0,
+      "collector_ms": 2,
+      "roots": [
+        {
+          "pid": 101,
+          "identity": "a:10",
+          "role": "owned"
+        },
+        {
+          "pid": 201,
+          "identity": "b:20",
+          "role": "external"
+        }
+      ],
+      "processes": [
+        {
+          "pid": 101,
+          "ppid": 1,
+          "identity": "a:10",
+          "rss_bytes": 104857600,
+          "private_bytes": 62914560,
+          "peak_rss_bytes": 115343360,
+          "cpu_seconds": 1,
+          "handles": 2
+        },
+        {
+          "pid": 102,
+          "ppid": 101,
+          "identity": "a:11",
+          "rss_bytes": 31457280,
+          "private_bytes": 20971520,
+          "peak_rss_bytes": 41943040,
+          "cpu_seconds": 0.5,
+          "handles": 2
+        },
+        {
+          "pid": 201,
+          "ppid": 1,
+          "identity": "b:20",
+          "rss_bytes": 83886080,
+          "private_bytes": 52428800,
+          "peak_rss_bytes": 94371840,
+          "cpu_seconds": 1,
+          "handles": 2
+        },
+        {
+          "pid": 202,
+          "ppid": 201,
+          "identity": "b:21",
+          "rss_bytes": 20971520,
+          "private_bytes": 10485760,
+          "peak_rss_bytes": 31457280,
+          "cpu_seconds": 0.25,
+          "handles": 2
+        },
+        {
+          "pid": 900,
+          "ppid": 1,
+          "identity": "unrelated",
+          "rss_bytes": 943718400,
+          "private_bytes": 524288000,
+          "peak_rss_bytes": 954204160,
+          "cpu_seconds": 12,
+          "handles": 2
+        }
+      ]
+    },
+    {
+      "elapsed_ms": 1000,
+      "collector_ms": 3,
+      "roots": [
+        {
+          "pid": 101,
+          "identity": "a:10",
+          "role": "owned"
+        },
+        {
+          "pid": 201,
+          "identity": "b:20",
+          "role": "external"
+        }
+      ],
+      "processes": [
+        {
+          "pid": 101,
+          "ppid": 1,
+          "identity": "a:10",
+          "rss_bytes": 115343360,
+          "private_bytes": 68157440,
+          "peak_rss_bytes": 125829120,
+          "cpu_seconds": 1.1,
+          "handles": 2
+        },
+        {
+          "pid": 102,
+          "ppid": 101,
+          "identity": "a:11",
+          "rss_bytes": 34603008,
+          "private_bytes": 23068672,
+          "peak_rss_bytes": 45088768,
+          "cpu_seconds": 0.55,
+          "handles": 2
+        },
+        {
+          "pid": 201,
+          "ppid": 1,
+          "identity": "b:20",
+          "rss_bytes": 89128960,
+          "private_bytes": 57671680,
+          "peak_rss_bytes": 99614720,
+          "cpu_seconds": 1.1,
+          "handles": 2
+        },
+        {
+          "pid": 202,
+          "ppid": 201,
+          "identity": "b:21",
+          "rss_bytes": 20971520,
+          "private_bytes": 10485760,
+          "peak_rss_bytes": 31457280,
+          "cpu_seconds": 0.3,
+          "handles": 2
+        },
+        {
+          "pid": 900,
+          "ppid": 1,
+          "identity": "unrelated",
+          "rss_bytes": 943718400,
+          "private_bytes": 524288000,
+          "peak_rss_bytes": 954204160,
+          "cpu_seconds": 15,
+          "handles": 2
+        }
+      ]
+    }
+  ],
+  "events": {
+    "startup_ms": 300,
+    "tool_latencies_ms": [
+      10,
+      20,
+      30,
+      40,
+      50
+    ]
+  }
+}
