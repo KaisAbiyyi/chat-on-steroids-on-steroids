@@ -1,5 +1,5 @@
-mod profile;
 mod migration;
+mod profile;
 use cos_core::{
     config,
     logging::{self, DiagnosticLog},
