@@ -98,12 +98,23 @@ pub(super) fn inventory(root: &Path) -> io::Result<BTreeMap<PathBuf, (u64, Strin
 // appears between a preflight check and rename. Both paths share a parent.
 #[cfg(target_os = "linux")]
 pub(super) fn publish_new(stage: &Path, destination: &Path) -> io::Result<()> {
-    use std::{ffi::{CString, c_char}, os::unix::ffi::OsStrExt};
+    use std::{
+        ffi::{CString, c_char},
+        os::unix::ffi::OsStrExt,
+    };
     unsafe extern "C" {
-        fn renameat2(olddirfd: i32, oldpath: *const c_char, newdirfd: i32, newpath: *const c_char, flags: u32) -> i32;
+        fn renameat2(
+            olddirfd: i32,
+            oldpath: *const c_char,
+            newdirfd: i32,
+            newpath: *const c_char,
+            flags: u32,
+        ) -> i32;
     }
-    let from = CString::new(stage.as_os_str().as_bytes()).map_err(|_| invalid("Invalid staging path"))?;
-    let to = CString::new(destination.as_os_str().as_bytes()).map_err(|_| invalid("Invalid destination path"))?;
+    let from =
+        CString::new(stage.as_os_str().as_bytes()).map_err(|_| invalid("Invalid staging path"))?;
+    let to = CString::new(destination.as_os_str().as_bytes())
+        .map_err(|_| invalid("Invalid destination path"))?;
     // AT_FDCWD / RENAME_NOREPLACE. Never silently fall back to destructive rename.
     if unsafe { renameat2(-100, from.as_ptr(), -100, to.as_ptr(), 1) } != 0 {
         return Err(io::Error::last_os_error());
@@ -118,8 +129,16 @@ pub(super) fn publish_new(stage: &Path, destination: &Path) -> io::Result<()> {
     unsafe extern "system" {
         fn MoveFileW(existing: *const u16, new: *const u16) -> i32;
     }
-    let from = stage.as_os_str().encode_wide().chain(std::iter::once(0)).collect::<Vec<_>>();
-    let to = destination.as_os_str().encode_wide().chain(std::iter::once(0)).collect::<Vec<_>>();
+    let from = stage
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect::<Vec<_>>();
+    let to = destination
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect::<Vec<_>>();
     // MoveFileW (unlike MoveFileExW with REPLACE_EXISTING) refuses existing targets.
     if unsafe { MoveFileW(from.as_ptr(), to.as_ptr()) } == 0 {
         return Err(io::Error::last_os_error());
@@ -129,7 +148,10 @@ pub(super) fn publish_new(stage: &Path, destination: &Path) -> io::Result<()> {
 
 #[cfg(not(any(target_os = "linux", windows)))]
 pub(super) fn publish_new(_stage: &Path, _destination: &Path) -> io::Result<()> {
-    Err(io::Error::new(io::ErrorKind::Unsupported, "No atomic no-clobber profile publication on this platform"))
+    Err(io::Error::new(
+        io::ErrorKind::Unsupported,
+        "No atomic no-clobber profile publication on this platform",
+    ))
 }
 
 pub fn import(source: &Path, target: &Path) -> io::Result<Value> {
