@@ -1,0 +1,46 @@
+name: 16C headless runtime bundle and license gates
+on:
+  push:
+    branches:
+      - 'work/16c-*'
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  headless-bundle-audit:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - name: Synthetic bundle/licensing regression tests
+        run: python -m unittest tools.test_release_16c -v
+      - name: Compile Python source
+        run: python -m py_compile tools/release_16c.py tools/test_release_16c.py
+      - name: Metadata from exact checked-out target-specific Cargo graph
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then target=x86_64-pc-windows-msvc; else target=x86_64-unknown-linux-gnu; fi
+          cargo metadata --locked --format-version 1 --filter-platform "$target" > metadata.json
+      - name: Fail fast on transitive package licenses and provenance
+        shell: bash
+        run: python -c "import json,tomllib; from pathlib import Path; from tools.release_16c import inventory; items,notices=inventory(json.loads(Path('metadata.json').read_text('utf-8')),tomllib.loads(Path('Cargo.lock').read_text('utf-8')),Path('LICENSE')); print('license inventory:',len(items),'packages;',len(notices),'notice chars')"
+      - name: Build the headless Rust runtime only
+        run: cargo build --release --locked -p cos-app
+      - name: Audit exact-sha headless bundle and dependency license texts
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            artifact="target/release/cos-rust.exe"
+            os_platform="windows-x64"
+          else
+            artifact="target/release/cos-rust"
+            os_platform="linux-x64"
+          fi
+          python tools/release_16c.py build --binary "$artifact" --project-license LICENSE --metadata-json metadata.json --cargo-lock Cargo.lock --out release-16c-headless.zip --platform "$os_platform" --source-sha "${{ github.sha }}"
+          python tools/release_16c.py verify --bundle release-16c-headless.zip --source-sha "${{ github.sha }}"
