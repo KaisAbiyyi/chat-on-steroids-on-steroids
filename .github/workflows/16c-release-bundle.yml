@@ -22,11 +22,14 @@ jobs:
         run: python -m unittest tools.test_release_16c -v
       - name: Compile Python source
         run: python -m py_compile tools/release_16c.py tools/test_release_16c.py
-      - name: Build the headless Rust runtime only
-        run: cargo build --release --locked -p cos-app
       - name: Metadata from exact checked-out Cargo graph
         shell: bash
         run: python -c "import pathlib,subprocess; pathlib.Path('metadata.json').write_bytes(subprocess.check_output(['cargo','metadata','--locked','--format-version','1']))"
+      - name: Fail fast on transitive package licenses and provenance
+        shell: bash
+        run: python -c "import json,tomllib; from pathlib import Path; from tools.release_16c import inventory; items,notices=inventory(json.loads(Path('metadata.json').read_text('utf-8')),tomllib.loads(Path('Cargo.lock').read_text('utf-8')),Path('LICENSE')); print('license inventory:',len(items),'packages;',len(notices),'notice chars')"
+      - name: Build the headless Rust runtime only
+        run: cargo build --release --locked -p cos-app
       - name: Audit exact-sha headless bundle and dependency license texts
         shell: bash
         run: |
