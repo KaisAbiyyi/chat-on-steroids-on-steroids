@@ -102,6 +102,26 @@ class BundleTests(unittest.TestCase):
         (self.pkg / "LICENSE-MIT").unlink()
         self.assertEqual(self.build()["status"], "PASS")
 
+    def test_same_source_workspace_sibling_license_notice(self):
+        sibling = self.root / "sibling"
+        sibling.mkdir()
+        (sibling / "Cargo.toml").write_text("[package]\\nname='rquickjs'\\n", encoding="utf-8")
+        (sibling / "LICENSE").write_text("Sibling canonical MIT notice", encoding="utf-8")
+        self.meta["packages"][0]["repository"] = "https://example.org/canonical"
+        self.meta["packages"].append({
+            "name": "sibling", "version": "0.1.0", "license": "MIT OR Apache-2.0",
+            "source": "registry+https://github.com/rust-lang/crates.io-index",
+            "manifest_path": str(sibling / "Cargo.toml"),
+            "repository": "https://example.org/canonical"
+        })
+        self.lock["package"].append({
+            "name": "sibling", "version": "0.1.0",
+            "source": "registry+https://github.com/rust-lang/crates.io-index",
+            "checksum": "c" * 64
+        })
+        (self.pkg / "LICENSE-MIT").unlink()
+        self.assertEqual(self.build()["status"], "PASS")
+
     def test_missing_license_text_refused(self):
         (self.pkg / "LICENSE-MIT").unlink()
         with self.assertRaisesRegex(bundle.Refused, "missing license"):
