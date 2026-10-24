@@ -32,7 +32,8 @@ Consequently, native clean start/restart, multi-tab/profile preservation, crash/
 | Browser architecture guardrails | **16 PASS**, validator exit 0; provisional architecture/source contract only, no native acceptance |
 | DAG consistency | **PASS**, 115 tasks / 72 C / 28 L / 15 U, no cyclic or dangling edges |
 | Rust formatting | **PASS**, `cargo fmt --all --check` on the source under test |
-| Local `cos-core` regressions | **63 PASS, 0 FAIL, 0 ignored**; `cargo test -p cos-core --locked`. Full workspace strict check still running |
+| Local `cos-core` regressions | **63 PASS, 0 FAIL, 0 ignored**; `cargo test -p cos-core --locked` |
+| Full local Rust workspace | **343 PASS, 0 FAIL, 0 ignored**, 82 test groups; `python tools/check-workspace.py --strict` exit 0, formatting and strict all-target Clippy **PASS** |
 | Current 7L1 WebView2 host build | **PASS**, 0 warnings/errors, Release build with warnings as errors; separate preflight executable |
 | Physical WebView2 MV3 discovery | **PASS**, preflight process exit 0, independent live extension worker sessions; no Rust or 8B/8C integration started |
 | 8L1 native acceptance | **BLOCKED / NOT_RUN**, missing privileged integration and gate runner |
@@ -49,7 +50,7 @@ The subsequent CI step exposed the same stale 8B-ready expectation in `test_brow
 
 ## Direct self-review and handoff
 
-Self-review — Codex local / `COS-8L1-20261024`: check source caller inventory, native/synthetic attribution, raw receipt integrity, all changed coordination paths, authentic prerequisite SHAs, absence of product edits, and protected WIP before committing. No independent reviewer or Copilot gate is imposed. Review of this documentation cannot change native acceptance.
+Self-review — Codex local / `COS-8L1-20261024`: reviewed source caller inventory, native/synthetic attribution, raw receipt integrity, all changed coordination paths and the two snapshot regression tests, authentic prerequisite SHAs, absence of product edits, and unchanged protected WIP hashes/status. The product-source diff against the SHA under test is empty. Evidence/coordination changes PASS; native acceptance remains BLOCKED. The PR review record identifies the final exact head after publication. No independent reviewer or Copilot gate is imposed. Review of this documentation cannot change native acceptance.
 
 LOCAL REQUIRED: rerun **8L1 on the exact accepted repair SHA**, using an executable native host adapter and source/binary manifest. Cloud repair must wire privileged context and actual WebView2 storage partitions to 8B, authenticated navigation/process/crash/restart/close/rebind events to 8C, and atomic one-use consent/current-context checks to real permission handling. Supply bounded synthetic native restart/multi-tab/profile-preservation and stale-proof negative tests, default-deny behavior, and Windows/Ubuntu CI. Keep this unit BLOCKED until the physical gate succeeds; `8U1` remains blocked.
 
