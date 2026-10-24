@@ -26,43 +26,85 @@ struct HostWire {
 }
 impl From<HostWire> for TrustedHostEvidence {
     fn from(h: HostWire) -> Self {
-        Self { identity: h.identity, origin: h.origin, host_generation: h.host_generation }
+        Self {
+            identity: h.identity,
+            origin: h.origin,
+            host_generation: h.host_generation,
+        }
     }
 }
 #[derive(Deserialize)]
-#[serde(tag = "op", rename_all = "snake_case", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "op",
+    rename_all = "snake_case",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 enum Request {
-    Register { host: HostWire },
-    Handshake { host: HostWire, channel_id: u64, generation: u64, proof: String },
+    Register {
+        host: HostWire,
+    },
+    Handshake {
+        host: HostWire,
+        channel_id: u64,
+        generation: u64,
+        proof: String,
+    },
     Observe {
-        host: HostWire, channel_id: u64, generation: u64, sequence: u64,
-        payload: String, mac: String,
+        host: HostWire,
+        channel_id: u64,
+        generation: u64,
+        sequence: u64,
+        payload: String,
+        mac: String,
     },
     ToolAttach {
-        host: HostWire, channel_id: u64, generation: u64, sequence: u64,
-        payload: String, mac: String,
+        host: HostWire,
+        channel_id: u64,
+        generation: u64,
+        sequence: u64,
+        payload: String,
+        mac: String,
     },
     ToolSnapshot {
-        host: HostWire, channel_id: u64, generation: u64, sequence: u64,
-        payload: String, mac: String, handle: u64,
+        host: HostWire,
+        channel_id: u64,
+        generation: u64,
+        sequence: u64,
+        payload: String,
+        mac: String,
+        handle: u64,
     },
     ToolDetach {
-        host: HostWire, channel_id: u64, generation: u64, sequence: u64,
-        payload: String, mac: String, handle: u64,
+        host: HostWire,
+        channel_id: u64,
+        generation: u64,
+        sequence: u64,
+        payload: String,
+        mac: String,
+        handle: u64,
     },
-    Retire { channel_id: u64 },
+    Retire {
+        channel_id: u64,
+    },
 }
 fn unhex(input: &str) -> Result<Vec<u8>, String> {
     if !input.len().is_multiple_of(2) || input.len() > 16384 {
         return Err("invalid hex length".into());
     }
-    input.as_bytes().chunks_exact(2).map(|pair| {
-        let s = std::str::from_utf8(pair).map_err(|_| "hex encoding".to_string())?;
-        u8::from_str_radix(s, 16).map_err(|_| "invalid hex".to_string())
-    }).collect()
+    input
+        .as_bytes()
+        .chunks_exact(2)
+        .map(|pair| {
+            let s = std::str::from_utf8(pair).map_err(|_| "hex encoding".to_string())?;
+            u8::from_str_radix(s, 16).map_err(|_| "invalid hex".to_string())
+        })
+        .collect()
 }
 fn digest(input: &str) -> Result<[u8; 32], String> {
-    unhex(input)?.try_into().map_err(|_| "MAC must be 32 bytes".into())
+    unhex(input)?
+        .try_into()
+        .map_err(|_| "MAC must be 32 bytes".into())
 }
 fn hex(bytes: &[u8]) -> String {
     const DIGITS: &[u8] = b"0123456789abcdef";
@@ -98,7 +140,9 @@ impl NativePipe {
     }
     fn write(&mut self, value: &Value) -> Result<(), String> {
         writeln!(self.output, "{value}").map_err(|_| "host pipe write error".to_string())?;
-        self.output.flush().map_err(|_| "host pipe flush error".to_string())
+        self.output
+            .flush()
+            .map_err(|_| "host pipe flush error".to_string())
     }
 }
 
@@ -126,7 +170,10 @@ impl WebView2Debugger {
         if reply.get("ok").and_then(Value::as_bool) != Some(true) {
             return Err("privileged WebView2 debugger denied or failed".into());
         }
-        Ok(reply.get("value").cloned().ok_or("missing native CDP value")?)
+        Ok(reply
+            .get("value")
+            .cloned()
+            .ok_or("missing native CDP value")?)
     }
 }
 impl BrowserDebugger for WebView2Debugger {
@@ -139,7 +186,7 @@ impl BrowserDebugger for WebView2Debugger {
     fn snapshot(&mut self, host: &TrustedHostEvidence) -> Result<BrowserSnapshot, String> {
         let value = self.cdp("snapshot", host)?;
         #[derive(Deserialize)]
-        #[serde(rename_all="camelCase",deny_unknown_fields)]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
         struct SnapshotWire {
             identity: DocumentIdentity,
             url: String,
@@ -149,7 +196,10 @@ impl BrowserDebugger for WebView2Debugger {
         let data: SnapshotWire = serde_json::from_value(value)
             .map_err(|_| "invalid native debugger snapshot schema".to_string())?;
         Ok(BrowserSnapshot {
-            identity:data.identity, url:data.url, title:data.title, text:data.text
+            identity: data.identity,
+            url: data.url,
+            title: data.title,
+            text: data.text,
         })
     }
 }
@@ -160,66 +210,161 @@ struct State {
 }
 impl State {
     fn auth<'a>(
-        host: &'a TrustedHostEvidence, channel_id: u64, generation: u64,
-        sequence: u64, payload: &'a [u8], mac: [u8; 32],
+        host: &'a TrustedHostEvidence,
+        channel_id: u64,
+        generation: u64,
+        sequence: u64,
+        payload: &'a [u8],
+        mac: [u8; 32],
     ) -> ToolAuthorization<'a> {
         ToolAuthorization {
-            trusted: host, channel_id, generation, sequence, signed_frame: payload, mac
+            trusted: host,
+            channel_id,
+            generation,
+            sequence,
+            signed_frame: payload,
+            mac,
         }
     }
-    fn apply(&mut self, req: Request) -> Result<Value,String> {
+    fn apply(&mut self, req: Request) -> Result<Value, String> {
         match req {
-            Request::Register {host} => {
+            Request::Register { host } => {
                 let host: TrustedHostEvidence = host.into();
-                let boot = self.bridge.register_host(host.clone()).map_err(|e|e.to_string())?;
+                let boot = self
+                    .bridge
+                    .register_host(host.clone())
+                    .map_err(|e| e.to_string())?;
                 self.owned.insert(boot.channel_id, host);
                 Ok(json!({"channelId":boot.channel_id,
                     "hostGeneration":boot.host_generation,
                     "challenge":hex(&boot.challenge),
                     "key":hex(&boot.isolated_worker_key())}))
             }
-            Request::Handshake {host,channel_id,generation,proof} => {
-                self.bridge.complete_handshake(&host.into(),channel_id,generation,&digest(&proof)?)
-                    .map_err(|e|e.to_string())?;
+            Request::Handshake {
+                host,
+                channel_id,
+                generation,
+                proof,
+            } => {
+                self.bridge
+                    .complete_handshake(&host.into(), channel_id, generation, &digest(&proof)?)
+                    .map_err(|e| e.to_string())?;
                 Ok(json!({"authenticated":true}))
             }
-            Request::Observe {host,channel_id,generation,sequence,payload,mac} => {
-                let result=self.bridge.observe(&host.into(),channel_id,generation,sequence,
-                    &unhex(&payload)?,&digest(&mac)?).map_err(|e|e.to_string())?;
+            Request::Observe {
+                host,
+                channel_id,
+                generation,
+                sequence,
+                payload,
+                mac,
+            } => {
+                let result = self
+                    .bridge
+                    .observe(
+                        &host.into(),
+                        channel_id,
+                        generation,
+                        sequence,
+                        &unhex(&payload)?,
+                        &digest(&mac)?,
+                    )
+                    .map_err(|e| e.to_string())?;
                 Ok(json!({"observation":format!("{result:?}")}))
             }
-            Request::ToolAttach {host,channel_id,generation,sequence,payload,mac} => {
-                let host: TrustedHostEvidence=host.into();
-                let frame=unhex(&payload)?;
-                let handle=self.tools.attach(&mut self.bridge,
-                    Self::auth(&host,channel_id,generation,sequence,&frame,digest(&mac)?))
-                    .map_err(|e|e.to_string())?;
+            Request::ToolAttach {
+                host,
+                channel_id,
+                generation,
+                sequence,
+                payload,
+                mac,
+            } => {
+                let host: TrustedHostEvidence = host.into();
+                let frame = unhex(&payload)?;
+                let handle = self
+                    .tools
+                    .attach(
+                        &mut self.bridge,
+                        Self::auth(
+                            &host,
+                            channel_id,
+                            generation,
+                            sequence,
+                            &frame,
+                            digest(&mac)?,
+                        ),
+                    )
+                    .map_err(|e| e.to_string())?;
                 Ok(json!({"handle":handle}))
             }
-            Request::ToolSnapshot {host,channel_id,generation,sequence,payload,mac,handle} => {
-                let host: TrustedHostEvidence=host.into();
-                let frame=unhex(&payload)?;
-                let snapshot=self.tools.snapshot(&mut self.bridge,
-                    Self::auth(&host,channel_id,generation,sequence,&frame,digest(&mac)?),
-                    handle).map_err(|e|e.to_string())?;
+            Request::ToolSnapshot {
+                host,
+                channel_id,
+                generation,
+                sequence,
+                payload,
+                mac,
+                handle,
+            } => {
+                let host: TrustedHostEvidence = host.into();
+                let frame = unhex(&payload)?;
+                let snapshot = self
+                    .tools
+                    .snapshot(
+                        &mut self.bridge,
+                        Self::auth(
+                            &host,
+                            channel_id,
+                            generation,
+                            sequence,
+                            &frame,
+                            digest(&mac)?,
+                        ),
+                        handle,
+                    )
+                    .map_err(|e| e.to_string())?;
                 Ok(json!({"identity":snapshot.identity,
                     "url":snapshot.url,"title":snapshot.title,"text":snapshot.text}))
             }
-            Request::ToolDetach {host,channel_id,generation,sequence,payload,mac,handle} => {
-                let host: TrustedHostEvidence=host.into();
-                let frame=unhex(&payload)?;
-                self.tools.detach(&mut self.bridge,
-                    Self::auth(&host,channel_id,generation,sequence,&frame,digest(&mac)?),
-                    handle).map_err(|e|e.to_string())?;
+            Request::ToolDetach {
+                host,
+                channel_id,
+                generation,
+                sequence,
+                payload,
+                mac,
+                handle,
+            } => {
+                let host: TrustedHostEvidence = host.into();
+                let frame = unhex(&payload)?;
+                self.tools
+                    .detach(
+                        &mut self.bridge,
+                        Self::auth(
+                            &host,
+                            channel_id,
+                            generation,
+                            sequence,
+                            &frame,
+                            digest(&mac)?,
+                        ),
+                        handle,
+                    )
+                    .map_err(|e| e.to_string())?;
                 Ok(json!({"detached":true}))
             }
-            Request::Retire {channel_id} => {
+            Request::Retire { channel_id } => {
                 let was_owned = self.owned.get(&channel_id);
                 // If physical detach fails, retain the Rust lease: never grant
                 // a new contender an ambiguously live debugger.
                 if let Some(host) = was_owned {
-                    if self.tools.has_lease_for(host,channel_id,host.host_generation)
-                        && !self.tools.retire_from_native(host,channel_id,host.host_generation)
+                    if self
+                        .tools
+                        .has_lease_for(host, channel_id, host.host_generation)
+                        && !self
+                            .tools
+                            .retire_from_native(host, channel_id, host.host_generation)
                     {
                         return Err("native debugger detach unresolved".into());
                     }
@@ -231,27 +376,30 @@ impl State {
     }
 }
 fn main() {
-    let pipe=Rc::new(RefCell::new(NativePipe {
-        input:io::stdin(),output:io::BufWriter::new(io::stdout())
+    let pipe = Rc::new(RefCell::new(NativePipe {
+        input: io::stdin(),
+        output: io::BufWriter::new(io::stdout()),
     }));
-    let mut state=State {
-        bridge:NativeBrowserBridge::new(),
-        tools:DirectBrowserTools::new(WebView2Debugger{pipe:pipe.clone()}),
-        owned:HashMap::new(),
+    let mut state = State {
+        bridge: NativeBrowserBridge::new(),
+        tools: DirectBrowserTools::new(WebView2Debugger { pipe: pipe.clone() }),
+        owned: HashMap::new(),
     };
     loop {
-        let line=match pipe.borrow_mut().read(MAX_COMMAND) {
-            Ok(line)=>line,
-            Err(_)=>break,
+        let line = match pipe.borrow_mut().read(MAX_COMMAND) {
+            Ok(line) => line,
+            Err(_) => break,
         };
-        let response=serde_json::from_str::<Request>(&line)
-            .map_err(|_|"invalid request schema".to_string())
-            .and_then(|req|state.apply(req));
-        let value=match response {
-            Ok(v)=>json!({"ok":true,"value":v}),
-            Err(error)=>json!({"ok":false,"error":error}),
+        let response = serde_json::from_str::<Request>(&line)
+            .map_err(|_| "invalid request schema".to_string())
+            .and_then(|req| state.apply(req));
+        let value = match response {
+            Ok(v) => json!({"ok":true,"value":v}),
+            Err(error) => json!({"ok":false,"error":error}),
         };
-        if pipe.borrow_mut().write(&value).is_err(){break;}
+        if pipe.borrow_mut().write(&value).is_err() {
+            break;
+        }
     }
 }
 
@@ -260,7 +408,7 @@ mod tests {
     use super::*;
     #[test]
     fn private_wire_requires_exact_tool_operation_fields() {
-        let good=json!({"op":"tool_attach",
+        let good = json!({"op":"tool_attach",
             "host":{"identity":{"profileId":"a","tabId":1,"frameId":0,
                 "documentId":"d","navigationEpoch":1,"sessionId":"s",
                 "sessionEpoch":1,"workerGeneration":1},
@@ -268,8 +416,8 @@ mod tests {
             "channelId":1,"generation":1,"sequence":2,"payload":"00",
             "mac":"00".repeat(32)});
         assert!(serde_json::from_value::<Request>(good.clone()).is_ok());
-        let mut bad=good;
-        bad["command"]=json!("Runtime.evaluate");
+        let mut bad = good;
+        bad["command"] = json!("Runtime.evaluate");
         assert!(serde_json::from_value::<Request>(bad).is_err());
         assert!(serde_json::from_value::<Request>(json!({"op":"tool_send"})).is_err());
     }
