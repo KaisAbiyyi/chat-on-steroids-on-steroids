@@ -2,8 +2,8 @@
 use cos_core::ui_focus::{
     UiFocus, UiFocusError, UiFocusTarget, UiKeyEvent, UiKeyFrame, UiKeyOutcome,
 };
-use cos_core::ui_localization::{text, UiLanguage, UiTextKey};
-use serde_json::{json, Value};
+use cos_core::ui_localization::{UiLanguage, UiTextKey, text};
+use serde_json::{Value, json};
 
 fn key(epoch: u64, sequence: u64, event: Value) -> Vec<u8> {
     serde_json::to_vec(&json!({
@@ -22,8 +22,7 @@ fn tab(shift: bool) -> Value {
 #[test]
 fn all_thirteen_canonical_languages_have_safe_nonempty_shell_keys() {
     let upstream = [
-        "en", "de", "es", "fr", "pt-BR", "pt-PT", "ru", "tr", "vi", "ja",
-        "ko", "zh-CN", "zh-TW",
+        "en", "de", "es", "fr", "pt-BR", "pt-PT", "ru", "tr", "vi", "ja", "ko", "zh-CN", "zh-TW",
     ];
     assert_eq!(UiLanguage::ALL.len(), upstream.len());
     for (lang, tag) in UiLanguage::ALL.into_iter().zip(upstream) {
@@ -49,8 +48,15 @@ fn all_thirteen_canonical_languages_have_safe_nonempty_shell_keys() {
 #[test]
 fn unsupported_malformed_or_unset_locale_falls_back_exactly_to_english() {
     let invalid = [
-        None, Some(""), Some("EN"), Some("en-US"), Some("pt-br"),
-        Some("ar"), Some("id"), Some("../en"), Some("<script>"),
+        None,
+        Some(""),
+        Some("EN"),
+        Some("en-US"),
+        Some("pt-br"),
+        Some("ar"),
+        Some("id"),
+        Some("../en"),
+        Some("<script>"),
     ];
     for value in invalid {
         assert_eq!(UiLanguage::select(value), UiLanguage::En);
@@ -63,7 +69,9 @@ fn unsupported_malformed_or_unset_locale_falls_back_exactly_to_english() {
 fn tab_cycles_forward_backward_without_phantom_revisions() {
     let mut focus = UiFocus::new(9).unwrap();
     for (i, target) in [
-        UiFocusTarget::Main, UiFocusTarget::Composer, UiFocusTarget::Navigation,
+        UiFocusTarget::Main,
+        UiFocusTarget::Composer,
+        UiFocusTarget::Navigation,
     ]
     .into_iter()
     .enumerate()
@@ -76,7 +84,11 @@ fn tab_cycles_forward_backward_without_phantom_revisions() {
         assert_eq!(reply.state.revision, i as u64 + 2);
     }
     assert_eq!(
-        focus.handle_json(&key(9, 4, tab(true))).unwrap().state.target,
+        focus
+            .handle_json(&key(9, 4, tab(true)))
+            .unwrap()
+            .state
+            .target,
         UiFocusTarget::Composer
     );
     let current = focus.snapshot();
@@ -96,11 +108,19 @@ fn modal_traps_navigation_and_restores_original_focus_on_escape() {
     );
     assert_eq!(focus.open_dialog(), Err(UiFocusError::Dialog));
     assert_eq!(
-        focus.handle_json(&key(10, 1, tab(false))).unwrap().state.target,
+        focus
+            .handle_json(&key(10, 1, tab(false)))
+            .unwrap()
+            .state
+            .target,
         UiFocusTarget::DialogCancel
     );
     assert_eq!(
-        focus.handle_json(&key(10, 2, tab(true))).unwrap().state.target,
+        focus
+            .handle_json(&key(10, 2, tab(true)))
+            .unwrap()
+            .state
+            .target,
         UiFocusTarget::DialogConfirm
     );
     let reply = focus
@@ -128,9 +148,7 @@ fn composition_modified_keys_and_nonmodal_escape_pass_through() {
         json!({"key":"escape","composing":false}),
     ];
     for (i, event) in events.into_iter().enumerate() {
-        let reply = focus
-            .handle_json(&key(3, i as u64 + 1, event))
-            .unwrap();
+        let reply = focus.handle_json(&key(3, i as u64 + 1, event)).unwrap();
         assert_eq!(reply.outcome, UiKeyOutcome::PassThrough);
         assert_eq!(reply.state, initial);
     }
@@ -145,7 +163,10 @@ fn replay_stale_unknown_oversize_and_duplicate_events_fail_closed() {
     let mut focus = UiFocus::new(7).unwrap();
     let first = key(7, 1, tab(false));
     focus.handle_json(&first).unwrap();
-    assert_eq!(focus.handle_json(&first).unwrap_err(), UiFocusError::Sequence);
+    assert_eq!(
+        focus.handle_json(&first).unwrap_err(),
+        UiFocusError::Sequence
+    );
     assert_eq!(
         focus.handle_json(&key(6, 2, tab(false))).unwrap_err(),
         UiFocusError::Epoch
@@ -157,12 +178,17 @@ fn replay_stale_unknown_oversize_and_duplicate_events_fail_closed() {
     let snapshot = focus.snapshot();
     let bad = [
         br#"{"hostEpoch":7,"sequence":2,"event":{"key":"execute","script":"x"}}"#.as_slice(),
-        br#"{"hostEpoch":7,"sequence":2,"event":{"key":"escape","composing":false,"grant":true}}"#.as_slice(),
+        br#"{"hostEpoch":7,"sequence":2,"event":{"key":"escape","composing":false,"grant":true}}"#
+            .as_slice(),
         br#"{"hostEpoch":7,"sequence":2,"event":{"key":"tab","shift":false}}"#.as_slice(),
-        br#"{"hostEpoch":7,"sequence":2,"sequence":3,"event":{"key":"escape","composing":false}}"#.as_slice(),
+        br#"{"hostEpoch":7,"sequence":2,"sequence":3,"event":{"key":"escape","composing":false}}"#
+            .as_slice(),
     ];
     for payload in bad {
-        assert_eq!(focus.handle_json(payload).unwrap_err(), UiFocusError::Malformed);
+        assert_eq!(
+            focus.handle_json(payload).unwrap_err(),
+            UiFocusError::Malformed
+        );
     }
     assert_eq!(
         focus.handle_json(&vec![b' '; 8193]).unwrap_err(),
@@ -186,13 +212,14 @@ fn host_rebind_retires_modal_focus_and_old_keyboard_epoch() {
         Err(UiFocusError::Epoch)
     );
     assert_eq!(
-        focus.handle(UiKeyFrame {
-            host_epoch: 21,
-            sequence: 1,
-            event: UiKeyEvent::Escape { composing: false },
-        })
-        .unwrap()
-        .outcome,
+        focus
+            .handle(UiKeyFrame {
+                host_epoch: 21,
+                sequence: 1,
+                event: UiKeyEvent::Escape { composing: false },
+            })
+            .unwrap()
+            .outcome,
         UiKeyOutcome::PassThrough
     );
 }
