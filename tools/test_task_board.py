@@ -190,7 +190,9 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(board.explain(self.data, "8U1")["missing_direct"], ["8L1"])
         forecast = {task["id"] for wave in board.waves(self.data) for task in wave}
         self.assertTrue({"8L1", "8U1", "9A"}.isdisjoint(forecast))
-        self.assertIn("15B", forecast)
+        self.assertNotIn("15B", forecast)  # 15B cloud scope accepted on merged PR #77
+        self.assertIn("PERF-00", forecast)  # 15G cloud scope is now accepted
+        self.assertIn("16A", forecast)  # 16A independent release track remains unclaimed
 
     def test_dangling_dependency_is_rejected(self):
         data = copy.deepcopy(self.data)
