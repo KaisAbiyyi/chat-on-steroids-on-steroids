@@ -111,8 +111,8 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(board.explain(self.data, "8L1")["state"], "BLOCKED")
         self.assertNotIn("8L1", ready_ids)
         self.assertNotIn("8U1", ready_ids)
-        self.assertIn("15B", ready_ids)
-        self.assertEqual(board.explain(self.data, "15B")["state"], "READY_CANDIDATE")
+        self.assertNotIn("15B", ready_ids)
+        self.assertEqual(board.explain(self.data, "15B")["state"], "DONE")
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.

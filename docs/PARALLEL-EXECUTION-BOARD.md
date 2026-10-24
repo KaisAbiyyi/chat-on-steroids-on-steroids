@@ -156,19 +156,19 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `14L3` | Native dictation/pet lifecycle proof | `14F` | `windows-pet` | L (Windows) | BLOCKED |
 | `14U2` | Owner dictation, overlay privacy acceptance | `14L3` | `human-desktop` | U (owner) | BLOCKED |
 | `15A` | UI navigation and IPC contracts | `8C` | `ui-architecture` | C (cloud) | DONE |
-| `15B` | Conversation rendering and large history | `15A` | `ui-conversation` | C (cloud) | **READY · PARALLEL** |
-| `15C` | Rich editor/terminal/code/PDF/math panels | `15A` | `ui-rich` | C (cloud) | **READY · PARALLEL** |
+| `15B` | Conversation rendering and large history | `15A` | `ui-conversation` | C (cloud) | DONE |
+| `15C` | Rich editor/terminal/code/PDF/math panels | `15A` | `ui-rich` | C (cloud) | DONE |
 | `15L1` | Native editor/terminal/PDF/math proof | `15C` | `windows-ui-rich` | L (Windows) | BLOCKED |
-| `15D` | Projects/files/agents/plugins settings | `15A` | `ui-settings` | C (cloud) | **READY · PARALLEL** |
-| `15E` | 13 locales, accessiblity and focus keyboard | `15A` | `ui-i18n` | C (cloud) | **READY · PARALLEL** |
-| `15F` | Screenshot/regression fixed DPI/themes | `15B`, `15C`, `15D`, `15E` | `ui-snapshots` | C (cloud) | BLOCKED |
+| `15D` | Projects/files/agents/plugins settings | `15A` | `ui-settings` | C (cloud) | DONE |
+| `15E` | 13 locales, accessiblity and focus keyboard | `15A` | `ui-i18n` | C (cloud) | DONE |
+| `15F` | Screenshot/regression fixed DPI/themes | `15B`, `15C`, `15D`, `15E` | `ui-snapshots` | C (cloud) | DONE |
 | `15L2` | Native 13-locale/DPI interaction matrices | `15F` | `windows-ui-i18n` | L (Windows) | BLOCKED |
-| `15G` | Full desktop integration/performance review | `15F` | `ui-integration` | C (cloud) | BLOCKED |
-| `15L3` | Real large-history desktop RAM/performance | `15G` | `windows-ui-load` | L (Windows) | BLOCKED |
+| `15G` | Full desktop integration/performance review | `15F` | `ui-integration` | C (cloud) | DONE |
+| `15L3` | Real large-history desktop RAM/performance | `15G` | `windows-ui-load` | L (Windows) | **READY · PARALLEL** |
 | `15U1` | Owner daily navigation/editor approval | `15L1` | `human-ui` | U (owner) | BLOCKED |
 | `15U2` | Owner keyboard/i18n/accessibility approval | `15L2` | `human-ui` | U (owner) | BLOCKED |
 | `15U3` | Owner feature-completeness acceptance | `15L3` | `human-ui` | U (owner) | BLOCKED |
-| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | BLOCKED |
+| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | **READY · PARALLEL** |
 | `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | BLOCKED |
 | `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | BLOCKED |
 | `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | BLOCKED |
