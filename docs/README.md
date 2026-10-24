@@ -2,6 +2,9 @@
 
 ## Active engineering authority
 
+- [P0 performance-first product ADR](decisions/2026-10-24-performance-first-workstation.md) — supersedes mandatory full-CoS feature parity
+- [PERF-00–06 execution plan](implementation-plan/2026-10-24-performance-first-workstream.md) — early resource measurement, architecture and native endurance gates
+
 - [Current phase and next-unit handoff](CURRENT-PHASE.md) — live checkpoint, previous agent's protected WIP, and explicit outstanding gates
 - [GitHub bootstrap receipt](implementation-summary/2026-10-18-github-bootstrap.md) — first public main SHA, publication screening and CI scope
 - [BIG implementation plan](BIG-IMPLEMENTATION-PLAN.md) — cloud-first phase/work-unit roadmap for all 16 migration phases

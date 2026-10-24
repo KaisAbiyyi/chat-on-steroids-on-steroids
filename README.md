@@ -1,5 +1,8 @@
 # CoS-Rust
 
+**P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](docs/decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](docs/implementation-plan/2026-10-24-performance-first-workstream.md).
+
+
 Current development policy: **cloud-first, like Mind Place**, with GitHub coding/PR/CI and
 explicit local Windows/device qualification on D:. See [current state](docs/CURRENT-PHASE.md),
 [BIG roadmap](docs/BIG-IMPLEMENTATION-PLAN.md), [C/L/U phase breakdown](docs/implementation-plan/2026-10-18-cloud-first-units.md),
@@ -14,11 +17,10 @@ The baseline is the open-source [Chat On Steroids upstream repository](https://g
 pinned to `024731d8083d92c46e8248d64e7e0b36ab0a470f`. An optional local clone is kept under
 `upstream/chat-on-steroids/` and is ignored by Git; it is not included in this repository.
 Rust runtime, sessions, MCP, files/projects/SSH and process/terminal services now run in this workspace.
-The original **16-phase** roadmap remains the scope reference. **Phases 1–6 remain PARTIAL against
-full exact parity**. Windows service implementation and evidence are recorded separately from GUI,
+The original **16-phase** feature matrix is a historical compatibility reference, **not** an obligation to ship every original feature. **Phases 1–6 remain PARTIAL against older full-parity scope** while accepted backend gates retain their exact acceptance. Windows service implementation and evidence are recorded separately from GUI,
 browser, external SSH/tunnel, packaging and native macOS/Linux acceptance.
 
-Current work is [closing phase 1–6 gaps](docs/implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md).
+Current work prioritizes browser/product host integration, performance baselines and runtime budgets; [Phase 1–6 closure](docs/implementation-summary/2026-10-17-phase1-6-parity-closure-v1.0.md) is historical.
 Windows is active; macOS/other platforms are on hold by request. The committed baseline has now also
 passed 112 native Linux tests in a disposable WSL2 container. Contributions are welcome; see
 [CONTRIBUTING](CONTRIBUTING.md) for reproducible checks and scope/evidence rules.

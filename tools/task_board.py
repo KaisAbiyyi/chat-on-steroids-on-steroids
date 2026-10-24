@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 
 REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
-EXPECTED = {"C": 72, "L": 28, "U": 15}
+EXPECTED = {"C": 78, "L": 30, "U": 15}
 STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
 PHASES = {"1-6", *(str(n) for n in range(7, 17))}
 NOTICE = (
@@ -92,6 +92,11 @@ def validate(data: dict) -> list[str]:
         "7P-A": ["CL-L6"], "7P-B": ["7P-A"], "7P-L1": ["7P-B"],
         "7A": ["7P-B"], "7L1": ["7C", "7P-L1"], "8A": ["7E"], "8B": ["8A"], "8C": ["8B"],
         "8L1": ["8C"], "8U1": ["8L1"],
+        "7U1-PREP": ["7L2"], "7U1": ["7L2", "7U1-PREP"],
+        "PERF-00": ["15G"], "PERF-01": ["PERF-00"],
+        "PERF-02": ["PERF-00"], "PERF-03": ["PERF-00"], "PERF-04": ["PERF-00"],
+        "PERF-05": ["PERF-01", "PERF-02", "PERF-03", "PERF-04", "8L1", "15L3"],
+        "PERF-06": ["PERF-05", "16D"],
         "CL-09C": ["CL-09A", "CL-05A"],
         "CL-L3": ["CL-06B", "CL-07B"],
         "CL-10": ["CL-04B", "CL-04C", "CL-L2", "CL-L3", "CL-L4", "CL-L5"],
