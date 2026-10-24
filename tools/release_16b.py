@@ -28,6 +28,10 @@ class Refused(ValueError):
     pass
 
 
+def is_link(path):
+    return path.is_symlink() or getattr(path, "is_junction", lambda: False)()
+
+
 def version(s):
     if not isinstance(s, str) or VERSION.fullmatch(s) is None:
         raise Refused("version must be canonical numeric major.minor.patch")
@@ -35,7 +39,7 @@ def version(s):
 
 
 def path_is_safe(root, path):
-    if root.is_symlink() or any(parent.is_symlink() for parent in root.parents):
+    if is_link(root) or any(is_link(parent) for parent in root.parents):
         raise Refused("linked staging directory refused")
     relative = PurePosixPath(path)
     if (
@@ -45,7 +49,7 @@ def path_is_safe(root, path):
     ):
         raise Refused("unsafe relative path")
     result = root.joinpath(*relative.parts)
-    if result.is_symlink() or any(parent.is_symlink() for parent in result.parents if parent != root):
+    if is_link(result) or any(is_link(parent) for parent in result.parents if parent != root):
         raise Refused("linked artifact path refused")
     if not result.is_file():
         raise Refused("missing staged file")
@@ -92,7 +96,7 @@ def windows_signature(path):
 def inspect(root, expected_source, current_version, trusted_thumbprint, signature_check=None):
     """Fail closed before any publication. signature_check injectable only for tests."""
     root = Path(root).absolute()
-    if not root.is_dir() or root.is_symlink():
+    if not root.is_dir() or is_link(root) or any(is_link(parent) for parent in root.parents):
         raise Refused("missing or linked staging directory")
     thumb = str(trusted_thumbprint).upper()
     if not THUMBPRINT.fullmatch(thumb):
@@ -100,7 +104,7 @@ def inspect(root, expected_source, current_version, trusted_thumbprint, signatur
     if not isinstance(expected_source, str) or not SHA40.fullmatch(expected_source):
         raise Refused("expected source commit SHA invalid")
     manifest_path = root / "release.json"
-    if manifest_path.is_symlink() or not manifest_path.is_file():
+    if is_link(manifest_path) or not manifest_path.is_file():
         raise Refused("missing regular release manifest")
     if manifest_path.stat().st_size > 64 * 1024:
         raise Refused("manifest exceeds bounded size")
@@ -146,7 +150,7 @@ def inspect(root, expected_source, current_version, trusted_thumbprint, signatur
         raise Refused("no native signed executable/installer candidate")
     actual = set()
     for candidate in root.rglob("*"):
-        if candidate.is_symlink():
+        if is_link(candidate):
             raise Refused("linked or external files refused")
         if candidate.is_file():
             actual.add(candidate.relative_to(root).as_posix())
@@ -156,6 +160,10 @@ def inspect(root, expected_source, current_version, trusted_thumbprint, signatur
     for binary in executables:
         if verifier(binary) != thumb:
             raise Refused("publisher thumbprint mismatch")
+        # Refuse a same-path mutation between digest and native signature checks.
+        indexed = next(item for item in files if root.joinpath(*PurePosixPath(item["path"]).parts) == binary)
+        if digest_file(binary) != (indexed["sha256"], indexed["bytes"]):
+            raise Refused("signed bytes changed after verification")
     return {
         "schema": SCHEMA, "status": "PASS", "source_sha": expected_source,
         "version": manifest["version"], "files": len(seen),
