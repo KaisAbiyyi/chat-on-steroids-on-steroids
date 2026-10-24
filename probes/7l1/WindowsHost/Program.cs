@@ -309,6 +309,27 @@ internal sealed partial class GateForm : Form
             browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
         };
         view.CoreWebView2.ProcessFailed += (_, _) => RevokeAndRetire(browser);
+        if (_l2)
+        {
+            // Real browser-owned MV3 worker target retirement. A pre-signed
+            // stale frame cannot retain authority after this CDP event.
+            var destroyed = view.CoreWebView2.GetDevToolsProtocolEventReceiver(
+                "Target.targetDestroyed");
+            destroyed.DevToolsProtocolEventReceived += (_, evt) =>
+            {
+                try
+                {
+                    using var report = JsonDocument.Parse(evt.ParameterObjectAsJson);
+                    if (report.RootElement.TryGetProperty("targetId", out var target) &&
+                        target.GetString() == browser.WorkerTargetId)
+                        RevokeAndRetire(browser);
+                }
+                catch (JsonException)
+                {
+                    RevokeAndRetire(browser); // invalid native lifecycle report fails closed
+                }
+            };
+        }
         view.Disposed += (_, _) => RevokeAndRetire(browser);
         view.CoreWebView2.Navigate(StartUrl);
         await WaitPageAsync(browser);
