@@ -68,6 +68,28 @@ class BundleTests(unittest.TestCase):
         self.meta["packages"][0]["license"] = "MIT/Apache-2.0"
         self.assertEqual(self.build()["status"], "PASS")
 
+    def test_spdx_permissive_alternative_with_lgpl(self):
+        self.meta["packages"][0]["license"] = "MIT OR Apache-2.0 OR LGPL-2.1-or-later"
+        self.assertEqual(self.build()["status"], "PASS")
+
+    def test_spdx_legacy_unlicense_dual(self):
+        self.meta["packages"][0]["license"] = "Unlicense/MIT"
+        self.assertEqual(self.build()["status"], "PASS")
+
+    def test_spdx_parenthesized_and_precedence(self):
+        self.meta["packages"][0]["license"] = "(MIT OR Apache-2.0) AND Unicode-3.0"
+        self.assertEqual(self.build()["status"], "PASS")
+
+    def test_spdx_rejects_mandatory_incompatible_license(self):
+        self.meta["packages"][0]["license"] = "MIT AND LGPL-2.1-or-later"
+        with self.assertRaisesRegex(bundle.Refused, "license audit blocked"):
+            self.build()
+
+    def test_spdx_rejects_unknown_exception_in_or(self):
+        self.meta["packages"][0]["license"] = "MIT OR Apache-2.0 WITH Unknown-exception"
+        with self.assertRaisesRegex(bundle.Refused, "unapproved license exception"):
+            self.build()
+
     def test_unreviewed_exception_refused(self):
         self.meta["packages"][0]["license"] = "Apache-2.0 WITH Unknown-exception OR MIT"
         with self.assertRaisesRegex(bundle.Refused, "unapproved"):
