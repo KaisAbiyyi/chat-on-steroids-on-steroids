@@ -33,17 +33,30 @@ class Refused(ValueError):
 def licenses(expr):
     if not isinstance(expr, str) or not expr.strip():
         raise Refused("missing SPDX license identifier")
-    # Conservative: every SPDX alternative must be approved; WITH exceptions
-    # and LicenseRef require a manual, documented licensing decision.
+    # Only the LLVM exception applied to Apache-2.0 is approved explicitly.
+    # All OR/AND alternatives are still audited, never silently dropped.
     normalized = re.sub(r"[()]", " ", expr)
-    atoms = normalized.split()
-    terms = [a for a in atoms if a not in ("AND", "OR")]
-    if (not terms or "WITH" in atoms or
-            any(a not in APPROVED for a in terms) or
-            re.sub(r"\s+", " ", normalized).strip() != " ".join(atoms)):
-        raise Refused("unsupported/unknown SPDX license: " + expr)
+    tokens = normalized.split()
+    if (not tokens or
+            re.sub(r"\\s+", " ", normalized).strip() != " ".join(tokens)):
+        raise Refused("malformed SPDX license expression")
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if token in ("AND", "OR"):
+            i += 1
+            continue
+        if token not in APPROVED:
+            raise Refused("unsupported/unknown SPDX license: " + expr)
+        if i + 1 < len(tokens) and tokens[i + 1] == "WITH":
+            if i + 2 >= len(tokens) or (token, tokens[i + 2]) != ("Apache-2.0", "LLVM-exception"):
+                raise Refused("unapproved license exception: " + expr)
+            i += 3
+        else:
+            i += 1
+    if tokens[0] in ("AND", "OR") or tokens[-1] in ("AND", "OR"):
+        raise Refused("malformed SPDX conjunction")
     return expr
-
 
 def read_notice(folder, explicit=None):
     if not isinstance(folder, Path) or not folder.is_dir():
@@ -75,7 +88,7 @@ def read_notice(folder, explicit=None):
     return "\n\n".join(chunks)
 
 
-def inventory(metadata, lockfile):
+def inventory(metadata, lockfile, project_license=None):
     if (not isinstance(metadata, dict) or
             not isinstance(metadata.get("packages"), list) or
             not isinstance(lockfile, dict) or not isinstance(lockfile.get("package"), list)):
@@ -108,7 +121,15 @@ def inventory(metadata, lockfile):
             "source": "registry" if source else "workspace",
             "checksum": checksum if source else None
         }
-        text = read_notice(directory, p.get("license_file"))
+        if source is None and not any(
+            item.is_file() and item.name.upper().startswith(LICENSE_NAMES)
+            for item in directory.iterdir()
+        ):
+            if project_license is None:
+                raise Refused("workspace license text unavailable")
+            text = "=== PROJECT LICENSE ===\\n" + Path(project_license).read_text("utf-8")
+        else:
+            text = read_notice(directory, p.get("license_file"))
         notices.append("## " + name + " " + ver + " [" + license_id + "]\n" + text)
         result.append(entry)
     if not result:
@@ -143,7 +164,7 @@ def build(binary, project_license, meta, lock, output, os_target, source):
     project_license = Path(project_license)
     if project_license.is_symlink() or not project_license.is_file():
         raise Refused("project LICENSE missing")
-    packages, notices = inventory(meta, lock)
+    packages, notices = inventory(meta, lock, project_license)
     members = {
         name: binary.read_bytes(),
         "LICENSE": project_license.read_bytes(),
