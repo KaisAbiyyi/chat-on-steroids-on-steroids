@@ -74,10 +74,11 @@ impl SafePreferences {
         let locale = self.locale.as_bytes();
         if locale.is_empty()
             || locale.len() > 35
-            || !self
-                .locale
-                .split('-')
-                .all(|piece| !piece.is_empty() && piece.len() <= 8 && piece.bytes().all(|b| b.is_ascii_alphanumeric()))
+            || !self.locale.split('-').all(|piece| {
+                !piece.is_empty()
+                    && piece.len() <= 8
+                    && piece.bytes().all(|b| b.is_ascii_alphanumeric())
+            })
             || !(75..=200).contains(&self.font_scale_percent)
         {
             return Err(PanelError::InvalidCatalog);
@@ -166,7 +167,8 @@ pub struct PanelCatalog {
 
 impl PanelCatalog {
     fn validate(&self) -> Result<(), PanelError> {
-        let total = self.projects.len() + self.files.len() + self.agents.len() + self.extensions.len();
+        let total =
+            self.projects.len() + self.files.len() + self.agents.len() + self.extensions.len();
         if total > MAX_PANEL_ITEMS {
             return Err(PanelError::InvalidCatalog);
         }
@@ -238,7 +240,9 @@ fn valid_label(label: &str) -> Result<(), PanelError> {
     if label.is_empty()
         || label.len() > MAX_LABEL_BYTES
         || label.trim() != label
-        || label.chars().any(|c| c.is_control() || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}'))
+        || label.chars().any(|c| {
+            c.is_control() || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
+        })
     {
         return Err(PanelError::InvalidCatalog);
     }
@@ -251,7 +255,9 @@ fn valid_relative_path(path: &str) -> Result<(), PanelError> {
         || path.contains('\\')
         || path.contains(':')
         || path.chars().any(|c| c.is_control())
-        || path.split('/').any(|part| part.is_empty() || part == "." || part == "..")
+        || path
+            .split('/')
+            .any(|part| part.is_empty() || part == "." || part == "..")
     {
         return Err(PanelError::InvalidIdentifier);
     }
@@ -431,7 +437,8 @@ impl UiPanels {
         if bytes.len() > MAX_PANEL_IPC_BYTES {
             return Err(PanelError::Oversize);
         }
-        let request: PanelRequest = serde_json::from_slice(bytes).map_err(|_| PanelError::Malformed)?;
+        let request: PanelRequest =
+            serde_json::from_slice(bytes).map_err(|_| PanelError::Malformed)?;
         self.dispatch(request)
     }
 
@@ -451,11 +458,17 @@ impl UiPanels {
         let mut next = self.snapshot.clone();
         match request.command {
             PanelCommand::Snapshot {} => {}
-            PanelCommand::OpenPanel { panel, expected_revision } => {
+            PanelCommand::OpenPanel {
+                panel,
+                expected_revision,
+            } => {
                 expect_revision(&next, expected_revision)?;
                 next.panel = panel;
             }
-            PanelCommand::SelectProject { project_id, expected_revision } => {
+            PanelCommand::SelectProject {
+                project_id,
+                expected_revision,
+            } => {
                 expect_revision(&next, expected_revision)?;
                 valid_id(&project_id)?;
                 if !next.catalog.projects.iter().any(|p| p.id == project_id) {
@@ -465,18 +478,30 @@ impl UiPanels {
                 next.selected_project = Some(project_id);
                 next.selected_file = None;
             }
-            PanelCommand::SelectFile { project_id, relative_path, expected_revision } => {
+            PanelCommand::SelectFile {
+                project_id,
+                relative_path,
+                expected_revision,
+            } => {
                 expect_revision(&next, expected_revision)?;
                 valid_id(&project_id)?;
                 valid_relative_path(&relative_path)?;
-                if !next.catalog.files.iter().any(|f| f.project_id == project_id && f.relative_path == relative_path) {
+                if !next
+                    .catalog
+                    .files
+                    .iter()
+                    .any(|f| f.project_id == project_id && f.relative_path == relative_path)
+                {
                     return Err(PanelError::NotFound);
                 }
                 next.panel = Panel::Files;
                 next.selected_project = Some(project_id);
                 next.selected_file = Some(relative_path);
             }
-            PanelCommand::SelectAgent { agent_id, expected_revision } => {
+            PanelCommand::SelectAgent {
+                agent_id,
+                expected_revision,
+            } => {
                 expect_revision(&next, expected_revision)?;
                 valid_id(&agent_id)?;
                 if !next.catalog.agents.iter().any(|a| a.id == agent_id) {
@@ -485,16 +510,31 @@ impl UiPanels {
                 next.panel = Panel::Agents;
                 next.selected_agent = Some(agent_id);
             }
-            PanelCommand::SelectExtension { kind, extension_id, expected_revision } => {
+            PanelCommand::SelectExtension {
+                kind,
+                extension_id,
+                expected_revision,
+            } => {
                 expect_revision(&next, expected_revision)?;
                 valid_id(&extension_id)?;
-                if !next.catalog.extensions.iter().any(|e| e.id == extension_id && e.kind == kind) {
+                if !next
+                    .catalog
+                    .extensions
+                    .iter()
+                    .any(|e| e.id == extension_id && e.kind == kind)
+                {
                     return Err(PanelError::NotFound);
                 }
-                next.panel = match kind { ExtensionKind::Skill => Panel::Skills, ExtensionKind::Plugin => Panel::Plugins };
+                next.panel = match kind {
+                    ExtensionKind::Skill => Panel::Skills,
+                    ExtensionKind::Plugin => Panel::Plugins,
+                };
                 next.selected_extension = Some((kind, extension_id));
             }
-            PanelCommand::OpenSettingsTab { tab, expected_revision } => {
+            PanelCommand::OpenSettingsTab {
+                tab,
+                expected_revision,
+            } => {
                 expect_revision(&next, expected_revision)?;
                 next.panel = Panel::Settings;
                 next.settings_tab = tab;
@@ -504,20 +544,34 @@ impl UiPanels {
             next.revision = next_counter(self.snapshot.revision)?;
             self.snapshot = next;
         }
-        Ok(PanelReply { protocol: UI_PROTOCOL_VERSION, sequence: request.sequence, state: self.snapshot() })
+        Ok(PanelReply {
+            protocol: UI_PROTOCOL_VERSION,
+            sequence: request.sequence,
+            state: self.snapshot(),
+        })
     }
 }
 
 fn expect_revision(state: &PanelSnapshot, expected: u64) -> Result<(), PanelError> {
-    if state.revision != expected { Err(PanelError::Revision) } else { Ok(()) }
+    if state.revision != expected {
+        Err(PanelError::Revision)
+    } else {
+        Ok(())
+    }
 }
 
 fn check_counter(n: u64) -> Result<(), PanelError> {
-    if n == 0 || n > MAX_JS_SAFE_INTEGER { Err(PanelError::Exhausted) } else { Ok(()) }
+    if n == 0 || n > MAX_JS_SAFE_INTEGER {
+        Err(PanelError::Exhausted)
+    } else {
+        Ok(())
+    }
 }
 
 fn next_counter(n: u64) -> Result<u64, PanelError> {
-    n.checked_add(1).filter(|v| *v <= MAX_JS_SAFE_INTEGER).ok_or(PanelError::Exhausted)
+    n.checked_add(1)
+        .filter(|v| *v <= MAX_JS_SAFE_INTEGER)
+        .ok_or(PanelError::Exhausted)
 }
 
 #[cfg(test)]
@@ -527,38 +581,159 @@ mod tests {
 
     fn fixture() -> PanelCatalog {
         PanelCatalog {
-            projects: vec![ProjectItem { id: "project-1".into(), name: "Demo".into(), remote: false }],
-            files: vec![FileItem { project_id: "project-1".into(), relative_path: "src/main.rs".into(), kind: FileKind::File }],
-            agents: vec![AgentItem { id: "agent-1".into(), name: "Assistant".into(), status: AgentStatus::Available }],
+            projects: vec![ProjectItem {
+                id: "project-1".into(),
+                name: "Demo".into(),
+                remote: false,
+            }],
+            files: vec![FileItem {
+                project_id: "project-1".into(),
+                relative_path: "src/main.rs".into(),
+                kind: FileKind::File,
+            }],
+            agents: vec![AgentItem {
+                id: "agent-1".into(),
+                name: "Assistant".into(),
+                status: AgentStatus::Available,
+            }],
             extensions: vec![
-                ExtensionItem { id: "same-name".into(), name: "Example Skill".into(), kind: ExtensionKind::Skill, status: ExtensionStatus::Enabled },
-                ExtensionItem { id: "same-name".into(), name: "Example Plugin".into(), kind: ExtensionKind::Plugin, status: ExtensionStatus::ConsentRequired },
+                ExtensionItem {
+                    id: "same-name".into(),
+                    name: "Example Skill".into(),
+                    kind: ExtensionKind::Skill,
+                    status: ExtensionStatus::Enabled,
+                },
+                ExtensionItem {
+                    id: "same-name".into(),
+                    name: "Example Plugin".into(),
+                    kind: ExtensionKind::Plugin,
+                    status: ExtensionStatus::ConsentRequired,
+                },
             ],
             ..PanelCatalog::default()
         }
     }
 
-    fn call(ui: &mut UiPanels, sequence: u64, command: PanelCommand) -> Result<PanelReply, PanelError> {
-        ui.dispatch(PanelRequest { protocol: UI_PROTOCOL_VERSION, host_epoch: 1, sequence, command })
+    fn call(
+        ui: &mut UiPanels,
+        sequence: u64,
+        command: PanelCommand,
+    ) -> Result<PanelReply, PanelError> {
+        ui.dispatch(PanelRequest {
+            protocol: UI_PROTOCOL_VERSION,
+            host_epoch: 1,
+            sequence,
+            command,
+        })
     }
 
     #[test]
     fn panels_select_only_catalog_entries() {
         let mut ui = UiPanels::new(1).unwrap();
         ui.replace_catalog(fixture()).unwrap();
-        assert_eq!(call(&mut ui, 1, PanelCommand::SelectProject { project_id:"project-1".into(), expected_revision:2 }).unwrap().state.panel, Panel::Files);
-        assert_eq!(call(&mut ui, 2, PanelCommand::SelectFile { project_id:"project-1".into(), relative_path:"src/main.rs".into(), expected_revision:3 }).unwrap().state.selected_file.as_deref(), Some("src/main.rs"));
-        assert_eq!(call(&mut ui, 3, PanelCommand::SelectAgent { agent_id:"agent-1".into(), expected_revision:4 }).unwrap().state.panel, Panel::Agents);
-        assert_eq!(call(&mut ui, 4, PanelCommand::SelectExtension { kind:ExtensionKind::Plugin, extension_id:"same-name".into(), expected_revision:5 }).unwrap().state.panel, Panel::Plugins);
-        assert_eq!(call(&mut ui, 5, PanelCommand::SelectExtension { kind:ExtensionKind::Skill, extension_id:"same-name".into(), expected_revision:6 }).unwrap().state.panel, Panel::Skills);
-        assert_eq!(call(&mut ui, 6, PanelCommand::OpenSettingsTab { tab: SettingsTab::Privacy, expected_revision:7 }).unwrap().state.settings_tab, SettingsTab::Privacy);
+        assert_eq!(
+            call(
+                &mut ui,
+                1,
+                PanelCommand::SelectProject {
+                    project_id: "project-1".into(),
+                    expected_revision: 2
+                }
+            )
+            .unwrap()
+            .state
+            .panel,
+            Panel::Files
+        );
+        assert_eq!(
+            call(
+                &mut ui,
+                2,
+                PanelCommand::SelectFile {
+                    project_id: "project-1".into(),
+                    relative_path: "src/main.rs".into(),
+                    expected_revision: 3
+                }
+            )
+            .unwrap()
+            .state
+            .selected_file
+            .as_deref(),
+            Some("src/main.rs")
+        );
+        assert_eq!(
+            call(
+                &mut ui,
+                3,
+                PanelCommand::SelectAgent {
+                    agent_id: "agent-1".into(),
+                    expected_revision: 4
+                }
+            )
+            .unwrap()
+            .state
+            .panel,
+            Panel::Agents
+        );
+        assert_eq!(
+            call(
+                &mut ui,
+                4,
+                PanelCommand::SelectExtension {
+                    kind: ExtensionKind::Plugin,
+                    extension_id: "same-name".into(),
+                    expected_revision: 5
+                }
+            )
+            .unwrap()
+            .state
+            .panel,
+            Panel::Plugins
+        );
+        assert_eq!(
+            call(
+                &mut ui,
+                5,
+                PanelCommand::SelectExtension {
+                    kind: ExtensionKind::Skill,
+                    extension_id: "same-name".into(),
+                    expected_revision: 6
+                }
+            )
+            .unwrap()
+            .state
+            .panel,
+            Panel::Skills
+        );
+        assert_eq!(
+            call(
+                &mut ui,
+                6,
+                PanelCommand::OpenSettingsTab {
+                    tab: SettingsTab::Privacy,
+                    expected_revision: 7
+                }
+            )
+            .unwrap()
+            .state
+            .settings_tab,
+            SettingsTab::Privacy
+        );
     }
 
     #[test]
     fn no_op_and_snapshot_do_not_bump_revision() {
         let mut ui = UiPanels::new(1).unwrap();
         let a = call(&mut ui, 1, PanelCommand::Snapshot {}).unwrap();
-        let b = call(&mut ui, 2, PanelCommand::OpenPanel { panel: Panel::Projects, expected_revision:1 }).unwrap();
+        let b = call(
+            &mut ui,
+            2,
+            PanelCommand::OpenPanel {
+                panel: Panel::Projects,
+                expected_revision: 1,
+            },
+        )
+        .unwrap();
         assert_eq!(a.state.revision, b.state.revision);
     }
 
@@ -566,17 +741,52 @@ mod tests {
     fn invalid_revisions_and_missing_ids_leave_state_unchanged_but_consume_sequence() {
         let mut ui = UiPanels::new(1).unwrap();
         let before = ui.snapshot();
-        assert_eq!(call(&mut ui, 1, PanelCommand::OpenPanel { panel: Panel::Plugins, expected_revision: 0 }).unwrap_err(), PanelError::Revision);
-        assert_eq!(call(&mut ui, 1, PanelCommand::Snapshot {}).unwrap_err(), PanelError::Sequence);
-        assert_eq!(call(&mut ui, 2, PanelCommand::SelectProject { project_id:"unknown".into(), expected_revision:1 }).unwrap_err(), PanelError::NotFound);
+        assert_eq!(
+            call(
+                &mut ui,
+                1,
+                PanelCommand::OpenPanel {
+                    panel: Panel::Plugins,
+                    expected_revision: 0
+                }
+            )
+            .unwrap_err(),
+            PanelError::Revision
+        );
+        assert_eq!(
+            call(&mut ui, 1, PanelCommand::Snapshot {}).unwrap_err(),
+            PanelError::Sequence
+        );
+        assert_eq!(
+            call(
+                &mut ui,
+                2,
+                PanelCommand::SelectProject {
+                    project_id: "unknown".into(),
+                    expected_revision: 1
+                }
+            )
+            .unwrap_err(),
+            PanelError::NotFound
+        );
         assert_eq!(ui.snapshot(), before);
-        assert_eq!(call(&mut ui, 3, PanelCommand::Snapshot {}).unwrap().sequence, 3);
+        assert_eq!(
+            call(&mut ui, 3, PanelCommand::Snapshot {})
+                .unwrap()
+                .sequence,
+            3
+        );
     }
 
     #[test]
     fn rejects_protocol_epoch_and_replay() {
         let mut ui = UiPanels::new(1).unwrap();
-        let mut req = PanelRequest { protocol: 999, host_epoch: 1, sequence:1, command: PanelCommand::Snapshot {} };
+        let mut req = PanelRequest {
+            protocol: 999,
+            host_epoch: 1,
+            sequence: 1,
+            command: PanelCommand::Snapshot {},
+        };
         assert_eq!(ui.dispatch(req.clone()).unwrap_err(), PanelError::Protocol);
         req.protocol = UI_PROTOCOL_VERSION;
         req.host_epoch = 2;
@@ -593,29 +803,80 @@ mod tests {
         assert_eq!(ui.rebind(1).unwrap_err(), PanelError::Epoch);
         ui.rebind(2).unwrap();
         assert!(ui.snapshot().catalog.projects.is_empty());
-        assert_eq!(call(&mut ui, 1, PanelCommand::Snapshot {}).unwrap_err(), PanelError::Epoch);
-        assert_eq!(ui.dispatch(PanelRequest { protocol:UI_PROTOCOL_VERSION, host_epoch:2, sequence:1, command:PanelCommand::Snapshot {} }).unwrap().sequence, 1);
+        assert_eq!(
+            call(&mut ui, 1, PanelCommand::Snapshot {}).unwrap_err(),
+            PanelError::Epoch
+        );
+        assert_eq!(
+            ui.dispatch(PanelRequest {
+                protocol: UI_PROTOCOL_VERSION,
+                host_epoch: 2,
+                sequence: 1,
+                command: PanelCommand::Snapshot {}
+            })
+            .unwrap()
+            .sequence,
+            1
+        );
     }
 
     #[test]
     fn json_rejects_oversize_unknown_fields_unknown_actions_and_duplicate_keys() {
         let mut ui = UiPanels::new(1).unwrap();
-        assert_eq!(ui.dispatch_json(&vec![b'x'; MAX_PANEL_IPC_BYTES + 1]).unwrap_err(), PanelError::Oversize);
+        assert_eq!(
+            ui.dispatch_json(&vec![b'x'; MAX_PANEL_IPC_BYTES + 1])
+                .unwrap_err(),
+            PanelError::Oversize
+        );
         assert_eq!(ui.dispatch_json(br#"{"protocol":1,"hostEpoch":1,"sequence":1,"command":{"action":"snapshot"},"extra":1}"#).unwrap_err(), PanelError::Malformed);
-        assert_eq!(ui.dispatch_json(br#"{"protocol":1,"hostEpoch":1,"sequence":1,"command":{"action":"execute-tool"}}"#).unwrap_err(), PanelError::Malformed);
+        assert_eq!(
+            ui.dispatch_json(
+                br#"{"protocol":1,"hostEpoch":1,"sequence":1,"command":{"action":"execute-tool"}}"#
+            )
+            .unwrap_err(),
+            PanelError::Malformed
+        );
         assert_eq!(ui.dispatch_json(br#"{"protocol":1,"hostEpoch":1,"sequence":1,"sequence":2,"command":{"action":"snapshot"}}"#).unwrap_err(), PanelError::Malformed);
         let ok = json!({"protocol":1,"hostEpoch":1,"sequence":1,"command":{"action":"snapshot"}});
-        assert_eq!(ui.dispatch_json(&serde_json::to_vec(&ok).unwrap()).unwrap().sequence, 1);
+        assert_eq!(
+            ui.dispatch_json(&serde_json::to_vec(&ok).unwrap())
+                .unwrap()
+                .sequence,
+            1
+        );
     }
 
     #[test]
     fn disallow_traversal_drive_paths_and_unknown_file_selections() {
         let mut ui = UiPanels::new(1).unwrap();
         ui.replace_catalog(fixture()).unwrap();
-        for path in ["../secret","src/../secret","C:/Windows","/absolute","src\\main.rs","src//main.rs","src/."] {
-            assert_eq!(valid_relative_path(path), Err(PanelError::InvalidIdentifier));
+        for path in [
+            "../secret",
+            "src/../secret",
+            "C:/Windows",
+            "/absolute",
+            "src\\main.rs",
+            "src//main.rs",
+            "src/.",
+        ] {
+            assert_eq!(
+                valid_relative_path(path),
+                Err(PanelError::InvalidIdentifier)
+            );
         }
-        assert_eq!(call(&mut ui, 1, PanelCommand::SelectFile { project_id:"project-1".into(), relative_path:"src/unknown.rs".into(), expected_revision:2 }).unwrap_err(), PanelError::NotFound);
+        assert_eq!(
+            call(
+                &mut ui,
+                1,
+                PanelCommand::SelectFile {
+                    project_id: "project-1".into(),
+                    relative_path: "src/unknown.rs".into(),
+                    expected_revision: 2
+                }
+            )
+            .unwrap_err(),
+            PanelError::NotFound
+        );
         assert!(ui.snapshot().selected_file.is_none());
     }
 
@@ -626,13 +887,22 @@ mod tests {
         let original = ui.snapshot();
         let mut catalog = fixture();
         catalog.files[0].project_id = "missing".into();
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidCatalog);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidCatalog
+        );
         let mut catalog = fixture();
         catalog.projects.push(catalog.projects[0].clone());
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidCatalog);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidCatalog
+        );
         let mut catalog = fixture();
         catalog.agents[0].name = "Spoof\u{202e}".into();
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidCatalog);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidCatalog
+        );
         assert_eq!(ui.snapshot(), original);
     }
 
@@ -641,25 +911,49 @@ mod tests {
         let mut ui = UiPanels::new(1).unwrap();
         let mut catalog = fixture();
         catalog.preferences.font_scale_percent = 201;
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidCatalog);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidCatalog
+        );
         let mut catalog = fixture();
         catalog.preferences.locale = "en--US".into();
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidCatalog);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidCatalog
+        );
         let mut catalog = fixture();
         catalog.agents[0].id = "../bad".into();
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidIdentifier);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidIdentifier
+        );
         let mut catalog = fixture();
         for i in 0..=MAX_PANEL_ITEMS {
-            catalog.agents.push(AgentItem { id:format!("agent-{i}"), name:"A".into(), status:AgentStatus::Offline });
+            catalog.agents.push(AgentItem {
+                id: format!("agent-{i}"),
+                name: "A".into(),
+                status: AgentStatus::Offline,
+            });
         }
-        assert_eq!(ui.replace_catalog(catalog).unwrap_err(), PanelError::InvalidCatalog);
+        assert_eq!(
+            ui.replace_catalog(catalog).unwrap_err(),
+            PanelError::InvalidCatalog
+        );
     }
 
     #[test]
     fn replacement_clears_stale_selections() {
         let mut ui = UiPanels::new(1).unwrap();
         ui.replace_catalog(fixture()).unwrap();
-        call(&mut ui, 1, PanelCommand::SelectProject { project_id:"project-1".into(), expected_revision:2 }).unwrap();
+        call(
+            &mut ui,
+            1,
+            PanelCommand::SelectProject {
+                project_id: "project-1".into(),
+                expected_revision: 2,
+            },
+        )
+        .unwrap();
         ui.replace_catalog(PanelCatalog::default()).unwrap();
         assert!(ui.snapshot().selected_project.is_none());
         assert!(ui.snapshot().catalog.files.is_empty());
@@ -668,8 +962,14 @@ mod tests {
     #[test]
     fn counters_fence_out_of_range_values() {
         assert_eq!(UiPanels::new(0).unwrap_err(), PanelError::Epoch);
-        assert_eq!(UiPanels::new(MAX_JS_SAFE_INTEGER + 1).unwrap_err(), PanelError::Epoch);
+        assert_eq!(
+            UiPanels::new(MAX_JS_SAFE_INTEGER + 1).unwrap_err(),
+            PanelError::Epoch
+        );
         let mut ui = UiPanels::new(1).unwrap();
-        assert_eq!(call(&mut ui, MAX_JS_SAFE_INTEGER + 1, PanelCommand::Snapshot {}).unwrap_err(), PanelError::Sequence);
+        assert_eq!(
+            call(&mut ui, MAX_JS_SAFE_INTEGER + 1, PanelCommand::Snapshot {}).unwrap_err(),
+            PanelError::Sequence
+        );
     }
 }
