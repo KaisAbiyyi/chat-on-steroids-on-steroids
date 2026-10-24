@@ -492,6 +492,9 @@ impl Manager {
         }
         let waiting = session.clone();
         thread::spawn(move || {
+            // Most processes outlive their first poll. Avoid 100 wakeups/second
+            // per idle owned process while keeping exit publication bounded.
+            let mut poll = crate::idle::IdlePoll::new();
             loop {
                 let status = match waiting.child.lock() {
                     Ok(mut c) => waiting
@@ -539,7 +542,7 @@ impl Manager {
                     }
                     _ => {}
                 }
-                thread::sleep(Duration::from_millis(10));
+                poll.wait();
             }
         });
         Self::response(id, &session, wait, false, max_tokens)
