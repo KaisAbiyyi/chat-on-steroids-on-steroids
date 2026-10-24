@@ -397,7 +397,10 @@ impl RichDeck {
     }
 }
 
-fn find_panel_mut<'a>(state: &'a mut RichSnapshot, key: &str) -> Result<&'a mut RichPanel, RichError> {
+fn find_panel_mut<'a>(
+    state: &'a mut RichSnapshot,
+    key: &str,
+) -> Result<&'a mut RichPanel, RichError> {
     state
         .panels
         .iter_mut()
