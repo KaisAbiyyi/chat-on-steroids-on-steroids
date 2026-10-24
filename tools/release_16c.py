@@ -35,7 +35,10 @@ def licenses(expr):
         raise Refused("missing SPDX license identifier")
     # Only the LLVM exception applied to Apache-2.0 is approved explicitly.
     # All OR/AND alternatives are still audited, never silently dropped.
+    # Some legacy Cargo crates use this pre-SPDX dual-license shorthand.
     normalized = re.sub(r"[()]", " ", expr)
+    normalized = normalized.replace("MIT/Apache-2.0", "MIT OR Apache-2.0")
+    normalized = normalized.replace("Apache-2.0/MIT", "Apache-2.0 OR MIT")
     tokens = normalized.split()
     if (not tokens or
             re.sub(r"\\s+", " ", normalized).strip() != " ".join(tokens)):
@@ -93,6 +96,14 @@ def inventory(metadata, lockfile, project_license=None):
             not isinstance(metadata.get("packages"), list) or
             not isinstance(lockfile, dict) or not isinstance(lockfile.get("package"), list)):
         raise Refused("invalid cargo metadata or lockfile")
+    license_errors = []
+    for pkg in metadata["packages"]:
+        try:
+            licenses(pkg.get("license"))
+        except Refused as ex:
+            license_errors.append(str(pkg.get("name")) + "@" + str(pkg.get("version")) + ": " + str(ex))
+    if license_errors:
+        raise Refused("license audit blocked: " + "; ".join(license_errors[:30]))
     locked = {(p["name"], p["version"], p.get("source")): p
               for p in lockfile["package"]}
     if len(locked) != len(lockfile["package"]):
