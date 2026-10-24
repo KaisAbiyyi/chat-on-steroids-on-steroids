@@ -62,14 +62,9 @@ impl DesktopAudit {
         rich: &RichSnapshot,
         conversation: &ConversationSnapshot,
     ) -> Result<Self, DesktopAuditError> {
-        let projection = VisualProjection::from_hosts(
-            navigation,
-            focus,
-            panels,
-            rich,
-            conversation,
-        )
-        .map_err(|_| DesktopAuditError::InconsistentHosts)?;
+        let projection =
+            VisualProjection::from_hosts(navigation, focus, panels, rich, conversation)
+                .map_err(|_| DesktopAuditError::InconsistentHosts)?;
 
         // These routes correspond to a host-projected panel surface. A host
         // should audit only after the route and panel models have settled.
