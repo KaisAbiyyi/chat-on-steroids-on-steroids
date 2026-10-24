@@ -94,6 +94,44 @@ pub(super) fn inventory(root: &Path) -> io::Result<BTreeMap<PathBuf, (u64, Strin
     }
     Ok(files)
 }
+// New profile publication must not replace even an empty directory that
+// appears between a preflight check and rename. Both paths share a parent.
+#[cfg(target_os = "linux")]
+pub(super) fn publish_new(stage: &Path, destination: &Path) -> io::Result<()> {
+    use std::{ffi::{CString, c_char}, os::unix::ffi::OsStrExt};
+    unsafe extern "C" {
+        fn renameat2(olddirfd: i32, oldpath: *const c_char, newdirfd: i32, newpath: *const c_char, flags: u32) -> i32;
+    }
+    let from = CString::new(stage.as_os_str().as_bytes()).map_err(|_| invalid("Invalid staging path"))?;
+    let to = CString::new(destination.as_os_str().as_bytes()).map_err(|_| invalid("Invalid destination path"))?;
+    // AT_FDCWD / RENAME_NOREPLACE. Never silently fall back to destructive rename.
+    if unsafe { renameat2(-100, from.as_ptr(), -100, to.as_ptr(), 1) } != 0 {
+        return Err(io::Error::last_os_error());
+    }
+    Ok(())
+}
+
+#[cfg(windows)]
+pub(super) fn publish_new(stage: &Path, destination: &Path) -> io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    #[link(name = "Kernel32")]
+    unsafe extern "system" {
+        fn MoveFileW(existing: *const u16, new: *const u16) -> i32;
+    }
+    let from = stage.as_os_str().encode_wide().chain(std::iter::once(0)).collect::<Vec<_>>();
+    let to = destination.as_os_str().encode_wide().chain(std::iter::once(0)).collect::<Vec<_>>();
+    // MoveFileW (unlike MoveFileExW with REPLACE_EXISTING) refuses existing targets.
+    if unsafe { MoveFileW(from.as_ptr(), to.as_ptr()) } == 0 {
+        return Err(io::Error::last_os_error());
+    }
+    Ok(())
+}
+
+#[cfg(not(any(target_os = "linux", windows)))]
+pub(super) fn publish_new(_stage: &Path, _destination: &Path) -> io::Result<()> {
+    Err(io::Error::new(io::ErrorKind::Unsupported, "No atomic no-clobber profile publication on this platform"))
+}
+
 pub fn import(source: &Path, target: &Path) -> io::Result<Value> {
     if !source.is_absolute() || !target.is_absolute() {
         return Err(invalid("Import paths must be absolute"));
@@ -166,6 +204,6 @@ pub fn import(source: &Path, target: &Path) -> io::Result<Value> {
         &staging.path().join("cos-rust-import-receipt.json"),
         &serde_json::to_vec_pretty(&receipt)?,
     )?;
-    fs::rename(staging.path(), &target)?;
+    publish_new(staging.path(), &target)?;
     Ok(receipt)
 }
