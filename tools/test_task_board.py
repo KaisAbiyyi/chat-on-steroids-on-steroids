@@ -52,8 +52,8 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_all_work_units_preserved(self):
         kinds = {k: sum(t["kind"] == k for t in self.data["tasks"]) for k in "CLU"}
-        self.assertEqual(kinds, {"C": 72, "L": 28, "U": 15})
-        self.assertEqual(len(self.tasks), 115)
+        self.assertEqual(kinds, {"C": 78, "L": 30, "U": 15})
+        self.assertEqual(len(self.tasks), 123)
 
     def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
         ready, _ = board.readiness(self.data)
@@ -111,8 +111,8 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(board.explain(self.data, "8L1")["state"], "BLOCKED")
         self.assertNotIn("8L1", ready_ids)
         self.assertNotIn("8U1", ready_ids)
-        self.assertIn("15B", ready_ids)
-        self.assertEqual(board.explain(self.data, "15B")["state"], "READY_CANDIDATE")
+        self.assertNotIn("15B", ready_ids)
+        self.assertEqual(board.explain(self.data, "15B")["state"], "DONE")
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
@@ -190,7 +190,9 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(board.explain(self.data, "8U1")["missing_direct"], ["8L1"])
         forecast = {task["id"] for wave in board.waves(self.data) for task in wave}
         self.assertTrue({"8L1", "8U1", "9A"}.isdisjoint(forecast))
-        self.assertIn("15B", forecast)
+        self.assertNotIn("15B", forecast)  # 15B cloud scope accepted on merged PR #77
+        self.assertIn("PERF-00", forecast)  # 15G cloud scope is now accepted
+        self.assertIn("16A", forecast)  # 16A independent release track remains unclaimed
 
     def test_dangling_dependency_is_rejected(self):
         data = copy.deepcopy(self.data)

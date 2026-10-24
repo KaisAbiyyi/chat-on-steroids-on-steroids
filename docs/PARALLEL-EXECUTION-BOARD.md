@@ -1,5 +1,14 @@
 # CoSoS — full phase task dependency / parallel board
 
+## Product strategy supersession — 2026-10-24
+
+**P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](implementation-plan/2026-10-24-performance-first-workstream.md).
+
+Active cross-cutting units PERF-00 through PERF-06 execute earlier than release Phase 16 if their AND dependencies and exclusive locks allow. Historical feature-parity matrices and measurement receipts remain immutable references, not current release feature obligations. Real native Windows 15L3, product WebView2 8L1 and owner 7U1 remain unproven where their evidence says NOT_RUN/BLOCKED. Cloud tests do not certify full product RAM. New tasks are unclaimed unless genuinely claimed in GitHub and Notion.
+
+PERF-00 is a new cloud Ready candidate. PERF siblings are blocked until accepted PERF-00; group metadata alone cannot trigger eager history hydration. Snapshot statuses are not live claims.
+
+
 **2026-10-24 8L1 physical Windows — BLOCKED:** accepted cloud 8B #61, 8C #65 and 15A #67 are reconciled from live GitHub; native 8L1 cannot run because the 8A/8B/8C controllers have no privileged native host callers or executable gate. [Blocked native receipt and repair handoff](implementation-summary/2026-10-24-8l1-native-integration-blocker.md), issue #71. 8U1 remains blocked. 15B/15C/15D/15E are cloud prerequisite-ready candidates; check live ownership and overlapping files before claiming. No native completion or new 15B claim is implied. Earlier dated entries below are historical.
 
 **2026-10-23 8B Cloud code — Review:** `8A` PR #59 accepted at `eb91712d3c92c74f8714ef5f573939ad4fb19575`. **Now:** `8B` claimed by ChatGPT GPT-6 Cloud (gen 1), exclusive `browser-profiles`, [issue #60](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/60), draft [PR #61](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/61), hosted exact-head CI/self-review pending; `7L2` native Windows separately ready and not run in this cloud task. **Up Next:** `8C` blocked until accepted 8B. No local files/provider sign-in/owner account accessed. Older entries are historical.
@@ -87,8 +96,9 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `7L1` | Real extension handshake/MV3 restart | `7C`, `7P-L1` | `windows-bridge` | L (Windows) | DONE |
 | `7D` | Direct browser tools/debugger/frame ownership | `7C`, `7L1` | `browser-tools` | C (cloud) | DONE |
 | `7E` | Differential transport fuzz/error/reconnect review | `7D` | `browser-qualification` | C (cloud) | DONE |
-| `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | **READY · PARALLEL** |
-| `7U1` | Owner real signed-in observe-only browser test | `7L2` | `human-provider` | U (owner) | BLOCKED |
+| `7L2` | Native browser tools/duplicate input safety | `7E` | `windows-browser-tools` | L (Windows) | DONE |
+| `7U1-PREP` | Source-attested ChatGPT read-only owner runner | `7L2` | `provider-observe-only-test-host` | C (cloud) | **READY · PARALLEL** |
+| `7U1` | Owner real signed-in observe-only browser test | `7L2`, `7U1-PREP` | `human-provider` | U (owner) | BLOCKED |
 | `8A` | Chrome API/extension adapter and worker world | `7E` | `embedded-adapter` | C (cloud) | DONE |
 | `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | DONE |
 | `8C` | Native browser lifecycle and permission hardening | `8B` | `browser-lifecycle` | C (cloud) | DONE |
@@ -146,19 +156,19 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `14L3` | Native dictation/pet lifecycle proof | `14F` | `windows-pet` | L (Windows) | BLOCKED |
 | `14U2` | Owner dictation, overlay privacy acceptance | `14L3` | `human-desktop` | U (owner) | BLOCKED |
 | `15A` | UI navigation and IPC contracts | `8C` | `ui-architecture` | C (cloud) | DONE |
-| `15B` | Conversation rendering and large history | `15A` | `ui-conversation` | C (cloud) | **READY · PARALLEL** |
-| `15C` | Rich editor/terminal/code/PDF/math panels | `15A` | `ui-rich` | C (cloud) | **READY · PARALLEL** |
+| `15B` | Conversation rendering and large history | `15A` | `ui-conversation` | C (cloud) | DONE |
+| `15C` | Rich editor/terminal/code/PDF/math panels | `15A` | `ui-rich` | C (cloud) | DONE |
 | `15L1` | Native editor/terminal/PDF/math proof | `15C` | `windows-ui-rich` | L (Windows) | BLOCKED |
-| `15D` | Projects/files/agents/plugins settings | `15A` | `ui-settings` | C (cloud) | **READY · PARALLEL** |
-| `15E` | 13 locales, accessiblity and focus keyboard | `15A` | `ui-i18n` | C (cloud) | **READY · PARALLEL** |
-| `15F` | Screenshot/regression fixed DPI/themes | `15B`, `15C`, `15D`, `15E` | `ui-snapshots` | C (cloud) | BLOCKED |
+| `15D` | Projects/files/agents/plugins settings | `15A` | `ui-settings` | C (cloud) | DONE |
+| `15E` | 13 locales, accessiblity and focus keyboard | `15A` | `ui-i18n` | C (cloud) | DONE |
+| `15F` | Screenshot/regression fixed DPI/themes | `15B`, `15C`, `15D`, `15E` | `ui-snapshots` | C (cloud) | DONE |
 | `15L2` | Native 13-locale/DPI interaction matrices | `15F` | `windows-ui-i18n` | L (Windows) | BLOCKED |
-| `15G` | Full desktop integration/performance review | `15F` | `ui-integration` | C (cloud) | BLOCKED |
-| `15L3` | Real large-history desktop RAM/performance | `15G` | `windows-ui-load` | L (Windows) | BLOCKED |
+| `15G` | Full desktop integration/performance review | `15F` | `ui-integration` | C (cloud) | DONE |
+| `15L3` | Real large-history desktop RAM/performance | `15G` | `windows-ui-load` | L (Windows) | **READY · PARALLEL** |
 | `15U1` | Owner daily navigation/editor approval | `15L1` | `human-ui` | U (owner) | BLOCKED |
 | `15U2` | Owner keyboard/i18n/accessibility approval | `15L2` | `human-ui` | U (owner) | BLOCKED |
 | `15U3` | Owner feature-completeness acceptance | `15L3` | `human-ui` | U (owner) | BLOCKED |
-| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | BLOCKED |
+| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | **READY · PARALLEL** |
 | `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | BLOCKED |
 | `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | BLOCKED |
 | `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | BLOCKED |
@@ -169,6 +179,14 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | BLOCKED |
 | `16L3` | Full Windows release/startup/size proof | `16F`, `16L1`, `16L2` | `windows-release` | L (Windows) | BLOCKED |
 | `16U2` | Owner guided final release decision | `16L3` | `human-release` | U (owner) | BLOCKED |
+
+| `PERF-00` | Cloud performance measurement harness, workload matrix and process-tree accounting | `15G` | `perf-methodology` | C (cloud) | **READY · PARALLEL** |
+| `PERF-01` | Native Windows CoS baseline RAM/CPU/startup on matched coding workloads | `PERF-00` | `windows-perf-baseline` | L (Windows) | BLOCKED |
+| `PERF-02` | Compare external-browser reuse and on-demand embedded WebView2 | `PERF-00` | `perf-browser-mode` | C (cloud) | BLOCKED |
+| `PERF-03` | Bounded UI history, lazy rich panels, caches and idle update contracts | `PERF-00` | `perf-ui-state` | C (cloud) | BLOCKED |
+| `PERF-04` | Tab/worker lifecycle and terminal/process buffer resource limits | `PERF-00` | `perf-worker-lifecycle` | C (cloud) | BLOCKED |
+| `PERF-05` | Native Windows product endurance and total process-tree RAM comparison | `PERF-01`, `PERF-02`, `PERF-03`, `PERF-04`, `8L1`, `15L3` | `windows-perf-endurance` | L (Windows) | BLOCKED |
+| `PERF-06` | Freeze measured resource budgets and CI/native regression policy | `PERF-05`, `16D` | `perf-release-gates` | C (cloud) | BLOCKED |
 
 ## Parallel execution lanes
 

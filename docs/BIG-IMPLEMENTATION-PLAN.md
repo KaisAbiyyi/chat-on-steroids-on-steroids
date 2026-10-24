@@ -1,16 +1,22 @@
 # CoS-Rust — BIG implementation plan (cloud-first)
 
-Direction updated: 2026-10-18, Asia/Jakarta. This document is the current *execution roadmap*. The original [16-phase feature/parity assessment](implementation-plan/2026-10-16-rust-migration-phases-v1.0.md) continues to define full product scope and dependencies. The [phase 1–6 closure ledger](implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md) remains historical evidence. Detailed cloud unit names, local gates and manual testing are in the [unit and acceptance matrix](implementation-plan/2026-10-18-cloud-first-units.md).
+Direction updated: 2026-10-24, Asia/Jakarta. This document is the current *performance-first execution roadmap*. The original [16-phase feature/parity assessment](implementation-plan/2026-10-16-rust-migration-phases-v1.0.md) is historical feature coverage and dependency reference, **not an all-features release requirement**. The [phase 1–6 closure ledger](implementation-plan/2026-10-17-phase1-6-parity-closure-v1.0.md) remains historical evidence. Detailed cloud unit names, local gates and manual testing are in the [unit and acceptance matrix](implementation-plan/2026-10-18-cloud-first-units.md).
 
 **CoS-Rust is now cloud-first, following Mind Place's development flow.** Cloud ChatGPT/Codex agents implement directly against [the published GitHub repository](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids), starting from a CI-qualified `main` SHA. Local Windows agents perform the device/runtime qualification named by a gate; the user participates only for account consent, irreversible choices or subjective acceptance. The old local history is included in public `main`; eight unfinished local recorder/caption paths remain protected and unpublished.
 
 ## Product and acceptance principles
 
-The objective remains a smaller, Rust-owned Chat On Steroids with the original features, security boundaries and observable behavior preserved. The frozen upstream source is commit `024731d8083d92c46e8248d64e7e0b36ab0a470f` (source app 2.1.39, bridge 14); exact differences must be consciously registered. A Rust service running on Windows is one milestone, not the finished desktop product.
+The objective is a lightweight, reliable, Rust-owned ChatGPT coding workstation with coding-critical tools and security behavior preserved; non-coding original features are selectively optional. The frozen upstream source is commit `024731d8083d92c46e8248d64e7e0b36ab0a470f` (source app 2.1.39, bridge 14); exact differences must be consciously registered. A Rust service running on Windows is one milestone, not the finished desktop product.
 
 Priority order: **security and privacy; durable correctness, identity and provenance; deterministic contracts and testability; measured performance and resource cost; maintainable code; product experience and documentation**. All are requirements; priority determines how to resolve a conflict. Prefer a small correct, bounded interface and a measured improvement over a large speculative rewrite. Keep native-platform differences explicit and preserve prior valid data and receipts.
 
 Windows x64 is the **primary shipped and native-qualification focus**, including cloud Windows CI. Linux cloud CI is useful for cross-platform Rust code. Linux Docker on the user's device requires proof of D: backing storage; macOS and other targets are **HOLD** under the present user directive, not deleted from full migration scope.
+
+## Product strategy supersession — 2026-10-24
+
+**P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](implementation-plan/2026-10-24-performance-first-workstream.md).
+
+Active cross-cutting units PERF-00 through PERF-06 execute earlier than release Phase 16 if their AND dependencies and exclusive locks allow. Historical feature-parity matrices and measurement receipts remain immutable references, not current release feature obligations. Real native Windows 15L3, product WebView2 8L1 and owner 7U1 remain unproven where their evidence says NOT_RUN/BLOCKED. Cloud tests do not certify full product RAM. New tasks are unclaimed unless genuinely claimed in GitHub and Notion.
 
 ## Cloud development and handoff
 
@@ -131,7 +137,7 @@ The original 16-phase dependency map is authoritative: browser capability must b
 | --- | ---: | ---: | ---: |
 | GitHub bootstrap | 0 | 1 | 1 |
 | Remaining phases 1–6 `CL` | 18 | 6 | 0 |
-| Phase 7 — preflight + bridge | 7 | 3 | 1 |
+| Phase 7 — preflight + bridge plus owner runner prep | 8 | 3 | 1 |
 | Phase 8 — embedded browser | 3 | 1 | 1 |
 | Phase 9 — outbox/uploads | 5 | 2 | 1 |
 | Phase 10 — Compact & Resume | 5 | 2 | 1 |
@@ -140,17 +146,18 @@ The original 16-phase dependency map is authoritative: browser capability must b
 | Phase 13 — plugins/Skills/OAuth | 6 | 2 | 2 |
 | Phase 14 — native desktop | 6 | 3 | 2 |
 | Phase 15 — desktop UI | 7 | 3 | 3 |
-| Phase 16 — migration/release | 6 | 3 | 2 |
-| **Remaining development** | **72** | **28** | **15** |
-| **With bootstrap** | **72** | **29** | **16** |
+| Phase 16 — migration/release (legacy units) | 6 | 3 | 2 |
+| **P0 PERF-00–06 cross-cutting (early)** | **5** | **2** | **0** |
+| **Full DAG unit inventory (includes accepted historical units)** | **78** | **30** | **15** |
+| **With historical bootstrap** | **78** | **31** | **16** |
 
-`C` means a GitHub/CI cloud agent run, `L` means a local Windows agent session (the user triggers the handoff; the agent executes tests), and `U` means **the user personally needs to act**. These are base handoff counts; failure/retry units are separate. `U0` for the backend closure means no manual UX/account test is planned. Each cloud handoff tells the user explicitly whether to do anything **right now**, later at the phase local gate, or not at all.
+`C` means a GitHub/CI cloud agent run, `L` means a local Windows agent session (the user triggers the handoff; the agent executes tests), and `U` means **the user personally needs to act**. These are total canonical task IDs, **not** all unfinished work or all mandatory feature commitments under the new owner decision. The old 72/28/15 full-parity tally was superseded by 7U1-PREP plus PERF-00–06; failure/retry units are separate. `U0` for the backend closure means no manual UX/account test is planned. Each cloud handoff tells the user explicitly whether to do anything **right now**, later at the phase local gate, or not at all.
 
 ## Quality and release gates
 
 For every cloud Rust implementation unit use an actual observable RED→GREEN regression, focused tests, `cargo fmt --all --check`, strict Clippy and appropriate Windows/Linux GitHub Actions CI. Local qualification uses `python tools/check-workspace.py --strict`, `tools/qualify-session.py`, `qualify-search.py`, native SSH/process tests or GUI/browser scripts **only when named by an L gate**. Always run with isolated synthetic profiles. A release-affecting unit records executable size/runtime cost, and the later local release gate verifies actual packaged size separately.
 
-Security gate: no credential leakage into args/results/assets/captions, no stale authority, no unsafe filesystem escape or unclear side-effect retry. Performance gate: baseline/candidate with exact commit, fixture, units and comparable setup; actual p95/timing/RSS/size evidence if the unit changes critical latency or memory. Review gate: independent Critical/Important inspection for permissions, durability, concurrency, protocol and native boundary changes.
+Security gate: no credential leakage into args/results/assets/captions, no stale authority, no unsafe filesystem escape or unclear side-effect retry. Performance gate: baseline/candidate with exact commit, fixture, units and comparable setup; actual p95/timing/RSS/size evidence if the unit changes critical latency or memory. Review gate: direct critical implementor **self-review** of exact SHA/diff, permissions, durability, concurrency, protocol and native boundaries; independent feedback is optional and not a merge gate.
 
 Record one of `PASS`, `FAIL`, `PARTIAL`, `BLOCKED`, `NOT RUN`, `HOLD` for each gate. Historical failing receipts remain available. Never claim `READY` for the full product based solely on unit tests or a headless service release.
 

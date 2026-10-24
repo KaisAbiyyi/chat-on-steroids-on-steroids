@@ -1,5 +1,14 @@
 # CoS-Rust current backend checkpoint
 
+## Product strategy supersession — 2026-10-24
+
+**P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](implementation-plan/2026-10-24-performance-first-workstream.md).
+
+Active cross-cutting units PERF-00 through PERF-06 execute earlier than release Phase 16 if their AND dependencies and exclusive locks allow. Historical feature-parity matrices and measurement receipts remain immutable references, not current release feature obligations. Real native Windows 15L3, product WebView2 8L1 and owner 7U1 remain unproven where their evidence says NOT_RUN/BLOCKED. Cloud tests do not certify full product RAM. New tasks are unclaimed unless genuinely claimed in GitHub and Notion.
+
+**Live statuses are Notion + GitHub acceptance/CI, not older dated handoffs.** Do not reinterpret past reviews or native NOT_RUN as current PASS.
+
+
 ## 8L1 physical Windows investigation — BLOCKED, 2026-10-24
 
 - **Claim / source:** Codex local `COS-8L1-20261024`, generation 1, [issue #71](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/71), isolated D: branch `feature/8l1-native-20261024`, exact merged source `eb9f3dc9684fe97017dcc3a57ae63553d2118547`. Accepted cloud 8B #61, 8C #65 and 15A #67 were independently verified and stale registry statuses reconciled; their cloud scope does not certify a native host.

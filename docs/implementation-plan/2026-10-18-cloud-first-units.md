@@ -1,3 +1,5 @@
+> 2026-10-24 supersession: [P0 performance-first ADR](../decisions/2026-10-24-performance-first-workstation.md) replaces mandatory full upstream feature parity. [Early PERF-00–06 gates](2026-10-24-performance-first-workstream.md) are cross-cutting. Do not alter previously accepted security/data C/L/U receipts or falsely declare native product readiness.
+
 # CoS-Rust: bounded cloud units and native acceptance schedule
 
 Decision 2026-10-18 (Asia/Jakarta). **Planning matrix, not a progress report.** Apply alongside [BIG plan](../BIG-IMPLEMENTATION-PLAN.md), [current state](../CURRENT-PHASE.md) and the [original 16-phase dependency map](2026-10-16-rust-migration-phases-v1.0.md). Scope may be subdivided when source review proves a unit too large, but never merged merely to save prompts. Only phases 1–6 have existing partial Rust/service work.

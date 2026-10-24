@@ -1,12 +1,19 @@
 # CoS-Rust cloud-first development workflow
 
+## Product strategy supersession — 2026-10-24
+
+**P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](implementation-plan/2026-10-24-performance-first-workstream.md).
+
+Active cross-cutting units PERF-00 through PERF-06 execute earlier than release Phase 16 if their AND dependencies and exclusive locks allow. Historical feature-parity matrices and measurement receipts remain immutable references, not current release feature obligations. Real native Windows 15L3, product WebView2 8L1 and owner 7U1 remain unproven where their evidence says NOT_RUN/BLOCKED. Cloud tests do not certify full product RAM. New tasks are unclaimed unless genuinely claimed in GitHub and Notion.
+
+
 Decision updated: 2026-10-18 (Asia/Jakarta). The user now requests **the same cloud-first development model as Mind Place**, with more explicit Windows device/local agent gates. This is a process contract, not proof that current feature implementations are finished.
 
 ## 1. Sources of truth
 
 1. The user's current instruction controls the active task.
 2. `AGENTS.md` sets persistent agent rules; `docs/CURRENT-PHASE.md` names the one active work unit and its evidence.
-3. `docs/BIG-IMPLEMENTATION-PLAN.md` supplies sequencing and exit criteria; the original [16-phase assessment](implementation-plan/2026-10-16-rust-migration-phases-v1.0.md) remains the technical feature/parity scope.
+3. `docs/BIG-IMPLEMENTATION-PLAN.md` supplies sequencing and exit criteria; the original [16-phase assessment](implementation-plan/2026-10-16-rust-migration-phases-v1.0.md) is archival feature coverage, while the [P0 ADR](decisions/2026-10-24-performance-first-workstation.md) governs what CoSoS must ship.
 4. Dated `implementation-plan/`, `implementation-summary/`, `implementation-review/`, `research/`, and `audit/` contain historical contracts and immutable evidence. They can contradict later conclusions because they capture different SHAs or environments; do not rewrite their history.
 5. **After the reviewed first GitHub publication** at `8637c12`, canonical implementation comes from `https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids` and the exact merged SHA. Earlier local Git commits remain historical checkpoints and pinned upstream/public synthetic fixtures remain the behavioral reference. Verify that the current GitHub default branch and its required checks are healthy before every new cloud unit.
 
