@@ -1,0 +1,90 @@
+name: 7D-FIX privileged native WebView2 debugger
+on:
+  pull_request:
+    paths:
+      - 'crates/cos-core/**'
+      - 'probes/7l1/**'
+      - 'probes/7l2/**'
+      - '.github/workflows/7d-fix-native-debugger.yml'
+  push:
+    branches: ['main', 'work/7d-fix-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  rust-and-worker-security:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+          components: rustfmt, clippy
+      - name: Rust formatting
+        run: cargo fmt --all --check
+      - name: Exact all-target strict Clippy
+        run: cargo clippy --locked -p cos-core --all-targets -- -D warnings
+      - name: Native WebView2 bridge contract and 7D regression
+        run: cargo test --locked -p cos-core --lib browser_tools
+      - name: Native callback schema tests
+        run: cargo test --locked -p cos-core --example 7l2_bridge
+      - name: Prior authenticated 7B bridge tests
+        run: cargo test --locked -p cos-core --lib native_browser_bridge
+      - name: Existing MV3 ledger test
+        run: node --test extension/companion/tests/ledger.test.mjs
+      - name: Source-owned MV3 auth test
+        env:
+          COS_TEST_TMP: ${{ runner.temp }}
+        run: node --test probes/7l1/tests/worker-auth.test.mjs
+      - name: JavaScript native worker syntax
+        run: node --check probes/7l1/extension/sw.mjs
+
+  windows-native-debugger-artifact:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile real 7B+7D Rust child
+        run: cargo build --locked -p cos-core --example 7l2_bridge --release
+      - name: Compile source-owned WebView2 native host, no warnings
+        run: dotnet build probes/7l1/WindowsHost/WindowsHost.csproj -c Release -warnaserror
+      - name: Assemble exact source and SHA256 manifest
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path gate/host | Out-Null
+          Copy-Item target/release/examples/7l2_bridge.exe gate/7l2_bridge.exe
+          Copy-Item probes/7l1/WindowsHost/bin/Release/net8.0-windows/* gate/host/ -Recurse
+          (git rev-parse HEAD).Trim() | Set-Content gate/source.sha -NoNewline
+          $root = (Resolve-Path gate).Path
+          $entries = @(Get-ChildItem gate -Recurse -File | Where-Object { $_.Name -ne 'hashes.json' } | ForEach-Object {
+            [pscustomobject]@{
+              path = $_.FullName.Substring($root.Length + 1).Replace('\','/')
+              sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            }
+          })
+          $entries | ConvertTo-Json -Depth 4 | Set-Content gate/hashes.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cos-7d-fix-7l2-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: gate/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Physical host qualification is separate
+        shell: pwsh
+        run: |
+          Write-Output 'BUILD ONLY. Hosted CI cannot certify installed WebView2 native debugger or real MV3 lifecycle.'
+          Write-Output '7L2 remains BLOCKED / NOT_RUN until source-matched physical Windows test.'

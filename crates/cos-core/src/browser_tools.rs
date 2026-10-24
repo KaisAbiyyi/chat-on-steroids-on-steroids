@@ -120,6 +120,21 @@ impl<B: BrowserDebugger> DirectBrowserTools<B> {
         self.leases.len()
     }
 
+    /// Native lifecycle helper: distinguish a missing/stale lease from a
+    /// failed detach of this exact channel. Never unlock other tab owners.
+    pub fn has_lease_for(
+        &self,
+        trusted: &TrustedHostEvidence,
+        channel_id: u64,
+        generation: u64,
+    ) -> bool {
+        self.leases.get(&TabKey::new(trusted)).is_some_and(|lease| {
+            lease.evidence == *trusted
+                && lease.channel_id == channel_id
+                && lease.generation == generation
+        })
+    }
+
     /// Only host-proven frame/document may attach; a second contender cannot
     /// steal the debugger, even with its own authenticated channel.
     pub fn attach(

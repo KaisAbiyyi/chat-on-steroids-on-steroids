@@ -16,7 +16,7 @@ internal static class Program
     }
 }
 
-internal sealed class GateForm : Form
+internal sealed partial class GateForm : Form
 {
     private const string Origin = "https://synthetic.cos.test";
     private const string StartUrl = Origin + "/index.html";
@@ -26,7 +26,7 @@ internal sealed class GateForm : Form
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
     private readonly string? _artifactRoot;
-    private readonly bool _idle, _cdpPreflight;
+    private readonly bool _idle, _cdpPreflight, _l2;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -62,7 +62,7 @@ internal sealed class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight") { options.Add(args[i], "true"); continue; }
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2") { options.Add(args[i], "true"); continue; }
             if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
@@ -78,6 +78,9 @@ internal sealed class GateForm : Form
             throw new UnauthorizedAccessException("7L1 requires D: under projects/CoS-Rust");
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
+        _l2 = options.ContainsKey("--7l2");
+        if (_l2 && (_cdpPreflight || _idle))
+            throw new ArgumentException("7L2 is a distinct source-pinned native gate");
         if (!_cdpPreflight &&
             (_artifactRoot is null || !IsUnderProject(_artifactRoot)))
             throw new UnauthorizedAccessException("Integrated 7L1 requires verified D: artifact root");
@@ -85,7 +88,8 @@ internal sealed class GateForm : Form
             RejectReparseAncestors(path);
         if (_artifactRoot is not null)
             RejectReparseAncestors(_artifactRoot);
-        Text = "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
+        Text = _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
+            "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
         Height = 720;
         var split = new SplitContainer
@@ -157,7 +161,7 @@ internal sealed class GateForm : Form
         if (_artifactRoot is null) throw new UnauthorizedAccessException("missing native artifact");
         var manifestPath = Path.Combine(_artifactRoot, "hashes.json");
         var sourcePath = Path.Combine(_artifactRoot, "source.sha");
-        var expectedRust = Path.GetFullPath(Path.Combine(_artifactRoot, "7l1_bridge.exe"));
+        var expectedRust = Path.GetFullPath(Path.Combine(_artifactRoot, _l2 ? "7l2_bridge.exe" : "7l1_bridge.exe"));
         var expectedHost = Path.GetFullPath(Path.Combine(_artifactRoot, "host", "WindowsHost.dll"));
         if (!string.Equals(_bridgePath, expectedRust, StringComparison.OrdinalIgnoreCase) ||
             !string.Equals(Path.GetFullPath(typeof(GateForm).Assembly.Location), expectedHost,
@@ -170,9 +174,11 @@ internal sealed class GateForm : Form
             throw new UnauthorizedAccessException("native source SHA mismatch");
         var dirty = GitOutput(_repo, "status", "--porcelain", "--",
             "probes/7l1/extension", "probes/7l1/assets", "probes/7l1/WindowsHost",
+            "probes/7l2", "crates/cos-core/src/browser_tools.rs",
             "extension/companion/worker.mjs",
             "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
-            "crates/cos-core/examples/7l1_bridge.rs");
+            "crates/cos-core/examples/7l1_bridge.rs",
+            "crates/cos-core/examples/7l2_bridge.rs");
         if (dirty.Length != 0)
             throw new UnauthorizedAccessException("dirty native/extension source");
         using var json = JsonDocument.Parse(File.ReadAllBytes(manifestPath));
@@ -196,7 +202,7 @@ internal sealed class GateForm : Form
                     StringComparison.OrdinalIgnoreCase))
                 throw new UnauthorizedAccessException("artifact hash or path mismatch");
         }
-        foreach (var required in new[] {"7l1_bridge.exe", "host/WindowsHost.dll", "source.sha"})
+        foreach (var required in new[] {_l2 ? "7l2_bridge.exe" : "7l1_bridge.exe", "host/WindowsHost.dll", "source.sha"})
             if (!seen.Contains(required))
                 throw new UnauthorizedAccessException("incomplete artifact manifest");
         // The listed hashes are insufficient unless every loadable file is
@@ -303,6 +309,27 @@ internal sealed class GateForm : Form
             browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
         };
         view.CoreWebView2.ProcessFailed += (_, _) => RevokeAndRetire(browser);
+        if (_l2)
+        {
+            // Real browser-owned MV3 worker target retirement. A pre-signed
+            // stale frame cannot retain authority after this CDP event.
+            var destroyed = view.CoreWebView2.GetDevToolsProtocolEventReceiver(
+                "Target.targetDestroyed");
+            destroyed.DevToolsProtocolEventReceived += (_, evt) =>
+            {
+                try
+                {
+                    using var report = JsonDocument.Parse(evt.ParameterObjectAsJson);
+                    if (report.RootElement.TryGetProperty("targetId", out var target) &&
+                        target.GetString() == browser.WorkerTargetId)
+                        RevokeAndRetire(browser);
+                }
+                catch (JsonException)
+                {
+                    RevokeAndRetire(browser); // invalid native lifecycle report fails closed
+                }
+            };
+        }
         view.Disposed += (_, _) => RevokeAndRetire(browser);
         view.CoreWebView2.Navigate(StartUrl);
         await WaitPageAsync(browser);
@@ -493,11 +520,29 @@ internal sealed class GateForm : Form
                 throw new InvalidOperationException("Rust authority process unavailable");
             await _bridge.StandardInput.WriteLineAsync(JsonSerializer.Serialize(command));
             await _bridge.StandardInput.FlushAsync();
-            var response = await _bridge.StandardOutput.ReadLineAsync()
-                .WaitAsync(TimeSpan.FromSeconds(10));
-            if (response is null) throw new IOException("Rust authority exited without reply");
-            using var data = JsonDocument.Parse(response);
-            return data.RootElement.Clone();
+            for (var callbackCount = 0; callbackCount < 4; callbackCount++)
+            {
+                var response = await _bridge.StandardOutput.ReadLineAsync()
+                    .WaitAsync(TimeSpan.FromSeconds(15));
+                if (response is null) throw new IOException("Rust authority exited without reply");
+                using var data = JsonDocument.Parse(response);
+                if (!data.RootElement.TryGetProperty("cdpCallback", out var callback))
+                    return data.RootElement.Clone();
+                if (!_l2) throw new UnauthorizedAccessException("CDP callback outside 7L2");
+                object answer;
+                try
+                {
+                    var value = await Run7L2CdpAsync(callback);
+                    answer = new { cdpResponse = true, ok = true, value };
+                }
+                catch
+                {
+                    answer = new { cdpResponse = true, ok = false, value = (object?)null };
+                }
+                await _bridge.StandardInput.WriteLineAsync(JsonSerializer.Serialize(answer));
+                await _bridge.StandardInput.FlushAsync();
+            }
+            throw new UnauthorizedAccessException("native debugger callback limit");
         }
         finally
         {
@@ -615,6 +660,7 @@ internal sealed class GateForm : Form
 
     private async Task ExecuteAsync()
     {
+        if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;
         var rustExit = -1;
         try

@@ -93,6 +93,27 @@ globalThis.__cos7l1Native = Object.freeze({
     lastSequence = 1;
     return true;
   },
+  async authorizeTool(sequence) {
+    if (!channel || pending || sequence !== lastSequence + 1 ||
+        sequence < 2 || !Number.isSafeInteger(sequence))
+      throw Error("tool-auth-sequence");
+    const c = channel.context;
+    const frame = {protocol:14, identity:{
+      profileId:c.profileId, tabId:c.tabId, frameId:c.frameId,
+      documentId:c.documentId, navigationEpoch:c.navigationEpoch,
+      sessionId:c.sessionId, sessionEpoch:c.sessionEpoch,
+      workerGeneration:c.workerGeneration
+    }};
+    const payload = JSON.stringify(frame);
+    return {payload:encode(utf8.encode(payload)),
+      mac:await sign("CoSoS/7B/authorization/v1",sequence,payload)};
+  },
+  confirmToolAuthorization(sequence) {
+    if (!channel || pending || sequence !== lastSequence + 1 ||
+        sequence < 2) throw Error("unconfirmed-tool-auth");
+    lastSequence = sequence;
+    return true;
+  },
   async prepare(event, sequence) {
     if (!channel || pending || sequence !== lastSequence + 1 || sequence < 2)
       throw Error("event-sequence");
