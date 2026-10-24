@@ -46,22 +46,32 @@ fn manifest(inventory: &Inventory) -> io::Result<Value> {
 // cleanup of an existing target. The staging directory is owned by TempDir.
 fn destinations(source: &Path, target: &Path) -> io::Result<(PathBuf, PathBuf)> {
     if !source.is_absolute() || !target.is_absolute() {
-        return Err(invalid("Source and destination must be explicit absolute paths"));
+        return Err(invalid(
+            "Source and destination must be explicit absolute paths",
+        ));
     }
     let source = fs::canonicalize(source)?;
     if fs::symlink_metadata(target).is_ok() {
-        return Err(invalid("Destination already exists; overwrite is forbidden"));
+        return Err(invalid(
+            "Destination already exists; overwrite is forbidden",
+        ));
     }
-    let parent = target.parent().ok_or_else(|| invalid("Destination has no parent"))?;
+    let parent = target
+        .parent()
+        .ok_or_else(|| invalid("Destination has no parent"))?;
     fs::create_dir_all(parent)?;
     let parent = fs::canonicalize(parent)?;
-    let leaf = target.file_name().ok_or_else(|| invalid("Invalid destination"))?;
+    let leaf = target
+        .file_name()
+        .ok_or_else(|| invalid("Invalid destination"))?;
     let target = parent.join(leaf);
     if source.starts_with(&target) || target.starts_with(&source) {
         return Err(invalid("Source and destination must be disjoint"));
     }
     if fs::symlink_metadata(&target).is_ok() {
-        return Err(invalid("Destination already exists; overwrite is forbidden"));
+        return Err(invalid(
+            "Destination already exists; overwrite is forbidden",
+        ));
     }
     Ok((source, target))
 }
@@ -75,7 +85,11 @@ fn copy_verified(source: &Path, stage: &Path, original: &Inventory) -> io::Resul
             .ok_or_else(|| invalid("Backup is larger than the 64 GiB safety bound"))?;
         let input = owned_path(source, relative, false)?;
         let output = stage.join(relative);
-        fs::create_dir_all(output.parent().ok_or_else(|| invalid("Invalid staged path"))?)?;
+        fs::create_dir_all(
+            output
+                .parent()
+                .ok_or_else(|| invalid("Invalid staged path"))?,
+        )?;
         let mut reader = fs::File::open(&input)?;
         let mut writer = fs::OpenOptions::new()
             .write(true)
@@ -85,11 +99,15 @@ fn copy_verified(source: &Path, stage: &Path, original: &Inventory) -> io::Resul
         writer.flush()?;
         writer.sync_all()?;
         if count != *size || profile::digest(&output)? != *expected {
-            return Err(io::Error::other("Source changed during backup; no snapshot published"));
+            return Err(io::Error::other(
+                "Source changed during backup; no snapshot published",
+            ));
         }
     }
     if profile::inventory(source)? != *original {
-        return Err(io::Error::other("Source changed during backup verification; no snapshot published"));
+        return Err(io::Error::other(
+            "Source changed during backup verification; no snapshot published",
+        ));
     }
     Ok(total)
 }
@@ -99,7 +117,11 @@ pub fn backup(source: &Path, target: &Path) -> io::Result<Value> {
     let original = profile::inventory(&source)?;
     let stage = tempfile::Builder::new()
         .prefix(".cos-rust-backup-")
-        .tempdir_in(target.parent().ok_or_else(|| invalid("Missing backup parent"))?)?;
+        .tempdir_in(
+            target
+                .parent()
+                .ok_or_else(|| invalid("Missing backup parent"))?,
+        )?;
     let total = copy_verified(&source, stage.path(), &original)?;
     let manifest_bytes = serde_json::to_vec_pretty(&manifest(&original)?)?;
     atomic_write(&stage.path().join(MANIFEST), &manifest_bytes)?;
@@ -109,7 +131,9 @@ pub fn backup(source: &Path, target: &Path) -> io::Result<Value> {
     }
     let hash = sha256(&manifest_bytes);
     if fs::symlink_metadata(&target).is_ok() {
-        return Err(invalid("Destination appeared during backup; overwrite refused"));
+        return Err(invalid(
+            "Destination appeared during backup; overwrite refused",
+        ));
     }
     fs::rename(stage.path(), &target)?;
     Ok(json!({
@@ -121,9 +145,13 @@ pub fn backup(source: &Path, target: &Path) -> io::Result<Value> {
 
 pub fn restore(backup: &Path, target: &Path, expected_manifest_sha256: &str) -> io::Result<Value> {
     if expected_manifest_sha256.len() != 64
-        || !expected_manifest_sha256.bytes().all(|c| c.is_ascii_hexdigit())
+        || !expected_manifest_sha256
+            .bytes()
+            .all(|c| c.is_ascii_hexdigit())
     {
-        return Err(invalid("Restore requires the exact 64-character backup manifest SHA-256"));
+        return Err(invalid(
+            "Restore requires the exact 64-character backup manifest SHA-256",
+        ));
     }
     let (source, target) = destinations(backup, target)?;
     let manifest_path = owned_path(&source, Path::new(MANIFEST), false)?;
@@ -132,25 +160,31 @@ pub fn restore(backup: &Path, target: &Path, expected_manifest_sha256: &str) -> 
         return Err(invalid("Backup manifest exceeds 32 MiB"));
     }
     let mut raw = Vec::new();
-    (&mut file).take(32 * 1024 * 1024 + 1).read_to_end(&mut raw)?;
+    (&mut file)
+        .take(32 * 1024 * 1024 + 1)
+        .read_to_end(&mut raw)?;
     if raw.len() > 32 * 1024 * 1024 {
         return Err(invalid("Backup manifest exceeds 32 MiB"));
     }
     if sha256(&raw) != expected_manifest_sha256.to_ascii_lowercase() {
         return Err(invalid("Backup manifest hash mismatch; restore refused"));
     }
-    let parsed: Value = serde_json::from_slice(&raw)
-        .map_err(|_| invalid("Unreadable backup manifest"))?;
+    let parsed: Value =
+        serde_json::from_slice(&raw).map_err(|_| invalid("Unreadable backup manifest"))?;
     if parsed["schemaVersion"] != SCHEMA_VERSION
         || parsed["kind"] != "cos-rust-profile-backup"
         || parsed["sourceFormat"] != 1
         || parsed["upstreamCommit"] != cos_core::UPSTREAM_COMMIT
     {
-        return Err(invalid("Unsupported backup schema, source format or upstream identity"));
+        return Err(invalid(
+            "Unsupported backup schema, source format or upstream identity",
+        ));
     }
     let actual = profile::inventory(&source)?;
     if manifest(&actual)? != parsed {
-        return Err(invalid("Backup file inventory differs from verified manifest"));
+        return Err(invalid(
+            "Backup file inventory differs from verified manifest",
+        ));
     }
     // import itself re-inventories the source, hashes each copied file,
     // validates the synthetic copied session/config and atomically publishes.
@@ -170,7 +204,10 @@ mod tests {
         let source = home.path().join("source");
         fs::create_dir_all(source.join("state"))?;
         fs::write(source.join("config.json"), b"{}")?;
-        fs::write(source.join("state").join("example.json"), b"{\"hello\":\"world\"}")?;
+        fs::write(
+            source.join("state").join("example.json"),
+            b"{\"hello\":\"world\"}",
+        )?;
         Ok((home, source))
     }
 
@@ -185,8 +222,14 @@ mod tests {
         let restored = home.path().join("restored");
         let result = restore(&backup_dir, &restored, hash)?;
         assert_eq!(result["restoredFromBackup"], true);
-        assert_eq!(fs::read(source.join("state/example.json"))?, b"{\"hello\":\"world\"}");
-        assert_eq!(fs::read(restored.join("state/example.json"))?, b"{\"hello\":\"world\"}");
+        assert_eq!(
+            fs::read(source.join("state/example.json"))?,
+            b"{\"hello\":\"world\"}"
+        );
+        assert_eq!(
+            fs::read(restored.join("state/example.json"))?,
+            b"{\"hello\":\"world\"}"
+        );
         assert!(restored.join("cos-rust-profile.json").exists());
         assert!(backup_dir.join(MANIFEST).exists());
         Ok(())
@@ -199,7 +242,14 @@ mod tests {
         let receipt = backup(&source, &backup_dir)?;
         fs::write(backup_dir.join("config.json"), b"{\"altered\":true}")?;
         let restored = home.path().join("restored");
-        assert!(restore(&backup_dir, &restored, receipt["manifestSha256"].as_str().unwrap()).is_err());
+        assert!(
+            restore(
+                &backup_dir,
+                &restored,
+                receipt["manifestSha256"].as_str().unwrap()
+            )
+            .is_err()
+        );
         assert!(!restored.exists());
         Ok(())
     }
