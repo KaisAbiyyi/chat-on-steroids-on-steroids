@@ -28,6 +28,9 @@ def hash_file(path):
 
 def verify_manifest(artifact, expected_sha):
     artifact = artifact.absolute()
+    for ancestor in (artifact, *artifact.parents):
+        if ancestor.is_symlink() or getattr(ancestor, "is_junction", lambda: False)():
+            raise Refused("symlink/junction artifact ancestor is forbidden")
     source = artifact / "source.sha"
     manifest = artifact / "hashes.json"
     if not source.is_file() or not manifest.is_file():
@@ -109,6 +112,17 @@ def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
         ).stdout.strip()).lower()
         if not SHA40.fullmatch(sha or "") or head != sha:
             raise Refused("source SHA mismatch")
+        if observed_sha is None:
+            status = subprocess.run(
+                ["git", "-C", str(repo), "status", "--porcelain",
+                 "--untracked-files=all", "--",
+                 "probes/7u1", "probes/7l1", "probes/7l2",
+                 "crates/cos-core", "crates/cos-app",
+                 "extension/companion"],
+                capture_output=True, text=True, check=True, timeout=10
+            )
+            if status.stdout.strip():
+                raise Refused("dirty security-critical source files")
         check("source_provenance", "PASS", "Git HEAD matches expected source SHA")
     except (Refused, OSError, subprocess.SubprocessError) as e:
         check("source_provenance", "FAIL", str(e))
