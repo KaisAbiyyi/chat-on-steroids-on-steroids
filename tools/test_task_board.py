@@ -105,9 +105,14 @@ class TaskBoardTests(unittest.TestCase):
         self.assertEqual(self.tasks["8A"]["status"], "done")
         self.assertNotIn("8A", ready_ids)
         self.assertEqual(board.explain(self.data, "8A")["state"], "DONE")
-        self.assertIn("8B", ready_ids)
-        self.assertEqual(board.explain(self.data, "8B")["state"], "READY_CANDIDATE")
-        self.assertNotIn("8C", ready_ids)
+        for accepted in ("8B", "8C", "15A"):
+            self.assertNotIn(accepted, ready_ids)
+            self.assertEqual(board.explain(self.data, accepted)["state"], "DONE")
+        self.assertEqual(board.explain(self.data, "8L1")["state"], "BLOCKED")
+        self.assertNotIn("8L1", ready_ids)
+        self.assertNotIn("8U1", ready_ids)
+        self.assertIn("15B", ready_ids)
+        self.assertEqual(board.explain(self.data, "15B")["state"], "READY_CANDIDATE")
         self.assertEqual(self.tasks["16L3"]["status"], "todo")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
@@ -164,11 +169,13 @@ class TaskBoardTests(unittest.TestCase):
         # A completed gate is excluded from forecasts. In a hypothetical
         # reopened native gate, every downstream phase must retain its order.
         future = copy.deepcopy(self.data)
-        # A synthetic rollback of CL-L6 must also roll back its already
-        # accepted dependent 7P-A, or this cannot be a valid readiness DAG.
+        # Reopen the complete future browser/UI branch, including blocked
+        # native gates, for this hypothetical successful forecast only.
+        # Live 8L1 remains blocked and is tested separately below.
         for task in future["tasks"]:
-            if task["id"] in ("CL-L6", "7P-A", "7P-B", "7P-L1", "7A", "7L1", "7E", "8A"):
+            if task["id"] == "CL-L6" or task["phase"] in {str(n) for n in range(7, 17)}:
                 task["status"] = "todo"
+        self.assertEqual(board.validate(future), [])
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
@@ -176,6 +183,14 @@ class TaskBoardTests(unittest.TestCase):
         self.assertLess(flat.index("7P-L1"), flat.index("7L1"))
         self.assertLess(flat.index("7E"), flat.index("8A"))
         self.assertLess(flat.index("8U1"), flat.index("9A"))
+
+    def test_blocked_native_gate_never_enters_forecast(self):
+        self.assertEqual(self.tasks["8C"]["status"], "done")
+        self.assertEqual(self.tasks["8L1"]["status"], "blocked")
+        self.assertEqual(board.explain(self.data, "8U1")["missing_direct"], ["8L1"])
+        forecast = {task["id"] for wave in board.waves(self.data) for task in wave}
+        self.assertTrue({"8L1", "8U1", "9A"}.isdisjoint(forecast))
+        self.assertIn("15B", forecast)
 
     def test_dangling_dependency_is_rejected(self):
         data = copy.deepcopy(self.data)

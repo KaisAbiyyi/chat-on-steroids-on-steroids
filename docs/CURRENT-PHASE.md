@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 8L1 physical Windows investigation — BLOCKED, 2026-10-24
+
+- **Claim / source:** Codex local `COS-8L1-20261024`, generation 1, [issue #71](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/71), isolated D: branch `feature/8l1-native-20261024`, exact merged source `eb9f3dc9684fe97017dcc3a57ae63553d2118547`. Accepted cloud 8B #61, 8C #65 and 15A #67 were independently verified and stale registry statuses reconciled; their cloud scope does not certify a native host.
+- **Outcome:** 8A/8B/8C controllers have definitions and synthetic-test callers only; no native host constructs them. Native 8L1 restart/multi-tab/profile/permission proof is **BLOCKED / NOT_RUN**, `native8L1Accepted=false`. Real WebView2 MV3 discovery preflight passed with process exit 0, separately from 8L1. No product implementation changed; protected eight-path WIP untouched.
+- **Evidence:** [implementation summary and exact repair contract](implementation-summary/2026-10-24-8l1-native-integration-blocker.md), [source/native receipt](../audit/2026-10-24/8l1-native-integration-blocked.json). 56 JS, 15 DAG, 16 browser guardrail and 343 full-workspace Rust tests passed; native host build, formatting and strict Clippy passed. [Receipt PR #75](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/75) still requires its own exact-head CI/self-review before evidence merge. No native 8L1 acceptance follows from these checks.
+- **Next:** cloud privileged host/profile/lifecycle/permission integration repair under #71, then source-pinned physical **8L1 retest**. Release this local claim/physical-host lock after the blocked handoff is published; do not unlock 8U1. Provider sign-in remains separate, OS IME stays HOLD/UNVERIFIED. 15B is cloud-eligible from accepted 15A but remains unclaimed here: the owner's continuation condition requires completed 8L1, which this blocked gate does not meet.
+
 ## 8A cloud Chrome worker adapter — CLAIMED / in CI self-review, 2026-10-23
 
 - 7E accepted [PR #57](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/57), main `f5b27921d54c005cd027f3afdb8af9e11d736557`.
