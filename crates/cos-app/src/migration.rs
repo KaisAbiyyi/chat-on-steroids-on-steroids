@@ -288,6 +288,19 @@ mod tests {
         Ok(())
     }
 
+    #[test]
+    fn atomic_publication_does_not_replace_an_existing_empty_directory() -> io::Result<()> {
+        let home = tempfile::tempdir()?;
+        let staged = home.path().join("staged");
+        let occupied = home.path().join("occupied");
+        fs::create_dir(&staged)?;
+        fs::create_dir(&occupied)?;
+        assert!(profile::publish_new(&staged, &occupied).is_err());
+        assert!(staged.is_dir());
+        assert!(occupied.is_dir());
+        Ok(())
+    }
+
     #[cfg(unix)]
     #[test]
     fn symlinked_data_refuses_backup() -> io::Result<()> {
