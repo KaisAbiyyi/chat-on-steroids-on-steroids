@@ -143,11 +143,23 @@ def sha256(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
-def zip_member(name, data, executable=False):
+def sha256_file(path):
+    h = hashlib.sha256()
+    total = 0
+    with Path(path).open("rb") as inp:
+        for block in iter(lambda: inp.read(1024 * 1024), b""):
+            total += len(block)
+            if total > MAX_ARCHIVE:
+                raise Refused("oversize binary or archive")
+            h.update(block)
+    return h.hexdigest(), total
+
+
+def zip_member(name, executable=False):
     info = ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
     info.compress_type = ZIP_STORED
     info.external_attr = (0o100755 if executable else 0o100644) << 16
-    return info, data
+    return info
 
 
 def build(binary, project_license, meta, lock, output, os_target, source):
@@ -165,20 +177,22 @@ def build(binary, project_license, meta, lock, output, os_target, source):
     if project_license.is_symlink() or not project_license.is_file():
         raise Refused("project LICENSE missing")
     packages, notices = inventory(meta, lock, project_license)
+    binary_sha, binary_len = sha256_file(binary)
     members = {
-        name: binary.read_bytes(),
         "LICENSE": project_license.read_bytes(),
         "THIRD_PARTY_NOTICES.txt": notices.encode("utf-8")
     }
+    items = [{"path": name, "bytes": binary_len, "sha256": binary_sha}]
+    items.extend({"path": key, "bytes": len(value), "sha256": sha256(value)}
+                 for key, value in sorted(members.items()))
     index = {
         "schema": SCHEMA, "source_sha": source, "platform": os_target,
         "binary": name, "signature": "NOT_SIGNED",
         "native_host": "NOT_INCLUDED", "webview2_runtime": "EXTERNAL_NOT_VERIFIED",
-        "files": [{"path": key, "bytes": len(value), "sha256": sha256(value)}
-                  for key, value in sorted(members.items())],
+        "files": sorted(items, key=lambda x: x["path"]),
         "packages": packages
     }
-    if sum(len(v) for v in members.values()) > MAX_ARCHIVE:
+    if binary_len + sum(len(v) for v in members.values()) > MAX_ARCHIVE:
         raise Refused("bundle over size limit")
     members["bundle-index.json"] = (json.dumps(index, sort_keys=True, indent=2) + "\n").encode("utf-8")
     output = Path(output)
@@ -189,9 +203,12 @@ def build(binary, project_license, meta, lock, output, os_target, source):
     try:
         with ZipFile(output, "x", compression=ZIP_STORED, allowZip64=False) as z:
             for filename, data in sorted(members.items()):
-                z.writestr(*zip_member(filename, data, filename == name))
-        receipt = verify(output, source)
-        return receipt
+                z.writestr(zip_member(filename), data)
+            with z.open(zip_member(name, executable=True), "w", force_zip64=False) as dest:
+                with binary.open("rb") as source_file:
+                    for block in iter(lambda: source_file.read(1024 * 1024), b""):
+                        dest.write(block)
+        return verify(output, source)
     except Exception:
         output.unlink(missing_ok=True)
         raise
@@ -224,13 +241,20 @@ def verify(bundle, source):
         if not isinstance(files, list) or set(names) != {x["path"] for x in files} | {"bundle-index.json"}:
             raise Refused("bundle index coverage mismatch")
         for item in files:
-            raw = z.read(item["path"])
-            if len(raw) != item["bytes"] or sha256(raw) != item["sha256"]:
+            h = hashlib.sha256()
+            size = 0
+            with z.open(item["path"]) as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b""):
+                    size += len(block)
+                    if size > MAX_ARCHIVE:
+                        raise Refused("oversize ZIP content")
+                    h.update(block)
+            if size != item["bytes"] or h.hexdigest() != item["sha256"]:
                 raise Refused("bundle checksum mismatch")
         return {
             "status": "PASS", "schema": SCHEMA, "source_sha": source,
             "platform": index["platform"], "files": len(files),
-            "dependencies": len(index["packages"]), "bundle_sha256": sha256(bundle.read_bytes()),
+            "dependencies": len(index["packages"]), "bundle_sha256": sha256_file(bundle)[0],
             "native_release": "BLOCKED: unsigned headless-only, native host absent"
         }
 
