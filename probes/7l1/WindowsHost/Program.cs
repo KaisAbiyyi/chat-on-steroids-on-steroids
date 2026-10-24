@@ -11,6 +11,13 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // Windows CI can exercise fail-closed proof logic without creating
+        // WebView2 profiles, attaching debuggers or claiming physical acceptance.
+        if (args.Length == 1 && args[0] == "--mv3-retirement-self-test")
+        {
+            NativeRetirementProof.RunSelfTests();
+            return;
+        }
         ApplicationConfiguration.Initialize();
         Application.Run(new GateForm(args));
     }
@@ -51,6 +58,7 @@ internal sealed partial class GateForm : Form
         public string SessionId { get; set; } = "";
         public ulong BoundNavigation { get; set; }
         public bool Revoked { get; set; }
+        public bool WorkerDestroyedEventObserved { get; set; }
         public int InFlightLedgerWrites { get; set; }
         public int RefusedOrigins { get; set; }
         public bool RetireScheduled { get; set; }
@@ -320,11 +328,24 @@ internal sealed partial class GateForm : Form
                 try
                 {
                     using var report = JsonDocument.Parse(evt.ParameterObjectAsJson);
-                    if (report.RootElement.TryGetProperty("targetId", out var target) &&
-                        target.GetString() == browser.WorkerTargetId)
+                    if (!report.RootElement.TryGetProperty("targetId", out var target) ||
+                        target.ValueKind != JsonValueKind.String ||
+                        string.IsNullOrWhiteSpace(target.GetString()))
+                    {
+                        RevokeAndRetire(browser); // malformed native event fails closed
+                        return;
+                    }
+                    if (!string.IsNullOrWhiteSpace(browser.WorkerTargetId) &&
+                        string.Equals(target.GetString(), browser.WorkerTargetId,
+                            StringComparison.Ordinal))
+                    {
+                        // Native CDP event for THIS tracked worker, not a
+                        // similarly named worker from a subsequent generation.
+                        browser.WorkerDestroyedEventObserved = true;
                         RevokeAndRetire(browser);
+                    }
                 }
-                catch (JsonException)
+                catch (Exception ex) when (ex is JsonException or InvalidOperationException)
                 {
                     RevokeAndRetire(browser); // invalid native lifecycle report fails closed
                 }
@@ -442,6 +463,7 @@ internal sealed partial class GateForm : Form
                 var sessionId = Field(session, "sessionId").GetString();
                 if (string.IsNullOrWhiteSpace(sessionId))
                     throw new UnauthorizedAccessException("missing worker CDP session");
+                b.WorkerDestroyedEventObserved = false;
                 b.WorkerTargetId = id;
                 b.WorkerSession = sessionId;
                 b.BoundNavigation = b.NavigationEpoch;

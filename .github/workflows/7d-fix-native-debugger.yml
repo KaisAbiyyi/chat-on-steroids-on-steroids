@@ -62,6 +62,8 @@ jobs:
         run: cargo build --locked -p cos-core --example 7l2_bridge --release
       - name: Compile source-owned WebView2 native host, no warnings
         run: dotnet build probes/7l1/WindowsHost/WindowsHost.csproj -c Release -warnaserror
+      - name: MV3 retirement proof regressions (late/missing event, close failure, identity fence)
+        run: dotnet probes/7l1/WindowsHost/bin/Release/net8.0-windows/WindowsHost.dll --mv3-retirement-self-test
       - name: Assemble exact source and SHA256 manifest
         shell: pwsh
         run: |
