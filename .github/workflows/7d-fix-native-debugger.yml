@@ -7,7 +7,7 @@ on:
       - 'probes/7l2/**'
       - '.github/workflows/7d-fix-native-debugger.yml'
   push:
-    branches: ['work/7d-fix-*']
+    branches: ['main', 'work/7d-fix-*']
   workflow_dispatch:
 permissions:
   contents: read
