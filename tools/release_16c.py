@@ -207,6 +207,28 @@ def inventory(metadata, lockfile, project_license=None):
                         continue
                     text = "=== Same-upstream license source: " + other["name"] + "@" + ver + " ===\\n" + notice
                     break
+                if text is None and (
+                    name == "tree-sitter" and ver == "0.25.1"
+                    and license_id == "MIT"
+                    and p["repository"] == "https://github.com/tree-sitter/tree-sitter"
+                ):
+                    # Reproducibly carry the exact v0.25.1 upstream original
+                    # (git blob 451fe1...) when the crates.io package omits it.
+                    pinned = (Path(__file__).resolve().parent.parent / "docs"
+                              / "third-party-licenses" / "tree-sitter-0.25.1-LICENSE")
+                    if pinned.is_symlink() or not pinned.is_file():
+                        raise Refused("missing pinned upstream Tree-sitter notice")
+                    raw = pinned.read_bytes()
+                    actual = hashlib.sha1(
+                        b"blob " + str(len(raw)).encode("ascii") + b"\\x00" + raw
+                    ).hexdigest()
+                    if actual != "451fe1d26ee6043ac94f6c8a81a6143f17748b4d":
+                        raise Refused("pinned Tree-sitter source notice altered")
+                    text = (
+                        "=== Upstream tree-sitter/tree-sitter tag v0.25.1 LICENSE "
+                        "(git blob 451fe1d26ee6043ac94f6c8a81a6143f17748b4d) ===\\n"
+                        + raw.decode("utf-8")
+                    )
                 if text is None:
                     raise err
         notices.append("## " + name + " " + ver + " [" + license_id + "]\n" + text)
