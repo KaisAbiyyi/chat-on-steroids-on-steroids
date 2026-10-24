@@ -196,10 +196,10 @@ impl VisualProjection {
             older = page.start > 0;
             newer = end < page.total;
         }
-        if let UiRoute::Conversation { session_id } = &navigation.route {
-            if conversation.session_id.as_deref() != Some(session_id.as_str()) {
-                return Err(CaptureError::InconsistentState);
-            }
+        if let UiRoute::Conversation { session_id } = &navigation.route
+            && conversation.session_id.as_deref() != Some(session_id.as_str())
+        {
+            return Err(CaptureError::InconsistentState);
         }
 
         Ok(Self {
