@@ -1,0 +1,21 @@
+name: 16B updater and signer contract
+on:
+  push:
+    branches:
+      - 'work/16b-*'
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  updater-preflight-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Synthetic release authorization and regression tests
+        run: python -m unittest tools.test_release_16b -v
+      - name: Compile Python source
+        run: python -m py_compile tools/release_16b.py tools/test_release_16b.py
