@@ -1,0 +1,14 @@
+{
+  "providers": [
+    {
+      "id": "chatgpt",
+      "origin": "https://chatgpt.com",
+      "redirectOrigins": ["https://auth.openai.com"]
+    },
+    {
+      "id": "gemini",
+      "origin": "https://gemini.google.com",
+      "redirectOrigins": []
+    }
+  ]
+}
