@@ -45,15 +45,19 @@ $rustExe = Join-Path $ArtifactRoot '7l2_bridge.exe'
 if (-not (Test-Path -LiteralPath $hostDll) -or -not (Test-Path -LiteralPath $rustExe)) {
   throw 'Missing source-bound product Windows host or authenticated Rust child'
 }
-# Each launch creates a NEW OS host process and Rust child, checked by PID
-# and source/binary identities. Profiles are independently synthetic; this
-# is a clean restart smoke check, not an OS crash or profile persistence claim.
+# Each launch creates a NEW OS host process and Rust child; restart uses
+# the EXACT SAME browser-owned profile directories and packaged extension,
+# never live user profiles. Compare independent browser-local storage markers,
+# extension identity and fresh Rust attestations across processes.
 $receipts = @()
+$profileRoot = Assert-OwnedPath (Join-Path $Out 'retained-profiles')
 $rounds = if ($VerifyRestart) { @('before-restart','after-restart') } else { @('single') }
 foreach ($round in $rounds) {
   $destination = if ($VerifyRestart) { Join-Path $Out $round } else { $Out }
   $hostArgs = @($hostDll, '--8l1', '--repo', $Repo, '--bridge', $rustExe,
-    '--artifact-root', $ArtifactRoot, '--out', $destination)
+    '--artifact-root', $ArtifactRoot, '--out', $destination,
+    '--profile-root', $profileRoot)
+  if ($round -eq 'after-restart') { $hostArgs += '--reuse-8l1-profile' }
   if ($CrashProbe) { $hostArgs += '--8l1-crash' }
   if ($ConsentProbe) { $hostArgs += '--8l1-consent' }
   dotnet @hostArgs
@@ -71,7 +75,9 @@ foreach ($round in $rounds) {
     throw "Real browser crash failed to retire all scopes in $round"
   }
   if ($code -ne 0 -or $receipt.rustProcessExit -ne 0 -or
-      $receipt.sourceSha -ne $expected -or $receipt.native8L1Accepted -ne $false) {
+      $receipt.sourceSha -ne $expected -or $receipt.native8L1Accepted -ne $false -or
+      $receipt.checks.native_profile_storage_proof.status -ne 'PASS' -or
+      $receipt.checks.native_rust_mv3_authenticated.status -ne 'PASS') {
     throw "8L1-HOST bounded check failed during $round; inspect $receiptPath"
   }
 }
@@ -84,12 +90,26 @@ if ($VerifyRestart) {
     $first.rustProcessId -gt 0 -and $second.rustProcessId -gt 0
   $sameBinaries = $first.hostBinarySha256 -eq $second.hostBinarySha256 -and
     $first.rustBinarySha256 -eq $second.rustBinarySha256
+  $sameProfiles = $first.retainedProfileMode -eq $true -and
+    $first.reusedRetainedProfiles -eq $false -and
+    $second.reusedRetainedProfiles -eq $true -and
+    $first.profileAPath -eq $second.profileAPath -and
+    $first.profileBPath -eq $second.profileBPath -and
+    $first.profileAPath -ne $first.profileBPath -and
+    $first.extensionAId -eq $second.extensionAId -and
+    $first.extensionBId -eq $second.extensionBId -and
+    $first.syntheticMarkerA -eq $second.syntheticMarkerA -and
+    $first.syntheticMarkerB -eq $second.syntheticMarkerB -and
+    -not [string]::IsNullOrWhiteSpace($second.syntheticMarkerA) -and
+    -not [string]::IsNullOrWhiteSpace($second.syntheticMarkerB) -and
+    $second.checks.native_rust_mv3_authenticated.status -eq 'PASS'
   $result = [pscustomobject]@{
     sourceSha = $expected
     cleanProcessRelaunch = if ($fresh -and $sameBinaries) { 'PASS' } else { 'FAIL' }
+    retainedProfileAndRustRecovery = if ($fresh -and $sameBinaries -and $sameProfiles) { 'PASS' } else { 'FAIL' }
     physical8L1Accepted = $false
     osCrashQualification = if ($CrashProbe) { 'PASS' } else { 'NOT_RUN' }
-    retainedProfileQualification = 'NOT_RUN'
+    retainedProfileQualification = if ($sameProfiles) { 'PASS' } else { 'FAIL' }
     firstHostPid = $first.hostProcessId
     secondHostPid = $second.hostProcessId
     firstRustPid = $first.rustProcessId
@@ -97,6 +117,8 @@ if ($VerifyRestart) {
     sameManifestedBinaries = $sameBinaries
   }
   $result | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $Out 'restart-receipt.json')
-  if (-not $fresh -or -not $sameBinaries) { throw 'Native process relaunch identity failed' }
+  if (-not $fresh -or -not $sameBinaries -or -not $sameProfiles) {
+    throw 'Native profile/channel recovery failed after process restart'
+  }
 }
-Write-Output '8L1-HOST physical checks recorded. Full 8L1 owner permission interaction and persistent profile recovery still require separate acceptance.'
+Write-Output '8L1-HOST physical checks recorded. Restart requires the SAME persisted WebView2 profiles, new Rust authority and fresh authenticated channels. Full 8L1 acceptance remains separate.'
