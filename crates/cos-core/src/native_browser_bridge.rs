@@ -645,6 +645,36 @@ mod tests {
             Err(NativeBridgeError::Channel)
         );
         assert!(bridge.retire_host(target_boot.channel_id));
+        // A sibling tab in profile A must not retain a live authenticated
+        // lease across the profile-wide application session reattribution.
+        let mut sibling = source.clone();
+        sibling.identity.tab_id = 3;
+        sibling.identity.session_id = "session-sibling".into();
+        let sibling_boot = bridge.register_host(sibling.clone()).unwrap();
+        bridge
+            .complete_handshake(
+                &sibling,
+                sibling_boot.channel_id,
+                1,
+                &sibling_boot.handshake_proof(),
+            )
+            .unwrap();
+        let sibling_frame = bytes(&sibling);
+        bridge
+            .observe(
+                &sibling,
+                sibling_boot.channel_id,
+                1,
+                1,
+                &sibling_frame,
+                &sibling_boot.observation_mac(1, &sibling_frame),
+            )
+            .unwrap();
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(sibling_boot.channel_id));
         let mut foreign = target.clone();
         foreign.origin = "https://foreign.invalid".into();
         assert_eq!(
