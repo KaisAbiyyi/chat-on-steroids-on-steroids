@@ -228,6 +228,23 @@ internal sealed partial class GateForm
 
     internal static void Run8PPolicyTests() => ProviderPolicy.SelfTest();
 
+    private void BuildProductionExtension()
+    {
+        var source = Path.Combine(_repo, "probes", "8p", "extension");
+        var destination = Path.Combine(_root, "extension");
+        Directory.CreateDirectory(destination);
+        foreach (var file in new[] { "manifest.json", "sw.mjs" })
+        {
+            var input = Path.Combine(source, file);
+            var output = Path.Combine(destination, file);
+            RejectReparseAncestors(input);
+            RejectReparseAncestors(output);
+            if (File.Exists(output))
+                throw new UnauthorizedAccessException("8P extension output is not fresh");
+            File.Copy(input, output);
+        }
+    }
+
     private async Task Execute8PAsync()
     {
         // This opt-in source-owned navigation entrypoint is NOT the 7U1 sign-in
@@ -255,7 +272,7 @@ internal sealed partial class GateForm
         // worker has NO provider host permission, page listener, content script,
         // or access to provider cookies/content. It only authenticates the
         // native Rust channel; actual signed-in 7U1 observation stays disabled.
-        BuildExtension();
+        BuildProductionExtension();
         if (!File.Exists(_bridgePath))
             throw new FileNotFoundException("source-bound Rust bridge not installed");
         var psi = new System.Diagnostics.ProcessStartInfo(_bridgePath)
