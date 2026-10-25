@@ -845,9 +845,9 @@ internal sealed partial class GateForm
                     // Rebind on ACTUAL navigation events, not a synthetic
                     // document counter change. Both OAuth/profile partitions
                     // stay on their original OS WebView2 environments.
+                    var startBound = bound;
                     _a.CoreWebView2.Navigate(landing);
                     _b.CoreWebView2.Navigate(landing);
-                    var startBound = bound;
                     for (var attempt = 0; attempt < 150 &&
                         bound < startBound + 2; attempt++)
                         await Task.Delay(100);
