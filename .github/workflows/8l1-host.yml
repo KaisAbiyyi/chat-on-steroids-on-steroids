@@ -7,6 +7,8 @@ on:
       - 'probes/8l1/**'
       - 'crates/cos-core/**'
       - 'extension/adapter/**'
+      - 'docs/implementation-summary/2026-10-25-8l1-contract-matrix.md'
+      - 'docs/implementation-summary/2026-10-25-8l1-host-cloud.md'
       - '.github/workflows/8l1-host.yml'
   push:
     branches: ['main', 'work/8l1-host-*']
@@ -68,6 +70,23 @@ jobs:
       - name: Execute native host authority tests (no browser profile)
         shell: pwsh
         run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test
+      - name: Verify native contract mapping is reviewed at this SHA
+        shell: pwsh
+        run: |
+          $matrix = Get-Content -Raw docs/implementation-summary/2026-10-25-8l1-contract-matrix.md
+          $native = Get-Content -Raw apps/windows-host/Native8L1.cs
+          foreach ($contract in @('probe', 'startSignIn', 'handoff', 'track', 'transition', 'requestPermission', 'dispose')) {
+            if (-not $matrix.Contains($contract)) { throw "Undocumented 8B/8C contract: $contract" }
+          }
+          foreach ($entry in @('ClaimProfileActions', 'ApproveHandoff', 'CommitHandoffAfterRust', 'PermissionRequested', 'On8L1ProcessFailure', 'FreshRebind')) {
+            if (-not $matrix.Contains($entry) -or -not $native.Contains($entry)) {
+              throw "Native entrypoint missing from implementation or review map: $entry"
+            }
+          }
+          if (-not $matrix.Contains('Physical Windows NOT_RUN')) {
+            throw 'Native physical evidence boundary must not be silently omitted'
+          }
+          Write-Output 'Matrix coverage names verified; NOT proof of behavioral parity or native acceptance.'
       - name: Validate bounded native runner PowerShell parses
         shell: pwsh
         run: |
