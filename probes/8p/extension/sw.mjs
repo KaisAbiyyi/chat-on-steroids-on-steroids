@@ -22,6 +22,7 @@ const concat = (...parts) => {
   return result;
 };
 let generation = 0;
+let current = null;
 const instance = crypto.randomUUID();
 globalThis.__cos7l1Native = Object.freeze({
   workerInstance:instance,
@@ -49,7 +50,33 @@ globalThis.__cos7l1Native = Object.freeze({
       counter(spec.hostGeneration),counter(0),challenge,counter(0));
     const mac = new Uint8Array(await crypto.subtle.sign("HMAC", privateKey, payload));
     generation = spec.hostGeneration;
+    // This key is nonextractable. It may ONLY attest the in-memory logical
+    // session identity; it cannot authorize browser tools or page reads.
+    current = Object.freeze({
+      generation, channelId:spec.channelId, challenge, key:privateKey,
+      identity:Object.freeze({...spec.context})
+    });
     return Object.freeze({proof:encode(mac),workerInstance:instance});
+  },
+  async attestSession() {
+    if (!current || current.generation !== generation)
+      throw Error("8P:unbound");
+    const {identity:c} = current;
+    const frame = {protocol:14,identity:{
+      profileId:c.profileId,tabId:c.tabId,frameId:c.frameId,
+      documentId:c.documentId,navigationEpoch:c.navigationEpoch,
+      sessionId:c.sessionId,sessionEpoch:c.sessionEpoch,
+      workerGeneration:c.workerGeneration
+    }};
+    const serialized=JSON.stringify(frame);
+    const bytes=encoder.encode(serialized);
+    const label=encoder.encode("CoSoS/7B/observation/v1");
+    const signed=concat(counter(label.length),label,
+      counter(current.channelId),counter(current.generation),counter(1),
+      current.challenge,counter(bytes.length),bytes);
+    const mac=new Uint8Array(await crypto.subtle.sign(
+      "HMAC",current.key,signed));
+    return Object.freeze({payload:encode(bytes),mac:encode(mac)});
   }
 });
 // A worker restart is a fresh, untrusted instance until the host reattests it.
