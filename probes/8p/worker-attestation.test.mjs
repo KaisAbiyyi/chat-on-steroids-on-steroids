@@ -18,7 +18,7 @@ test("8P handshake-only worker fences generation and never exposes observations"
   globalThis.chrome={runtime:{onInstalled:{addListener(){}}}};
   await import("./extension/sw.mjs");
   const worker=globalThis.__cos7l1Native;
-  assert.deepEqual(Object.keys(worker).sort(),["bootstrap","workerInstance"]);
+  assert.deepEqual(Object.keys(worker).sort(),["attestSession","bootstrap","workerInstance"]);
   assert.equal(Object.isFrozen(worker),true);
   const key=Buffer.alloc(32,7), challenge=Buffer.alloc(32,11);
   const u64=v=>{const b=Buffer.alloc(8);b.writeBigUInt64BE(BigInt(v));return b;};
@@ -39,6 +39,20 @@ test("8P handshake-only worker fences generation and never exposes observations"
   ])).digest("hex");
   assert.equal(result.proof,expected);
   assert.match(result.workerInstance,/^[0-9a-f-]{36}$/);
+  const signed=await worker.attestSession();
+  const bytes=Buffer.from(signed.payload,"hex");
+  const frame=JSON.parse(bytes.toString("utf8"));
+  assert.deepEqual(frame.identity,{
+    profileId:"8p-chatgpt",tabId:1,frameId:0,documentId:"doc-1",
+    navigationEpoch:1,sessionId:"8p-unattributed",sessionEpoch:1,
+    workerGeneration:1
+  });
+  const observationLabel=Buffer.from("CoSoS/7B/observation/v1");
+  const proof=createHmac("sha256",key).update(Buffer.concat([
+    u64(observationLabel.length),observationLabel,u64(1),u64(1),
+    u64(1),challenge,u64(bytes.length),bytes
+  ])).digest("hex");
+  assert.equal(signed.mac,proof);
   assert.equal(typeof worker.observe,"undefined");
   assert.equal(typeof worker.authorizeTool,"undefined");
   assert.equal(typeof worker.prepare,"undefined");
