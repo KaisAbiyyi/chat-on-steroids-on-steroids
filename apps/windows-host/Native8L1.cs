@@ -12,6 +12,25 @@ internal sealed partial class GateForm
 {
     private Native8L1Authority? _native8L1Authority;
     private int _native8L1ProcessFailures;
+    private string _native8L1MarkerA = "";
+    private string _native8L1MarkerB = "";
+    private string _native8L1ProfilePathA = "";
+    private string _native8L1ProfilePathB = "";
+    private string _native8L1ExtensionA = "";
+    private string _native8L1ExtensionB = "";
+
+    // Synthetic-only storage sentinel. This is NOT authority: only real
+    // WebView2 profile isolation and new Rust/MV3 attestation confer it.
+    private async Task<string> ReadRecoveryMarkerAsync(Browser browser)
+    {
+        var expression = _reuse8L1Profile
+            ? "localStorage.getItem('cos8l1-synthetic-recovery')"
+            : "(() => { const key='cos8l1-synthetic-recovery'; " +
+              "if (localStorage.getItem(key)) throw Error('not a clean profile'); " +
+              "const value=crypto.randomUUID(); localStorage.setItem(key,value); return value; })()";
+        var raw = await browser.View.CoreWebView2.ExecuteScriptAsync(expression);
+        return JsonSerializer.Deserialize<string>(raw) ?? "";
+    }
 
     // A real native ProcessFailed event invalidates every open 8C scope.
     // Retire on the Rust bridge as well, not only in the C# scope dictionary.
@@ -335,6 +354,19 @@ internal sealed partial class GateForm
                 "Two independent real WebView2 MV3 workers authenticated by existing 7L2 Rust bridge");
             _native8L1Authority.Track(a);
             _native8L1Authority.Track(b);
+            _native8L1ProfilePathA = a.ProfilePath;
+            _native8L1ProfilePathB = b.ProfilePath;
+            _native8L1ExtensionA = a.ExtensionId;
+            _native8L1ExtensionB = b.ExtensionId;
+            _native8L1MarkerA = await ReadRecoveryMarkerAsync(a);
+            _native8L1MarkerB = await ReadRecoveryMarkerAsync(b);
+            Mark("native_profile_storage_proof",
+                _native8L1MarkerA.Length > 0 && _native8L1MarkerB.Length > 0 &&
+                _native8L1MarkerA != _native8L1MarkerB &&
+                _native8L1Authority.Current(a) && _native8L1Authority.Current(b),
+                _reuse8L1Profile
+                    ? "Retained browser-local storage loaded before verified fresh Rust/MV3 channel registration"
+                    : "Independent real profiles create distinct synthetic-only browser-local markers");
             Mark("native_8b_independent_partitions",
                 _native8L1Authority.Current(a) && _native8L1Authority.Current(b) &&
                 !_native8L1Authority.SamePartition(a, b),
@@ -498,7 +530,16 @@ internal sealed partial class GateForm
                     rustBinarySha256 = File.Exists(_bridgePath) ? HashFile(_bridgePath) : "missing",
                     native8L1Accepted = false, cloudIntegrationPartial = exit == 0,
                     hostProcessId = Environment.ProcessId, rustProcessId = rustPid,
-                    rustProcessExit = rustExit, checks = _checks
+                    rustProcessExit = rustExit,
+                    retainedProfileMode = _retained8L1ProfileRoot is not null,
+                    reusedRetainedProfiles = _reuse8L1Profile,
+                    profileAPath = _native8L1ProfilePathA,
+                    profileBPath = _native8L1ProfilePathB,
+                    extensionAId = _native8L1ExtensionA,
+                    extensionBId = _native8L1ExtensionB,
+                    syntheticMarkerA = _native8L1MarkerA,
+                    syntheticMarkerB = _native8L1MarkerB,
+                    checks = _checks
                 }, new JsonSerializerOptions { WriteIndented = true }));
             Environment.ExitCode = exit;
             BeginInvoke(new Action(Close));
