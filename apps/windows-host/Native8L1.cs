@@ -46,16 +46,17 @@ internal sealed partial class GateForm
     // the authenticated Rust/MV3 channel may create or change this state.
     private sealed class Native8L1Authority
     {
-        private sealed record Binding(
+        public sealed record Binding(
             string ProfileId, string PartitionId, string ProfilePath,
             uint TabId, string DocumentId, ulong NavigationEpoch,
             ulong WorkerGeneration, ulong HostGeneration, ulong ChannelId,
-            string SessionId, string Origin, ulong Sequence);
+            string SessionId, ulong SessionEpoch, string Origin, ulong Sequence);
 
         private readonly Dictionary<Browser, Binding> _bindings = new(ReferenceEqualityComparer.Instance);
         private readonly Dictionary<string, (string Path, string Partition)> _profiles =
             new(StringComparer.Ordinal);
         private readonly HashSet<string> _consumedApprovals = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _consumedHandoffs = new(StringComparer.Ordinal);
         // A modal owner consent dialog can pump native events. Serialize each
         // browser's permission request and reattest after the dialog closes.
         private readonly HashSet<Browser> _permissionBusy = new(ReferenceEqualityComparer.Instance);
@@ -118,6 +119,7 @@ internal sealed partial class GateForm
             next.HostGeneration > prior.HostGeneration &&
             next.WorkerGeneration >= prior.WorkerGeneration &&
             next.SessionId == prior.SessionId &&
+            next.SessionEpoch == prior.SessionEpoch &&
             next.NavigationEpoch > prior.NavigationEpoch &&
             next.DocumentId != prior.DocumentId;
 
@@ -134,7 +136,7 @@ internal sealed partial class GateForm
                 if (!condition) throw new InvalidOperationException("8L1 native contract regression");
             }
             var first = new Binding("profile-A", "partition-A", @"D:\projects\CoS-Rust\synthetic\A",
-                1, "doc-1", 1, 1, 1, 1, "session-A", Origin, 1);
+                1, "doc-1", 1, 1, 1, 1, "session-A", 1, Origin, 1);
             var stale = first with { DocumentId = "doc-2", NavigationEpoch = 2 };
             var foreign = first with { ProfileId = "profile-B", PartitionId = "partition-B" };
             var consumed = new HashSet<string>(StringComparer.Ordinal);
@@ -155,6 +157,17 @@ internal sealed partial class GateForm
             Require(!ExactOrigin("http://synthetic.cos.test/", Origin));
             Require(!ExactOrigin("https://user@synthetic.cos.test/", Origin));
             Require(first.PartitionId != foreign.PartitionId);
+            var second = first with {
+                ProfileId = "profile-B", PartitionId = "partition-B",
+                ProfilePath = @"D:\projects\CoS-Rust\synthetic\B",
+                TabId = 2, SessionId = "session-B"
+            };
+            Require(CanHandoff(first, second));
+            Require(!CanHandoff(first, first));
+            Require(!CanHandoff(first, second with { PartitionId = first.PartitionId }));
+            Require(!CanHandoff(first, second with { Origin = "https://foreign.invalid" }));
+            Require(!CanHandoff(first, second with { SessionId = first.SessionId }));
+            Require(!CanHandoff(first, second with { ProfilePath = first.ProfilePath }));
             Require(!FreshRebind(first, first));
             Require(!FreshRebind(first, stale));
             Require(!FreshRebind(first, first with {
@@ -285,7 +298,7 @@ internal sealed partial class GateForm
             b.WorkerGeneration == v.WorkerGeneration &&
             b.HostGeneration == v.HostGeneration &&
             b.ChannelId == v.ChannelId && b.ChannelId > 0 &&
-            b.SessionId == v.SessionId &&
+            b.SessionId == v.SessionId && b.SessionEpoch == v.SessionEpoch &&
             string.Equals(b.View.CoreWebView2.Source, v.Origin + "/index.html",
                 StringComparison.Ordinal) &&
             string.Equals(Path.GetFullPath(b.View.CoreWebView2.Profile.ProfilePath),
@@ -320,7 +333,7 @@ internal sealed partial class GateForm
                 var next = new Binding(b.Profile, owner.Partition, path,
                     b.TabId, b.DocumentId, b.NavigationEpoch,
                     b.WorkerGeneration, b.HostGeneration, b.ChannelId,
-                    b.SessionId, Origin, (prior?.Sequence ?? 0) + 1);
+                    b.SessionId, b.SessionEpoch, Origin, (prior?.Sequence ?? 0) + 1);
                 if (prior is not null && !FreshRebind(prior, next))
                     throw new UnauthorizedAccessException("8C stale or cross-partition rebind");
                 _bindings[b] = next;
@@ -361,6 +374,123 @@ internal sealed partial class GateForm
                 // open; the stale handler itself always denies on recheck.
                 // Retain the old binding as a tombstone so the next Track
                 // requires a strictly newer authenticated host generation.
+            }
+        }
+
+        // 8B synthetic provider navigation: this confirms consent to START
+        // navigation, never an authenticated account or an imported cookie.
+        public bool ApproveSyntheticSignIn(Browser browser, string providerId)
+        {
+            Binding? snapshot;
+            lock (_gate)
+            {
+                if (providerId != "synthetic" ||
+                    !_bindings.TryGetValue(browser, out snapshot) ||
+                    !Matches(browser, snapshot) || _permissionBusy.Contains(browser))
+                    return false;
+            }
+            var result = MessageBox.Show(browser.View.FindForm(),
+                "Start opt-in synthetic provider sign-in navigation for profile " +
+                snapshot.ProfileId + "? No account or credential is accessed.",
+                "CoSoS 8B native sign-in", MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            lock (_gate)
+                return result == DialogResult.Yes &&
+                    _bindings.TryGetValue(browser, out var current) &&
+                    current == snapshot && Matches(browser, current);
+        }
+
+        public sealed record HandoffTicket(
+            string Nonce, Binding Source, Binding Target,
+            string NewSourceSessionId, ulong SourceNextEpoch, ulong TargetNextEpoch);
+
+        private static bool CanHandoff(Binding source, Binding target) =>
+            source.ProfileId != target.ProfileId &&
+            source.PartitionId != target.PartitionId &&
+            !string.Equals(source.ProfilePath, target.ProfilePath,
+                StringComparison.OrdinalIgnoreCase) &&
+            source.Origin == target.Origin &&
+            source.SessionId != target.SessionId &&
+            source.SessionEpoch > 0 && target.SessionEpoch > 0 &&
+            source.SessionEpoch < 9_007_199_254_740_989UL &&
+            target.SessionEpoch < 9_007_199_254_740_989UL;
+
+        public HandoffTicket? ApproveHandoff(Browser source, Browser target)
+        {
+            Binding? first, second;
+            lock (_gate)
+            {
+                if (!_bindings.TryGetValue(source, out first) ||
+                    !_bindings.TryGetValue(target, out second) ||
+                    !Matches(source, first) || !Matches(target, second) ||
+                    !CanHandoff(first, second) ||
+                    _permissionBusy.Contains(source) || _permissionBusy.Contains(target))
+                    return null;
+            }
+            var choice = MessageBox.Show(source.View.FindForm(),
+                "Transfer ONLY application session attribution from " + first.ProfileId +
+                " to " + second.ProfileId + "? Browser cookies, login and " +
+                "profile data will NOT be moved. Both native Rust channels will retire.",
+                "CoSoS 8B explicit logical handoff",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);
+            if (choice != DialogResult.Yes) return null;
+            lock (_gate)
+            {
+                if (!_bindings.TryGetValue(source, out var nowSource) ||
+                    !_bindings.TryGetValue(target, out var nowTarget) ||
+                    first != nowSource || second != nowTarget ||
+                    !Matches(source, nowSource) || !Matches(target, nowTarget) ||
+                    _permissionBusy.Contains(source) || _permissionBusy.Contains(target))
+                    return null;
+                return new HandoffTicket(
+                    Guid.NewGuid().ToString("N"), first, second,
+                    "handoff-empty-" + Guid.NewGuid().ToString("N"),
+                    first.SessionEpoch + 1,
+                    Math.Max(first.SessionEpoch, second.SessionEpoch) + 1);
+            }
+        }
+
+        // Called ONLY after a successful Rust-side atomic handoff, and after
+        // BOTH old channels have confirmed retirement. The host changes both
+        // local session bindings together under the native gate lock.
+        public bool CommitHandoffAfterRust(
+            Browser source, Browser target, HandoffTicket ticket)
+        {
+            lock (_gate)
+            {
+                if (_consumedHandoffs.Contains(ticket.Nonce) ||
+                    !_bindings.TryGetValue(source, out var nowSource) ||
+                    !_bindings.TryGetValue(target, out var nowTarget) ||
+                    nowSource != ticket.Source || nowTarget != ticket.Target ||
+                    !CanHandoff(nowSource, nowTarget) ||
+                    !source.Revoked || !target.Revoked ||
+                    source.ChannelId != 0 || target.ChannelId != 0 ||
+                    source.RetirementTask is not null || target.RetirementTask is not null ||
+                    source.DocumentId != nowSource.DocumentId ||
+                    target.DocumentId != nowTarget.DocumentId ||
+                    source.NavigationEpoch != nowSource.NavigationEpoch ||
+                    target.NavigationEpoch != nowTarget.NavigationEpoch ||
+                    source.SessionId != nowSource.SessionId ||
+                    target.SessionId != nowTarget.SessionId ||
+                    !string.Equals(Path.GetFullPath(source.View.CoreWebView2.Profile.ProfilePath),
+                        nowSource.ProfilePath, StringComparison.OrdinalIgnoreCase) ||
+                    !string.Equals(Path.GetFullPath(target.View.CoreWebView2.Profile.ProfilePath),
+                        nowTarget.ProfilePath, StringComparison.OrdinalIgnoreCase))
+                    return false;
+                _consumedHandoffs.Add(ticket.Nonce);
+                source.SessionId = ticket.NewSourceSessionId;
+                source.SessionEpoch = ticket.SourceNextEpoch;
+                target.SessionId = nowSource.SessionId;
+                target.SessionEpoch = ticket.TargetNextEpoch;
+                // Tombstones preserve strict FreshRebind generation fencing.
+                _bindings[source] = nowSource with {
+                    SessionId = source.SessionId, SessionEpoch = source.SessionEpoch
+                };
+                _bindings[target] = nowTarget with {
+                    SessionId = target.SessionId, SessionEpoch = target.SessionEpoch
+                };
+                return true;
             }
         }
 
