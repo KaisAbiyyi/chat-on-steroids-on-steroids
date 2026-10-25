@@ -4,7 +4,8 @@ param(
   [Parameter(Mandatory=$true)][string]$ArtifactRoot,
   [Parameter(Mandatory=$true)][string]$Out,
   [Parameter(Mandatory=$true)][string]$ProviderConfig,
-  [Parameter(Mandatory=$true)][string]$ProviderId
+  [Parameter(Mandatory=$true)][string]$ProviderId,
+  [switch]$HandoffProbe
 )
 $ErrorActionPreference = 'Stop'
 function Assert-DPath([string]$path) {
@@ -53,7 +54,11 @@ foreach ($entry in $manifest) {
 $hostDll = Join-Path $ArtifactRoot 'host/WindowsHost.dll'
 if (-not (Test-Path -LiteralPath $hostDll)) { throw 'Missing host binary' }
 Write-Output 'Owner chooses a configured provider. Native Yes only opens its allowed HTTPS landing origin; it does not grant sign-in/observation/permission.'
-dotnet $hostDll --8p --repo $Repo --out $Out --bridge (Join-Path $ArtifactRoot '7l2_bridge.exe') --artifact-root $ArtifactRoot --8p-config $ProviderConfig --8p-provider $ProviderId
+$runtimeArgs = @('--8p','--repo',$Repo,'--out',$Out,'--bridge',
+  (Join-Path $ArtifactRoot '7l2_bridge.exe'),'--artifact-root',$ArtifactRoot,
+  '--8p-config',$ProviderConfig,'--8p-provider',$ProviderId)
+if ($HandoffProbe) { $runtimeArgs += '--8p-handoff-probe' }
+dotnet $hostDll @runtimeArgs
 if ($LASTEXITCODE -ne 0) { throw '8P host execution failed' }
 $receiptPath = Join-Path $Out '8p-navigation-receipt.json'
 if (-not (Test-Path -LiteralPath $receiptPath)) {
@@ -62,7 +67,8 @@ if (-not (Test-Path -LiteralPath $receiptPath)) {
 $r = Get-Content -Raw $receiptPath | ConvertFrom-Json
 if ($r.sourceSha -ne $expected -or $r.native8PAccepted -ne $false -or
     $r.owner7U1Accepted -ne $false -or $r.rustChannelActive -ne $true -or
-    $r.mv3WorkerAttested -ne $true -or $r.nativeWorkerRebinds -lt 1) {
+    $r.mv3WorkerAttested -ne $true -or $r.nativeWorkerRebinds -lt 1 -or
+    ($HandoffProbe -and $r.crossProfileHandoffPassed -ne $true)) {
   throw 'Receipt authority boundary violation'
 }
 Write-Output 'Native provider MV3/Rust channel attested (no provider content read); production signed-in gate remains NOT_RUN.'
