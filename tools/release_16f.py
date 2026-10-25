@@ -38,6 +38,11 @@ TRACKED = (
     "docs/implementation-summary/2026-10-24-16c-bundle-licenses.md",
     "docs/implementation-summary/2026-10-25-16d-cloud-headless-perf.md",
     "docs/implementation-summary/2026-10-25-16e-install-matrix.md",
+    "docs/CURRENT-PHASE.md",
+    "tools/release_16f.py",
+    "tools/test_release_16f.py",
+    ".github/workflows/16f-release-report.yml",
+    "docs/implementation-summary/2026-10-25-16f-cloud-release-security.md",
 )
 GATES = (
     "16L1_native_installer",
@@ -138,8 +143,9 @@ def collect(repo, expected_head):
     for path in TRACKED:
         local = root / path
         require(local.is_file() and not local.is_symlink(), "unsafe or missing tracked file: " + path)
-        data = git(root, "show", "HEAD:" + path)
-        # Stripping subprocess stdout would alter hashes; re-read binary blob exactly.
+        require(not any(parent.is_symlink() for parent in local.parents if parent != root),
+                "linked source parent forbidden: " + path)
+        # Preserve blob bytes exactly; never strip whitespace from provenance bytes.
         proc = subprocess.run(["git", "-C", str(root), "show", "HEAD:" + path],
                               capture_output=True, check=False, timeout=30)
         require(proc.returncode == 0 and len(proc.stdout) <= MAX_SOURCE_BYTES, "unavailable tracked blob: " + path)
