@@ -104,6 +104,11 @@ internal sealed partial class GateForm
             return true;
         }
 
+        // Used at both permission-event entry and post-modal commit; a native
+        // profile handoff must not be bypassed by an already-open owner dialog.
+        private static bool PermissionOutsideProfileAction(HashSet<string> busy, Binding binding) =>
+            !busy.Contains(binding.ProfileId);
+
         private sealed class ProfileActionLease : IDisposable
         {
             private readonly Native8L1Authority _owner;
@@ -211,6 +216,14 @@ internal sealed partial class GateForm
             Require(!ReserveProfiles(busy, new[] { "profile-B", "profile-C" }));
             Require(!busy.Contains("profile-C")); // failed reservation is atomic
             Require(!ReserveProfiles(busy, new[] { "profile-C", "profile-C" }));
+            Require(!PermissionOutsideProfileAction(busy, first));
+            var lockOwner = new Native8L1Authority();
+            lockOwner._profileActionBusy.Add("profile-A");
+            var lease = new ProfileActionLease(lockOwner, new[] { "profile-A" });
+            Require(!PermissionOutsideProfileAction(lockOwner._profileActionBusy, first));
+            lease.Dispose();
+            lease.Dispose(); // releasing a lease is idempotent
+            Require(PermissionOutsideProfileAction(lockOwner._profileActionBusy, first));
             busy.Remove("profile-A");
             busy.Remove("profile-B");
             Require(ReserveProfiles(busy, new[] { "profile-B" }));
@@ -274,7 +287,7 @@ internal sealed partial class GateForm
                     _permissionEvents++;
                     if (cap == "unsupported" || _permissionBusy.Contains(b) ||
                         !_bindings.TryGetValue(b, out snapshot) ||
-                        _profileActionBusy.Contains(snapshot.ProfileId) ||
+                        !PermissionOutsideProfileAction(_profileActionBusy, snapshot) ||
                         !Matches(b, snapshot) || !ExactOrigin(e.Uri, snapshot.Origin))
                         return;
                     if (_armReplayOnNextEvent)
@@ -321,7 +334,7 @@ internal sealed partial class GateForm
                     lock (_gate)
                     {
                         if (!_bindings.TryGetValue(b, out var current) ||
-                            _profileActionBusy.Contains(current.ProfileId) ||
+                            !PermissionOutsideProfileAction(_profileActionBusy, current) ||
                             !Matches(b, current))
                         {
                             if (forceStale) _staleAllowDenied++;
