@@ -357,7 +357,7 @@ mod tests {
         assert!(fence.require_current(&fresh_target).is_ok());
         assert_eq!(
             fence.observe_verified(source),
-            Err(BridgeContractError::ConflictingAttribution)
+            Err(BridgeContractError::ConflictingSession)
         );
     }
 
