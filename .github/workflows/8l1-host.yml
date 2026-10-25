@@ -65,6 +65,9 @@ jobs:
         run: cargo build --locked -p cos-core --example 7l2_bridge --release
       - name: Compile product-owned WebView2 8L1 host with strict warnings
         run: dotnet build apps/windows-host/WindowsHost.csproj -c Release -warnaserror
+      - name: Execute native host authority tests (no browser profile)
+        shell: pwsh
+        run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test
       - name: Validate bounded native runner PowerShell parses
         shell: pwsh
         run: |
@@ -100,4 +103,4 @@ jobs:
         shell: pwsh
         run: |
           Write-Output 'Only a source-matched D: run can exercise live WebView2 native profile/lifecycle.'
-          Write-Output '8L1 remains NOT_RUN; consent UI and same-profile multi-tab/restart are NOT_RUN.'
+          Write-Output 'Physical 8L1 remains NOT_RUN; hosted self-tests cover one-use native policy only.'
