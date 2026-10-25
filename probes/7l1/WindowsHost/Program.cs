@@ -40,7 +40,7 @@ internal sealed partial class GateForm : Form
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
     private readonly string? _artifactRoot;
-    private readonly bool _idle, _cdpPreflight, _l2, _host8L1;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -81,7 +81,7 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1") { options.Add(args[i], "true"); continue; }
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash") { options.Add(args[i], "true"); continue; }
             if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
@@ -98,6 +98,9 @@ internal sealed partial class GateForm : Form
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
         _host8L1 = options.ContainsKey("--8l1");
+        _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
+        if (_host8L1CrashProbe && !_host8L1)
+            throw new ArgumentException("Native crash probe requires the 8L1 host");
         _l2 = options.ContainsKey("--7l2") || _host8L1;
         if (_l2 && (_cdpPreflight || _idle || (options.ContainsKey("--7l2") && _host8L1)))
             throw new ArgumentException("7L2 is a distinct source-pinned native gate");
