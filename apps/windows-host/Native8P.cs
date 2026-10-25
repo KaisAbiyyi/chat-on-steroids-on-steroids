@@ -539,6 +539,8 @@ internal sealed partial class GateForm
             browser.ChannelId == 0 || browser.ProductionOrigin is null ||
             browser.ProductionUrl is null || browser.WorkerSession is null ||
             browser.View.IsDisposed ||
+            !string.Equals(browser.View.CoreWebView2.Source,
+                browser.ProductionUrl, StringComparison.Ordinal) ||
             !string.Equals(browser.ProfilePath,
                 Path.GetFullPath(browser.View.CoreWebView2.Profile.ProfilePath),
                 StringComparison.OrdinalIgnoreCase))
@@ -558,7 +560,8 @@ internal sealed partial class GateForm
     private static bool Eligible8PHandoff(
         Native8PSessionSnapshot a, Native8PSessionSnapshot b,
         string primaryOrigin) =>
-        a.Profile != b.Profile && a.ProfilePath != b.ProfilePath &&
+        a.Profile != b.Profile &&
+        !string.Equals(a.ProfilePath,b.ProfilePath,StringComparison.OrdinalIgnoreCase) &&
         a.Origin == b.Origin && a.Origin == primaryOrigin &&
         a.SessionId != b.SessionId && a.SessionEpoch > 0 &&
         b.SessionEpoch > 0 &&
@@ -654,6 +657,8 @@ internal sealed partial class GateForm
         // cookies, form input, history or tokens are read or exported here.
         if (_host8PConfig is null || _host8PProvider is null)
             throw new ArgumentException("8P requires --8p-config and --8p-provider");
+        var providerId = _host8PProvider ??
+            throw new ArgumentException("8P provider required");
         RejectReparseAncestors(_host8PConfig);
         if (!IsUnderProject(_host8PConfig) || !File.Exists(_host8PConfig))
             throw new UnauthorizedAccessException("8P configuration must be an existing D: host file");
@@ -663,10 +668,10 @@ internal sealed partial class GateForm
         VerifySourceArtifact();
         var policy = ProviderPolicy.Parse(File.ReadAllText(_host8PConfig));
         var oauth = new OAuthNavigationGate();
-        var landing = policy.Landing(_host8PProvider); // rejects unlisted provider before navigation
+        var landing = policy.Landing(providerId); // rejects unlisted provider before navigation
         var decision = MessageBox.Show(this,
             "Navigate the isolated CoSoS profile to the configured provider " +
-            _host8PProvider + "?\nNo sign-in, observation, or permission is authorized by this action.",
+            providerId + "?\nNo sign-in, observation, or permission is authorized by this action.",
             "8P-HOST native provider consent", MessageBoxButtons.YesNo,
             MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
         if (decision != DialogResult.Yes) { Close(); return; }
@@ -748,12 +753,12 @@ internal sealed partial class GateForm
                 browser.ProductionOrigin = null;
                 browser.NavigationEpoch++;
                 browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
-                if (policy.IsCallbackCandidate(_host8PProvider, e.Uri))
+                if (policy.IsCallbackCandidate(providerId, e.Uri))
                 {
                     var callbackPath = new Uri(e.Uri).GetLeftPart(UriPartial.Path);
-                    if (policy.TryCallback(_host8PProvider, e.Uri,
+                    if (policy.TryCallback(providerId, e.Uri,
                             out var callbackState) &&
-                        oauth.Consume(_host8PProvider, browser.Profile,
+                        oauth.Consume(providerId, browser.Profile,
                             browser.SessionId, callbackPath, callbackState,
                             browser.NavigationEpoch, DateTimeOffset.UtcNow))
                         oauthCallbacksConsumed++;
@@ -762,23 +767,23 @@ internal sealed partial class GateForm
                     e.Cancel = true; // never load the code-bearing page
                     return;
                 }
-                if (!policy.Allows(_host8PProvider, e.Uri))
+                if (!policy.Allows(providerId, e.Uri))
                 {
                     refused++;
                     oauth.InvalidateProfile(browser.Profile);
                     e.Cancel = true;
                     return;
                 }
-                if (policy.TryAuthorizationRequest(_host8PProvider, e.Uri,
+                if (policy.TryAuthorizationRequest(providerId, e.Uri,
                         out var state, out var callback))
                 {
                     var currentUrl = view.CoreWebView2.Source;
                     if (!Uri.TryCreate(currentUrl, UriKind.Absolute,
                             out var current) ||
                         !string.Equals(current.GetLeftPart(UriPartial.Authority),
-                            policy.PrimaryOrigin(_host8PProvider),
+                            policy.PrimaryOrigin(providerId),
                             StringComparison.Ordinal) ||
-                        !oauth.Begin(_host8PProvider, browser.Profile,
+                        !oauth.Begin(providerId, browser.Profile,
                             browser.SessionId, state, callback,
                             browser.NavigationEpoch, DateTimeOffset.UtcNow))
                     {
@@ -804,7 +809,7 @@ internal sealed partial class GateForm
                 }
                 var epoch = browser.NavigationEpoch;
                 var url = view.CoreWebView2.Source;
-                if (!policy.Allows(_host8PProvider, url))
+                if (!policy.Allows(providerId, url))
                 {
                     RevokeAndRetire(browser);
                     ready.TrySetResult(false);
@@ -875,7 +880,7 @@ internal sealed partial class GateForm
                 {
                     handoffPassed = await Execute8PHandoffProbeAsync(
                         first.Browser, second.Browser,
-                        policy.PrimaryOrigin(_host8PProvider));
+                        policy.PrimaryOrigin(providerId));
                 }
                 finally { handoffLocked = false; }
                 if (handoffPassed)
@@ -913,7 +918,7 @@ internal sealed partial class GateForm
         // or worker key/challenge in a source-attested receipt.
         var receipt = new
         {
-            sourceSha = _verifiedSourceSha, providerId = _host8PProvider,
+            sourceSha = _verifiedSourceSha, providerId = providerId,
             navigationAllowed = success, navigationEpoch = first.Browser.NavigationEpoch,
             deniedNavigationCount = refused, oauthCallbacksConsumed,
             nativeWorkerRebinds = bound, crossProfileHandoffPassed = handoffPassed,
