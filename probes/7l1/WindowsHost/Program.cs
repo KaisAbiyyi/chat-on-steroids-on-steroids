@@ -33,7 +33,7 @@ internal sealed partial class GateForm : Form
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
     private readonly string? _artifactRoot;
-    private readonly bool _idle, _cdpPreflight, _l2;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8L1;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -70,7 +70,7 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2") { options.Add(args[i], "true"); continue; }
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1") { options.Add(args[i], "true"); continue; }
             if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
@@ -86,8 +86,9 @@ internal sealed partial class GateForm : Form
             throw new UnauthorizedAccessException("7L1 requires D: under projects/CoS-Rust");
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
-        _l2 = options.ContainsKey("--7l2");
-        if (_l2 && (_cdpPreflight || _idle))
+        _host8L1 = options.ContainsKey("--8l1");
+        _l2 = options.ContainsKey("--7l2") || _host8L1;
+        if (_l2 && (_cdpPreflight || _idle || (options.ContainsKey("--7l2") && _host8L1)))
             throw new ArgumentException("7L2 is a distinct source-pinned native gate");
         if (!_cdpPreflight &&
             (_artifactRoot is null || !IsUnderProject(_artifactRoot)))
@@ -96,7 +97,8 @@ internal sealed partial class GateForm : Form
             RejectReparseAncestors(path);
         if (_artifactRoot is not null)
             RejectReparseAncestors(_artifactRoot);
-        Text = _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
+        Text = _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
+            _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
             "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
         Height = 720;
@@ -186,7 +188,10 @@ internal sealed partial class GateForm : Form
             "extension/companion/worker.mjs",
             "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
             "crates/cos-core/examples/7l1_bridge.rs",
-            "crates/cos-core/examples/7l2_bridge.rs");
+            "crates/cos-core/examples/7l2_bridge.rs",
+            "apps/windows-host", "probes/8l1",
+            "extension/adapter/browser-lifecycle.mjs",
+            "extension/adapter/profile-session.mjs");
         if (dirty.Length != 0)
             throw new UnauthorizedAccessException("dirty native/extension source");
         using var json = JsonDocument.Parse(File.ReadAllBytes(manifestPath));
@@ -292,6 +297,7 @@ internal sealed partial class GateForm : Form
             ExtensionId = extension.Id, TabId = tabId
         };
         _browsers.Add(view, browser);
+        _native8L1Authority?.Attach(browser);
         view.CoreWebView2.SetVirtualHostNameToFolderMapping("synthetic.cos.test",
             Path.Combine(_repo, "probes", "7l1", "assets"),
             CoreWebView2HostResourceAccessKind.DenyCors);
@@ -503,6 +509,7 @@ internal sealed partial class GateForm : Form
         // Runs synchronously from WebView2 lifetime events, so the stale
         // channel cannot start another privileged evaluation.
         browser.Revoked = true;
+        _native8L1Authority?.Revoke(browser);
         if (browser.ChannelId != 0 && !browser.RetireScheduled)
         {
             browser.RetireScheduled = true;
@@ -682,6 +689,7 @@ internal sealed partial class GateForm : Form
 
     private async Task ExecuteAsync()
     {
+        if (_host8L1) { await Execute8L1Async(); return; }
         if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;
         var rustExit = -1;
