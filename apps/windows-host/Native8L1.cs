@@ -484,31 +484,75 @@ internal sealed partial class GateForm
                 "Navigating one real WebView2 did not steal a separate browser-owned partition");
             if (_host8L1ConsentProbe)
             {
-                // The browser creates actual native PermissionRequested events.
-                // Only a person interacting with the native dialog can approve.
-                // Location results never leave this isolated synthetic page.
+                // Physical permission events only. Owner selects Yes to first
+                // request, No to second, then Yes to the stale third dialog.
+                // The replay request is automatically refused without a dialog.
+                const string permissionScript =
+                    "navigator.geolocation.getCurrentPosition(() => {}, () => {}, " +
+                    "{timeout:1000,maximumAge:0});";
                 for (var request = 0; request < 2; request++)
                 {
-                    await _b.CoreWebView2.ExecuteScriptAsync(
-                        "navigator.geolocation.getCurrentPosition(() => {}, () => {}, " +
-                        "{timeout:1000,maximumAge:0});");
-                    for (var attempts = 0; attempts < 100; attempts++)
-                    {
-                        if (_native8L1Authority.OwnerConsentCounts().Prompts > request) break;
+                    var before = _native8L1Authority.OwnerConsentCounts().Events;
+                    await _b.CoreWebView2.ExecuteScriptAsync(permissionScript);
+                    for (var attempts = 0; attempts < 100 &&
+                        _native8L1Authority.OwnerConsentCounts().Events == before; attempts++)
                         await Task.Delay(100);
-                    }
-                    await Task.Delay(150);
                 }
-                var counts = _native8L1Authority.OwnerConsentCounts();
+                var normal = _native8L1Authority.OwnerConsentCounts();
                 Mark("native_permission_positive_consent",
-                    counts.Prompts >= 2 && counts.Grants >= 1 && counts.Denials >= 1 &&
+                    normal.Prompts >= 2 && normal.Grants >= 1 && normal.Denials >= 1 &&
                     _native8L1Authority.Current(b),
-                    "Two physical native WebView2 permission prompts must include one owner Allow " +
-                    "and one owner Deny, without persistent grants");
+                    "Two real WebView2 permission events: explicit owner Yes and No, no persisted grant");
+
+                if (normal.Grants == 0)
+                    throw new UnauthorizedAccessException("Owner Allow missing for replay probe");
+                _native8L1Authority.ArmReplayProbe();
+                var beforeReplay = normal.Events;
+                await _b.CoreWebView2.ExecuteScriptAsync(permissionScript);
+                for (var attempts = 0; attempts < 100 &&
+                    _native8L1Authority.OwnerConsentCounts().Events == beforeReplay; attempts++)
+                    await Task.Delay(100);
+                var replay = _native8L1Authority.OwnerConsentCounts();
+                Mark("native_permission_replay_event_denied",
+                    replay.Events > beforeReplay && replay.ReplayDenied == 1 &&
+                    replay.Grants == normal.Grants && replay.Prompts == normal.Prompts,
+                    "Actual third WebView2 permission event refuses already-consumed owner approval");
+
+                _native8L1Authority.ArmStaleProbe(b);
+                var beforeStale = replay.Events;
+                try { await _b.CoreWebView2.ExecuteScriptAsync(permissionScript); }
+                catch (Exception ex) when (ex is InvalidOperationException or
+                    System.Runtime.InteropServices.COMException)
+                {
+                    // Native navigation may abort the in-flight page evaluation.
+                    // Only native event counts decide whether the probe passed.
+                }
+                for (var attempts = 0; attempts < 100 &&
+                    _native8L1Authority.OwnerConsentCounts().Events == beforeStale; attempts++)
+                    await Task.Delay(100);
+                var stale = _native8L1Authority.OwnerConsentCounts();
+                Mark("native_permission_stale_event_denied",
+                    stale.Events > beforeStale && stale.StaleAllowDenied == 1 &&
+                    stale.Grants == normal.Grants && !_native8L1Authority.Current(b),
+                    "Actual modal Yes after native navigation cannot grant old document permission");
+                await WaitPageAsync(b);
+                await BindAsync(b, "8l1-synthetic-b");
+                _native8L1Authority.Track(b);
+                Mark("native_permission_recovered_new_channel",
+                    _native8L1Authority.Current(b) && Ok(await ObserveAsync(b)),
+                    "After stale consent is refused, new real document and Rust channel reauthenticate");
             }
             else
+            {
                 Pending("native_permission_positive_consent",
-                    "Opt in to two real owner permission dialogs with run-native.ps1 -ConsentProbe");
+                    "Requires owner-driven live WebView2 Yes/No via -ConsentProbe");
+                Pending("native_permission_replay_event_denied",
+                    "Requires real WebView2 event against consumed grant via -ConsentProbe");
+                Pending("native_permission_stale_event_denied",
+                    "Requires owner Yes after real navigation during modal prompt via -ConsentProbe");
+                Pending("native_permission_recovered_new_channel",
+                    "Requires native channel rebind after stale consent via -ConsentProbe");
+            }
             // 8L1 physical full gate is still NOT_RUN until restart/crash,
             // one-use real consent and multi-tab are independently exercised.
             Pending("native_host_process_restart",
