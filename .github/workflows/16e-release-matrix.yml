@@ -1,0 +1,26 @@
+name: 16E synthetic install upgrade rollback matrix
+on:
+  push:
+    branches:
+      - 'work/16e-*'
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  release-transaction-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Validate synthetic 16B 16C 16E release contracts
+        run: python -m unittest tools.test_release_16b tools.test_release_16c tools.test_release_16e -v
+      - name: Compile 16B 16C 16E Python contracts
+        run: python -m py_compile tools/release_16b.py tools/release_16c.py tools/release_16e.py tools/test_release_16b.py tools/test_release_16c.py tools/test_release_16e.py
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - name: Verify 16A source profile backup restore contract (synthetic data)
+        run: cargo test --locked -p cos-app
