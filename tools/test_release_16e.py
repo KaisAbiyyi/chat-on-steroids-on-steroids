@@ -123,6 +123,36 @@ class MatrixTests(unittest.TestCase):
                     self.matrix.install_or_upgrade(src)
                 self.assertFalse(self.matrix.selector.exists())
 
+    def test_valid_alternative_package_swap_during_preflight_refused(self):
+        # A staged package can be exchanged for another internally valid
+        # package with the same release version after the first verifier.
+        # Pin the exact initially inspected manifest, not just the version.
+        from unittest import mock
+        src = self.stage("0.1.0")
+        real_inspect = release_16b.inspect
+        switched = [False]
+
+        def adversarial_swap(*args, **kwargs):
+            receipt = real_inspect(*args, **kwargs)
+            if not switched[0]:
+                switched[0] = True
+                raw = b"synthetic-alternative-payload-valid-under-same-version"
+                payload = src / "bin" / "cos-rust.exe"
+                payload.write_bytes(raw)
+                doc = src / "release.json"
+                manifest = json.loads(doc.read_text("utf-8"))
+                manifest["files"][0]["bytes"] = len(raw)
+                manifest["files"][0]["sha256"] = hashlib.sha256(raw).hexdigest()
+                doc.write_text(json.dumps(manifest), encoding="utf-8")
+            return receipt
+
+        with mock.patch.object(release_16e.release_16b, "inspect",
+                               side_effect=adversarial_swap):
+            with self.assertRaisesRegex(release_16e.RehearsalRefused,
+                                        "manifest changed during preflight"):
+                self.matrix.install_or_upgrade(src)
+        self.assertFalse(self.matrix.selector.exists())
+
     def test_bad_signer_refuses_even_synthetic_install(self):
         matrix = release_16e.DisposableMatrix(SHA, CERT, lambda _: "C" * 40)
         self.addCleanup(matrix.close)
