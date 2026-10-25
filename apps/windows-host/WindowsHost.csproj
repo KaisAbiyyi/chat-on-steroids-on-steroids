@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
+    <Compile Include="../../probes/7l1/WindowsHost/Program.cs" Link="Shared/Program.cs" />
+    <Compile Include="../../probes/7l1/WindowsHost/Native7L2.cs" Link="Shared/Native7L2.cs" />
+    <Compile Include="../../probes/7l1/WindowsHost/NativeRetirementProof.cs" Link="Shared/NativeRetirementProof.cs" />
+  </ItemGroup>
+  <Target Name="ExcludeUnusedWebView2Wpf" BeforeTargets="ResolveAssemblyReferences"
+          Condition="'$(UseWPF)' != 'true'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+</Project>
