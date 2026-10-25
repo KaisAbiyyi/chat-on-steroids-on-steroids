@@ -243,6 +243,11 @@ internal sealed partial class GateForm
                 """{"providers":[{"id":"bad","origin":"https://example.com/path","redirectOrigins":[]}]}""",
                 """{"providers":[{"id":"bad","origin":"https://example.com/","redirectOrigins":[]}]}""",
                 """{"providers":[{"id":"bad","origin":"https://example.com.evil/","redirectOrigins":["http://example.com"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://evil.example/callback"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["http://example.com/callback"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://example.com/"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://example.com/callback?code=raw"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://example.com/callback","https://example.com/callback"]}]}""",
                 """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"unsafe":true}]}""",
                 """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[]},{"id":"bad","origin":"https://example.com","redirectOrigins":[]}]}"""
             })
