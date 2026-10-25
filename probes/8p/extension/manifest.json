@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "CoSoS 8P Native-Attested Transport Only",
+  "version": "0.0.1",
+  "description": "Native Rust worker attestation only. No provider page access, history or account observation.",
+  "permissions": [],
+  "host_permissions": [],
+  "background": {
+    "service_worker": "sw.mjs",
+    "type": "module"
+  }
+}
