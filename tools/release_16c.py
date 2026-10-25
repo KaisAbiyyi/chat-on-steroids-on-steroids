@@ -335,8 +335,10 @@ def build(binary, project_license, meta, lock, output, os_target, source):
         raise Refused("refusing to overwrite an existing bundle")
     if not output.parent.is_dir():
         raise Refused("bundle parent must already exist")
+    created = False
     try:
         with ZipFile(output, "x", compression=ZIP_STORED, allowZip64=False) as z:
+            created = True
             for filename, data in sorted(members.items()):
                 z.writestr(zip_member(filename), data)
             with z.open(zip_member(name, executable=True), "w", force_zip64=False) as dest:
@@ -345,7 +347,10 @@ def build(binary, project_license, meta, lock, output, os_target, source):
                         dest.write(block)
         return verify(output, source)
     except Exception:
-        output.unlink(missing_ok=True)
+        # Exclusive creation may race with another writer: never delete a
+        # competing file if ZipFile(..., "x") failed before opening ours.
+        if created:
+            output.unlink(missing_ok=True)
         raise
 
 
@@ -372,10 +377,29 @@ def verify(bundle, source):
                 or index.get("native_host") != "NOT_INCLUDED"
                 or index.get("webview2_runtime") != "EXTERNAL_NOT_VERIFIED"):
             raise Refused("bundle provenance/schema mismatch")
+        expected_binary = {
+            "windows-x64": "cos-rust.exe",
+            "linux-x64": "cos-rust",
+        }.get(index.get("platform"))
+        if expected_binary is None or index.get("binary") != expected_binary:
+            raise Refused("invalid bundle platform/binary contract")
+        required = {expected_binary, "LICENSE", "THIRD_PARTY_NOTICES.txt"}
+        if len(names) != 4 or set(names) != required | {"bundle-index.json"}:
+            raise Refused("missing or unexpected required bundle payload")
         files = index.get("files")
-        if not isinstance(files, list) or set(names) != {x["path"] for x in files} | {"bundle-index.json"}:
+        if (not isinstance(files, list) or len(files) != 3
+                or any(not isinstance(item, dict) for item in files)
+                or any(not isinstance(item.get("path"), str) for item in files)
+                or {item["path"] for item in files} != required
+                or len({item["path"] for item in files}) != len(files)):
             raise Refused("bundle index coverage mismatch")
+        if not isinstance(index.get("packages"), list) or not index["packages"]:
+            raise Refused("empty or malformed dependency inventory")
         for item in files:
+            if (type(item.get("bytes")) is not int or not 0 < item["bytes"] <= MAX_ARCHIVE
+                    or not isinstance(item.get("sha256"), str)
+                    or not SHA64.fullmatch(item["sha256"])):
+                raise Refused("invalid bundle file hash/size declaration")
             h = hashlib.sha256()
             size = 0
             with z.open(item["path"]) as stream:
