@@ -314,6 +314,7 @@ internal sealed partial class GateForm : Form
         {
             var sourceFile = Path.Combine(from, file);
             var destinationFile = Path.Combine(destination, file);
+            RejectReparseAncestors(destinationFile);
             if (File.Exists(destinationFile))
             {
                 if (!HashFile(sourceFile).Equals(HashFile(destinationFile),
@@ -332,14 +333,17 @@ internal sealed partial class GateForm : Form
         CoreWebView2Environment? sharedEnvironment = null, string? installedExtensionId = null)
     {
         var profileRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "profile-" + label);
+        RejectReparseAncestors(profileRoot);
         var env = sharedEnvironment ??
             await CoreWebView2Environment.CreateAsync(null, profileRoot,
                 new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
         await view.EnsureCoreWebView2Async(env);
         var profilePath = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
+        RejectReparseAncestors(profilePath);
         if (!IsUnderProject(profilePath)) throw new UnauthorizedAccessException("unsafe WebView2 profile");
         var extensionRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension");
         var idFile = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension-id-" + label + ".txt");
+        RejectReparseAncestors(idFile);
         CoreWebView2BrowserExtension extension;
         if (installedExtensionId is not null)
             extension = (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
