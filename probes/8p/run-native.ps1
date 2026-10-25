@@ -61,8 +61,8 @@ if (-not (Test-Path -LiteralPath $receiptPath)) {
 }
 $r = Get-Content -Raw $receiptPath | ConvertFrom-Json
 if ($r.sourceSha -ne $expected -or $r.native8PAccepted -ne $false -or
-    $r.owner7U1Accepted -ne $false -or $r.rustChannelActive -ne $false -or
-    $r.mv3WorkerAttested -ne $false) {
+    $r.owner7U1Accepted -ne $false -or $r.rustChannelActive -ne $true -or
+    $r.mv3WorkerAttested -ne $true -or $r.nativeWorkerRebinds -lt 1) {
   throw 'Receipt authority boundary violation'
 }
-Write-Output 'Navigation receipt written; production signed-in gate remains NOT_RUN.'
+Write-Output 'Native provider MV3/Rust channel attested (no provider content read); production signed-in gate remains NOT_RUN.'
