@@ -137,7 +137,9 @@ def sample(binary, profile):
         payload = json.loads(out)
     except (UnicodeError, ValueError) as exc:
         raise Refused("headless CLI did not emit JSON") from exc
-    require(isinstance(payload, dict), "headless CLI info must return object")
+    require(isinstance(payload, dict) and isinstance(payload.get("version"), str)
+            and payload.get("fullApplicationReady") is False,
+            "headless CLI must identify a non-desktop versioned runtime")
     require(math.isfinite(elapsed) and elapsed > 0, "invalid launch measurement")
     return {"launch_to_cli_json_ms": round(elapsed, 3),
             "root_peak_working_set_bytes": peak,
