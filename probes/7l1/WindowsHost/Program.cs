@@ -333,7 +333,17 @@ internal sealed partial class GateForm : Form
             browser.NavigationEpoch++;
             browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
         };
-        view.CoreWebView2.ProcessFailed += (_, _) => RevokeAndRetire(browser);
+        view.CoreWebView2.ProcessFailed += (_, _) =>
+        {
+#if COS_8L1_PRODUCT
+            if (_host8L1)
+            {
+                On8L1ProcessFailure();
+                return;
+            }
+#endif
+            RevokeAndRetire(browser);
+        };
         if (_l2)
         {
             // Real browser-owned MV3 worker target retirement. A pre-signed
