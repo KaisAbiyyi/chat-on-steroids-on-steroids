@@ -14,12 +14,22 @@ export function installVerifiedCompanion({ chromeApi, subscribeVerifiedNativeEve
   const companion = createCompanion({
     sessionStore: chromeApi.storage.session, verifyHostEvent
   });
-  // The listener must be installed synchronously during worker initialization
-  // when 7L1 integrates its authenticated host API.
-  subscribeVerifiedNativeEvent((event, proof) => companion.dispatch(event, proof));
+  // Install synchronously for MV3. The native host may return an unsubscriber
+  // for explicit retirement. Do not discard in-flight ledger writes on shutdown:
+  // claims and ACKs that entered dispatch must durably complete or fail.
+  let disposed = false;
+  const dispatch = (event, proof) => disposed
+    ? Promise.reject(new Error("7C:worker-disposed"))
+    : companion.dispatch(event, proof);
+  const unsubscribe = subscribeVerifiedNativeEvent(dispatch);
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    if (typeof unsubscribe === "function") unsubscribe();
+  }
   // MV3 onSuspend cannot be awaited. Every claim/ACK is persisted BEFORE reply,
   // never batched at suspend time. An interrupted operation yields no ACK;
   // a restarted worker MUST query repair and never execute the intent again.
   chromeApi.runtime?.onSuspend?.addListener(() => {});
-  return companion;
+  return Object.freeze({dispatch, dispose});
 }

@@ -265,6 +265,9 @@ impl Terminals {
         let owner = self.0.clone();
         let terminal = id.to_owned();
         std::thread::spawn(move || {
+            // Adaptive observation retires idle poll pressure without moving
+            // the reader/ACK or final-exit custody to a detached thread.
+            let mut poll = crate::idle::IdlePoll::new();
             let code = loop {
                 match entry
                     .tree
@@ -272,7 +275,7 @@ impl Terminals {
                     .and_then(|ready| if ready { child.try_wait() } else { Ok(None) })
                 {
                     Ok(Some(status)) => break status.exit_code(),
-                    Ok(None) => std::thread::sleep(Duration::from_millis(10)),
+                    Ok(None) => poll.wait(),
                     Err(_) => break 1,
                 }
             };

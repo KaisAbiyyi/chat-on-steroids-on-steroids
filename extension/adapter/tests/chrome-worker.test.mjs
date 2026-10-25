@@ -235,3 +235,36 @@ test("API mismatch, uncertain execution and storage operations cannot impersonat
   await assert.rejects(invalid,/invalid-event/);
   assert.equal(f.stats().reads,0);
 });
+
+test("privileged disposal releases frame fences and rejects further worker activity", async () => {
+  const f = harness();
+  await f.adapter.inject({nativeProof:f.proof,world:"ISOLATED"});
+  const emitted = f.calls().length;
+  f.adapter.dispose();
+  f.adapter.dispose();
+  await assert.rejects(
+    f.adapter.inject({nativeProof:f.proof,world:"ISOLATED"}),
+    fail("adapter-disposed")
+  );
+  await assert.rejects(
+    f.nativeEvent(event("attach",1),"native"), /7C:worker-disposed/
+  );
+  assert.equal(f.calls().length,emitted);
+});
+
+test("host disposal racing script completion rejects the stale injection receipt", async () => {
+  const f = harness();
+  let entered, complete;
+  const started = new Promise(resolve => { entered=resolve; });
+  f.hook((_spec, callback, results) => {
+    entered();
+    return new Promise(resolve => {
+      complete=() => { callback(results); resolve(results); };
+    });
+  });
+  const pending=f.adapter.inject({nativeProof:f.proof,world:"ISOLATED"});
+  await started;
+  f.adapter.dispose();
+  complete();
+  await assert.rejects(pending, fail("adapter-disposed"));
+});
