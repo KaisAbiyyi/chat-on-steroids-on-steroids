@@ -18,6 +18,13 @@ internal static class Program
             NativeRetirementProof.RunSelfTests();
             return;
         }
+#if COS_8L1_PRODUCT
+        if (args.Length == 1 && args[0] == "--8l1-authority-self-test")
+        {
+            GateForm.Run8L1PolicyTests();
+            return;
+        }
+#endif
         ApplicationConfiguration.Initialize();
         Application.Run(new GateForm(args));
     }
@@ -33,12 +40,18 @@ internal sealed partial class GateForm : Form
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
     private readonly string? _artifactRoot;
-    private readonly bool _idle, _cdpPreflight, _l2;
+    private readonly string? _retained8L1ProfileRoot;
+    private readonly bool _reuse8L1Profile;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
     private bool _failed;
     private string? _verifiedSourceSha;
+
+#if COS_8L1_PRODUCT
+    internal static void Run8L1PolicyTests() => Native8L1Authority.RunSelfTests();
+#endif
 
     private sealed class Browser
     {
@@ -56,6 +69,7 @@ internal sealed partial class GateForm : Form
         public string? WorkerInstance { get; set; }
         public ulong ChannelId { get; set; }
         public string SessionId { get; set; } = "";
+        public ulong SessionEpoch { get; set; } = 1;
         public ulong BoundNavigation { get; set; }
         public bool Revoked { get; set; }
         public bool WorkerDestroyedEventObserved { get; set; }
@@ -70,8 +84,8 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2") { options.Add(args[i], "true"); continue; }
-            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root") ||
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
+            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
             options.Add(args[i], args[++i]);
@@ -86,8 +100,36 @@ internal sealed partial class GateForm : Form
             throw new UnauthorizedAccessException("7L1 requires D: under projects/CoS-Rust");
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
-        _l2 = options.ContainsKey("--7l2");
-        if (_l2 && (_cdpPreflight || _idle))
+        _host8L1 = options.ContainsKey("--8l1");
+        _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
+        _host8L1ConsentProbe = options.ContainsKey("--8l1-consent");
+        _host8L1ProfileActionsProbe = options.ContainsKey("--8l1-profile-actions");
+        _retained8L1ProfileRoot = options.TryGetValue("--profile-root", out var retained)
+            ? Path.GetFullPath(retained) : null;
+        _reuse8L1Profile = options.ContainsKey("--reuse-8l1-profile");
+        if ((_retained8L1ProfileRoot is not null || _reuse8L1Profile) && !_host8L1)
+            throw new ArgumentException("Retained profiles exclusive to 8L1");
+        if (_reuse8L1Profile && _retained8L1ProfileRoot is null)
+            throw new ArgumentException("Reuse requires exact profile root");
+        if (_retained8L1ProfileRoot is not null)
+        {
+            var prefix = Path.DirectorySeparatorChar;
+            if (!IsUnderProject(_retained8L1ProfileRoot) ||
+                _root.Equals(_retained8L1ProfileRoot, StringComparison.OrdinalIgnoreCase) ||
+                _root.StartsWith(_retained8L1ProfileRoot.TrimEnd(prefix) + prefix, StringComparison.OrdinalIgnoreCase) ||
+                _retained8L1ProfileRoot.StartsWith(_root.TrimEnd(prefix) + prefix, StringComparison.OrdinalIgnoreCase))
+                throw new UnauthorizedAccessException("Profile root and output must not overlap");
+            RejectReparseAncestors(_retained8L1ProfileRoot);
+            if (_reuse8L1Profile && !Directory.Exists(_retained8L1ProfileRoot))
+                throw new UnauthorizedAccessException("Missing retained profiles");
+            if (!_reuse8L1Profile && Directory.Exists(_retained8L1ProfileRoot) &&
+                Directory.EnumerateFileSystemEntries(_retained8L1ProfileRoot).Any())
+                throw new UnauthorizedAccessException("First launch needs empty profile root");
+        }
+        if ((_host8L1CrashProbe || _host8L1ConsentProbe || _host8L1ProfileActionsProbe) && !_host8L1)
+            throw new ArgumentException("Native crash probe requires the 8L1 host");
+        _l2 = options.ContainsKey("--7l2") || _host8L1;
+        if (_l2 && (_cdpPreflight || _idle || (options.ContainsKey("--7l2") && _host8L1)))
             throw new ArgumentException("7L2 is a distinct source-pinned native gate");
         if (!_cdpPreflight &&
             (_artifactRoot is null || !IsUnderProject(_artifactRoot)))
@@ -96,7 +138,8 @@ internal sealed partial class GateForm : Form
             RejectReparseAncestors(path);
         if (_artifactRoot is not null)
             RejectReparseAncestors(_artifactRoot);
-        Text = _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
+        Text = _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
+            _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
             "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
         Height = 720;
@@ -186,7 +229,10 @@ internal sealed partial class GateForm : Form
             "extension/companion/worker.mjs",
             "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
             "crates/cos-core/examples/7l1_bridge.rs",
-            "crates/cos-core/examples/7l2_bridge.rs");
+            "crates/cos-core/examples/7l2_bridge.rs",
+            "apps/windows-host", "probes/8l1",
+            "extension/adapter/browser-lifecycle.mjs",
+            "extension/adapter/profile-session.mjs");
         if (dirty.Length != 0)
             throw new UnauthorizedAccessException("dirty native/extension source");
         using var json = JsonDocument.Parse(File.ReadAllBytes(manifestPath));
@@ -260,31 +306,67 @@ internal sealed partial class GateForm : Form
     {
         var source = Path.Combine(_repo, "probes", "7l1", "extension");
         var companion = Path.Combine(_repo, "extension", "companion");
-        var destination = Path.Combine(_root, "extension");
+        var destination = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension");
         Directory.CreateDirectory(destination);
         foreach (var (from, file) in new[]
         {
             (source, "manifest.json"), (source, "sw.mjs"),
             (companion, "worker.mjs"), (companion, "ledger.mjs")
         })
-            File.Copy(Path.Combine(from, file), Path.Combine(destination, file), overwrite: true);
+        {
+            var sourceFile = Path.Combine(from, file);
+            var destinationFile = Path.Combine(destination, file);
+            RejectReparseAncestors(destinationFile);
+            if (File.Exists(destinationFile))
+            {
+                if (!HashFile(sourceFile).Equals(HashFile(destinationFile),
+                    StringComparison.OrdinalIgnoreCase))
+                    throw new UnauthorizedAccessException("Retained extension source changed");
+            }
+            else if (_reuse8L1Profile)
+                throw new UnauthorizedAccessException("Retained extension incomplete");
+            else
+                File.Copy(sourceFile, destinationFile);
+        }
     }
 
     private async Task<Browser> SetupAsync(
         WebView2 view, string label, uint tabId,
         CoreWebView2Environment? sharedEnvironment = null, string? installedExtensionId = null)
     {
-        var profileRoot = Path.Combine(_root, "profile-" + label);
+        var profileRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "profile-" + label);
+        RejectReparseAncestors(profileRoot);
         var env = sharedEnvironment ??
             await CoreWebView2Environment.CreateAsync(null, profileRoot,
                 new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
         await view.EnsureCoreWebView2Async(env);
         var profilePath = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
+        RejectReparseAncestors(profilePath);
         if (!IsUnderProject(profilePath)) throw new UnauthorizedAccessException("unsafe WebView2 profile");
-        var extension = installedExtensionId is null
-            ? await view.CoreWebView2.Profile.AddBrowserExtensionAsync(Path.Combine(_root, "extension"))
-            : (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
+        var extensionRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension");
+        var idFile = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension-id-" + label + ".txt");
+        RejectReparseAncestors(idFile);
+        CoreWebView2BrowserExtension extension;
+        if (installedExtensionId is not null)
+            extension = (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
                 .Single(x => x.Id == installedExtensionId);
+        else if (_reuse8L1Profile)
+        {
+            if (!File.Exists(idFile))
+                throw new UnauthorizedAccessException("Missing retained extension ID");
+            var id = File.ReadAllText(idFile).Trim();
+            extension = (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
+                .Single(x => x.Id == id);
+        }
+        else
+        {
+            if (_retained8L1ProfileRoot is not null &&
+                (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync()).Count != 0)
+                throw new UnauthorizedAccessException("Unexpected extension in clean profile");
+            extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(extensionRoot);
+            if (_retained8L1ProfileRoot is not null)
+                File.WriteAllText(idFile, extension.Id);
+        }
         if (!extension.IsEnabled) throw new InvalidOperationException("extension disabled");
         var browser = new Browser
         {
@@ -292,6 +374,7 @@ internal sealed partial class GateForm : Form
             ExtensionId = extension.Id, TabId = tabId
         };
         _browsers.Add(view, browser);
+        _native8L1Authority?.Attach(browser);
         view.CoreWebView2.SetVirtualHostNameToFolderMapping("synthetic.cos.test",
             Path.Combine(_repo, "probes", "7l1", "assets"),
             CoreWebView2HostResourceAccessKind.DenyCors);
@@ -316,7 +399,17 @@ internal sealed partial class GateForm : Form
             browser.NavigationEpoch++;
             browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
         };
-        view.CoreWebView2.ProcessFailed += (_, _) => RevokeAndRetire(browser);
+        view.CoreWebView2.ProcessFailed += (_, _) =>
+        {
+#if COS_8L1_PRODUCT
+            if (_host8L1)
+            {
+                On8L1ProcessFailure();
+                return;
+            }
+#endif
+            RevokeAndRetire(browser);
+        };
         if (_l2)
         {
             // Real browser-owned MV3 worker target retirement. A pre-signed
@@ -482,7 +575,7 @@ internal sealed partial class GateForm : Form
     {
         profileId = b.Profile, tabId = b.TabId, frameId = 0,
         documentId = b.DocumentId, navigationEpoch = b.NavigationEpoch,
-        sessionId = b.SessionId, sessionEpoch = 1, workerGeneration = b.WorkerGeneration,
+        sessionId = b.SessionId, sessionEpoch = b.SessionEpoch, workerGeneration = b.WorkerGeneration,
         hostGeneration = b.HostGeneration, channelId = b.ChannelId
     };
 
@@ -492,7 +585,7 @@ internal sealed partial class GateForm : Form
         {
             profileId = b.Profile, tabId = b.TabId, frameId = 0,
             documentId = b.DocumentId, navigationEpoch = b.NavigationEpoch,
-            sessionId = b.SessionId, sessionEpoch = 1, workerGeneration = b.WorkerGeneration
+            sessionId = b.SessionId, sessionEpoch = b.SessionEpoch, workerGeneration = b.WorkerGeneration
         },
         origin = Origin,
         hostGeneration = b.HostGeneration
@@ -503,6 +596,7 @@ internal sealed partial class GateForm : Form
         // Runs synchronously from WebView2 lifetime events, so the stale
         // channel cannot start another privileged evaluation.
         browser.Revoked = true;
+        _native8L1Authority?.Revoke(browser);
         if (browser.ChannelId != 0 && !browser.RetireScheduled)
         {
             browser.RetireScheduled = true;
@@ -682,6 +776,7 @@ internal sealed partial class GateForm : Form
 
     private async Task ExecuteAsync()
     {
+        if (_host8L1) { await Execute8L1Async(); return; }
         if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;
         var rustExit = -1;

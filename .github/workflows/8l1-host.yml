@@ -1,0 +1,125 @@
+name: 8L1-HOST privileged native WebView2 integration
+on:
+  pull_request:
+    paths:
+      - 'apps/windows-host/**'
+      - 'probes/7l1/WindowsHost/**'
+      - 'probes/8l1/**'
+      - 'crates/cos-core/**'
+      - 'extension/adapter/**'
+      - 'docs/implementation-summary/2026-10-25-8l1-contract-matrix.md'
+      - 'docs/implementation-summary/2026-10-25-8l1-host-cloud.md'
+      - '.github/workflows/8l1-host.yml'
+  push:
+    branches: ['main', 'work/8l1-host-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  contract-and-security:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+          components: rustfmt, clippy
+      - name: Rust strict formatting
+        run: cargo fmt --all --check
+      - name: Rust strict all-target Clippy
+        run: cargo clippy --locked -p cos-core --all-targets -- -D warnings
+      - name: Native Rust bridge authority regressions
+        run: cargo test --locked -p cos-core --lib native_browser_bridge
+      - name: Native Rust 7L2 host callback tests
+        run: cargo test --locked -p cos-core --example 7l2_bridge
+      - name: Accepted 8B privileged partition contract
+        run: node --test extension/adapter/tests/profile-session.test.mjs
+      - name: Accepted 8C lifecycle and permission contract
+        run: node --test extension/adapter/tests/browser-lifecycle.test.mjs
+      - name: MV3 authenticated host worker regression
+        run: node --test probes/7l1/tests/worker-auth.test.mjs
+        env:
+          COS_TEST_TMP: ${{ runner.temp }}
+
+  windows-source-bound-artifact:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile real authenticated Rust 7L2 child
+        run: cargo build --locked -p cos-core --example 7l2_bridge --release
+      - name: Compile product-owned WebView2 8L1 host with strict warnings
+        run: dotnet build apps/windows-host/WindowsHost.csproj -c Release -warnaserror
+      - name: Execute native host authority tests (no browser profile)
+        shell: pwsh
+        run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test
+      - name: Verify native contract mapping is reviewed at this SHA
+        shell: pwsh
+        run: |
+          $matrix = Get-Content -Raw docs/implementation-summary/2026-10-25-8l1-contract-matrix.md
+          $native = Get-Content -Raw apps/windows-host/Native8L1.cs
+          foreach ($contract in @('probe', 'startSignIn', 'handoff', 'track', 'transition', 'requestPermission', 'dispose')) {
+            if (-not $matrix.Contains($contract)) { throw "Undocumented 8B/8C contract: $contract" }
+          }
+          foreach ($entry in @('ClaimProfileActions', 'ApproveHandoff', 'CommitHandoffAfterRust', 'PermissionRequested', 'On8L1ProcessFailure', 'FreshRebind')) {
+            if (-not $matrix.Contains($entry) -or -not $native.Contains($entry)) {
+              throw "Native entrypoint missing from implementation or review map: $entry"
+            }
+          }
+          if (-not $matrix.Contains('Physical Windows NOT_RUN')) {
+            throw 'Native physical evidence boundary must not be silently omitted'
+          }
+          Write-Output 'Matrix coverage names verified; NOT proof of behavioral parity or native acceptance.'
+      - name: Validate bounded native runner PowerShell parses
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path probes/8l1/run-native.ps1), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count) { $errors | Out-String | Write-Error; exit 1 }
+      - name: Build all-loadable-files SHA256 manifest pinned to exact source
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force gate/host | Out-Null
+          Copy-Item target/release/examples/7l2_bridge.exe gate/7l2_bridge.exe
+          Copy-Item apps/windows-host/bin/Release/net8.0-windows/* gate/host/ -Recurse
+          (git rev-parse HEAD).Trim() | Set-Content gate/source.sha -NoNewline
+          $root = (Resolve-Path gate).Path
+          $files = @(Get-ChildItem gate -File -Recurse | Where-Object { $_.Name -ne 'hashes.json' } | ForEach-Object {
+            [pscustomobject]@{
+              path = $_.FullName.Substring($root.Length + 1).Replace('\','/')
+              sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            }
+          })
+          if ($files.Count -lt 5) { throw 'Incomplete source-bound artifact' }
+          ConvertTo-Json -InputObject $files -Depth 4 | Set-Content gate/hashes.json
+          Write-Host "Exact source: $(Get-Content gate/source.sha); manifest entries: $($files.Count)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cos-8l1-host-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: gate/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Hosted CI is not physical native acceptance
+        shell: pwsh
+        run: |
+          Write-Output 'Only a source-matched D: run can exercise live WebView2 native profile/lifecycle.'
+          Write-Output 'Physical 8L1 remains NOT_RUN; hosted self-tests cover one-use native policy only.'

@@ -93,6 +93,14 @@ enum Request {
         mac: String,
         handle: u64,
     },
+    // The privileged host owns this child-process pipe; no renderer ingress.
+    Handoff {
+        source: HostWire,
+        target: HostWire,
+        new_source_session_id: String,
+        source_next_session_epoch: u64,
+        target_next_session_epoch: u64,
+    },
     Retire {
         channel_id: u64,
     },
@@ -386,6 +394,24 @@ impl State {
                     )
                     .map_err(|e| e.to_string())?;
                 Ok(json!({"detached":true}))
+            }
+            Request::Handoff {
+                source,
+                target,
+                new_source_session_id,
+                source_next_session_epoch,
+                target_next_session_epoch,
+            } => {
+                self.bridge
+                    .handoff_sessions(
+                        &source.into(),
+                        &target.into(),
+                        &new_source_session_id,
+                        source_next_session_epoch,
+                        target_next_session_epoch,
+                    )
+                    .map_err(|e| e.to_string())?;
+                Ok(json!({"committed":true}))
             }
             Request::Retire { channel_id } => {
                 let was_owned = self.owned.get(&channel_id);

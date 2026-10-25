@@ -9,6 +9,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
+    <!-- Shared code keeps legacy native 7L1/7L2 builds compiling unchanged. -->
+    <Compile Include="../../../apps/windows-host/Native8L1.cs" Link="Native8L1.cs" />
   </ItemGroup>
   <Target Name="ExcludeUnusedWebView2Wpf" BeforeTargets="ResolveAssemblyReferences"
           Condition="'$(UseWPF)' != 'true'">

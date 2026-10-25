@@ -226,6 +226,41 @@ impl NativeBrowserBridge {
         self.channels.len()
     }
 
+    /// Native-only atomic logical session transfer. The caller must prove
+    /// one-use owner consent and retire both Rust channels before this call.
+    pub fn handoff_sessions(
+        &mut self,
+        source: &TrustedHostEvidence,
+        target: &TrustedHostEvidence,
+        next_source_id: &str,
+        next_source_epoch: u64,
+        next_target_epoch: u64,
+    ) -> Result<(), NativeBridgeError> {
+        source.validate()?;
+        target.validate()?;
+        if source.origin != target.origin
+            || source.identity.profile_id == target.identity.profile_id
+        {
+            return Err(NativeBridgeError::Host);
+        }
+        // Session attribution belongs to profiles, not only these two tabs:
+        // a still-live sibling WebView2 tab could otherwise retain an older
+        // authenticated Rust lease into the old application session.
+        if self.owners.keys().any(|(profile, _, _)| {
+            profile == &source.identity.profile_id || profile == &target.identity.profile_id
+        }) {
+            return Err(NativeBridgeError::Channel);
+        }
+        self.fence.handoff_verified(
+            &source.identity,
+            &target.identity,
+            next_source_id,
+            next_source_epoch,
+            next_target_epoch,
+        )?;
+        Ok(())
+    }
+
     /// Called ONLY after the native host has separately attested its event
     /// source. Registering the same scope requires a strictly newer native
     /// generation, retires the old channel, and forces a new handshake.
@@ -569,6 +604,125 @@ mod tests {
             )
             .unwrap();
         (bridge, e, bootstrap)
+    }
+
+    #[test]
+    fn native_handoff_requires_retired_channels_and_rebinds_first_proofs() {
+        let (mut bridge, source, source_boot) = authenticated();
+        let mut target = evidence();
+        target.identity.profile_id = "profile-B".into();
+        target.identity.tab_id = 2;
+        target.identity.session_id = "session-B".into();
+        let target_boot = bridge.register_host(target.clone()).unwrap();
+        bridge
+            .complete_handshake(
+                &target,
+                target_boot.channel_id,
+                1,
+                &target_boot.handshake_proof(),
+            )
+            .unwrap();
+        for (host, boot) in [(&source, &source_boot), (&target, &target_boot)] {
+            let signed = bytes(host);
+            bridge
+                .observe(
+                    host,
+                    boot.channel_id,
+                    1,
+                    1,
+                    &signed,
+                    &boot.observation_mac(1, &signed),
+                )
+                .unwrap();
+        }
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(source_boot.channel_id));
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(target_boot.channel_id));
+        // A sibling tab in profile A must not retain a live authenticated
+        // lease across the profile-wide application session reattribution.
+        let mut sibling = source.clone();
+        sibling.identity.tab_id = 3;
+        sibling.identity.session_id = "session-sibling".into();
+        let sibling_boot = bridge.register_host(sibling.clone()).unwrap();
+        bridge
+            .complete_handshake(
+                &sibling,
+                sibling_boot.channel_id,
+                1,
+                &sibling_boot.handshake_proof(),
+            )
+            .unwrap();
+        let sibling_frame = bytes(&sibling);
+        bridge
+            .observe(
+                &sibling,
+                sibling_boot.channel_id,
+                1,
+                1,
+                &sibling_frame,
+                &sibling_boot.observation_mac(1, &sibling_frame),
+            )
+            .unwrap();
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(sibling_boot.channel_id));
+        let mut foreign = target.clone();
+        foreign.origin = "https://foreign.invalid".into();
+        assert_eq!(
+            bridge.handoff_sessions(&source, &foreign, "empty-session", 2, 2),
+            Err(NativeBridgeError::Host)
+        );
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Ok(())
+        );
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "other-session", 3, 3),
+            Err(NativeBridgeError::Contract(BridgeContractError::NotCurrent))
+        );
+        let mut new_source = source.clone();
+        new_source.identity.document_id = "new-A".into();
+        new_source.identity.navigation_epoch = 2;
+        new_source.identity.worker_generation = 2;
+        new_source.identity.session_id = "empty-session".into();
+        new_source.identity.session_epoch = 2;
+        new_source.host_generation = 2;
+        let mut new_target = target.clone();
+        new_target.identity.document_id = "new-B".into();
+        new_target.identity.navigation_epoch = 2;
+        new_target.identity.worker_generation = 2;
+        new_target.identity.session_id = source.identity.session_id.clone();
+        new_target.identity.session_epoch = 2;
+        new_target.host_generation = 2;
+        for host in [new_source, new_target] {
+            let boot = bridge.register_host(host.clone()).unwrap();
+            bridge
+                .complete_handshake(&host, boot.channel_id, 2, &boot.handshake_proof())
+                .unwrap();
+            let signed = bytes(&host);
+            assert_eq!(
+                bridge
+                    .observe(
+                        &host,
+                        boot.channel_id,
+                        2,
+                        1,
+                        &signed,
+                        &boot.observation_mac(1, &signed),
+                    )
+                    .unwrap(),
+                Observation::FirstProof
+            );
+        }
     }
 
     #[test]
