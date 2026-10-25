@@ -70,6 +70,8 @@ internal sealed partial class GateForm
             string.Equals(prior.ProfilePath, next.ProfilePath, StringComparison.OrdinalIgnoreCase) &&
             prior.Origin == next.Origin &&
             next.HostGeneration > prior.HostGeneration &&
+            next.WorkerGeneration >= prior.WorkerGeneration &&
+            next.SessionId == prior.SessionId &&
             next.NavigationEpoch > prior.NavigationEpoch &&
             next.DocumentId != prior.DocumentId;
 
@@ -115,6 +117,12 @@ internal sealed partial class GateForm
             Require(!FreshRebind(first, first with {
                 HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2",
                 ProfileId = "profile-B" }));
+            Require(!FreshRebind(first, first with {
+                HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2",
+                SessionId = "stolen-session" }));
+            Require(!FreshRebind(first, first with {
+                HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2",
+                WorkerGeneration = 0 }));
             Require(FreshRebind(first, first with {
                 HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2" }));
             Console.WriteLine("8L1 native authority consent, replay, stale-scope and origin policy PASS");
@@ -379,11 +387,36 @@ internal sealed partial class GateForm
             // one-use real consent and multi-tab are independently exercised.
             Pending("native_host_process_restart",
                 "OS process restart and browser crash/recovery require separate physical Windows proof");
-            Pending("native_browser_process_failed",
-                "Native ProcessFailed revokes ALL active Rust channels; physical crash event not injected");
+            if (_host8L1CrashProbe)
+            {
+                // Optional physically executed failure gate. A real browser
+                // process crash must asynchronously emit WebView2 ProcessFailed.
+                // No production tab/window profile is used by this runner.
+                var channels = new[] { a, b }.Select(v => v.ChannelId).ToArray();
+                try
+                {
+                    await CdpAsync(a, "Browser.crash", new { });
+                }
+                catch (Exception) { /* an actual crash can interrupt its own CDP reply */ }
+                for (var tries = 0; tries < 50 && _native8L1ProcessFailures == 0; tries++)
+                    await Task.Delay(100);
+                var revokedAll = _native8L1ProcessFailures > 0 &&
+                    !_native8L1Authority.Current(a) && !_native8L1Authority.Current(b);
+                var retiredAll = revokedAll;
+                foreach (var browser in new[] { a, b })
+                    retiredAll &= browser.RetirementTask is not null &&
+                        await browser.RetirementTask;
+                Mark("native_browser_process_failed",
+                    revokedAll && retiredAll && channels.All(v => v != 0),
+                    "Real Browser.crash must trigger WebView2 ProcessFailed, revoke all native scopes and confirm Rust retire");
+            }
+            else
+                Pending("native_browser_process_failed",
+                    "Opt in to a real synthetic WebView2 browser crash with run-native.ps1 -CrashProbe");
             Mark("native_browser_failure_listener_installed",
-                _native8L1ProcessFailures == 0 && _native8L1Authority.Current(b),
-                "Real WebView2 ProcessFailed callback is wired to host-wide Rust channel retirement");
+                _host8L1CrashProbe ? _native8L1ProcessFailures > 0 :
+                    _native8L1ProcessFailures == 0 && _native8L1Authority.Current(b),
+                "Actual WebView2 ProcessFailed event handler retires every tracked native Rust channel");
             Pending("native_permission_positive_consent",
                 "Native owner Yes/No prompt implemented; physical one-use WebView2 permission grant/deny interaction not yet exercised");
             exit = _failed ? 1 : 0;
