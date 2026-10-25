@@ -346,7 +346,10 @@ mod tests {
             session_epoch: 5,
             ..target.clone()
         };
-        assert_eq!(fence.observe_verified(fresh_source), Ok(Observation::FirstProof));
+        assert_eq!(
+            fence.observe_verified(fresh_source),
+            Ok(Observation::FirstProof)
+        );
         assert_eq!(
             fence.observe_verified(fresh_target.clone()),
             Ok(Observation::FirstProof)
