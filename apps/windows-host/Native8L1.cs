@@ -314,6 +314,12 @@ internal sealed partial class GateForm
                 rivalRetired && !_native8L1Authority.Current(rival) &&
                 _native8L1Authority.Current(b),
                 "Closing one physical tab retires its own Rust channel without revoking profile B");
+            // Rebind an existing native scope only after a real navigation,
+            // fresh WebView2 document and confirmed retirement of its old Rust channel.
+            _a.CoreWebView2.Navigate(StartUrl + "?after-rival-close=1");
+            await Task.Delay(300);
+            _a.CoreWebView2.Navigate(StartUrl);
+            await WaitPageAsync(a);
             a.HostGeneration = Math.Max(a.HostGeneration, rival.HostGeneration);
             await BindAsync(a, "8l1-synthetic-a");
             _native8L1Authority.Track(a);
