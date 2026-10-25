@@ -286,7 +286,10 @@ internal sealed partial class GateForm
         {
             lock (_gate)
             {
-                _permissionBusy.Remove(b);
+                // Keep an in-flight modal request serialized until its
+                // handler unwinds. Removing busy here would permit a second
+                // dialog after navigation/revocation while the first remains
+                // open; the stale handler itself always denies on recheck.
                 // Retain the old binding as a tombstone so the next Track
                 // requires a strictly newer authenticated host generation.
             }
