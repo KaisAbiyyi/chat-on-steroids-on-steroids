@@ -415,6 +415,16 @@ internal sealed partial class GateForm
             source.SessionEpoch < 9_007_199_254_740_989UL &&
             target.SessionEpoch < 9_007_199_254_740_989UL;
 
+        // Cross-profile transfer is a whole-profile operation: deny while an
+        // authenticated sibling tab still owns a native/Rust lease.
+        private bool HasLiveSibling(Browser source, Browser target) =>
+            _bindings.Any(pair =>
+                !ReferenceEquals(pair.Key, source) &&
+                !ReferenceEquals(pair.Key, target) &&
+                !pair.Key.Revoked && pair.Key.ChannelId != 0 &&
+                (pair.Value.ProfileId == source.Profile ||
+                 pair.Value.ProfileId == target.Profile));
+
         public HandoffTicket? ApproveHandoff(Browser source, Browser target)
         {
             Binding? first, second;
@@ -423,7 +433,7 @@ internal sealed partial class GateForm
                 if (!_bindings.TryGetValue(source, out first) ||
                     !_bindings.TryGetValue(target, out second) ||
                     !Matches(source, first) || !Matches(target, second) ||
-                    !CanHandoff(first, second) ||
+                    !CanHandoff(first, second) || HasLiveSibling(source, target) ||
                     _permissionBusy.Contains(source) || _permissionBusy.Contains(target))
                     return null;
             }
@@ -441,6 +451,7 @@ internal sealed partial class GateForm
                     !_bindings.TryGetValue(target, out var nowTarget) ||
                     first != nowSource || second != nowTarget ||
                     !Matches(source, nowSource) || !Matches(target, nowTarget) ||
+                    HasLiveSibling(source, target) ||
                     _permissionBusy.Contains(source) || _permissionBusy.Contains(target))
                     return null;
                 return new HandoffTicket(
@@ -464,6 +475,7 @@ internal sealed partial class GateForm
                     !_bindings.TryGetValue(target, out var nowTarget) ||
                     nowSource != ticket.Source || nowTarget != ticket.Target ||
                     !CanHandoff(nowSource, nowTarget) ||
+                    HasLiveSibling(source, target) ||
                     !source.Revoked || !target.Revoked ||
                     source.ChannelId != 0 || target.ChannelId != 0 ||
                     source.RetirementTask is not null || target.RetirementTask is not null ||
