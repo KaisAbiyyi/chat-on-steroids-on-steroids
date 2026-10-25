@@ -47,7 +47,7 @@ internal sealed partial class GateForm : Form
     private readonly string? _artifactRoot;
     private readonly string? _retained8L1ProfileRoot;
     private readonly bool _reuse8L1Profile;
-    private readonly bool _idle, _cdpPreflight, _l2, _host8P, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8P, _host8PHandoffProbe, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -94,7 +94,7 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8p" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8p" or "--8p-handoff-probe" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
             if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root" or "--8p-config" or "--8p-provider") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
@@ -112,6 +112,9 @@ internal sealed partial class GateForm : Form
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
         _host8L1 = options.ContainsKey("--8l1");
         _host8P = options.ContainsKey("--8p");
+        _host8PHandoffProbe = options.ContainsKey("--8p-handoff-probe");
+        if (_host8PHandoffProbe && !_host8P)
+            throw new ArgumentException("8P handoff probe requires explicit --8p");
 #if COS_8L1_PRODUCT
         _host8PConfig = options.GetValueOrDefault("--8p-config");
         _host8PProvider = options.GetValueOrDefault("--8p-provider");
