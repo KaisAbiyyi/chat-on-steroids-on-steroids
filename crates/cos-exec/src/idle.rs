@@ -31,13 +31,12 @@ mod tests {
     fn idle_checks_back_off_and_never_exceed_an_eighty_ms_receipt_delay() {
         let mut poll = IdlePoll::new();
         let observed: Vec<_> = (0..10).map(|_| poll.next_delay()).collect();
-        assert_eq!(
-            observed[..4],
-            [10, 20, 40, 80].map(Duration::from_millis)
+        assert_eq!(observed[..4], [10, 20, 40, 80].map(Duration::from_millis));
+        assert!(
+            observed[4..]
+                .iter()
+                .all(|delay| *delay == Duration::from_millis(80))
         );
-        assert!(observed[4..]
-            .iter()
-            .all(|delay| *delay == Duration::from_millis(80)));
     }
 
     #[test]
