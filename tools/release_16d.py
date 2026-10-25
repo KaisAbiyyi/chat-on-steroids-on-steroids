@@ -19,7 +19,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipFile
 
 try:
     from tools import release_16c
@@ -199,6 +199,15 @@ def collect(binary, bundle, platform, source):
 def validate(receipt, binary, bundle, platform, source):
     require(isinstance(receipt, dict) and receipt.get("schema") == SCHEMA,
             "wrong performance receipt schema")
+    required = {"schema", "status", "source_sha", "platform",
+                "binary_sha256", "binary_bytes", "bundle_sha256", "bundle_bytes",
+                "workload", "classification", "process_scope",
+                "fresh_profile", "reused_profile", "bundle_size_gate",
+                "release_performance_budget", "native_product_acceptance",
+                "physical_windows_acceptance", "original_cos_comparison"}
+    require(set(receipt) == required, "unknown/private performance receipt fields")
+    require(receipt["workload"] == "isolated-headless-info-cli; fresh-profile vs reused-profile",
+            "unrecognized synthetic workload")
     require(receipt.get("source_sha") == source and receipt.get("platform") == platform,
             "performance receipt provenance mismatch")
     require(receipt.get("status") == "PASS"
@@ -216,6 +225,8 @@ def validate(receipt, binary, bundle, platform, source):
         group = receipt.get(name)
         require(isinstance(group, dict) and len(group.get("runs", [])) == REPEATS,
                 "missing launch samples")
+        require(set(group) == {"runs", "launch_ms", "root_peak_ws_bytes"},
+                "unknown/private launch group fields")
         runs = group["runs"]
         require(all(isinstance(r, dict) and set(r) ==
                     {"launch_to_cli_json_ms", "root_peak_working_set_bytes", "memory_samples"}
@@ -268,7 +279,7 @@ def main(argv=None):
                                       args.binary, args.bundle, args.platform, args.source_sha)))
         return 0
     except (Refused, release_16c.Refused, OSError, ValueError, KeyError,
-            subprocess.SubprocessError) as exc:
+            subprocess.SubprocessError, BadZipFile) as exc:
         print(json.dumps({"status": "BLOCKED", "reason": str(exc)}), file=sys.stderr)
         return 2
 
