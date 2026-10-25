@@ -464,6 +464,34 @@ internal sealed partial class GateForm
     {
         ProviderPolicy.SelfTest();
         OAuthNavigationGate.SelfTest();
+        static void Verify(bool ok)
+        {
+            if (!ok) throw new InvalidOperationException(
+                "8P native 8B profile/session handoff policy regression");
+        }
+        var first = new Native8PSessionSnapshot("8p-A",
+            @"D:\\projects\\CoS-Rust\\a", "https://chatgpt.com",
+            "session-A", 1, "doc-A", 1, 1, 1);
+        var second = first with {
+            Profile = "8p-B",
+            ProfilePath = @"D:\\projects\\CoS-Rust\\b",
+            SessionId = "session-B",
+            DocumentId = "doc-B",
+            ChannelId = 2
+        };
+        Verify(Eligible8PHandoff(first, second, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, first, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second with {
+            ProfilePath = first.ProfilePath
+        }, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second with {
+            SessionId = first.SessionId
+        }, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second with {
+            Origin = "https://auth.openai.com"
+        }, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second,
+            "https://wrong.example"));
     }
 
     private void BuildProductionExtension()
