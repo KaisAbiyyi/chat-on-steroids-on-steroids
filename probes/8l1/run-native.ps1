@@ -5,7 +5,8 @@ param(
   [Parameter(Mandatory=$true)][string]$ArtifactRoot,
   [Parameter(Mandatory=$true)][string]$Out,
   [switch]$VerifyRestart,
-  [switch]$CrashProbe
+  [switch]$CrashProbe,
+  [switch]$ConsentProbe
 )
 $ErrorActionPreference = 'Stop'
 function Assert-OwnedPath([string]$path) {
@@ -54,6 +55,7 @@ foreach ($round in $rounds) {
   $hostArgs = @($hostDll, '--8l1', '--repo', $Repo, '--bridge', $rustExe,
     '--artifact-root', $ArtifactRoot, '--out', $destination)
   if ($CrashProbe) { $hostArgs += '--8l1-crash' }
+  if ($ConsentProbe) { $hostArgs += '--8l1-consent' }
   dotnet @hostArgs
   $code = $LASTEXITCODE
   $receiptPath = Join-Path $destination 'receipt.json'
@@ -62,6 +64,9 @@ foreach ($round in $rounds) {
   }
   $receipt = Get-Content -Raw -LiteralPath $receiptPath | ConvertFrom-Json
   $receipts += $receipt
+  if ($ConsentProbe -and $receipt.checks.native_permission_positive_consent.status -ne 'PASS') {
+    throw "Owner one-use permission consent gate failed in $round"
+  }
   if ($CrashProbe -and $receipt.checks.native_browser_process_failed.status -ne 'PASS') {
     throw "Real browser crash failed to retire all scopes in $round"
   }
