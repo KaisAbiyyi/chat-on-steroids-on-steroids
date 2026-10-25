@@ -162,25 +162,6 @@ internal sealed partial class GateForm
             }
         }
 
-        public void Restart()
-        {
-            lock (_gate)
-            {
-                foreach (var b in _bindings.Keys.ToArray())
-                {
-                    _pending.Remove(b);
-                    RevokeAndRequireRetirement(b);
-                }
-            }
-        }
-
-        // This callback is supplied by the owning GateForm; never invoke
-        // anything asynchronous while holding the native permission lock.
-        private static void RevokeAndRequireRetirement(Browser b)
-        {
-            b.Revoked = true;
-        }
-
         // Consent is host-created only and MUST require a real owner UI
         // before production callers use it. No self-test or page path exposes it.
         // Until a trusted UI exists, no approval is issued: all requests deny.
@@ -230,7 +211,6 @@ internal sealed partial class GateForm
             Mark("native_permission_default_deny",
                 _native8L1Authority.PermissionDefaultDeny(),
                 "All native CoreWebView2.PermissionRequested handlers default deny, no page-supplied consent");
-            var old = Host(a);
             var oldChannel = a.ChannelId;
             _a.CoreWebView2.Navigate(StartUrl + "?new-document=1");
             await Task.Delay(300);
