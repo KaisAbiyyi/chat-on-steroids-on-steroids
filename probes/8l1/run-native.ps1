@@ -6,7 +6,8 @@ param(
   [Parameter(Mandatory=$true)][string]$Out,
   [switch]$VerifyRestart,
   [switch]$CrashProbe,
-  [switch]$ConsentProbe
+  [switch]$ConsentProbe,
+  [switch]$ProfileActionsProbe
 )
 $ErrorActionPreference = 'Stop'
 function Assert-OwnedPath([string]$path) {
@@ -49,6 +50,9 @@ if (-not (Test-Path -LiteralPath $hostDll) -or -not (Test-Path -LiteralPath $rus
 # the EXACT SAME browser-owned profile directories and packaged extension,
 # never live user profiles. Compare independent browser-local storage markers,
 # extension identity and fresh Rust attestations across processes.
+if ($ProfileActionsProbe) {
+  Write-Output 'Physical owner sequence: choose Yes for synthetic provider sign-in, then Yes for cross-profile logical session handoff. This does NOT authenticate a real provider or copy browser credentials.'
+}
 if ($ConsentProbe) {
   Write-Output 'Physical owner sequence: choose Allow (Yes), then Deny (No), then Allow (Yes) on the stale-navigation prompt. The replayed approval will be denied without a dialog.'
 }
@@ -63,6 +67,7 @@ foreach ($round in $rounds) {
   if ($round -eq 'after-restart') { $hostArgs += '--reuse-8l1-profile' }
   if ($CrashProbe) { $hostArgs += '--8l1-crash' }
   if ($ConsentProbe) { $hostArgs += '--8l1-consent' }
+  if ($ProfileActionsProbe) { $hostArgs += '--8l1-profile-actions' }
   dotnet @hostArgs
   $code = $LASTEXITCODE
   $receiptPath = Join-Path $destination 'receipt.json'
@@ -80,6 +85,20 @@ foreach ($round in $rounds) {
     )) {
       if ($receipt.checks.$checkName.status -ne 'PASS') {
         throw "Actual WebView2 permission $checkName failed in $round"
+      }
+    }
+  }
+  if ($ProfileActionsProbe) {
+    foreach ($checkName in @(
+      'native_8b_signin_navigation',
+      'native_8b_signin_rebind',
+      'native_8b_source_reattested',
+      'native_8b_session_handoff_atomic',
+      'native_8b_handoff_replay_denied',
+      'native_8b_handoff_fresh_observation'
+    )) {
+      if ($receipt.checks.$checkName.status -ne 'PASS') {
+        throw "Actual native 8B profile action $checkName failed in $round"
       }
     }
   }
