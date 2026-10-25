@@ -1,0 +1,38 @@
+name: PERF-01 WebView2 synthetic benchmark contract
+
+on:
+  push:
+    paths:
+      - 'probes/perf-01-webview2/**'
+      - '.github/workflows/perf-01-webview2-probe.yml'
+  pull_request:
+    paths:
+      - 'probes/perf-01-webview2/**'
+      - '.github/workflows/perf-01-webview2-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fixture-and-windows-compile:
+    name: Synthetic fixture and Windows compile (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Deterministic synthetic history
+        run: node --test probes/perf-01-webview2/create-fixture.test.mjs
+      - name: Install .NET 8 SDK (compile only)
+        if: runner.os == 'Windows'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile WebView2 benchmark host (does not accept native UI)
+        if: runner.os == 'Windows'
+        run: dotnet build probes/perf-01-webview2/NativeBrowserProbe.csproj --configuration Release --warnaserror

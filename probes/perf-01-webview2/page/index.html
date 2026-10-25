@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CoSoS Synthetic History Native Probe</title>
+<style>
+  html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#131720;color:#e7e9ee}
+  header{height:60px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #39404b}
+  #view{height:calc(100% - 60px);overflow-y:auto;position:relative}
+  #space{position:relative}
+  .row{position:absolute;left:18px;right:18px;min-height:62px;padding:8px 16px;box-sizing:border-box;border-bottom:1px solid #343b46;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .row span{font-weight:700;margin-right:12px;color:#a2b8f7}
+</style>
+</head>
+<body><header><strong>CoSoS native WebView2 fixture</strong> <span id="count" style="margin-left:18px">Waiting for fixture</span></header>
+<div id="view"><div id="space"></div></div>
+<script>
+(()=>{
+  "use strict";
+  const rowHeight=80;
+  const view=document.getElementById("view");
+  const space=document.getElementById("space");
+  const count=document.getElementById("count");
+  let rows=[];
+  let lastRange="";
+  function paint(){
+    if(!rows.length)return;
+    const first=Math.max(0,Math.floor(view.scrollTop/rowHeight)-4);
+    const last=Math.min(rows.length,first+Math.ceil(view.clientHeight/rowHeight)+12);
+    const range=first+":"+last;
+    if(range===lastRange)return;
+    lastRange=range;
+    space.replaceChildren();
+    const frag=document.createDocumentFragment();
+    for(let i=first;i<last;i++){
+      const data=rows[i];
+      const el=document.createElement("div");
+      el.className="row";
+      el.style.top=(i*rowHeight)+"px";
+      const label=document.createElement("span");
+      label.textContent=(i+1)+" · "+data.kind;
+      el.append(label,document.createTextNode(String(data.text||"").slice(0,500)));
+      frag.appendChild(el);
+    }
+    space.appendChild(frag);
+  }
+  view.addEventListener("scroll",paint,{passive:true});
+  window.perf01Load=(items)=>{
+    if(!Array.isArray(items)||items.length!==6000)throw Error("Invalid synthetic 6000-message fixture");
+    if(items.some(x=>!x||!["user_message","assistant_message"].includes(x.kind)||typeof x.text!=="string"))
+      throw Error("Invalid synthetic message");
+    rows=items;
+    space.style.height=(rows.length*rowHeight)+"px";
+    count.textContent=rows.length.toLocaleString()+" synthetic messages";
+    paint();
+    return {count:rows.length,domRows:space.children.length,scrollHeight:view.scrollHeight};
+  };
+  window.perf01Scroll=async ()=>{
+    if(rows.length!==6000)throw Error("Fixture not loaded");
+    const durations=[];
+    const positions=Array.from({length:60},(_,i)=>i%2?0:(i/60)*(view.scrollHeight-view.clientHeight));
+    for(const y of positions){
+      const start=performance.now();
+      view.scrollTop=y;
+      paint();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      durations.push(performance.now()-start);
+    }
+    durations.sort((a,b)=>a-b);
+    return {n:durations.length,p50Ms:durations[Math.floor(durations.length*.5)],
+      p95Ms:durations[Math.min(durations.length-1,Math.ceil(durations.length*.95)-1)],
+      maxMs:durations.at(-1),maxVisibleDomRows:space.children.length,
+      historyMessages:rows.length};
+  };
+})();
+</script></body></html>
