@@ -142,7 +142,7 @@ internal sealed partial class GateForm : Form
         }
         if ((_host8L1CrashProbe || _host8L1ConsentProbe || _host8L1ProfileActionsProbe) && !_host8L1)
             throw new ArgumentException("Native crash probe requires the 8L1 host");
-        _l2 = options.ContainsKey("--7l2") || _host8L1;
+        _l2 = options.ContainsKey("--7l2") || _host8L1 || _host8P;
         if (_l2 && (_cdpPreflight || _idle || (options.ContainsKey("--7l2") && _host8L1)))
             throw new ArgumentException("7L2 is a distinct source-pinned native gate");
         if (!_cdpPreflight &&
@@ -245,7 +245,7 @@ internal sealed partial class GateForm : Form
             "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
             "crates/cos-core/examples/7l1_bridge.rs",
             "crates/cos-core/examples/7l2_bridge.rs",
-            "apps/windows-host", "probes/8l1",
+            "apps/windows-host", "probes/8l1", "probes/8p",
             "extension/adapter/browser-lifecycle.mjs",
             "extension/adapter/profile-session.mjs");
         if (dirty.Length != 0)
