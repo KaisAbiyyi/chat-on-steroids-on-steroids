@@ -42,7 +42,7 @@ internal sealed partial class GateForm : Form
     private readonly string? _artifactRoot;
     private readonly string? _retained8L1ProfileRoot;
     private readonly bool _reuse8L1Profile;
-    private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -69,6 +69,7 @@ internal sealed partial class GateForm : Form
         public string? WorkerInstance { get; set; }
         public ulong ChannelId { get; set; }
         public string SessionId { get; set; } = "";
+        public ulong SessionEpoch { get; set; } = 1;
         public ulong BoundNavigation { get; set; }
         public bool Revoked { get; set; }
         public bool WorkerDestroyedEventObserved { get; set; }
@@ -83,7 +84,7 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
             if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
@@ -102,6 +103,7 @@ internal sealed partial class GateForm : Form
         _host8L1 = options.ContainsKey("--8l1");
         _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
         _host8L1ConsentProbe = options.ContainsKey("--8l1-consent");
+        _host8L1ProfileActionsProbe = options.ContainsKey("--8l1-profile-actions");
         _retained8L1ProfileRoot = options.TryGetValue("--profile-root", out var retained)
             ? Path.GetFullPath(retained) : null;
         _reuse8L1Profile = options.ContainsKey("--reuse-8l1-profile");
@@ -124,7 +126,7 @@ internal sealed partial class GateForm : Form
                 Directory.EnumerateFileSystemEntries(_retained8L1ProfileRoot).Any())
                 throw new UnauthorizedAccessException("First launch needs empty profile root");
         }
-        if ((_host8L1CrashProbe || _host8L1ConsentProbe) && !_host8L1)
+        if ((_host8L1CrashProbe || _host8L1ConsentProbe || _host8L1ProfileActionsProbe) && !_host8L1)
             throw new ArgumentException("Native crash probe requires the 8L1 host");
         _l2 = options.ContainsKey("--7l2") || _host8L1;
         if (_l2 && (_cdpPreflight || _idle || (options.ContainsKey("--7l2") && _host8L1)))
@@ -573,7 +575,7 @@ internal sealed partial class GateForm : Form
     {
         profileId = b.Profile, tabId = b.TabId, frameId = 0,
         documentId = b.DocumentId, navigationEpoch = b.NavigationEpoch,
-        sessionId = b.SessionId, sessionEpoch = 1, workerGeneration = b.WorkerGeneration,
+        sessionId = b.SessionId, sessionEpoch = b.SessionEpoch, workerGeneration = b.WorkerGeneration,
         hostGeneration = b.HostGeneration, channelId = b.ChannelId
     };
 
@@ -583,7 +585,7 @@ internal sealed partial class GateForm : Form
         {
             profileId = b.Profile, tabId = b.TabId, frameId = 0,
             documentId = b.DocumentId, navigationEpoch = b.NavigationEpoch,
-            sessionId = b.SessionId, sessionEpoch = 1, workerGeneration = b.WorkerGeneration
+            sessionId = b.SessionId, sessionEpoch = b.SessionEpoch, workerGeneration = b.WorkerGeneration
         },
         origin = Origin,
         hostGeneration = b.HostGeneration
