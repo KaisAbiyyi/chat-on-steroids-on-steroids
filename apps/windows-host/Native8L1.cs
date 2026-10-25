@@ -27,12 +27,65 @@ internal sealed partial class GateForm
         private readonly Dictionary<string, (string Path, string Partition)> _profiles =
             new(StringComparer.Ordinal);
         private readonly HashSet<string> _consumedApprovals = new(StringComparer.Ordinal);
-        private readonly Dictionary<Browser, OneUseApproval> _pending = new(ReferenceEqualityComparer.Instance);
+        // A modal owner consent dialog can pump native events. Serialize each
+        // browser's permission request and reattest after the dialog closes.
+        private readonly HashSet<Browser> _permissionBusy = new(ReferenceEqualityComparer.Instance);
         private readonly object _gate = new();
 
-        private sealed record OneUseApproval(
-            string Nonce, string DocumentId, ulong NavigationEpoch,
-            ulong HostGeneration, string Capability, string Origin);
+        private sealed record OneUseApproval(string Nonce, Binding Binding, string Capability);
+
+        private static bool ExactOrigin(string requestUri, string trustedOrigin)
+        {
+            if (!Uri.TryCreate(requestUri, UriKind.Absolute, out var uri) ||
+                uri.UserInfo.Length != 0 || uri.Fragment.Length != 0) return false;
+            return string.Equals(uri.GetLeftPart(UriPartial.Authority),
+                trustedOrigin, StringComparison.Ordinal);
+        }
+
+        // Shared by the actual WebView2 permission side effect and the cloud
+        // contract self-test. Approval is tied to every 8B/8C scope field.
+        private static bool Authorizes(OneUseApproval approval, Binding expected,
+            Binding current, string capability, string requestUri) =>
+            approval.Binding == expected && expected == current &&
+            approval.Capability == capability && capability != "unsupported" &&
+            ExactOrigin(requestUri, expected.Origin);
+
+        private static bool Consume(OneUseApproval approval, Binding expected,
+            Binding current, string capability, string requestUri,
+            HashSet<string> consumed) =>
+            consumed.Add(approval.Nonce) &&
+            Authorizes(approval, expected, current, capability, requestUri);
+
+        public static void RunSelfTests()
+        {
+            static void Require(bool condition)
+            {
+                if (!condition) throw new InvalidOperationException("8L1 native contract regression");
+            }
+            var first = new Binding("profile-A", "partition-A", @"D:\projects\CoS-Rust\synthetic\A",
+                1, "doc-1", 1, 1, 1, 1, "session-A", Origin, 1);
+            var stale = first with { DocumentId = "doc-2", NavigationEpoch = 2 };
+            var foreign = first with { ProfileId = "profile-B", PartitionId = "partition-B" };
+            var consumed = new HashSet<string>(StringComparer.Ordinal);
+            var grant = new OneUseApproval("native-owner-approval", first, "camera");
+            Require(Consume(grant, first, first, "camera", Origin + "/index.html", consumed));
+            Require(!Consume(grant, first, first, "camera", Origin, consumed));
+            Require(!Consume(new OneUseApproval("stale", first, "camera"), first,
+                stale, "camera", Origin, consumed));
+            Require(!Consume(new OneUseApproval("foreign", first, "camera"), first,
+                foreign, "camera", Origin, consumed));
+            Require(!Consume(new OneUseApproval("wrong-kind", first, "camera"), first,
+                first, "microphone", Origin, consumed));
+            Require(!Consume(new OneUseApproval("origin", first, "camera"), first,
+                first, "camera", "https://attacker.invalid", consumed));
+            Require(!Consume(new OneUseApproval("unsupported", first, "unsupported"), first,
+                first, "unsupported", Origin, consumed));
+            Require(!ExactOrigin("https://synthetic.cos.test.evil.test/", Origin));
+            Require(!ExactOrigin("http://synthetic.cos.test/", Origin));
+            Require(!ExactOrigin("https://user@synthetic.cos.test/", Origin));
+            Require(first.PartitionId != foreign.PartitionId);
+            Console.WriteLine("8L1 native authority consent, replay, stale-scope and origin policy PASS");
+        }
 
         private static string Capability(CoreWebView2PermissionKind kind) => kind switch
         {
@@ -51,24 +104,46 @@ internal sealed partial class GateForm
             // any renderer or extension can authorize a permission or popup.
             b.View.CoreWebView2.PermissionRequested += (_, e) =>
             {
+                // Explicit state prevents a WebView2 default grant. Never
+                // persist it in the profile: every request needs new consent.
+                e.State = CoreWebView2PermissionState.Deny;
+                e.SavesInProfile = false;
+                e.Handled = true;
+                var cap = Capability(e.PermissionKind);
+                Binding? snapshot;
                 lock (_gate)
                 {
-                    e.State = CoreWebView2PermissionState.Deny;
-                    if (!_bindings.TryGetValue(b, out var bound) || b.Revoked ||
-                        !Matches(b, bound) || !string.Equals(e.Uri, bound.Origin + "/index.html",
-                            StringComparison.Ordinal) ||
-                        !_pending.TryGetValue(b, out var grant)) return;
-                    _pending.Remove(b); // uncertainty consumes approval, never retries
-                    var cap = Capability(e.PermissionKind);
-                    if (cap == "unsupported" || grant.Capability != cap ||
-                        grant.DocumentId != bound.DocumentId ||
-                        grant.NavigationEpoch != bound.NavigationEpoch ||
-                        grant.HostGeneration != bound.HostGeneration ||
-                        grant.Origin != bound.Origin ||
-                        !_consumedApprovals.Add(grant.Nonce)) return;
-                    // This is the only native browser permission side effect.
-                    e.State = CoreWebView2PermissionState.Allow;
+                    if (cap == "unsupported" || _permissionBusy.Contains(b) ||
+                        !_bindings.TryGetValue(b, out snapshot) ||
+                        !Matches(b, snapshot) || !ExactOrigin(e.Uri, snapshot.Origin))
+                        return;
+                    _permissionBusy.Add(b);
                 }
+                try
+                {
+                    // The actual native owner dialog is the sole grant source;
+                    // no page, MV3 script or webmessage can supply approval.
+                    var result = MessageBox.Show(
+                        b.View.FindForm(),
+                        "Allow ONE " + cap + " request?\nOrigin: " + snapshot.Origin +
+                        "\nProfile: " + snapshot.ProfileId + "\nTab: " + snapshot.TabId +
+                        "\nDefault is Deny. Permission will not be saved.",
+                        "CoSoS native browser permission",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes) return;
+                    lock (_gate)
+                    {
+                        if (!_bindings.TryGetValue(b, out var current) ||
+                            !Matches(b, current)) return;
+                        var approval = new OneUseApproval(
+                            Guid.NewGuid().ToString("N"), snapshot, cap);
+                        if (Consume(approval, snapshot, current, cap,
+                            e.Uri, _consumedApprovals))
+                            e.State = CoreWebView2PermissionState.Allow;
+                    }
+                }
+                finally { lock (_gate) _permissionBusy.Remove(b); }
             };
             b.View.CoreWebView2.NewWindowRequested += (_, e) => e.Handled = true;
             b.View.CoreWebView2.WebMessageReceived += (_, _) =>
@@ -156,16 +231,16 @@ internal sealed partial class GateForm
         {
             lock (_gate)
             {
-                _pending.Remove(b);
+                _permissionBusy.Remove(b);
                 // Retain the old binding as a tombstone so the next Track
                 // requires a strictly newer authenticated host generation.
             }
         }
 
-        // Consent is host-created only and MUST require a real owner UI
-        // before production callers use it. No self-test or page path exposes it.
-        // Until a trusted UI exists, no approval is issued: all requests deny.
-        public bool PermissionDefaultDeny() => _pending.Count == 0;
+        public bool PermissionDefaultDeny()
+        {
+            lock (_gate) return _permissionBusy.Count == 0;
+        }
     }
 
     private async Task Execute8L1Async()
