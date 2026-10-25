@@ -687,6 +687,112 @@ internal sealed partial class GateForm
             // one-use real consent and multi-tab are independently exercised.
             Pending("native_host_process_restart",
                 "OS process restart and browser crash/recovery require separate physical Windows proof");
+            if (_host8L1ProfileActionsProbe)
+            {
+                // The first 8B action is an actual WebView2 navigation,
+                // consented to at the NATIVE side rather than by page JS.
+                // Synthetic provider only: this never claims a real login.
+                if (!_native8L1Authority.ApproveSyntheticSignIn(b, "synthetic"))
+                    throw new UnauthorizedAccessException("Native sign-in consent denied");
+                var originalSession = b.SessionId;
+                var originalEpoch = b.SessionEpoch;
+                var originalDocument = b.DocumentId;
+                _b.CoreWebView2.Navigate(StartUrl + "?native-sign-in=1");
+                await Task.Delay(300);
+                var signInNavigated = b.Revoked &&
+                    b.DocumentId != originalDocument &&
+                    b.RetirementTask is not null &&
+                    await b.RetirementTask;
+                Mark("native_8b_signin_navigation",
+                    signInNavigated && b.SessionId == originalSession &&
+                    b.SessionEpoch == originalEpoch,
+                    "Native Yes starts real synthetic provider WebView2 navigation; " +
+                    "old Rust channel retired, no authentication or cookie transfer is claimed");
+                _b.CoreWebView2.Navigate(StartUrl);
+                await WaitPageAsync(b);
+                await BindAsync(b, originalSession);
+                _native8L1Authority.Track(b);
+                Mark("native_8b_signin_rebind",
+                    _native8L1Authority.Current(b) &&
+                    b.SessionEpoch == originalEpoch &&
+                    Ok(await ObserveAsync(b)),
+                    "Fresh Rust/MV3 channel after sign-in navigation, same profile/session/partition");
+
+                // Every signed observation must exist before the Rust first-
+                // proof fence can transfer its two currently owned sessions.
+                Mark("native_8b_source_reattested",
+                    _native8L1Authority.Current(a) && Ok(await ObserveAsync(a)),
+                    "Source reauthenticated at fresh document and Rust first-proof boundary");
+                var ticket = _native8L1Authority.ApproveHandoff(a, b) ??
+                    throw new UnauthorizedAccessException("Native 8B handoff owner consent denied");
+                var oldA = Host(a);
+                var oldB = Host(b);
+                var oldSessionA = a.SessionId;
+                var oldSessionB = b.SessionId;
+                RevokeAndRetire(a);
+                RevokeAndRetire(b);
+                await RequireRetirementAsync(a);
+                await RequireRetirementAsync(b);
+                var transferred = await RustAsync(new
+                {
+                    op = "handoff", source = oldA, target = oldB,
+                    newSourceSessionId = ticket.NewSourceSessionId,
+                    sourceNextSessionEpoch = ticket.SourceNextEpoch,
+                    targetNextSessionEpoch = ticket.TargetNextEpoch
+                });
+                var rustCommitted = Ok(transferred) &&
+                    transferred.GetProperty("value").GetProperty("committed").GetBoolean();
+                if (!rustCommitted ||
+                    !_native8L1Authority.CommitHandoffAfterRust(a, b, ticket))
+                    throw new UnauthorizedAccessException("Native 8B atomic handoff was not confirmed");
+                Mark("native_8b_session_handoff_atomic",
+                    a.SessionId == ticket.NewSourceSessionId &&
+                    b.SessionId == oldSessionA && b.SessionId != oldSessionB &&
+                    a.SessionEpoch == ticket.SourceNextEpoch &&
+                    b.SessionEpoch == ticket.TargetNextEpoch,
+                    "Native one-use owner grant; both Rust leases retired before atomic " +
+                    "first-proof and C# session attribution transaction, no profile data copied");
+                Mark("native_8b_handoff_replay_denied",
+                    await RustDeniedAsync(new
+                    {
+                        op = "handoff", source = oldA, target = oldB,
+                        newSourceSessionId = ticket.NewSourceSessionId,
+                        sourceNextSessionEpoch = ticket.SourceNextEpoch,
+                        targetNextSessionEpoch = ticket.TargetNextEpoch
+                    }) &&
+                    !_native8L1Authority.CommitHandoffAfterRust(a, b, ticket),
+                    "Both Rust first-proof and native one-use consent refuse handoff replay");
+                _a.CoreWebView2.Navigate(StartUrl);
+                _b.CoreWebView2.Navigate(StartUrl);
+                await WaitPageAsync(a);
+                await WaitPageAsync(b);
+                await BindAsync(a, a.SessionId);
+                await BindAsync(b, b.SessionId);
+                _native8L1Authority.Track(a);
+                _native8L1Authority.Track(b);
+                Mark("native_8b_handoff_fresh_observation",
+                    _native8L1Authority.Current(a) &&
+                    _native8L1Authority.Current(b) &&
+                    !_native8L1Authority.SamePartition(a, b) &&
+                    Ok(await ObserveAsync(a)) && Ok(await ObserveAsync(b)),
+                    "New Rust/MV3 first proofs bind reattributed sessions to " +
+                    "separate original WebView2 storage partitions");
+            }
+            else
+            {
+                Pending("native_8b_signin_navigation",
+                    "Actual synthetic provider navigation needs owner opt-in ProfileActionsProbe");
+                Pending("native_8b_signin_rebind",
+                    "Actual synthetic navigation must rebind with fresh Rust channel");
+                Pending("native_8b_source_reattested",
+                    "8B source Rust signed proof needed before live handoff");
+                Pending("native_8b_session_handoff_atomic",
+                    "Native owner one-use consent and retired source/target channels required");
+                Pending("native_8b_handoff_replay_denied",
+                    "Requires live native handoff and replay denial");
+                Pending("native_8b_handoff_fresh_observation",
+                    "Requires both fresh native Rust/MV3 identities after handoff");
+            }
             if (_host8L1CrashProbe)
             {
                 // Optional physically executed failure gate. A real browser
