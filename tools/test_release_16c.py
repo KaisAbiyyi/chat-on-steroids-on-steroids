@@ -2,6 +2,7 @@ import hashlib
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -198,6 +199,45 @@ class BundleTests(unittest.TestCase):
                 z.writestr(name, contents[name])
         with self.assertRaisesRegex(bundle.Refused, "checksum"):
             bundle.verify(self.out, SHA)
+
+
+    def test_forged_index_without_runtime_binary_refused(self):
+        self.build()
+        with ZipFile(self.out) as z:
+            members = {name: z.read(name) for name in z.namelist()}
+        index = json.loads(members["bundle-index.json"])
+        index["files"] = [item for item in index["files"] if item["path"] != "cos-rust.exe"]
+        members.pop("cos-rust.exe")
+        members["bundle-index.json"] = json.dumps(index).encode("utf-8")
+        self.out.unlink()
+        with ZipFile(self.out, "w") as z:
+            for name, content in sorted(members.items()):
+                z.writestr(name, content)
+        with self.assertRaisesRegex(bundle.Refused, "required bundle payload"):
+            bundle.verify(self.out, SHA)
+
+    def test_forged_platform_binary_refused(self):
+        self.build()
+        with ZipFile(self.out) as z:
+            members = {name: z.read(name) for name in z.namelist()}
+        index = json.loads(members["bundle-index.json"])
+        index["platform"] = "macos-arm64"
+        members["bundle-index.json"] = json.dumps(index).encode("utf-8")
+        self.out.unlink()
+        with ZipFile(self.out, "w") as z:
+            for name, content in sorted(members.items()):
+                z.writestr(name, content)
+        with self.assertRaisesRegex(bundle.Refused, "platform/binary"):
+            bundle.verify(self.out, SHA)
+
+    def test_competing_file_creation_race_never_deleted(self):
+        def competing_writer(*args, **kwargs):
+            self.out.write_bytes(b"created by another process")
+            raise FileExistsError("exclusive create lost the race")
+        with patch.object(bundle, "ZipFile", side_effect=competing_writer):
+            with self.assertRaises(FileExistsError):
+                self.build()
+        self.assertEqual(self.out.read_bytes(), b"created by another process")
 
     def test_wrong_source_refused(self):
         self.build()
