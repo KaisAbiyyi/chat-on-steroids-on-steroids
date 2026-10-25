@@ -11,7 +11,8 @@ internal sealed partial class GateForm
     private string? _host8PConfig;
     private string? _host8PProvider;
 
-    private sealed record ProviderSpec(string Id, string Origin, HashSet<string> Origins);
+    private sealed record ProviderSpec(string Id, string Origin, HashSet<string> Origins,
+        HashSet<string> CallbackUrls);
 
     private sealed class ProviderPolicy
     {
@@ -58,7 +59,9 @@ internal sealed partial class GateForm
             var parsed = new Dictionary<string, ProviderSpec>(StringComparer.Ordinal);
             foreach (var entry in values.EnumerateArray())
             {
-                if (!ExactKeys(entry, "id", "origin", "redirectOrigins")) Deny("entry-shape");
+                if (!ExactKeys(entry, "id", "origin", "redirectOrigins") &&
+                    !ExactKeys(entry, "id", "origin", "redirectOrigins", "callbackUrls"))
+                    Deny("entry-shape");
                 var idElement = entry.GetProperty("id");
                 var originElement = entry.GetProperty("origin");
                 var redirects = entry.GetProperty("redirectOrigins");
@@ -79,7 +82,29 @@ internal sealed partial class GateForm
                         !ExactHttpsOrigin(redirect.GetString()) ||
                         !allowed.Add(redirect.GetString()!)) Deny("redirect-origin");
                 }
-                if (!parsed.TryAdd(id, new ProviderSpec(id, origin, allowed)))
+                var callbacks = new HashSet<string>(StringComparer.Ordinal);
+                if (entry.TryGetProperty("callbackUrls", out var callbackList))
+                {
+                    if (callbackList.ValueKind != JsonValueKind.Array ||
+                        callbackList.GetArrayLength() > 8) Deny("callback-shape");
+                    foreach (var item in callbackList.EnumerateArray())
+                    {
+                        if (item.ValueKind != JsonValueKind.String) Deny("callback-type");
+                        var callbackRaw = item.GetString() ?? "";
+                        if (!Uri.TryCreate(callbackRaw, UriKind.Absolute, out var callback) ||
+                            callback.Scheme != Uri.UriSchemeHttps ||
+                            callback.UserInfo.Length != 0 || callback.Query.Length != 0 ||
+                            callback.Fragment.Length != 0 || callbackRaw.Contains('\\') ||
+                            callbackRaw.Contains('@') || callbackRaw.Contains('%') ||
+                            !string.Equals(callback.AbsoluteUri, callbackRaw,
+                                StringComparison.Ordinal) ||
+                            callback.AbsolutePath == "/" ||
+                            !allowed.Contains(callback.GetLeftPart(UriPartial.Authority)) ||
+                            !callbacks.Add(callbackRaw))
+                            Deny("callback-url");
+                    }
+                }
+                if (!parsed.TryAdd(id, new ProviderSpec(id, origin, allowed, callbacks)))
                     Deny("duplicate-provider");
             }
             return new ProviderPolicy(parsed);
@@ -155,7 +180,7 @@ internal sealed partial class GateForm
                 redirectText.Contains('@') ||
                 !provider.Origins.Contains(redirect.GetLeftPart(UriPartial.Authority)))
                 return false;
-            return true;
+            return provider.CallbackUrls.Contains(redirectText);
         }
 
         public bool Allows(string providerId, string url)
@@ -177,7 +202,7 @@ internal sealed partial class GateForm
 
         public static void SelfTest()
         {
-            const string config = """{"providers":[{"id":"chatgpt","origin":"https://chatgpt.com","redirectOrigins":["https://auth.openai.com"]},{"id":"gemini","origin":"https://gemini.google.com","redirectOrigins":[]}]}""";
+            const string config = """{"providers":[{"id":"chatgpt","origin":"https://chatgpt.com","redirectOrigins":["https://auth.openai.com"],"callbackUrls":["https://chatgpt.com/auth/callback"]},{"id":"gemini","origin":"https://gemini.google.com","redirectOrigins":[],"callbackUrls":[]}]}""";
             var p = Parse(config);
             static void Check(bool value) { if (!value) throw new InvalidOperationException("8P origin policy regression"); }
             Check(p.Landing("chatgpt") == "https://chatgpt.com/");
@@ -204,6 +229,8 @@ internal sealed partial class GateForm
                 "?code=credential", "?access_token=secret", "?state=guess",
                 "?response_type=token", query + "&code=credential",
                 query.Replace("chatgpt.com%2Fauth", "attacker.test%2Fauth"),
+                query.Replace("chatgpt.com%2Fauth%2Fcallback",
+                    "chatgpt.com%2Fnot-an-allowed-callback"),
                 query.Replace("state=abcdefghijklmnop0123456789", "state=x"),
                 query.Replace("code_challenge_method=S256", "code_challenge_method=plain"),
                 query + "&state=duplicate"
