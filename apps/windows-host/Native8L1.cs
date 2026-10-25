@@ -41,6 +41,12 @@ internal sealed partial class GateForm
         // browser's permission request and reattest after the dialog closes.
         private readonly HashSet<Browser> _permissionBusy = new(ReferenceEqualityComparer.Instance);
         private readonly object _gate = new();
+        private int _ownerPrompts, _ownerGrants, _ownerDenials;
+
+        public (int Prompts, int Grants, int Denials) OwnerConsentCounts()
+        {
+            lock (_gate) return (_ownerPrompts, _ownerGrants, _ownerDenials);
+        }
 
         private sealed record OneUseApproval(string Nonce, Binding Binding, string Capability);
 
@@ -159,6 +165,7 @@ internal sealed partial class GateForm
                         !Matches(b, snapshot) || !ExactOrigin(e.Uri, snapshot.Origin))
                         return;
                     _permissionBusy.Add(b);
+                    _ownerPrompts++;
                 }
                 try
                 {
@@ -172,7 +179,11 @@ internal sealed partial class GateForm
                         "CoSoS native browser permission",
                         MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
-                    if (result != DialogResult.Yes) return;
+                    if (result != DialogResult.Yes)
+                    {
+                        lock (_gate) _ownerDenials++;
+                        return;
+                    }
                     lock (_gate)
                     {
                         if (!_bindings.TryGetValue(b, out var current) ||
@@ -182,7 +193,10 @@ internal sealed partial class GateForm
                         if (_consumedApprovals.Count < 4096 &&
                             Consume(approval, snapshot, current, cap,
                                 e.Uri, _consumedApprovals))
+                        {
                             e.State = CoreWebView2PermissionState.Allow;
+                            _ownerGrants++;
+                        }
                     }
                 }
                 finally { lock (_gate) _permissionBusy.Remove(b); }
@@ -383,6 +397,33 @@ internal sealed partial class GateForm
             Mark("native_prior_profile_preserved",
                 _native8L1Authority.Current(b) && !_native8L1Authority.SamePartition(a,b),
                 "Navigating one real WebView2 did not steal a separate browser-owned partition");
+            if (_host8L1ConsentProbe)
+            {
+                // The browser creates actual native PermissionRequested events.
+                // Only a person interacting with the native dialog can approve.
+                // Location results never leave this isolated synthetic page.
+                for (var request = 0; request < 2; request++)
+                {
+                    await _b.CoreWebView2.ExecuteScriptAsync(
+                        "navigator.geolocation.getCurrentPosition(() => {}, () => {}, " +
+                        "{timeout:1000,maximumAge:0});");
+                    for (var attempts = 0; attempts < 100; attempts++)
+                    {
+                        if (_native8L1Authority.OwnerConsentCounts().Prompts > request) break;
+                        await Task.Delay(100);
+                    }
+                    await Task.Delay(150);
+                }
+                var counts = _native8L1Authority.OwnerConsentCounts();
+                Mark("native_permission_positive_consent",
+                    counts.Prompts >= 2 && counts.Grants >= 1 && counts.Denials >= 1 &&
+                    _native8L1Authority.Current(b),
+                    "Two physical native WebView2 permission prompts must include one owner Allow " +
+                    "and one owner Deny, without persistent grants");
+            }
+            else
+                Pending("native_permission_positive_consent",
+                    "Opt in to two real owner permission dialogs with run-native.ps1 -ConsentProbe");
             // 8L1 physical full gate is still NOT_RUN until restart/crash,
             // one-use real consent and multi-tab are independently exercised.
             Pending("native_host_process_restart",
@@ -417,8 +458,6 @@ internal sealed partial class GateForm
                 _host8L1CrashProbe ? _native8L1ProcessFailures > 0 :
                     _native8L1ProcessFailures == 0 && _native8L1Authority.Current(b),
                 "Actual WebView2 ProcessFailed event handler retires every tracked native Rust channel");
-            Pending("native_permission_positive_consent",
-                "Native owner Yes/No prompt implemented; physical one-use WebView2 permission grant/deny interaction not yet exercised");
             exit = _failed ? 1 : 0;
         }
         catch (Exception ex)
