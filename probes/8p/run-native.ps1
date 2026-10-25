@@ -53,7 +53,7 @@ foreach ($entry in $manifest) {
 $hostDll = Join-Path $ArtifactRoot 'host/WindowsHost.dll'
 if (-not (Test-Path -LiteralPath $hostDll)) { throw 'Missing host binary' }
 Write-Output 'Owner chooses a configured provider. Native Yes only opens its allowed HTTPS landing origin; it does not grant sign-in/observation/permission.'
-dotnet $hostDll --8p --repo $Repo --out $Out --artifact-root $ArtifactRoot --8p-config $ProviderConfig --8p-provider $ProviderId
+dotnet $hostDll --8p --repo $Repo --out $Out --bridge (Join-Path $ArtifactRoot '7l2_bridge.exe') --artifact-root $ArtifactRoot --8p-config $ProviderConfig --8p-provider $ProviderId
 if ($LASTEXITCODE -ne 0) { throw '8P host execution failed' }
 $receiptPath = Join-Path $Out '8p-navigation-receipt.json'
 if (-not (Test-Path -LiteralPath $receiptPath)) {
