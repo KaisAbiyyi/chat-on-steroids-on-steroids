@@ -606,14 +606,12 @@ internal sealed partial class GateForm
         });
         if (!replayDenied)
             throw new UnauthorizedAccessException("8P handoff replay unexpectedly accepted");
-        await BindAsync(a, a.SessionId);
-        await BindAsync(b, b.SessionId);
-        await Prove8PSessionAsync(a);
-        await Prove8PSessionAsync(b);
+        // The next proof MUST originate from a real new WebView2 document.
+        // The caller navigates both profiles after dropping its native
+        // transaction lock. Never fabricate a documentId/navigationEpoch.
         if (a.SessionId != empty || b.SessionId != first.SessionId ||
             a.SessionEpoch != newSourceEpoch ||
             b.SessionEpoch != newTargetEpoch ||
-            a.ChannelId == first.ChannelId || b.ChannelId == second.ChannelId ||
             a.ProfilePath == b.ProfilePath)
             throw new UnauthorizedAccessException("8P native handoff postcondition");
         return true;
@@ -831,14 +829,46 @@ internal sealed partial class GateForm
             if (success)
             {
                 handoffLocked = true; // blocks reentrant WebView2 nav during modal
+                var oldA = first.Browser.ChannelId;
+                var oldB = second.Browser!.ChannelId;
+                var oldEpochA = first.Browser.NavigationEpoch;
+                var oldEpochB = second.Browser.NavigationEpoch;
                 try
                 {
                     handoffPassed = await Execute8PHandoffProbeAsync(
-                        first.Browser, second.Browser!,
+                        first.Browser, second.Browser,
                         policy.PrimaryOrigin(_host8PProvider));
-                    success = handoffPassed;
                 }
                 finally { handoffLocked = false; }
+                if (handoffPassed)
+                {
+                    // Rebind on ACTUAL navigation events, not a synthetic
+                    // document counter change. Both OAuth/profile partitions
+                    // stay on their original OS WebView2 environments.
+                    _a.CoreWebView2.Navigate(landing);
+                    _b.CoreWebView2.Navigate(landing);
+                    var startBound = bound;
+                    for (var attempt = 0; attempt < 150 &&
+                        bound < startBound + 2; attempt++)
+                        await Task.Delay(100);
+                    handoffPassed =
+                        bound >= startBound + 2 &&
+                        first.Browser.NavigationEpoch > oldEpochA &&
+                        second.Browser.NavigationEpoch > oldEpochB &&
+                        first.Browser.ChannelId != oldA &&
+                        second.Browser.ChannelId != oldB &&
+                        first.Browser.ChannelId != 0 &&
+                        second.Browser.ChannelId != 0 &&
+                        !first.Browser.Revoked && !second.Browser.Revoked &&
+                        first.Browser.ProfilePath != second.Browser.ProfilePath &&
+                        first.Browser.SessionId != second.Browser.SessionId;
+                    if (handoffPassed)
+                    {
+                        await Prove8PSessionAsync(first.Browser);
+                        await Prove8PSessionAsync(second.Browser);
+                    }
+                }
+                success = handoffPassed;
             }
         }
         // Never include page URLs, account metadata, OAuth parameters, secrets
