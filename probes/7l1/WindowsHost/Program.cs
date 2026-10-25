@@ -81,6 +81,11 @@ internal sealed partial class GateForm : Form
         public int InFlightLedgerWrites { get; set; }
         public int RefusedOrigins { get; set; }
         public bool RetireScheduled { get; set; }
+        // Host-attested production document URL only. Never set from web
+        // messages, renderer events, or worker-supplied content.
+        public bool Production8P { get; init; }
+        public string? ProductionUrl { get; set; }
+        public string? ProductionOrigin { get; set; }
         public Task<bool>? RetirementTask { get; set; }
     }
 
@@ -533,12 +538,17 @@ internal sealed partial class GateForm : Form
             string.IsNullOrWhiteSpace(b.WorkerTargetId) ||
             !string.Equals(Path.GetFullPath(b.View.CoreWebView2.Profile.ProfilePath),
                 b.ProfilePath, StringComparison.OrdinalIgnoreCase) ||
-            !string.Equals(b.View.CoreWebView2.Source, StartUrl, StringComparison.Ordinal))
+            !string.Equals(b.View.CoreWebView2.Source,
+                b.Production8P ? b.ProductionUrl : StartUrl, StringComparison.Ordinal) ||
+            (b.Production8P && (b.ProductionOrigin is null ||
+                !string.Equals(new Uri(b.ProductionUrl!).GetLeftPart(UriPartial.Authority),
+                    b.ProductionOrigin, StringComparison.Ordinal))))
             throw new UnauthorizedAccessException("stale controller/profile/page");
         var page = await CdpAsync(b, "Target.getTargetInfo", new { });
         var pageInfo = Field(page, "targetInfo");
         if (pageInfo.GetProperty("type").GetString() != "page" ||
-            pageInfo.GetProperty("url").GetString() != StartUrl)
+            pageInfo.GetProperty("url").GetString() !=
+                (b.Production8P ? b.ProductionUrl : StartUrl))
             throw new UnauthorizedAccessException("current real page target changed");
         var worker = await CdpAsync(b, "Target.getTargetInfo",
             new { targetId = b.WorkerTargetId });
@@ -549,7 +559,8 @@ internal sealed partial class GateForm : Form
                 $"chrome-extension://{b.ExtensionId}/sw.mjs")
             throw new UnauthorizedAccessException("foreign/replaced MV3 worker target");
         if (b.View.IsDisposed || b.Revoked || b.NavigationEpoch != b.BoundNavigation ||
-            !string.Equals(b.View.CoreWebView2.Source, StartUrl, StringComparison.Ordinal))
+            !string.Equals(b.View.CoreWebView2.Source,
+                b.Production8P ? b.ProductionUrl : StartUrl, StringComparison.Ordinal))
             throw new UnauthorizedAccessException("controller revoked during asynchronous target verification");
     }
 
@@ -602,7 +613,7 @@ internal sealed partial class GateForm : Form
             documentId = b.DocumentId, navigationEpoch = b.NavigationEpoch,
             sessionId = b.SessionId, sessionEpoch = b.SessionEpoch, workerGeneration = b.WorkerGeneration
         },
-        origin = Origin,
+        origin = b.Production8P ? b.ProductionOrigin : Origin,
         hostGeneration = b.HostGeneration
     };
 
