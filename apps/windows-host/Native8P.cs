@@ -787,6 +787,14 @@ internal sealed partial class GateForm
             };
             view.CoreWebView2.NavigationCompleted += async (_, e) =>
             {
+                // Never allow a deferred event to rebind while the owner
+                // modal/Rust two-profile transaction holds exclusive control.
+                if (handoffLocked)
+                {
+                    RevokeAndRetire(browser);
+                    ready.TrySetResult(false);
+                    return;
+                }
                 if (!e.IsSuccess || view.IsDisposed)
                 {
                     ready.TrySetResult(false);
