@@ -107,10 +107,14 @@ internal sealed partial class GateForm : Form
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
         _host8L1 = options.ContainsKey("--8l1");
         _host8P = options.ContainsKey("--8p");
+#if COS_8L1_PRODUCT
         _host8PConfig = options.GetValueOrDefault("--8p-config");
         _host8PProvider = options.GetValueOrDefault("--8p-provider");
-        if (_host8P && (_host8L1 || _cdpPreflight || _idle || options.ContainsKey("--7l2") ||
-            _retained8L1ProfileRoot is not null)) throw new ArgumentException("8P is a separate isolated product origin gate");
+        if (_host8P && (_host8L1 || _cdpPreflight || _idle || options.ContainsKey("--7l2")))
+            throw new ArgumentException("8P is a separate isolated product origin gate");
+#else
+        if (_host8P) throw new ArgumentException("8P only available in product host");
+#endif
         _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
         _host8L1ConsentProbe = options.ContainsKey("--8l1-consent");
         _host8L1ProfileActionsProbe = options.ContainsKey("--8l1-profile-actions");
@@ -148,7 +152,8 @@ internal sealed partial class GateForm : Form
             RejectReparseAncestors(path);
         if (_artifactRoot is not null)
             RejectReparseAncestors(_artifactRoot);
-        Text = _host8P ? "CoSoS 8P production origin native consent gate" :\n            _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
+        Text = _host8P ? "CoSoS 8P production origin native consent gate" :
+            _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
             _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
             "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
@@ -786,7 +791,9 @@ internal sealed partial class GateForm : Form
 
     private async Task ExecuteAsync()
     {
-        if (_host8P) { await Execute8PAsync(); return; }\n        if (_host8L1) { await Execute8L1Async(); return; }
+#if COS_8L1_PRODUCT
+        if (_host8P) { await Execute8PAsync(); return; }
+#endif\n        if (_host8L1) { await Execute8L1Async(); return; }
         if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;
         var rustExit = -1;
