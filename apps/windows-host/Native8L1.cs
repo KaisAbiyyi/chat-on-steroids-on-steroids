@@ -258,6 +258,7 @@ internal sealed partial class GateForm
     {
         var exit = 2;
         var rustExit = -1;
+        var rustPid = 0;
         try
         {
             if (Directory.Exists(_root) && Directory.EnumerateFileSystemEntries(_root).Any())
@@ -277,6 +278,7 @@ internal sealed partial class GateForm
             psi.Environment["TEMP"] = _root;
             psi.Environment["TMP"] = _root;
             _bridge = Process.Start(psi) ?? throw new InvalidOperationException("Rust 7L2 bridge unavailable");
+            rustPid = _bridge.Id;
             var a = await SetupAsync(_a, "A", 1);
             var b = await SetupAsync(_b, "B", 2);
             await BindAsync(a, "8l1-synthetic-a");
@@ -398,6 +400,7 @@ internal sealed partial class GateForm
                     hostBinarySha256 = HashFile(typeof(GateForm).Assembly.Location),
                     rustBinarySha256 = File.Exists(_bridgePath) ? HashFile(_bridgePath) : "missing",
                     native8L1Accepted = false, cloudIntegrationPartial = exit == 0,
+                    hostProcessId = Environment.ProcessId, rustProcessId = rustPid,
                     rustProcessExit = rustExit, checks = _checks
                 }, new JsonSerializerOptions { WriteIndented = true }));
             Environment.ExitCode = exit;
