@@ -18,6 +18,13 @@ internal static class Program
             NativeRetirementProof.RunSelfTests();
             return;
         }
+#if COS_8L1_PRODUCT
+        if (args.Length == 1 && args[0] == "--8l1-authority-self-test")
+        {
+            GateForm.Run8L1PolicyTests();
+            return;
+        }
+#endif
         ApplicationConfiguration.Initialize();
         Application.Run(new GateForm(args));
     }
@@ -39,6 +46,10 @@ internal sealed partial class GateForm : Form
     private Process? _bridge;
     private bool _failed;
     private string? _verifiedSourceSha;
+
+#if COS_8L1_PRODUCT
+    internal static void Run8L1PolicyTests() => Native8L1Authority.RunSelfTests();
+#endif
 
     private sealed class Browser
     {
