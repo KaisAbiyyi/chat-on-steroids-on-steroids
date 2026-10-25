@@ -483,6 +483,142 @@ internal sealed partial class GateForm
         }
     }
 
+    private async Task Prove8PSessionAsync(Browser browser)
+    {
+        // Signed identity only: the 8P MV3 worker has no provider host grants
+        // and exposes no snapshot, observation or browser tool API.
+        var proof = await WorkerAsync(browser, Js("attestSession", new { }));
+        await RustAllowAsync(new
+        {
+            op = "observe", host = Host(browser),
+            channelId = browser.ChannelId,
+            generation = browser.HostGeneration, sequence = 1,
+            payload = proof.GetProperty("payload").GetString(),
+            mac = proof.GetProperty("mac").GetString()
+        });
+    }
+
+    private sealed record Native8PSessionSnapshot(
+        string Profile, string ProfilePath, string Origin,
+        string SessionId, ulong SessionEpoch, string DocumentId,
+        ulong NavigationEpoch, ulong HostGeneration, ulong ChannelId);
+
+    private static Native8PSessionSnapshot Snapshot8P(Browser browser)
+    {
+        if (!browser.Production8P || browser.Revoked ||
+            browser.ChannelId == 0 || browser.ProductionOrigin is null ||
+            browser.ProductionUrl is null || browser.WorkerSession is null ||
+            browser.View.IsDisposed ||
+            !string.Equals(browser.ProfilePath,
+                Path.GetFullPath(browser.View.CoreWebView2.Profile.ProfilePath),
+                StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("8P handoff scope unbound");
+        return new(browser.Profile, browser.ProfilePath,
+            browser.ProductionOrigin, browser.SessionId, browser.SessionEpoch,
+            browser.DocumentId, browser.NavigationEpoch, browser.HostGeneration,
+            browser.ChannelId);
+    }
+
+    private static bool Same8P(Browser b, Native8PSessionSnapshot s)
+    {
+        try { return Snapshot8P(b) == s; }
+        catch (UnauthorizedAccessException) { return false; }
+    }
+
+    private static bool Eligible8PHandoff(
+        Native8PSessionSnapshot a, Native8PSessionSnapshot b,
+        string primaryOrigin) =>
+        a.Profile != b.Profile && a.ProfilePath != b.ProfilePath &&
+        a.Origin == b.Origin && a.Origin == primaryOrigin &&
+        a.SessionId != b.SessionId && a.SessionEpoch > 0 &&
+        b.SessionEpoch > 0 &&
+        a.SessionEpoch < 9_007_199_254_740_989UL &&
+        b.SessionEpoch < 9_007_199_254_740_989UL;
+
+    private async Task<bool> Execute8PHandoffProbeAsync(
+        Browser a, Browser b, string primaryOrigin)
+    {
+        // Both profiles are host-created and MV3/Rust-bound. No page can
+        // request this operation. Consent is a native default-No modal.
+        var first = Snapshot8P(a);
+        var second = Snapshot8P(b);
+        if (!Eligible8PHandoff(first, second, primaryOrigin))
+            throw new UnauthorizedAccessException("8P foreign/shared handoff");
+        var decision = MessageBox.Show(this,
+            "Transfer ONLY the CoSoS logical application session from profile A " +
+            "to profile B? Browser logins, cookies, storage and files stay separated. " +
+            "Both Rust channels will be retired. This action cannot be retried.",
+            "8P-HOST one-use cross-profile handoff",
+            MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2);
+        if (decision != DialogResult.Yes) return false;
+        if (!Same8P(a, first) || !Same8P(b, second))
+            throw new UnauthorizedAccessException("8P handoff scope changed during consent");
+        // Exactly one signed first-proof per native scope before the transaction.
+        await Prove8PSessionAsync(a);
+        await Prove8PSessionAsync(b);
+        if (!Same8P(a, first) || !Same8P(b, second))
+            throw new UnauthorizedAccessException("8P handoff proof raced navigation");
+        var oldA = Host(a);
+        var oldB = Host(b);
+        var empty = "8p-empty-" + Guid.NewGuid().ToString("N");
+        var newSourceEpoch = first.SessionEpoch + 1;
+        var newTargetEpoch = Math.Max(first.SessionEpoch, second.SessionEpoch) + 1;
+        RevokeAndRetire(a);
+        RevokeAndRetire(b);
+        await RequireRetirementAsync(a);
+        await RequireRetirementAsync(b);
+        // After retirement, C# must still own exactly the old document and
+        // profile; failures keep both channels revoked (never retry/rollback
+        // ambiguously committed Rust transactions).
+        bool Stable(Browser v, Native8PSessionSnapshot s) =>
+            v.Revoked && v.ChannelId == 0 &&
+            v.SessionId == s.SessionId && v.SessionEpoch == s.SessionEpoch &&
+            v.DocumentId == s.DocumentId &&
+            v.NavigationEpoch == s.NavigationEpoch &&
+            !v.View.IsDisposed &&
+            string.Equals(v.ProductionOrigin,s.Origin,StringComparison.Ordinal) &&
+            string.Equals(Path.GetFullPath(v.View.CoreWebView2.Profile.ProfilePath),
+                s.ProfilePath, StringComparison.OrdinalIgnoreCase);
+        if (!Stable(a, first) || !Stable(b, second))
+            throw new UnauthorizedAccessException("8P handoff changed after retirement");
+        var committed = await RustAllowAsync(new
+        {
+            op = "handoff", source = oldA, target = oldB,
+            newSourceSessionId = empty,
+            sourceNextSessionEpoch = newSourceEpoch,
+            targetNextSessionEpoch = newTargetEpoch
+        });
+        if (!committed.GetProperty("committed").GetBoolean() ||
+            !Stable(a, first) || !Stable(b, second))
+            throw new UnauthorizedAccessException("8P native/Rust commit uncertain");
+        // No await between second native precommit recheck and paired updates.
+        a.SessionId = empty;
+        a.SessionEpoch = newSourceEpoch;
+        b.SessionId = first.SessionId;
+        b.SessionEpoch = newTargetEpoch;
+        var replayDenied = await RustDeniedAsync(new
+        {
+            op = "handoff", source = oldA, target = oldB,
+            newSourceSessionId = empty,
+            sourceNextSessionEpoch = newSourceEpoch,
+            targetNextSessionEpoch = newTargetEpoch
+        });
+        if (!replayDenied)
+            throw new UnauthorizedAccessException("8P handoff replay unexpectedly accepted");
+        await BindAsync(a, a.SessionId);
+        await BindAsync(b, b.SessionId);
+        await Prove8PSessionAsync(a);
+        await Prove8PSessionAsync(b);
+        if (a.SessionId != empty || b.SessionId != first.SessionId ||
+            a.SessionEpoch != newSourceEpoch ||
+            b.SessionEpoch != newTargetEpoch ||
+            a.ChannelId == first.ChannelId || b.ChannelId == second.ChannelId ||
+            a.ProfilePath == b.ProfilePath)
+            throw new UnauthorizedAccessException("8P native handoff postcondition");
+        return true;
+    }
+
     private async Task Execute8PAsync()
     {
         // This opt-in source-owned navigation entrypoint is NOT the 7U1 sign-in
