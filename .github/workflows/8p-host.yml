@@ -39,6 +39,7 @@ jobs:
       - run: cargo test --locked -p cos-core --example 7l2_bridge
       - run: node --test extension/adapter/tests/profile-session.test.mjs
       - run: node --test extension/adapter/tests/browser-lifecycle.test.mjs
+      - run: node --test probes/8p/production-contract.test.mjs
       - run: node --test probes/7l1/tests/worker-auth.test.mjs
         env:
           COS_TEST_TMP: ${{ runner.temp }}
