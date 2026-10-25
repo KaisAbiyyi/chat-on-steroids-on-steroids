@@ -60,6 +60,10 @@ internal sealed partial class GateForm
         // A modal owner consent dialog can pump native events. Serialize each
         // browser's permission request and reattest after the dialog closes.
         private readonly HashSet<Browser> _permissionBusy = new(ReferenceEqualityComparer.Instance);
+        // Hold exclusive 8B profile ownership across modal consent, Rust
+        // retirement/commit and fresh WebView2 rebind. Consent alone is not a
+        // transaction lock because MessageBox pumps native events.
+        private readonly HashSet<string> _profileActionBusy = new(StringComparer.Ordinal);
         private readonly HashSet<Browser> _armStaleOnNextEvent = new(ReferenceEqualityComparer.Instance);
         private readonly object _gate = new();
         private bool _armReplayOnNextEvent;
@@ -90,6 +94,51 @@ internal sealed partial class GateForm
         }
 
         private sealed record OneUseApproval(string Nonce, Binding Binding, string Capability);
+
+        private static bool ReserveProfiles(HashSet<string> busy, string[] ids)
+        {
+            if (ids.Length == 0 || ids.Distinct(StringComparer.Ordinal).Count() != ids.Length ||
+                ids.Any(id => string.IsNullOrWhiteSpace(id) || busy.Contains(id)))
+                return false;
+            foreach (var id in ids) busy.Add(id);
+            return true;
+        }
+
+        private sealed class ProfileActionLease : IDisposable
+        {
+            private readonly Native8L1Authority _owner;
+            private readonly string[] _profiles;
+            private bool _disposed;
+            public ProfileActionLease(Native8L1Authority owner, string[] profiles)
+            {
+                _owner = owner;
+                _profiles = profiles;
+            }
+            public void Dispose()
+            {
+                lock (_owner._gate)
+                {
+                    if (_disposed) return;
+                    foreach (var id in _profiles) _owner._profileActionBusy.Remove(id);
+                    _disposed = true;
+                }
+            }
+        }
+
+        public IDisposable ClaimProfileActions(params Browser[] browsers)
+        {
+            lock (_gate)
+            {
+                if (browsers.Length == 0 || browsers.Any(browser =>
+                    !_bindings.TryGetValue(browser, out var binding) ||
+                    !Matches(browser, binding) || _permissionBusy.Contains(browser)))
+                    throw new UnauthorizedAccessException("8B profile action requires current native proof");
+                var ids = browsers.Select(browser => _bindings[browser].ProfileId).ToArray();
+                if (!ReserveProfiles(_profileActionBusy, ids))
+                    throw new UnauthorizedAccessException("8B profile action already in progress");
+                return new ProfileActionLease(this, ids);
+            }
+        }
 
         private static bool ExactOrigin(string requestUri, string trustedOrigin)
         {
@@ -157,6 +206,14 @@ internal sealed partial class GateForm
             Require(!ExactOrigin("http://synthetic.cos.test/", Origin));
             Require(!ExactOrigin("https://user@synthetic.cos.test/", Origin));
             Require(first.PartitionId != foreign.PartitionId);
+            var busy = new HashSet<string>(StringComparer.Ordinal);
+            Require(ReserveProfiles(busy, new[] { "profile-A", "profile-B" }));
+            Require(!ReserveProfiles(busy, new[] { "profile-B", "profile-C" }));
+            Require(!busy.Contains("profile-C")); // failed reservation is atomic
+            Require(!ReserveProfiles(busy, new[] { "profile-C", "profile-C" }));
+            busy.Remove("profile-A");
+            busy.Remove("profile-B");
+            Require(ReserveProfiles(busy, new[] { "profile-B" }));
             var second = first with {
                 ProfileId = "profile-B", PartitionId = "partition-B",
                 ProfilePath = @"D:\projects\CoS-Rust\synthetic\B",
@@ -217,6 +274,7 @@ internal sealed partial class GateForm
                     _permissionEvents++;
                     if (cap == "unsupported" || _permissionBusy.Contains(b) ||
                         !_bindings.TryGetValue(b, out snapshot) ||
+                        _profileActionBusy.Contains(snapshot.ProfileId) ||
                         !Matches(b, snapshot) || !ExactOrigin(e.Uri, snapshot.Origin))
                         return;
                     if (_armReplayOnNextEvent)
@@ -386,6 +444,7 @@ internal sealed partial class GateForm
             {
                 if (providerId != "synthetic" ||
                     !_bindings.TryGetValue(browser, out snapshot) ||
+                    !_profileActionBusy.Contains(snapshot.ProfileId) ||
                     !Matches(browser, snapshot) || _permissionBusy.Contains(browser))
                     return false;
             }
@@ -434,6 +493,8 @@ internal sealed partial class GateForm
                     !_bindings.TryGetValue(target, out second) ||
                     !Matches(source, first) || !Matches(target, second) ||
                     !CanHandoff(first, second) || HasLiveSibling(source, target) ||
+                    !_profileActionBusy.Contains(first.ProfileId) ||
+                    !_profileActionBusy.Contains(second.ProfileId) ||
                     _permissionBusy.Contains(source) || _permissionBusy.Contains(target))
                     return null;
             }
@@ -704,6 +765,7 @@ internal sealed partial class GateForm
                 // The first 8B action is an actual WebView2 navigation,
                 // consented to at the NATIVE side rather than by page JS.
                 // Synthetic provider only: this never claims a real login.
+                using var signInLease = _native8L1Authority.ClaimProfileActions(b);
                 if (!_native8L1Authority.ApproveSyntheticSignIn(b, "synthetic"))
                     throw new UnauthorizedAccessException("Native sign-in consent denied");
                 var originalSession = b.SessionId;
@@ -729,12 +791,14 @@ internal sealed partial class GateForm
                     b.SessionEpoch == originalEpoch &&
                     Ok(await ObserveAsync(b)),
                     "Fresh Rust/MV3 channel after sign-in navigation, same profile/session/partition");
+                signInLease.Dispose();
 
                 // Every signed observation must exist before the Rust first-
                 // proof fence can transfer its two currently owned sessions.
                 Mark("native_8b_source_reattested",
                     _native8L1Authority.Current(a) && Ok(await ObserveAsync(a)),
                     "Source reauthenticated at fresh document and Rust first-proof boundary");
+                using var handoffLease = _native8L1Authority.ClaimProfileActions(a, b);
                 var ticket = _native8L1Authority.ApproveHandoff(a, b) ??
                     throw new UnauthorizedAccessException("Native 8B handoff owner consent denied");
                 var oldA = Host(a);
