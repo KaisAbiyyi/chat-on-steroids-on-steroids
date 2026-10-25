@@ -100,6 +100,25 @@ class ReleasePerfTests(unittest.TestCase):
             with self.subTest(field=key), self.assertRaisesRegex(perf.Refused, "may not assert"):
                 perf.validate(receipt, self.exe, self.out, self.target, SHA)
 
+    def test_private_extra_receipt_fields_are_refused(self):
+        baseline = self.receipt()
+        for key, value in (("private_profile_path", "C:/Users/secret"),
+                           ("provider_token", "secret")):
+            receipt = copy.deepcopy(baseline)
+            receipt[key] = value
+            with self.subTest(field=key), self.assertRaisesRegex(perf.Refused, "private"):
+                perf.validate(receipt, self.exe, self.out, self.target, SHA)
+        receipt = copy.deepcopy(baseline)
+        receipt["fresh_profile"]["user"] = "secret"
+        with self.assertRaisesRegex(perf.Refused, "private"):
+            perf.validate(receipt, self.exe, self.out, self.target, SHA)
+
+    def test_forged_workload_is_refused(self):
+        receipt = self.receipt()
+        receipt["workload"] = "fully-interactive-gui"
+        with self.assertRaisesRegex(perf.Refused, "unrecognized synthetic workload"):
+            perf.validate(receipt, self.exe, self.out, self.target, SHA)
+
     def test_forged_distribution_is_refused(self):
         receipt = self.receipt()
         receipt["fresh_profile"]["launch_ms"]["median"] = 0
