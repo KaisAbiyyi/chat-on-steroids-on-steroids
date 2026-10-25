@@ -40,6 +40,8 @@ internal sealed partial class GateForm : Form
     private readonly SortedDictionary<string, object> _checks = new();
     private readonly string _root, _repo, _bridgePath;
     private readonly string? _artifactRoot;
+    private readonly string? _retained8L1ProfileRoot;
+    private readonly bool _reuse8L1Profile;
     private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
@@ -81,8 +83,8 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent") { options.Add(args[i], "true"); continue; }
-            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root") ||
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
+            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
             options.Add(args[i], args[++i]);
@@ -100,6 +102,28 @@ internal sealed partial class GateForm : Form
         _host8L1 = options.ContainsKey("--8l1");
         _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
         _host8L1ConsentProbe = options.ContainsKey("--8l1-consent");
+        _retained8L1ProfileRoot = options.TryGetValue("--profile-root", out var retained)
+            ? Path.GetFullPath(retained) : null;
+        _reuse8L1Profile = options.ContainsKey("--reuse-8l1-profile");
+        if ((_retained8L1ProfileRoot is not null || _reuse8L1Profile) && !_host8L1)
+            throw new ArgumentException("Retained profiles exclusive to 8L1");
+        if (_reuse8L1Profile && _retained8L1ProfileRoot is null)
+            throw new ArgumentException("Reuse requires exact profile root");
+        if (_retained8L1ProfileRoot is not null)
+        {
+            var prefix = Path.DirectorySeparatorChar;
+            if (!IsUnderProject(_retained8L1ProfileRoot) ||
+                _root.Equals(_retained8L1ProfileRoot, StringComparison.OrdinalIgnoreCase) ||
+                _root.StartsWith(_retained8L1ProfileRoot.TrimEnd(prefix) + prefix, StringComparison.OrdinalIgnoreCase) ||
+                _retained8L1ProfileRoot.StartsWith(_root.TrimEnd(prefix) + prefix, StringComparison.OrdinalIgnoreCase))
+                throw new UnauthorizedAccessException("Profile root and output must not overlap");
+            RejectReparseAncestors(_retained8L1ProfileRoot);
+            if (_reuse8L1Profile && !Directory.Exists(_retained8L1ProfileRoot))
+                throw new UnauthorizedAccessException("Missing retained profiles");
+            if (!_reuse8L1Profile && Directory.Exists(_retained8L1ProfileRoot) &&
+                Directory.EnumerateFileSystemEntries(_retained8L1ProfileRoot).Any())
+                throw new UnauthorizedAccessException("First launch needs empty profile root");
+        }
         if ((_host8L1CrashProbe || _host8L1ConsentProbe) && !_host8L1)
             throw new ArgumentException("Native crash probe requires the 8L1 host");
         _l2 = options.ContainsKey("--7l2") || _host8L1;
@@ -280,31 +304,63 @@ internal sealed partial class GateForm : Form
     {
         var source = Path.Combine(_repo, "probes", "7l1", "extension");
         var companion = Path.Combine(_repo, "extension", "companion");
-        var destination = Path.Combine(_root, "extension");
+        var destination = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension");
         Directory.CreateDirectory(destination);
         foreach (var (from, file) in new[]
         {
             (source, "manifest.json"), (source, "sw.mjs"),
             (companion, "worker.mjs"), (companion, "ledger.mjs")
         })
-            File.Copy(Path.Combine(from, file), Path.Combine(destination, file), overwrite: true);
+        {
+            var sourceFile = Path.Combine(from, file);
+            var destinationFile = Path.Combine(destination, file);
+            if (File.Exists(destinationFile))
+            {
+                if (!HashFile(sourceFile).Equals(HashFile(destinationFile),
+                    StringComparison.OrdinalIgnoreCase))
+                    throw new UnauthorizedAccessException("Retained extension source changed");
+            }
+            else if (_reuse8L1Profile)
+                throw new UnauthorizedAccessException("Retained extension incomplete");
+            else
+                File.Copy(sourceFile, destinationFile);
+        }
     }
 
     private async Task<Browser> SetupAsync(
         WebView2 view, string label, uint tabId,
         CoreWebView2Environment? sharedEnvironment = null, string? installedExtensionId = null)
     {
-        var profileRoot = Path.Combine(_root, "profile-" + label);
+        var profileRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "profile-" + label);
         var env = sharedEnvironment ??
             await CoreWebView2Environment.CreateAsync(null, profileRoot,
                 new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
         await view.EnsureCoreWebView2Async(env);
         var profilePath = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
         if (!IsUnderProject(profilePath)) throw new UnauthorizedAccessException("unsafe WebView2 profile");
-        var extension = installedExtensionId is null
-            ? await view.CoreWebView2.Profile.AddBrowserExtensionAsync(Path.Combine(_root, "extension"))
-            : (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
+        var extensionRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension");
+        var idFile = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension-id-" + label + ".txt");
+        CoreWebView2BrowserExtension extension;
+        if (installedExtensionId is not null)
+            extension = (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
                 .Single(x => x.Id == installedExtensionId);
+        else if (_reuse8L1Profile)
+        {
+            if (!File.Exists(idFile))
+                throw new UnauthorizedAccessException("Missing retained extension ID");
+            var id = File.ReadAllText(idFile).Trim();
+            extension = (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
+                .Single(x => x.Id == id);
+        }
+        else
+        {
+            if (_retained8L1ProfileRoot is not null &&
+                (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync()).Count != 0)
+                throw new UnauthorizedAccessException("Unexpected extension in clean profile");
+            extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(extensionRoot);
+            if (_retained8L1ProfileRoot is not null)
+                File.WriteAllText(idFile, extension.Id);
+        }
         if (!extension.IsEnabled) throw new InvalidOperationException("extension disabled");
         var browser = new Browser
         {
