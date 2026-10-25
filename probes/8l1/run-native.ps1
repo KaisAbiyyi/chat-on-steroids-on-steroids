@@ -3,7 +3,8 @@
 param(
   [Parameter(Mandatory=$true)][string]$Repo,
   [Parameter(Mandatory=$true)][string]$ArtifactRoot,
-  [Parameter(Mandatory=$true)][string]$Out
+  [Parameter(Mandatory=$true)][string]$Out,
+  [switch]$VerifyRestart
 )
 $ErrorActionPreference = 'Stop'
 function Assert-OwnedPath([string]$path) {
@@ -42,10 +43,48 @@ $rustExe = Join-Path $ArtifactRoot '7l2_bridge.exe'
 if (-not (Test-Path -LiteralPath $hostDll) -or -not (Test-Path -LiteralPath $rustExe)) {
   throw 'Missing source-bound product Windows host or authenticated Rust child'
 }
-dotnet $hostDll --8l1 --repo $Repo --bridge $rustExe --artifact-root $ArtifactRoot --out $Out
-$code = $LASTEXITCODE
-$receipt = Join-Path $Out 'receipt.json'
-if (-not (Test-Path -LiteralPath $receipt)) { throw 'Native host did not return receipt' }
-Get-Content -Raw -LiteralPath $receipt
-if ($code -ne 0) { throw "8L1-HOST bounded check failed with exit $code" }
-Write-Output 'Bounded host test only. Full physical 8L1 remains NOT_RUN; see receipt pending checks.'
+# Each launch creates a NEW OS host process and Rust child, checked by PID
+# and source/binary identities. Profiles are independently synthetic; this
+# is a clean restart smoke check, not an OS crash or profile persistence claim.
+$receipts = @()
+$rounds = if ($VerifyRestart) { @('before-restart','after-restart') } else { @('single') }
+foreach ($round in $rounds) {
+  $destination = if ($VerifyRestart) { Join-Path $Out $round } else { $Out }
+  dotnet $hostDll --8l1 --repo $Repo --bridge $rustExe --artifact-root $ArtifactRoot --out $destination
+  $code = $LASTEXITCODE
+  $receiptPath = Join-Path $destination 'receipt.json'
+  if (-not (Test-Path -LiteralPath $receiptPath)) {
+    throw "Native host did not return receipt for $round"
+  }
+  $receipt = Get-Content -Raw -LiteralPath $receiptPath | ConvertFrom-Json
+  $receipts += $receipt
+  if ($code -ne 0 -or $receipt.rustProcessExit -ne 0 -or
+      $receipt.sourceSha -ne $expected -or $receipt.native8L1Accepted -ne $false) {
+    throw "8L1-HOST bounded check failed during $round; inspect $receiptPath"
+  }
+}
+if ($VerifyRestart) {
+  $first = $receipts[0]
+  $second = $receipts[1]
+  $fresh = $first.hostProcessId -ne $second.hostProcessId -and
+    $first.rustProcessId -ne $second.rustProcessId -and
+    $first.hostProcessId -gt 0 -and $second.hostProcessId -gt 0 -and
+    $first.rustProcessId -gt 0 -and $second.rustProcessId -gt 0
+  $sameBinaries = $first.hostBinarySha256 -eq $second.hostBinarySha256 -and
+    $first.rustBinarySha256 -eq $second.rustBinarySha256
+  $result = [pscustomobject]@{
+    sourceSha = $expected
+    cleanProcessRelaunch = if ($fresh -and $sameBinaries) { 'PASS' } else { 'FAIL' }
+    physical8L1Accepted = $false
+    osCrashQualification = 'NOT_RUN'
+    retainedProfileQualification = 'NOT_RUN'
+    firstHostPid = $first.hostProcessId
+    secondHostPid = $second.hostProcessId
+    firstRustPid = $first.rustProcessId
+    secondRustPid = $second.rustProcessId
+    sameManifestedBinaries = $sameBinaries
+  }
+  $result | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $Out 'restart-receipt.json')
+  if (-not $fresh -or -not $sameBinaries) { throw 'Native process relaunch identity failed' }
+}
+Write-Output '8L1-HOST bounded physical checks complete. Full 8L1 requires separate crash, consent and profile persistence qualification.'
