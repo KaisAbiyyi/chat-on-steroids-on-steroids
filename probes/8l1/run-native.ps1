@@ -49,6 +49,9 @@ if (-not (Test-Path -LiteralPath $hostDll) -or -not (Test-Path -LiteralPath $rus
 # the EXACT SAME browser-owned profile directories and packaged extension,
 # never live user profiles. Compare independent browser-local storage markers,
 # extension identity and fresh Rust attestations across processes.
+if ($ConsentProbe) {
+  Write-Output 'Physical owner sequence: choose Allow (Yes), then Deny (No), then Allow (Yes) on the stale-navigation prompt. The replayed approval will be denied without a dialog.'
+}
 $receipts = @()
 $profileRoot = Assert-OwnedPath (Join-Path $Out 'retained-profiles')
 $rounds = if ($VerifyRestart) { @('before-restart','after-restart') } else { @('single') }
@@ -68,8 +71,17 @@ foreach ($round in $rounds) {
   }
   $receipt = Get-Content -Raw -LiteralPath $receiptPath | ConvertFrom-Json
   $receipts += $receipt
-  if ($ConsentProbe -and $receipt.checks.native_permission_positive_consent.status -ne 'PASS') {
-    throw "Owner one-use permission consent gate failed in $round"
+  if ($ConsentProbe) {
+    foreach ($checkName in @(
+      'native_permission_positive_consent',
+      'native_permission_replay_event_denied',
+      'native_permission_stale_event_denied',
+      'native_permission_recovered_new_channel'
+    )) {
+      if ($receipt.checks.$checkName.status -ne 'PASS') {
+        throw "Actual WebView2 permission $checkName failed in $round"
+      }
+    }
   }
   if ($CrashProbe -and $receipt.checks.native_browser_process_failed.status -ne 'PASS') {
     throw "Real browser crash failed to retire all scopes in $round"
