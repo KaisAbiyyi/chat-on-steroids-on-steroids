@@ -67,17 +67,19 @@ class ReleasePerfTests(unittest.TestCase):
     def test_mismatched_source_platform_are_refused(self):
         with self.assertRaises(bundle.Refused):
             perf.artifact(self.exe, self.out, self.target, "b" * 40)
-        with self.assertRaisesRegex(perf.Refused, "platform"):
-            perf.artifact(self.exe, self.out, "linux-x64", SHA)
+        linux_binary = self.root / "cos-rust"
+        linux_binary.write_bytes(self.exe.read_bytes())
+        with self.assertRaisesRegex(perf.Refused, "bundle platform mismatch"):
+            perf.artifact(linux_binary, self.out, "linux-x64", SHA)
 
-    def test_signed_bundle_index_or_unknown_member_is_refused(self):
-        with self.out.open("ab") as stream:
-            stream.write(b"tamper")
-        # Extra trailer does not invalidate ZIP internal hashes, but identity
-        # changes and 16D records the exact bundle digest, not old receipt.
-        altered = self.receipt()
-        self.assertEqual(altered["bundle_sha256"], perf.digest(self.out)[0])
-        self.assertEqual(perf.validate(altered, self.exe, self.out, self.target, SHA)["status"], "PASS")
+    def test_corrupted_bundle_payload_is_refused(self):
+        from zipfile import BadZipFile
+        raw = self.out.read_bytes()
+        self.assertIn(b"synthetic-headless-not-executable", raw)
+        self.out.write_bytes(raw.replace(b"synthetic-headless-not-executable",
+                                         b"synthetic-headless-not-executablX", 1))
+        with self.assertRaises((bundle.Refused, BadZipFile)):
+            perf.artifact(self.exe, self.out, self.target, SHA)
 
     def test_tampered_receipt_size_or_hash_is_refused(self):
         baseline = self.receipt()
