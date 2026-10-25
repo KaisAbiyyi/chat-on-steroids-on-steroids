@@ -40,6 +40,7 @@ jobs:
       - run: node --test extension/adapter/tests/profile-session.test.mjs
       - run: node --test extension/adapter/tests/browser-lifecycle.test.mjs
       - run: node --test probes/8p/production-contract.test.mjs
+      - run: node --test probes/8p/worker-attestation.test.mjs
       - run: node --test probes/7l1/tests/worker-auth.test.mjs
         env:
           COS_TEST_TMP: ${{ runner.temp }}
