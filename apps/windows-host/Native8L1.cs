@@ -60,6 +60,19 @@ internal sealed partial class GateForm
             approval.Capability == capability && capability != "unsupported" &&
             ExactOrigin(requestUri, expected.Origin);
 
+        // Equivalent to the accepted 8C suspended/navigated/rebound guard:
+        // all authority generations must be fresh on renewal and partitions
+        // cannot migrate under the same native profile/tab scope.
+        private static bool FreshRebind(Binding prior, Binding next) =>
+            prior.ProfileId == next.ProfileId &&
+            prior.TabId == next.TabId &&
+            prior.PartitionId == next.PartitionId &&
+            string.Equals(prior.ProfilePath, next.ProfilePath, StringComparison.OrdinalIgnoreCase) &&
+            prior.Origin == next.Origin &&
+            next.HostGeneration > prior.HostGeneration &&
+            next.NavigationEpoch > prior.NavigationEpoch &&
+            next.DocumentId != prior.DocumentId;
+
         private static bool Consume(OneUseApproval approval, Binding expected,
             Binding current, string capability, string requestUri,
             HashSet<string> consumed) =>
@@ -94,6 +107,16 @@ internal sealed partial class GateForm
             Require(!ExactOrigin("http://synthetic.cos.test/", Origin));
             Require(!ExactOrigin("https://user@synthetic.cos.test/", Origin));
             Require(first.PartitionId != foreign.PartitionId);
+            Require(!FreshRebind(first, first));
+            Require(!FreshRebind(first, stale));
+            Require(!FreshRebind(first, first with {
+                HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2",
+                PartitionId = "partition-replaced" }));
+            Require(!FreshRebind(first, first with {
+                HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2",
+                ProfileId = "profile-B" }));
+            Require(FreshRebind(first, first with {
+                HostGeneration = 2, NavigationEpoch = 2, DocumentId = "doc-2" }));
             Console.WriteLine("8L1 native authority consent, replay, stale-scope and origin policy PASS");
         }
 
@@ -203,14 +226,13 @@ internal sealed partial class GateForm
                 if (_bindings.Count >= 256 && !_bindings.ContainsKey(b))
                     throw new UnauthorizedAccessException("8C frame capacity");
                 var prior = _bindings.GetValueOrDefault(b);
-                if (prior is not null && (b.HostGeneration <= prior.HostGeneration ||
-                    b.NavigationEpoch <= prior.NavigationEpoch ||
-                    b.DocumentId == prior.DocumentId))
-                    throw new UnauthorizedAccessException("8C stale rebind");
-                _bindings[b] = new Binding(b.Profile, owner.Partition, path,
+                var next = new Binding(b.Profile, owner.Partition, path,
                     b.TabId, b.DocumentId, b.NavigationEpoch,
                     b.WorkerGeneration, b.HostGeneration, b.ChannelId,
                     b.SessionId, Origin, (prior?.Sequence ?? 0) + 1);
+                if (prior is not null && !FreshRebind(prior, next))
+                    throw new UnauthorizedAccessException("8C stale or cross-partition rebind");
+                _bindings[b] = next;
             }
         }
 
