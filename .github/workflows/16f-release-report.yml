@@ -1,0 +1,39 @@
+name: 16F source-bound cloud security/provenance review
+on:
+  push:
+    branches:
+      - 'work/16f-*'
+  pull_request:
+permissions:
+  contents: read
+env:
+  VERIFIED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  security-provenance-report:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ env.VERIFIED_HEAD }}
+          fetch-depth: 0
+      - name: Source-pinned negative evidence and predecessor regressions
+        run: python -m unittest tools.test_release_16f tools.test_release_16b tools.test_release_16c tools.test_release_16d tools.test_release_16e -v
+      - name: Syntax check for release audit and predecessor contracts
+        run: python -m py_compile tools/release_16f.py tools/test_release_16f.py tools/release_16b.py tools/release_16c.py tools/release_16d.py tools/release_16e.py
+      - name: Produce and verify exact-source cloud provenance receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/release_16f.py report --expected-head "$VERIFIED_HEAD" --receipt 16f-cloud-release-report.json
+          python tools/release_16f.py verify --expected-head "$VERIFIED_HEAD" --receipt 16f-cloud-release-report.json
+      - name: Upload cloud-only immutable-scope report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cosos-16f-cloud-${{ runner.os }}-${{ github.run_id }}
+          path: 16f-cloud-release-report.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,57 @@
+name: 16D source-bound cloud startup RAM size gates
+on:
+  push:
+    branches:
+      - 'work/16d-*'
+  pull_request:
+    paths:
+      - 'tools/release_16d.py'
+      - 'tools/test_release_16d.py'
+      - '.github/workflows/16d-release-perf.yml'
+permissions:
+  contents: read
+env:
+  CARGO_BUILD_JOBS: 2
+jobs:
+  headless-perf:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - name: Negative synthetic receipt and bundle regression tests
+        run: python -m unittest tools.test_release_16d tools.test_release_16c -v
+      - name: Compile Python scripts
+        run: python -m py_compile tools/release_16d.py tools/test_release_16d.py
+      - name: Build source-bound release executable and 16C bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            target=x86_64-pc-windows-msvc
+            binary=target/release/cos-rust.exe
+            platform=windows-x64
+          else
+            target=x86_64-unknown-linux-gnu
+            binary=target/release/cos-rust
+            platform=linux-x64
+          fi
+          cargo metadata --locked --format-version 1 --filter-platform "$target" > metadata-16d.json
+          cargo build --release --locked -p cos-app
+          python tools/release_16c.py build --binary "$binary" --project-license LICENSE --metadata-json metadata-16d.json --cargo-lock Cargo.lock --out 16d-headless-bundle.zip --platform "$platform" --source-sha "$GITHUB_SHA"
+          python tools/release_16c.py verify --bundle 16d-headless-bundle.zip --source-sha "$GITHUB_SHA"
+          python tools/release_16d.py measure --binary "$binary" --bundle 16d-headless-bundle.zip --platform "$platform" --source-sha "$GITHUB_SHA" --out 16d-cloud-perf.json
+          python tools/release_16d.py verify --binary "$binary" --bundle 16d-headless-bundle.zip --platform "$platform" --source-sha "$GITHUB_SHA" --receipt 16d-cloud-perf.json
+      - name: Upload provisional numeric receipt (not native product acceptance)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cosos-16d-cloud-${{ runner.os }}-${{ github.run_id }}
+          path: 16d-cloud-perf.json
+          if-no-files-found: error
+          retention-days: 14
