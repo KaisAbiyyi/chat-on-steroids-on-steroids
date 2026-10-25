@@ -243,9 +243,7 @@ impl NativeBrowserBridge {
         {
             return Err(NativeBridgeError::Host);
         }
-        if self.owners.contains_key(&source.scope())
-            || self.owners.contains_key(&target.scope())
-        {
+        if self.owners.contains_key(&source.scope()) || self.owners.contains_key(&target.scope()) {
             return Err(NativeBridgeError::Channel);
         }
         self.fence.handoff_verified(
@@ -673,12 +671,7 @@ mod tests {
         for host in [new_source, new_target] {
             let boot = bridge.register_host(host.clone()).unwrap();
             bridge
-                .complete_handshake(
-                    &host,
-                    boot.channel_id,
-                    2,
-                    &boot.handshake_proof(),
-                )
+                .complete_handshake(&host, boot.channel_id, 2, &boot.handshake_proof())
                 .unwrap();
             let signed = bytes(&host);
             assert_eq!(
