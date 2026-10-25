@@ -321,6 +321,7 @@ internal sealed partial class GateForm
                     lock (_gate)
                     {
                         if (!_bindings.TryGetValue(b, out var current) ||
+                            _profileActionBusy.Contains(current.ProfileId) ||
                             !Matches(b, current))
                         {
                             if (forceStale) _staleAllowDenied++;
@@ -537,6 +538,8 @@ internal sealed partial class GateForm
                     nowSource != ticket.Source || nowTarget != ticket.Target ||
                     !CanHandoff(nowSource, nowTarget) ||
                     HasLiveSibling(source, target) ||
+                    !_profileActionBusy.Contains(nowSource.ProfileId) ||
+                    !_profileActionBusy.Contains(nowTarget.ProfileId) ||
                     !source.Revoked || !target.Revoked ||
                     source.ChannelId != 0 || target.ChannelId != 0 ||
                     source.RetirementTask is not null || target.RetirementTask is not null ||
