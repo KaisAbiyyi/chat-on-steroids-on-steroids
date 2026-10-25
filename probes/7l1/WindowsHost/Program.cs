@@ -19,6 +19,11 @@ internal static class Program
             return;
         }
 #if COS_8L1_PRODUCT
+        if (args.Length == 1 && args[0] == "--8p-policy-self-test")
+        {
+            GateForm.Run8PPolicyTests();
+            return;
+        }
         if (args.Length == 1 && args[0] == "--8l1-authority-self-test")
         {
             GateForm.Run8L1PolicyTests();
@@ -42,7 +47,7 @@ internal sealed partial class GateForm : Form
     private readonly string? _artifactRoot;
     private readonly string? _retained8L1ProfileRoot;
     private readonly bool _reuse8L1Profile;
-    private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8P, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -84,8 +89,8 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
-            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root") ||
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8p" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
+            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root" or "--8p-config" or "--8p-provider") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
             options.Add(args[i], args[++i]);
@@ -101,6 +106,11 @@ internal sealed partial class GateForm : Form
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
         _host8L1 = options.ContainsKey("--8l1");
+        _host8P = options.ContainsKey("--8p");
+        _host8PConfig = options.GetValueOrDefault("--8p-config");
+        _host8PProvider = options.GetValueOrDefault("--8p-provider");
+        if (_host8P && (_host8L1 || _cdpPreflight || _idle || options.ContainsKey("--7l2") ||
+            _retained8L1ProfileRoot is not null)) throw new ArgumentException("8P is a separate isolated product origin gate");
         _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
         _host8L1ConsentProbe = options.ContainsKey("--8l1-consent");
         _host8L1ProfileActionsProbe = options.ContainsKey("--8l1-profile-actions");
@@ -138,7 +148,7 @@ internal sealed partial class GateForm : Form
             RejectReparseAncestors(path);
         if (_artifactRoot is not null)
             RejectReparseAncestors(_artifactRoot);
-        Text = _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
+        Text = _host8P ? "CoSoS 8P production origin native consent gate" :\n            _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
             _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
             "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
@@ -776,7 +786,7 @@ internal sealed partial class GateForm : Form
 
     private async Task ExecuteAsync()
     {
-        if (_host8L1) { await Execute8L1Async(); return; }
+        if (_host8P) { await Execute8PAsync(); return; }\n        if (_host8L1) { await Execute8L1Async(); return; }
         if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;
         var rustExit = -1;
