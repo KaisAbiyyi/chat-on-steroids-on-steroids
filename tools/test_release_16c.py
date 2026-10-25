@@ -183,7 +183,7 @@ class BundleTests(unittest.TestCase):
         self.build()
         with ZipFile(self.out, "a") as z:
             z.writestr("secret.txt", "not allowed")
-        with self.assertRaisesRegex(bundle.Refused, "index coverage"):
+        with self.assertRaisesRegex(bundle.Refused, "required bundle payload"):
             bundle.verify(self.out, SHA)
 
     def test_tampered_content_refused(self):
