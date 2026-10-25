@@ -177,6 +177,20 @@ internal sealed partial class GateForm
             next.NavigationEpoch > prior.NavigationEpoch &&
             next.DocumentId != prior.DocumentId;
 
+        // The 8L1 *qualifier* owns only the synthetic virtual host. Never
+        // reinterpret a provider ID as a URL or start a real sign-in here:
+        // provider-origin redirects, authenticated worker attestation and
+        // user-operated account sign-in require a separate product adapter.
+        private static bool EligibleSyntheticNavigation(
+            string providerId, string requestedOrigin, Binding binding) =>
+            string.Equals(providerId, "synthetic", StringComparison.Ordinal) &&
+            string.Equals(requestedOrigin, Origin, StringComparison.Ordinal) &&
+            string.Equals(binding.Origin, Origin, StringComparison.Ordinal) &&
+            Uri.TryCreate(requestedOrigin, UriKind.Absolute, out var uri) &&
+            uri.UserInfo.Length == 0 && uri.Fragment.Length == 0 &&
+            string.Equals(uri.GetLeftPart(UriPartial.Authority), Origin,
+                StringComparison.Ordinal);
+
         private static bool Consume(OneUseApproval approval, Binding expected,
             Binding current, string capability, string requestUri,
             HashSet<string> consumed) =>
@@ -210,6 +224,20 @@ internal sealed partial class GateForm
             Require(!ExactOrigin("https://synthetic.cos.test.evil.test/", Origin));
             Require(!ExactOrigin("http://synthetic.cos.test/", Origin));
             Require(!ExactOrigin("https://user@synthetic.cos.test/", Origin));
+            Require(EligibleSyntheticNavigation("synthetic", Origin, first));
+            foreach (var rejected in new[] {
+                "http://synthetic.cos.test",
+                "https://synthetic.cos.test.evil.invalid",
+                "https://user@synthetic.cos.test",
+                "https://synthetic.cos.test/index.html",
+                "https://synthetic.cos.test/",
+                "https://other-provider.invalid"
+            }) Require(!EligibleSyntheticNavigation("synthetic", rejected, first));
+            Require(!EligibleSyntheticNavigation("chatgpt", Origin, first));
+            Require(!EligibleSyntheticNavigation("gemini", Origin, first));
+            Require(!EligibleSyntheticNavigation("claude", Origin, first));
+            Require(!EligibleSyntheticNavigation("synthetic", Origin,
+                first with { Origin = "https://other-provider.invalid" }));
             Require(first.PartitionId != foreign.PartitionId);
             var busy = new HashSet<string>(StringComparer.Ordinal);
             Require(ReserveProfiles(busy, new[] { "profile-A", "profile-B" }));
@@ -451,13 +479,14 @@ internal sealed partial class GateForm
 
         // 8B synthetic provider navigation: this confirms consent to START
         // navigation, never an authenticated account or an imported cookie.
-        public bool ApproveSyntheticSignIn(Browser browser, string providerId)
+        public bool ApproveSyntheticSignIn(
+            Browser browser, string providerId, string requestedOrigin)
         {
             Binding? snapshot;
             lock (_gate)
             {
-                if (providerId != "synthetic" ||
-                    !_bindings.TryGetValue(browser, out snapshot) ||
+                if (!_bindings.TryGetValue(browser, out snapshot) ||
+                    !EligibleSyntheticNavigation(providerId, requestedOrigin, snapshot) ||
                     !_profileActionBusy.Contains(snapshot.ProfileId) ||
                     !Matches(browser, snapshot) || _permissionBusy.Contains(browser))
                     return false;
@@ -782,7 +811,7 @@ internal sealed partial class GateForm
                 // consented to at the NATIVE side rather than by page JS.
                 // Synthetic provider only: this never claims a real login.
                 using var signInLease = _native8L1Authority.ClaimProfileActions(b);
-                if (!_native8L1Authority.ApproveSyntheticSignIn(b, "synthetic"))
+                if (!_native8L1Authority.ApproveSyntheticSignIn(b, "synthetic", Origin))
                     throw new UnauthorizedAccessException("Native sign-in consent denied");
                 var originalSession = b.SessionId;
                 var originalEpoch = b.SessionEpoch;
