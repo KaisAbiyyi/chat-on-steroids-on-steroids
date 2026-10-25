@@ -285,7 +285,38 @@ internal sealed partial class GateForm
                 "Privileged native target identity and opaque storage partition cannot cross profiles");
             Mark("native_permission_default_deny",
                 _native8L1Authority.PermissionDefaultDeny(),
-                "All native CoreWebView2.PermissionRequested handlers default deny, no page-supplied consent");
+                "Real native permission side effect default-deny; each owner approval is one-use and not persisted");
+            // Two distinct real WebView2 controllers share the OS profile,
+            // extension storage and opaque 8B partition, with separate tabs.
+            var rival = await SetupAsync(_sameProfileTab, "A", 3,
+                _a.CoreWebView2.Environment, a.ExtensionId);
+            var actualSharedProfile = rival.ProfilePath == a.ProfilePath &&
+                rival.ExtensionId == a.ExtensionId && rival.TabId != a.TabId &&
+                !ReferenceEquals(rival.View.CoreWebView2, a.View.CoreWebView2);
+            rival.HostGeneration = a.HostGeneration;
+            var rivalHandshake = await BindAsync(rival, "8l1-synthetic-a");
+            _native8L1Authority.Track(rival);
+            Mark("native_multitab_same_partition",
+                actualSharedProfile && rivalHandshake.GetProperty("authenticated").GetBoolean() &&
+                _native8L1Authority.Current(rival) &&
+                _native8L1Authority.SamePartition(a, rival) &&
+                !_native8L1Authority.SamePartition(b, rival),
+                "Two live WebView2 tabs share profile A only; distinct profile B cannot share partition");
+            var rivalObservation = await ObserveAsync(rival);
+            Mark("native_multitab_conflicting_claim_denied",
+                !rivalObservation.GetProperty("ok").GetBoolean() &&
+                rivalObservation.GetProperty("error").GetString() ==
+                    "a session is already attributed to another browser scope",
+                "Rust 7A refuses two tabs claiming the same application session");
+            _sameProfileTab.Dispose();
+            var rivalRetired = rival.RetirementTask is not null && await rival.RetirementTask;
+            Mark("native_multitab_close_retires_channel",
+                rivalRetired && !_native8L1Authority.Current(rival) &&
+                _native8L1Authority.Current(b),
+                "Closing one physical tab retires its own Rust channel without revoking profile B");
+            a.HostGeneration = Math.Max(a.HostGeneration, rival.HostGeneration);
+            await BindAsync(a, "8l1-synthetic-a");
+            _native8L1Authority.Track(a);
             var oldChannel = a.ChannelId;
             _a.CoreWebView2.Navigate(StartUrl + "?new-document=1");
             await Task.Delay(300);
@@ -305,9 +336,10 @@ internal sealed partial class GateForm
                 "Navigating one real WebView2 did not steal a separate browser-owned partition");
             // 8L1 physical full gate is still NOT_RUN until restart/crash,
             // one-use real consent and multi-tab are independently exercised.
-            Pending("native_host_process_restart", "Separate OS process restart is not exercised in this partial host test");
-            Pending("native_permission_positive_consent", "Owner-controlled permission UI is not yet connected");
-            Pending("native_multitab_same_partition", "Actual same-profile multi-tab fixture is not yet connected");
+            Pending("native_host_process_restart",
+                "OS process restart must be qualified on physical Windows with two source-matched invocations");
+            Pending("native_permission_positive_consent",
+                "Native owner Yes/No prompt implemented; physical one-use WebView2 permission grant/deny interaction not yet exercised");
             exit = _failed ? 1 : 0;
         }
         catch (Exception ex)
