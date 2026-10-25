@@ -793,7 +793,8 @@ internal sealed partial class GateForm : Form
     {
 #if COS_8L1_PRODUCT
         if (_host8P) { await Execute8PAsync(); return; }
-#endif\n        if (_host8L1) { await Execute8L1Async(); return; }
+#endif
+        if (_host8L1) { await Execute8L1Async(); return; }
         if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;
         var rustExit = -1;
