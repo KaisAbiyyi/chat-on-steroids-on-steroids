@@ -6,6 +6,7 @@ server or selects user data. Release 16B's Authenticode verifier is replaced
 only with an explicitly supplied fixture callback. Native install, signature,
 WebView2, and real-profile rollback remain separate gates.
 """
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -85,6 +86,14 @@ class DisposableMatrix:
             self._slot(value["previous"])
         return value
 
+    @staticmethod
+    def _manifest_sha(root):
+        manifest = Path(root) / "release.json"
+        if (manifest.is_symlink() or not manifest.is_file()
+                or manifest.stat().st_size > 64 * 1024):
+            raise RehearsalRefused("missing, linked or oversize release manifest")
+        return hashlib.sha256(manifest.read_bytes()).hexdigest()
+
     def _inspect(self, directory, current_version):
         try:
             return release_16b.inspect(
@@ -124,7 +133,10 @@ class DisposableMatrix:
         before = self.state()
         active = self.current()
         current_version = active["version"] if active is not None else "0.0.0"
+        expected_manifest_sha = self._manifest_sha(staging_dir)
         receipt = self._inspect(staging_dir, current_version)
+        if self._manifest_sha(staging_dir) != expected_manifest_sha:
+            raise RehearsalRefused("staging manifest changed during preflight")
         if fail_at == "after_preflight":
             raise InjectedCrash(fail_at)
         name = "slot-" + uuid.uuid4().hex
@@ -143,6 +155,9 @@ class DisposableMatrix:
                     shutil.copyfileobj(reader, writer, length=1024 * 1024)
             if fail_at == "after_copy":
                 raise InjectedCrash(fail_at)
+            if (self._manifest_sha(new_slot) != expected_manifest_sha
+                    or self._manifest_sha(staging_dir) != expected_manifest_sha):
+                raise RehearsalRefused("staging manifest changed during copy")
             check = self._inspect(new_slot, current_version)
             if check["version"] != receipt["version"]:
                 raise RehearsalRefused("copied release version changed")
