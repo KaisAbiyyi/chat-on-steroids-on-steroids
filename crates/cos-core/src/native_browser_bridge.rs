@@ -243,7 +243,12 @@ impl NativeBrowserBridge {
         {
             return Err(NativeBridgeError::Host);
         }
-        if self.owners.contains_key(&source.scope()) || self.owners.contains_key(&target.scope()) {
+        // Session attribution belongs to profiles, not only these two tabs:
+        // a still-live sibling WebView2 tab could otherwise retain an older
+        // authenticated Rust lease into the old application session.
+        if self.owners.keys().any(|(profile, _, _)| {
+            profile == &source.identity.profile_id || profile == &target.identity.profile_id
+        }) {
             return Err(NativeBridgeError::Channel);
         }
         self.fence.handoff_verified(
