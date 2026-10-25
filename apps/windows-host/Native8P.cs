@@ -290,7 +290,7 @@ internal sealed partial class GateForm
             TabId = 1, SessionId = "8p-unattributed", Production8P = true
         };
         _browsers.Add(_a, browser);
-        using var rebindLock = new SemaphoreSlim(1, 1);
+        var rebindLock = new SemaphoreSlim(1, 1);
         var refused = 0;
         var bound = 0;
         var completed = new TaskCompletionSource<bool>(
