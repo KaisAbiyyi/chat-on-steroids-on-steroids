@@ -229,6 +229,55 @@ impl IdentityFence {
         Ok(Observation::FirstProof)
     }
 
+    /// Explicit 8B handoff after both native Rust channels retire.
+    /// A normal browser observation never transfers ownership.
+    pub(crate) fn handoff_verified(
+        &mut self,
+        source: &DocumentIdentity,
+        target: &DocumentIdentity,
+        next_source_id: &str,
+        next_source_epoch: u64,
+        next_target_epoch: u64,
+    ) -> Result<(), BridgeContractError> {
+        self.require_current(source)?;
+        self.require_current(target)?;
+        if source.profile_id == target.profile_id
+            || source.session_id == target.session_id
+            || next_source_id == source.session_id
+            || next_source_id == target.session_id
+            || next_source_epoch <= source.session_epoch
+            || next_target_epoch <= source.session_epoch.max(target.session_epoch)
+        {
+            return Err(BridgeContractError::ConflictingSession);
+        }
+        let new_source = DocumentIdentity {
+            session_id: next_source_id.to_string(),
+            session_epoch: next_source_epoch,
+            ..source.clone()
+        };
+        let new_target = DocumentIdentity {
+            session_id: source.session_id.clone(),
+            session_epoch: next_target_epoch,
+            ..target.clone()
+        };
+        new_source.validate()?;
+        new_target.validate()?;
+        if self.first_proof.contains_key(&new_source.session())
+            || self.first_proof.contains_key(&new_target.session())
+        {
+            return Err(BridgeContractError::ConflictingAttribution);
+        }
+        self.current.remove(&source.scope());
+        self.current.remove(&target.scope());
+        self.first_proof.remove(&source.session());
+        self.first_proof.remove(&target.session());
+        self.first_proof
+            .insert(new_source.session(), new_source.scope());
+        self.first_proof
+            .insert(new_target.session(), new_target.scope());
+        Ok(())
+    }
+
     /// Admission requires an *exact* current identity, not just a matching
     /// session, URL, tab, or increasing client-provided counter.
     fn require_current(&self, identity: &DocumentIdentity) -> Result<(), BridgeContractError> {
@@ -259,6 +308,54 @@ mod tests {
             session_epoch: 3,
             worker_generation: 1,
         }
+    }
+
+    #[test]
+    fn explicit_handoff_reserves_target_and_fences_old_claims() {
+        let mut fence = IdentityFence::new();
+        let source = identity();
+        let target = DocumentIdentity {
+            profile_id: "profile-B".into(),
+            tab_id: 8,
+            session_id: "local-session-B".into(),
+            ..source.clone()
+        };
+        fence.observe_verified(source.clone()).unwrap();
+        fence.observe_verified(target.clone()).unwrap();
+        assert_eq!(
+            fence.handoff_verified(&source, &target, "empty-session", 4, 5),
+            Ok(())
+        );
+        assert_eq!(
+            fence.handoff_verified(&source, &target, "another-session", 5, 6),
+            Err(BridgeContractError::NotCurrent)
+        );
+        let fresh_source = DocumentIdentity {
+            document_id: "after-A".into(),
+            navigation_epoch: 2,
+            worker_generation: 2,
+            session_id: "empty-session".into(),
+            session_epoch: 4,
+            ..source.clone()
+        };
+        let fresh_target = DocumentIdentity {
+            document_id: "after-B".into(),
+            navigation_epoch: 2,
+            worker_generation: 2,
+            session_id: source.session_id.clone(),
+            session_epoch: 5,
+            ..target.clone()
+        };
+        assert_eq!(fence.observe_verified(fresh_source), Ok(Observation::FirstProof));
+        assert_eq!(
+            fence.observe_verified(fresh_target.clone()),
+            Ok(Observation::FirstProof)
+        );
+        assert!(fence.require_current(&fresh_target).is_ok());
+        assert_eq!(
+            fence.observe_verified(source),
+            Err(BridgeContractError::ConflictingAttribution)
+        );
     }
 
     #[test]
