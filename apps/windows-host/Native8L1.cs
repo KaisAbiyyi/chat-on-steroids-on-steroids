@@ -59,12 +59,33 @@ internal sealed partial class GateForm
         // A modal owner consent dialog can pump native events. Serialize each
         // browser's permission request and reattest after the dialog closes.
         private readonly HashSet<Browser> _permissionBusy = new(ReferenceEqualityComparer.Instance);
+        private readonly HashSet<Browser> _armStaleOnNextEvent = new(ReferenceEqualityComparer.Instance);
         private readonly object _gate = new();
+        private bool _armReplayOnNextEvent;
+        private OneUseApproval? _priorGrant;
         private int _ownerPrompts, _ownerGrants, _ownerDenials;
+        private int _permissionEvents, _replayDenied, _staleAllowDenied;
 
-        public (int Prompts, int Grants, int Denials) OwnerConsentCounts()
+        public (int Prompts, int Grants, int Denials, int Events, int ReplayDenied,
+            int StaleAllowDenied) OwnerConsentCounts()
         {
-            lock (_gate) return (_ownerPrompts, _ownerGrants, _ownerDenials);
+            lock (_gate) return (_ownerPrompts, _ownerGrants, _ownerDenials,
+                _permissionEvents, _replayDenied, _staleAllowDenied);
+        }
+
+        // Test-only arms: these cannot grant a permission; an actual
+        // WebView2 PermissionRequested event is still necessary to test them.
+        public void ArmReplayProbe()
+        {
+            lock (_gate)
+            {
+                if (_priorGrant is null) throw new InvalidOperationException("No owner grant to replay");
+                _armReplayOnNextEvent = true;
+            }
+        }
+        public void ArmStaleProbe(Browser browser)
+        {
+            lock (_gate) _armStaleOnNextEvent.Add(browser);
         }
 
         private sealed record OneUseApproval(string Nonce, Binding Binding, string Capability);
@@ -177,17 +198,40 @@ internal sealed partial class GateForm
                 e.Handled = true;
                 var cap = Capability(e.PermissionKind);
                 Binding? snapshot;
+                bool forceStale;
                 lock (_gate)
                 {
+                    _permissionEvents++;
                     if (cap == "unsupported" || _permissionBusy.Contains(b) ||
                         !_bindings.TryGetValue(b, out snapshot) ||
                         !Matches(b, snapshot) || !ExactOrigin(e.Uri, snapshot.Origin))
                         return;
+                    if (_armReplayOnNextEvent)
+                    {
+                        _armReplayOnNextEvent = false;
+                        var previous = _priorGrant;
+                        if (previous is not null && !Consume(previous, previous.Binding,
+                            snapshot, cap, e.Uri, _consumedApprovals))
+                            _replayDenied++;
+                        // This real WebView2 request stays Deny. No new dialog.
+                        return;
+                    }
+                    forceStale = _armStaleOnNextEvent.Remove(b);
                     _permissionBusy.Add(b);
                     _ownerPrompts++;
                 }
                 try
                 {
+                    if (forceStale)
+                    {
+                        // WinForms modal MessageBox pumps this posted native
+                        // navigation, revoking the exact old document scope.
+                        b.View.BeginInvoke(new Action(() =>
+                        {
+                            if (!b.View.IsDisposed)
+                                b.View.CoreWebView2.Navigate(StartUrl);
+                        }));
+                    }
                     // The actual native owner dialog is the sole grant source;
                     // no page, MV3 script or webmessage can supply approval.
                     var result = MessageBox.Show(
@@ -206,7 +250,12 @@ internal sealed partial class GateForm
                     lock (_gate)
                     {
                         if (!_bindings.TryGetValue(b, out var current) ||
-                            !Matches(b, current)) return;
+                            !Matches(b, current))
+                        {
+                            if (forceStale) _staleAllowDenied++;
+                            return;
+                        }
+                        if (forceStale) return; // probe never grants without proven revocation
                         var approval = new OneUseApproval(
                             Guid.NewGuid().ToString("N"), snapshot, cap);
                         if (_consumedApprovals.Count < 4096 &&
@@ -214,6 +263,7 @@ internal sealed partial class GateForm
                                 e.Uri, _consumedApprovals))
                         {
                             e.State = CoreWebView2PermissionState.Allow;
+                            _priorGrant = approval;
                             _ownerGrants++;
                         }
                     }
