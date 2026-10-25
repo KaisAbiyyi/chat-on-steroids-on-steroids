@@ -200,6 +200,82 @@ internal sealed partial class GateForm
             return SafeOAuthRequest(provider, parsed.Query);
         }
 
+        // These methods only parse host-configured flow transitions. The
+        // provider page owns its OAuth request; none of these values are
+        // credentials or proof of authentication.
+        public bool TryAuthorizationRequest(string providerId, string url,
+            out string state, out string callback)
+        {
+            state = callback = "";
+            if (!Allows(providerId, url) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
+                parsed.Query.Length == 0) return false;
+            var query = parsed.Query[1..].Split('&')
+                .Select(value => value.Split('=', 2))
+                .ToDictionary(parts => parts[0], parts => parts[1],
+                    StringComparer.Ordinal);
+            state = Uri.UnescapeDataString(query["state"]);
+            callback = Uri.UnescapeDataString(query["redirect_uri"]);
+            return true;
+        }
+
+        public bool IsCallbackCandidate(string providerId, string url)
+        {
+            if (!_providers.TryGetValue(providerId, out var provider) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                uri.Scheme != Uri.UriSchemeHttps || uri.UserInfo.Length != 0)
+                return false;
+            return provider.CallbackUrls.Contains(uri.GetLeftPart(UriPartial.Path));
+        }
+
+        public bool TryCallback(string providerId, string url,
+            out string state)
+        {
+            state = "";
+            if (!IsCallbackCandidate(providerId, url) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
+                parsed.Fragment.Length != 0 || parsed.Query.Length is < 2 or > 2049 ||
+                url.Contains('\\') || url.Contains('@')) return false;
+            var pieces = parsed.Query[1..].Split('&');
+            if (pieces.Length != 2) return false;
+            var values = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in pieces)
+            {
+                var split = pair.IndexOf('=');
+                if (split <= 0 || split == pair.Length - 1) return false;
+                var key = pair[..split];
+                var value = pair[(split + 1)..];
+                if (key is not ("state" or "code") ||
+                    !values.TryAdd(key, value) || value.Length > 1024 ||
+                    value.Contains('+') || value.Any(ch => ch <= 0x20 ||
+                        ch >= 0x7f || ch == '#' || ch == '@' || ch == '\\'))
+                    return false;
+                for (var i = 0; i < value.Length; i++)
+                {
+                    if (value[i] != '%') continue;
+                    if (i + 2 >= value.Length ||
+                        !Uri.IsHexDigit(value[i + 1]) ||
+                        !Uri.IsHexDigit(value[i + 2])) return false;
+                    i += 2;
+                }
+            }
+            if (!values.TryGetValue("state", out var encodedState) ||
+                !values.TryGetValue("code", out var code) ||
+                code.Length is < 1 or > 1024) return false;
+            state = Uri.UnescapeDataString(encodedState);
+            return state.Length is >= 16 and <= 256 &&
+                state.All(ch => (ch >= 'a' && ch <= 'z') ||
+                    (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= '0' && ch <= '9') || ch is '-' or '_');
+        }
+
+        public string PrimaryOrigin(string providerId)
+        {
+            if (!_providers.TryGetValue(providerId, out var provider))
+                Deny("unknown-provider");
+            return provider!.Origin;
+        }
+
         public static void SelfTest()
         {
             const string config = """{"providers":[{"id":"chatgpt","origin":"https://chatgpt.com","redirectOrigins":["https://auth.openai.com"],"callbackUrls":["https://chatgpt.com/auth/callback"]},{"id":"gemini","origin":"https://gemini.google.com","redirectOrigins":[],"callbackUrls":[]}]}""";
@@ -225,6 +301,22 @@ internal sealed partial class GateForm
                 "&code_challenge_method=S256" +
                 "&redirect_uri=https%3A%2F%2Fchatgpt.com%2Fauth%2Fcallback";
             Check(p.Allows("chatgpt", "https://auth.openai.com/authorize" + query));
+            Check(p.TryAuthorizationRequest("chatgpt",
+                "https://auth.openai.com/authorize" + query,
+                out var requestState, out var requestCallback) &&
+                requestState == "abcdefghijklmnop0123456789" &&
+                requestCallback == "https://chatgpt.com/auth/callback");
+            Check(p.TryCallback("chatgpt",
+                "https://chatgpt.com/auth/callback?code=one-use&state=abcdefghijklmnop0123456789",
+                out var callbackState) &&
+                callbackState == requestState);
+            Check(!p.TryCallback("chatgpt",
+                "https://chatgpt.com/auth/callback?access_token=evil&state=abcdefghijklmnop0123456789",
+                out _));
+            Check(!p.TryCallback("chatgpt",
+                "https://chatgpt.com/auth/callback?code=one&state=abcdefghijklmnop0123456789&code=two",
+                out _));
+
             foreach (var suffix in new[] {
                 "?code=credential", "?access_token=secret", "?state=guess",
                 "?response_type=token", query + "&code=credential",
@@ -258,7 +350,110 @@ internal sealed partial class GateForm
         }
     }
 
-    internal static void Run8PPolicyTests() => ProviderPolicy.SelfTest();
+    // Native, memory-only correlation for a provider-managed OAuth redirect.
+    // A matching code callback is consumed ONCE and navigation is canceled:
+    // no token exchange, browser-history persistence, account observation or
+    // provider authentication is implied. All values remain private to host.
+    private sealed class OAuthNavigationGate
+    {
+        private sealed record Pending(string Provider, string Profile,
+            string Session, string Callback, ulong Epoch, DateTimeOffset Started);
+        private readonly Dictionary<string, Pending> _pending =
+            new(StringComparer.Ordinal);
+        private readonly HashSet<string> _consumed = new(StringComparer.Ordinal);
+        private static string Digest(string value) =>
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes(value)));
+
+        public bool Begin(string provider, string profile, string session,
+            string state, string callback, ulong epoch, DateTimeOffset now)
+        {
+            if (state.Length is < 16 or > 256 || epoch == 0 ||
+                state.Any(ch => !((ch >= 'a' && ch <= 'z') ||
+                    (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= '0' && ch <= '9') || ch is '-' or '_')))
+                return false;
+            Prune(now);
+            var digest = Digest(state);
+            if (_consumed.Contains(digest) || _pending.ContainsKey(digest) ||
+                _pending.Count >= 16) return false;
+            _pending.Add(digest, new Pending(provider, profile, session,
+                callback, epoch, now));
+            return true;
+        }
+
+        public bool Consume(string provider, string profile, string session,
+            string callback, string state, ulong epoch, DateTimeOffset now)
+        {
+            Prune(now);
+            var digest = Digest(state);
+            if (!_pending.TryGetValue(digest, out var pending) ||
+                _consumed.Contains(digest) ||
+                !string.Equals(pending.Provider, provider, StringComparison.Ordinal) ||
+                !string.Equals(pending.Profile, profile, StringComparison.Ordinal) ||
+                !string.Equals(pending.Session, session, StringComparison.Ordinal) ||
+                !string.Equals(pending.Callback, callback, StringComparison.Ordinal) ||
+                epoch <= pending.Epoch) return false;
+            _pending.Remove(digest);
+            _consumed.Add(digest);
+            return true;
+        }
+
+        private void Prune(DateTimeOffset now)
+        {
+            foreach (var pair in _pending.ToArray())
+                if (now < pair.Value.Started ||
+                    now - pair.Value.Started > TimeSpan.FromMinutes(5))
+                {
+                    _pending.Remove(pair.Key);
+                    _consumed.Add(pair.Key);
+                }
+        }
+
+        public static void SelfTest()
+        {
+            static void Check(bool value)
+            {
+                if (!value) throw new InvalidOperationException(
+                    "8P OAuth one-use state regression");
+            }
+            var now = DateTimeOffset.UtcNow;
+            var gate = new OAuthNavigationGate();
+            const string state = "abcdefghijklmnop0123456789";
+            const string callback = "https://chatgpt.com/auth/callback";
+            Check(gate.Begin("chatgpt", "profile-A", "session-A", state,
+                callback, 2, now));
+            Check(!gate.Begin("chatgpt", "profile-A", "session-A", state,
+                callback, 2, now));
+            Check(!gate.Consume("chatgpt", "profile-B", "session-A", callback,
+                state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-B", callback,
+                state, 3, now));
+            Check(!gate.Consume("gemini", "profile-A", "session-A", callback,
+                state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-A",
+                "https://chatgpt.com/evil", state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-A", callback,
+                state, 2, now));
+            Check(gate.Consume("chatgpt", "profile-A", "session-A", callback,
+                state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-A", callback,
+                state, 4, now));
+            Check(!gate.Begin("chatgpt", "profile-A", "session-A", state,
+                callback, 4, now));
+            var other = new OAuthNavigationGate();
+            Check(other.Begin("chatgpt", "profile-A", "session-A",
+                "different_state_1234567890", callback, 1, now));
+            Check(!other.Consume("chatgpt", "profile-A", "session-A", callback,
+                "different_state_1234567890", 2, now.AddMinutes(6)));
+        }
+    }
+
+    internal static void Run8PPolicyTests()
+    {
+        ProviderPolicy.SelfTest();
+        OAuthNavigationGate.SelfTest();
+    }
 
     private void BuildProductionExtension()
     {
