@@ -11,6 +11,16 @@ namespace CoSoS.Probe7L1.WindowsHost;
 internal sealed partial class GateForm
 {
     private Native8L1Authority? _native8L1Authority;
+    private int _native8L1ProcessFailures;
+
+    // A real native ProcessFailed event invalidates every open 8C scope.
+    // Retire on the Rust bridge as well, not only in the C# scope dictionary.
+    private void On8L1ProcessFailure()
+    {
+        _native8L1ProcessFailures++;
+        foreach (var browser in _browsers.Values.ToArray())
+            RevokeAndRetire(browser);
+    }
 
     // Native source authority; 8B/8C's JS controllers define the exact
     // profile/context/lifecycle contract. Only WebView2 host events and
@@ -138,8 +148,9 @@ internal sealed partial class GateForm
                             !Matches(b, current)) return;
                         var approval = new OneUseApproval(
                             Guid.NewGuid().ToString("N"), snapshot, cap);
-                        if (Consume(approval, snapshot, current, cap,
-                            e.Uri, _consumedApprovals))
+                        if (_consumedApprovals.Count < 4096 &&
+                            Consume(approval, snapshot, current, cap,
+                                e.Uri, _consumedApprovals))
                             e.State = CoreWebView2PermissionState.Allow;
                     }
                 }
@@ -343,7 +354,12 @@ internal sealed partial class GateForm
             // 8L1 physical full gate is still NOT_RUN until restart/crash,
             // one-use real consent and multi-tab are independently exercised.
             Pending("native_host_process_restart",
-                "OS process restart must be qualified on physical Windows with two source-matched invocations");
+                "OS process restart and browser crash/recovery require separate physical Windows proof");
+            Pending("native_browser_process_failed",
+                "Native ProcessFailed revokes ALL active Rust channels; physical crash event not injected");
+            Mark("native_browser_failure_listener_installed",
+                _native8L1ProcessFailures == 0 && _native8L1Authority.Current(b),
+                "Real WebView2 ProcessFailed callback is wired to host-wide Rust channel retirement");
             Pending("native_permission_positive_consent",
                 "Native owner Yes/No prompt implemented; physical one-use WebView2 permission grant/deny interaction not yet exercised");
             exit = _failed ? 1 : 0;
