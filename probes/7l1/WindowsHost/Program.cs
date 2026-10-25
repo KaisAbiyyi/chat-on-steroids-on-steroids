@@ -540,7 +540,7 @@ internal sealed partial class GateForm : Form
                 b.ProfilePath, StringComparison.OrdinalIgnoreCase) ||
             !string.Equals(b.View.CoreWebView2.Source,
                 b.Production8P ? b.ProductionUrl : StartUrl, StringComparison.Ordinal) ||
-            (b.Production8P && (b.ProductionOrigin is null ||
+            (b.Production8P && (b.ProductionUrl is null || b.ProductionOrigin is null ||
                 !string.Equals(new Uri(b.ProductionUrl!).GetLeftPart(UriPartial.Authority),
                     b.ProductionOrigin, StringComparison.Ordinal))))
             throw new UnauthorizedAccessException("stale controller/profile/page");
