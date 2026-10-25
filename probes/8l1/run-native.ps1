@@ -4,7 +4,8 @@ param(
   [Parameter(Mandatory=$true)][string]$Repo,
   [Parameter(Mandatory=$true)][string]$ArtifactRoot,
   [Parameter(Mandatory=$true)][string]$Out,
-  [switch]$VerifyRestart
+  [switch]$VerifyRestart,
+  [switch]$CrashProbe
 )
 $ErrorActionPreference = 'Stop'
 function Assert-OwnedPath([string]$path) {
@@ -50,7 +51,10 @@ $receipts = @()
 $rounds = if ($VerifyRestart) { @('before-restart','after-restart') } else { @('single') }
 foreach ($round in $rounds) {
   $destination = if ($VerifyRestart) { Join-Path $Out $round } else { $Out }
-  dotnet $hostDll --8l1 --repo $Repo --bridge $rustExe --artifact-root $ArtifactRoot --out $destination
+  $hostArgs = @($hostDll, '--8l1', '--repo', $Repo, '--bridge', $rustExe,
+    '--artifact-root', $ArtifactRoot, '--out', $destination)
+  if ($CrashProbe) { $hostArgs += '--8l1-crash' }
+  dotnet @hostArgs
   $code = $LASTEXITCODE
   $receiptPath = Join-Path $destination 'receipt.json'
   if (-not (Test-Path -LiteralPath $receiptPath)) {
@@ -58,6 +62,9 @@ foreach ($round in $rounds) {
   }
   $receipt = Get-Content -Raw -LiteralPath $receiptPath | ConvertFrom-Json
   $receipts += $receipt
+  if ($CrashProbe -and $receipt.checks.native_browser_process_failed.status -ne 'PASS') {
+    throw "Real browser crash failed to retire all scopes in $round"
+  }
   if ($code -ne 0 -or $receipt.rustProcessExit -ne 0 -or
       $receipt.sourceSha -ne $expected -or $receipt.native8L1Accepted -ne $false) {
     throw "8L1-HOST bounded check failed during $round; inspect $receiptPath"
@@ -76,7 +83,7 @@ if ($VerifyRestart) {
     sourceSha = $expected
     cleanProcessRelaunch = if ($fresh -and $sameBinaries) { 'PASS' } else { 'FAIL' }
     physical8L1Accepted = $false
-    osCrashQualification = 'NOT_RUN'
+    osCrashQualification = if ($CrashProbe) { 'PASS' } else { 'NOT_RUN' }
     retainedProfileQualification = 'NOT_RUN'
     firstHostPid = $first.hostProcessId
     secondHostPid = $second.hostProcessId
@@ -87,4 +94,4 @@ if ($VerifyRestart) {
   $result | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $Out 'restart-receipt.json')
   if (-not $fresh -or -not $sameBinaries) { throw 'Native process relaunch identity failed' }
 }
-Write-Output '8L1-HOST bounded physical checks complete. Full 8L1 requires separate crash, consent and profile persistence qualification.'
+Write-Output '8L1-HOST physical checks recorded. Full 8L1 owner permission interaction and persistent profile recovery still require separate acceptance.'
