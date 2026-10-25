@@ -226,6 +226,38 @@ impl NativeBrowserBridge {
         self.channels.len()
     }
 
+    /// Native-only atomic logical session transfer. The caller must prove
+    /// one-use owner consent and retire both Rust channels before this call.
+    pub fn handoff_sessions(
+        &mut self,
+        source: &TrustedHostEvidence,
+        target: &TrustedHostEvidence,
+        next_source_id: &str,
+        next_source_epoch: u64,
+        next_target_epoch: u64,
+    ) -> Result<(), NativeBridgeError> {
+        source.validate()?;
+        target.validate()?;
+        if source.origin != target.origin
+            || source.identity.profile_id == target.identity.profile_id
+        {
+            return Err(NativeBridgeError::Host);
+        }
+        if self.owners.contains_key(&source.scope())
+            || self.owners.contains_key(&target.scope())
+        {
+            return Err(NativeBridgeError::Channel);
+        }
+        self.fence.handoff_verified(
+            &source.identity,
+            &target.identity,
+            next_source_id,
+            next_source_epoch,
+            next_target_epoch,
+        )?;
+        Ok(())
+    }
+
     /// Called ONLY after the native host has separately attested its event
     /// source. Registering the same scope requires a strictly newer native
     /// generation, retires the old channel, and forces a new handshake.
