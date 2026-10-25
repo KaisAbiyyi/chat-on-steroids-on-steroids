@@ -22,12 +22,11 @@ const concat = (...parts) => {
   return result;
 };
 let generation = 0;
-let bound = false;
 const instance = crypto.randomUUID();
 globalThis.__cos7l1Native = Object.freeze({
   workerInstance:instance,
   async bootstrap(spec) {
-    if (!spec || bound || !Number.isSafeInteger(spec.hostGeneration) ||
+    if (!spec || !Number.isSafeInteger(spec.hostGeneration) ||
         !Number.isSafeInteger(spec.channelId) || spec.hostGeneration <= generation ||
         spec.hostGeneration < 1 || spec.channelId < 1 ||
         !spec.context || typeof spec.context !== "object" ||
@@ -50,7 +49,6 @@ globalThis.__cos7l1Native = Object.freeze({
       counter(spec.hostGeneration),counter(0),challenge,counter(0));
     const mac = new Uint8Array(await crypto.subtle.sign("HMAC", privateKey, payload));
     generation = spec.hostGeneration;
-    bound = true;
     return Object.freeze({proof:encode(mac),workerInstance:instance});
   }
 });
