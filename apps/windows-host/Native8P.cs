@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
 
 namespace CoSoS.Probe7L1.WindowsHost;
 
