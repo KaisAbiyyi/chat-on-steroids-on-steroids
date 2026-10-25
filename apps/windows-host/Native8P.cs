@@ -375,8 +375,10 @@ internal sealed partial class GateForm
                 return false;
             Prune(now);
             var digest = Digest(state);
+            // Never evict replay tombstones during this host session; when
+            // exhausted, fail closed rather than permitting an old state again.
             if (_consumed.Contains(digest) || _pending.ContainsKey(digest) ||
-                _pending.Count >= 16) return false;
+                _pending.Count >= 16 || _consumed.Count >= 1024) return false;
             _pending.Add(digest, new Pending(provider, profile, session,
                 callback, epoch, now));
             return true;
