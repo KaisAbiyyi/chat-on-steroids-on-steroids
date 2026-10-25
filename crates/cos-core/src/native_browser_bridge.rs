@@ -604,6 +604,100 @@ mod tests {
     }
 
     #[test]
+    fn native_handoff_requires_retired_channels_and_rebinds_first_proofs() {
+        let (mut bridge, source, source_boot) = authenticated();
+        let mut target = evidence();
+        target.identity.profile_id = "profile-B".into();
+        target.identity.tab_id = 2;
+        target.identity.session_id = "session-B".into();
+        let target_boot = bridge.register_host(target.clone()).unwrap();
+        bridge
+            .complete_handshake(
+                &target,
+                target_boot.channel_id,
+                1,
+                &target_boot.handshake_proof(),
+            )
+            .unwrap();
+        for (host, boot) in [(&source, &source_boot), (&target, &target_boot)] {
+            let signed = bytes(host);
+            bridge
+                .observe(
+                    host,
+                    boot.channel_id,
+                    1,
+                    1,
+                    &signed,
+                    &boot.observation_mac(1, &signed),
+                )
+                .unwrap();
+        }
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(source_boot.channel_id));
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(target_boot.channel_id));
+        let mut foreign = target.clone();
+        foreign.origin = "https://foreign.invalid".into();
+        assert_eq!(
+            bridge.handoff_sessions(&source, &foreign, "empty-session", 2, 2),
+            Err(NativeBridgeError::Host)
+        );
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "empty-session", 2, 2),
+            Ok(())
+        );
+        assert_eq!(
+            bridge.handoff_sessions(&source, &target, "other-session", 3, 3),
+            Err(NativeBridgeError::Contract(BridgeContractError::NotCurrent))
+        );
+        let mut new_source = source.clone();
+        new_source.identity.document_id = "new-A".into();
+        new_source.identity.navigation_epoch = 2;
+        new_source.identity.worker_generation = 2;
+        new_source.identity.session_id = "empty-session".into();
+        new_source.identity.session_epoch = 2;
+        new_source.host_generation = 2;
+        let mut new_target = target.clone();
+        new_target.identity.document_id = "new-B".into();
+        new_target.identity.navigation_epoch = 2;
+        new_target.identity.worker_generation = 2;
+        new_target.identity.session_id = source.identity.session_id.clone();
+        new_target.identity.session_epoch = 2;
+        new_target.host_generation = 2;
+        for host in [new_source, new_target] {
+            let boot = bridge.register_host(host.clone()).unwrap();
+            bridge
+                .complete_handshake(
+                    &host,
+                    boot.channel_id,
+                    2,
+                    &boot.handshake_proof(),
+                )
+                .unwrap();
+            let signed = bytes(&host);
+            assert_eq!(
+                bridge
+                    .observe(
+                        &host,
+                        boot.channel_id,
+                        2,
+                        1,
+                        &signed,
+                        &boot.observation_mac(1, &signed),
+                    )
+                    .unwrap(),
+                Observation::FirstProof
+            );
+        }
+    }
+
+    #[test]
     fn companion_event_must_bind_exact_kind_digest_receipt_and_fresh_sequence() {
         let (mut bridge, host, bootstrap) = authenticated();
         let identity = bytes(&host);
