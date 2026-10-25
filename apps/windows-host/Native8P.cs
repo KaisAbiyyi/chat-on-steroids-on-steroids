@@ -91,20 +91,88 @@ internal sealed partial class GateForm
             return provider!.Origin + "/";
         }
 
-        // A redirect must remain at an exact host-configured HTTPS origin.
-        // Query, fragment, credential-bearing, noncanonical and popup URLs are
-        // denied (some real IdP OAuth flows thus remain intentionally unsupported).
+        // A URL from WebView2 is untrusted: a permitted HTTPS origin does not
+        // authorize user/session identity or any native/MV3 capability.
+        // OAuth authorization *requests* may contain a bounded PKCE query, but
+        // credential-bearing callbacks and fragment/implicit-token flows are
+        // denied until a separately native-attested one-use callback is built.
+        private static readonly HashSet<string> OAuthRequestKeys = new(StringComparer.Ordinal)
+        {
+            "response_type", "client_id", "redirect_uri", "scope", "state",
+            "nonce", "code_challenge", "code_challenge_method", "prompt",
+            "audience"
+        };
+
+        private static bool SafeOAuthRequest(ProviderSpec provider, string query)
+        {
+            if (query.Length is < 2 or > 2049 || query[0] != '?') return false;
+            var args = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in query[1..].Split('&'))
+            {
+                var split = pair.IndexOf('=');
+                if (split <= 0 || split == pair.Length - 1) return false;
+                var key = pair[..split];
+                var raw = pair[(split + 1)..];
+                // Only the value may use percent encoding; keys are exact and
+                // unambiguous. No encoded delimiters, controls or double
+                // decoding are ever treated as authority.
+                if (!OAuthRequestKeys.Contains(key) || !args.TryAdd(key, raw) ||
+                    raw.Length > 1024 || raw.Contains('+') ||
+                    raw.Any(c => c <= 0x20 || c >= 0x7f || c == '#' || c == '\\' ||
+                        c == '@')) return false;
+                for (var i = 0; i < raw.Length; i++)
+                {
+                    if (raw[i] != '%') continue;
+                    if (i + 2 >= raw.Length ||
+                        !Uri.IsHexDigit(raw[i + 1]) || !Uri.IsHexDigit(raw[i + 2]))
+                        return false;
+                    i += 2;
+                }
+                var decoded = Uri.UnescapeDataString(raw);
+                if (decoded.Length > 1024 ||
+                    decoded.Any(c => char.IsControl(c) || c == '\\'))
+                    return false;
+            }
+            // The request is just a browser navigation, not an OAuth result.
+            // Native code never receives/logs the verifier, state or code.
+            if (!args.TryGetValue("response_type", out var responseType) ||
+                responseType != "code" ||
+                !args.TryGetValue("code_challenge_method", out var method) ||
+                method != "S256" ||
+                !args.TryGetValue("client_id", out var client) ||
+                client.Length is < 1 or > 128 ||
+                !args.TryGetValue("state", out var state) ||
+                state.Length is < 16 or > 256 ||
+                !args.TryGetValue("code_challenge", out var challenge) ||
+                challenge.Length is < 43 or > 128 ||
+                !args.TryGetValue("redirect_uri", out var encodedRedirect))
+                return false;
+            var redirectText = Uri.UnescapeDataString(encodedRedirect);
+            if (!Uri.TryCreate(redirectText, UriKind.Absolute, out var redirect) ||
+                redirect.Scheme != Uri.UriSchemeHttps ||
+                redirect.UserInfo.Length != 0 || redirect.Query.Length != 0 ||
+                redirect.Fragment.Length != 0 || redirectText.Contains('\\') ||
+                redirectText.Contains('@') ||
+                !provider.Origins.Contains(redirect.GetLeftPart(UriPartial.Authority)))
+                return false;
+            return true;
+        }
+
         public bool Allows(string providerId, string url)
         {
             if (!_providers.TryGetValue(providerId, out var provider) ||
-                string.IsNullOrEmpty(url) || url.Length > 2048 ||
-                url.Contains('\\') || url.Contains('@') || url.Contains('%') ||
+                string.IsNullOrEmpty(url) || url.Length > 4096 ||
+                url.Contains('\\') || url.Contains('@') ||
                 !Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
                 parsed.Scheme != Uri.UriSchemeHttps || parsed.UserInfo.Length != 0 ||
-                parsed.Query.Length != 0 || parsed.Fragment.Length != 0 ||
-                !string.Equals(parsed.AbsoluteUri, url, StringComparison.Ordinal))
+                parsed.Fragment.Length != 0 ||
+                !string.Equals(parsed.AbsoluteUri, url, StringComparison.Ordinal) ||
+                !provider.Origins.Contains(parsed.GetLeftPart(UriPartial.Authority)))
                 return false;
-            return provider.Origins.Contains(parsed.GetLeftPart(UriPartial.Authority));
+            if (parsed.AbsolutePath.Contains('%') || parsed.AbsolutePath.Contains(';'))
+                return false;
+            if (parsed.Query.Length == 0) return true;
+            return SafeOAuthRequest(provider, parsed.Query);
         }
 
         public static void SelfTest()
@@ -123,6 +191,23 @@ internal sealed partial class GateForm
                 "javascript:alert(1)", "file:///C:/secret", "https://auth.openai.com.evil.test/",
                 "https://chatgpt.com/%2f", "https://gemini.google.com/"
             }) Check(!p.Allows("chatgpt", rejected));
+            // Safe authorization-code + PKCE request is navigation-only.
+            // Callback codes, bearer tokens, unsolicited state and open
+            // redirect_uri hosts never pass the production origin gate.
+            var query = "?response_type=code&client_id=public-web" +
+                "&state=abcdefghijklmnop0123456789" +
+                "&code_challenge=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ" +
+                "&code_challenge_method=S256" +
+                "&redirect_uri=https%3A%2F%2Fchatgpt.com%2Fauth%2Fcallback";
+            Check(p.Allows("chatgpt", "https://auth.openai.com/authorize" + query));
+            foreach (var suffix in new[] {
+                "?code=credential", "?access_token=secret", "?state=guess",
+                "?response_type=token", query + "&code=credential",
+                query.Replace("chatgpt.com%2Fauth", "attacker.test%2Fauth"),
+                query.Replace("state=abcdefghijklmnop0123456789", "state=x"),
+                query.Replace("code_challenge_method=S256", "code_challenge_method=plain"),
+                query + "&state=duplicate"
+            }) Check(!p.Allows("chatgpt", "https://auth.openai.com/authorize" + suffix));
             Check(!p.Allows("unlisted", "https://chatgpt.com/"));
             foreach (var invalid in new[] {
                 """{"providers":[]}""",
