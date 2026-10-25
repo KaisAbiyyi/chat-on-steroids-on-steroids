@@ -660,145 +660,151 @@ internal sealed partial class GateForm
         psi.Environment["TMP"] = _root;
         _bridge = System.Diagnostics.Process.Start(psi) ??
             throw new InvalidOperationException("8P Rust child process missing");
-        var profile = Path.Combine(_root, "8p-isolated-profile");
-        RejectReparseAncestors(profile);
-        var env = await CoreWebView2Environment.CreateAsync(null, profile,
-            new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
-        await _a.EnsureCoreWebView2Async(env);
-        var effectiveProfile = Path.GetFullPath(_a.CoreWebView2.Profile.ProfilePath);
-        RejectReparseAncestors(effectiveProfile);
-        if (!IsUnderProject(effectiveProfile))
-            throw new UnauthorizedAccessException("foreign 8P profile");
-        if ((await _a.CoreWebView2.Profile.GetBrowserExtensionsAsync()).Count != 0)
-            throw new UnauthorizedAccessException("8P profile must have no prior extensions");
-        var extension = await _a.CoreWebView2.Profile.AddBrowserExtensionAsync(
-            Path.Combine(_root, "extension"));
-        if (!extension.IsEnabled)
-            throw new UnauthorizedAccessException("8P native MV3 extension disabled");
-        var browser = new Browser
-        {
-            View = _a, Profile = "8p-" + _host8PProvider,
-            ProfilePath = effectiveProfile, ExtensionId = extension.Id,
-            TabId = 1, SessionId = "8p-unattributed", Production8P = true
-        };
-        _browsers.Add(_a, browser);
-        var rebindLock = new SemaphoreSlim(1, 1);
         var refused = 0;
         var oauthCallbacksConsumed = 0;
         var bound = 0;
-        var completed = new TaskCompletionSource<bool>(
-            TaskCreationOptions.RunContinuationsAsynchronously);
-        _a.CoreWebView2.PermissionRequested += (_, e) =>
+        var handoffPassed = false;
+        var handoffLocked = false;
+        async Task<(Browser Browser, TaskCompletionSource<bool> Ready)> SetupProductionAsync(
+            WebView2 view, string label, uint tab)
         {
-            e.State = CoreWebView2PermissionState.Deny;
-            e.SavesInProfile = false;
-            e.Handled = true;
-        };
-        _a.CoreWebView2.NewWindowRequested += (_, e) => e.Handled = true;
-        _a.CoreWebView2.ProcessFailed += (_, _) =>
-        {
-            RevokeAndRetire(browser); // failure cannot inherit live Rust proof
-            oauth.InvalidateProfile(browser.Profile);
-            browser.ProductionUrl = null;
-            browser.ProductionOrigin = null;
-            completed.TrySetResult(false);
-        };
-        _a.CoreWebView2.NavigationStarting += (_, e) =>
-        {
-            // Synchronous local revocation precedes any document navigation.
-            // Rust retirement must finish before BindAsync can allocate a new
-            // channel; no async callback can revive the previous page.
-            RevokeAndRetire(browser);
-            browser.ProductionUrl = null;
-            browser.ProductionOrigin = null;
-            browser.NavigationEpoch++;
-            browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
-            // The callback may carry a real authorization code. Consume the
-            // host-bound state at most once, but ALWAYS cancel browser
-            // navigation: code must never be loaded into a page or logged.
-            if (policy.IsCallbackCandidate(_host8PProvider, e.Uri))
+            var profile = Path.Combine(_root, "8p-isolated-profile-" + label);
+            RejectReparseAncestors(profile);
+            var env = await CoreWebView2Environment.CreateAsync(null, profile,
+                new CoreWebView2EnvironmentOptions {
+                    AreBrowserExtensionsEnabled = true
+                });
+            await view.EnsureCoreWebView2Async(env);
+            var effectiveProfile = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
+            RejectReparseAncestors(effectiveProfile);
+            if (!IsUnderProject(effectiveProfile))
+                throw new UnauthorizedAccessException("foreign 8P profile");
+            if ((await view.CoreWebView2.Profile.GetBrowserExtensionsAsync()).Count != 0)
+                throw new UnauthorizedAccessException("8P profile must have no prior extensions");
+            var extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(
+                Path.Combine(_root, "extension"));
+            if (!extension.IsEnabled)
+                throw new UnauthorizedAccessException("8P native MV3 extension disabled");
+            var browser = new Browser
             {
-                var callbackPath = new Uri(e.Uri).GetLeftPart(UriPartial.Path);
-                if (policy.TryCallback(_host8PProvider, e.Uri,
-                        out var callbackState) &&
-                    oauth.Consume(_host8PProvider, browser.Profile,
-                        browser.SessionId, callbackPath, callbackState,
-                        browser.NavigationEpoch, DateTimeOffset.UtcNow))
-                    oauthCallbacksConsumed++;
-                else
-                    refused++;
-                e.Cancel = true;
-                return;
-            }
-            if (!policy.Allows(_host8PProvider, e.Uri))
+                View = view, Profile = "8p-" + label,
+                ProfilePath = effectiveProfile, ExtensionId = extension.Id,
+                TabId = tab, SessionId = "8p-session-" + label,
+                Production8P = true
+            };
+            _browsers.Add(view, browser);
+            var rebindLock = new SemaphoreSlim(1, 1);
+            var ready = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            view.CoreWebView2.PermissionRequested += (_, e) =>
             {
-                refused++;
+                e.State = CoreWebView2PermissionState.Deny;
+                e.SavesInProfile = false;
+                e.Handled = true;
+            };
+            view.CoreWebView2.NewWindowRequested += (_, e) => e.Handled = true;
+            view.CoreWebView2.ProcessFailed += (_, _) =>
+            {
+                RevokeAndRetire(browser);
                 oauth.InvalidateProfile(browser.Profile);
-                e.Cancel = true;
-                return;
-            }
-            if (policy.TryAuthorizationRequest(_host8PProvider, e.Uri,
-                    out var state, out var callback))
+                browser.ProductionUrl = null;
+                browser.ProductionOrigin = null;
+                ready.TrySetResult(false);
+            };
+            view.CoreWebView2.NavigationStarting += (_, e) =>
             {
-                // Native event source must currently be the selected provider;
-                // an arbitrary untrusted window may not seed callback state.
-                if (!string.Equals(
-                        new Uri(_a.CoreWebView2.Source).GetLeftPart(UriPartial.Authority),
-                        policy.PrimaryOrigin(_host8PProvider), StringComparison.Ordinal) ||
-                    !oauth.Begin(_host8PProvider, browser.Profile,
-                        browser.SessionId, state, callback,
-                        browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                // Native modal consent must never admit reentrant navigation.
+                if (handoffLocked) { e.Cancel = true; refused++; return; }
+                RevokeAndRetire(browser);
+                browser.ProductionUrl = null;
+                browser.ProductionOrigin = null;
+                browser.NavigationEpoch++;
+                browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
+                if (policy.IsCallbackCandidate(_host8PProvider, e.Uri))
+                {
+                    var callbackPath = new Uri(e.Uri).GetLeftPart(UriPartial.Path);
+                    if (policy.TryCallback(_host8PProvider, e.Uri,
+                            out var callbackState) &&
+                        oauth.Consume(_host8PProvider, browser.Profile,
+                            browser.SessionId, callbackPath, callbackState,
+                            browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                        oauthCallbacksConsumed++;
+                    else
+                        refused++;
+                    e.Cancel = true; // never load the code-bearing page
+                    return;
+                }
+                if (!policy.Allows(_host8PProvider, e.Uri))
                 {
                     refused++;
+                    oauth.InvalidateProfile(browser.Profile);
                     e.Cancel = true;
+                    return;
                 }
-            }
-        };
-        _a.CoreWebView2.NavigationCompleted += async (_, e) =>
-        {
-            if (!e.IsSuccess || _a.IsDisposed)
+                if (policy.TryAuthorizationRequest(_host8PProvider, e.Uri,
+                        out var state, out var callback))
+                {
+                    var currentUrl = view.CoreWebView2.Source;
+                    if (!Uri.TryCreate(currentUrl, UriKind.Absolute,
+                            out var current) ||
+                        !string.Equals(current.GetLeftPart(UriPartial.Authority),
+                            policy.PrimaryOrigin(_host8PProvider),
+                            StringComparison.Ordinal) ||
+                        !oauth.Begin(_host8PProvider, browser.Profile,
+                            browser.SessionId, state, callback,
+                            browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                    {
+                        refused++;
+                        e.Cancel = true;
+                    }
+                }
+            };
+            view.CoreWebView2.NavigationCompleted += async (_, e) =>
             {
-                completed.TrySetResult(false);
-                return;
-            }
-            var epoch = browser.NavigationEpoch;
-            var url = _a.CoreWebView2.Source;
-            if (!policy.Allows(_host8PProvider, url))
-            {
-                RevokeAndRetire(browser);
-                completed.TrySetResult(false);
-                return;
-            }
-            await rebindLock.WaitAsync();
-            try
-            {
-                if (_a.IsDisposed || browser.NavigationEpoch != epoch ||
-                    !string.Equals(_a.CoreWebView2.Source, url,
-                        StringComparison.Ordinal)) return;
-                browser.ProductionUrl = url; // webview-owned committed document
-                browser.ProductionOrigin = new Uri(url).GetLeftPart(UriPartial.Authority);
-                var response = await BindAsync(browser, browser.SessionId);
-                var authenticated = response.GetProperty("authenticated").GetBoolean();
-                if (!authenticated || browser.NavigationEpoch != epoch ||
-                    browser.Revoked || browser.ChannelId == 0)
-                    throw new UnauthorizedAccessException("8P stale or unbound worker");
-                bound++;
-                completed.TrySetResult(true);
-            }
-            catch
-            {
-                RevokeAndRetire(browser);
-                completed.TrySetResult(false);
-            }
-            finally
-            {
-                rebindLock.Release();
-            }
-        };
-        _a.Disposed += (_, _) => RevokeAndRetire(browser);
+                if (!e.IsSuccess || view.IsDisposed)
+                {
+                    ready.TrySetResult(false);
+                    return;
+                }
+                var epoch = browser.NavigationEpoch;
+                var url = view.CoreWebView2.Source;
+                if (!policy.Allows(_host8PProvider, url))
+                {
+                    RevokeAndRetire(browser);
+                    ready.TrySetResult(false);
+                    return;
+                }
+                await rebindLock.WaitAsync();
+                try
+                {
+                    if (view.IsDisposed || browser.NavigationEpoch != epoch ||
+                        !string.Equals(view.CoreWebView2.Source, url,
+                            StringComparison.Ordinal)) return;
+                    browser.ProductionUrl = url;
+                    browser.ProductionOrigin =
+                        new Uri(url).GetLeftPart(UriPartial.Authority);
+                    var response = await BindAsync(browser, browser.SessionId);
+                    if (!response.GetProperty("authenticated").GetBoolean() ||
+                        browser.NavigationEpoch != epoch || browser.Revoked ||
+                        browser.ChannelId == 0)
+                        throw new UnauthorizedAccessException("8P stale worker");
+                    bound++;
+                    ready.TrySetResult(true);
+                }
+                catch
+                {
+                    RevokeAndRetire(browser);
+                    ready.TrySetResult(false);
+                }
+                finally { rebindLock.Release(); }
+            };
+            view.Disposed += (_, _) => RevokeAndRetire(browser);
+            return (browser, ready);
+        }
+
         FormClosed += (_, _) =>
         {
-            RevokeAndRetire(browser);
+            foreach (var item in _browsers.Values) RevokeAndRetire(item);
             try
             {
                 if (_bridge is { HasExited: false })
@@ -807,21 +813,47 @@ internal sealed partial class GateForm
             catch (InvalidOperationException) { }
             finally { _bridge?.Dispose(); _bridge = null; }
         };
+        var first = await SetupProductionAsync(_a, "A", 1);
+        var second = _host8PHandoffProbe ?
+            await SetupProductionAsync(_b, "B", 2) : default;
         _a.CoreWebView2.Navigate(landing);
-        var settled = await Task.WhenAny(
-            completed.Task, Task.Delay(TimeSpan.FromSeconds(60)));
-        var success = settled == completed.Task && await completed.Task;
+        if (_host8PHandoffProbe) _b.CoreWebView2.Navigate(landing);
+        var firstSettled = await Task.WhenAny(first.Ready.Task,
+            Task.Delay(TimeSpan.FromSeconds(60)));
+        var success = firstSettled == first.Ready.Task &&
+            await first.Ready.Task;
+        if (_host8PHandoffProbe)
+        {
+            var secondSettled = await Task.WhenAny(second.Ready!.Task,
+                Task.Delay(TimeSpan.FromSeconds(60)));
+            success = success && secondSettled == second.Ready.Task &&
+                await second.Ready.Task;
+            if (success)
+            {
+                handoffLocked = true; // blocks reentrant WebView2 nav during modal
+                try
+                {
+                    handoffPassed = await Execute8PHandoffProbeAsync(
+                        first.Browser, second.Browser!,
+                        policy.PrimaryOrigin(_host8PProvider));
+                    success = handoffPassed;
+                }
+                finally { handoffLocked = false; }
+            }
+        }
         // Never include page URLs, account metadata, OAuth parameters, secrets
         // or worker key/challenge in a source-attested receipt.
         var receipt = new
         {
             sourceSha = _verifiedSourceSha, providerId = _host8PProvider,
-            navigationAllowed = success, navigationEpoch = browser.NavigationEpoch,
+            navigationAllowed = success, navigationEpoch = first.Browser.NavigationEpoch,
             deniedNavigationCount = refused, oauthCallbacksConsumed,
-            nativeWorkerRebinds = bound,
-            rustChannelActive = success && !browser.Revoked && browser.ChannelId != 0,
-            mv3WorkerAttested = success && !browser.Revoked &&
-                browser.WorkerTargetId is not null && browser.WorkerSession is not null,
+            nativeWorkerRebinds = bound, crossProfileHandoffPassed = handoffPassed,
+            rustChannelActive = success && !first.Browser.Revoked &&
+                first.Browser.ChannelId != 0,
+            mv3WorkerAttested = success && !first.Browser.Revoked &&
+                first.Browser.WorkerTargetId is not null &&
+                first.Browser.WorkerSession is not null,
             permissionPolicy = "Deny (nonpersistent)", authenticated = false,
             native8PAccepted = false, owner7U1Accepted = false
         };
