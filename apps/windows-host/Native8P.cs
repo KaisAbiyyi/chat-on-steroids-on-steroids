@@ -399,6 +399,17 @@ internal sealed partial class GateForm
             return true;
         }
 
+        public void InvalidateProfile(string profile)
+        {
+            foreach (var pair in _pending.ToArray())
+                if (string.Equals(pair.Value.Profile, profile,
+                    StringComparison.Ordinal))
+                {
+                    _pending.Remove(pair.Key);
+                    _consumed.Add(pair.Key);
+                }
+        }
+
         private void Prune(DateTimeOffset now)
         {
             foreach (var pair in _pending.ToArray())
@@ -487,6 +498,7 @@ internal sealed partial class GateForm
         Directory.CreateDirectory(_root);
         VerifySourceArtifact();
         var policy = ProviderPolicy.Parse(File.ReadAllText(_host8PConfig));
+        var oauth = new OAuthNavigationGate();
         var landing = policy.Landing(_host8PProvider); // rejects unlisted provider before navigation
         var decision = MessageBox.Show(this,
             "Navigate the isolated CoSoS profile to the configured provider " +
@@ -536,6 +548,7 @@ internal sealed partial class GateForm
         _browsers.Add(_a, browser);
         var rebindLock = new SemaphoreSlim(1, 1);
         var refused = 0;
+        var oauthCallbacksConsumed = 0;
         var bound = 0;
         var completed = new TaskCompletionSource<bool>(
             TaskCreationOptions.RunContinuationsAsynchronously);
@@ -549,6 +562,7 @@ internal sealed partial class GateForm
         _a.CoreWebView2.ProcessFailed += (_, _) =>
         {
             RevokeAndRetire(browser); // failure cannot inherit live Rust proof
+            oauth.InvalidateProfile(browser.Profile);
             browser.ProductionUrl = null;
             browser.ProductionOrigin = null;
             completed.TrySetResult(false);
@@ -563,10 +577,45 @@ internal sealed partial class GateForm
             browser.ProductionOrigin = null;
             browser.NavigationEpoch++;
             browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
+            // The callback may carry a real authorization code. Consume the
+            // host-bound state at most once, but ALWAYS cancel browser
+            // navigation: code must never be loaded into a page or logged.
+            if (policy.IsCallbackCandidate(_host8PProvider, e.Uri))
+            {
+                var callbackPath = new Uri(e.Uri).GetLeftPart(UriPartial.Path);
+                if (policy.TryCallback(_host8PProvider, e.Uri,
+                        out var callbackState) &&
+                    oauth.Consume(_host8PProvider, browser.Profile,
+                        browser.SessionId, callbackPath, callbackState,
+                        browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                    oauthCallbacksConsumed++;
+                else
+                    refused++;
+                e.Cancel = true;
+                return;
+            }
             if (!policy.Allows(_host8PProvider, e.Uri))
             {
                 refused++;
+                oauth.InvalidateProfile(browser.Profile);
                 e.Cancel = true;
+                return;
+            }
+            if (policy.TryAuthorizationRequest(_host8PProvider, e.Uri,
+                    out var state, out var callback))
+            {
+                // Native event source must currently be the selected provider;
+                // an arbitrary untrusted window may not seed callback state.
+                if (!string.Equals(
+                        new Uri(_a.CoreWebView2.Source).GetLeftPart(UriPartial.Authority),
+                        policy.PrimaryOrigin(_host8PProvider), StringComparison.Ordinal) ||
+                    !oauth.Begin(_host8PProvider, browser.Profile,
+                        browser.SessionId, state, callback,
+                        browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                {
+                    refused++;
+                    e.Cancel = true;
+                }
             }
         };
         _a.CoreWebView2.NavigationCompleted += async (_, e) =>
@@ -632,7 +681,8 @@ internal sealed partial class GateForm
         {
             sourceSha = _verifiedSourceSha, providerId = _host8PProvider,
             navigationAllowed = success, navigationEpoch = browser.NavigationEpoch,
-            deniedNavigationCount = refused, nativeWorkerRebinds = bound,
+            deniedNavigationCount = refused, oauthCallbacksConsumed,
+            nativeWorkerRebinds = bound,
             rustChannelActive = success && !browser.Revoked && browser.ChannelId != 0,
             mv3WorkerAttested = success && !browser.Revoked &&
                 browser.WorkerTargetId is not null && browser.WorkerSession is not null,
