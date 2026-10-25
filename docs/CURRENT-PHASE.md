@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 16F release security/provenance — cloud Review, 2026-10-25
+
+- **Exclusive claim:** [#121](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/121), lock `release-closure`; task [16F](https://app.notion.com/p/400c4a6aaf7381c685aaea92e95f639a) status Review; draft [PR #122](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/122). Exact head and CI status are NOT accepted until all hosted checks complete.
+- 16A/16B/16C/16D/16E merged source prerequisites verified; [report and threat/limitation ledger](implementation-summary/2026-10-25-16f-cloud-release-security.md) and `tools/release_16f.py` prove exact-source Git ancestry, contract hashes and failure-closed gate reporting with Windows/Ubuntu synthetic CI.
+- **Not a release authorization:** 16L1 native signed Windows installer, 16U1 explicit owner consent, 16L2 copy-only physical migration, 16L3 final desktop benchmarking, 16U2 owner decision and PERF-05/06 product targets remain NOT_RUN/unaccepted. 16L3 depends on all of 16F, 16L1 and 16L2; do not make it Ready on cloud 16F alone.
+
+
 ## Product strategy supersession — 2026-10-24
 
 **P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](implementation-plan/2026-10-24-performance-first-workstream.md).
