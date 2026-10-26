@@ -535,7 +535,9 @@ mod tests {
         assert!(require_handoff_wire_version(&a, &b, Some("v0")).is_err());
         assert!(require_handoff_wire_version(&a, &legacy, Some(NATIVE_8P_TWO_PHASE_V1)).is_err());
         assert!(require_handoff_wire_version(&legacy, &legacy, None).is_ok());
-        assert!(require_handoff_wire_version(&legacy, &legacy, Some(NATIVE_8P_TWO_PHASE_V1)).is_err());
+        assert!(
+            require_handoff_wire_version(&legacy, &legacy, Some(NATIVE_8P_TWO_PHASE_V1)).is_err()
+        );
         let request = json!({
             "op": "handoff",
             "source": {
