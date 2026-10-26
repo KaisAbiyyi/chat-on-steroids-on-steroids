@@ -156,6 +156,6 @@ test('failure injection AFTER Rust commit but BEFORE target fresh MV3 proof: no 
       generation:nextA.hostGeneration,proof:'00'.repeat(32)
     }),/authority unavailable/);
     // The abandoned worker/key has no authenticated IPC path after failure.
-    assert.equal(rust.child.exitCode === null,false);
+    assert.ok(rust.child.exitCode !== null || rust.child.signalCode !== null);
   } finally {rust.stop();}
 });
