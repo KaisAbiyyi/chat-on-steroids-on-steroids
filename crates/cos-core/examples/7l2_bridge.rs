@@ -97,6 +97,10 @@ enum Request {
     Handoff {
         source: HostWire,
         target: HostWire,
+        // Explicit 8P version on the trusted C#/Rust pipe. Legacy synthetic
+        // 8L1 callers intentionally omit this for their separate contract.
+        #[serde(default)]
+        contract_version: Option<String>,
         new_source_session_id: String,
         source_next_session_epoch: u64,
         target_next_session_epoch: u64,
@@ -105,6 +109,31 @@ enum Request {
         channel_id: u64,
     },
 }
+const NATIVE_8P_TWO_PHASE_V1: &str = "CoSoS/8P/native-two-phase/v1";
+
+// Versioning is enforced at the actual privileged Rust IPC entrypoint. It
+// cannot be bypassed by merely tagging a C# selftest; "8p-" is reserved for
+// the production-owned profiles created by the current Windows host.
+fn require_handoff_wire_version(
+    source: &HostWire,
+    target: &HostWire,
+    version: Option<&str>,
+) -> Result<(), String> {
+    let production_8p = source.identity.profile_id.starts_with("8p-")
+        || target.identity.profile_id.starts_with("8p-");
+    if production_8p {
+        if !source.identity.profile_id.starts_with("8p-")
+            || !target.identity.profile_id.starts_with("8p-")
+            || version != Some(NATIVE_8P_TWO_PHASE_V1)
+        {
+            return Err("8P native handoff protocol downgrade/foreign profile".into());
+        }
+    } else if version.is_some() {
+        return Err("unexpected 8P contract on legacy native handoff".into());
+    }
+    Ok(())
+}
+
 fn unhex(input: &str) -> Result<Vec<u8>, String> {
     if !input.len().is_multiple_of(2) || input.len() > 16384 {
         return Err("invalid hex length".into());
@@ -398,10 +427,16 @@ impl State {
             Request::Handoff {
                 source,
                 target,
+                contract_version,
                 new_source_session_id,
                 source_next_session_epoch,
                 target_next_session_epoch,
             } => {
+                // Production 8P may never downgrade to the legacy 8L1 wire
+                // semantics by omitting or forging the contract version.
+                require_handoff_wire_version(
+                    &source, &target, contract_version.as_deref()
+                )?;
                 self.bridge
                     .handoff_sessions(
                         &source.into(),
@@ -478,6 +513,48 @@ mod tests {
         bad["command"] = json!("Runtime.evaluate");
         assert!(serde_json::from_value::<Request>(bad).is_err());
         assert!(serde_json::from_value::<Request>(json!({"op":"tool_send"})).is_err());
+    }
+
+    #[test]
+    fn production_8p_ipc_handoff_must_have_exact_version_never_downgrade() {
+        let host = |profile: &str| -> HostWire {
+            serde_json::from_value(json!({
+                "identity": {
+                    "profileId": profile, "tabId": 1, "frameId": 0,
+                    "documentId": "doc", "navigationEpoch": 1,
+                    "sessionId": "session", "sessionEpoch": 1,
+                    "workerGeneration": 1
+                },
+                "origin": "https://chatgpt.com", "hostGeneration": 1
+            }))
+            .unwrap()
+        };
+        let a = host("8p-A");
+        let b = host("8p-B");
+        let legacy = host("7l1-A");
+        assert!(require_handoff_wire_version(
+            &a, &b, Some(NATIVE_8P_TWO_PHASE_V1)).is_ok());
+        assert!(require_handoff_wire_version(&a, &b, None).is_err());
+        assert!(require_handoff_wire_version(&a, &b, Some("v0")).is_err());
+        assert!(require_handoff_wire_version(&a, &legacy,
+            Some(NATIVE_8P_TWO_PHASE_V1)).is_err());
+        assert!(require_handoff_wire_version(&legacy, &legacy, None).is_ok());
+        assert!(require_handoff_wire_version(&legacy, &legacy,
+            Some(NATIVE_8P_TWO_PHASE_V1)).is_err());
+        let request = json!({
+            "op": "handoff",
+            "source": a, "target": b,
+            "contractVersion": NATIVE_8P_TWO_PHASE_V1,
+            "newSourceSessionId": "empty",
+            "sourceNextSessionEpoch": 2,
+            "targetNextSessionEpoch": 2
+        });
+        assert!(matches!(
+            serde_json::from_value::<Request>(request),
+            Ok(Request::Handoff {
+                contract_version: Some(version), ..
+            }) if version == NATIVE_8P_TWO_PHASE_V1
+        ));
     }
 
     #[test]
