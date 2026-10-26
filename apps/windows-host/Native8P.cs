@@ -573,6 +573,32 @@ internal sealed partial class GateForm
             "built-in ID cannot masquerade as source-owned extension");
     }
 
+    // Shared by the production post-Rust-commit path and compiled negative tests.
+    // Rust commit ACK alone is NEVER authority to release a session.
+    private sealed class Native8PCommitProofGate
+    {
+        private bool _committed;
+        private bool _sourceProved;
+        private bool _targetProved;
+        private bool _poisoned;
+        public void CommitAcknowledged()
+        {
+            if (_poisoned || _committed)
+                throw new UnauthorizedAccessException("8P invalid commit state");
+            _committed = true;
+        }
+        public void FirstProof(bool source)
+        {
+            if (_poisoned || !_committed || (source ? _sourceProved : _targetProved))
+                throw new UnauthorizedAccessException("8P stale/duplicate postcommit proof");
+            if (source) _sourceProved = true;
+            else _targetProved = true;
+        }
+        public bool CanRelease => _committed && _sourceProved &&
+            _targetProved && !_poisoned;
+        public void Poison() => _poisoned = true;
+    }
+
     internal static void Run8PPolicyTests()
     {
         ProviderPolicy.SelfTest();
@@ -640,6 +666,31 @@ internal sealed partial class GateForm
         }
         catch (UnauthorizedAccessException) { }
         Verify(retireCalls == 2);
+        var failAfterRustCommit = new Native8PCommitProofGate();
+        failAfterRustCommit.CommitAcknowledged();
+        Verify(!failAfterRustCommit.CanRelease);
+        failAfterRustCommit.Poison(); // injected failure immediately after Rust ACK
+        Verify(!failAfterRustCommit.CanRelease);
+        try
+        {
+            failAfterRustCommit.FirstProof(true);
+            throw new InvalidOperationException("8P accepted proof after fault");
+        }
+        catch (UnauthorizedAccessException) { }
+        var failAfterAProof = new Native8PCommitProofGate();
+        failAfterAProof.CommitAcknowledged();
+        failAfterAProof.FirstProof(true);
+        Verify(!failAfterAProof.CanRelease); // injected B worker failure
+        failAfterAProof.Poison();
+        Verify(!failAfterAProof.CanRelease);
+        var goodProofs = new Native8PCommitProofGate();
+        goodProofs.CommitAcknowledged();
+        goodProofs.FirstProof(true);
+        Verify(!goodProofs.CanRelease);
+        goodProofs.FirstProof(false);
+        Verify(goodProofs.CanRelease);
+        goodProofs.Poison();
+        Verify(!goodProofs.CanRelease);
         var first = new Native8PSessionSnapshot("8p-A",
             @"D:\\projects\\CoS-Rust\\a", "https://chatgpt.com",
             "session-A", 1, "doc-A", 1, 1, 1, 1,
@@ -1037,6 +1088,25 @@ internal sealed partial class GateForm
         var bound = 0;
         var handoffPassed = false;
         var handoffLocked = false;
+        var handoffAwaitingPostCommitProof = false;
+        var handoffQuarantined = false;
+        // Irreversible failure fence for an ambiguous Rust commit/rebind.
+        // This poisons the child authority and keeps subsequent nav denied.
+        void Quarantine8PHandoff()
+        {
+            handoffQuarantined = true;
+            handoffLocked = true;
+            handoffAwaitingPostCommitProof = false;
+            foreach (var item in _browsers.Values.Where(b => b.Production8P))
+                RevokeAndRetire(item);
+            try
+            {
+                if (_bridge is { HasExited: false })
+                    _bridge.Kill(entireProcessTree: true);
+            }
+            catch (InvalidOperationException) { }
+            catch (System.ComponentModel.Win32Exception) { }
+        }
         async Task<(Browser Browser, TaskCompletionSource<bool> Ready)> SetupProductionAsync(
             WebView2 view, string label, uint tab)
         {
@@ -1106,13 +1176,15 @@ internal sealed partial class GateForm
                 browser.ProductionUrl = null;
                 browser.ProductionOrigin = null;
                 ready.TrySetResult(false);
+                if (handoffAwaitingPostCommitProof)
+                    Quarantine8PHandoff();
             };
             view.CoreWebView2.NavigationStarting += (_, e) =>
             {
                 // Native consent/Rust transfer cannot receive reentrant
                 // navigation or a stale async completion from a prior page.
                 navigationAdmission.Invalidate();
-                if (handoffLocked)
+                if (handoffLocked || handoffQuarantined)
                 {
                     RevokeAndRetire(browser);
                     browser.ProductionUrl = null;
@@ -1171,7 +1243,7 @@ internal sealed partial class GateForm
             {
                 // Never allow a deferred event to rebind while the owner
                 // modal/Rust two-profile transaction holds exclusive control.
-                if (handoffLocked)
+                if (handoffLocked || handoffQuarantined)
                 {
                     navigationAdmission.Invalidate();
                     RevokeAndRetire(browser);
@@ -1257,49 +1329,65 @@ internal sealed partial class GateForm
             if (success)
             {
                 handoffLocked = true; // blocks reentrant WebView2 nav during modal
-                var priorA = Snapshot8P(first.Browser);
-                var priorB = Snapshot8P(second.Browser!);
-                var transferSourceSession = "";
+                handoffAwaitingPostCommitProof = true;
+                var postcommit = new Native8PCommitProofGate();
                 try
                 {
+                    var priorA = Snapshot8P(first.Browser);
+                    var priorB = Snapshot8P(second.Browser!);
                     var result = await Execute8PHandoffProbeAsync(
                         first.Browser, second.Browser,
                         policy.PrimaryOrigin(providerId));
                     handoffPassed = result.Committed;
-                    transferSourceSession = result.NewSourceSession;
-                }
-                finally { handoffLocked = false; }
-                if (handoffPassed)
-                {
-                    // Rebind on ACTUAL navigation events, not a synthetic
-                    // document counter change. Both OAuth/profile partitions
-                    // stay on their original OS WebView2 environments.
-                    var startBound = bound;
-                    _a.CoreWebView2.Navigate(landing);
-                    _b.CoreWebView2.Navigate(landing);
-                    for (var attempt = 0; attempt < 150 &&
-                        bound < startBound + 2; attempt++)
-                        await Task.Delay(100);
-                    try
-                    {
-                        var afterA = Snapshot8P(first.Browser);
-                        var afterB = Snapshot8P(second.Browser);
-                        handoffPassed = bound >= startBound + 2 &&
-                            Verified8PTwoPhaseResult(priorA, priorB, afterA,
-                                afterB, policy.PrimaryOrigin(providerId),
-                                transferSourceSession);
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        handoffPassed = false;
-                    }
                     if (handoffPassed)
                     {
+                        postcommit.CommitAcknowledged();
+                        handoffLocked = false; // allow ONLY fresh document rebind
+                        var startBound = bound;
+                        _a.CoreWebView2.Navigate(landing);
+                        _b.CoreWebView2.Navigate(landing);
+                        for (var attempt = 0; attempt < 150 &&
+                            bound < startBound + 2 && !handoffQuarantined; attempt++)
+                            await Task.Delay(100);
+                        var afterA = Snapshot8P(first.Browser);
+                        var afterB = Snapshot8P(second.Browser);
+                        if (handoffQuarantined || bound < startBound + 2 ||
+                            !Verified8PTwoPhaseResult(priorA, priorB, afterA,
+                                afterB, policy.PrimaryOrigin(providerId),
+                                result.NewSourceSession))
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit native v1 rebind incomplete");
                         await Prove8PSessionAsync(first.Browser);
+                        if (handoffQuarantined || first.Browser.Revoked)
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit source first-proof revoked");
+                        postcommit.FirstProof(true);
                         await Prove8PSessionAsync(second.Browser);
+                        if (handoffQuarantined || second.Browser.Revoked)
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit target first-proof revoked");
+                        postcommit.FirstProof(false);
+                        if (!postcommit.CanRelease)
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit proof gate incomplete");
+                        handoffAwaitingPostCommitProof = false;
+                    }
+                    else
+                    {
+                        // Native owner declined consent, so no Rust commit.
+                        handoffAwaitingPostCommitProof = false;
+                        handoffLocked = false;
                     }
                 }
-                success = handoffPassed;
+                catch (Exception)
+                {
+                    // Includes ambiguous Rust ACK, replay failure, navigation,
+                    // crash, and failure after either fresh MV3 proof.
+                    postcommit.Poison();
+                    handoffPassed = false;
+                    Quarantine8PHandoff();
+                }
+                success = handoffPassed && !handoffQuarantined;
             }
         }
         // Never include page URLs, account metadata, OAuth parameters, secrets
