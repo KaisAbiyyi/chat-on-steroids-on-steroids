@@ -28,6 +28,14 @@ internal static class NativeProfileExtensions
         return ownedFixture is null || seen.Contains(ownedFixture);
     }
 
+    internal static bool MayRestoreOwnedFixture(IEnumerable<string> ids, bool verifiedRuntime, string ownedFixture)
+    {
+        var inventory = ids.ToArray();
+        return CanonicalId(ownedFixture) && !Components.Contains(ownedFixture) &&
+            !inventory.Contains(ownedFixture, StringComparer.Ordinal) &&
+            Accepts(inventory, verifiedRuntime, null);
+    }
+
     private static bool CanonicalId(string id) =>
         id.Length == 32 && id.All(c => c is >= 'a' and <= 'p');
 

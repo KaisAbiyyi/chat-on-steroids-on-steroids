@@ -15,3 +15,5 @@ Ledger:
 - Policy GREEN: 17 native assertions PASS, including installed signed runtime. Host strict build PASS. Physical repaired run pending.
 
 - Native run01 at ed4754f clears component guard and authenticates real channels. Browser.crash kills profile A OS browser while its native CDP Task never resolves; B remains live. Bounded crash-request wait is required; retain ProcessFailed/all-scopes/Rust-retirement assertions unchanged. Earlier run timeout retained.
+
+- Run02 at b420bae: first-round native auth/multi-tab/navigation/real crash+all Rust retire PASS. After-restart RED: crashed browser A had not flushed unpacked fixture metadata; B retained it. Repair only source-hashed pinned fixture from retained extension path; require exact previous ID and full post-install inventory, then fresh Rust proof. Missing fixture alone never confers authority; unknown extensions still refuse.

@@ -19,6 +19,10 @@ Check(!NativeProfileExtensions.Accepts(["Microsoft Clipboard Extension"],true,nu
 Check(!NativeProfileExtensions.Accepts([clipboard],true,clipboard),"component cannot impersonate fixture");
 Check(!NativeProfileExtensions.Accepts([""],true,null),"blank id refused");
 Check(!NativeProfileExtensions.Accepts([],false,null),"runtime proof required even for empty inventory");
+Check(NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,pdf],true,owned),"crash-lost source-owned fixture can be restored");
+Check(!NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,pdf,owned],true,owned),"already-installed fixture is not restored");
+Check(!NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],true,owned),"foreign inventory cannot trigger restoration");
+Check(!NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,pdf],false,owned),"unverified runtime cannot restore fixture");
 if(args.Length==1) {
  Check(NativeProfileExtensions.VerifiedMicrosoftRuntime(args[0]),"actual installed signed runtime");
  Check(!NativeProfileExtensions.VerifiedMicrosoftRuntime(typeof(Program).Assembly.Location),"unsigned arbitrary executable cannot attest components");
