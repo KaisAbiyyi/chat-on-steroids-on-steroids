@@ -27,6 +27,12 @@ jobs:
           try {
             $proc | Wait-Process -Timeout 90 -ErrorAction Stop
             $proc.Refresh()
+            $receipt = Join-Path (Split-Path $exe -Parent) '15host-native-smoke.json'
+            if (Test-Path $receipt) {
+              Get-Content $receipt -Raw | Write-Host
+            } else {
+              Write-Host 'Native smoke receipt missing (early startup, process crash or unhandled exception)'
+            }
             if ($proc.ExitCode -ne 0) { throw "Synthetic native WebView2 capture failed: exit $($proc.ExitCode)" }
           } finally {
             $proc.Refresh()
