@@ -845,6 +845,7 @@ internal sealed partial class GateForm
         var committed = await RustAllowAsync(new
         {
             op = "handoff", source = oldA, target = oldB,
+            contractVersion = Native8PContractVersion,
             newSourceSessionId = empty,
             sourceNextSessionEpoch = newSourceEpoch,
             targetNextSessionEpoch = newTargetEpoch
@@ -860,6 +861,7 @@ internal sealed partial class GateForm
         var replayDenied = await RustDeniedAsync(new
         {
             op = "handoff", source = oldA, target = oldB,
+            contractVersion = Native8PContractVersion,
             newSourceSessionId = empty,
             sourceNextSessionEpoch = newSourceEpoch,
             targetNextSessionEpoch = newTargetEpoch
