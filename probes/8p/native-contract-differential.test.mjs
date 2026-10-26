@@ -6,6 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {dirname, resolve} from 'node:path';
 import {createProfileSessionController} from '../../extension/adapter/profile-session.mjs';
@@ -45,7 +46,11 @@ async function runJs8B(vector) {
       const x = pre.get(proof);
       if (!x) throw Error('foreign-partition');
       return {
-        profileId: key(x), partitionId: x.ProfilePath,
+        profileId: key(x),
+        // 8B uses an opaque host attested handle, never a native disk path.
+        // Hashing this fixed SYNTHETIC path preserves collision/equality tests.
+        partitionId: 'p-' + createHash('sha256')
+          .update(x.ProfilePath).digest('hex'),
         isolationGeneration: 1, mode: 'persistent'
       };
     },
