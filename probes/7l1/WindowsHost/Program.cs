@@ -824,7 +824,6 @@ internal sealed partial class GateForm : Form
 
             registering = true;
             var registration = await RustAllowAsync(new { op = "register", host = Host(b) });
-            registering = false;
             var registeredChannel = registration.GetProperty("channelId").GetUInt64();
             // Registration may return after native revocation while ChannelId
             // was 0. The source-tested admission/retirement helper rejects it
@@ -834,6 +833,7 @@ internal sealed partial class GateForm : Form
                     registeredChannel, () => BindingCurrent() && !b.Revoked,
                     RetireAsync);
             b.ChannelId = registeredChannel;
+            registering = false; // Only now do we own a retireable channel ID.
             var spec = new
             {
                 channelId = registeredChannel, hostGeneration = b.HostGeneration,
