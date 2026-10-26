@@ -754,6 +754,23 @@ internal sealed partial class GateForm : Form
     private async Task<JsonElement> RustAllowAsync(object command) =>
         RequireSuccess(await RustAsync(command));
 
+    // Source-executed in the production register/rebind handler and Windows
+    // cloud negative regressions. The registration's native lifetime ticket is
+    // NOT an authorization credential; it only rejects stale async results.
+    private static bool Accept8PBindingLease(
+        ulong initialRevocation, ulong actualRevocation,
+        ulong initialNavigation, ulong actualNavigation,
+        string? initialUrl, string? actualUrl, string? sourceUrl,
+        string? initialOrigin, string? actualOrigin,
+        bool disposed) =>
+        initialRevocation == actualRevocation &&
+        initialNavigation == actualNavigation &&
+        initialUrl is not null && initialOrigin is not null &&
+        !disposed &&
+        string.Equals(initialUrl, actualUrl, StringComparison.Ordinal) &&
+        string.Equals(initialOrigin, actualOrigin, StringComparison.Ordinal) &&
+        string.Equals(initialUrl, sourceUrl, StringComparison.Ordinal);
+
     private async Task<JsonElement> BindAsync(Browser b, string sessionId)
     {
         // Existing 8L1 synthetic binds keep their accepted semantics.
@@ -769,14 +786,11 @@ internal sealed partial class GateForm : Form
         var documentUrl = b.ProductionUrl;
         var documentOrigin = b.ProductionOrigin;
         bool BindingCurrent() =>
-            !b.Production8P ||
-            (b.BindingRevocationGeneration == revocation &&
-             b.NavigationEpoch == documentEpoch &&
-             documentUrl is not null && documentOrigin is not null &&
-             !b.View.IsDisposed &&
-             string.Equals(b.ProductionUrl, documentUrl, StringComparison.Ordinal) &&
-             string.Equals(b.ProductionOrigin, documentOrigin, StringComparison.Ordinal) &&
-             string.Equals(b.View.CoreWebView2.Source, documentUrl, StringComparison.Ordinal));
+            !b.Production8P || Accept8PBindingLease(
+                revocation, b.BindingRevocationGeneration,
+                documentEpoch, b.NavigationEpoch,
+                documentUrl, b.ProductionUrl, b.View.CoreWebView2.Source,
+                documentOrigin, b.ProductionOrigin, b.View.IsDisposed);
         if (!BindingCurrent())
             throw new UnauthorizedAccessException("8P stale initial document binding");
         try
