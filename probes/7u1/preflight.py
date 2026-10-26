@@ -12,6 +12,8 @@ PROVIDERS = {"chatgpt": "https://chatgpt.com", "claude": "https://claude.ai",
              "gemini": "https://gemini.google.com"}
 SHA40 = re.compile(r"[0-9a-f]{40}")
 SHA64 = re.compile(r"[0-9a-f]{64}")
+PORTABLE_PART = re.compile(r"[A-Za-z0-9_.-]+")
+WINDOWS_RESERVED = {"con", "prn", "aux", "nul", *(f"com{i}" for i in range(1, 10)), *(f"lpt{i}" for i in range(1, 10))}
 
 
 class Refused(Exception):
@@ -26,6 +28,31 @@ def hash_file(path):
     return digest.hexdigest()
 
 
+def strict_json(path):
+    """Refuse duplicate JSON keys in provenance and contract metadata."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise Refused("duplicate JSON key")
+            result[key] = value
+        return result
+    return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_pairs)
+
+
+def validate_manifest_path(raw):
+    if (not isinstance(raw, str) or not raw or chr(92) in raw or
+            ":" in raw or PurePosixPath(raw).is_absolute() or
+            PurePosixPath(raw).as_posix() != raw):
+        raise Refused("unsafe manifest path")
+    for part in raw.split("/"):
+        if (not part or part in (".", "..") or not PORTABLE_PART.fullmatch(part)
+                or part.endswith(".")
+                or part.split(".", 1)[0].lower() in WINDOWS_RESERVED):
+            raise Refused("nonportable manifest component")
+    return raw.casefold()
+
+
 def verify_manifest(artifact, expected_sha):
     artifact = artifact.absolute()
     for ancestor in (artifact, *artifact.parents):
@@ -37,22 +64,22 @@ def verify_manifest(artifact, expected_sha):
         raise Refused("missing source.sha or hashes.json")
     if source.read_text(encoding="utf-8").strip() != expected_sha:
         raise Refused("artifact is not pinned to this commit")
-    items = json.loads(manifest.read_text(encoding="utf-8"))
-    if not isinstance(items, list) or not items:
+    items = strict_json(manifest)
+    if not isinstance(items, list) or not 1 <= len(items) <= 4096:
         raise Refused("invalid SHA256 manifest")
     seen = set()
+    seen_folded = set()
     for item in items:
         if not isinstance(item, dict) or set(item) != {"path", "sha256"}:
             raise Refused("unexpected manifest fields")
         raw = item["path"]
-        if (not isinstance(raw, str) or not raw or "\\" in raw or
-                ":" in raw or PurePosixPath(raw).is_absolute() or
-                any(x in (".", "..", "") for x in raw.split("/")) or
-                PurePosixPath(raw).as_posix() != raw or raw in seen):
+        folded = validate_manifest_path(raw)
+        if raw == "hashes.json" or raw in seen or folded in seen_folded:
             raise Refused("unsafe or duplicate manifest path")
         if not isinstance(item["sha256"], str) or not SHA64.fullmatch(item["sha256"]):
             raise Refused("invalid SHA256")
         seen.add(raw)
+        seen_folded.add(folded)
         file = artifact / raw
         if not file.is_file() or hash_file(file) != item["sha256"]:
             raise Refused("missing or mutated artifact")
@@ -71,7 +98,7 @@ def verify_product_adapter(repo, files, provider):
     declaration = repo / "probes" / "7u1" / "product-integration.json"
     if not declaration.is_file():
         raise Refused("real CoSoS product WebView2/Rust adapter is missing (8L1 #71)")
-    value = json.loads(declaration.read_text(encoding="utf-8"))
+    value = strict_json(declaration)
     expected = {
         "schema": "cosos.7u1.product-integration.v1",
         "kind": "product-webview2-rust-mv3",
@@ -113,12 +140,9 @@ def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
         if not SHA40.fullmatch(sha or "") or head != sha:
             raise Refused("source SHA mismatch")
         if observed_sha is None:
+            # The whole checkout (including native 8P and extension files) must be clean.
             status = subprocess.run(
-                ["git", "-C", str(repo), "status", "--porcelain",
-                 "--untracked-files=all", "--",
-                 "probes/7u1", "probes/7l1", "probes/7l2",
-                 "crates/cos-core", "crates/cos-app",
-                 "extension/companion"],
+                ["git", "-C", str(repo), "status", "--porcelain", "--untracked-files=all"],
                 capture_output=True, text=True, check=True, timeout=10
             )
             if status.stdout.strip():
