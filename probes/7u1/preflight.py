@@ -95,6 +95,10 @@ def verify_manifest(artifact, expected_sha):
 
 
 def verify_product_adapter(repo, files, provider):
+    if "artifact-kind.json" in files:
+        # This file is emitted only for the CI synthetic 7L2 build.
+        # A deceptive product-integration.json never upgrades that artifact.
+        raise Refused("synthetic 7L2 artifact is not a provider product adapter")
     declaration = repo / "probes" / "7u1" / "product-integration.json"
     if not declaration.is_file():
         raise Refused("real CoSoS product WebView2/Rust adapter is missing (8L1 #71)")
