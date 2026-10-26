@@ -532,7 +532,8 @@ internal sealed partial class GateForm
         }
         var first = new Native8PSessionSnapshot("8p-A",
             @"D:\\projects\\CoS-Rust\\a", "https://chatgpt.com",
-            "session-A", 1, "doc-A", 1, 1, 1);
+            "session-A", 1, "doc-A", 1, 1, 1, 1,
+            "extension-A", "worker-target-A", "worker-instance-A");
         var second = first with {
             Profile = "8p-B",
             ProfilePath = @"D:\\projects\\CoS-Rust\\b",
@@ -553,6 +554,37 @@ internal sealed partial class GateForm
         }, "https://chatgpt.com"));
         Verify(!Eligible8PHandoff(first, second,
             "https://wrong.example"));
+        var rebound = first with {
+            SessionId = "8p-empty-new", SessionEpoch = 2,
+            DocumentId = "doc-new-A", NavigationEpoch = 2,
+            HostGeneration = 2, WorkerGeneration = 2, ChannelId = 3,
+            WorkerTargetId = "new-worker-target"
+        };
+        Verify(Fresh8PPostHandoff(first, rebound, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            ProfilePath = second.ProfilePath
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            ExtensionId = "foreign-extension"
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            DocumentId = first.DocumentId
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            ChannelId = first.ChannelId
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            HostGeneration = first.HostGeneration
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            WorkerGeneration = first.WorkerGeneration
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            SessionId = first.SessionId
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            SessionEpoch = first.SessionEpoch
+        }, "8p-empty-new", 2));
     }
 
     private void BuildProductionExtension()
@@ -590,13 +622,18 @@ internal sealed partial class GateForm
     private sealed record Native8PSessionSnapshot(
         string Profile, string ProfilePath, string Origin,
         string SessionId, ulong SessionEpoch, string DocumentId,
-        ulong NavigationEpoch, ulong HostGeneration, ulong ChannelId);
+        ulong NavigationEpoch, ulong HostGeneration, ulong WorkerGeneration,
+        ulong ChannelId, string ExtensionId, string WorkerTargetId,
+        string WorkerInstance);
 
     private static Native8PSessionSnapshot Snapshot8P(Browser browser)
     {
         if (!browser.Production8P || browser.Revoked ||
             browser.ChannelId == 0 || browser.ProductionOrigin is null ||
             browser.ProductionUrl is null || browser.WorkerSession is null ||
+            string.IsNullOrWhiteSpace(browser.WorkerTargetId) ||
+            string.IsNullOrWhiteSpace(browser.WorkerInstance) ||
+            string.IsNullOrWhiteSpace(browser.ExtensionId) ||
             browser.View.IsDisposed ||
             !string.Equals(browser.View.CoreWebView2.Source,
                 browser.ProductionUrl, StringComparison.Ordinal) ||
@@ -607,7 +644,8 @@ internal sealed partial class GateForm
         return new(browser.Profile, browser.ProfilePath,
             browser.ProductionOrigin, browser.SessionId, browser.SessionEpoch,
             browser.DocumentId, browser.NavigationEpoch, browser.HostGeneration,
-            browser.ChannelId);
+            browser.WorkerGeneration, browser.ChannelId, browser.ExtensionId,
+            browser.WorkerTargetId!, browser.WorkerInstance!);
     }
 
     private static bool Same8P(Browser b, Native8PSessionSnapshot s)
@@ -626,6 +664,29 @@ internal sealed partial class GateForm
         b.SessionEpoch > 0 &&
         a.SessionEpoch < 9_007_199_254_740_989UL &&
         b.SessionEpoch < 9_007_199_254_740_989UL;
+
+    // Native-specific two-phase postcondition. JS 8B handoff preserves an
+    // existing channel, whereas 8P Rust explicitly requires both channels
+    // retired; therefore require a *genuinely new* 8C document/worker/channel
+    // proof without changing either OS partition or installed MV3 extension.
+    // This is a stronger native requirement, not a claim of literal JS parity.
+    private static bool Fresh8PPostHandoff(
+        Native8PSessionSnapshot prior, Native8PSessionSnapshot next,
+        string expectedSession, ulong expectedSessionEpoch) =>
+        prior.Profile == next.Profile &&
+        string.Equals(prior.ProfilePath, next.ProfilePath,
+            StringComparison.OrdinalIgnoreCase) &&
+        prior.Origin == next.Origin &&
+        prior.ExtensionId == next.ExtensionId &&
+        next.SessionId == expectedSession &&
+        next.SessionEpoch == expectedSessionEpoch &&
+        next.DocumentId != prior.DocumentId &&
+        next.NavigationEpoch > prior.NavigationEpoch &&
+        next.HostGeneration > prior.HostGeneration &&
+        next.WorkerGeneration > prior.WorkerGeneration &&
+        next.ChannelId != prior.ChannelId && next.ChannelId != 0 &&
+        !string.IsNullOrWhiteSpace(next.WorkerInstance) &&
+        !string.IsNullOrWhiteSpace(next.WorkerTargetId);
 
     private async Task<bool> Execute8PHandoffProbeAsync(
         Browser a, Browser b, string primaryOrigin)
@@ -955,10 +1016,8 @@ internal sealed partial class GateForm
             if (success)
             {
                 handoffLocked = true; // blocks reentrant WebView2 nav during modal
-                var oldA = first.Browser.ChannelId;
-                var oldB = second.Browser!.ChannelId;
-                var oldEpochA = first.Browser.NavigationEpoch;
-                var oldEpochB = second.Browser.NavigationEpoch;
+                var priorA = Snapshot8P(first.Browser);
+                var priorB = Snapshot8P(second.Browser!);
                 try
                 {
                     handoffPassed = await Execute8PHandoffProbeAsync(
@@ -977,17 +1036,26 @@ internal sealed partial class GateForm
                     for (var attempt = 0; attempt < 150 &&
                         bound < startBound + 2; attempt++)
                         await Task.Delay(100);
-                    handoffPassed =
-                        bound >= startBound + 2 &&
-                        first.Browser.NavigationEpoch > oldEpochA &&
-                        second.Browser.NavigationEpoch > oldEpochB &&
-                        first.Browser.ChannelId != oldA &&
-                        second.Browser.ChannelId != oldB &&
-                        first.Browser.ChannelId != 0 &&
-                        second.Browser.ChannelId != 0 &&
-                        !first.Browser.Revoked && !second.Browser.Revoked &&
-                        first.Browser.ProfilePath != second.Browser.ProfilePath &&
-                        first.Browser.SessionId != second.Browser.SessionId;
+                    try
+                    {
+                        var afterA = Snapshot8P(first.Browser);
+                        var afterB = Snapshot8P(second.Browser);
+                        handoffPassed = bound >= startBound + 2 &&
+                            Eligible8PHandoff(priorA, priorB,
+                                policy.PrimaryOrigin(providerId)) &&
+                            Fresh8PPostHandoff(priorA, afterA,
+                                first.Browser.SessionId,
+                                priorA.SessionEpoch + 1) &&
+                            Fresh8PPostHandoff(priorB, afterB,
+                                priorA.SessionId,
+                                Math.Max(priorA.SessionEpoch, priorB.SessionEpoch) + 1) &&
+                            first.Browser.SessionId != priorA.SessionId &&
+                            first.Browser.SessionId != second.Browser.SessionId;
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        handoffPassed = false;
+                    }
                     if (handoffPassed)
                     {
                         await Prove8PSessionAsync(first.Browser);
