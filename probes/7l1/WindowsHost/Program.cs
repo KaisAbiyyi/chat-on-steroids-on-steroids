@@ -24,6 +24,11 @@ internal static class Program
             GateForm.Run8PPolicyTests();
             return;
         }
+        if (args.Length == 1 && args[0] == "--8p-native-differential-v1")
+        {
+            GateForm.Write8PTwoPhaseDifferentialVectors();
+            return;
+        }
         if (args.Length == 1 && args[0] == "--8l1-authority-self-test")
         {
             GateForm.Run8L1PolicyTests();
