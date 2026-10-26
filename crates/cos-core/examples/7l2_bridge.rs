@@ -543,7 +543,14 @@ mod tests {
             Some(NATIVE_8P_TWO_PHASE_V1)).is_err());
         let request = json!({
             "op": "handoff",
-            "source": a, "target": b,
+            "source": {
+                "identity": &a.identity, "origin": &a.origin,
+                "hostGeneration": a.host_generation
+            },
+            "target": {
+                "identity": &b.identity, "origin": &b.origin,
+                "hostGeneration": b.host_generation
+            },
             "contractVersion": NATIVE_8P_TWO_PHASE_V1,
             "newSourceSessionId": "empty",
             "sourceNextSessionEpoch": 2,
