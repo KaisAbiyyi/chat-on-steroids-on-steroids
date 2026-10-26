@@ -463,10 +463,68 @@ internal sealed partial class GateForm
         }
     }
 
+    // A CoreWebView2 NavigationCompleted event never grants a binding on its
+    // own: it must consume the *specific* browser NavigationStarting admission.
+    // Redirects can reuse a navigation ID but every new start invalidates the
+    // previous epoch; cancelled/forbidden starts never arm a completion.
+    private sealed class NativeNavigationAdmission
+    {
+        private ulong _navigationId;
+        private ulong _epoch;
+        private bool _admitted;
+
+        public void Invalidate() => _admitted = false;
+
+        public void Arm(ulong navigationId, ulong epoch)
+        {
+            _admitted = navigationId != 0 && epoch != 0;
+            _navigationId = navigationId;
+            _epoch = epoch;
+        }
+
+        public bool Consume(ulong navigationId, ulong epoch)
+        {
+            var accepted = _admitted && navigationId == _navigationId &&
+                epoch == _epoch;
+            _admitted = false;
+            return accepted;
+        }
+
+        public static void SelfTest()
+        {
+            static void Require(bool value)
+            {
+                if (!value) throw new InvalidOperationException(
+                    "8P native WebView2 navigation admission regression");
+            }
+            var fence = new NativeNavigationAdmission();
+            Require(!fence.Consume(1, 1)); // unsolicited completion
+            fence.Arm(10, 1);
+            Require(!fence.Consume(9, 1)); // stale completion consumes grant
+            Require(!fence.Consume(10, 1)); // cannot reuse stale admission
+            fence.Arm(10, 1);
+            fence.Invalidate(); // disallowed redirect / user cancel / crash
+            Require(!fence.Consume(10, 1));
+            fence.Arm(11, 2);
+            Require(!fence.Consume(11, 3)); // epoch changed
+            fence.Arm(11, 3);
+            Require(fence.Consume(11, 3));
+            Require(!fence.Consume(11, 3)); // replay
+            fence.Arm(12, 4);
+            fence.Arm(12, 5); // same NavigationId, a new redirected start
+            Require(!fence.Consume(12, 4));
+            fence.Arm(12, 5);
+            Require(fence.Consume(12, 5));
+            fence.Arm(0, 6);
+            Require(!fence.Consume(0, 6));
+        }
+    }
+
     internal static void Run8PPolicyTests()
     {
         ProviderPolicy.SelfTest();
         OAuthNavigationGate.SelfTest();
+        NativeNavigationAdmission.SelfTest();
         static void Verify(bool ok)
         {
             if (!ok) throw new InvalidOperationException(
@@ -728,6 +786,7 @@ internal sealed partial class GateForm
             };
             _browsers.Add(view, browser);
             var rebindLock = new SemaphoreSlim(1, 1);
+            var navigationAdmission = new NativeNavigationAdmission();
             var ready = new TaskCompletionSource<bool>(
                 TaskCreationOptions.RunContinuationsAsynchronously);
             view.CoreWebView2.PermissionRequested += (_, e) =>
@@ -739,6 +798,7 @@ internal sealed partial class GateForm
             view.CoreWebView2.NewWindowRequested += (_, e) => e.Handled = true;
             view.CoreWebView2.ProcessFailed += (_, _) =>
             {
+                navigationAdmission.Invalidate();
                 RevokeAndRetire(browser);
                 oauth.InvalidateProfile(browser.Profile);
                 browser.ProductionUrl = null;
@@ -747,8 +807,18 @@ internal sealed partial class GateForm
             };
             view.CoreWebView2.NavigationStarting += (_, e) =>
             {
-                // Native modal consent must never admit reentrant navigation.
-                if (handoffLocked) { e.Cancel = true; refused++; return; }
+                // Native consent/Rust transfer cannot receive reentrant
+                // navigation or a stale async completion from a prior page.
+                navigationAdmission.Invalidate();
+                if (handoffLocked)
+                {
+                    RevokeAndRetire(browser);
+                    browser.ProductionUrl = null;
+                    browser.ProductionOrigin = null;
+                    e.Cancel = true;
+                    refused++;
+                    return;
+                }
                 RevokeAndRetire(browser);
                 browser.ProductionUrl = null;
                 browser.ProductionOrigin = null;
@@ -792,6 +862,8 @@ internal sealed partial class GateForm
                         e.Cancel = true;
                     }
                 }
+                if (!e.Cancel)
+                    navigationAdmission.Arm(e.NavigationId, browser.NavigationEpoch);
             };
             view.CoreWebView2.NavigationCompleted += async (_, e) =>
             {
@@ -799,13 +871,23 @@ internal sealed partial class GateForm
                 // modal/Rust two-profile transaction holds exclusive control.
                 if (handoffLocked)
                 {
+                    navigationAdmission.Invalidate();
                     RevokeAndRetire(browser);
                     ready.TrySetResult(false);
                     return;
                 }
                 if (!e.IsSuccess || view.IsDisposed)
                 {
+                    navigationAdmission.Invalidate();
                     ready.TrySetResult(false);
+                    return;
+                }
+                if (!navigationAdmission.Consume(
+                        e.NavigationId, browser.NavigationEpoch))
+                {
+                    // A cancelled, foreign or superseded completion must not
+                    // revive a document's previously retired Rust authority.
+                    RevokeAndRetire(browser);
                     return;
                 }
                 var epoch = browser.NavigationEpoch;
