@@ -342,8 +342,9 @@ internal sealed partial class GateForm
         {
             // Actual WebView2 browser-side effect handlers: deny before
             // any renderer or extension can authorize a permission or popup.
-            b.View.CoreWebView2.PermissionRequested += (_, e) =>
+            b.View.CoreWebView2.PermissionRequested += async (_, e) =>
             {
+                using var permissionDeferral = e.GetDeferral();
                 // Explicit state prevents a WebView2 default grant. Never
                 // persist it in the profile: every request needs new consent.
                 e.State = CoreWebView2PermissionState.Deny;
@@ -380,6 +381,16 @@ internal sealed partial class GateForm
                 }
                 try
                 {
+                    // WebView2 prohibits nested modal loops inside its callback.
+                    // The deferral retains default-Deny args while yielding the
+                    // callback before native UI and navigation can be scheduled.
+                    await Task.Yield();
+                    lock (_gate)
+                    {
+                        if (!_bindings.TryGetValue(b, out var beforePrompt) ||
+                            beforePrompt != snapshot || !Matches(b, beforePrompt) ||
+                            !PermissionOutsideProfileAction(_profileActionBusy, beforePrompt)) return;
+                    }
                     if (forceStale)
                     {
                         // WinForms modal MessageBox pumps this posted native
@@ -426,6 +437,12 @@ internal sealed partial class GateForm
                             _ownerGrants++;
                         }
                     }
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or
+                    System.Runtime.InteropServices.COMException)
+                {
+                    // Revoked/disposed WebView2 requests retain initial Deny.
+                    // No uncertain native side effect can publish a grant.
                 }
                 finally
                 {
