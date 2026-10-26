@@ -1,5 +1,13 @@
 # CoS-Rust current backend checkpoint
 
+## 8L1 physical Windows retest — FAIL / incomplete, 2026-10-26
+
+- Exact source/artifact `aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd` (merged #120), full 14-file SHA256 manifest and in-host attestation PASS. Local claim `COS-8L1-20261026`, generation 2, branch `feature/8l1-native-20261026`, [issue #71](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/71).
+- Two new retained-profile runs fail at `SetupAsync`: WebView2 155.0.4283.62 enumerates built-in Microsoft Clipboard/PDF extensions; existing zero-extension freshness guard refuses them. Restart/crash/multi-tab acceptance not reached. Separate single-process diagnostic timed out without receipt; do not label it PASS.
+- Owner explicitly deferred real Yes/No dialogs and requested automated tests first; consent and profile-action probes NOT_RUN. `native8L1Accepted=false`; all-PASS merge condition unmet, evidence PR stays Draft. Existing cloud 8P-HOST #124 owns overlapping native source; no local product edits or weakened checks.
+- [Implementation summary and failure handoff](implementation-summary/2026-10-26-8l1-native-windows-qualification.md); [sanitized receipt](../audit/2026-10-26/8l1-native/qualification.json). Historical receipts and protected eight-path WIP preserved. Next: source-reviewed cloud repair, source-bound artifact, exact-SHA full physical retest including owner dialogs.
+
+
 ## 16F release security/provenance — cloud Review, 2026-10-25
 
 - **Exclusive claim:** [#121](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/121), lock `release-closure`; task [16F](https://app.notion.com/p/400c4a6aaf7381c685aaea92e95f639a) status Review; draft [PR #122](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/122). Exact head and CI status are NOT accepted until all hosted checks complete.

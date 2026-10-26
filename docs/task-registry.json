@@ -535,7 +535,7 @@
       "phase": "8",
       "kind": "L",
       "status": "blocked",
-      "evidence": "Physical Windows investigation at eb9f3dc9684fe97017dcc3a57ae63553d2118547, issue #71: 8A/8B/8C controllers have only synthetic-test callers; native integration and 8L1 runner missing. native8L1Accepted=false. See audit/2026-10-24/8l1-native-integration-blocked.json. Claim released after publishing blocked handoff; 8U1 remains blocked."
+      "evidence": "2026-10-26 physical retest at merged 8L1-HOST #120 aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd: source/14-file artifact attestation PASS; retained-profile clean start FAIL twice (runtime built-in Microsoft extensions hit zero-extension guard); separate single-process diagnostic TIMEOUT. Owner consent/profile actions NOT_RUN at explicit owner deferral. native8L1Accepted=false. See audit/2026-10-26/8l1-native/qualification.json and docs/implementation-summary/2026-10-26-8l1-native-windows-qualification.md. Cloud repair must coordinate active native source owner #124; full exact-SHA physical retest required; no conditional merge until all required gates PASS."
     },
     {
       "id": "8U1",

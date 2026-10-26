@@ -1,0 +1,34 @@
+{
+  "scope": "8L1-HOST limited real native integration; synthetic profiles only",
+  "dateUtc": "2026-10-26T03:02:10.6119832+00:00",
+  "sourceSha": "aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd",
+  "hostBinarySha256": "68245a38671820d531a9e1a91461bc4543e177da19377aab86af0ab12ff2971c",
+  "rustBinarySha256": "3f6f3fc5ae26e8cce2e1c168b33fde48511c60bd756bc74c47e17f85aa576447",
+  "native8L1Accepted": false,
+  "cloudIntegrationPartial": false,
+  "hostProcessId": 7512,
+  "rustProcessId": 28268,
+  "rustProcessExit": 0,
+  "retainedProfileMode": true,
+  "reusedRetainedProfiles": false,
+  "profileAPath": "",
+  "profileBPath": "",
+  "extensionAId": "",
+  "extensionBId": "",
+  "syntheticMarkerA": "",
+  "syntheticMarkerB": "",
+  "checks": {
+    "fatal": {
+      "status": "FAIL",
+      "evidence": "UnauthorizedAccessException: Unexpected extension in clean profile"
+    },
+    "rust_process_exit": {
+      "status": "PASS",
+      "evidence": "Native Rust child exit=0"
+    },
+    "source_artifact_provenance": {
+      "status": "PASS",
+      "evidence": "In-host checked Git HEAD, clean authority files and all 14 SHA256 manifests: aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd"
+    }
+  }
+}

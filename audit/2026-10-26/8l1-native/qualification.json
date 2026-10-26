@@ -1,0 +1,63 @@
+{
+  "unit": "8L1",
+  "session": "COS-8L1-20261026",
+  "claimGeneration": 2,
+  "date": "2026-10-26",
+  "timezone": "Asia/Jakarta",
+  "sourceSha": "aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd",
+  "sourcePr": 120,
+  "artifactWorkflowRun": 40182064158,
+  "artifactId": 12594850863,
+  "artifactManifestEntries": 14,
+  "artifactManifestAllVerified": true,
+  "hostBinarySha256": "68245a38671820d531a9e1a91461bc4543e177da19377aab86af0ab12ff2971c",
+  "rustBinarySha256": "3f6f3fc5ae26e8cce2e1c168b33fde48511c60bd756bc74c47e17f85aa576447",
+  "status": "FAIL",
+  "native8L1Accepted": false,
+  "automated": {
+    "nativeAuthoritySelftest": "PASS",
+    "javascript": {
+      "status": "PASS",
+      "tests": 65
+    },
+    "taskDag": {
+      "status": "PASS",
+      "tests": 15
+    },
+    "browserGuardrails": {
+      "status": "PASS",
+      "tests": 16
+    },
+    "rustWorkspace": "IN_PROGRESS",
+    "strictClippy": "IN_PROGRESS",
+    "format": "PASS"
+  },
+  "native": {
+    "retainedProfileCleanStart": "FAIL",
+    "reproductionCount": 2,
+    "restart": "BLOCKED",
+    "crash": "NOT_RUN",
+    "multiTab": "NOT_RUN",
+    "permissionDialogs": "NOT_RUN",
+    "profileActionDialogs": "NOT_RUN",
+    "singleProcessDiagnostic": "TIMEOUT"
+  },
+  "rootCause": {
+    "path": "probes/7l1/WindowsHost/Program.cs",
+    "line": 363,
+    "exception": "UnauthorizedAccessException: Unexpected extension in clean profile",
+    "runtime": "155.0.4283.62",
+    "observedFreshProfileExtensions": [
+      "Microsoft Clipboard Extension (dgiklkfkllikcanfonkcabmbdfmgleag)",
+      "Microsoft Edge PDF Viewer (mhjfbmdgcfjbbpaeojofohoefgiehjai)"
+    ],
+    "analysis": "Accepted host requires zero extensions in a brand-new retained profile. Actual runtime enumerates two built-in Microsoft extensions. Independent fresh-profile WebView2 API inventory confirms this before adding fixture extension. No extension allowlist or acceptance threshold was changed."
+  },
+  "humanDeferral": "Owner explicitly requested automated tests first; unavailable for actual native Yes/No dialogs. No consent/ProfileActions probes started.",
+  "sourceChanges": "Evidence and coordination only; no native host, fixture, production code or protected WIP edited. Active cloud 8P-HOST #124 owns overlapping source.",
+  "protectedWip": "8/8 hashes unchanged",
+  "upstreamSha": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
+  "localStorage": "All task output/build cache/test temp and synthetic profiles on D: under CoS-Rust. No Docker/WSL run.",
+  "merge": "HOLD: required physical gates not PASS; evidence PR must remain draft",
+  "next": "Cloud native-host owner repairs fresh-profile extension attestation and bounded diagnostics without trusting arbitrary preinstalled extensions; exact-SHA CI/build; physical rerun on D: with all four switches and real owner dialogs."
+}
