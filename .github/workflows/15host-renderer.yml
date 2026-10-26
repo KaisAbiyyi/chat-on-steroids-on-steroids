@@ -1,0 +1,46 @@
+name: 15HOST synthetic native renderer foundation
+on:
+  pull_request:
+    paths:
+      - 'apps/windows-renderer/**'
+      - '.github/workflows/15host-renderer.yml'
+  workflow_dispatch:
+jobs:
+  windows-contract-and-binary:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore WebView2 native renderer
+        run: dotnet restore apps/windows-renderer/WindowsRenderer.csproj
+      - name: Strict Windows native compilation
+        run: dotnet build apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-restore --warnaserror
+      - name: Source-compiled negative IPC fixture tests (NOT a native product test)
+        run: dotnet run --project apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-build -- --contract-selftest
+      - name: Hash source-bound Windows artifact
+        shell: pwsh
+        run: |
+          $exe = 'apps/windows-renderer/bin/Release/net8.0-windows/WindowsRenderer.exe'
+          if (!(Test-Path $exe)) { throw 'Missing renderer executable' }
+          $sha = (Get-FileHash -Algorithm SHA256 $exe).Hash
+          "$env:GITHUB_SHA  $sha  WindowsRenderer.exe" | Out-File -FilePath 'apps/windows-renderer/sha256-manifest.txt' -Encoding ascii
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 15host-windows-synthetic-renderer-${{ github.sha }}
+          path: |
+            apps/windows-renderer/bin/Release/net8.0-windows/
+            apps/windows-renderer/sha256-manifest.txt
+          if-no-files-found: error
+  ubuntu-cross-compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Strict Windows targeting cross-build (NOT Linux native execution)
+        run: |
+          dotnet restore apps/windows-renderer/WindowsRenderer.csproj
+          dotnet build apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-restore --warnaserror
