@@ -74,6 +74,8 @@ jobs:
         run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test
       - name: Compile authenticated Rust bridge
         run: cargo build --locked -p cos-core --example 7l2_bridge --release
+      - name: Hosted cross-component C# contract, real Rust IPC and MV3 first-proof/failure regression
+        run: node --test probes/8p/native-rust-mv3-integration.test.mjs
       - name: Check opt-in runner parses
         shell: pwsh
         run: |
