@@ -137,3 +137,20 @@ An ordinary `16F` workflow success is not a human/independent reviewer
 approval; a self-authored review is not independent. **The gate stays
 `NOT_RUN` until an independent reviewer posts an explicit verdict on the
 final HEAD.** Owner 7U1 signed-in acceptance stays **NOT_RUN, separate**.
+
+
+## GEN9 CLOUD-ONLY integration and versioned phase matrix (2026-10-26)
+
+**Owner scope supersession:** Earlier owner-physical gate text is historical/downstream product qualification, **not** an 8P-HOST cloud merge prerequisite. Local physical Windows, dialogs and real provider sign-in are downstream NOT_RUN. The 8P merge gate is exact-final-SHA Windows/Ubuntu CI and a separate independent cloud security approval.
+
+| Caller / wire contract | Native precommit | Mutation / postcondition |
+| --- | --- | --- |
+| Unchanged JS 8B (single phase) | Native scope and two independent opaque partitions | Session-only attribution with stable document, channel and worker identities; changed identities intentionally rejected |
+| Production C# native-two-phase/v1 | Strict origin/partition/profile policy, default-No consent, two authenticated Rust/MV3 first proofs, both channels fully retired | Rust atomic session attribution followed by actual NEW WebView2 documents, channels and workers, source AND target fresh first-proofs |
+| Rust private 7L2 IPC (CoSoS/8P/native-two-phase/v1) | Exact version for two production 8p- profiles, no sibling live leases | Reject mixed/legacy/downgraded/missing contract versions, foreign scopes, replay and stale channels; legacy 8L1 protocol distinct |
+
+**Source-executed Windows CI:** probes/8p/native-rust-mv3-integration.test.mjs uses the **compiled production C# contract vectors**, real release Rust 7L2 child-process IPC and the unchanged source-owned MV3 worker loaded into separate JavaScript realms. It covers two first proofs, live sibling rejection, both retire ACKs, version/downgrade/mixed/replay denial, and two fresh postcommit first proofs. Its failure injection kills the real Rust child after successful commit but before target first proof, and verifies the abandoned channel has no live IPC authority.
+
+The production C# host reuses the compiled Native8PCommitProofGate predicate/state in the --8p-policy-self-test. A Rust commit ACK without BOTH fresh first proofs never releases the host, and failures after ACK or after source proof trigger irreversible Quarantine8PHandoff: block new navigation and binds, revoke both native channels, kill the private Rust authority. Independent reviewer must inspect the actual deployed code on final HEAD, not just this test description.
+
+**Limits:** This cloud test executes real Rust + real source MV3 but does NOT run an interactive WebView2 browser, physical NavigationStarting/ProcessFailed events, real login, OAuth token redemption, or signed-in 7U1. It proves bounded native source policy and IPC semantics, not literal JS 8B parity. Such product/owner evidence remains downstream NOT_RUN, never marked PASS or treated as a cloud blocker. Final-HEAD 12/12 workflow PASS and distinct independent reviewer security APPROVAL are still required. Keep PR Draft/NO MERGE until then.
