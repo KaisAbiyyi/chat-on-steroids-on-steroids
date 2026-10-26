@@ -779,13 +779,8 @@ mod tests {
             bridge.handoff_sessions(&a, &wrong, "8p-empty", 2, 2),
             Err(NativeBridgeError::Host)
         );
-        assert_eq!(
-            bridge.handoff_sessions(&a, &b, "8p-empty", 2, 2),
-            Ok(())
-        );
-        assert!(bridge
-            .handoff_sessions(&a, &b, "8p-other", 3, 3)
-            .is_err());
+        assert_eq!(bridge.handoff_sessions(&a, &b, "8p-empty", 2, 2), Ok(()));
+        assert!(bridge.handoff_sessions(&a, &b, "8p-other", 3, 3).is_err());
         for (mut next, session) in [(a, "8p-empty"), (b, "8p-session-A")] {
             next.identity.document_id = "next-document".into();
             next.identity.navigation_epoch += 1;
@@ -799,7 +794,7 @@ mod tests {
                     &next,
                     bootstrap.channel_id,
                     bootstrap.host_generation,
-                    &bootstrap.handshake_proof()
+                    &bootstrap.handshake_proof(),
                 )
                 .unwrap();
             let payload = bytes(&next);
