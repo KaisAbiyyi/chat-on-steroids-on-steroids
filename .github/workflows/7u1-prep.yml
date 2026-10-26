@@ -88,14 +88,15 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP '7u1-synthetic-artifact'
           $receipt = Join-Path $env:RUNNER_TEMP '7u1-synthetic-preflight.json'
           $sha = (git rev-parse HEAD).Trim()
-          python probes/7u1/preflight.py --repo . --artifact $stage --expected-sha $sha --provider chatgpt --profile 7u1-cloud-fixture001 --owner-consent --receipt $receipt
+          python probes/7u1/preflight.py --repo . --artifact $stage --expected-sha $sha --provider chatgpt --profile 7u1-cloud-fixture001 --receipt $receipt
           $status = $LASTEXITCODE
           if ($status -ne 2) { throw "Expected fail-closed exit 2; got $status" }
           $result = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
           if ($result.preflightStatus -ne 'BLOCKED' -or $result.owner7U1Status -ne 'NOT_RUN' -or
               $result.owner7U1Accepted -or $null -ne $result.outgoingSendCount -or
               $result.checks.artifact_manifest.status -ne 'PASS' -or
-              $result.checks.product_native_adapter.status -ne 'BLOCKED') {
+              $result.checks.product_native_adapter.status -ne 'BLOCKED' -or
+              $result.checks.explicit_owner_opt_in.status -ne 'BLOCKED') {
             throw 'Synthetic binaries must not receive product/owner acceptance'
           }
           # A deliberately BLOCKED probe exits 2. The assertion above is the
