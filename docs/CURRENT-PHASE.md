@@ -1,5 +1,13 @@
 # CoS-Rust current backend checkpoint
 
+## 8L1 exact merged-SHA native gate — ACCEPTED / PASS, 2026-10-26
+
+- [PR125](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125) merged as `934cc293f0d59c6eea74d3c2171bd93f35a7ac2d` after37/37 exact-head CI SUCCESS and direct self-review. Complete merge tree equals reviewed/tested headf382061.
+- Rebuilt that exact merged source and reran all four native switches with actual owner Yes/No/Yes +Yes/Yes in both OS process rounds. **54 native +4 retained-profile/crash/restart assertions PASS**, exit0; both Rust children exit0. Exact merge-SHA strict405 Rust/fmt/Clippy PASS. Protected original WIP/status and upstream pin unchanged.
+- [Final implementation summary v3](implementation-summary/2026-10-26-8l1-native-closure-v3.0.md), [merged-source native aggregate/raw receipts](../audit/2026-10-26/8l1-native-merged/qualification-pass.json). This supersedes the pending/failed bounded8L1 snapshots below while retaining their historical evidence.
+- 8L1 has no remaining local/owner action. Release the local claim after documentation/Notion synchronization. **8U1/7U1 remain unaccepted** pending production8P-HOST124 and real provider gates; no production OAuth, full product UI/performance, installer or IME acceptance. Closure publication changes documentation/evidence only; qualified runtime source remains934cc29.
+
+
 ## 8L1 repaired physical synthetic gate — PASS, publication/retest pending, 2026-10-26
 
 - Owner-directed continued local repair, COS-8L1-20261026 generation3, [PR125](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125). Source `62bbfdde6fb4506f5cb78d768e6960b50975dfab` real owner run07 PASS: 27 native checks in each of 2 fresh OS host/Rust process pairs plus 4 retained-profile/crash/restart comparisons. Owner consent, stale/replay denial, synthetic navigation and logical handoff physically exercised.
