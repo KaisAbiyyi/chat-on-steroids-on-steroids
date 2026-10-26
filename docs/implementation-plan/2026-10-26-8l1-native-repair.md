@@ -13,3 +13,5 @@ Shared-source inspection: active8P-HOST124 at0c205bf changes other Program.cs me
 Ledger:
 - RED: two real retained-profile receipts fail Unexpected extension in clean profile before marker/session checks; single-process run times out without receipt.
 - Policy GREEN: 17 native assertions PASS, including installed signed runtime. Host strict build PASS. Physical repaired run pending.
+
+- Native run01 at ed4754f clears component guard and authenticates real channels. Browser.crash kills profile A OS browser while its native CDP Task never resolves; B remains live. Bounded crash-request wait is required; retain ProcessFailed/all-scopes/Rust-retirement assertions unchanged. Earlier run timeout retained.

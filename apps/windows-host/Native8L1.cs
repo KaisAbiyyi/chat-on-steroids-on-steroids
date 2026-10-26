@@ -940,7 +940,12 @@ internal sealed partial class GateForm
                 var channels = new[] { a, b }.Select(v => v.ChannelId).ToArray();
                 try
                 {
-                    await CdpAsync(a, "Browser.crash", new { });
+                    File.WriteAllText(Path.Combine(_root, "progress.json"), JsonSerializer.Serialize(
+                        new { step = "browser-crash-command", status = "RUNNING", dateUtc = DateTimeOffset.UtcNow }));
+                    // Browser.crash may kill the transport without completing its
+                    // native CDP Task. Only actual ProcessFailed + confirmed Rust
+                    // retirement below can pass, never a reply or this timeout.
+                    await CdpAsync(a, "Browser.crash", new { }).WaitAsync(TimeSpan.FromSeconds(3));
                 }
                 catch (Exception) { /* an actual crash can interrupt its own CDP reply */ }
                 for (var tries = 0; tries < 50 && _native8L1ProcessFailures == 0; tries++)
