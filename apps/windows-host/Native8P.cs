@@ -520,11 +520,65 @@ internal sealed partial class GateForm
         }
     }
 
+    // 8P shares the same compiled, fail-closed Microsoft WebView2 runtime
+    // inventory policy as 8L1. The caller MUST derive verifiedRuntime from
+    // the actual browser process Authenticode/path check, never page input.
+    // Before installing our MV3 extension, only the two exact runtime-owned
+    // components (or an empty inventory) may exist in a FRESH host-owned profile.
+    private static bool Accept8PInventory(
+        IEnumerable<string> ids, bool verifiedRuntime, string? ownedExtensionId) =>
+        NativeProfileExtensions.Accepts(ids, verifiedRuntime, ownedExtensionId);
+
+    private static void Verify8PInventoryPolicy()
+    {
+        static void Require(bool result, string description)
+        {
+            if (!result) throw new InvalidOperationException(
+                "8P Windows WebView2 built-in inventory regression: " + description);
+        }
+        const string clipboard = "dgiklkfkllikcanfonkcabmbdfmgleag";
+        const string pdf = "mhjfbmdgcfjbbpaeojofohoefgiehjai";
+        const string owned = "abcdefghijklmnopabcdefghijklmnop";
+        const string foreign = "pppppppppppppppppppppppppppppppp";
+        Require(Accept8PInventory([], true, null), "empty signed fresh runtime");
+        Require(Accept8PInventory([clipboard, pdf], true, null),
+            "both pinned WebView2 components before install");
+        Require(Accept8PInventory([pdf, clipboard], true, null),
+            "order of runtime-owned components not trusted");
+        Require(Accept8PInventory([clipboard, pdf, owned], true, owned),
+            "only exact installed CoSoS extension after install");
+        Require(!Accept8PInventory([clipboard, pdf], false, null),
+            "unsigned or foreign browser process");
+        Require(!Accept8PInventory([], false, null),
+            "empty inventory never bypasses runtime attestation");
+        Require(!Accept8PInventory([owned], true, null),
+            "pre-existing CoSoS ID is not preauthorized");
+        Require(!Accept8PInventory([clipboard, foreign], true, null),
+            "foreign unpacked extension before install");
+        Require(!Accept8PInventory([clipboard, pdf, foreign], true, owned),
+            "foreign extension cannot replace CoSoS");
+        Require(!Accept8PInventory([clipboard, pdf, owned, foreign], true, owned),
+            "foreign extension after install");
+        Require(!Accept8PInventory([clipboard, clipboard], true, null),
+            "duplicate runtime component");
+        Require(!Accept8PInventory([clipboard, pdf, owned, owned], true, owned),
+            "duplicate owned extension");
+        Require(!Accept8PInventory([clipboard, pdf], true, owned),
+            "missing CoSoS extension after install");
+        Require(!Accept8PInventory([clipboard, pdf, owned], false, owned),
+            "unsigned runtime cannot install CoSoS");
+        Require(!Accept8PInventory([clipboard, pdf, owned.ToUpperInvariant()],
+            true, owned), "uppercase extension ID is not canonical");
+        Require(!Accept8PInventory([clipboard, pdf, owned], true, clipboard),
+            "built-in ID cannot masquerade as source-owned extension");
+    }
+
     internal static void Run8PPolicyTests()
     {
         ProviderPolicy.SelfTest();
         OAuthNavigationGate.SelfTest();
         NativeNavigationAdmission.SelfTest();
+        Verify8PInventoryPolicy();
         static void Verify(bool ok)
         {
             if (!ok) throw new InvalidOperationException(
@@ -932,6 +986,12 @@ internal sealed partial class GateForm
         {
             var profile = Path.Combine(_root, "8p-isolated-profile-" + label);
             RejectReparseAncestors(profile);
+            // Profile creation is host-owned and MUST be new/empty before the
+            // Microsoft runtime supplies its own two built-in components.
+            // An existing user profile is never an admissible extension source.
+            if (Directory.Exists(profile) &&
+                Directory.EnumerateFileSystemEntries(profile).Any())
+                throw new UnauthorizedAccessException("8P needs a fresh empty profile");
             var env = await CoreWebView2Environment.CreateAsync(null, profile,
                 new CoreWebView2EnvironmentOptions {
                     AreBrowserExtensionsEnabled = true
@@ -939,14 +999,30 @@ internal sealed partial class GateForm
             await view.EnsureCoreWebView2Async(env);
             var effectiveProfile = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
             RejectReparseAncestors(effectiveProfile);
-            if (!IsUnderProject(effectiveProfile))
+            var expectedRoot = Path.GetFullPath(profile).TrimEnd(Path.DirectorySeparatorChar);
+            if (!IsUnderProject(effectiveProfile) ||
+                !(effectiveProfile.Equals(expectedRoot, StringComparison.OrdinalIgnoreCase) ||
+                  effectiveProfile.StartsWith(expectedRoot + Path.DirectorySeparatorChar,
+                      StringComparison.OrdinalIgnoreCase)))
                 throw new UnauthorizedAccessException("foreign 8P profile");
-            if ((await view.CoreWebView2.Profile.GetBrowserExtensionsAsync()).Count != 0)
-                throw new UnauthorizedAccessException("8P profile must have no prior extensions");
+            using var runtimeProcess = System.Diagnostics.Process.GetProcessById(
+                checked((int)view.CoreWebView2.BrowserProcessId));
+            var runtimeExecutable = runtimeProcess.MainModule?.FileName;
+            var verifiedRuntime = runtimeExecutable is not null &&
+                NativeProfileExtensions.VerifiedMicrosoftRuntime(runtimeExecutable);
+            var priorExtensions = await view.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            if (!Accept8PInventory(priorExtensions.Select(e => e.Id), verifiedRuntime, null))
+                throw new UnauthorizedAccessException(
+                    "8P unexpected extension or unverified WebView2 runtime");
             var extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(
                 Path.Combine(_root, "extension"));
-            if (!extension.IsEnabled)
-                throw new UnauthorizedAccessException("8P native MV3 extension disabled");
+            var installedExtensions = await view.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            if (!extension.IsEnabled ||
+                !Accept8PInventory(installedExtensions.Select(e => e.Id),
+                    verifiedRuntime, extension.Id) ||
+                installedExtensions.Count(e => e.Id == extension.Id && e.IsEnabled) != 1)
+                throw new UnauthorizedAccessException(
+                    "8P native MV3 extension identity/inventory mismatch");
             var browser = new Browser
             {
                 View = view, Profile = "8p-" + label,
