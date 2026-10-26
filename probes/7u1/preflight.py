@@ -101,7 +101,7 @@ def verify_product_adapter(repo, files, provider):
         raise Refused("synthetic 7L2 artifact is not a provider product adapter")
     declaration = repo / "probes" / "7u1" / "product-integration.json"
     if not declaration.is_file():
-        raise Refused("real CoSoS product WebView2/Rust adapter is missing (8L1 #71)")
+        raise Refused("reviewed production 8P host and restricted 7U1 observation adapter missing (#123/#124)")
     value = strict_json(declaration)
     expected = {
         "schema": "cosos.7u1.product-integration.v1",
