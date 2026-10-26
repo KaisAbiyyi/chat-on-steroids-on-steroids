@@ -1,0 +1,27 @@
+{
+  "unit": "8L1",
+  "sourceSha": "934cc293f0d59c6eea74d3c2171bd93f35a7ac2d",
+  "status": "PASS",
+  "native8L1Accepted": true,
+  "exactMergedShaRetest": true,
+  "nativeChecks": 54,
+  "crossProcessRestartChecks": 4,
+  "rawReceipts": [
+    "run09-before-pass.json",
+    "run09-after-pass.json",
+    "run09-restart-pass.json"
+  ],
+  "hostBinarySha256": "4950b79b8fe29eb75dc3af956fae10d6684093f7c81dcda3eb1579c955e83e0d",
+  "rustBinarySha256": "1ebe4e34efed6e16c8609575aa793f23f3cef553a09a8b8b58ef0165a3f0b3ed",
+  "ownerInteractions": "Actual owner Yes/No/Yes +Yes/Yes both process rounds; no automated button operation",
+  "scope": "Synthetic privileged WebView2 8L1 only; production8P-HOST/real provider sign-in/IME/product performance remain separate",
+  "sourcePr": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125",
+  "validatedPrHead": "f3820612a8a680f574be8753845aabe126553304",
+  "prHeadCiChecks": "37/37 PASS",
+  "mergedTreeEqualsQualifiedPrHead": true,
+  "mergedRustWorkspaceTests": 405,
+  "mergedStrictRunner": "PASS / exit0: format, workspace, all-target Clippy -D warnings",
+  "mergedStrictLogSha256": "3b5c62ae9e2d1623f80cfcfcddde7a404c9609bb27ca6ac48b92a73721b067fe",
+  "historicalUnsuccessfulAttempt": "Run08 required No was not exercised (2 grants/0 denials); required assertion refused PASS. Original receipt retained. Run09 executes actual Yes/No/Yes both rounds and resolves the required gate.",
+  "rawFlagExplanation": "Raw process/wrapper flags remain false by design; separate L review requires 27 actual named in-process checks in both rounds plus4 actual cross-process comparisons. native_host_process_restart process-local NOT_RUN is resolved by parent restart receipt. No raw flag or acceptance threshold changed."
+}
