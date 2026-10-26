@@ -1,5 +1,13 @@
 # CoS-Rust current backend checkpoint
 
+## 8L1 repaired physical synthetic gate — PASS, publication/retest pending, 2026-10-26
+
+- Owner-directed continued local repair, COS-8L1-20261026 generation3, [PR125](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125). Source `62bbfdde6fb4506f5cb78d768e6960b50975dfab` real owner run07 PASS: 27 native checks in each of 2 fresh OS host/Rust process pairs plus 4 retained-profile/crash/restart comparisons. Owner consent, stale/replay denial, synthetic navigation and logical handoff physically exercised.
+- Repaired signed-runtime component bootstrap, dying Browser.crash transport wait, source-owned extension recovery after crash, and deferral/settlement of actual native permission callbacks. Unknown extension and source/manifest/partition/consent fences retained; no unrelated Native8P, Rust or JS contract edits.
+- [Implementation summary v2](implementation-summary/2026-10-26-8l1-native-repair-v2.0.md) and [qualified aggregate/raw receipts](../audit/2026-10-26/8l1-native-repair/qualification-pass.json). Windows405 Rust +3 bridge,25 C# policy,65JS,16DAG,16guardrail, fmt/strict Clippy PASS. Final-head hosted CI/merge and exact merge-SHA native retest remain publication/handoff gates.
+- Registry proposes 8L1 Done on accepted native proof once this PR merges; 8U1 remains Blocked pending production8P-HOST124/real provider gate. No production OAuth, full product UI/performance, installer or IME acceptance. Earlier FAIL/NOT_RUN entries below are immutable history, superseded for this bounded gate only. Protected original root eight-path WIP retained.
+
+
 ## 8L1 physical Windows retest â€” FAIL / incomplete, 2026-10-26
 
 - Exact source/artifact `aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd` (merged #120), full 14-file SHA256 manifest and in-host attestation PASS. Local claim `COS-8L1-20261026`, generation 2, branch `feature/8l1-native-20261026`, [issue #71](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/71).

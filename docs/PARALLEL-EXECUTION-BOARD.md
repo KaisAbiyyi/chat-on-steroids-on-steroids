@@ -59,6 +59,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 
 ¹ `READY · PARALLEL` is a committed snapshot **not an active grant/lock**. Immediately before every claim, inspect live GitHub `main` SHA and checks, open PRs, current claims, transitive prerequisites, logical contracts and paths; never assume different named locks imply non-overlapping code. `L` gates cannot run in GitHub-only CI and should be serialized on one physical Windows host. `U` gates require the owner's explicit scoped action. After a gate is accepted, update the registry status and evidence through a reviewed PR, then rerun the resolver; never edit status just to unlock successors.
 
+2026-10-26 update: source-bound owner-operated synthetic 8L1 native gate PASS (run07, source62bbfdd); source repair PR125 final CI/merge and exact-merge retest remain the publication/handoff gates. 8U1 stays blocked on production 8P-HOST124 and real owner provider qualification. Historical failures remain preserved.
+
 ## Full 16-phase task registry
 
 | Task | Deliverable | Prerequisites (ALL) | Resource lock | Execution | Candidate status¹ |
@@ -102,7 +104,7 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `8A` | Chrome API/extension adapter and worker world | `7E` | `embedded-adapter` | C (cloud) | DONE |
 | `8B` | Sign-in, isolated profiles, session transfer | `8A` | `browser-profiles` | C (cloud) | DONE |
 | `8C` | Native browser lifecycle and permission hardening | `8B` | `browser-lifecycle` | C (cloud) | DONE |
-| `8L1` | Native embedded restart/multi-tab/profile behavior | `8C` | `windows-embedded` | L (Windows) | BLOCKED |
+| `8L1` | Native embedded restart/multi-tab/profile behavior | `8C` | `windows-embedded` | L (Windows) | DONE |
 | `8U1` | Owner provider sign-in and profile UX | `8L1` | `human-provider` | U (owner) | BLOCKED |
 | `9A` | Durable outbox attachment ownership | `8U1` | `outbox-schema` | C (cloud) | BLOCKED |
 | `9B` | Queue/edit/reorder/cancel state machine | `9A` | `outbox-queue` | C (cloud) | BLOCKED |
