@@ -62,7 +62,11 @@ jobs:
           node-version: '22'
       - name: Compile product native host (strict)
         run: dotnet build apps/windows-host/WindowsHost.csproj -c Release -warnaserror
-      - name: Native origin allowlist selftests (no WebView2 account/browser)
+      - name: Windows regression — Microsoft WebView2 built-in and foreign extension inventory
+        shell: pwsh
+        run: dotnet run --project probes/8l1/PolicyTests/PolicyTests.csproj --configuration Release
+      - name: Windows 8P production inventory and origin policy selftests (no browser/account)
+        shell: pwsh
         run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8p-policy-self-test
       - name: Compiled C# production method vs accepted JS 8B differential (synthetic only)
         run: node --test probes/8p/native-contract-differential.test.mjs
