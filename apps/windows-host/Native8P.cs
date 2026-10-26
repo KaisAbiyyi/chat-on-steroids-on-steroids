@@ -584,6 +584,24 @@ internal sealed partial class GateForm
             if (!ok) throw new InvalidOperationException(
                 "8P native 8B profile/session handoff policy regression");
         }
+        // Exercises the SAME lease predicate used immediately after native
+        // Rust register/worker bootstrap/handshake continuations.
+        const string source = "https://chatgpt.com/";
+        const string origin = "https://chatgpt.com";
+        static bool Lease(ulong revocation, ulong navigation,
+            string? actualUrl = source, string? actualSource = source,
+            string? actualOrigin = origin, bool disposed = false) =>
+            Accept8PBindingLease(3, revocation, 11, navigation,
+                source, actualUrl, actualSource, origin, actualOrigin, disposed);
+        Verify(Lease(3, 11));
+        Verify(!Lease(4, 11)); // process failure invalidates without navigation
+        Verify(!Lease(3, 12)); // navigation during delayed Rust register
+        Verify(!Lease(3, 11, actualUrl: null)); // revoked document
+        Verify(!Lease(3, 11, actualSource: "https://evil.example/"));
+        Verify(!Lease(3, 11, actualOrigin: "https://evil.example"));
+        Verify(!Lease(3, 11, disposed: true));
+        // The stale lease MUST never publish a newly returned channel, even
+        // if it would have matched the old unrevoked document identity.
         var first = new Native8PSessionSnapshot("8p-A",
             @"D:\\projects\\CoS-Rust\\a", "https://chatgpt.com",
             "session-A", 1, "doc-A", 1, 1, 1, 1,
