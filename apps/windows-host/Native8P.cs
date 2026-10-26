@@ -688,6 +688,113 @@ internal sealed partial class GateForm
         !string.IsNullOrWhiteSpace(next.WorkerInstance) &&
         !string.IsNullOrWhiteSpace(next.WorkerTargetId);
 
+    // VERSIONED native production protocol, deliberately distinct from
+    // JS 8B's *single-phase* stable-document postcondition:
+    // 8P/native-two-phase/v1 = validated and one-use Rust handoff on retired
+    // channels, followed by NEW native WebView2 document/worker/channel proofs.
+    // This method is used by production *and* compiled C# differential vectors.
+    private const string Native8PContractVersion = "CoSoS/8P/native-two-phase/v1";
+
+    private static bool Verified8PTwoPhaseResult(
+        Native8PSessionSnapshot priorA, Native8PSessionSnapshot priorB,
+        Native8PSessionSnapshot nextA, Native8PSessionSnapshot nextB,
+        string primaryOrigin, string newSourceSession) =>
+        Eligible8PHandoff(priorA, priorB, primaryOrigin) &&
+        newSourceSession != priorA.SessionId &&
+        newSourceSession != priorB.SessionId &&
+        Fresh8PPostHandoff(priorA, nextA,
+            newSourceSession, priorA.SessionEpoch + 1) &&
+        Fresh8PPostHandoff(priorB, nextB,
+            priorA.SessionId, Math.Max(priorA.SessionEpoch, priorB.SessionEpoch) + 1) &&
+        nextA.SessionId != nextB.SessionId &&
+        nextA.Profile != nextB.Profile &&
+        !string.Equals(nextA.ProfilePath, nextB.ProfilePath,
+            StringComparison.OrdinalIgnoreCase);
+
+    // Deterministic, SYNTHETIC inputs; executes the exact same compiled native
+    // postcondition function as the production WebView2 path. The JS differential
+    // harness consumes this program's output and exercises unmodified JS 8B.
+    // It proves the expected divergence; it is NOT physical browser acceptance.
+    internal static void Write8PTwoPhaseDifferentialVectors()
+    {
+        var a = new Native8PSessionSnapshot("8p-A",
+            @"D:\projects\CoS-Rust\synthetic\A", "https://chatgpt.com",
+            "session-A", 1, "doc-A", 1, 1, 1, 101,
+            "ext-A", "worker-target-A", "worker-instance-A");
+        var b = a with {
+            Profile = "8p-B", ProfilePath = @"D:\projects\CoS-Rust\synthetic\B",
+            SessionId = "session-B", DocumentId = "doc-B", ChannelId = 102,
+            ExtensionId = "ext-B", WorkerTargetId = "worker-target-B",
+            WorkerInstance = "worker-instance-B"
+        };
+        var reboundA = a with {
+            SessionId = "empty-A", SessionEpoch = 2,
+            DocumentId = "fresh-A", NavigationEpoch = 2,
+            HostGeneration = 2, WorkerGeneration = 2, ChannelId = 201,
+            WorkerTargetId = "worker-target-fresh-A",
+            WorkerInstance = "worker-instance-fresh-A"
+        };
+        var reboundB = b with {
+            SessionId = a.SessionId, SessionEpoch = 2,
+            DocumentId = "fresh-B", NavigationEpoch = 2,
+            HostGeneration = 2, WorkerGeneration = 2, ChannelId = 202,
+            WorkerTargetId = "worker-target-fresh-B",
+            WorkerInstance = "worker-instance-fresh-B"
+        };
+        var stableA = a with { SessionId = "empty-A", SessionEpoch = 2 };
+        var stableB = b with { SessionId = a.SessionId, SessionEpoch = 2 };
+        var cases = new (string Id, Native8PSessionSnapshot A,
+            Native8PSessionSnapshot B, Native8PSessionSnapshot NextA,
+            Native8PSessionSnapshot NextB, bool ExpectedNative, bool ExpectedJs)[]
+        {
+            ("native-two-phase-fresh", a, b, reboundA, reboundB, true, false),
+            ("js-8b-stable-postcondition", a, b, stableA, stableB, false, true),
+            ("foreign-profile-path", a, b, reboundA,
+                reboundB with { ProfilePath = a.ProfilePath }, false, false),
+            ("foreign-extension-id", a, b, reboundA,
+                reboundB with { ExtensionId = a.ExtensionId }, false, false),
+            ("stale-document", a, b,
+                reboundA with { DocumentId = a.DocumentId }, reboundB, false, false),
+            ("stale-navigation-epoch", a, b,
+                reboundA with { NavigationEpoch = a.NavigationEpoch }, reboundB,
+                false, false),
+            ("stale-rust-channel", a, b, reboundA,
+                reboundB with { ChannelId = b.ChannelId }, false, false),
+            ("stale-worker-generation", a, b,
+                reboundA with { WorkerGeneration = a.WorkerGeneration }, reboundB,
+                false, false),
+            ("stale-host-generation", a, b, reboundA,
+                reboundB with { HostGeneration = b.HostGeneration }, false, false),
+            ("foreign-target-session", a, b, reboundA,
+                reboundB with { SessionId = "other-session" }, false, false),
+            ("replayed-session-epoch", a, b,
+                reboundA with { SessionEpoch = a.SessionEpoch }, reboundB,
+                false, false),
+            ("shared-partition-before", a,
+                b with { ProfilePath = a.ProfilePath }, reboundA, reboundB,
+                false, false),
+            ("foreign-origin", a, b, reboundA,
+                reboundB with { Origin = "https://foreign.invalid" },
+                false, false)
+        };
+        var output = cases.Select(v => new {
+            id = v.Id,
+            beforeA = v.A, beforeB = v.B, afterA = v.NextA, afterB = v.NextB,
+            sourceSessionTicket = "empty-A",
+            nativeAccepted = Verified8PTwoPhaseResult(
+                v.A, v.B, v.NextA, v.NextB, "https://chatgpt.com", "empty-A"),
+            expectedNative = v.ExpectedNative,
+            expectedJs8B = v.ExpectedJs
+        }).ToArray();
+        if (output.Any(v => v.nativeAccepted != v.expectedNative))
+            throw new InvalidOperationException(
+                "native two-phase contract differential expectation regressed");
+        Console.WriteLine(JsonSerializer.Serialize(new {
+            version = Native8PContractVersion, browserPhysical = false,
+            rustBridgePhysical = false, cases = output
+        }));
+    }
+
     private async Task<(bool Committed, string NewSourceSession)> Execute8PHandoffProbeAsync(
         Browser a, Browser b, string primaryOrigin)
     {
@@ -1044,16 +1151,9 @@ internal sealed partial class GateForm
                         var afterA = Snapshot8P(first.Browser);
                         var afterB = Snapshot8P(second.Browser);
                         handoffPassed = bound >= startBound + 2 &&
-                            Eligible8PHandoff(priorA, priorB,
-                                policy.PrimaryOrigin(providerId)) &&
-                            Fresh8PPostHandoff(priorA, afterA,
-                                transferSourceSession,
-                                priorA.SessionEpoch + 1) &&
-                            Fresh8PPostHandoff(priorB, afterB,
-                                priorA.SessionId,
-                                Math.Max(priorA.SessionEpoch, priorB.SessionEpoch) + 1) &&
-                            first.Browser.SessionId != priorA.SessionId &&
-                            first.Browser.SessionId != second.Browser.SessionId;
+                            Verified8PTwoPhaseResult(priorA, priorB, afterA,
+                                afterB, policy.PrimaryOrigin(providerId),
+                                transferSourceSession);
                     }
                     catch (UnauthorizedAccessException)
                     {
