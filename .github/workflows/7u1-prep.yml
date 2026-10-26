@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m unittest discover -s probes/7u1/tests -p 'test_*.py' -v
-      - run: python -m py_compile probes/7u1/preflight.py
+      - run: python -m py_compile probes/7u1/preflight.py probes/7u1/package_artifact.py
 
   windows-negative-contract:
     runs-on: windows-latest
@@ -58,13 +58,41 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
-      - name: Build existing native synthetic bridge (explicitly NOT product acceptance)
+      - name: Build existing Rust synthetic bridge
         run: cargo build --locked -p cos-core --example 7l2_bridge --release
-      - name: Build existing synthetic WebView2 host
-        run: dotnet build probes/7l1/WindowsHost/WindowsHost.csproj --configuration Release -warnaserror
-      - name: Verify synthetic native binaries exist; keep 7U1 NOT_RUN
+      - name: Publish existing synthetic Windows WebView2 host
         shell: pwsh
         run: |
-          if (-not (Test-Path target/release/examples/7l2_bridge.exe)) { throw 'Rust bridge build absent' }
-          if (-not (Test-Path probes/7l1/WindowsHost/bin/Release/net8.0-windows/WindowsHost.dll)) { throw 'WebView2 host build absent' }
-          Write-Host 'Source-owned SYNTHETIC native binaries only; 8L1 product adapter BLOCKED; signed-in 7U1 NOT_RUN.'
+          $stage = Join-Path $env:RUNNER_TEMP '7u1-synthetic-artifact'
+          $hostDir = Join-Path $stage 'host'
+          New-Item -ItemType Directory -Force -Path $hostDir | Out-Null
+          dotnet publish probes/7l1/WindowsHost/WindowsHost.csproj --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=false -warnaserror -o $hostDir
+          if ($LASTEXITCODE -ne 0) { throw 'Windows host publish failed' }
+          Copy-Item -LiteralPath target/release/examples/7l2_bridge.exe -Destination (Join-Path $stage '7l2_bridge.exe')
+          python probes/7u1/package_artifact.py --repo . --artifact $stage
+          if ($LASTEXITCODE -ne 0) { throw 'Synthetic SHA256 artifact packaging failed' }
+          $sha = (git rev-parse HEAD).Trim()
+          if ((Get-Content (Join-Path $stage 'source.sha') -Raw).Trim() -ne $sha) { throw 'Package SHA differs from checkout' }
+          Write-Host "SYNTHETIC-only source-attested artifact at $sha; never 7U1 signed-in acceptance"
+      - name: Prove packaged binary remains BLOCKED for production 7U1
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP '7u1-synthetic-artifact'
+          $receipt = Join-Path $env:RUNNER_TEMP '7u1-synthetic-preflight.json'
+          $sha = (git rev-parse HEAD).Trim()
+          python probes/7u1/preflight.py --repo . --artifact $stage --expected-sha $sha --provider chatgpt --profile 7u1-cloud-fixture001 --owner-consent --receipt $receipt
+          $status = $LASTEXITCODE
+          if ($status -ne 2) { throw "Expected fail-closed exit 2; got $status" }
+          $result = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
+          if ($result.preflightStatus -ne 'BLOCKED' -or $result.owner7U1Status -ne 'NOT_RUN' -or
+              $result.owner7U1Accepted -or $null -ne $result.outgoingSendCount -or
+              $result.checks.artifact_manifest.status -ne 'PASS' -or
+              $result.checks.product_native_adapter.status -ne 'BLOCKED') {
+            throw 'Synthetic binaries must not receive product/owner acceptance'
+          }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: 7u1-prep-synthetic-native-only
+          path: ${{ runner.temp }}/7u1-synthetic-artifact/
+          if-no-files-found: error
+          retention-days: 7
