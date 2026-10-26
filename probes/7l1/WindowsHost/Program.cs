@@ -81,6 +81,9 @@ internal sealed partial class GateForm : Form
         public string SessionId { get; set; } = "";
         public ulong SessionEpoch { get; set; } = 1;
         public ulong BoundNavigation { get; set; }
+        // Increments synchronously on every native 8P lifetime invalidation.
+        // The epoch alone does not cover a ProcessFailed without navigation.
+        public ulong BindingRevocationGeneration { get; set; }
         public bool Revoked { get; set; }
         public bool WorkerDestroyedEventObserved { get; set; }
         public int InFlightLedgerWrites { get; set; }
@@ -660,7 +663,15 @@ internal sealed partial class GateForm : Form
     private void RevokeAndRetire(Browser browser)
     {
         // Runs synchronously from WebView2 lifetime events, so the stale
-        // channel cannot start another privileged evaluation.
+        // channel cannot start another privileged evaluation. Revoke a
+        // REGISTERING 8P channel too: its eventual continuation must not
+        // publish a channel/worker after this generation has advanced.
+        if (browser.Production8P)
+        {
+            if (browser.BindingRevocationGeneration == ulong.MaxValue)
+                throw new UnauthorizedAccessException("8P binding lease generation exhausted");
+            browser.BindingRevocationGeneration++;
+        }
         browser.Revoked = true;
         _native8L1Authority?.Revoke(browser);
         if (browser.ChannelId != 0 && !browser.RetireScheduled)
@@ -745,32 +756,82 @@ internal sealed partial class GateForm : Form
 
     private async Task<JsonElement> BindAsync(Browser b, string sessionId)
     {
+        // Existing 8L1 synthetic binds keep their accepted semantics.
+        // For production 8P, acquire an immutable native lifetime ticket
+        // AFTER any prior channel retirement. A ProcessFailed, navigation or
+        // dispose invalidates it even when Rust register is still in flight.
         if (b.ChannelId != 0 && !b.RetireScheduled)
             RevokeAndRetire(b);
         if (b.RetireScheduled)
             await RequireRetirementAsync(b);
-        b.SessionId = sessionId;
-        b.HostGeneration++;
-        b.WorkerGeneration++;
-        await AttachWorkerAsync(b);
-        var registration = await RustAllowAsync(new { op = "register", host = Host(b) });
-        b.ChannelId = registration.GetProperty("channelId").GetUInt64();
-        var spec = new
+        var revocation = b.BindingRevocationGeneration;
+        var documentEpoch = b.NavigationEpoch;
+        var documentUrl = b.ProductionUrl;
+        var documentOrigin = b.ProductionOrigin;
+        bool BindingCurrent() =>
+            !b.Production8P ||
+            (b.BindingRevocationGeneration == revocation &&
+             b.NavigationEpoch == documentEpoch &&
+             documentUrl is not null && documentOrigin is not null &&
+             !b.View.IsDisposed &&
+             string.Equals(b.ProductionUrl, documentUrl, StringComparison.Ordinal) &&
+             string.Equals(b.ProductionOrigin, documentOrigin, StringComparison.Ordinal) &&
+             string.Equals(b.View.CoreWebView2.Source, documentUrl, StringComparison.Ordinal));
+        if (!BindingCurrent())
+            throw new UnauthorizedAccessException("8P stale initial document binding");
+        try
         {
-            channelId = b.ChannelId, hostGeneration = b.HostGeneration,
-            challenge = registration.GetProperty("challenge").GetString(),
-            key = registration.GetProperty("key").GetString(),
-            context = Context(b)
-        };
-        // A one-use key is delivered ONLY to the pinned chrome-extension
-        // service_worker CDP session, never to ExecuteScript/page/WebMessage.
-        var worker = await WorkerAsync(b, Js("bootstrap", spec));
-        b.WorkerInstance = worker.GetProperty("workerInstance").GetString();
-        return await RustAllowAsync(new
+            b.SessionId = sessionId;
+            b.HostGeneration++;
+            b.WorkerGeneration++;
+            await AttachWorkerAsync(b);
+            if (!BindingCurrent() || b.Revoked)
+                throw new UnauthorizedAccessException("8P document retired during worker attach");
+
+            var registration = await RustAllowAsync(new { op = "register", host = Host(b) });
+            var registeredChannel = registration.GetProperty("channelId").GetUInt64();
+            // The Rust register can complete AFTER a native NavStarting or
+            // ProcessFailed revoked the browser, while ChannelId was still 0.
+            // Immediately retire this never-published channel before any
+            // worker bootstrap/key proof. Do NOT assign it to a stale Browser.
+            if (!BindingCurrent() || b.Revoked)
+            {
+                if (!await RetireAsync(registeredChannel))
+                    throw new UnauthorizedAccessException(
+                        "8P retirement of stale registration unresolved");
+                throw new UnauthorizedAccessException("8P registered after native revocation");
+            }
+            b.ChannelId = registeredChannel;
+            var spec = new
+            {
+                channelId = registeredChannel, hostGeneration = b.HostGeneration,
+                challenge = registration.GetProperty("challenge").GetString(),
+                key = registration.GetProperty("key").GetString(),
+                context = Context(b)
+            };
+            // Native-only CDP service-worker session; NEVER via page scripts,
+            // WebMessage, or renderer callbacks.
+            var worker = await WorkerAsync(b, Js("bootstrap", spec));
+            if (!BindingCurrent() || b.Revoked || b.ChannelId != registeredChannel)
+                throw new UnauthorizedAccessException("8P stale worker bootstrap");
+            b.WorkerInstance = worker.GetProperty("workerInstance").GetString();
+            var handshake = await RustAllowAsync(new
+            {
+                op = "handshake", host = Host(b), channelId = registeredChannel,
+                generation = b.HostGeneration, proof = worker.GetProperty("proof").GetString()
+            });
+            if (!BindingCurrent() || b.Revoked || b.ChannelId != registeredChannel)
+                throw new UnauthorizedAccessException("8P stale handshake continuation");
+            return handshake;
+        }
+        catch
         {
-            op = "handshake", host = Host(b), channelId = b.ChannelId,
-            generation = b.HostGeneration, proof = worker.GetProperty("proof").GetString()
-        });
+            // The next bind always awaits any in-flight Rust retirement.
+            // Even if worker/Rust registration failed halfway, never restore
+            // the revoked browser or reuse its channel.
+            if (b.Production8P) RevokeAndRetire(b);
+            throw;
+        }
     }
 
     private async Task<JsonElement> ObserveAsync(Browser b)
