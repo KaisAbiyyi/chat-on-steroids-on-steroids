@@ -602,6 +602,44 @@ internal sealed partial class GateForm
         Verify(!Lease(3, 11, disposed: true));
         // The stale lease MUST never publish a newly returned channel, even
         // if it would have matched the old unrevoked document identity.
+        // Test the exact async channel ADOPTION code used after production
+        // Rust register, including delayed navigation/process-failed poison,
+        // one-use retirement and an ambiguous failed retire.
+        var retireCalls = 0;
+        var nativeCurrent = true;
+        Task<bool> RetireSimulated(ulong channel)
+        {
+            retireCalls++;
+            return Task.FromResult(channel == 41);
+        }
+        Verify(Adopt8PRegisteredChannelAsync(41, () => nativeCurrent,
+            RetireSimulated).GetAwaiter().GetResult() == 41);
+        Verify(retireCalls == 0); // valid first registration is not retired
+        nativeCurrent = false; // native navigation during delayed register
+        try
+        {
+            _ = Adopt8PRegisteredChannelAsync(41, () => nativeCurrent,
+                RetireSimulated).GetAwaiter().GetResult();
+            throw new InvalidOperationException("accepted stale Rust channel");
+        }
+        catch (UnauthorizedAccessException) { }
+        Verify(retireCalls == 1);
+        try
+        {
+            _ = Adopt8PRegisteredChannelAsync(43, () => nativeCurrent,
+                RetireSimulated).GetAwaiter().GetResult();
+            throw new InvalidOperationException("accepted uncertain retired Rust channel");
+        }
+        catch (UnauthorizedAccessException) { }
+        Verify(retireCalls == 2); // caller must poison Rust authority on failure
+        try
+        {
+            _ = Adopt8PRegisteredChannelAsync(0, () => true,
+                RetireSimulated).GetAwaiter().GetResult();
+            throw new InvalidOperationException("accepted zero Rust channel");
+        }
+        catch (UnauthorizedAccessException) { }
+        Verify(retireCalls == 2);
         var first = new Native8PSessionSnapshot("8p-A",
             @"D:\\projects\\CoS-Rust\\a", "https://chatgpt.com",
             "session-A", 1, "doc-A", 1, 1, 1, 1,
