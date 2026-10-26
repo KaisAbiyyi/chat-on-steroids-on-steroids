@@ -19,6 +19,24 @@ internal sealed partial class GateForm
     private string _native8L1ExtensionA = "";
     private string _native8L1ExtensionB = "";
 
+    private async Task<T> Native8L1StepAsync<T>(string step, Func<Task<T>> action)
+    {
+        File.WriteAllText(Path.Combine(_root, "progress.json"), JsonSerializer.Serialize(
+            new { step, status = "RUNNING", dateUtc = DateTimeOffset.UtcNow }));
+        try
+        {
+            var value = await action().WaitAsync(TimeSpan.FromSeconds(30));
+            File.WriteAllText(Path.Combine(_root, "progress.json"), JsonSerializer.Serialize(
+                new { step, status = "PASS", dateUtc = DateTimeOffset.UtcNow }));
+            return value;
+        }
+        catch (TimeoutException)
+        {
+            foreach (var browser in _browsers.Values.ToArray()) RevokeAndRetire(browser);
+            throw new TimeoutException("Native 8L1 step timed out: " + step);
+        }
+    }
+
     // Synthetic-only storage sentinel. This is NOT authority: only real
     // WebView2 profile isolation and new Rust/MV3 attestation confer it.
     private async Task<string> ReadRecoveryMarkerAsync(Browser browser)
@@ -643,10 +661,10 @@ internal sealed partial class GateForm
             psi.Environment["TMP"] = _root;
             _bridge = Process.Start(psi) ?? throw new InvalidOperationException("Rust 7L2 bridge unavailable");
             rustPid = _bridge.Id;
-            var a = await SetupAsync(_a, "A", 1);
-            var b = await SetupAsync(_b, "B", 2);
-            await BindAsync(a, "8l1-synthetic-a");
-            await BindAsync(b, "8l1-synthetic-b");
+            var a = await Native8L1StepAsync("setup-A", () => SetupAsync(_a, "A", 1));
+            var b = await Native8L1StepAsync("setup-B", () => SetupAsync(_b, "B", 2));
+            await Native8L1StepAsync("bind-A", () => BindAsync(a, "8l1-synthetic-a"));
+            await Native8L1StepAsync("bind-B", () => BindAsync(b, "8l1-synthetic-b"));
             Mark("native_rust_mv3_authenticated",
                 Ok(await ObserveAsync(a)) && Ok(await ObserveAsync(b)),
                 "Two independent real WebView2 MV3 workers authenticated by existing 7L2 Rust bridge");
@@ -678,13 +696,13 @@ internal sealed partial class GateForm
                 "Real native permission side effect default-deny; each owner approval is one-use and not persisted");
             // Two distinct real WebView2 controllers share the OS profile,
             // extension storage and opaque 8B partition, with separate tabs.
-            var rival = await SetupAsync(_sameProfileTab, "A", 3,
-                _a.CoreWebView2.Environment, a.ExtensionId);
+            var rival = await Native8L1StepAsync("setup-sibling", () => SetupAsync(_sameProfileTab, "A", 3,
+                _a.CoreWebView2.Environment, a.ExtensionId));
             var actualSharedProfile = rival.ProfilePath == a.ProfilePath &&
                 rival.ExtensionId == a.ExtensionId && rival.TabId != a.TabId &&
                 !ReferenceEquals(rival.View.CoreWebView2, a.View.CoreWebView2);
             rival.HostGeneration = a.HostGeneration;
-            var rivalHandshake = await BindAsync(rival, "8l1-synthetic-a");
+            var rivalHandshake = await Native8L1StepAsync("bind-sibling", () => BindAsync(rival, "8l1-synthetic-a"));
             _native8L1Authority.Track(rival);
             Mark("native_multitab_same_partition",
                 actualSharedProfile && rivalHandshake.GetProperty("authenticated").GetBoolean() &&
@@ -711,7 +729,7 @@ internal sealed partial class GateForm
             _a.CoreWebView2.Navigate(StartUrl);
             await WaitPageAsync(a);
             a.HostGeneration = Math.Max(a.HostGeneration, rival.HostGeneration);
-            await BindAsync(a, "8l1-synthetic-a");
+            await Native8L1StepAsync("bind-A", () => BindAsync(a, "8l1-synthetic-a"));
             _native8L1Authority.Track(a);
             var oldChannel = a.ChannelId;
             _a.CoreWebView2.Navigate(StartUrl + "?new-document=1");
@@ -722,7 +740,7 @@ internal sealed partial class GateForm
                 "Actual WebView2 navigation revokes prior native identity and Rust channel");
             _a.CoreWebView2.Navigate(StartUrl);
             await WaitPageAsync(a);
-            await BindAsync(a, "8l1-synthetic-a");
+            await Native8L1StepAsync("bind-A", () => BindAsync(a, "8l1-synthetic-a"));
             _native8L1Authority.Track(a);
             Mark("native_rebind_fresh_generation", _native8L1Authority.Current(a) &&
                 a.ChannelId != oldChannel,
@@ -784,7 +802,7 @@ internal sealed partial class GateForm
                     stale.Grants == normal.Grants && !_native8L1Authority.Current(b),
                     "Actual modal Yes after native navigation cannot grant old document permission");
                 await WaitPageAsync(b);
-                await BindAsync(b, "8l1-synthetic-b");
+                await Native8L1StepAsync("bind-B", () => BindAsync(b, "8l1-synthetic-b"));
                 _native8L1Authority.Track(b);
                 Mark("native_permission_recovered_new_channel",
                     _native8L1Authority.Current(b) && Ok(await ObserveAsync(b)),
