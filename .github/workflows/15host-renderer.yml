@@ -19,6 +19,19 @@ jobs:
         run: dotnet build apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-restore --warnaserror
       - name: Source-compiled negative IPC fixture tests (NOT a native product test)
         run: dotnet run --project apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-build -- --contract-selftest
+      - name: Hosted Windows real WebView2 synthetic render and screenshot smoke
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path 'apps/windows-renderer/bin/Release/net8.0-windows/WindowsRenderer.exe').Path
+          $proc = Start-Process -FilePath $exe -ArgumentList '--synthetic-native-capture' -PassThru
+          try {
+            $proc | Wait-Process -Timeout 90 -ErrorAction Stop
+            $proc.Refresh()
+            if ($proc.ExitCode -ne 0) { throw "Synthetic native WebView2 capture failed: exit $($proc.ExitCode)" }
+          } finally {
+            $proc.Refresh()
+            if (!$proc.HasExited) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
+          }
       - name: Hash source-bound Windows artifact
         shell: pwsh
         run: |
