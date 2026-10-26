@@ -770,7 +770,7 @@ internal sealed partial class GateForm
         // Signed identity only: the 8P MV3 worker has no provider host grants
         // and exposes no snapshot, observation or browser tool API.
         var proof = await WorkerAsync(browser, Js("attestSession", new { }));
-        await RustAllowAsync(new
+        var observed = await RustAllowAsync(new
         {
             op = "observe", host = Host(browser),
             channelId = browser.ChannelId,
@@ -778,6 +778,11 @@ internal sealed partial class GateForm
             payload = proof.GetProperty("payload").GetString(),
             mac = proof.GetProperty("mac").GetString()
         });
+        // An authenticated non-first observation is NOT sufficient for either
+        // handoff phase. Require Rust's exact first-document identity verdict.
+        if (!string.Equals(observed.GetProperty("observation").GetString(),
+                "FirstProof", StringComparison.Ordinal))
+            throw new UnauthorizedAccessException("8P missing fresh Rust first-proof");
     }
 
     private sealed record Native8PSessionSnapshot(
