@@ -20,13 +20,15 @@ internal static class Program
             Console.WriteLine("15HOST synthetic contract selftest PASS");
             return 0;
         }
-        if (!args.SequenceEqual(["--synthetic-native"]))
+        var capture = args.SequenceEqual(["--synthetic-native-capture"]);
+        if (!capture && !args.SequenceEqual(["--synthetic-native"]))
         {
-            Console.Error.WriteLine("Usage: WindowsRenderer --contract-selftest | --synthetic-native");
+            Console.Error.WriteLine(
+                "Usage: WindowsRenderer --contract-selftest | --synthetic-native | --synthetic-native-capture");
             return 2;
         }
         ApplicationConfiguration.Initialize();
-        Application.Run(new RendererWindow());
+        Application.Run(new RendererWindow(capture));
         return Environment.ExitCode;
     }
 }
@@ -125,9 +127,11 @@ internal sealed class RendererWindow : Form
     private readonly string _isolationRoot = Path.Combine(Path.GetTempPath(),
         "cosos-15host-synthetic-" + Guid.NewGuid().ToString("N"));
     private bool _ready;
+    private readonly bool _capture;
 
-    internal RendererWindow()
+    internal RendererWindow(bool capture)
     {
+        _capture = capture;
         Text = "CoSoS 15HOST — Synthetic Native Renderer (NOT PRODUCT ACCEPTED)";
         Width = 1280;
         Height = 820;
@@ -190,6 +194,29 @@ internal sealed class RendererWindow : Form
             throw new IOException("15HOST local renderer navigation rejected");
         _ready = true;
         core.PostWebMessageAsJson(RendererContracts.MakePage(0));
+        if (_capture)
+        {
+            // A real WebView2 capture, but of a synthetic fixture only.
+            // Never generate candidate-derived golden reference pixels.
+            await Task.Delay(1000);
+            var output = Path.Combine(_isolationRoot, "15host-synthetic.png");
+            await using (var stream = new FileStream(output, FileMode.CreateNew,
+                FileAccess.Write, FileShare.None))
+            {
+                await core.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
+            }
+            var bytes = new FileInfo(output).Length;
+            if (bytes is <= 0 or > 16_777_216)
+                throw new IOException("Synthetic native preview outside image budget");
+            var sha256 = Convert.ToHexString(
+                SHA256.HashData(await File.ReadAllBytesAsync(output)));
+            Console.WriteLine(JsonSerializer.Serialize(new {
+                kind = "15host-synthetic-native-capture", sha256, bytes,
+                syntheticOnly = true, rustAuthenticated = false,
+                productAccepted = false, goldenAccepted = false
+            }));
+            Close();
+        }
     }
 }
 
