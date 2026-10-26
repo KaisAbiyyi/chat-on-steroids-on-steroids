@@ -596,6 +596,19 @@ internal sealed partial class GateForm
         }
         public bool CanRelease => _committed && _sourceProved &&
             _targetProved && !_poisoned;
+        // The browser can navigate/crash between asynchronous source and target
+        // Rust first-proofs. A successful earlier proof is NOT a live lease.
+        // Call on the UI thread only after both awaits, with freshly validated
+        // native scopes; failed admission irrevocably poisons this transfer.
+        public bool ReleaseIfScopesCurrent(bool sourceCurrent, bool targetCurrent)
+        {
+            if (!CanRelease || !sourceCurrent || !targetCurrent)
+            {
+                Poison();
+                return false;
+            }
+            return true;
+        }
         public void Poison() => _poisoned = true;
     }
 
@@ -689,6 +702,19 @@ internal sealed partial class GateForm
         Verify(!goodProofs.CanRelease);
         goodProofs.FirstProof(false);
         Verify(goodProofs.CanRelease);
+        Verify(goodProofs.ReleaseIfScopesCurrent(true, true));
+        var sourceNavigationAfterProof = new Native8PCommitProofGate();
+        sourceNavigationAfterProof.CommitAcknowledged();
+        sourceNavigationAfterProof.FirstProof(true);
+        sourceNavigationAfterProof.FirstProof(false);
+        Verify(!sourceNavigationAfterProof.ReleaseIfScopesCurrent(false, true));
+        Verify(!sourceNavigationAfterProof.CanRelease);
+        var targetCrashAfterProof = new Native8PCommitProofGate();
+        targetCrashAfterProof.CommitAcknowledged();
+        targetCrashAfterProof.FirstProof(true);
+        targetCrashAfterProof.FirstProof(false);
+        Verify(!targetCrashAfterProof.ReleaseIfScopesCurrent(true, false));
+        Verify(!targetCrashAfterProof.CanRelease);
         goodProofs.Poison();
         Verify(!goodProofs.CanRelease);
         var first = new Native8PSessionSnapshot("8p-A",
@@ -1356,6 +1382,8 @@ internal sealed partial class GateForm
                             await Task.Delay(100);
                         var afterA = Snapshot8P(first.Browser);
                         var afterB = Snapshot8P(second.Browser);
+                        var afterARevocation = first.Browser.BindingRevocationGeneration;
+                        var afterBRevocation = second.Browser.BindingRevocationGeneration;
                         if (handoffQuarantined || bound < startBound + 2 ||
                             !Verified8PTwoPhaseResult(priorA, priorB, afterA,
                                 afterB, policy.PrimaryOrigin(providerId),
@@ -1372,9 +1400,19 @@ internal sealed partial class GateForm
                             throw new UnauthorizedAccessException(
                                 "8P postcommit target first-proof revoked");
                         postcommit.FirstProof(false);
-                        if (!postcommit.CanRelease)
+                        // Observe BOTH scopes again after the final async Rust
+                        // response. A NavigationStarting/ProcessFailed event can
+                        // revoke A while B's first-proof is still in flight.
+                        // Never release using only the earlier proof booleans.
+                        if (!postcommit.ReleaseIfScopesCurrent(
+                                !handoffQuarantined &&
+                                    first.Browser.BindingRevocationGeneration == afterARevocation &&
+                                    Same8P(first.Browser, afterA),
+                                !handoffQuarantined &&
+                                    second.Browser.BindingRevocationGeneration == afterBRevocation &&
+                                    Same8P(second.Browser, afterB)))
                             throw new UnauthorizedAccessException(
-                                "8P postcommit proof gate incomplete");
+                                "8P postcommit proof scopes changed or incomplete");
                         handoffAwaitingPostCommitProof = false;
                     }
                     else
