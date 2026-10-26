@@ -28,6 +28,43 @@ explicitly between:
 Until one path is implemented and accepted, **P0 unresolved**, even if all
 hosted CI checks pass.
 
+## 1A. Versioned cross-language contract vectors (cloud-only, not physical)
+
+The production host now names its *different* physical protocol
+`CoSoS/8P/native-two-phase/v1`, implemented by
+`GateForm.Verified8PTwoPhaseResult` in `apps/windows-host/Native8P.cs`.
+This function is called **both** by the actual product handoff
+postcondition and by an isolated, deterministic test command:
+`WindowsHost.dll --8p-native-differential-v1`. It does not construct an
+untrusted alternate policy shim or silently change the accepted JS controller.
+
+`probes/8p/native-contract-differential.test.mjs` starts that **compiled
+product C# executable** and feeds its exact synthetic before/after values to
+the original `createProfileSessionController` (JS 8B), not a rewritten JS
+contract. Windows CI builds the product under `-warnaserror` and runs this
+cross-language differential as a required check. Its positive controls must
+prove *both* directions of the deliberate mismatch:
+
+- `native-two-phase-fresh`: C# **accepts**, unchanged JS 8B **rejects**,
+  because the new WebView2 document/channel/generation are not stable.
+- `js-8b-stable-postcondition`: JS 8B **accepts**, native v1 **rejects**,
+  because no retirement/new document/channel proof is established.
+
+The same compiled-source harness covers foreign profile/partition, extension
+substitution, stale document/epoch/channel/worker and host generations,
+session theft, and epoch replay. The fake native callback in the JS test is
+**synthetic** and is never interpreted as an independent security authority.
+Native Rust channel handoff, retirement, replay denial and signed first-proof
+are tested independently in `native_browser_bridge.rs` and
+`7l2_bridge.rs`; this cross-language CI does **not** operate a live
+C#/Rust bridge, MV3, or a physical WebView2 instance.
+
+**Acceptance remains P0 OPEN:** the independent reviewer must approve the
+semantic split and its phase-boundary/partition identity proof. The owner
+must produce actual **C#/Rust/MV3/WebView2** source-bound traces and replay/
+restart evidence before physical acceptance. A green differential *proves
+and pins the divergence*, not that both contracts are interchangeable.
+
 ## 2. Source-verified physical Windows acceptance
 
 The owner must use an isolated, fresh directory tree under
