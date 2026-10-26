@@ -57,10 +57,15 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Compile product native host (strict)
         run: dotnet build apps/windows-host/WindowsHost.csproj -c Release -warnaserror
       - name: Native origin allowlist selftests (no WebView2 account/browser)
         run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8p-policy-self-test
+      - name: Compiled C# production method vs accepted JS 8B differential (synthetic only)
+        run: node --test probes/8p/native-contract-differential.test.mjs
       - name: Preserve synthetic 8L1 authority regression
         run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test
       - name: Compile authenticated Rust bridge
