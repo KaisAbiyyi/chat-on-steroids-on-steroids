@@ -12,10 +12,10 @@ A separate diagnostic launch without retained profiles (`--8l1 --8l1-crash`) rem
 
 ## Validation
 
-- Artifact integrity/source provenance and compiled C# native authority self-test: **PASS**. The self-test exercises consent/replay/stale-scope/origin policy without physical owner dialogs.
+- Artifact integrity/source provenance and compiled C# native authority and MV3 retirement self-tests: **PASS**. The self-test exercises consent/replay/stale-scope/origin policy without physical owner dialogs.
 - All extension plus native-worker JavaScript tests: **65 PASS**, none skipped.
 - Task DAG: **15 PASS**; browser feasibility guardrails: **16 PASS**.
-- Rust workspace / strict Clippy: **IN PROGRESS** when this checkpoint was saved; final receipt will be updated after processes exit. Formatting **PASS**.
+- Rust workspace: **405 PASS / 0 FAIL / 0 ignored**, exit 0; explicit native Rust `7l2_bridge` example: **3 PASS**, exit 0. Independent `python tools/check-workspace.py --strict` also exited **0**, including workspace tests, formatting and all-target Clippy with `-D warnings`: **PASS**.
 - Physical retained-profile clean start: **FAIL twice**. Retained restart **BLOCKED**; actual crash/multi-tab **NOT_RUN** after early failure; exploratory single-process path **TIMEOUT**.
 - Owner consent and synthetic sign-in/handoff dialog paths: **NOT_RUN**. Owner explicitly chose automated tests first and cannot operate dialogs now. No agent-generated substitute for owner consent.
 - Protected WIP: **8/8 SHA256 unchanged**; pinned upstream HEAD unchanged at `024731d8083d92c46e8248d64e7e0b36ab0a470f` and clean.
@@ -30,6 +30,8 @@ A separate diagnostic launch without retained profiles (`--8l1 --8l1-crash`) rem
 - **LOCAL REQUIRED:** rerun exact accepted repair SHA with `-VerifyRestart -CrashProbe -ConsentProbe -ProfileActionsProbe` on new D: output, actual retained profiles and new host/Rust process IDs, fresh authenticated channels, real crash retirement and owner dialogs.
 - **YOU REQUIRED:** yes, later real Windows Yes/No choices for consent and profile actions, as required by the accepted PR #120 gate. No owner interaction requested while automated-only work runs.
 - **KNOWN LIMITS:** native8L1Accepted=false; 8L1 FAIL/incomplete, 8U1/7U1/product renderer/performance unaccepted; OS IME remains HOLD/UNVERIFIED. Native synthetic qualification does not prove production provider login.
-- **NEXT:** hand failure to existing cloud native-host owner (#123/#124) for a source-reviewed clean-profile attestation repair that still refuses unknown extensions; add bounded diagnostics for the hanging single-process run; exact-head CI and source-bound artifact; then repeat full physical gate. Keep this evidence PR **Draft / NO MERGE** because the owner's all-PASS condition is unmet. Release the local physical-host claim after durable publication.
+- **NEXT:** hand failure to existing cloud native-host owner (#123/#124) for a source-reviewed clean-profile attestation repair that still refuses unknown extensions; add bounded diagnostics for the hanging single-process run; exact-head CI and source-bound artifact; then repeat full physical gate. Keep this evidence PR **Draft / NO MERGE** because the owner's all-PASS condition is unmet. Local claim and physical-host lock **released** after the durable failure handoff; task remains Blocked, not accepted.
 
 Evidence: [qualification JSON](../../audit/2026-10-26/8l1-native/qualification.json), [first failure](../../audit/2026-10-26/8l1-native/native-retained-first.json), [repeat failure](../../audit/2026-10-26/8l1-native/native-retained-repeat.json), [fresh profile API inventory](../../audit/2026-10-26/8l1-native/fresh-profile-extension-inventory.json), [bounded diagnostic timeout](../../audit/2026-10-26/8l1-native/native-single-timeout.json).
+
+Cloud failure handoff: [active native-host issue #123](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/123#issuecomment-6407375914). Evidence [Draft PR #125](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125), no merge while physical gates are incomplete.

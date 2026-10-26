@@ -28,9 +28,42 @@
       "status": "PASS",
       "tests": 16
     },
-    "rustWorkspace": "IN_PROGRESS",
-    "strictClippy": "IN_PROGRESS",
-    "format": "PASS"
+    "rustWorkspace": {
+      "status": "PASS",
+      "tests": 405,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "command": "cargo test --workspace --locked",
+      "logSha256": "c94f9b379a8dcf627c22c33d2acfe1264aa75dab4b6cf5e686ec9b407f459027"
+    },
+    "strictClippy": {
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "cargo clippy --workspace --all-targets --locked -j2 -- -D warnings",
+      "via": "python tools/check-workspace.py --strict"
+    },
+    "format": "PASS",
+    "rust7L2BridgeExample": {
+      "status": "PASS",
+      "tests": 3,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "command": "cargo test --locked -p cos-core --example 7l2_bridge",
+      "logSha256": "5dd0d24c23be6d78016e57ba52fe9e918e7e8e48851b63aeb8720ca9aec9550a"
+    },
+    "nativeRetirementSelftest": "PASS",
+    "strictWorkspaceRunner": {
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "python tools/check-workspace.py --strict",
+      "includes": [
+        "cargo fmt --all -- --check",
+        "cargo test --workspace --locked -j2",
+        "cargo clippy --workspace --all-targets --locked -j2 -- -D warnings"
+      ]
+    }
   },
   "native": {
     "retainedProfileCleanStart": "FAIL",
@@ -59,5 +92,8 @@
   "upstreamSha": "024731d8083d92c46e8248d64e7e0b36ab0a470f",
   "localStorage": "All task output/build cache/test temp and synthetic profiles on D: under CoS-Rust. No Docker/WSL run.",
   "merge": "HOLD: required physical gates not PASS; evidence PR must remain draft",
-  "next": "Cloud native-host owner repairs fresh-profile extension attestation and bounded diagnostics without trusting arbitrary preinstalled extensions; exact-SHA CI/build; physical rerun on D: with all four switches and real owner dialogs."
+  "next": "Cloud native-host owner repairs fresh-profile extension attestation and bounded diagnostics without trusting arbitrary preinstalled extensions; exact-SHA CI/build; physical rerun on D: with all four switches and real owner dialogs.",
+  "handoff": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/123#issuecomment-6407375914",
+  "evidencePr": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125",
+  "claimStatus": "RELEASED after durable failure handoff; not task acceptance"
 }
