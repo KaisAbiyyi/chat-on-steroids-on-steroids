@@ -128,6 +128,7 @@ internal sealed class RendererWindow : Form
         "cosos-15host-synthetic-" + Guid.NewGuid().ToString("N"));
     private bool _ready;
     private readonly bool _capture;
+    private string _phase = "initialization";
 
     internal RendererWindow(bool capture)
     {
@@ -143,8 +144,19 @@ internal sealed class RendererWindow : Form
             catch (Exception ex)
             {
                 Environment.ExitCode = 1;
-                Console.Error.WriteLine("15HOST native synthetic initialization failed: " +
-                    ex.GetType().Name);
+                // Only stable failure category/HRESULT and internal phase;
+                // never dump raw exception messages, URLs, or user paths.
+                try
+                {
+                    File.WriteAllText(Path.Combine(AppContext.BaseDirectory,
+                        "15host-native-smoke.json"),
+                        JsonSerializer.Serialize(new {
+                            pass = false, phase = _phase, failure = ex.GetType().Name,
+                            hresult = ex.HResult, syntheticOnly = true
+                        }));
+                }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
                 Close();
             }
         };
@@ -153,11 +165,15 @@ internal sealed class RendererWindow : Form
 
     private async Task InitializeAsync()
     {
+        _phase = "contract";
         RendererContracts.SelfTest();
+        _phase = "profile";
         // Always a freshly generated synthetic WebView2 user-data directory.
         if (Directory.Exists(_isolationRoot)) throw new IOException("Profile collision");
         Directory.CreateDirectory(_isolationRoot);
+        _phase = "webview2-environment";
         var env = await CoreWebView2Environment.CreateAsync(null, _isolationRoot);
+        _phase = "webview2-controller";
         await _browser.EnsureCoreWebView2Async(env);
         var core = _browser.CoreWebView2;
         core.Settings.AreDefaultContextMenusEnabled = false;
@@ -189,6 +205,7 @@ internal sealed class RendererWindow : Form
         var navigation = new TaskCompletionSource<bool>(
             TaskCreationOptions.RunContinuationsAsynchronously);
         core.NavigationCompleted += (_, e) => navigation.TrySetResult(e.IsSuccess);
+        _phase = "navigate-owned-document";
         _browser.NavigateToString(RendererDocument.Html);
         if (!await navigation.Task.WaitAsync(TimeSpan.FromSeconds(30)))
             throw new IOException("15HOST local renderer navigation rejected");
@@ -196,6 +213,7 @@ internal sealed class RendererWindow : Form
         core.PostWebMessageAsJson(RendererContracts.MakePage(0));
         if (_capture)
         {
+            _phase = "native-capture";
             // A real WebView2 capture, but of a synthetic fixture only.
             // Never generate candidate-derived golden reference pixels.
             await Task.Delay(1000);
@@ -210,8 +228,9 @@ internal sealed class RendererWindow : Form
                 throw new IOException("Synthetic native preview outside image budget");
             var sha256 = Convert.ToHexString(
                 SHA256.HashData(await File.ReadAllBytesAsync(output)));
-            Console.WriteLine(JsonSerializer.Serialize(new {
-                kind = "15host-synthetic-native-capture", sha256, bytes,
+            File.WriteAllText(Path.Combine(AppContext.BaseDirectory,
+                "15host-native-smoke.json"), JsonSerializer.Serialize(new {
+                pass = true, phase = "native-capture-complete", sha256, bytes,
                 syntheticOnly = true, rustAuthenticated = false,
                 productAccepted = false, goldenAccepted = false
             }));
