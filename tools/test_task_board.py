@@ -108,7 +108,7 @@ class TaskBoardTests(unittest.TestCase):
         for accepted in ("8B", "8C", "15A"):
             self.assertNotIn(accepted, ready_ids)
             self.assertEqual(board.explain(self.data, accepted)["state"], "DONE")
-        self.assertEqual(board.explain(self.data, "8L1")["state"], "BLOCKED")
+        self.assertEqual(board.explain(self.data, "8L1")["state"], "DONE")
         self.assertNotIn("8L1", ready_ids)
         self.assertNotIn("8U1", ready_ids)
         self.assertNotIn("15B", ready_ids)
@@ -186,13 +186,47 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_blocked_native_gate_never_enters_forecast(self):
         self.assertEqual(self.tasks["8C"]["status"], "done")
-        self.assertEqual(self.tasks["8L1"]["status"], "blocked")
-        self.assertEqual(board.explain(self.data, "8U1")["missing_direct"], ["8L1"])
-        forecast = {task["id"] for wave in board.waves(self.data) for task in wave}
+        blocked = copy.deepcopy(self.data)
+        next(t for t in blocked["tasks"] if t["id"] == "8L1")["status"] = "blocked"
+        next(t for t in blocked["tasks"] if t["id"] == "8U1")["status"] = "todo"
+        self.assertEqual(board.explain(blocked, "8L1")["state"], "BLOCKED")
+        self.assertEqual(board.explain(blocked, "8U1")["missing_direct"], ["8L1"])
+        forecast = {task["id"] for wave in board.waves(blocked) for task in wave}
         self.assertTrue({"8L1", "8U1", "9A"}.isdisjoint(forecast))
         self.assertNotIn("15B", forecast)  # 15B cloud scope accepted on merged PR #77
         self.assertIn("PERF-00", forecast)  # 15G cloud scope is now accepted
         self.assertIn("16A", forecast)  # 16A independent release track remains unclaimed
+
+    def test_native_8l1_acceptance_requires_both_physical_round_receipts(self):
+        root = Path(__file__).resolve().parents[1] / "audit/2026-10-26/8l1-native-repair"
+        accepted = json.loads((root / "qualification-pass.json").read_text(encoding="utf-8"))
+        self.assertTrue(accepted["native8L1Accepted"])
+        rounds = [json.loads((root / name).read_text(encoding="utf-8-sig"))
+                  for name in accepted["roundReceipts"]]
+        for receipt in rounds:
+            self.assertEqual(receipt["sourceSha"], accepted["sourceSha"])
+            self.assertEqual(receipt["hostBinarySha256"], accepted["hostBinarySha256"])
+            self.assertEqual(receipt["rustBinarySha256"], accepted["rustBinarySha256"])
+            for name in accepted["requiredNativeChecks"]:
+                self.assertEqual(receipt["checks"][name]["status"], "PASS", name)
+            self.assertFalse(any(v["status"] == "FAIL" for v in receipt["checks"].values()))
+            self.assertEqual(receipt["permissionCounters"]["StaleAllowDenied"], 1)
+            self.assertEqual(receipt["permissionCounters"]["ReplayDenied"], 1)
+            self.assertEqual(receipt["permissionCounters"]["Busy"], 0)
+            self.assertEqual(receipt["rustProcessExit"], 0)
+        for name in ("hostProcessId", "rustProcessId"):
+            self.assertGreater(rounds[0][name], 0)
+            self.assertGreater(rounds[1][name], 0)
+            self.assertNotEqual(rounds[0][name], rounds[1][name])
+        for name in ("profileAPath", "profileBPath", "extensionAId", "extensionBId",
+                     "syntheticMarkerA", "syntheticMarkerB"):
+            self.assertTrue(rounds[0][name])
+            self.assertEqual(rounds[0][name], rounds[1][name])
+        restart = json.loads((root / accepted["restartReceipt"]).read_text(encoding="utf-8-sig"))
+        for name in ("cleanProcessRelaunch", "retainedProfileAndRustRecovery",
+                     "osCrashQualification", "retainedProfileQualification"):
+            self.assertEqual(restart[name], "PASS")
+        self.assertEqual(self.tasks["8U1"]["status"], "blocked")
 
     def test_dangling_dependency_is_rejected(self):
         data = copy.deepcopy(self.data)

@@ -1,0 +1,16 @@
+{
+  "runtime": "155.0.4283.62",
+  "profilePath": "D:\\projects\\CoS-Rust\\.test-tmp\\8l1\\evidence-20261026\\inventory-fresh-profile\\EBWebView\\Default",
+  "extensions": [
+    {
+      "Id": "dgiklkfkllikcanfonkcabmbdfmgleag",
+      "Name": "Microsoft Clipboard Extension",
+      "IsEnabled": true
+    },
+    {
+      "Id": "mhjfbmdgcfjbbpaeojofohoefgiehjai",
+      "Name": "Microsoft Edge PDF Viewer",
+      "IsEnabled": true
+    }
+  ]
+}

@@ -1,5 +1,21 @@
 # CoS-Rust current backend checkpoint
 
+## 8L1 repaired physical synthetic gate � PASS, publication/retest pending, 2026-10-26
+
+- Owner-directed continued local repair, COS-8L1-20261026 generation3, [PR125](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/125). Source `62bbfdde6fb4506f5cb78d768e6960b50975dfab` real owner run07 PASS: 27 native checks in each of 2 fresh OS host/Rust process pairs plus 4 retained-profile/crash/restart comparisons. Owner consent, stale/replay denial, synthetic navigation and logical handoff physically exercised.
+- Repaired signed-runtime component bootstrap, dying Browser.crash transport wait, source-owned extension recovery after crash, and deferral/settlement of actual native permission callbacks. Unknown extension and source/manifest/partition/consent fences retained; no unrelated Native8P, Rust or JS contract edits.
+- [Implementation summary v2](implementation-summary/2026-10-26-8l1-native-repair-v2.0.md) and [qualified aggregate/raw receipts](../audit/2026-10-26/8l1-native-repair/qualification-pass.json). Windows405 Rust +3 bridge,25 C# policy,65JS,16DAG,16guardrail, fmt/strict Clippy PASS. Final-head hosted CI/merge and exact merge-SHA native retest remain publication/handoff gates.
+- Registry proposes 8L1 Done on accepted native proof once this PR merges; 8U1 remains Blocked pending production8P-HOST124/real provider gate. No production OAuth, full product UI/performance, installer or IME acceptance. Earlier FAIL/NOT_RUN entries below are immutable history, superseded for this bounded gate only. Protected original root eight-path WIP retained.
+
+
+## 8L1 physical Windows retest — FAIL / incomplete, 2026-10-26
+
+- Exact source/artifact `aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd` (merged #120), full 14-file SHA256 manifest and in-host attestation PASS. Local claim `COS-8L1-20261026`, generation 2, branch `feature/8l1-native-20261026`, [issue #71](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/71).
+- Two new retained-profile runs fail at `SetupAsync`: WebView2 155.0.4283.62 enumerates built-in Microsoft Clipboard/PDF extensions; existing zero-extension freshness guard refuses them. Restart/crash/multi-tab acceptance not reached. Separate single-process diagnostic timed out without receipt; do not label it PASS.
+- Owner explicitly deferred real Yes/No dialogs and requested automated tests first; consent and profile-action probes NOT_RUN. `native8L1Accepted=false`; all-PASS merge condition unmet, evidence PR stays Draft. Existing cloud 8P-HOST #124 owns overlapping native source; no local product edits or weakened checks.
+- [Implementation summary and failure handoff](implementation-summary/2026-10-26-8l1-native-windows-qualification.md); [sanitized receipt](../audit/2026-10-26/8l1-native/qualification.json). Historical receipts and protected eight-path WIP preserved. Next: source-reviewed cloud repair, source-bound artifact, exact-SHA full physical retest including owner dialogs.
+
+
 ## 16F release security/provenance — cloud Review, 2026-10-25
 
 - **Exclusive claim:** [#121](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/121), lock `release-closure`; task [16F](https://app.notion.com/p/400c4a6aaf7381c685aaea92e95f639a) status Review; draft [PR #122](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/122). Exact head and CI status are NOT accepted until all hosted checks complete.

@@ -534,8 +534,8 @@
       ],
       "phase": "8",
       "kind": "L",
-      "status": "blocked",
-      "evidence": "Physical Windows investigation at eb9f3dc9684fe97017dcc3a57ae63553d2118547, issue #71: 8A/8B/8C controllers have only synthetic-test callers; native integration and 8L1 runner missing. native8L1Accepted=false. See audit/2026-10-24/8l1-native-integration-blocked.json. Claim released after publishing blocked handoff; 8U1 remains blocked."
+      "status": "done",
+      "evidence": "Physical Windows source62bbfdde6fb4506f5cb78d768e6960b50975dfab, COS-8L1-20261026 generation3 owner run07: PASS 27 named checks in each of two independent OS host/Rust runs, 4 retained-profile/crash/restart comparisons, actual owner consent/replay/stale/handoff, same source/binary manifests. See audit/2026-10-26/8l1-native-repair/qualification-pass.json and implementation summary v2. Source repair PR125 requires exact-head CI/self-review/merge; post-merge exact-SHA retest required for final handoff. Historical failures preserved. Synthetic privileged host gate only; production provider8P-HOST/8U1 and IME remain separate."
     },
     {
       "id": "8U1",
@@ -548,7 +548,8 @@
       ],
       "phase": "8",
       "kind": "U",
-      "status": "todo"
+      "status": "blocked",
+      "evidence": "8L1 synthetic native gate accepted on source-bound owner run07; real provider sign-in still requires production 8P-HOST #124, currently Draft/Changes Required. No automatic owner gate or account access from offline readiness; 7U1 separate."
     },
     {
       "id": "9A",

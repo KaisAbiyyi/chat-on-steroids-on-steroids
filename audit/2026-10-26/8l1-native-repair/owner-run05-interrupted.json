@@ -1,0 +1,11 @@
+{
+  "sourceSha": "56b374e87d466bfd79533ebdcee1a47c08a9eecf",
+  "status": "INTERRUPTED",
+  "reason": "Correcting unsupported modal UI inside WebView2 PermissionRequested callback; deferral/post-callback scheduling required by Microsoft threading contract",
+  "hostPid": 27240,
+  "lastProgress": {
+    "step": "bind-A",
+    "status": "PASS",
+    "dateUtc": "2026-10-26T11:07:57.3549555+07:00"
+  }
+}

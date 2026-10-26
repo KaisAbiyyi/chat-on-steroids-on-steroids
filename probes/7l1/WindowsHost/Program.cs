@@ -336,6 +336,10 @@ internal sealed partial class GateForm : Form
     {
         var profileRoot = Path.Combine(_retained8L1ProfileRoot ?? _root, "profile-" + label);
         RejectReparseAncestors(profileRoot);
+        var strictInventory = _host8L1 && _retained8L1ProfileRoot is not null;
+        if (strictInventory && sharedEnvironment is null && !_reuse8L1Profile &&
+            Directory.Exists(profileRoot) && Directory.EnumerateFileSystemEntries(profileRoot).Any())
+            throw new UnauthorizedAccessException("New WebView2 profile is not empty before runtime creation");
         var env = sharedEnvironment ??
             await CoreWebView2Environment.CreateAsync(null, profileRoot,
                 new CoreWebView2EnvironmentOptions { AreBrowserExtensionsEnabled = true });
@@ -347,6 +351,37 @@ internal sealed partial class GateForm : Form
         var idFile = Path.Combine(_retained8L1ProfileRoot ?? _root, "extension-id-" + label + ".txt");
         RejectReparseAncestors(idFile);
         CoreWebView2BrowserExtension extension;
+        if (strictInventory)
+        {
+            var expectedOwned = installedExtensionId;
+            if (expectedOwned is null && _reuse8L1Profile)
+            {
+                if (!File.Exists(idFile)) throw new UnauthorizedAccessException("Missing retained extension ID");
+                expectedOwned = File.ReadAllText(idFile).Trim();
+            }
+            using var process = Process.GetProcessById(checked((int)view.CoreWebView2.BrowserProcessId));
+            var runtime = process.MainModule?.FileName;
+            var verified = runtime is not null && NativeProfileExtensions.VerifiedMicrosoftRuntime(runtime);
+            var inventory = await view.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            if (!NativeProfileExtensions.Accepts(inventory.Select(e => e.Id), verified, expectedOwned))
+            {
+                // A real browser crash can precede Chromium's first preference
+                // flush. Recover only this source-hashed, previously pinned
+                // fixture; never accept missing/foreign inventory as authority.
+                if (!_reuse8L1Profile || expectedOwned is null ||
+                    !NativeProfileExtensions.MayRestoreOwnedFixture(inventory.Select(e => e.Id), verified, expectedOwned))
+                    throw new UnauthorizedAccessException("Unexpected extension or unverified runtime in isolated profile");
+                var restored = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(extensionRoot);
+                var recovered = await view.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+                if (restored.Id != expectedOwned || !restored.IsEnabled ||
+                    !NativeProfileExtensions.Accepts(recovered.Select(e => e.Id), verified, expectedOwned))
+                    throw new UnauthorizedAccessException("Source-owned extension recovery did not restore exact identity");
+                Mark("native_retained_extension_recovery_" + label, true,
+                    "Crash-lost unpacked fixture restored from source-hashed retained path, exact original ID and inventory rechecked");
+            }
+            Mark("native_runtime_component_inventory_" + label, true,
+                "Actual signed Microsoft browser process; only pinned runtime components and exact retained fixture ID");
+        }
         if (installedExtensionId is not null)
             extension = (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync())
                 .Single(x => x.Id == installedExtensionId);
@@ -360,9 +395,6 @@ internal sealed partial class GateForm : Form
         }
         else
         {
-            if (_retained8L1ProfileRoot is not null &&
-                (await view.CoreWebView2.Profile.GetBrowserExtensionsAsync()).Count != 0)
-                throw new UnauthorizedAccessException("Unexpected extension in clean profile");
             extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(extensionRoot);
             if (_retained8L1ProfileRoot is not null)
                 File.WriteAllText(idFile, extension.Id);

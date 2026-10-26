@@ -1,0 +1,11 @@
+{
+  "sourceSha": "ed4754fda92b0559d88df38ea61e823fdabf2e46",
+  "status": "TIMEOUT",
+  "lastProgress": {
+    "step": "bind-A",
+    "status": "PASS",
+    "dateUtc": "2026-10-26T10:58:53.6802572+07:00"
+  },
+  "remainingBrowserProcesses": 1,
+  "note": "Both independent profile browser processes were launched; only one remains after Browser.crash. Awaited CDP reply never completes after browser death. Native request timeout missing; no final receipt."
+}

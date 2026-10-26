@@ -1,0 +1,34 @@
+{
+  "scope": "8L1-HOST limited real native integration; synthetic profiles only",
+  "dateUtc": "2026-10-26T04:00:52.3195682+00:00",
+  "sourceSha": "b420bae8d883f26c8a1877f8f8e628dfd822bad6",
+  "hostBinarySha256": "b6adb0bfa4839beebb6f67f5aa62e46b1e57423a033c68907b44e87844ced256",
+  "rustBinarySha256": "1ebe4e34efed6e16c8609575aa793f23f3cef553a09a8b8b58ef0165a3f0b3ed",
+  "native8L1Accepted": false,
+  "cloudIntegrationPartial": false,
+  "hostProcessId": 3732,
+  "rustProcessId": 14012,
+  "rustProcessExit": 0,
+  "retainedProfileMode": true,
+  "reusedRetainedProfiles": true,
+  "profileAPath": "",
+  "profileBPath": "",
+  "extensionAId": "",
+  "extensionBId": "",
+  "syntheticMarkerA": "",
+  "syntheticMarkerB": "",
+  "checks": {
+    "fatal": {
+      "status": "FAIL",
+      "evidence": "UnauthorizedAccessException: Unexpected extension or unverified runtime in isolated profile"
+    },
+    "rust_process_exit": {
+      "status": "PASS",
+      "evidence": "Native Rust child exit=0"
+    },
+    "source_artifact_provenance": {
+      "status": "PASS",
+      "evidence": "In-host checked Git HEAD, clean authority files and all 14 SHA256 manifests: b420bae8d883f26c8a1877f8f8e628dfd822bad6"
+    }
+  }
+}
