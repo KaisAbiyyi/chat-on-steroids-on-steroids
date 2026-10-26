@@ -688,7 +688,7 @@ internal sealed partial class GateForm
         !string.IsNullOrWhiteSpace(next.WorkerInstance) &&
         !string.IsNullOrWhiteSpace(next.WorkerTargetId);
 
-    private async Task<bool> Execute8PHandoffProbeAsync(
+    private async Task<(bool Committed, string NewSourceSession)> Execute8PHandoffProbeAsync(
         Browser a, Browser b, string primaryOrigin)
     {
         // Both profiles are host-created and MV3/Rust-bound. No page can
@@ -704,7 +704,7 @@ internal sealed partial class GateForm
             "8P-HOST one-use cross-profile handoff",
             MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2);
-        if (decision != DialogResult.Yes) return false;
+        if (decision != DialogResult.Yes) return (false, "");
         if (!Same8P(a, first) || !Same8P(b, second))
             throw new UnauthorizedAccessException("8P handoff scope changed during consent");
         // Exactly one signed first-proof per native scope before the transaction.
@@ -767,7 +767,7 @@ internal sealed partial class GateForm
             b.SessionEpoch != newTargetEpoch ||
             a.ProfilePath == b.ProfilePath)
             throw new UnauthorizedAccessException("8P native handoff postcondition");
-        return true;
+        return (true, empty);
     }
 
     private async Task Execute8PAsync()
@@ -1018,11 +1018,14 @@ internal sealed partial class GateForm
                 handoffLocked = true; // blocks reentrant WebView2 nav during modal
                 var priorA = Snapshot8P(first.Browser);
                 var priorB = Snapshot8P(second.Browser!);
+                var transferSourceSession = "";
                 try
                 {
-                    handoffPassed = await Execute8PHandoffProbeAsync(
+                    var result = await Execute8PHandoffProbeAsync(
                         first.Browser, second.Browser,
                         policy.PrimaryOrigin(providerId));
+                    handoffPassed = result.Committed;
+                    transferSourceSession = result.NewSourceSession;
                 }
                 finally { handoffLocked = false; }
                 if (handoffPassed)
@@ -1044,7 +1047,7 @@ internal sealed partial class GateForm
                             Eligible8PHandoff(priorA, priorB,
                                 policy.PrimaryOrigin(providerId)) &&
                             Fresh8PPostHandoff(priorA, afterA,
-                                first.Browser.SessionId,
+                                transferSourceSession,
                                 priorA.SessionEpoch + 1) &&
                             Fresh8PPostHandoff(priorB, afterB,
                                 priorA.SessionId,
