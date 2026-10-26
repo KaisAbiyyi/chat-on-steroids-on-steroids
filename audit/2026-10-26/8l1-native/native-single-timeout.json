@@ -1,0 +1,8 @@
+{
+  "status": "TIMEOUT",
+  "elapsedSeconds": 195.8,
+  "sourceSha": "aeb6fa886f84ebb0215a88aa8111c4ce9f52d4cd",
+  "hostPid": 23512,
+  "receiptExists": false,
+  "note": "Diagnostic single-process --8l1 --8l1-crash remained live without final receipt; not native acceptance. No consent/profile-action switches. Host terminated after bounded observation."
+}

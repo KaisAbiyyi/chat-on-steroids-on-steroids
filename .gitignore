@@ -15,3 +15,9 @@
 /.cache/
 /.test-tmp/
 __pycache__/
+/apps/windows-host/bin/
+/apps/windows-host/obj/
+/probes/8l1/PolicyTests/bin/
+/probes/8l1/PolicyTests/obj/
+/probes/7l1/WindowsHost/bin/
+/probes/7l1/WindowsHost/obj/

@@ -1,0 +1,13 @@
+{
+  "sourceSha": "934cc293f0d59c6eea74d3c2171bd93f35a7ac2d",
+  "cleanProcessRelaunch": "PASS",
+  "retainedProfileAndRustRecovery": "PASS",
+  "physical8L1Accepted": false,
+  "osCrashQualification": "PASS",
+  "retainedProfileQualification": "PASS",
+  "firstHostPid": 34176,
+  "secondHostPid": 25420,
+  "firstRustPid": 29856,
+  "secondRustPid": 28872,
+  "sameManifestedBinaries": true
+}

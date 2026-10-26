@@ -67,6 +67,9 @@ jobs:
         run: cargo build --locked -p cos-core --example 7l2_bridge --release
       - name: Compile product-owned WebView2 8L1 host with strict warnings
         run: dotnet build apps/windows-host/WindowsHost.csproj -c Release -warnaserror
+      - name: Reject unknown/duplicate/unverified fresh-profile extensions
+        shell: pwsh
+        run: dotnet run --project probes/8l1/PolicyTests/PolicyTests.csproj --configuration Release
       - name: Execute native host authority tests (no browser profile)
         shell: pwsh
         run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test

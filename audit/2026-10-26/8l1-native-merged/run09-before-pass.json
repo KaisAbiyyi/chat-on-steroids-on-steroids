@@ -1,0 +1,144 @@
+{
+  "scope": "8L1-HOST limited real native integration; synthetic profiles only",
+  "dateUtc": "2026-10-26T04:34:42.3488198+00:00",
+  "sourceSha": "934cc293f0d59c6eea74d3c2171bd93f35a7ac2d",
+  "hostBinarySha256": "4950b79b8fe29eb75dc3af956fae10d6684093f7c81dcda3eb1579c955e83e0d",
+  "rustBinarySha256": "1ebe4e34efed6e16c8609575aa793f23f3cef553a09a8b8b58ef0165a3f0b3ed",
+  "native8L1Accepted": false,
+  "cloudIntegrationPartial": true,
+  "permissionCounters": {
+    "Prompts": 3,
+    "Grants": 1,
+    "Denials": 1,
+    "Events": 4,
+    "ReplayDenied": 1,
+    "StaleAllowDenied": 1,
+    "Settled": 4,
+    "Busy": 0
+  },
+  "hostProcessId": 34176,
+  "rustProcessId": 29856,
+  "rustProcessExit": 0,
+  "retainedProfileMode": true,
+  "reusedRetainedProfiles": false,
+  "profileAPath": "D:\\projects\\CoS-Rust\\.test-tmp\\8l1\\evidence-20261026\\post-merge-run09\\retained-profiles\\profile-A\\EBWebView\\Default",
+  "profileBPath": "D:\\projects\\CoS-Rust\\.test-tmp\\8l1\\evidence-20261026\\post-merge-run09\\retained-profiles\\profile-B\\EBWebView\\Default",
+  "extensionAId": "knigjgbbihikabimopichndknfdadpcn",
+  "extensionBId": "knigjgbbihikabimopichndknfdadpcn",
+  "syntheticMarkerA": "ac8ce05a-e9f5-483f-813e-664f774ec55c",
+  "syntheticMarkerB": "4d5aab1c-3dd2-4596-b4cb-ba00900a49b5",
+  "checks": {
+    "native_8b_handoff_fresh_observation": {
+      "status": "PASS",
+      "evidence": "New Rust/MV3 first proofs bind reattributed sessions to separate original WebView2 storage partitions"
+    },
+    "native_8b_handoff_replay_denied": {
+      "status": "PASS",
+      "evidence": "Both Rust first-proof and native one-use consent refuse handoff replay"
+    },
+    "native_8b_independent_partitions": {
+      "status": "PASS",
+      "evidence": "Distinct browser-created OS profile paths and host-minted opaque partition handles"
+    },
+    "native_8b_session_handoff_atomic": {
+      "status": "PASS",
+      "evidence": "Native one-use owner grant; both Rust leases retired before atomic first-proof and C# session attribution transaction, no profile data copied"
+    },
+    "native_8b_signin_navigation": {
+      "status": "PASS",
+      "evidence": "Native Yes starts real synthetic provider WebView2 navigation; old Rust channel retired, no authentication or cookie transfer is claimed"
+    },
+    "native_8b_signin_rebind": {
+      "status": "PASS",
+      "evidence": "Fresh Rust/MV3 channel after sign-in navigation, same profile/session/partition"
+    },
+    "native_8b_source_reattested": {
+      "status": "PASS",
+      "evidence": "Source reauthenticated at fresh document and Rust first-proof boundary"
+    },
+    "native_8c_foreign_profile_denial": {
+      "status": "PASS",
+      "evidence": "Privileged native target identity and opaque storage partition cannot cross profiles"
+    },
+    "native_browser_failure_listener_installed": {
+      "status": "PASS",
+      "evidence": "Actual WebView2 ProcessFailed event handler retires every tracked native Rust channel"
+    },
+    "native_browser_process_failed": {
+      "status": "PASS",
+      "evidence": "Real Browser.crash must trigger WebView2 ProcessFailed, revoke all native scopes and confirm Rust retire"
+    },
+    "native_host_process_restart": {
+      "status": "NOT_RUN",
+      "evidence": "OS process restart and browser crash/recovery require separate physical Windows proof"
+    },
+    "native_multitab_close_retires_channel": {
+      "status": "PASS",
+      "evidence": "Closing one physical tab retires its own Rust channel without revoking profile B"
+    },
+    "native_multitab_conflicting_claim_denied": {
+      "status": "PASS",
+      "evidence": "Rust 7A refuses two tabs claiming the same application session"
+    },
+    "native_multitab_same_partition": {
+      "status": "PASS",
+      "evidence": "Two live WebView2 tabs share profile A only; distinct profile B cannot share partition"
+    },
+    "native_navigation_revokes": {
+      "status": "PASS",
+      "evidence": "Actual WebView2 navigation revokes prior native identity and Rust channel"
+    },
+    "native_permission_default_deny": {
+      "status": "PASS",
+      "evidence": "Real native permission side effect default-deny; each owner approval is one-use and not persisted"
+    },
+    "native_permission_positive_consent": {
+      "status": "PASS",
+      "evidence": "Two real WebView2 permission events: explicit owner Yes and No, no persisted grant"
+    },
+    "native_permission_recovered_new_channel": {
+      "status": "PASS",
+      "evidence": "After stale consent is refused, new real document and Rust channel reauthenticate"
+    },
+    "native_permission_replay_event_denied": {
+      "status": "PASS",
+      "evidence": "Actual third WebView2 permission event refuses already-consumed owner approval"
+    },
+    "native_permission_stale_event_denied": {
+      "status": "PASS",
+      "evidence": "Actual modal Yes after native navigation cannot grant old document permission"
+    },
+    "native_prior_profile_preserved": {
+      "status": "PASS",
+      "evidence": "Navigating one real WebView2 did not steal a separate browser-owned partition"
+    },
+    "native_profile_storage_proof": {
+      "status": "PASS",
+      "evidence": "Independent real profiles create distinct synthetic-only browser-local markers"
+    },
+    "native_rebind_fresh_generation": {
+      "status": "PASS",
+      "evidence": "Rebind requires a fresh Rust/MV3 channel, native document and generation"
+    },
+    "native_runtime_component_inventory_A": {
+      "status": "PASS",
+      "evidence": "Actual signed Microsoft browser process; only pinned runtime components and exact retained fixture ID"
+    },
+    "native_runtime_component_inventory_B": {
+      "status": "PASS",
+      "evidence": "Actual signed Microsoft browser process; only pinned runtime components and exact retained fixture ID"
+    },
+    "native_rust_mv3_authenticated": {
+      "status": "PASS",
+      "evidence": "Two independent real WebView2 MV3 workers authenticated by existing 7L2 Rust bridge"
+    },
+    "rust_process_exit": {
+      "status": "PASS",
+      "evidence": "Native Rust child exit=0"
+    },
+    "source_artifact_provenance": {
+      "status": "PASS",
+      "evidence": "In-host checked Git HEAD, clean authority files and all 14 SHA256 manifests: 934cc293f0d59c6eea74d3c2171bd93f35a7ac2d"
+    }
+  }
+}
