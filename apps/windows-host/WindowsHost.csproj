@@ -14,6 +14,7 @@
     <Compile Include="../../probes/7l1/WindowsHost/Native7L2.cs" Link="Shared/Native7L2.cs" />
     <Compile Include="../../probes/7l1/WindowsHost/NativeRetirementProof.cs" Link="Shared/NativeRetirementProof.cs" />
     <Compile Include="../../probes/7l1/WindowsHost/NativeProfileExtensions.cs" Link="Shared/NativeProfileExtensions.cs" />
+    <Compile Include="../../probes/7l1/WindowsHost/NativePermissionProgress.cs" Link="Shared/NativePermissionProgress.cs" />
   </ItemGroup>
   <Target Name="ExcludeUnusedWebView2Wpf" BeforeTargets="ResolveAssemblyReferences"
           Condition="'$(UseWPF)' != 'true'">

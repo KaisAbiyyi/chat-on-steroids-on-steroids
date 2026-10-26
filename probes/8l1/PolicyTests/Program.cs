@@ -23,6 +23,10 @@ Check(NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,pdf],true,owned)
 Check(!NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,pdf,owned],true,owned),"already-installed fixture is not restored");
 Check(!NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],true,owned),"foreign inventory cannot trigger restoration");
 Check(!NativeProfileExtensions.MayRestoreOwnedFixture([clipboard,pdf],false,owned),"unverified runtime cannot restore fixture");
+Check(!NativePermissionProgress.Settled(0,1,0,1),"event entry while modal open is not completion");
+Check(!NativePermissionProgress.Settled(1,1,1,0),"old completion cannot settle next request");
+Check(NativePermissionProgress.Settled(0,1,1,0),"closed modal and final native decision settle request");
+Check(!NativePermissionProgress.Settled(0,1,1,1),"reentrant modal remains busy");
 if(args.Length==1) {
  Check(NativeProfileExtensions.VerifiedMicrosoftRuntime(args[0]),"actual installed signed runtime");
  Check(!NativeProfileExtensions.VerifiedMicrosoftRuntime(typeof(Program).Assembly.Location),"unsigned arbitrary executable cannot attest components");

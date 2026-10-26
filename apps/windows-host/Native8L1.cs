@@ -37,6 +37,30 @@ internal sealed partial class GateForm
         }
     }
 
+    private async Task Wait8L1PermissionSettledAsync(int before)
+    {
+        for (var attempt = 0; attempt < 3000; attempt++)
+        {
+            var state = _native8L1Authority!.OwnerConsentCounts();
+            if (NativePermissionProgress.Settled(before, state.Events, state.Settled, state.Busy)) return;
+            await Task.Delay(100);
+        }
+        throw new TimeoutException("Native permission event/owner decision did not settle");
+    }
+
+    private async Task Renew8L1PermissionDocumentAsync(Browser b)
+    {
+        // Permission decisions can be cached for a document even when they
+        // are not persisted in the profile. Exercise a real new document and
+        // fresh Rust proof before requesting the next independent permission.
+        b.View.CoreWebView2.Navigate(StartUrl + "?permission-reset=1");
+        await Task.Delay(300);
+        b.View.CoreWebView2.Navigate(StartUrl);
+        await WaitPageAsync(b);
+        await Native8L1StepAsync("permission-document-rebind", () => BindAsync(b, b.SessionId));
+        _native8L1Authority!.Track(b);
+    }
+
     // Synthetic-only storage sentinel. This is NOT authority: only real
     // WebView2 profile isolation and new Rust/MV3 attestation confer it.
     private async Task<string> ReadRecoveryMarkerAsync(Browser browser)
@@ -87,13 +111,13 @@ internal sealed partial class GateForm
         private bool _armReplayOnNextEvent;
         private OneUseApproval? _priorGrant;
         private int _ownerPrompts, _ownerGrants, _ownerDenials;
-        private int _permissionEvents, _replayDenied, _staleAllowDenied;
+        private int _permissionEvents, _permissionSettled, _replayDenied, _staleAllowDenied;
 
         public (int Prompts, int Grants, int Denials, int Events, int ReplayDenied,
-            int StaleAllowDenied) OwnerConsentCounts()
+            int StaleAllowDenied, int Settled, int Busy) OwnerConsentCounts()
         {
             lock (_gate) return (_ownerPrompts, _ownerGrants, _ownerDenials,
-                _permissionEvents, _replayDenied, _staleAllowDenied);
+                _permissionEvents, _replayDenied, _staleAllowDenied, _permissionSettled, _permissionBusy.Count);
         }
 
         // Test-only arms: these cannot grant a permission; an actual
@@ -335,7 +359,10 @@ internal sealed partial class GateForm
                         !_bindings.TryGetValue(b, out snapshot) ||
                         !PermissionOutsideProfileAction(_profileActionBusy, snapshot) ||
                         !Matches(b, snapshot) || !ExactOrigin(e.Uri, snapshot.Origin))
+                    {
+                        _permissionSettled++;
                         return;
+                    }
                     if (_armReplayOnNextEvent)
                     {
                         _armReplayOnNextEvent = false;
@@ -344,6 +371,7 @@ internal sealed partial class GateForm
                             snapshot, cap, e.Uri, _consumedApprovals))
                             _replayDenied++;
                         // This real WebView2 request stays Deny. No new dialog.
+                        _permissionSettled++;
                         return;
                     }
                     forceStale = _armStaleOnNextEvent.Remove(b);
@@ -399,7 +427,10 @@ internal sealed partial class GateForm
                         }
                     }
                 }
-                finally { lock (_gate) _permissionBusy.Remove(b); }
+                finally
+                {
+                    lock (_gate) { _permissionBusy.Remove(b); _permissionSettled++; }
+                }
             };
             b.View.CoreWebView2.NewWindowRequested += (_, e) => e.Handled = true;
             b.View.CoreWebView2.WebMessageReceived += (_, _) =>
@@ -760,9 +791,8 @@ internal sealed partial class GateForm
                 {
                     var before = _native8L1Authority.OwnerConsentCounts().Events;
                     await _b.CoreWebView2.ExecuteScriptAsync(permissionScript);
-                    for (var attempts = 0; attempts < 100 &&
-                        _native8L1Authority.OwnerConsentCounts().Events == before; attempts++)
-                        await Task.Delay(100);
+                    await Wait8L1PermissionSettledAsync(before);
+                    await Renew8L1PermissionDocumentAsync(b);
                 }
                 var normal = _native8L1Authority.OwnerConsentCounts();
                 Mark("native_permission_positive_consent",
@@ -775,15 +805,14 @@ internal sealed partial class GateForm
                 _native8L1Authority.ArmReplayProbe();
                 var beforeReplay = normal.Events;
                 await _b.CoreWebView2.ExecuteScriptAsync(permissionScript);
-                for (var attempts = 0; attempts < 100 &&
-                    _native8L1Authority.OwnerConsentCounts().Events == beforeReplay; attempts++)
-                    await Task.Delay(100);
+                await Wait8L1PermissionSettledAsync(beforeReplay);
                 var replay = _native8L1Authority.OwnerConsentCounts();
                 Mark("native_permission_replay_event_denied",
                     replay.Events > beforeReplay && replay.ReplayDenied == 1 &&
                     replay.Grants == normal.Grants && replay.Prompts == normal.Prompts,
                     "Actual third WebView2 permission event refuses already-consumed owner approval");
 
+                await Renew8L1PermissionDocumentAsync(b);
                 _native8L1Authority.ArmStaleProbe(b);
                 var beforeStale = replay.Events;
                 try { await _b.CoreWebView2.ExecuteScriptAsync(permissionScript); }
@@ -793,9 +822,7 @@ internal sealed partial class GateForm
                     // Native navigation may abort the in-flight page evaluation.
                     // Only native event counts decide whether the probe passed.
                 }
-                for (var attempts = 0; attempts < 100 &&
-                    _native8L1Authority.OwnerConsentCounts().Events == beforeStale; attempts++)
-                    await Task.Delay(100);
+                await Wait8L1PermissionSettledAsync(beforeStale);
                 var stale = _native8L1Authority.OwnerConsentCounts();
                 Mark("native_permission_stale_event_denied",
                     stale.Events > beforeStale && stale.StaleAllowDenied == 1 &&
@@ -976,6 +1003,7 @@ internal sealed partial class GateForm
         }
         finally
         {
+            var consentCounts = _native8L1Authority?.OwnerConsentCounts();
             _native8L1Authority = null;
             if (_bridge is not null)
             {
@@ -1003,6 +1031,10 @@ internal sealed partial class GateForm
                     hostBinarySha256 = HashFile(typeof(GateForm).Assembly.Location),
                     rustBinarySha256 = File.Exists(_bridgePath) ? HashFile(_bridgePath) : "missing",
                     native8L1Accepted = false, cloudIntegrationPartial = exit == 0,
+                    permissionCounters = consentCounts is { } counts ? new {
+                        counts.Prompts, counts.Grants, counts.Denials, counts.Events,
+                        counts.ReplayDenied, counts.StaleAllowDenied, counts.Settled, counts.Busy
+                    } : null,
                     hostProcessId = Environment.ProcessId, rustProcessId = rustPid,
                     rustProcessExit = rustExit,
                     retainedProfileMode = _retained8L1ProfileRoot is not null,
