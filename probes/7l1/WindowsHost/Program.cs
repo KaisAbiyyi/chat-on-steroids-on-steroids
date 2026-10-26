@@ -771,6 +771,25 @@ internal sealed partial class GateForm : Form
         string.Equals(initialOrigin, actualOrigin, StringComparison.Ordinal) &&
         string.Equals(initialUrl, sourceUrl, StringComparison.Ordinal);
 
+    // A source-executed gate between the asynchronous Rust register response
+    // and the first native publication of that channel to a mutable Browser.
+    // One stale/unknown channel is retired before any key/worker handoff.
+    private static async Task<ulong> Adopt8PRegisteredChannelAsync(
+        ulong channelId, Func<bool> nativeLeaseCurrent,
+        Func<ulong, Task<bool>> retire)
+    {
+        if (channelId == 0)
+            throw new UnauthorizedAccessException("8P invalid Rust channel");
+        if (!nativeLeaseCurrent())
+        {
+            if (!await retire(channelId))
+                throw new UnauthorizedAccessException(
+                    "8P uncertain stale Rust registration retirement");
+            throw new UnauthorizedAccessException("8P registered after native revocation");
+        }
+        return channelId;
+    }
+
     private async Task<JsonElement> BindAsync(Browser b, string sessionId)
     {
         // Existing 8L1 synthetic binds keep their accepted semantics.
@@ -793,6 +812,7 @@ internal sealed partial class GateForm : Form
                 documentOrigin, b.ProductionOrigin, b.View.IsDisposed);
         if (!BindingCurrent())
             throw new UnauthorizedAccessException("8P stale initial document binding");
+        var registering = false;
         try
         {
             b.SessionId = sessionId;
@@ -802,19 +822,17 @@ internal sealed partial class GateForm : Form
             if (!BindingCurrent() || b.Revoked)
                 throw new UnauthorizedAccessException("8P document retired during worker attach");
 
+            registering = true;
             var registration = await RustAllowAsync(new { op = "register", host = Host(b) });
+            registering = false;
             var registeredChannel = registration.GetProperty("channelId").GetUInt64();
-            // The Rust register can complete AFTER a native NavStarting or
-            // ProcessFailed revoked the browser, while ChannelId was still 0.
-            // Immediately retire this never-published channel before any
-            // worker bootstrap/key proof. Do NOT assign it to a stale Browser.
-            if (!BindingCurrent() || b.Revoked)
-            {
-                if (!await RetireAsync(registeredChannel))
-                    throw new UnauthorizedAccessException(
-                        "8P retirement of stale registration unresolved");
-                throw new UnauthorizedAccessException("8P registered after native revocation");
-            }
+            // Registration may return after native revocation while ChannelId
+            // was 0. The source-tested admission/retirement helper rejects it
+            // BEFORE a worker key is handed out or Browser channel published.
+            if (b.Production8P)
+                registeredChannel = await Adopt8PRegisteredChannelAsync(
+                    registeredChannel, () => BindingCurrent() && !b.Revoked,
+                    RetireAsync);
             b.ChannelId = registeredChannel;
             var spec = new
             {
@@ -840,6 +858,19 @@ internal sealed partial class GateForm : Form
         }
         catch
         {
+            // A failed register with no trustworthy channel ID is an uncertain
+            // remote-commit boundary: kill the private Rust authority process
+            // rather than guessing which lease to retire or reviving a sibling.
+            if (b.Production8P && registering)
+            {
+                try
+                {
+                    if (_bridge is { HasExited: false })
+                        _bridge.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException) { }
+                catch (System.ComponentModel.Win32Exception) { }
+            }
             // The next bind always awaits any in-flight Rust retirement.
             // Even if worker/Rust registration failed halfway, never restore
             // the revoked browser or reuse its channel.
