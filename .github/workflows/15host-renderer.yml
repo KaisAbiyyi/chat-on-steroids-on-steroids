@@ -3,6 +3,18 @@ on:
   pull_request:
     paths:
       - 'apps/windows-renderer/**'
+      - 'crates/cos-app/**'
+      - 'crates/cos-core/src/ui_contract.rs'
+      - 'crates/cos-core/src/ui_conversation.rs'
+      - 'crates/cos-core/src/ui_focus.rs'
+      - 'crates/cos-core/src/ui_localization.rs'
+      - 'crates/cos-core/src/ui_panels.rs'
+      - 'crates/cos-core/src/ui_rich.rs'
+      - 'crates/cos-core/src/ui_renderer_ipc.rs'
+      - 'crates/cos-core/src/ui_snapshots.rs'
+      - 'crates/cos-core/tests/ui_renderer_ipc.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
       - '.github/workflows/15host-renderer.yml'
   workflow_dispatch:
 jobs:
@@ -19,25 +31,46 @@ jobs:
         run: dotnet build apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-restore --warnaserror
       - name: Source-compiled negative IPC fixture tests (NOT a native product test)
         run: dotnet run --project apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-build -- --contract-selftest
-      - name: Hosted Windows real WebView2 synthetic render and screenshot smoke
+      - name: Hosted Windows native WebView2 candidate versus independent reference
         shell: pwsh
         run: |
           $exe = (Resolve-Path 'apps/windows-renderer/bin/Release/net8.0-windows/WindowsRenderer.exe').Path
-          $proc = Start-Process -FilePath $exe -ArgumentList '--synthetic-native-capture' -PassThru
-          try {
-            $proc | Wait-Process -Timeout 90 -ErrorAction Stop
-            $proc.Refresh()
-            $receipt = Join-Path (Split-Path $exe -Parent) '15host-native-smoke.json'
-            if (Test-Path $receipt) {
-              Get-Content $receipt -Raw | Write-Host
-            } else {
-              Write-Host 'Native smoke receipt missing (early startup, process crash or unhandled exception)'
+          $out = Split-Path $exe -Parent
+          $receipt = Join-Path $out '15host-native-smoke.json'
+          foreach ($mode in @('--golden-native-capture', '--synthetic-native-capture')) {
+            if (Test-Path $receipt) { Remove-Item $receipt -Force }
+            $proc = Start-Process -FilePath $exe -ArgumentList $mode -PassThru
+            try {
+              $proc | Wait-Process -Timeout 90 -ErrorAction Stop
+              $proc.Refresh()
+              if ($proc.ExitCode -ne 0) { throw "Native WebView2 capture failed for $mode with exit $($proc.ExitCode)" }
+              if (!(Test-Path $receipt)) { throw "Native WebView2 capture receipt missing for $mode" }
+              $parsed = Get-Content $receipt -Raw | ConvertFrom-Json
+              if (!$parsed.pass -or $parsed.syntheticOnly -ne $true -or $parsed.productAccepted -ne $false) {
+                throw "Native WebView2 receipt did not satisfy synthetic-only contract for $mode"
+              }
+              if ($parsed.width -ne 800 -or $parsed.height -ne 600 -or $parsed.pixelSha256 -notmatch '^[0-9a-f]{64}$') {
+                throw "Native WebView2 capture did not satisfy the 15F pixel descriptor for $mode"
+              }
+              $name = if ($mode -eq '--golden-native-capture') { '15host-reference.json' } else { '15host-candidate.json' }
+              Move-Item -Path $receipt -Destination (Join-Path $out $name) -Force
+            } finally {
+              $proc.Refresh()
+              if (!$proc.HasExited) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
             }
-            if ($proc.ExitCode -ne 0) { throw "Synthetic native WebView2 capture failed: exit $($proc.ExitCode)" }
-          } finally {
-            $proc.Refresh()
-            if (!$proc.HasExited) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
           }
+          $reference = Get-Content (Join-Path $out '15host-reference.json') -Raw | ConvertFrom-Json
+          $candidate = Get-Content (Join-Path $out '15host-candidate.json') -Raw | ConvertFrom-Json
+          if ($reference.referenceSourceSha256 -ne $candidate.referenceSourceSha256 -or
+              $reference.referenceSourceSha256 -notmatch '^[0-9a-f]{64}$') {
+            throw 'Independent reference source provenance is missing or inconsistent'
+          }
+          if ($reference.pixelSha256 -ne $candidate.pixelSha256) {
+            throw "Native screenshot regression: candidate $($candidate.pixelSha256) differs from independent reference $($reference.pixelSha256)"
+          }
+          @{ referenceSourceSha256=$reference.referenceSourceSha256; pixelSha256=$candidate.pixelSha256; width=$candidate.width; height=$candidate.height; sourceSha=$env:GITHUB_SHA; comparison='PASS'; productAccepted=$false } |
+            ConvertTo-Json | Out-File -FilePath (Join-Path $out '15host-screenshot-comparison.json') -Encoding ascii
+          Get-Content (Join-Path $out '15host-screenshot-comparison.json') -Raw | Write-Host
       - name: Hash source-bound Windows artifact
         shell: pwsh
         run: |
@@ -63,3 +96,9 @@ jobs:
         run: |
           dotnet restore apps/windows-renderer/WindowsRenderer.csproj
           dotnet build apps/windows-renderer/WindowsRenderer.csproj --configuration Release --no-restore --warnaserror
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rust 15HOST typed contract and authenticated host regression
+        run: |
+          cargo fmt --all --check
+          cargo test -p cos-core --test ui_renderer_ipc
+          cargo test -p cos-app

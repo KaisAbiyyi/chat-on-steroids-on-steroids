@@ -1,42 +1,27 @@
-# CoSoS 15HOST — bounded cloud renderer foundation
+# CoSoS 15HOST — authenticated native renderer
 
-Status: **IN PROGRESS / NOT PRODUCT ACCEPTED**. Implementation tracked by
-[GitHub #115](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/115).
-This stand-alone, native Windows WebView2 executable is an incremental **synthetic-only**
-rendering foundation. It is **not** the authenticated Rust-backed CoSoS desktop application.
+Status: **IN PROGRESS / NOT PRODUCT ACCEPTED**. Tracked by [GitHub #115](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/115). The branch now contains a Rust-launched WebView2 child and a bounded, authenticated presentation bridge; this is still a draft acceptance candidate, not a merge-ready product claim.
 
-## Cloud-evaluable scope
+## Implemented cloud-evaluable scope
 
-- `--contract-selftest` executes the **compiled native C#** JSON protocol validator,
-  including disallowed action, oversize, stale epoch, duplicate keys, out-of-bound
-  pages, and a 6,000-message deterministic synthetic fixture with at most 24
-  messages per delivered page.
-- `--synthetic-native` loads host-owned inert HTML via WebView2 `NavigateToString`,
-  with read-only virtualized synthetic history and preview-only rich panels.
-- `--synthetic-native-capture` opt-in captures actual WebView2 pixels to an
-  isolated temporary profile and outputs only sanitized SHA-256/byte counts.
-  These pixels are **candidate captures, NOT independent goldens**.
-- Every run creates an entirely fresh, random temporary user-data directory;
-  does not load an owner's profile, sign in, use any provider, send messages,
-  expose file paths, run tools, or grant WebView2 permission. New windows and
-  external navigation are disabled; HTML has a no-network CSP and textContent-only
-  rendering. All IPC responses contain synthetic fixture data.
+- Rust requires an absolute renderer executable plus its expected SHA-256, verifies the source-bound binary hash, then launches the child with private redirected stdin/stdout and a fresh per-process 256-bit key and epoch.
+- Rust/C# share a versioned JSON-line HMAC-SHA256 protocol with a cross-language fixed vector, constant-time MAC checks, strict fields, 512 KiB frame / 256 KiB payload bounds, monotonic independent directions, stale epoch/replay/downgrade rejection, per-process key isolation and key rotation.
+- Rust remains the authority for session selection and history. It validates IDs against the active explicitly opened profile, retains at most 6,000 sanitized entries, serves pages of at most 24, and sends only the current typed 15B/15C/15E/15F snapshots. The renderer has no filesystem, process, provider, account, or Send capability.
+- Native UI includes navigation, session history virtualization, an in-memory editor, output-only terminal surface, host-owned opaque PDF preview controls, inert math-source preview, locale selector for the 13 accepted tags, and keyboard/focus/dialog wiring. PDF bytes and a real math typesetter are not attached by this UI-only task; those remain explicit residual scope.
+- `NavigationStarting` and `NavigationCompleted` are correlated by `NavigationId`. Failures retain a nonzero process exit and write a sanitized receipt with `WebErrorStatus`, navigation IDs, phase, and recent URI classifications. No exit code is swallowed.
+- `--synthetic-native-capture` captures actual WebView2 pixels; `--golden-native-capture` captures a separately authored static reference fixture. CI compares decoded RGBA pixel SHA-256 values and records the independent reference source hash. The reference is **not yet an accepted product golden** until independent review.
 
-## Explicit nonclaims / acceptance blockers
+## Safety / boundedness
 
-1. A real authenticated Rust host → 15B/15C/15E/15F typed state bridge and
-   session/frame ownership checking with bounded IPC and hostile-renderer negatives
-   are **NOT IMPLEMENTED**. C# synthetic page guard is NOT a Rust security boundary.
-2. Real editor/terminal/PDF/math rendering and interaction, 13-locale/IME,
-   focus/a11y interactions, 6,000-message *product-state* injection, source-approved
-   independent screenshot goldens and screenshot comparison are **NOT_RUN**.
-3. Hosted cloud Windows build/selftests and Ubuntu cross-build do not by themselves
-   qualify actual Windows WebView2 execution/screenshots. Native
-   `--synthetic-native-capture` is opt-in and must be run in a reproducible cloud
-   Windows hosted interactive session or deferred with a concrete reason.
-4. Owner physical 15L1/15L2/15L3, PERF-01 matching original CoS and
-   credentials/sign-in are separate downstream **NOT_RUN**, not cloud CI proofs.
+- Synthetic capture uses a fresh temporary WebView2 user-data folder; the authenticated product child does the same. No owner profile, real account, provider login, real credentials, tool execution, or message sending is used by cloud tests.
+- Renderer intents are allowlisted and size-bounded in C# and then parsed again into strict Rust typed contracts. All user-visible content uses `textContent`; external navigation, new windows, permissions, network resources and arbitrary file paths are denied.
+- Session-switch code clears the old cached text before reading a new session; history cache entries and per-process IPC keys are zeroized on drop where supported.
 
-Never merge and mark 15HOST Done until its full acceptance contract has
-source-bound artifact, all final-HEAD CI PASS, security review, and real
-Rust↔renderer integration. No fake native PASS or fabricated golden pixels.
+## Acceptance gates still open
+
+1. Independent ChatGPT security review of the exact final HEAD, including Rust/C#/WebView2 integration and source-bound artifact evidence.
+2. The native screenshot reference needs independent approval/provenance review; CI equality against the checked-in reference source is a regression signal, not proof of product visual parity.
+3. Full PDF asset resolution/rendering and actual math typesetting are not implemented here; the UI exposes safe typed preview surfaces only.
+4. Physical 15L1/15L2/15L3 and PERF-01 remain downstream **NOT_RUN**. No local/physical Windows or owner gate is part of this cloud-only task.
+
+Keep PR #127 Draft and unmerged. Do not mark issue #115 Done until independent review and all applicable cloud checks pass.
