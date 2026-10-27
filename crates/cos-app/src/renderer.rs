@@ -106,8 +106,12 @@ pub fn launch(
     // Validate the complete framework-dependent .NET application, not only its apphost EXE.
     // The manifest digest MUST be independently trusted, never read as an
     // authoritative value from the renderer directory itself.
-    let manifest_sha =
+    // Keep the validated EXE/managed DLL/dependencies/manifest and directory
+    // handles open through native child exit, denying Windows replacement
+    // and delete sharing across the complete verifier-to-loader lifetime.
+    let locked_payload =
         renderer_integrity::verify(&renderer_path, &expected_sha, &expected_manifest)?;
+    let manifest_sha = locked_payload.manifest_sha.clone();
     let actual_sha = expected_sha.to_ascii_lowercase();
 
     let mut key = [0u8; 32];
@@ -218,6 +222,8 @@ pub fn launch(
     if outcome.is_ok() {
         let _ = reader_thread.join();
     }
+    // This must stay AFTER reaping the C# child (even on errors).
+    drop(locked_payload);
     outcome
 }
 
