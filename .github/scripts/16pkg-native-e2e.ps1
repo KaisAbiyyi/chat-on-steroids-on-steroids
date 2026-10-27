@@ -56,15 +56,32 @@ try {
     $public=Join-Path $testHome 'test-only.cer'
     Export-Certificate -Cert $cert -FilePath $public | Out-Null
     Write-Host '16PKG CI TEST: exported ephemeral TEST public certificate'
+    # Windows hosted CI has no interactive desktop. X509Store.Add to Root
+    # invoked a trust-confirmation UI and hung for 15 minutes; use certutil
+    # with -f (noninteractive force) and a hard process/reap timeout.
+    $certutil=Join-Path $env:SystemRoot 'System32\certutil.exe'
     foreach($storeName in @('Root','TrustedPublisher')){
-        $store=[Security.Cryptography.X509Certificates.X509Store]::new(
-            $storeName,[Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
-        try {
-            $store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
-            $store.Add($cert)
+        Write-Host "16PKG CI TEST: noninteractive trust import CurrentUser/$storeName"
+        $psi=[Diagnostics.ProcessStartInfo]::new($certutil)
+        $psi.UseShellExecute=$false
+        $psi.CreateNoWindow=$true
+        foreach($argument in @('-user','-f','-addstore',$storeName,$public)) {
+            [void]$psi.ArgumentList.Add($argument)
         }
-        finally { $store.Close() }
-        Write-Host "16PKG CI TEST: imported TEST certificate to CurrentUser/$storeName"
+        $child=[Diagnostics.Process]::Start($psi)
+        if(!$child){throw 'Windows certutil not available'}
+        try {
+            if(!$child.WaitForExit(20000)) {
+                $child.Kill($true)
+                [void]$child.WaitForExit(5000)
+                throw "Hosted Windows certificate trust import timed out in $storeName"
+            }
+            if($child.ExitCode -ne 0) {
+                throw "Hosted Windows certutil refused CurrentUser/$storeName"
+            }
+        }
+        finally { $child.Dispose() }
+        Write-Host "16PKG CI TEST: CurrentUser/$storeName trusted TEST issuer"
     }
     $publisher=Join-Path $testHome 'publisher-test-only.txt'
     [IO.File]::WriteAllText($publisher,$cert.Thumbprint,[Text.UTF8Encoding]::new($false))
