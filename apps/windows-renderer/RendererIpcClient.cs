@@ -71,7 +71,11 @@ internal sealed class RendererIpcClient : IDisposable
         ThrowIfDisposed();
         var payload = Encoding.UTF8.GetBytes(payloadJson);
         if (payload.Length > MaximumPayloadBytes) throw new InvalidDataException("Renderer payload too large");
-        using (JsonDocument.Parse(payloadJson)) { }
+        try { using var parsed = JsonDocument.Parse(payloadJson); }
+        catch (JsonException error)
+        {
+            throw new InvalidDataException("Malformed renderer payload JSON", error);
+        }
 
         var sequence = Next(_outboundSequence);
         var mac = HMACSHA256.HashData(_key, MacInput(Protocol, _epoch, sequence, payload));
@@ -314,6 +318,11 @@ internal sealed class RendererIpcClient : IDisposable
             throw new InvalidOperationException("15HOST malformed payload encoder regression failed");
         }
         catch (InvalidDataException) { }
+        // Malformed payloads must not consume a sequence or produce a MAC.
+        var afterRejected = sender.SignOutbound(ready);
+        using var afterRejectedFrame = JsonDocument.Parse(afterRejected);
+        if (afterRejectedFrame.RootElement.GetProperty("sequence").GetUInt64() != 2)
+            throw new InvalidOperationException("15HOST malformed payload advanced authenticated sequence");
     }
 
     private static byte[] MacInput(uint protocol, ulong epoch, ulong sequence, byte[] payload)
