@@ -750,7 +750,8 @@ impl RendererHostState {
         // Erase all session-owned rich panels and associated raster bytes
         // before displaying the next session; not just the history list.
         for panel in self.rich.snapshot().panels {
-            self.rich.remove_from_host(panel.key())
+            self.rich
+                .remove_from_host(panel.key())
                 .map_err(|error| error.code())?;
         }
         // Erase the prior visible page and cache before touching the new
