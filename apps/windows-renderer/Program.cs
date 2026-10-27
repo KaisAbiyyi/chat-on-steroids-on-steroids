@@ -724,7 +724,7 @@ h2{font-size:12px;margin:0;color:#b0becf}.panel-tabs{display:grid;grid-template-
 .output{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;font:11px ui-monospace,Consolas,monospace;color:#cbd5e1;margin:0}
 .pdf-page{flex:1;display:grid;place-items:center;border:1px dashed #435064;background:#121923;color:#b0becf;text-align:center;padding:12px}
 .math-source{font:11px ui-monospace,Consolas,monospace;padding:7px;min-height:54px;resize:vertical}
-.math-preview{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;padding:12px;border:1px solid #344256;border-radius:4px}
+ .math-preview{overflow-wrap:anywhere;font-size:14px;padding:12px;border:1px solid #344256;border-radius:4px}
 .panel-footer{font-size:10px;color:#7f8ea3;line-height:14px}
 dialog{background:#151e2a;color:#e6edf7;border:1px solid #526984;border-radius:6px;max-width:300px}
 dialog::backdrop{background:#0009}dialog button{margin-right:6px}
@@ -863,7 +863,29 @@ function renderRich(){
  }else if(panel.kind==='math'){
   const editor=document.createElement('textarea');editor.className='math-source';editor.value=String(panel.source||'');editor.setAttribute('aria-label','Math source');
   editor.addEventListener('change',()=>send({kind:'rich-command',command:{action:'replace-math',key:panel.key,expectedRevision:rich.revision,source:editor.value.slice(0,8192)}}));
-  const preview=document.createElement('pre');preview.className='math-preview';preview.textContent=String(panel.source||'');surface.append(editor,preview);
+  const preview=document.createElement('div');preview.className='math-preview';preview.setAttribute('aria-label','Math equation');
+  const source=String(panel.source||'').trim().slice(0,512);
+  const compact=source.replace(/\s/g,'');
+  const tokens=compact.match(/[a-zA-Z]+|[0-9]+|[+\-*/=()^]/g)||[];
+  if(!compact||tokens.join('')!==compact||tokens.length>128)preview.textContent='Unsupported math expression';
+  else{
+   const ns='http://www.w3.org/1998/Math/MathML',math=document.createElementNS(ns,'math');
+   math.setAttribute('display','block');let valid=true;
+   const tokenNode=token=>{
+    const tag=/^[0-9]+$/.test(token)?'mn':/^[a-zA-Z]+$/.test(token)?'mi':'mo';
+    const el=document.createElementNS(ns,tag);el.textContent=token;return el;
+   };
+   for(let i=0;i<tokens.length;i++){
+    if(tokens[i]==='^'){
+     const base=math.lastChild,exponent=tokens[++i];
+     if(!base||!exponent||!/^[a-zA-Z0-9]+$/.test(exponent)){valid=false;break;}
+     math.removeChild(base);
+     const sup=document.createElementNS(ns,'msup');sup.append(base,tokenNode(exponent));math.append(sup);
+    }else math.append(tokenNode(tokens[i]));
+   }
+   if(valid)preview.append(math);else preview.textContent='Unsupported math expression';
+  }
+  surface.append(editor,preview);
  }
 }
 function applyFocus(){
