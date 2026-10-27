@@ -853,7 +853,7 @@ internal static class RendererDocument
 
     internal const string Html = """
 <!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-__DOCUMENT_NONCE__'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; frame-src 'none'; img-src 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-__DOCUMENT_NONCE__'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; frame-src 'none'; img-src data:; object-src 'none'; worker-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 :root{font:13px system-ui,sans-serif;color:#e6edf7;background:#10151c;color-scheme:dark}
@@ -1019,7 +1019,21 @@ function renderRich(){
  }else if(panel.kind==='terminal'||panel.kind==='code'){
   const output=document.createElement('pre');output.className='output';output.textContent=String(panel.output||panel.text||'');surface.append(output);
  }else if(panel.kind==='pdf'){
-  const page=document.createElement('div');page.className='pdf-page';page.textContent='PDF preview · page '+panel.page+' of '+panel.pageCount+' · opaque host asset';surface.append(page);
+  const page=document.createElement('div');page.className='pdf-page';
+  const asset=state?.pdfPage;
+  if(asset&&asset.format==='image/png'&&asset.assetId===panel.assetId&&asset.page===panel.page&&
+     /^[a-f0-9]{64}$/.test(String(asset.sha256||''))&&
+     typeof asset.base64==='string'&&asset.base64.length<=131072&&
+     /^[A-Za-z0-9+/]*={0,2}$/.test(asset.base64)){
+   const image=document.createElement('img');image.alt='Host-authorized PDF page '+panel.page;
+   image.setAttribute('data-pdf-sha256',asset.sha256);image.decoding='async';
+   image.src='data:image/png;base64,'+asset.base64;
+   image.style.maxWidth='100%';image.style.maxHeight='100%';image.style.objectFit='contain';
+   page.append(image);
+  }else{
+   page.textContent='PDF page is unavailable or not authorized by this session';
+  }
+  surface.append(page);
   const controls=document.createElement('div');
   for(const [label,value] of [['Previous',Math.max(1,panel.page-1)],['Next',Math.min(panel.pageCount,panel.page+1)]]){
    const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=value===panel.page;
