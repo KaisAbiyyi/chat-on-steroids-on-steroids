@@ -142,5 +142,48 @@ class TestOwnerPreflight(unittest.TestCase):
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
 
 
+    def test_json_duplicate_keys_blocked_in_manifest_and_contract(self):
+        manifest = self.art / "hashes.json"
+        raw = manifest.read_text(encoding="utf-8")
+        raw = raw.replace('"sha256":', '"path": "shadow.dll", "sha256":', 1)
+        manifest.write_text(raw, encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        declaration = self.repo / "probes" / "7u1" / "product-integration.json"
+        raw = declaration.read_text(encoding="utf-8")
+        declaration.write_text(raw.replace('"kind":', '"kind": "other", "kind":', 1),
+                               encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
+    def test_windows_colliding_paths_and_reserved_names_denied(self):
+        path = self.art / "hashes.json"
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries.append({"path": entries[0]["path"].upper(),
+                        "sha256": entries[0]["sha256"]})
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries[0]["path"] = "CON.dll"
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries[0]["path"] = "host/trailing."
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
+    def test_tagged_synthetic_bundle_never_product(self):
+        (self.art / "artifact-kind.json").write_text(
+            json.dumps({"schema": "cosos.7u1.artifact-kind.v1",
+                        "kind": "synthetic-7l2-only"}), encoding="utf-8")
+        self.rehash()
+        result = self.gate()
+        self.assertEqual(result["checks"]["artifact_manifest"]["status"], "PASS")
+        self.assertEqual(result["checks"]["product_native_adapter"]["status"], "BLOCKED")
+        self.assertEqual(result["owner7U1Status"], "NOT_RUN")
+
+
+
 if __name__ == "__main__":
     unittest.main()

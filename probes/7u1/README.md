@@ -5,17 +5,27 @@
 The cloud deliverable here is a preflight security contract and Windows D:
 entrypoint, **NOT** a signed-in 7U1 product browser or owner qualification.
 Source-attested physical 7L2 PASS proves the synthetic WebView2/MV3/Rust
-bridge, not a provider account. Existing WindowsHost binds to
-https://synthetic.cos.test, and cos-app is still a CLI. Native 8L1 issue #71
-lacks a product-owned privileged WebView2 profile/controller adapter.
+bridge, not a provider account. Existing accepted 8L1 WindowsHost binds to
+https://synthetic.cos.test (issue #71 CLOSED/PASS on 2026-10-26);
+cos-app remains a CLI. The separate real-provider 8P-HOST issue #123 /
+draft PR #124 is not merged or independently accepted. Its navigation /
+native two-phase handoff contract does NOT yet prove 7U1's read-only
+signed-in snapshot/attach/detach contract.
 
-Until 8L1 is fixed, the tool must report BLOCKED. The missing
-probes/7u1/product-integration.json is intentional, not a broken CI fixture.
+Until a reviewed production owner-only observe-only integration ships, the
+7U1 product gate reports BLOCKED. The missing
+probes/7u1/product-integration.json is intentional, not broken CI.
 
 ## Cloud coverage
 
-- SHA-pinned repository HEAD and SHA256 full-artifact manifest (no loose
-  binaries/dependencies and no symlink/junction entries).
+- SHA-pinned clean repository HEAD and SHA256 full-artifact manifest (no loose
+  binaries/dependencies, case-colliding/reserved names, JSON duplicate keys, or
+  symlink/junction entries).
+- GitHub Actions builds/publishes a downloadable **synthetic-only** native Windows
+  artifact. `package_artifact.py` writes its complete `source.sha` and
+  `hashes.json`; its `artifact-kind.json` makes it impossible to mistake
+  that staged bundle for provider observation readiness. A Windows cloud job
+  intentionally checks the 7U1 preflight exit is BLOCKED, not a false PASS.
 - Exact provider HTTPS origin allowlist: chatgpt.com, claude.ai or gemini.google.com.
 - Human opt-in and distinct 7u1-prefixed dedicated test profile.
 - Reviewed integration contract for a real product-owned WebView2 host
@@ -32,7 +42,9 @@ They do not verify a Windows executable or its truthfully claimed abilities.
 
 ## Future native integration prerequisite (8L1 #71)
 
-The separate native integration owner must implement a real product entrypoint
+The separate production integration owner (#123, PR #124) must land a
+reviewed provider-origin/host foundation. A subsequent 7U1-PREP integration
+must implement a real product entrypoint
 that privately connects the built Rust bridge and WebView2/MV3 companion,
 with strict origin/profile/tab/frame/document/navigation/worker/host
 generation and MAC/sequence authority. Need observe-only bounded DOM
@@ -40,8 +52,9 @@ snapshot, lease release on navigation/close/crash/restart/worker retirement,
 cross-profile rejection, no arbitrary CDP, JS, Send, click, submit, cookie
 or credential capture, and a reproducible exact-SHA binary manifest.
 
-Once actual native implementation passes source-diff security review and
-hosted tests, the native 8L1 Windows gate needs physical PASS. Only then
+The synthetic 8L1 physical gate is already PASS, but is **not** real-provider
+acceptance. Once 8P production foundation is accepted and a real restricted
+observation harness passes security review and hosted cloud tests, only then
 create/review a distinct **interactive** 7U1 signed-in owner test runner
 with the above provenance. A JSON declaration by itself is NOT security
 proof and is never permission to sign in automatically.
@@ -63,3 +76,20 @@ observation and signed authority, navigates/closes/restarts, confirms stale
 handles refused and zero outgoing Send. Evidence is sanitized per-check
 PASS/FAIL/NOT_RUN without private chat, credentials, cookies, 2FA or tokens.
 Synthetic and hosted tests cannot upgrade this to PASS.
+
+## Cloud artifact reproducibility (no real provider)
+
+Run the exact-head Windows/Ubuntu `7U1-PREP fail-closed security` checks.
+The Windows job publishes the `7u1-prep-synthetic-native-only` Actions
+artifact (7-day retention) containing a .NET WindowsHost publish tree,
+Rust `7l2_bridge.exe`, `source.sha`, `hashes.json`, and
+`artifact-kind.json`. This is a fully hashed **synthetic** build, not the
+product or an owner 7U1 installer. All checks and receipts MUST preserve:
+`product_native_adapter=BLOCKED`, `owner7U1Status=NOT_RUN`,
+`outgoingSendCount=null`. CI uses temp isolated synthetic directories.
+The Windows D: PowerShell wrapper above is informational owner preflight
+only and intentionally cannot run 7U1 until the separate real product
+integration exists. Do not ask the owner to sign in on this artifact.
+
+Cloud generation 2: isolated to `probes/7u1/**` and the 7U1 workflow;
+do not modify source owned by active 8P-HOST PR #124.
