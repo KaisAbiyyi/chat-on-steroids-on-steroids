@@ -1,0 +1,20 @@
+{
+  "providers": [
+    {
+      "id": "chatgpt",
+      "origin": "https://chatgpt.com",
+      "redirectOrigins": [
+        "https://auth.openai.com"
+      ],
+      "callbackUrls": [
+        "https://chatgpt.com/auth/callback"
+      ]
+    },
+    {
+      "id": "gemini",
+      "origin": "https://gemini.google.com",
+      "redirectOrigins": [],
+      "callbackUrls": []
+    }
+  ]
+}

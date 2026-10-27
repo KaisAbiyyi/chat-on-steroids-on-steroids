@@ -726,6 +726,95 @@ mod tests {
     }
 
     #[test]
+    fn production_8p_signed_sessions_handoff_only_after_both_native_retires() {
+        let mut bridge = NativeBrowserBridge::new();
+        let mut a = evidence();
+        a.origin = "https://chatgpt.com".into();
+        a.identity.profile_id = "8p-A".into();
+        a.identity.session_id = "8p-session-A".into();
+        let mut b = a.clone();
+        b.identity.profile_id = "8p-B".into();
+        b.identity.tab_id = 2;
+        b.identity.session_id = "8p-session-B".into();
+        let mut channels = Vec::new();
+        for trusted in [&a, &b] {
+            let bootstrap = bridge.register_host(trusted.clone()).unwrap();
+            bridge
+                .complete_handshake(
+                    trusted,
+                    bootstrap.channel_id,
+                    bootstrap.host_generation,
+                    &bootstrap.handshake_proof(),
+                )
+                .unwrap();
+            let payload = bytes(trusted);
+            assert_eq!(
+                bridge
+                    .observe(
+                        trusted,
+                        bootstrap.channel_id,
+                        bootstrap.host_generation,
+                        1,
+                        &payload,
+                        &bootstrap.observation_mac(1, &payload)
+                    )
+                    .unwrap(),
+                Observation::FirstProof
+            );
+            channels.push(bootstrap.channel_id);
+        }
+        assert_eq!(
+            bridge.handoff_sessions(&a, &b, "8p-empty", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(channels[0]));
+        assert_eq!(
+            bridge.handoff_sessions(&a, &b, "8p-empty", 2, 2),
+            Err(NativeBridgeError::Channel)
+        );
+        assert!(bridge.retire_host(channels[1]));
+        let mut wrong = b.clone();
+        wrong.origin = "https://auth.openai.com".into();
+        assert_eq!(
+            bridge.handoff_sessions(&a, &wrong, "8p-empty", 2, 2),
+            Err(NativeBridgeError::Host)
+        );
+        assert_eq!(bridge.handoff_sessions(&a, &b, "8p-empty", 2, 2), Ok(()));
+        assert!(bridge.handoff_sessions(&a, &b, "8p-other", 3, 3).is_err());
+        for (mut next, session) in [(a, "8p-empty"), (b, "8p-session-A")] {
+            next.identity.document_id = "next-document".into();
+            next.identity.navigation_epoch += 1;
+            next.identity.worker_generation += 1;
+            next.identity.session_id = session.into();
+            next.identity.session_epoch = 2;
+            next.host_generation += 1;
+            let bootstrap = bridge.register_host(next.clone()).unwrap();
+            bridge
+                .complete_handshake(
+                    &next,
+                    bootstrap.channel_id,
+                    bootstrap.host_generation,
+                    &bootstrap.handshake_proof(),
+                )
+                .unwrap();
+            let payload = bytes(&next);
+            assert_eq!(
+                bridge
+                    .observe(
+                        &next,
+                        bootstrap.channel_id,
+                        bootstrap.host_generation,
+                        1,
+                        &payload,
+                        &bootstrap.observation_mac(1, &payload)
+                    )
+                    .unwrap(),
+                Observation::FirstProof
+            );
+        }
+    }
+
+    #[test]
     fn companion_event_must_bind_exact_kind_digest_receipt_and_fresh_sequence() {
         let (mut bridge, host, bootstrap) = authenticated();
         let identity = bytes(&host);
