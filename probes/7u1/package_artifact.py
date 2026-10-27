@@ -7,18 +7,10 @@ import subprocess
 import sys
 
 from audit_production_host import audit as audit_production_host
-from preflight import Refused, hash_file, validate_manifest_path, verify_manifest
+from preflight import PRODUCTION_SOURCE_COPIES, Refused, hash_file, validate_manifest_path, verify_manifest
 
 SYNTHETIC_KIND = "synthetic-7l2-only"
 PRODUCTION_HANDSHAKE_KIND = "production-8p-handshake-only-not-7u1"
-PRODUCTION_SOURCE_COPIES = {
-    "source/Native8P.cs": "apps/windows-host/Native8P.cs",
-    "source/native_browser_bridge.rs": "crates/cos-core/src/native_browser_bridge.rs",
-    "source/extension/manifest.json": "probes/8p/extension/manifest.json",
-    "source/extension/sw.mjs": "probes/8p/extension/sw.mjs",
-}
-
-
 def package(repo: Path, artifact: Path, kind: str = SYNTHETIC_KIND) -> str:
     repo = repo.absolute()
     artifact = artifact.absolute()

@@ -17,6 +17,24 @@ SHA64 = re.compile(r"[0-9a-f]{64}\Z")
 PORTABLE_PART = re.compile(r"[A-Za-z0-9_.-]+\Z")
 WINDOWS_RESERVED = {"con", "prn", "aux", "nul", *(f"com{i}" for i in range(1, 10)), *(f"lpt{i}" for i in range(1, 10))}
 
+PRODUCTION_SOURCE_COPIES = {
+    "source/WindowsHost.csproj": "apps/windows-host/WindowsHost.csproj",
+    "source/Native8P.cs": "apps/windows-host/Native8P.cs",
+    "source/Native8L1.cs": "apps/windows-host/Native8L1.cs",
+    "source/Program.cs": "probes/7l1/WindowsHost/Program.cs",
+    "source/Native7L2.cs": "probes/7l1/WindowsHost/Native7L2.cs",
+    "source/NativeRetirementProof.cs": "probes/7l1/WindowsHost/NativeRetirementProof.cs",
+    "source/NativeProfileExtensions.cs": "probes/7l1/WindowsHost/NativeProfileExtensions.cs",
+    "source/NativePermissionProgress.cs": "probes/7l1/WindowsHost/NativePermissionProgress.cs",
+    "source/Cargo.toml": "Cargo.toml",
+    "source/Cargo.lock": "Cargo.lock",
+    "source/cos-core-Cargo.toml": "crates/cos-core/Cargo.toml",
+    "source/7l2_bridge.rs": "crates/cos-core/examples/7l2_bridge.rs",
+    "source/native_browser_bridge.rs": "crates/cos-core/src/native_browser_bridge.rs",
+    "source/extension/manifest.json": "probes/8p/extension/manifest.json",
+    "source/extension/sw.mjs": "probes/8p/extension/sw.mjs",
+}
+
 
 class Refused(Exception):
     pass
@@ -123,12 +141,13 @@ def verify_product_adapter(repo, artifact, files, provider, expected_sha, observ
         raise Refused("unsupported/insecure product adapter declaration")
     if expected["host"] not in files or expected["bridge"] not in files:
         raise Refused("actual product host and Rust bridge absent from SHA256 manifest")
-    for relative in (
-        "source/Native8P.cs", "source/native_browser_bridge.rs",
-        "source/extension/manifest.json", "source/extension/sw.mjs",
-    ):
-        if relative not in files:
-            raise Refused("production host/Rust/MV3 source missing from manifest: " + relative)
+    for staged, source in PRODUCTION_SOURCE_COPIES.items():
+        staged_path = artifact / staged
+        source_path = repo / source
+        if staged not in files or not staged_path.is_file() or not source_path.is_file():
+            raise Refused("production build source missing from SHA256 manifest: " + staged)
+        if staged_path.read_bytes() != source_path.read_bytes():
+            raise Refused("source/binary mismatch: staged source differs from pinned checkout: " + staged)
     source_audit = audit_production_host(repo, expected_sha=expected_sha,
                                          observed_sha=observed_sha)
     if source_audit["productionObservationStatus"] != "API_SURFACE_PRESENT_REVIEW_REQUIRED":

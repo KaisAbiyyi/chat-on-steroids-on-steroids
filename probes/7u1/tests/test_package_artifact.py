@@ -12,7 +12,7 @@ from package_artifact import (
     SYNTHETIC_KIND,
     package,
 )
-from preflight import Refused, report, verify_manifest
+from preflight import PRODUCTION_SOURCE_COPIES, Refused, report, verify_manifest
 
 
 class PackageTests(unittest.TestCase):
@@ -54,16 +54,12 @@ class PackageTests(unittest.TestCase):
         )
 
     def test_production_handshake_bundle_is_source_bound_but_not_7u1(self):
-        source_map = {
-            "apps/windows-host/Native8P.cs": "source/Native8P.cs",
-            "crates/cos-core/src/native_browser_bridge.rs": "source/native_browser_bridge.rs",
-            "probes/8p/extension/manifest.json": "source/extension/manifest.json",
-            "probes/8p/extension/sw.mjs": "source/extension/sw.mjs",
-        }
-        for relative in source_map:
+        source_map = PRODUCTION_SOURCE_COPIES
+        for relative in source_map.values():
             path = self.repo / relative
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text("synthetic source fixture without observe-only API", encoding="utf-8")
+            path.write_text("synthetic source fixture without observe-only API: " + relative,
+                            encoding="utf-8")
         subprocess.run(["git", "-C", str(self.repo), "add", "."], check=True)
         subprocess.run(
             ["git", "-C", str(self.repo), "-c", "user.name=CI",
@@ -75,7 +71,7 @@ class PackageTests(unittest.TestCase):
         (self.art / "host").mkdir(parents=True)
         (self.art / "host" / "WindowsHost.dll").write_bytes(b"host build fixture")
         (self.art / "7l2_bridge.exe").write_bytes(b"rust build fixture")
-        for source, staged in source_map.items():
+        for staged, source in source_map.items():
             target = self.art / staged
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes((self.repo / source).read_bytes())

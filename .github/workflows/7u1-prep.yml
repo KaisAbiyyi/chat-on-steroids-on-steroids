@@ -135,7 +135,18 @@ jobs:
           dotnet publish apps/windows-host/WindowsHost.csproj --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=false -warnaserror -o $hostDir
           if ($LASTEXITCODE -ne 0) { throw 'Production 8P Windows host publish failed' }
           Copy-Item -LiteralPath target/release/examples/7l2_bridge.exe -Destination (Join-Path $stage '7l2_bridge.exe')
+          Copy-Item -LiteralPath apps/windows-host/WindowsHost.csproj -Destination (Join-Path $sourceDir 'WindowsHost.csproj')
           Copy-Item -LiteralPath apps/windows-host/Native8P.cs -Destination (Join-Path $sourceDir 'Native8P.cs')
+          Copy-Item -LiteralPath apps/windows-host/Native8L1.cs -Destination (Join-Path $sourceDir 'Native8L1.cs')
+          Copy-Item -LiteralPath probes/7l1/WindowsHost/Program.cs -Destination (Join-Path $sourceDir 'Program.cs')
+          Copy-Item -LiteralPath probes/7l1/WindowsHost/Native7L2.cs -Destination (Join-Path $sourceDir 'Native7L2.cs')
+          Copy-Item -LiteralPath probes/7l1/WindowsHost/NativeRetirementProof.cs -Destination (Join-Path $sourceDir 'NativeRetirementProof.cs')
+          Copy-Item -LiteralPath probes/7l1/WindowsHost/NativeProfileExtensions.cs -Destination (Join-Path $sourceDir 'NativeProfileExtensions.cs')
+          Copy-Item -LiteralPath probes/7l1/WindowsHost/NativePermissionProgress.cs -Destination (Join-Path $sourceDir 'NativePermissionProgress.cs')
+          Copy-Item -LiteralPath Cargo.toml -Destination (Join-Path $sourceDir 'Cargo.toml')
+          Copy-Item -LiteralPath Cargo.lock -Destination (Join-Path $sourceDir 'Cargo.lock')
+          Copy-Item -LiteralPath crates/cos-core/Cargo.toml -Destination (Join-Path $sourceDir 'cos-core-Cargo.toml')
+          Copy-Item -LiteralPath crates/cos-core/examples/7l2_bridge.rs -Destination (Join-Path $sourceDir '7l2_bridge.rs')
           Copy-Item -LiteralPath crates/cos-core/src/native_browser_bridge.rs -Destination (Join-Path $sourceDir 'native_browser_bridge.rs')
           Copy-Item -LiteralPath probes/8p/extension/manifest.json -Destination (Join-Path $extensionDir 'manifest.json')
           Copy-Item -LiteralPath probes/8p/extension/sw.mjs -Destination (Join-Path $extensionDir 'sw.mjs')
