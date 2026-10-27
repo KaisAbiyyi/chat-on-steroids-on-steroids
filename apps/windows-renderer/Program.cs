@@ -293,10 +293,27 @@ internal sealed class RendererWindow : Form
         core.NewWindowRequested += (_, e) => e.Handled = true;
         core.NavigationStarting += (_, e) =>
         {
-            var owned = _awaitingOwnedDocument && e.Uri == "about:blank";
-            RecordNavigation("starting", e.NavigationId, null, "pending", owned ? "about-blank" : "blocked");
-            if (!owned) e.Cancel = true;
-            else _expectedNavigationId = e.NavigationId;
+            // NavigateToString has an about:blank origin, but its navigation URI
+            // is WebView2/runtime-specific. Authorize only the first internal
+            // navigation issued by this host call; never network/user redirects.
+            var internalDocument = string.IsNullOrEmpty(e.Uri) ||
+                e.Uri.StartsWith("about:", StringComparison.OrdinalIgnoreCase) ||
+                e.Uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase);
+            var owned = _awaitingOwnedDocument && _expectedNavigationId == 0 &&
+                !e.IsUserInitiated && !e.IsRedirected && internalDocument;
+            var uriClass = string.IsNullOrEmpty(e.Uri) ? "empty" :
+                e.Uri.StartsWith("about:", StringComparison.OrdinalIgnoreCase) ? "about" :
+                e.Uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ? "data" : "blocked";
+            RecordNavigation("starting", e.NavigationId, null, "pending", owned ? "owned-" + uriClass : uriClass);
+            if (!owned)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                _expectedNavigationId = e.NavigationId;
+                _awaitingOwnedDocument = false; // One-shot, even before completion.
+            }
             _ready = false;
         };
         core.NavigationCompleted += (_, e) =>
