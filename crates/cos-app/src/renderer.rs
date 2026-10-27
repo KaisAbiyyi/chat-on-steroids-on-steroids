@@ -224,7 +224,7 @@ pub fn launch(
 fn renderer_loop(
     store: &SessionStore,
     child: &mut Child,
-    frames: &Receiver<io::Result<Option<Vec<u8>>>>,
+    frames: &RendererReceiver,
     writer: &mut BufWriter<ChildStdin>,
     authenticator: &mut RendererIpcAuthenticator,
     host: &mut RendererHostState,
@@ -298,12 +298,10 @@ impl Drop for ReapedChild {
     }
 }
 
-fn start_bounded_reader(
-    output: ChildStdout,
-) -> (
-    Receiver<io::Result<Option<Vec<u8>>>>,
-    thread::JoinHandle<()>,
-) {
+type RendererFrame = io::Result<Option<Vec<u8>>>;
+type RendererReceiver = Receiver<RendererFrame>;
+
+fn start_bounded_reader(output: ChildStdout) -> (RendererReceiver, thread::JoinHandle<()>) {
     // A small queue bounds memory even when a compromised child floods stdout.
     let (sender, receiver) = mpsc::sync_channel(4);
     let thread = thread::spawn(move || {
@@ -320,7 +318,7 @@ fn start_bounded_reader(
 }
 
 fn receive_frame(
-    frames: &Receiver<io::Result<Option<Vec<u8>>>>,
+    frames: &RendererReceiver,
     timeout: Duration,
 ) -> io::Result<Option<Vec<u8>>> {
     match frames.recv_timeout(timeout) {
