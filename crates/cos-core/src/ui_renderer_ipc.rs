@@ -99,10 +99,14 @@ impl RendererIpcAuthenticator {
     /// The caller must provide a new random per-process key.
     pub fn rebind(&mut self, epoch: u64, mut key: [u8; MAC_BYTES]) -> Result<(), RendererIpcError> {
         if epoch <= self.epoch || epoch > MAX_JS_SAFE_INTEGER {
+            key.zeroize();
             return Err(RendererIpcError::Epoch);
         }
+        self.key.zeroize();
+        let replacement = key;
+        key.zeroize();
+        self.key = replacement;
         self.epoch = epoch;
-        self.key = key;
         self.inbound_sequence = 0;
         self.outbound_sequence = 0;
         Ok(())
