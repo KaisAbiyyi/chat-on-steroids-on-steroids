@@ -1,5 +1,5 @@
 use cos_core::ui_renderer_ipc::{
-    RendererIpcAuthenticator, RendererIpcError, MAX_RENDERER_IPC_FRAME_BYTES,
+    MAX_RENDERER_IPC_FRAME_BYTES, RendererIpcAuthenticator, RendererIpcError,
 };
 
 const READY: &str =
