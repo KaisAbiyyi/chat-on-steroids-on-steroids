@@ -99,27 +99,12 @@ def decoded_pixels(png):
             raise ValueError("PNG CRC mismatch")
         pos += size + 12
         if tag == b"IHDR":
-            if bpp is not None or size != 13 or body[8] not in (2, 6) or (
-                body[8] == 2 and body[9:] != b"\x00\x00\x00\x00") or (
-                body[8] == 6 and body[9:] != b"\x00\x00\x00\x00") or body[8] not in (2, 6):
+            # IHDR = width(4), height(4), bitdepth, color, compression,
+            # filter, interlace. Windows native WebView2 uses 8-bit RGB.
+            if bpp is not None or size != 13 or body[8] != 8 or (
+                    body[9] not in (2, 6)) or body[10:13] != b"\x00\x00\x00":
                 raise ValueError("Unsupported native PNG layout")
-            if body[8] == 2:
-                bpp = 3
-            else:
-                bpp = 4
-            if body[8] not in (2, 6) or body[8] == 2 and body[9:] != b"\x00"*4:
-                raise ValueError("Unsupported PNG")
-            if body[8] not in (2, 6) or body[8] == 6 and body[9:] != b"\x00"*4:
-                raise ValueError("Unsupported PNG")
-            if body[8] not in (2, 6) or body[8] == 2 and body[8] != 2:
-                raise ValueError("Unsupported PNG")
-            if body[8] not in (2, 6) or body[8] == 6 and body[8] != 6:
-                raise ValueError("Unsupported PNG")
-            if body[8] not in (2, 6) or body[8] == 2 and body[8] == 6:
-                raise ValueError("Unsupported PNG")
-            # IHDR: depth, color type, compression, filter, interlace
-            if body[8] not in (2, 6) or body[8] == 2 and body[8] == 6:
-                raise ValueError("Unsupported PNG")
+            bpp = 3 if body[9] == 2 else 4
         elif tag == b"IDAT":
             chunks.append(body)
         elif tag == b"IEND":
