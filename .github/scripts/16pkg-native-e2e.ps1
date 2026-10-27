@@ -97,12 +97,18 @@ try {
     & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
     if($LASTEXITCODE -eq 0){throw 'Junction in installed root accepted'}
     Remove-Item -LiteralPath $junction -Force
+    $authority=Join-Path $dirty "slots\$($sel.Active)\authority\issuer.exe"
+    $authorityBytes=[IO.File]::ReadAllBytes($authority)
+    [IO.File]::WriteAllBytes($authority,[IO.File]::ReadAllBytes($setups['0.2.0']))
+    & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Different same-publisher signed release proof incorrectly accepted'}
+    [IO.File]::WriteAllBytes($authority,$authorityBytes)
     $binary=Join-Path $dirty "slots\$($sel.Active)\bin\cos-rust.exe"
     Add-Content -LiteralPath $binary -Value 'test-tamper' -NoNewline
     & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
     if($LASTEXITCODE -eq 0){throw 'Tampered binary passed integrity check'}
     $global:LASTEXITCODE=0
-    @{sourceSha=$source;testPublisher=$cert.Thumbprint;testOnly=$true;productionSigned=$false;native16L1Accepted=$false;cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';finalize='PASS';uninstall='PASS';binaryTamperRejected=$true} | ConvertTo-Json | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
+    @{sourceSha=$source;testPublisher=$cert.Thumbprint;testOnly=$true;productionSigned=$false;native16L1Accepted=$false;cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';finalize='PASS';uninstall='PASS';binaryTamperRejected=$true;samePublisherWrongReleaseRefused=$true} | ConvertTo-Json | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
 }
 finally {
     Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
