@@ -15,6 +15,9 @@ on:
         default: '0.1.0'
 permissions:
   contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 jobs:
   package:
     runs-on: windows-latest
@@ -67,6 +70,23 @@ jobs:
           zipSha256=(Get-FileHash candidate.zip -Algorithm SHA256).Hash.ToLowerInvariant();
           setupSha256=(Get-FileHash installer-package/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant()
           } | ConvertTo-Json | Set-Content -Encoding utf8 package-receipt.json
+      - name: Log exact candidate digests and source receipt
+        shell: pwsh
+        run: Get-Content package-receipt.json -Raw | Write-Host
+      # PR provenance signs candidate bytes via OIDC, not an Authenticode release.
+      # Protected-main issuer authorization is a separate downstream gate.
+      - name: GitHub OIDC provenance for unsigned release candidate receipt
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: package-receipt.json
+      - name: Verify genuine CI OIDC issuer and exact source
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $source=(git rev-parse HEAD).Trim()
+          gh attestation verify package-receipt.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $source
+          if($LASTEXITCODE -ne 0){throw 'OIDC candidate provenance invalid'}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: cosos-16pkg-unsigned-candidate-${{ github.event.pull_request.head.sha || github.sha }}
