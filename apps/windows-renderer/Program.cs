@@ -608,6 +608,18 @@ internal sealed class RendererWindow : Form
                 var locale = state.GetProperty("localization").GetProperty("tag").GetString();
                 if (locale != ProbeLocales[_probeLocalesChecked - 1])
                     throw new InvalidDataException("Native locale selection/state mismatch");
+                // Verify rendered content for EACH accepted locale, not only the
+                // Rust state tag that was supplied over authenticated IPC.
+                await Task.Delay(100);
+                var expectedNavigation = state.GetProperty("localization").GetProperty("texts")
+                    .GetProperty("navigation").GetString() ?? "Navigation";
+                var localeJs = "(()=>document.documentElement.lang===" +
+                    JsonSerializer.Serialize(locale) +
+                    "&&document.getElementById('navigationLabel').textContent===" +
+                    JsonSerializer.Serialize(expectedNavigation) + ")()";
+                var localeDom = await _browser.CoreWebView2.ExecuteScriptAsync(localeJs);
+                if (localeDom.Trim() != "true")
+                    throw new InvalidDataException("Native rendered localization does not match host state");
                 if (_probeLocalesChecked < ProbeLocales.Length)
                 {
                     ProbeIntent(new { kind = "set-locale", tag = ProbeLocales[_probeLocalesChecked] });
@@ -646,6 +658,11 @@ internal sealed class RendererWindow : Form
                     "document.querySelectorAll('#richSurface math msup').length===3)()");
                 if (js.Trim() != "true")
                     throw new InvalidDataException("Native WebView2 DOM localization/history proof failed");
+                var focusDom = await _browser.CoreWebView2.ExecuteScriptAsync(
+                    "(()=>{const area=document.querySelector('#richSurface textarea');" +
+                    "if(!area)return false;area.focus();return document.activeElement===area;})()");
+                if (focusDom.Trim() != "true")
+                    throw new InvalidDataException("Native WebView2 panel focus semantics failed");
 
                 await using var pixels = new MemoryStream();
                 await _browser.CoreWebView2.CapturePreviewAsync(
