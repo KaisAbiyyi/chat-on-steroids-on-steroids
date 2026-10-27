@@ -692,8 +692,25 @@ impl RendererHostState {
                     },
                     _ => return Err("invalid-rich-surface"),
                 };
+                let key = panel.key().to_owned();
                 self.rich
                     .publish_from_host(panel)
+                    .map_err(|error| error.code())?;
+                // Published host panels must become the actually visible surface.
+                // Use the accepted 15C typed activation sequence/revision contract.
+                let sequence = next_counter(&mut self.rich_sequence)?;
+                let frame = RichRendererRequest {
+                    protocol: RICH_PROTOCOL_VERSION,
+                    host_epoch: self.epoch,
+                    sequence,
+                    command: RichRendererCommand::Activate {
+                        key,
+                        expected_revision: self.rich.snapshot().revision,
+                    },
+                };
+                let bytes = serde_json::to_vec(&frame).map_err(|_| "invalid-intent")?;
+                self.rich
+                    .dispatch_renderer_json(&bytes)
                     .map_err(|error| error.code())?;
                 Ok(())
             }
@@ -730,6 +747,12 @@ impl RendererHostState {
             })
             .map_err(|error| error.code())?;
 
+        // Erase all session-owned rich panels and associated raster bytes
+        // before displaying the next session; not just the history list.
+        for panel in self.rich.snapshot().panels {
+            self.rich.remove_from_host(panel.key())
+                .map_err(|error| error.code())?;
+        }
         // Erase the prior visible page and cache before touching the new
         // session. A failed read cannot leave previous-session text visible.
         self.clear_history();
