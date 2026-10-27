@@ -166,5 +166,5 @@ jobs:
       - name: Rust 15HOST typed contract and authenticated host regression
         run: |
           cargo fmt --all --check
-          cargo test -p cos-core --test ui_renderer_ipc
-          cargo test -p cos-app
+          cargo test -p cos-core --test ui_renderer_ipc --locked
+          cargo test -p cos-app --locked
