@@ -26,6 +26,7 @@ use cos_store::{SessionStore, model};
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
 use std::{
     io::{self, BufRead, BufReader, BufWriter, Write},
     path::{Path, PathBuf},
@@ -381,6 +382,7 @@ struct RendererHostState {
     sessions: Vec<Value>,
     history: Vec<ConversationEntry>,
     active_history_session: Option<String>,
+    pdf_pages: Vec<AuthorizedPdfPage>,
     last_error: Option<String>,
 }
 
@@ -429,6 +431,7 @@ impl RendererHostState {
             sessions,
             history: Vec::new(),
             active_history_session: None,
+            pdf_pages: Vec::new(),
             last_error: None,
         })
     }
@@ -469,6 +472,20 @@ impl RendererHostState {
             "conversationHasOlder": projection.conversation_has_older,
             "conversationHasNewer": projection.conversation_has_newer
         });
+        let selected_pdf = rich.panels.iter().find_map(|panel| {
+            if let RichPanel::Pdf {key,asset_id,page,..} = panel {
+                if rich.active_key.as_deref() == Some(key.as_str()) {
+                    return self.pdf_pages.iter().find(|item| item.page == *page).map(|item| json!({
+                        "assetId":asset_id,
+                        "page":item.page,
+                        "format":"image/png",
+                        "sha256":format!("{:x}", Sha256::digest(&item.bytes)),
+                        "base64":base64_encode_png(&item.bytes)
+                    }));
+                }
+            }
+            None
+        });
         Ok(json!({
             "kind": "state",
             "mode": "authenticated",
@@ -478,6 +495,7 @@ impl RendererHostState {
             "conversation": conversation,
             "panels": panels,
             "rich": rich,
+            "pdfPage": selected_pdf,
             "focus": focus,
             "localization": localization_json(self.language),
             "availableLocales": UiLanguage::ALL.iter().map(|language| language.tag()).collect::<Vec<_>>(),
@@ -634,12 +652,24 @@ impl RendererHostState {
                                 .map_err(|_| "terminal-output-unavailable")?,
                         }
                     },
-                    "pdf" => RichPanel::Pdf {
-                        key: "pdf-preview".into(),
-                        title: "PDF preview".into(),
-                        asset_id: "synthetic-document".into(),
-                        page: 1,
-                        page_count: 1,
+                    "pdf" => {
+                        let session = self.active_history_session.as_deref()
+                            .ok_or("no-active-session")?;
+                        self.clear_pdf_pages();
+                        let pages = authorized_pdf_pages(store, session)
+                            .map_err(|_| "pdf-asset-unavailable")?;
+                        if pages.is_empty() {
+                            return Err("pdf-asset-unavailable");
+                        }
+                        let page_count = pages.len() as u32;
+                        self.pdf_pages = pages;
+                        RichPanel::Pdf {
+                            key: "host-pdf-raster".into(),
+                            title: "Host-authorized PDF page".into(),
+                            asset_id: "host-pdf-raster".into(),
+                            page: 1,
+                            page_count,
+                        }
                     },
                     "math" => RichPanel::Math {
                         key: "math-preview".into(),
@@ -689,6 +719,7 @@ impl RendererHostState {
         // Erase the prior visible page and cache before touching the new
         // session. A failed read cannot leave previous-session text visible.
         self.clear_history();
+        self.clear_pdf_pages();
         self.active_history_session = Some(session_id.to_owned());
         let ticket = self
             .conversation
@@ -717,6 +748,13 @@ impl RendererHostState {
             .publish_from_host(&ticket, session_id, page)
             .map_err(|error| error.code())?;
         Ok(())
+    }
+
+    fn clear_pdf_pages(&mut self) {
+        for page in &mut self.pdf_pages {
+            page.bytes.zeroize();
+        }
+        self.pdf_pages.clear();
     }
 
     fn clear_history(&mut self) {
@@ -993,6 +1031,74 @@ fn next_counter(counter: &mut u64) -> Result<u64, &'static str> {
     Ok(next)
 }
 
+// PDF document parsing/rasterization never runs in WebView2. The trusted Rust
+// profile stores pre-rendered image/png page assets explicitly marked
+// role=pdf-page in session events. A foreign session ID or arbitrary file path
+// is never accepted. A PDF without host-rendered pages is rejected, not mocked.
+struct AuthorizedPdfPage {
+    page: u32,
+    bytes: Vec<u8>,
+}
+const MAX_AUTHORIZED_PDF_PAGES: usize = 16;
+const MAX_PDF_PNG_BYTES: usize = 96 * 1024;
+
+fn authorized_pdf_pages(store: &SessionStore, id: &str) -> io::Result<Vec<AuthorizedPdfPage>> {
+    if !model::session_id(id) || store.summary(id)?.is_none() {
+        return Err(invalid("PDF session is outside the selected profile"));
+    }
+    let events = store.recent(id, 128, None)?;
+    let mut ids = std::collections::BTreeMap::new();
+    for event in events {
+        if let Some(assets) = event["assets"].as_array() {
+            for asset in assets {
+                if asset["role"] != "pdf-page" || asset["mimeType"] != "image/png" {
+                    continue;
+                }
+                let Some(page) = asset["page"].as_u64().filter(|n| *n > 0 && *n <= MAX_AUTHORIZED_PDF_PAGES as u64) else {
+                    continue;
+                };
+                let Some(asset_id) = asset["id"].as_str() else { continue };
+                // Last entry is authoritative within this selected session.
+                ids.insert(page as u32, asset_id.to_owned());
+            }
+        }
+    }
+    if ids.is_empty() || ids.len() > MAX_AUTHORIZED_PDF_PAGES {
+        return Ok(Vec::new());
+    }
+    let mut pages = Vec::new();
+    for (index,(page,asset_id)) in ids.iter().enumerate() {
+        if *page as usize != index + 1 {
+            return Err(invalid("PDF page raster indices must be contiguous"));
+        }
+        let bytes = store.read_asset(id, asset_id, Some(MAX_PDF_PNG_BYTES))?
+            .ok_or_else(|| invalid("PDF page asset unavailable in authorized session"))?;
+        if bytes.len() < 33 || !bytes.starts_with(b"\x89PNG\r\n\x1a\n") ||
+            &bytes[12..16] != b"IHDR" ||
+            u32::from_be_bytes(bytes[16..20].try_into().unwrap()) == 0 ||
+            u32::from_be_bytes(bytes[20..24].try_into().unwrap()) == 0 ||
+            u32::from_be_bytes(bytes[16..20].try_into().unwrap()) > 2048 ||
+            u32::from_be_bytes(bytes[20..24].try_into().unwrap()) > 2048 {
+            return Err(invalid("PDF page asset is not a bounded PNG raster"));
+        }
+        pages.push(AuthorizedPdfPage {page:*page,bytes});
+    }
+    Ok(pages)
+}
+
+fn base64_encode_png(bytes: &[u8]) -> String {
+    const T: &[u8;64]=b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out=String::with_capacity(bytes.len().div_ceil(3)*4);
+    for chunk in bytes.chunks(3) {
+        let b0=chunk[0]; let b1=*chunk.get(1).unwrap_or(&0); let b2=*chunk.get(2).unwrap_or(&0);
+        out.push(T[(b0>>2) as usize] as char);
+        out.push(T[(((b0 & 3)<<4)|(b1>>4)) as usize] as char);
+        out.push(if chunk.len()>1 {T[(((b1 & 15)<<2)|(b2>>6)) as usize] as char} else {'='});
+        out.push(if chunk.len()>2 {T[(b2&63) as usize] as char} else {'='});
+    }
+    out
+}
+
 /// An output-only terminal surface. The Rust host projects recorded tool-call
 /// results from the *selected* SessionStore; C#/WebView2 cannot execute commands.
 fn terminal_output_for_session(store: &SessionStore, session_id: &str) -> io::Result<String> {
@@ -1110,6 +1216,7 @@ fn invalid(message: &str) -> io::Error {
 impl Drop for RendererHostState {
     fn drop(&mut self) {
         self.clear_history();
+        self.clear_pdf_pages();
         if let Some(session_id) = &mut self.active_history_session {
             session_id.zeroize();
         }
