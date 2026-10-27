@@ -652,6 +652,8 @@ internal static class Program
         if (signedCurrent.Source != Source() || signedCurrent.Version != version ||
             signedCurrent.ManifestSha != Hash(manifest))
             throw new InvalidDataException("Self signed release manifest/source mismatch");
+        if (Directory.Exists(root+"-uninstalling") || File.Exists(root+"-uninstalling"))
+            throw new InvalidDataException("Incomplete protected uninstall must be recovered first");
         if (install && (Directory.Exists(root) || File.Exists(root)))
             throw new InvalidDataException("Target exists; never overwrite");
         if (!install && !Directory.Exists(root))
