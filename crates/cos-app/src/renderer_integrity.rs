@@ -5,7 +5,7 @@ use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeSet,
-    fs::{self, File},
+    fs::{self, File, OpenOptions},
     io::{self, Read},
     path::{Path, PathBuf},
 };
@@ -46,22 +46,56 @@ fn valid_sha(text: &str) -> bool {
     text.len() == 64 && text.bytes().all(|b| b.is_ascii_hexdigit())
 }
 
-fn digest_file(path: &Path) -> io::Result<String> {
-    let metadata = fs::symlink_metadata(path)?;
-    if !metadata.file_type().is_file() || metadata.len() == 0 || metadata.len() > MAX_FILE_BYTES {
+/// Windows CreateFile holds a read-only, non-delete-sharing handle until the
+/// native child exits. Runtime DLLs cannot be overwritten, replaced or renamed
+/// between the hash check and the Windows loader opening them.
+#[cfg(windows)]
+fn open_guarded(path: &Path, directory: bool) -> io::Result<File> {
+    use std::os::windows::fs::OpenOptionsExt;
+    const FILE_SHARE_READ: u32 = 0x0000_0001;
+    const OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    const BACKUP_SEMANTICS: u32 = 0x0200_0000;
+    let flags = OPEN_REPARSE_POINT | if directory { BACKUP_SEMANTICS } else { 0 };
+    let file = OpenOptions::new().read(true).share_mode(FILE_SHARE_READ)
+        .custom_flags(flags).open(path)?;
+    use std::os::windows::fs::MetadataExt;
+    if file.metadata()?.file_attributes() & 0x0000_0400 != 0 {
         return Err(denied());
     }
-    let mut file = File::open(path)?;
+    Ok(file)
+}
+#[cfg(not(windows))]
+fn open_guarded(path: &Path, _directory: bool) -> io::Result<File> {
+    OpenOptions::new().read(true).open(path)
+}
+
+/// The handles live in the launched Rust host for the entire child lifetime.
+pub struct VerifiedPayload {
+    pub manifest_sha: String,
+    _locked_handles: Vec<File>,
+}
+
+fn digest_guarded(file: &File) -> io::Result<String> {
+    let mut reader = file;
     let mut hasher = Sha256::new();
     let mut buffer = [0u8; 65536];
     loop {
-        let size = file.read(&mut buffer)?;
+        let size = reader.read(&mut buffer)?;
         if size == 0 {
             break;
         }
         hasher.update(&buffer[..size]);
     }
     Ok(format!("{:x}", hasher.finalize()))
+}
+
+fn digest_file(path: &Path) -> io::Result<String> {
+    let metadata = fs::symlink_metadata(path)?;
+    if !metadata.file_type().is_file() || metadata.len() == 0 || metadata.len() > MAX_FILE_BYTES {
+        return Err(denied());
+    }
+    let file = open_guarded(path, false)?;
+    digest_guarded(&file)
 }
 
 fn safe_parts(path: &str) -> bool {
@@ -75,7 +109,13 @@ fn safe_parts(path: &str) -> bool {
             .all(|part| !part.is_empty() && part != "." && part != "..")
 }
 
-fn inventory(directory: &Path, prefix: &str, found: &mut BTreeSet<String>) -> io::Result<()> {
+fn inventory(
+    directory: &Path,
+    prefix: &str,
+    found: &mut BTreeSet<String>,
+    locked_dirs: &mut Vec<File>,
+) -> io::Result<()> {
+    locked_dirs.push(open_guarded(directory, true)?);
     for item in fs::read_dir(directory)? {
         let item = item?;
         let name = item.file_name().into_string().map_err(|_| denied())?;
@@ -91,8 +131,15 @@ fn inventory(directory: &Path, prefix: &str, found: &mut BTreeSet<String>) -> io
         if ty.is_symlink() {
             return Err(denied());
         }
+        #[cfg(windows)]
+        {
+            use std::os::windows::fs::MetadataExt;
+            if fs::symlink_metadata(item.path())?.file_attributes() & 0x0000_0400 != 0 {
+                return Err(denied());
+            }
+        }
         if ty.is_dir() {
-            inventory(&item.path(), &relative, found)?;
+            inventory(&item.path(), &relative, found, locked_dirs)?;
         } else if ty.is_file() {
             if relative != "renderer-integrity.json" {
                 found.insert(relative);
@@ -109,7 +156,11 @@ fn inventory(directory: &Path, prefix: &str, found: &mut BTreeSet<String>) -> io
 
 /// The manifest digest is an independent caller-supplied acceptance input,
 /// NOT a digest read from the untrusted renderer directory.
-pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Result<String> {
+pub fn verify(
+    executable: &Path,
+    exe_sha: &str,
+    manifest_sha: &str,
+) -> io::Result<VerifiedPayload> {
     if !valid_sha(exe_sha)
         || !valid_sha(manifest_sha)
         || executable
@@ -124,7 +175,12 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
     if !meta.file_type().is_file() || meta.len() == 0 || meta.len() > MAX_MANIFEST_BYTES {
         return Err(denied());
     }
-    let bytes = fs::read(&manifest_path)?;
+    let mut locked = Vec::new();
+    // Hold the manifest handle through launch just like executable/DLL handles.
+    let mut manifest_file = open_guarded(&manifest_path, false)?;
+    let mut bytes = Vec::new();
+    manifest_file.read_to_end(&mut bytes)?;
+    locked.push(manifest_file);
     let actual_manifest_sha = format!("{:x}", Sha256::digest(&bytes));
     if !actual_manifest_sha.eq_ignore_ascii_case(manifest_sha) {
         return Err(denied());
@@ -158,9 +214,11 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
         if total > MAX_TOTAL_BYTES {
             return Err(denied());
         }
-        if !digest_file(&path)?.eq_ignore_ascii_case(&item.sha256) {
+        let file = open_guarded(&path, false)?;
+        if !digest_guarded(&file)?.eq_ignore_ascii_case(&item.sha256) {
             return Err(denied());
         }
+        locked.push(file);
         if item.path == "WindowsRenderer.exe" {
             if !item.sha256.eq_ignore_ascii_case(exe_sha) {
                 return Err(denied());
@@ -172,11 +230,14 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
         return Err(denied());
     }
     let mut actual = BTreeSet::new();
-    inventory(root, "", &mut actual)?;
+    inventory(root, "", &mut actual, &mut locked)?;
     if expected != actual {
         return Err(denied());
     }
-    Ok(actual_manifest_sha)
+    Ok(VerifiedPayload {
+        manifest_sha: actual_manifest_sha,
+        _locked_handles: locked,
+    })
 }
 
 #[cfg(test)]
@@ -216,6 +277,28 @@ mod tests {
         )
         .unwrap();
         assert!(verify(&temp.path().join("WindowsRenderer.exe"), &exe, &manifest).is_err());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn post_verification_managed_dll_swap_and_rename_are_denied_while_guard_is_alive() {
+        let temp = tempfile::tempdir().unwrap();
+        let (exe, manifest) = fixture(temp.path());
+        let executable = temp.path().join("WindowsRenderer.exe");
+        let dll = temp.path().join("WindowsRenderer.dll");
+        let guarded = verify(&executable, &exe, &manifest).unwrap();
+        // Attacker has retained the unchanged, previously approved EXE digest.
+        assert_eq!(guarded.manifest_sha, manifest);
+        assert!(fs::write(&dll, b"modified AFTER verification").is_err());
+        assert!(fs::rename(&dll, temp.path().join("swapped.dll")).is_err());
+        assert!(fs::remove_file(&dll).is_err());
+        assert!(fs::write(&executable, b"changed executable").is_err());
+        assert!(fs::rename(&executable, temp.path().join("swapped.exe")).is_err());
+        drop(guarded);
+        // Regression is meaningful only if the same attacker can mutate it once
+        // the launcher releases the guard; otherwise ACLs masked the gap.
+        fs::write(&dll, b"modified AFTER guard release").unwrap();
+        assert!(verify(&executable, &exe, &manifest).is_err());
     }
 
     #[test]
