@@ -176,7 +176,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | BLOCKED |
 | `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | BLOCKED |
 | `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | BLOCKED |
-| `16L1` | Native clean install/uninstall/updater | `16E` | `windows-installer` | L (Windows) | BLOCKED |
+| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | CLAIMED |
+| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | BLOCKED |
 | `16L2` | Only owner-approved profile copy migration | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
 | `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | BLOCKED |
 | `16L3` | Full Windows release/startup/size proof | `16F`, `16L1`, `16L2` | `windows-release` | L (Windows) | BLOCKED |
