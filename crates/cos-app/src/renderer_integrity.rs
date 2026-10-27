@@ -56,8 +56,11 @@ fn open_guarded(path: &Path, directory: bool) -> io::Result<File> {
     const OPEN_REPARSE_POINT: u32 = 0x0020_0000;
     const BACKUP_SEMANTICS: u32 = 0x0200_0000;
     let flags = OPEN_REPARSE_POINT | if directory { BACKUP_SEMANTICS } else { 0 };
-    let file = OpenOptions::new().read(true).share_mode(FILE_SHARE_READ)
-        .custom_flags(flags).open(path)?;
+    let file = OpenOptions::new()
+        .read(true)
+        .share_mode(FILE_SHARE_READ)
+        .custom_flags(flags)
+        .open(path)?;
     use std::os::windows::fs::MetadataExt;
     if file.metadata()?.file_attributes() & 0x0000_0400 != 0 {
         return Err(denied());
@@ -156,11 +159,7 @@ fn inventory(
 
 /// The manifest digest is an independent caller-supplied acceptance input,
 /// NOT a digest read from the untrusted renderer directory.
-pub fn verify(
-    executable: &Path,
-    exe_sha: &str,
-    manifest_sha: &str,
-) -> io::Result<VerifiedPayload> {
+pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Result<VerifiedPayload> {
     if !valid_sha(exe_sha)
         || !valid_sha(manifest_sha)
         || executable
