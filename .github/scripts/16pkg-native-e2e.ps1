@@ -18,6 +18,7 @@ try {
         if($LASTEXITCODE -ne 0){throw 'Disposable D drive unavailable'}
         $mapped=$true
     }
+    Write-Host '16PKG CI TEST: generating ephemeral certificate'
     $cert=New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=CoSoS-16PKG-TEST-ONLY-NOT-PRODUCTION' -CertStoreLocation 'Cert:\CurrentUser\My' -HashAlgorithm SHA256 -NotAfter (Get-Date).AddHours(2)
     $public=Join-Path $testHome 'test-only.cer'
     Export-Certificate -Cert $cert -FilePath $public | Out-Null
@@ -28,6 +29,7 @@ try {
     $shaFile=(Resolve-Path source-sha.txt).Path
     $setups=@{}
     foreach($v in @('0.1.0','0.2.0','0.3.0')){
+        Write-Host "16PKG CI TEST: preparing version $v"
         $zip=Join-Path $testHome "bundle-$v.zip"
         $out=Join-Path $testHome "setup-$v"
         python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out $zip --source-sha $source --version $v
@@ -35,12 +37,14 @@ try {
         dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" "-p:DefineConstants=COS_16PKG_TEST" -o $out
         if($LASTEXITCODE -ne 0){throw 'Native setup compile failed'}
         $exe=Join-Path $out 'CoSoSInstaller.exe'
+        Write-Host "16PKG CI TEST: signing version $v"
         $signed=Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256
         if($signed.Status -ne 'Valid'){throw "Test signer failed: $($signed.Status)"}
         $id=(& $exe --identity | ConvertFrom-Json)
         if($LASTEXITCODE -ne 0 -or $id.Source -ne $source -or $id.Version -ne $v -or $id.Publisher -ne $cert.Thumbprint){throw 'Signed identity mismatch'}
         $setups[$v]=$exe
     }
+    Write-Host '16PKG CI TEST: starting signed native lifecycle'
     ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
     # Abrupt crash after a complete signed slot rename, before state publish.
     # Root must retain old active slot; --recover removes verified orphan.
@@ -62,12 +66,14 @@ try {
     ExpectOk $setups['0.3.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--finalize',$root,'--publisher',$cert.Thumbprint)
+    Write-Host '16PKG CI TEST: crash recovery and atomic uninstall'
     $env:COSOS_16PKG_FAIL_AT='after_uninstall_rename'
     & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint 2>$null
     if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate uninstall'}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     if(Test-Path $root -or (Test-Path "$root-uninstalling")){throw 'Recovery left uninstall tombstone'}
+    Write-Host '16PKG CI TEST: negative signed-slot tamper matrix'
     ExpectOk $setups['0.1.0'] @('--install',$dirty,'--publisher',$cert.Thumbprint)
     $sel=Get-Content (Join-Path $dirty 'active.json') -Raw | ConvertFrom-Json
     $statePath=Join-Path $dirty 'active.json'
