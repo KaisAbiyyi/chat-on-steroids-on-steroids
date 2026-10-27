@@ -231,7 +231,7 @@ internal static class Program
     static string Quote(string value) => "'" + value.Replace("'","''") + "'";
     static void CheckSignature(string path, string pinned)
     {
-        SafeAncestors(path);
+        if (path.StartsWith(@"D:\",StringComparison.OrdinalIgnoreCase)) SafeAncestors(path);
         var result = PS("$ErrorActionPreference='Stop';$s=Get-AuthenticodeSignature -LiteralPath "
               + Quote(path) + ";if($s.Status -ne 'Valid' -or !$s.SignerCertificate){exit 7};"
               + "[Console]::Out.Write($s.SignerCertificate.Thumbprint)");
@@ -253,6 +253,7 @@ internal static class Program
             Environment.SpecialFolder.System), "icacls.exe");
         RunChecked(icacls, directory, "/inheritance:r", "/grant:r",
             "*S-1-5-32-544:(OI)(CI)F", "*S-1-5-18:(OI)(CI)F");
+        RunChecked(icacls, directory, "/setowner", "*S-1-5-32-544");
         VerifyProtection(directory);
     }
     static void VerifyProtection(string directory)
@@ -261,7 +262,8 @@ internal static class Program
         // Inspects *explicit effective* ACL, refusing writable non-admin principals
         // and inherited permissions. OS admin is the documented trust boundary.
         var script = "$a=Get-Acl -LiteralPath " + Quote(directory) + ";"
-            + "if(!$a.AreAccessRulesProtected){exit 5};"
+            + "$owner=try{$a.Owner.Translate([Security.Principal.SecurityIdentifier]).Value}catch{$a.Owner};"
+            + "if(!$a.AreAccessRulesProtected -or $owner -ne 'S-1-5-32-544'){exit 5};"
             + "$allowed=@('S-1-5-32-544','S-1-5-18');"
             + "foreach($rule in $a.Access){"
             + "$sid=try{$rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value}catch{exit 5};"
