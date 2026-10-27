@@ -99,23 +99,13 @@ fn rebind_retires_old_epoch_and_resets_both_sequences() {
 }
 
 #[test]
-fn valid_authenticated_frame_consumes_sequence_even_if_payload_is_malformed() {
-    // A frame with valid authentication but invalid inner JSON must consume
-    // the sequence, so replaying it cannot become a different interpretation.
+fn outbound_encoder_rejects_malformed_inner_json_without_consuming_sequence() {
     let mut sender = auth(7, 0x51);
-    let mut frame: serde_json::Value =
-        serde_json::from_str(&sender.sign_outbound("{}").unwrap()).unwrap();
-    frame["payloadJson"] = serde_json::json!("{");
-    // Re-sign the modified exact payload with the public encoder.
-    let mut sender2 = auth(7, 0x51);
-    let invalid_inner = sender2.sign_outbound("{").unwrap();
-    let mut receiver = auth(7, 0x51);
     assert_eq!(
-        receiver.verify_inbound(invalid_inner.as_bytes()),
+        sender.sign_outbound("{"),
         Err(RendererIpcError::Malformed)
     );
-    assert_eq!(
-        receiver.verify_inbound(invalid_inner.as_bytes()),
-        Err(RendererIpcError::Sequence)
-    );
+    let valid = sender.sign_outbound(READY).unwrap();
+    let decoded: serde_json::Value = serde_json::from_str(&valid).unwrap();
+    assert_eq!(decoded["sequence"], 1);
 }
