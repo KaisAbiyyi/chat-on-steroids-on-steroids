@@ -707,6 +707,7 @@ internal static class Program
         try
         {
             Directory.CreateDirectory(stage);
+            SyntheticCrash("after_stage_mkdir");
             Protect(stage);
             Directory.CreateDirectory(folder);
             // Install the cryptographic authority first. An interrupted
