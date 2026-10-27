@@ -65,7 +65,10 @@ pub fn launch(
         take_option(&mut args, "--renderer-manifest-sha256")?.ok_or_else(|| {
             invalid("UI launch requires --renderer-manifest-sha256 from trusted receipt")
         })?;
-    let synthetic_probe = if let Some(position) = args.iter().position(|option| option == "--synthetic-15host-probe") {
+    let synthetic_probe = if let Some(position) = args
+        .iter()
+        .position(|option| option == "--synthetic-15host-probe")
+    {
         args.remove(position);
         true
     } else {
@@ -75,7 +78,9 @@ pub fn launch(
         && std::fs::read(data_directory.join("15host-synthetic-fixture.marker"))?
             != b"15HOST_SYNTHETIC_CLOUD_E2E_V1"
     {
-        return Err(invalid("15HOST cloud probe requires an explicit synthetic fixture marker"));
+        return Err(invalid(
+            "15HOST cloud probe requires an explicit synthetic fixture marker",
+        ));
     }
     if !args.is_empty() {
         return Err(invalid("Unknown UI launch option"));
@@ -1109,35 +1114,52 @@ mod tests {
             Err(_) => return, // General workspace tests do not have the Windows artifact.
         };
         let exe_sha = std::env::var("COSOS_15HOST_E2E_EXE_SHA").expect("E2E EXE hash required");
-        let manifest_sha = std::env::var("COSOS_15HOST_E2E_MANIFEST_SHA").expect("E2E manifest digest required");
+        let manifest_sha =
+            std::env::var("COSOS_15HOST_E2E_MANIFEST_SHA").expect("E2E manifest digest required");
         let fixture = tempfile::tempdir().unwrap();
         let root = fixture.path();
-        std::fs::write(root.join("15host-synthetic-fixture.marker"),
-            b"15HOST_SYNTHETIC_CLOUD_E2E_V1").unwrap();
+        std::fs::write(
+            root.join("15host-synthetic-fixture.marker"),
+            b"15HOST_SYNTHETIC_CLOUD_E2E_V1",
+        )
+        .unwrap();
         let store = SessionStore::open(root).unwrap();
         let session_id = "synthetic-15host-e2e";
-        store.create(CreateOptions {
-            id: Some(session_id.into()),
-            title: Some("15HOST cloud-only synthetic session".into()),
-            ..Default::default()
-        }).unwrap();
+        store
+            .create(CreateOptions {
+                id: Some(session_id.into()),
+                title: Some("15HOST cloud-only synthetic session".into()),
+                ..Default::default()
+            })
+            .unwrap();
         for index in 0..HISTORY_WINDOW_LIMIT {
             let content = format!("SYNTHETIC-15HOST-E2E-{index:04}");
-            store.append(session_id, json!({
-                "kind":"note", "source":"15host-cloud-synthetic", "time":index + 1,
-                "message":{"text":content,"truncated":false,"chars":content.len()}
-            })).unwrap();
+            store
+                .append(
+                    session_id,
+                    json!({
+                        "kind":"note", "source":"15host-cloud-synthetic", "time":index + 1,
+                        "message":{"text":content,"truncated":false,"chars":content.len()}
+                    }),
+                )
+                .unwrap();
         }
-        let reply = launch(&store, root, json!({"ui":{"language":"en","theme":"dark"}}),
+        let reply = launch(
+            &store,
+            root,
+            json!({"ui":{"language":"en","theme":"dark"}}),
             vec![
-                "--renderer".into(),exe,
-                "--renderer-sha256".into(),exe_sha,
-                "--renderer-manifest-sha256".into(),manifest_sha,
-                "--synthetic-15host-probe".into()
-            ]).unwrap();
+                "--renderer".into(),
+                exe,
+                "--renderer-sha256".into(),
+                exe_sha,
+                "--renderer-manifest-sha256".into(),
+                manifest_sha,
+                "--synthetic-15host-probe".into(),
+            ],
+        )
+        .unwrap();
         assert_eq!(reply["authenticated"], true);
         assert_eq!(reply["syntheticProbeComplete"], true);
     }
-
-
 }
