@@ -48,6 +48,11 @@ try {
         $setups[$v]=$exe
     }
     Write-Host '16PKG CI TEST: starting signed native lifecycle'
+    $env:COSOS_16PKG_FAIL_AT='after_stage_mkdir'
+    & $setups['0.1.0'] --install $root --publisher $cert.Thumbprint 2>$null
+    if ($LASTEXITCODE -eq 0) { throw 'Unsealed stage crash injection did not terminate' }
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
     # Abrupt crash after a complete signed slot rename, before state publish.
     # Root must retain old active slot; --recover removes verified orphan.
