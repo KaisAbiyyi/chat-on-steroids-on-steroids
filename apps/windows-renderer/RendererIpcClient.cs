@@ -68,6 +68,11 @@ internal sealed class RendererIpcClient : IDisposable
 
     internal string SignOutbound(string payloadJson)
     {
+        lock (_writeLock) return SignOutboundCore(payloadJson);
+    }
+
+    private string SignOutboundCore(string payloadJson)
+    {
         ThrowIfDisposed();
         var payload = Encoding.UTF8.GetBytes(payloadJson);
         if (payload.Length > MaximumPayloadBytes) throw new InvalidDataException("Renderer payload too large");
@@ -97,17 +102,23 @@ internal sealed class RendererIpcClient : IDisposable
 
     internal void SendPayload(string payloadJson)
     {
-        var frame = SignOutbound(payloadJson);
-        var bytes = Encoding.UTF8.GetBytes(frame + "\n");
+        // Sign and write atomically. Otherwise two UI threads may emit valid
+        // MACs out of sequence, triggering a false replay rejection in Rust.
         lock (_writeLock)
         {
-            ThrowIfDisposed();
+            var frame = SignOutboundCore(payloadJson);
+            var bytes = Encoding.UTF8.GetBytes(frame + "\n");
             _output.Write(bytes, 0, bytes.Length);
             _output.Flush();
         }
     }
 
     internal bool TryVerifyInbound(string raw, out string payloadJson, out string code)
+    {
+        lock (_writeLock) return TryVerifyInboundCore(raw, out payloadJson, out code);
+    }
+
+    private bool TryVerifyInboundCore(string raw, out string payloadJson, out string code)
     {
         payloadJson = string.Empty;
         code = "invalid-renderer-frame";
@@ -231,15 +242,19 @@ internal sealed class RendererIpcClient : IDisposable
 
     internal void Rebind(ulong epoch, byte[] key)
     {
-        ThrowIfDisposed();
-        if (epoch <= _epoch || epoch > MaximumSafeInteger || key.Length != 32)
-            throw new InvalidDataException("Invalid renderer IPC rebind");
-        CryptographicOperations.ZeroMemory(_key);
-        _key = key.ToArray();
-        CryptographicOperations.ZeroMemory(key);
-        _epoch = epoch;
-        _inboundSequence = 0;
-        _outboundSequence = 0;
+        lock (_writeLock)
+        {
+            ThrowIfDisposed();
+            if (epoch <= _epoch || epoch > MaximumSafeInteger || key.Length != 32)
+                throw new InvalidDataException("Invalid renderer IPC rebind");
+            var replacement = key.ToArray();
+            CryptographicOperations.ZeroMemory(_key);
+            CryptographicOperations.ZeroMemory(key);
+            _key = replacement;
+            _epoch = epoch;
+            _inboundSequence = 0;
+            _outboundSequence = 0;
+        }
     }
 
     internal static string? ReadBoundedLine(Stream input, int maximumBytes)
@@ -323,6 +338,23 @@ internal sealed class RendererIpcClient : IDisposable
         using var afterRejectedFrame = JsonDocument.Parse(afterRejected);
         if (afterRejectedFrame.RootElement.GetProperty("sequence").GetUInt64() != 2)
             throw new InvalidOperationException("15HOST malformed payload advanced authenticated sequence");
+
+        using var concurrentOutput = new MemoryStream();
+        using var concurrentSender = new RendererIpcClient(7, key, new MemoryStream(), concurrentOutput);
+        Parallel.For(0, 64, _ => concurrentSender.SendPayload(ready));
+        concurrentOutput.Position = 0;
+        using var concurrentReader = new StreamReader(concurrentOutput, Encoding.UTF8,
+            detectEncodingFromByteOrderMarks: false, bufferSize: 4096, leaveOpen: true);
+        using var sequentialReceiver = CreateForTest(7, key);
+        for (var count = 0; count < 64; count++)
+        {
+            var signedLine = concurrentReader.ReadLine();
+            if (signedLine is null || !sequentialReceiver.TryVerifyInbound(signedLine, out var result, out _) ||
+                result != ready)
+                throw new InvalidOperationException("15HOST concurrent send sequence regression failed");
+        }
+        if (concurrentReader.ReadLine() is not null)
+            throw new InvalidOperationException("15HOST concurrent send emitted unexpected frames");
     }
 
     private static byte[] MacInput(uint protocol, ulong epoch, ulong sequence, byte[] payload)
@@ -350,9 +382,12 @@ internal sealed class RendererIpcClient : IDisposable
 
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-        CryptographicOperations.ZeroMemory(_key);
+        lock (_writeLock)
+        {
+            if (_disposed) return;
+            _disposed = true;
+            CryptographicOperations.ZeroMemory(_key);
+        }
     }
 
     private sealed class WireFrame
