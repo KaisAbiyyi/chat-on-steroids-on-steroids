@@ -1085,8 +1085,8 @@ mod tests {
     fn child_shutdown_timeout_kills_and_reaps() {
         #[cfg(windows)]
         let mut command = {
-            let mut command = Command::new("cmd");
-            command.args(["/C", "ping 127.0.0.1 -n 20 > NUL"]);
+            let mut command = Command::new("powershell");
+            command.args(["-NoProfile", "-Command", "Start-Sleep -Seconds 20"]);
             command
         };
         #[cfg(not(windows))]
