@@ -214,6 +214,7 @@ internal sealed class RendererWindow : Form
     private readonly CaptureMode _captureMode;
     private readonly string _captureSurface;
     private readonly CancellationTokenSource _readerCancellation = new();
+    private readonly System.Windows.Forms.Timer _ipcHeartbeat = new() { Interval = 3000 };
     private readonly TaskCompletionSource<NavigationOutcome> _navigation =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource<bool> _documentReady =
@@ -240,6 +241,11 @@ internal sealed class RendererWindow : Form
         FormBorderStyle = capture ? FormBorderStyle.None : FormBorderStyle.Sizable;
         StartPosition = FormStartPosition.CenterScreen;
         Controls.Add(_browser);
+        _ipcHeartbeat.Tick += (_, _) => {
+            if (_ipc is null || !_ready) return;
+            try { _ipc.SendPayload("{\"kind\":\"renderer-heartbeat\"}"); }
+            catch (Exception failure) { Fail(failure); }
+        };
 
         Shown += async (_, _) =>
         {
@@ -253,6 +259,7 @@ internal sealed class RendererWindow : Form
                 try { _ipc.SendPayload("{\"kind\":\"renderer-closing\"}"); }
                 catch (Exception) { Environment.ExitCode = 1; }
             }
+            _ipcHeartbeat.Stop();
             _readerCancellation.Cancel();
         };
         FormClosed += (_, _) =>
@@ -260,6 +267,7 @@ internal sealed class RendererWindow : Form
             _ready = false;
             _browser.Dispose();
             _ipc?.Dispose();
+            _ipcHeartbeat.Dispose();
             _readerCancellation.Dispose();
             try { if (Directory.Exists(_isolationRoot)) Directory.Delete(_isolationRoot, true); }
             catch (IOException) { }
@@ -364,6 +372,7 @@ internal sealed class RendererWindow : Form
             _phase = "authenticated-ipc-ready";
             _ipc.SendPayload("{\"kind\":\"ready\",\"rendererNonce\":\"" + _documentNonce + "\"}");
             _ = _ipc.ReadLoopAsync(OnHostPayload, OnIpcFailure, _readerCancellation.Token);
+            _ipcHeartbeat.Start();
         }
         else
         {
