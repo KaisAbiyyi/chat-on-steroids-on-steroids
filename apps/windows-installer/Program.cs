@@ -529,7 +529,15 @@ internal static class Program
             SafeAncestors(stage);
             VerifyProtection(stage);
             var inventory=Inventory(stage);
-            var containers=Directory.GetDirectories(Path.Combine(stage,"slots"));
+            var stagingSlots=Path.Combine(stage,"slots");
+            if(!Directory.Exists(stagingSlots))
+            {
+                if(inventory.Files.Count!=0 || inventory.Dirs.Count!=0)
+                    throw new InvalidDataException("Unrecognized incomplete stage quarantined");
+                Directory.Delete(stage);
+                continue;
+            }
+            var containers=Directory.GetDirectories(stagingSlots);
             if (containers.Length!=1 || !SlotName(Path.GetFileName(containers[0])))
                 throw new InvalidDataException("Unrecognized staged transaction; preserved");
             var slot=Path.GetFileName(containers[0]);
