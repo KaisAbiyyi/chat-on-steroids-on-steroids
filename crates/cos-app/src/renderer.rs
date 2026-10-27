@@ -1520,13 +1520,23 @@ mod tests {
                     .unwrap();
             let selected = format!("synthetic-15host-{tag}-secondary");
             let expected_revision = projection.navigation.snapshot().revision;
-            projection.handle_intent(&store, json!({
-                "kind":"select-session", "sessionId":selected,
-                "expectedRevision":expected_revision
-            })).unwrap();
-            projection.handle_intent(&store, json!({
-                "kind":"open-rich","surface":"pdf"
-            })).unwrap();
+            projection
+                .handle_intent(
+                    &store,
+                    json!({
+                        "kind":"select-session", "sessionId":selected,
+                        "expectedRevision":expected_revision
+                    }),
+                )
+                .unwrap();
+            projection
+                .handle_intent(
+                    &store,
+                    json!({
+                        "kind":"open-rich","surface":"pdf"
+                    }),
+                )
+                .unwrap();
             let state = projection.state_json().unwrap();
             assert!(state["pdfPage"].is_object(), "Host PDF raster projection absent");
             assert_eq!(state["pdfPage"]["format"], "image/png");
