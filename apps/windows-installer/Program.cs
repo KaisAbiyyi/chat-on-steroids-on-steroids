@@ -572,6 +572,14 @@ internal static class Program
                 || !Regex.IsMatch(name.Substring(baseName.Length),"^[a-f0-9]{32}$"))
                 continue;
             SafeAncestors(stage);
+            // Crash between mkdir and ACL protection: the uniquely scoped
+            // empty stage can be removed without ever touching user data.
+            // Any nonempty unprotected directory remains quarantined.
+            if (!Directory.EnumerateFileSystemEntries(stage).Any())
+            {
+                Directory.Delete(stage);
+                continue;
+            }
             VerifyProtection(stage);
             var inventory=Inventory(stage);
             var stagingSlots=Path.Combine(stage,"slots");
