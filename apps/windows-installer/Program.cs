@@ -472,6 +472,14 @@ internal static class Program
     }
     static void Recover(string root,string publisher)
     {
+        var tombstone = root + "-uninstalling";
+        if (Directory.Exists(tombstone))
+        {
+            if (Directory.Exists(root))
+                throw new InvalidDataException("Ambiguous live and uninstalling roots");
+            CompleteUninstall(tombstone,publisher);
+            return;
+        }
         var state = ReadState(root,publisher);
         VerifySlot(root,state.Active,publisher);
         if (state.Previous is not null) VerifySlot(root,state.Previous,publisher);
@@ -596,25 +604,61 @@ internal static class Program
     }
     static void Uninstall(string root,string publisher)
     {
+        string tombstone=root+"-uninstalling";
+        SafeAncestors(tombstone);
+        if (Directory.Exists(tombstone))
+        {
+            if (Directory.Exists(root))
+                throw new InvalidDataException("Ambiguous pending uninstall and active root");
+            CompleteUninstall(tombstone,publisher);
+            return;
+        }
         Recover(root,publisher);
         var state=ReadState(root,publisher);
-        var inv=Inventory(root);
-        var expected=new HashSet<string>(IC) { SelectorPath(root) };
-        foreach (var slot in new[] {state.Active,state.Previous})
+        var inventory=Inventory(root);
+        var files=new HashSet<string>(IC){SelectorPath(root)};
+        foreach(var slot in new[]{state.Active,state.Previous})
         {
-            if (slot is null) continue;
-            var folder=Path.Combine(root,"slots",slot);
-            foreach (var file in Inventory(folder).Files) expected.Add(file);
+            if(slot is null) continue;
+            VerifySlot(root,slot,publisher);
+            foreach(var path in Inventory(Path.Combine(root,"slots",slot)).Files)
+                files.Add(path);
         }
-        if (!expected.SetEquals(inv.Files))
-            throw new InvalidDataException("Unowned installation files must survive");
-        foreach (var slot in new[] {state.Previous,state.Active})
-            if (slot is not null) CleanOwnedSlot(root,slot,publisher);
-        File.Delete(SelectorPath(root));
-        foreach(var dir in Inventory(root).Dirs.OrderByDescending(d=>d.Length))
-            if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
-        if (Directory.EnumerateFileSystemEntries(root).Any())
-            throw new InvalidDataException("Unowned data survived and was preserved");
-        Directory.Delete(root);
+        if (!files.SetEquals(inventory.Files))
+            throw new InvalidDataException("Unowned install files must survive");
+        // Reject even unowned EMPTY directories before deleting anything.
+        var expectedDirs=new HashSet<string>(IC);
+        foreach(var file in files)
+        {
+            var parent=Path.GetDirectoryName(file);
+            while(parent is not null && !IC.Equals(parent,root))
+            {
+                expectedDirs.Add(parent);
+                parent=Path.GetDirectoryName(parent);
+            }
+        }
+        if(!expectedDirs.SetEquals(inventory.Dirs))
+            throw new InvalidDataException("Unowned directory would be deleted");
+        Directory.Move(root,tombstone); // same-volume atomic "do not launch" boundary
+        SyntheticCrash("after_uninstall_rename");
+        CompleteUninstall(tombstone,publisher);
     }
+    static void CompleteUninstall(string tombstone,string publisher)
+    {
+        VerifyProtection(tombstone);
+        var state=ReadState(tombstone,publisher);
+        foreach(var slot in new[]{state.Previous,state.Active})
+            if(slot is not null) CleanOwnedSlot(tombstone,slot,publisher);
+        var selector=SelectorPath(tombstone);
+        if(File.Exists(selector)) File.Delete(selector);
+        foreach(var folder in Inventory(tombstone).Dirs.OrderByDescending(x=>x.Length))
+        {
+            if(!Directory.EnumerateFileSystemEntries(folder).Any()) Directory.Delete(folder);
+            else throw new InvalidDataException("Unowned uninstall directory preserved");
+        }
+        if(Directory.EnumerateFileSystemEntries(tombstone).Any())
+            throw new InvalidDataException("Unowned uninstall file preserved");
+        Directory.Delete(tombstone);
+    }
+
 }
