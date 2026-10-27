@@ -5,24 +5,26 @@
 //! bounded presentation snapshots over authenticated redirected stdio; it is
 //! never granted filesystem, process, provider, or account authority.
 use cos_core::{
-    ui_contract::{UiCommand, UiNavigation, UiRequest, UiRoute, UI_PROTOCOL_VERSION},
+    ui_contract::{UI_PROTOCOL_VERSION, UiCommand, UiNavigation, UiRequest, UiRoute},
     ui_conversation::{
         ConversationCommand, ConversationEntry, ConversationPage, ConversationRequest,
-        ConversationRole, UiConversation, MAX_CONVERSATION_PAGE_ITEMS,
+        ConversationRole, MAX_CONVERSATION_PAGE_ITEMS, UiConversation,
     },
     ui_focus::{UiFocus, UiKeyEvent, UiKeyFrame},
     ui_localization::{self, UiLanguage, UiTextKey},
     ui_panels::{PanelCatalog, PanelCommand, PanelRequest, SafePreferences, Theme, UiPanels},
     ui_renderer_ipc::{
-        RendererIpcAuthenticator, MAX_RENDERER_IPC_FRAME_BYTES, RENDERER_IPC_PROTOCOL,
+        MAX_RENDERER_IPC_FRAME_BYTES, RENDERER_IPC_PROTOCOL, RendererIpcAuthenticator,
     },
-    ui_rich::{RichDeck, RichPanel, RichRendererCommand, RichRendererRequest, RICH_PROTOCOL_VERSION},
+    ui_rich::{
+        RICH_PROTOCOL_VERSION, RichDeck, RichPanel, RichRendererCommand, RichRendererRequest,
+    },
     ui_snapshots::{CaptureConfig, CaptureDescriptor, CaptureSurface},
 };
 use cos_store::{SessionStore, model};
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde::de::DeserializeOwned;
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{
     fs,
@@ -59,7 +61,8 @@ pub fn launch(
         return Err(invalid("Unknown UI launch option"));
     }
     let requested_path = PathBuf::from(renderer_path);
-    if !requested_path.is_absolute() || expected_sha.len() != 64
+    if !requested_path.is_absolute()
+        || expected_sha.len() != 64
         || !expected_sha.bytes().all(|b| b.is_ascii_hexdigit())
     {
         return Err(invalid("Renderer path or SHA-256 receipt is invalid"));
@@ -72,7 +75,9 @@ pub fn launch(
     let artifact = fs::read(&renderer_path)?;
     let actual_sha = format!("{:x}", Sha256::digest(&artifact));
     if !actual_sha.eq_ignore_ascii_case(&expected_sha) {
-        return Err(invalid("Renderer artifact SHA-256 does not match the supplied receipt"));
+        return Err(invalid(
+            "Renderer artifact SHA-256 does not match the supplied receipt",
+        ));
     }
 
     let mut key = [0u8; 32];
@@ -89,8 +94,14 @@ pub fn launch(
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()?;
-    let child_input = child.stdin.take().ok_or_else(|| invalid("Renderer stdin unavailable"))?;
-    let child_output = child.stdout.take().ok_or_else(|| invalid("Renderer stdout unavailable"))?;
+    let child_input = child
+        .stdin
+        .take()
+        .ok_or_else(|| invalid("Renderer stdin unavailable"))?;
+    let child_output = child
+        .stdout
+        .take()
+        .ok_or_else(|| invalid("Renderer stdout unavailable"))?;
     let mut writer = BufWriter::new(child_input);
     let mut reader = BufReader::new(child_output);
 
@@ -103,17 +114,20 @@ pub fn launch(
     write_json_line(&mut writer, &bootstrap)?;
     let ready_raw = read_bounded_line(&mut reader, MAX_RENDERER_IPC_FRAME_BYTES)?
         .ok_or_else(|| invalid("Renderer exited before authenticated ready handshake"))?;
-    let ready = authenticator.verify_inbound(&ready_raw)
+    let ready = authenticator
+        .verify_inbound(&ready_raw)
         .map_err(|_| invalid("Renderer ready handshake authentication failed"))?;
     let nonce = ready.payload["rendererNonce"].as_str().unwrap_or("");
-    if ready.payload["kind"] != "ready" || nonce.len() != 32
+    if ready.payload["kind"] != "ready"
+        || nonce.len() != 32
         || !nonce.bytes().all(|b| b.is_ascii_hexdigit())
     {
         let _ = child.kill();
         return Err(invalid("Renderer ready handshake contract rejected"));
     }
 
-    let locale = config["ui"]["language"].as_str()
+    let locale = config["ui"]["language"]
+        .as_str()
         .or_else(|| config["ui"]["locale"].as_str());
     let theme = match config["ui"]["theme"].as_str() {
         Some("light") => Theme::Light,
@@ -124,7 +138,14 @@ pub fn launch(
     let mut host = RendererHostState::new(epoch, store, theme, language)?;
     send_state(&mut writer, &mut authenticator, &host)?;
 
-    let result = renderer_loop(store, &mut child, &mut reader, &mut writer, &mut authenticator, &mut host);
+    let result = renderer_loop(
+        store,
+        &mut child,
+        &mut reader,
+        &mut writer,
+        &mut authenticator,
+        &mut host,
+    );
     if result.is_err() {
         let _ = child.kill();
     }
@@ -158,8 +179,9 @@ fn renderer_loop(
         let Some(raw) = read_bounded_line(reader, MAX_RENDERER_IPC_FRAME_BYTES)? else {
             return Ok(());
         };
-        let verified = authenticator.verify_inbound(&raw)
-            .map_err(|_| invalid("Renderer IPC authentication, epoch, sequence, or size check failed"))?;
+        let verified = authenticator.verify_inbound(&raw).map_err(|_| {
+            invalid("Renderer IPC authentication, epoch, sequence, or size check failed")
+        })?;
         if verified.payload["kind"] == "renderer-closing" {
             return Ok(());
         }
@@ -167,7 +189,10 @@ fn renderer_loop(
             let _ = child.kill();
             return Err(invalid("Renderer sent an unknown authenticated frame type"));
         }
-        let intent = verified.payload.get("intent").cloned()
+        let intent = verified
+            .payload
+            .get("intent")
+            .cloned()
             .ok_or_else(|| invalid("Renderer intent is missing"))?;
         host.last_error = None;
         if let Err(code) = host.handle_intent(store, intent) {
@@ -184,7 +209,8 @@ fn send_state(
 ) -> io::Result<()> {
     let state = host.state_json()?;
     let payload = serde_json::to_string(&state).map_err(io::Error::other)?;
-    let frame = authenticator.sign_outbound(&payload)
+    let frame = authenticator
+        .sign_outbound(&payload)
         .map_err(|_| invalid("Host UI state exceeded the authenticated renderer frame contract"))?;
     writer.write_all(frame.as_bytes())?;
     writer.write_all(b"\n")?;
@@ -218,8 +244,10 @@ impl RendererHostState {
         theme: Theme,
         language: UiLanguage,
     ) -> io::Result<Self> {
-        let navigation = UiNavigation::new(epoch).map_err(|_| invalid("Invalid navigation epoch"))?;
-        let conversation = UiConversation::new(epoch).map_err(|_| invalid("Invalid history epoch"))?;
+        let navigation =
+            UiNavigation::new(epoch).map_err(|_| invalid("Invalid navigation epoch"))?;
+        let conversation =
+            UiConversation::new(epoch).map_err(|_| invalid("Invalid history epoch"))?;
         let mut panels = UiPanels::new(epoch).map_err(|_| invalid("Invalid panels epoch"))?;
         let rich = RichDeck::new(epoch).map_err(|_| invalid("Invalid rich-panel epoch"))?;
         let focus = UiFocus::new(epoch).map_err(|_| invalid("Invalid focus epoch"))?;
@@ -233,7 +261,9 @@ impl RendererHostState {
             },
             ..PanelCatalog::default()
         };
-        panels.replace_catalog(catalog).map_err(|_| invalid("Initial UI preferences rejected"))?;
+        panels
+            .replace_catalog(catalog)
+            .map_err(|_| invalid("Initial UI preferences rejected"))?;
         let sessions = read_sessions(store)?;
         Ok(Self {
             epoch,
@@ -272,7 +302,8 @@ impl RendererHostState {
             &panels,
             &rich,
             &conversation,
-        ).map_err(|_| invalid("15F typed host snapshots are inconsistent"))?;
+        )
+        .map_err(|_| invalid("15F typed host snapshots are inconsistent"))?;
         let projection = &descriptor.projection;
         let capture_contract = json!({
             "version": descriptor.version,
@@ -319,36 +350,46 @@ impl RendererHostState {
         match kind {
             "navigate" => {
                 let request: NavigateIntent = decode_intent(intent)?;
-                if request.kind != "navigate" { return Err("invalid-intent"); }
+                if request.kind != "navigate" {
+                    return Err("invalid-intent");
+                }
                 if let UiRoute::Conversation { session_id } = request.route {
                     self.open_session(store, &session_id, request.expected_revision)
                 } else {
                     let sequence = next_counter(&mut self.navigation_sequence)?;
-                    self.navigation.dispatch(UiRequest {
-                        protocol: UI_PROTOCOL_VERSION,
-                        host_epoch: self.epoch,
-                        sequence,
-                        command: UiCommand::Navigate {
-                            route: request.route,
-                            expected_revision: request.expected_revision,
-                        },
-                    }).map_err(|error| error.code())?;
+                    self.navigation
+                        .dispatch(UiRequest {
+                            protocol: UI_PROTOCOL_VERSION,
+                            host_epoch: self.epoch,
+                            sequence,
+                            command: UiCommand::Navigate {
+                                route: request.route,
+                                expected_revision: request.expected_revision,
+                            },
+                        })
+                        .map_err(|error| error.code())?;
                     Ok(())
                 }
             }
             "select-session" => {
                 let request: SelectSessionIntent = decode_intent(intent)?;
-                if request.kind != "select-session" { return Err("invalid-intent"); }
+                if request.kind != "select-session" {
+                    return Err("invalid-intent");
+                }
                 self.open_session(store, &request.session_id, request.expected_revision)
             }
             "load-page" => {
                 let request: LoadPageIntent = decode_intent(intent)?;
-                if request.kind != "load-page" { return Err("invalid-intent"); }
+                if request.kind != "load-page" {
+                    return Err("invalid-intent");
+                }
                 self.move_to_page(request.start, request.expected_revision)
             }
             "rich-command" => {
                 let request: RichIntent = decode_intent(intent)?;
-                if request.kind != "rich-command" { return Err("invalid-intent"); }
+                if request.kind != "rich-command" {
+                    return Err("invalid-intent");
+                }
                 let sequence = next_counter(&mut self.rich_sequence)?;
                 let frame = RichRendererRequest {
                     protocol: RICH_PROTOCOL_VERSION,
@@ -357,75 +398,105 @@ impl RendererHostState {
                     command: request.command,
                 };
                 let bytes = serde_json::to_vec(&frame).map_err(|_| "invalid-intent")?;
-                self.rich.dispatch_renderer_json(&bytes).map_err(|error| error.code())?;
+                self.rich
+                    .dispatch_renderer_json(&bytes)
+                    .map_err(|error| error.code())?;
                 Ok(())
             }
             "panel-command" => {
                 let request: PanelIntent = decode_intent(intent)?;
-                if request.kind != "panel-command" { return Err("invalid-intent"); }
+                if request.kind != "panel-command" {
+                    return Err("invalid-intent");
+                }
                 let sequence = next_counter(&mut self.panels_sequence)?;
-                self.panels.dispatch(PanelRequest {
-                    protocol: UI_PROTOCOL_VERSION,
-                    host_epoch: self.epoch,
-                    sequence,
-                    command: request.command,
-                }).map_err(|error| error.code())?;
+                self.panels
+                    .dispatch(PanelRequest {
+                        protocol: UI_PROTOCOL_VERSION,
+                        host_epoch: self.epoch,
+                        sequence,
+                        command: request.command,
+                    })
+                    .map_err(|error| error.code())?;
                 Ok(())
             }
             "focus-event" => {
                 let request: FocusIntent = decode_intent(intent)?;
-                if request.kind != "focus-event" { return Err("invalid-intent"); }
+                if request.kind != "focus-event" {
+                    return Err("invalid-intent");
+                }
                 let sequence = next_counter(&mut self.focus_sequence)?;
-                self.focus.handle(UiKeyFrame {
-                    host_epoch: self.epoch,
-                    sequence,
-                    event: request.event,
-                }).map_err(|error| error.code())?;
+                self.focus
+                    .handle(UiKeyFrame {
+                        host_epoch: self.epoch,
+                        sequence,
+                        event: request.event,
+                    })
+                    .map_err(|error| error.code())?;
                 Ok(())
             }
             "set-locale" => {
                 let request: LocaleIntent = decode_intent(intent)?;
-                if request.kind != "set-locale" { return Err("invalid-intent"); }
+                if request.kind != "set-locale" {
+                    return Err("invalid-intent");
+                }
                 let language = UiLanguage::parse(&request.tag).ok_or("unsupported-locale")?;
                 let mut catalog = self.panels.snapshot().catalog;
                 catalog.preferences.locale = language.tag().to_owned();
-                self.panels.replace_catalog(catalog).map_err(|error| error.code())?;
+                self.panels
+                    .replace_catalog(catalog)
+                    .map_err(|error| error.code())?;
                 self.language = language;
                 Ok(())
             }
             "dialog-action" => {
                 let request: DialogIntent = decode_intent(intent)?;
-                if request.kind != "dialog-action" { return Err("invalid-intent"); }
+                if request.kind != "dialog-action" {
+                    return Err("invalid-intent");
+                }
                 match request.action.as_str() {
                     "open" => self.focus.open_dialog().map_err(|error| error.code())?,
-                    "confirm" | "cancel" => self.focus.close_dialog().map_err(|error| error.code())?,
+                    "confirm" | "cancel" => {
+                        self.focus.close_dialog().map_err(|error| error.code())?
+                    }
                     _ => return Err("invalid-dialog-action"),
                 }
                 Ok(())
             }
             "open-rich" => {
                 let request: OpenRichIntent = decode_intent(intent)?;
-                if request.kind != "open-rich" { return Err("invalid-intent"); }
+                if request.kind != "open-rich" {
+                    return Err("invalid-intent");
+                }
                 let panel = match request.surface.as_str() {
                     "editor" => RichPanel::Editor {
-                        key: "scratch-editor".into(), title: "Untitled editor".into(),
-                        language: "text".into(), text: String::new(), read_only: false,
+                        key: "scratch-editor".into(),
+                        title: "Untitled editor".into(),
+                        language: "text".into(),
+                        text: String::new(),
+                        read_only: false,
                     },
                     "terminal" => RichPanel::Terminal {
-                        key: "terminal-preview".into(), title: "Terminal output".into(),
+                        key: "terminal-preview".into(),
+                        title: "Terminal output".into(),
                         output: "Output-only preview. No process is attached.".into(),
                     },
                     "pdf" => RichPanel::Pdf {
-                        key: "pdf-preview".into(), title: "PDF preview".into(),
-                        asset_id: "synthetic-document".into(), page: 1, page_count: 1,
+                        key: "pdf-preview".into(),
+                        title: "PDF preview".into(),
+                        asset_id: "synthetic-document".into(),
+                        page: 1,
+                        page_count: 1,
                     },
                     "math" => RichPanel::Math {
-                        key: "math-preview".into(), title: "Math preview".into(),
+                        key: "math-preview".into(),
+                        title: "Math preview".into(),
                         source: "x^2 + y^2 = z^2".into(),
                     },
                     _ => return Err("invalid-rich-surface"),
                 };
-                self.rich.publish_from_host(panel).map_err(|error| error.code())?;
+                self.rich
+                    .publish_from_host(panel)
+                    .map_err(|error| error.code())?;
                 Ok(())
             }
             _ => Err("unknown-intent"),
@@ -438,25 +509,37 @@ impl RendererHostState {
         session_id: &str,
         expected_navigation_revision: u64,
     ) -> Result<(), &'static str> {
-        if !model::session_id(session_id) || store.summary(session_id).map_err(|_| "session-unavailable")?.is_none() {
+        if !model::session_id(session_id)
+            || store
+                .summary(session_id)
+                .map_err(|_| "session-unavailable")?
+                .is_none()
+        {
             return Err("session-not-found");
         }
         let sequence = next_counter(&mut self.navigation_sequence)?;
-        self.navigation.dispatch(UiRequest {
-            protocol: UI_PROTOCOL_VERSION,
-            host_epoch: self.epoch,
-            sequence,
-            command: UiCommand::Navigate {
-                route: UiRoute::Conversation { session_id: session_id.to_owned() },
-                expected_revision: expected_navigation_revision,
-            },
-        }).map_err(|error| error.code())?;
+        self.navigation
+            .dispatch(UiRequest {
+                protocol: UI_PROTOCOL_VERSION,
+                host_epoch: self.epoch,
+                sequence,
+                command: UiCommand::Navigate {
+                    route: UiRoute::Conversation {
+                        session_id: session_id.to_owned(),
+                    },
+                    expected_revision: expected_navigation_revision,
+                },
+            })
+            .map_err(|error| error.code())?;
 
         // Erase the prior visible page and cache before touching the new
         // session. A failed read cannot leave previous-session text visible.
         self.clear_history();
         self.active_history_session = Some(session_id.to_owned());
-        let ticket = self.conversation.open_from_host(session_id).map_err(|error| error.code())?;
+        let ticket = self
+            .conversation
+            .open_from_host(session_id)
+            .map_err(|error| error.code())?;
         let events = match store.recent(session_id, HISTORY_WINDOW_LIMIT, None) {
             Ok(events) => events,
             Err(_) => {
@@ -464,11 +547,21 @@ impl RendererHostState {
                 return Err("history-unavailable");
             }
         };
-        let history = events.iter().enumerate().map(|(index, event)| history_entry(index, event)).collect::<Vec<_>>();
+        let history = events
+            .iter()
+            .enumerate()
+            .map(|(index, event)| history_entry(index, event))
+            .collect::<Vec<_>>();
         self.history = history;
-        let start = if self.history.is_empty() { 0 } else { ((self.history.len() as u64 - 1) / PAGE_LIMIT) * PAGE_LIMIT };
+        let start = if self.history.is_empty() {
+            0
+        } else {
+            ((self.history.len() as u64 - 1) / PAGE_LIMIT) * PAGE_LIMIT
+        };
         let page = page_at(&self.history, start).ok_or("history-page-invalid")?;
-        self.conversation.publish_from_host(&ticket, session_id, page).map_err(|error| error.code())?;
+        self.conversation
+            .publish_from_host(&ticket, session_id, page)
+            .map_err(|error| error.code())?;
         Ok(())
     }
 
@@ -476,29 +569,47 @@ impl RendererHostState {
         for entry in &mut self.history {
             entry.text.zeroize();
             entry.message_id.zeroize();
-            if let Some(turn_id) = &mut entry.turn_id { turn_id.zeroize(); }
+            if let Some(turn_id) = &mut entry.turn_id {
+                turn_id.zeroize();
+            }
         }
         self.history.clear();
     }
 
     fn move_to_page(&mut self, target: u64, expected_revision: u64) -> Result<(), &'static str> {
         let current = self.conversation.snapshot();
-        if current.revision != expected_revision { return Err("stale-revision"); }
-        if target > self.history.len() as u64 || target % PAGE_LIMIT != 0
+        if current.revision != expected_revision {
+            return Err("stale-revision");
+        }
+        if target > self.history.len() as u64
+            || target % PAGE_LIMIT != 0
             || (target == self.history.len() as u64 && !self.history.is_empty())
         {
             return Err("invalid-history-page");
         }
-        let session_id = self.active_history_session.clone().ok_or("no-active-session")?;
+        let session_id = self
+            .active_history_session
+            .clone()
+            .ok_or("no-active-session")?;
         for _ in 0..=HISTORY_WINDOW_LIMIT.div_ceil(PAGE_LIMIT as usize) {
             let current = self.conversation.snapshot();
             let current_start = current.page.as_ref().map(|page| page.start).unwrap_or(0);
-            if current_start == target { return Ok(()); }
-            let direction = if target < current_start { "older" } else { "newer" };
-            let command = if direction == "older" {
-                ConversationCommand::LoadOlder { expected_revision: current.revision }
+            if current_start == target {
+                return Ok(());
+            }
+            let direction = if target < current_start {
+                "older"
             } else {
-                ConversationCommand::LoadNewer { expected_revision: current.revision }
+                "newer"
+            };
+            let command = if direction == "older" {
+                ConversationCommand::LoadOlder {
+                    expected_revision: current.revision,
+                }
+            } else {
+                ConversationCommand::LoadNewer {
+                    expected_revision: current.revision,
+                }
             };
             let sequence = next_counter(&mut self.conversation_sequence)?;
             let reply = self.conversation.dispatch(ConversationRequest {
@@ -513,13 +624,24 @@ impl RendererHostState {
                 Ok(_) => {}
                 Err(error) => return Err(error.code()),
             }
-            let ticket = self.conversation.snapshot().pending.clone().ok_or("history-ticket-missing")?;
+            let ticket = self
+                .conversation
+                .snapshot()
+                .pending
+                .clone()
+                .ok_or("history-ticket-missing")?;
             let next_start = match direction {
                 "older" => current_start.saturating_sub(PAGE_LIMIT),
-                _ => current.page.as_ref().map(|page| page.start + page.entries.len() as u64).unwrap_or(0),
+                _ => current
+                    .page
+                    .as_ref()
+                    .map(|page| page.start + page.entries.len() as u64)
+                    .unwrap_or(0),
             };
             let page = page_at(&self.history, next_start).ok_or("history-page-invalid")?;
-            self.conversation.publish_from_host(&ticket, &session_id, page).map_err(|error| error.code())?;
+            self.conversation
+                .publish_from_host(&ticket, &session_id, page)
+                .map_err(|error| error.code())?;
         }
         Err("history-page-step-limit")
     }
@@ -527,31 +649,61 @@ impl RendererHostState {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct NavigateIntent { kind: String, route: UiRoute, expected_revision: u64 }
+struct NavigateIntent {
+    kind: String,
+    route: UiRoute,
+    expected_revision: u64,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct SelectSessionIntent { kind: String, session_id: String, expected_revision: u64 }
+struct SelectSessionIntent {
+    kind: String,
+    session_id: String,
+    expected_revision: u64,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct LoadPageIntent { kind: String, start: u64, expected_revision: u64 }
+struct LoadPageIntent {
+    kind: String,
+    start: u64,
+    expected_revision: u64,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct RichIntent { kind: String, command: RichRendererCommand }
+struct RichIntent {
+    kind: String,
+    command: RichRendererCommand,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct PanelIntent { kind: String, command: PanelCommand }
+struct PanelIntent {
+    kind: String,
+    command: PanelCommand,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct FocusIntent { kind: String, event: UiKeyEvent }
+struct FocusIntent {
+    kind: String,
+    event: UiKeyEvent,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct LocaleIntent { kind: String, tag: String }
+struct LocaleIntent {
+    kind: String,
+    tag: String,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct DialogIntent { kind: String, action: String }
+struct DialogIntent {
+    kind: String,
+    action: String,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct OpenRichIntent { kind: String, surface: String }
+struct OpenRichIntent {
+    kind: String,
+    surface: String,
+}
 
 fn decode_intent<T: DeserializeOwned>(value: Value) -> Result<T, &'static str> {
     serde_json::from_value(value).map_err(|_| "invalid-intent")
@@ -560,27 +712,55 @@ fn decode_intent<T: DeserializeOwned>(value: Value) -> Result<T, &'static str> {
 fn read_sessions(store: &SessionStore) -> io::Result<Vec<Value>> {
     let value = store.list_page(SESSION_LIST_LIMIT, None, None)?;
     let sessions = value["sessions"].as_array().cloned().unwrap_or_default();
-    Ok(sessions.into_iter().filter_map(|row| {
-        let id = row["id"].as_str()?.to_owned();
-        if !model::session_id(&id) { return None; }
-        let title = safe_text(row["title"].as_str().or_else(|| row["name"].as_str()).unwrap_or("Conversation"), 128);
-        Some(json!({
-            "id": id,
-            "title": if title.is_empty() { "Conversation".to_owned() } else { title },
-            "updatedAt": row["updatedAt"].as_u64().unwrap_or(0)
-        }))
-    }).collect())
+    Ok(sessions
+        .into_iter()
+        .filter_map(|row| {
+            let id = row["id"].as_str()?.to_owned();
+            if !model::session_id(&id) {
+                return None;
+            }
+            let title = safe_text(
+                row["title"]
+                    .as_str()
+                    .or_else(|| row["name"].as_str())
+                    .unwrap_or("Conversation"),
+                128,
+            );
+            Some(json!({
+                "id": id,
+                "title": if title.is_empty() { "Conversation".to_owned() } else { title },
+                "updatedAt": row["updatedAt"].as_u64().unwrap_or(0)
+            }))
+        })
+        .collect())
 }
 
 fn history_entry(index: usize, event: &Value) -> ConversationEntry {
     let kind = event["kind"].as_str().unwrap_or("activity");
     let (role, text) = match kind {
-        "user_message" => (ConversationRole::User, event["message"]["text"].as_str().unwrap_or("")),
-        "assistant_message" => (ConversationRole::Assistant, event["message"]["text"].as_str().unwrap_or("")),
-        "tool_call" => (ConversationRole::Tool, event["call"]["result"]["text"].as_str()
-            .or_else(|| event["call"]["summary"]["text"].as_str()).unwrap_or("Tool activity")),
-        "chat_error" => (ConversationRole::Error, event["message"]["text"].as_str().unwrap_or("Error")),
-        _ => (ConversationRole::Activity, event["message"]["text"].as_str().unwrap_or(kind)),
+        "user_message" => (
+            ConversationRole::User,
+            event["message"]["text"].as_str().unwrap_or(""),
+        ),
+        "assistant_message" => (
+            ConversationRole::Assistant,
+            event["message"]["text"].as_str().unwrap_or(""),
+        ),
+        "tool_call" => (
+            ConversationRole::Tool,
+            event["call"]["result"]["text"]
+                .as_str()
+                .or_else(|| event["call"]["summary"]["text"].as_str())
+                .unwrap_or("Tool activity"),
+        ),
+        "chat_error" => (
+            ConversationRole::Error,
+            event["message"]["text"].as_str().unwrap_or("Error"),
+        ),
+        _ => (
+            ConversationRole::Activity,
+            event["message"]["text"].as_str().unwrap_or(kind),
+        ),
     };
     let safe = safe_text(text, cos_core::ui_conversation::MAX_CONVERSATION_TEXT_BYTES);
     ConversationEntry {
@@ -614,7 +794,9 @@ fn safe_text(value: &str, max_bytes: usize) -> String {
         {
             continue;
         }
-        if output.len().saturating_add(character.len_utf8()) > max_bytes { break; }
+        if output.len().saturating_add(character.len_utf8()) > max_bytes {
+            break;
+        }
         output.push(character);
     }
     output
@@ -642,12 +824,15 @@ fn localization_json(language: UiLanguage) -> Value {
         (UiTextKey::Confirm, "confirm"),
     ];
     let mut texts = serde_json::Map::new();
-    for (key, name) in pairs { texts.insert(name.into(), json!(ui_localization::text(language, key))); }
+    for (key, name) in pairs {
+        texts.insert(name.into(), json!(ui_localization::text(language, key)));
+    }
     json!({ "tag": language.tag(), "texts": texts })
 }
 
 fn next_counter(counter: &mut u64) -> Result<u64, &'static str> {
-    let next = counter.checked_add(1)
+    let next = counter
+        .checked_add(1)
         .filter(|value| *value <= cos_core::ui_contract::MAX_JS_SAFE_INTEGER)
         .ok_or("counter-exhausted")?;
     *counter = next;
@@ -656,7 +841,9 @@ fn next_counter(counter: &mut u64) -> Result<u64, &'static str> {
 
 fn take_option(args: &mut Vec<String>, option: &str) -> io::Result<Option<String>> {
     if let Some(index) = args.iter().position(|arg| arg == option) {
-        if index + 1 >= args.len() { return Err(invalid("Option requires a value")); }
+        if index + 1 >= args.len() {
+            return Err(invalid("Option requires a value"));
+        }
         let value = args.remove(index + 1);
         args.remove(index);
         Ok(Some(value))
@@ -667,7 +854,9 @@ fn take_option(args: &mut Vec<String>, option: &str) -> io::Result<Option<String
 
 fn write_json_line<W: Write>(writer: &mut W, value: &Value) -> io::Result<()> {
     let encoded = serde_json::to_vec(value).map_err(io::Error::other)?;
-    if encoded.len() > 4096 { return Err(invalid("Renderer bootstrap exceeds its limit")); }
+    if encoded.len() > 4096 {
+        return Err(invalid("Renderer bootstrap exceeds its limit"));
+    }
     writer.write_all(&encoded)?;
     writer.write_all(b"\n")?;
     writer.flush()
@@ -678,9 +867,19 @@ fn read_bounded_line<R: BufRead>(reader: &mut R, max_bytes: usize) -> io::Result
     loop {
         let available = reader.fill_buf()?;
         if available.is_empty() {
-            return if output.is_empty() { Ok(None) } else { Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Truncated renderer frame")) };
+            return if output.is_empty() {
+                Ok(None)
+            } else {
+                Err(io::Error::new(
+                    io::ErrorKind::UnexpectedEof,
+                    "Truncated renderer frame",
+                ))
+            };
         }
-        let take = available.iter().position(|byte| *byte == b'\n').map_or(available.len(), |index| index + 1);
+        let take = available
+            .iter()
+            .position(|byte| *byte == b'\n')
+            .map_or(available.len(), |index| index + 1);
         if output.len().saturating_add(take) > max_bytes.saturating_add(1) {
             return Err(invalid("Renderer frame exceeds the byte limit"));
         }
@@ -689,8 +888,12 @@ fn read_bounded_line<R: BufRead>(reader: &mut R, max_bytes: usize) -> io::Result
         reader.consume(take);
         if complete {
             output.pop();
-            if output.last() == Some(&b'\r') { output.pop(); }
-            if output.len() > max_bytes { return Err(invalid("Renderer frame exceeds the byte limit")); }
+            if output.last() == Some(&b'\r') {
+                output.pop();
+            }
+            if output.len() > max_bytes {
+                return Err(invalid("Renderer frame exceeds the byte limit"));
+            }
             return Ok(Some(output));
         }
     }
@@ -716,14 +919,16 @@ mod tests {
 
     #[test]
     fn history_page_window_is_bounded_to_twenty_four_of_six_thousand() {
-        let history = (0..HISTORY_WINDOW_LIMIT).map(|index| ConversationEntry {
-            position: index as u64,
-            message_id: format!("msg-{index:04}"),
-            turn_id: None,
-            role: ConversationRole::User,
-            text: format!("Synthetic message {index}"),
-            truncated: false,
-        }).collect::<Vec<_>>();
+        let history = (0..HISTORY_WINDOW_LIMIT)
+            .map(|index| ConversationEntry {
+                position: index as u64,
+                message_id: format!("msg-{index:04}"),
+                turn_id: None,
+                role: ConversationRole::User,
+                text: format!("Synthetic message {index}"),
+                truncated: false,
+            })
+            .collect::<Vec<_>>();
         let page = page_at(&history, 5_976).unwrap();
         assert_eq!(page.total, 6_000);
         assert_eq!(page.entries.len(), 24);
@@ -746,8 +951,12 @@ mod tests {
 impl Drop for RendererHostState {
     fn drop(&mut self) {
         self.clear_history();
-        if let Some(session_id) = &mut self.active_history_session { session_id.zeroize(); }
-        for session in &mut self.sessions { zeroize_json(session); }
+        if let Some(session_id) = &mut self.active_history_session {
+            session_id.zeroize();
+        }
+        for session in &mut self.sessions {
+            zeroize_json(session);
+        }
     }
 }
 

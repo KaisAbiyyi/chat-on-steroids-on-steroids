@@ -2,8 +2,7 @@ use cos_core::ui_renderer_ipc::{
     MAX_RENDERER_IPC_FRAME_BYTES, RendererIpcAuthenticator, RendererIpcError,
 };
 
-const READY: &str =
-    r#"{"kind":"ready","rendererNonce":"00112233445566778899aabbccddeeff"}"#;
+const READY: &str = r#"{"kind":"ready","rendererNonce":"00112233445566778899aabbccddeeff"}"#;
 
 fn auth(epoch: u64, key_byte: u8) -> RendererIpcAuthenticator {
     RendererIpcAuthenticator::new(epoch, [key_byte; 32]).unwrap()
@@ -101,10 +100,7 @@ fn rebind_retires_old_epoch_and_resets_both_sequences() {
 #[test]
 fn outbound_encoder_rejects_malformed_inner_json_without_consuming_sequence() {
     let mut sender = auth(7, 0x51);
-    assert_eq!(
-        sender.sign_outbound("{"),
-        Err(RendererIpcError::Malformed)
-    );
+    assert_eq!(sender.sign_outbound("{"), Err(RendererIpcError::Malformed));
     let valid = sender.sign_outbound(READY).unwrap();
     let decoded: serde_json::Value = serde_json::from_str(&valid).unwrap();
     assert_eq!(decoded["sequence"], 1);
