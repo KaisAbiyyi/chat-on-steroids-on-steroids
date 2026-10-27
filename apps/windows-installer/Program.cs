@@ -58,12 +58,26 @@ internal static class Program
                 throw new InvalidDataException("Approved code signing publisher not configured or mismatched");
             RequireAdmin();
             CheckSignature(Environment.ProcessPath!, pin);
+            // Serialize all root mutations, including recovery, update, rollback
+            // and uninstall. The mutex is acquired only after elevation and
+            // publisher identity verification; multi-process races refuse.
+            var mutexName = @"Global\CoSoS-16PKG-" + Hash(Encoding.UTF8.GetBytes(
+                path.ToUpperInvariant())).Substring(0,48);
+            using var mutex = new Mutex(false,mutexName);
+            bool locked;
+            try { locked = mutex.WaitOne(TimeSpan.FromSeconds(30)); }
+            catch(AbandonedMutexException) { locked = true; }
+            if (!locked) throw new InvalidOperationException("Installer root is busy");
+            try
+            {
             if (op == "--install" || op == "--update")
                 InstallOrUpdate(path, op == "--install", pin);
             else if (op == "--rollback") Rollback(path, pin);
             else if (op == "--finalize") FinalizePrevious(path, pin);
             else if (op == "--recover") Recover(path, pin);
             else Uninstall(path, pin);
+            }
+            finally { mutex.ReleaseMutex(); }
             Console.WriteLine("COSOS_NATIVE_TRANSACTION_OK:" + op);
             return 0;
         }
@@ -485,7 +499,7 @@ internal static class Program
             if (inventory.Files.Any(path=>!allowed.Contains(path)))
                 throw new InvalidDataException("Unexpected files during slot cleanup");
             string installedManifest=Path.Combine(directory,"release.json");
-            if (File.Exists(installedManifest) && FileHash(installedManifest)!=proof.ManifestSha)
+            if (!stagingOnly && File.Exists(installedManifest) && FileHash(installedManifest)!=proof.ManifestSha)
                 throw new InvalidDataException("Installed release.json modified during cleanup");
             foreach(var (name,item) in index.Files)
             {
