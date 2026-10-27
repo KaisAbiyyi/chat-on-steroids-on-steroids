@@ -107,8 +107,21 @@ try {
     Add-Content -LiteralPath $binary -Value 'test-tamper' -NoNewline
     & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
     if($LASTEXITCODE -eq 0){throw 'Tampered binary passed integrity check'}
+    # Self-consistent rehash of mutable binary+manifest+state must STILL fail,
+    # because issuer-signed proof embeds the independent original manifest.
+    $mutated=Get-Content $release -Raw | ConvertFrom-Json
+    $entry=@($mutated.files | Where-Object { $_.path -eq 'bin/cos-rust.exe' })
+    if($entry.Count -ne 1){throw 'Missing Rust executable from signed payload'}
+    $entry[0].sha256=(Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant()
+    $entry[0].bytes=(Get-Item -LiteralPath $binary).Length
+    [IO.File]::WriteAllText($release,($mutated | ConvertTo-Json -Depth 10 -Compress))
+    $alteredState=Get-Content $statePath -Raw | ConvertFrom-Json
+    $alteredState.Generation++
+    [IO.File]::WriteAllText($statePath,($alteredState | ConvertTo-Json -Compress))
+    & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Rehashed binary+manifest+state improperly trusted'}
     $global:LASTEXITCODE=0
-    @{sourceSha=$source;testPublisher=$cert.Thumbprint;testOnly=$true;productionSigned=$false;native16L1Accepted=$false;cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';finalize='PASS';uninstall='PASS';binaryTamperRejected=$true;samePublisherWrongReleaseRefused=$true} | ConvertTo-Json | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
+    @{sourceSha=$source;testPublisher=$cert.Thumbprint;testOnly=$true;productionSigned=$false;native16L1Accepted=$false;cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';finalize='PASS';uninstall='PASS';binaryTamperRejected=$true;samePublisherWrongReleaseRefused=$true;jointSlotStateManifestTamperRejected=$true} | ConvertTo-Json | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
 }
 finally {
     Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
