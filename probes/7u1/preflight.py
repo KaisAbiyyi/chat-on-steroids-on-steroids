@@ -31,6 +31,7 @@ PRODUCTION_SOURCE_COPIES = {
     "source/cos-core-Cargo.toml": "crates/cos-core/Cargo.toml",
     "source/7l2_bridge.rs": "crates/cos-core/examples/7l2_bridge.rs",
     "source/native_browser_bridge.rs": "crates/cos-core/src/native_browser_bridge.rs",
+    "source/browser_tools.rs": "crates/cos-core/src/browser_tools.rs",
     "source/extension/manifest.json": "probes/8p/extension/manifest.json",
     "source/extension/sw.mjs": "probes/8p/extension/sw.mjs",
 }
@@ -152,7 +153,7 @@ def verify_product_adapter(repo, artifact, files, provider, expected_sha, observ
                                          observed_sha=observed_sha)
     if source_audit["productionObservationStatus"] != "API_SURFACE_PRESENT_REVIEW_REQUIRED":
         missing = ", ".join(source_audit["missingCapabilities"])
-        raise Refused("production 8P host is handshake-only; read-only API missing: " + missing)
+        raise Refused("production 8P read-only integration is blocked; missing/unqualified capabilities: " + missing)
     # This is a preflight for independent review, not a security approval or owner acceptance.
 
 
