@@ -26,6 +26,8 @@ const REQUIRED: &[&str] = &[
 struct Manifest {
     format: u32,
     files: Vec<Entry>,
+    #[serde(default, rename = "sourceSha")]
+    source_sha: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -75,6 +77,7 @@ fn open_guarded(path: &Path, _directory: bool) -> io::Result<File> {
 /// The handles live in the launched Rust host for the entire child lifetime.
 pub struct VerifiedPayload {
     pub manifest_sha: String,
+    pub source_sha: Option<String>,
     _locked_handles: Vec<File>,
 }
 
@@ -192,6 +195,12 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
     {
         return Err(denied());
     }
+    if manifest.source_sha.as_deref().is_some_and(|sha| {
+        sha.len() != 40 || !sha.bytes().all(|value| value.is_ascii_hexdigit())
+    }) {
+        return Err(denied());
+    }
+    let source_sha = manifest.source_sha.clone();
     let mut expected = BTreeSet::new();
     let mut folded = BTreeSet::new();
     let mut total = 0u64;
@@ -237,6 +246,7 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
     }
     Ok(VerifiedPayload {
         manifest_sha: actual_manifest_sha,
+        source_sha,
         _locked_handles: locked,
     })
 }

@@ -4,7 +4,7 @@
 //! selected CoSoS profile and authorizes session reads. The child receives
 //! bounded presentation snapshots over authenticated redirected stdio; it is
 //! never granted filesystem, process, provider, or account authority.
-use crate::renderer_integrity;
+use crate::{renderer_integrity, renderer_release};
 use cos_core::{
     ui_contract::{UI_PROTOCOL_VERSION, UiCommand, UiNavigation, UiRequest, UiRoute},
     ui_conversation::{
@@ -66,6 +66,7 @@ pub fn launch(
         take_option(&mut args, "--renderer-manifest-sha256")?.ok_or_else(|| {
             invalid("UI launch requires --renderer-manifest-sha256 from trusted receipt")
         })?;
+    let release_source_sha = take_option(&mut args, "--renderer-source-sha")?;
     let synthetic_probe = if let Some(position) = args
         .iter()
         .position(|option| option == "--synthetic-15host-probe")
@@ -120,6 +121,17 @@ pub fn launch(
     // and delete sharing across the complete verifier-to-loader lifetime.
     let locked_payload =
         renderer_integrity::verify(&renderer_path, &expected_sha, &expected_manifest)?;
+    // The manifest is independently checked against its publisher's GitHub
+    // OIDC/Sigstore attestation in production, never just caller SHA arguments.
+    // Unit/hosted synthetic test binaries deliberately exercise integrity only;
+    // a non-test production executable has no flag to bypass issuer verification.
+    if !cfg!(test) {
+        renderer_release::verify_trusted_release(
+            &renderer_path,
+            locked_payload.source_sha.as_deref(),
+            release_source_sha.as_deref(),
+        )?;
+    }
     let manifest_sha = locked_payload.manifest_sha.clone();
     let actual_sha = expected_sha.to_ascii_lowercase();
 

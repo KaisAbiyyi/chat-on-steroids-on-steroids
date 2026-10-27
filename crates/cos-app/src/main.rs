@@ -2,6 +2,7 @@ mod migration;
 mod profile;
 mod renderer;
 mod renderer_integrity;
+mod renderer_release;
 use cos_core::{
     config,
     logging::{self, DiagnosticLog},

@@ -25,3 +25,17 @@ Status: **IN PROGRESS / NOT PRODUCT ACCEPTED**. Tracked by [GitHub #115](https:/
 4. Physical 15L1/15L2/15L3 and PERF-01 remain downstream **NOT_RUN**. No local/physical Windows or owner gate is part of this cloud-only task.
 
 Keep PR #127 Draft and unmerged. Do not mark issue #115 Done until independent review and all applicable cloud checks pass.
+
+## Trusted release issuer gate (15HOST final cloud follow-up)
+
+The signed artifact subject is `renderer-integrity.json` (including `sourceSha`, SHA-256 for **every** app-owned file). In Actions, `actions/attest@v4` generates an OIDC/Sigstore SLSA provenance and `gh attestation verify` checks certificate-backed repository/workflow/ref/source identity with forged-issuer, substituted-artifact and wrong-source negative probes. A PR attestation is **candidate provenance only**, not an authorized release.
+
+Non-test Rust launches refuse to start until the manifest also has an attestation verified by the OS-protected `C:\\Program Files\\GitHub CLI\\gh.exe` executable, with the pinned signer `KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/15host-renderer.yml`, `refs/heads/main`, and the exact `--renderer-source-sha` 40-hex commit that must match the manifest sourceSHA. The prior `--renderer-sha256` and `--renderer-manifest-sha256` inputs remain required for file integrity but are **not sufficient** for authenticity. A missing trusted CLI, unavailable attestation service, source mismatch, issuer mismatch, or verification timeout rejects launch. The `gh.exe` install must be administrator-protected; writable/verifier replacement is outside the asserted threat boundary and must be explicitly prohibited by the distributor.
+
+**Release requirement:** the authorized main-ref artifact must be built/attested from the exact approved source commit using the dedicated workflow (workflow_dispatch or main push after merge). The cloud PR run can test OIDC trust and forged-attestation denials but is NOT itself an authorized main-branch release. If GitHub attestation is unavailable, do not substitute a local checksum or skip provenance: release remains blocked until an authorized signing provider and pinned verifier are available.
+
+## Product-state golden review pack
+
+The workflow packages seven native WebView2 screenshot candidates: editor, terminal and PDF for independent profiles A/B, plus math. `15host-review-index.json` includes individual PNG SHA-256, receipt SHA-256, capture environment, exact source HEAD, 15F reference and explicit per-surface criteria. `python tools/host15_review_package.py --input DIR --source-sha SHA --output DIR/15host-review-index.json` verifies candidate bytes and rejects mutated receipt/source/PNG or spoofed approval flags. `--compare-dir INDEPENDENT_BASELINES` permits deterministic exact byte comparison but **never implies golden acceptance**.
+
+The independent reviewer must supply separately approved PRODUCT-state baselines and an attributable approval/provenance record; no candidate may be promoted by the implementation author. The release/build attestation does not approve pixels. Until independent visual approval exists: `approvedGolden=false`, `productAccepted=false`; PR stays Draft/NOT MERGE SAFE. Physical 15L1/15L2/15L3/PERF-01 remain downstream NOT_RUN.

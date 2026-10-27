@@ -1,5 +1,11 @@
 name: 15HOST synthetic native renderer foundation
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/windows-renderer/**'
+      - 'crates/cos-app/**'
+      - '.github/workflows/15host-renderer.yml'
   pull_request:
     paths:
       - 'apps/windows-renderer/**'
@@ -17,6 +23,11 @@ on:
       - 'Cargo.lock'
       - '.github/workflows/15host-renderer.yml'
   workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 jobs:
   windows-contract-and-binary:
     runs-on: windows-latest
@@ -148,13 +159,45 @@ jobs:
           $required = @('WindowsRenderer.exe','WindowsRenderer.dll','WindowsRenderer.deps.json','WindowsRenderer.runtimeconfig.json')
           foreach ($name in $required) { if ($name -notin @($entries | ForEach-Object { $_.path })) { throw "Renderer package missing $name" } }
           if ($entries.Count -gt 128) { throw 'Renderer package exceeds file count bound' }
-          $json = @{ format=1; files=$entries } | ConvertTo-Json -Depth 6 -Compress
+          $json = @{ format=1; sourceSha=$env:SOURCE_SHA; files=$entries } | ConvertTo-Json -Depth 6 -Compress
           $manifest = Join-Path $root 'renderer-integrity.json'
           [IO.File]::WriteAllText($manifest, $json, (New-Object Text.UTF8Encoding($false)))
           $manifestSha = (Get-FileHash -LiteralPath $manifest -Algorithm SHA256).Hash.ToLowerInvariant()
           $exeSha = (Get-FileHash -LiteralPath (Join-Path $root 'WindowsRenderer.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
           "$env:SOURCE_SHA $exeSha $manifestSha" | Out-File -FilePath 'apps/windows-renderer/sha256-manifest.txt' -Encoding ascii
           Write-Host "Attested renderer payload: $($entries.Count) files; manifest SHA256 $manifestSha; EXE SHA256 $exeSha"
+      # This is an OIDC-signed BUILD provenance for the manifest bytes.
+      # PR attestations remain CANDIDATES: production launch permits only
+      # signer identity on refs/heads/main and exact source digest.
+      - name: Issue OIDC/Sigstore SLSA provenance for complete payload manifest
+        uses: actions/attest@v4
+        with:
+          subject-path: apps/windows-renderer/renderer-package/renderer-integrity.json
+      - name: Verify OIDC origin, source identity and forged-release negatives
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $manifest = 'apps/windows-renderer/renderer-package/renderer-integrity.json'
+          $policy = @('--repo', $env:GITHUB_REPOSITORY,
+            '--signer-workflow', "$env:GITHUB_REPOSITORY/.github/workflows/15host-renderer.yml",
+            '--source-ref', $env:GITHUB_REF, '--source-digest', $env:GITHUB_SHA)
+          & gh attestation verify $manifest @policy
+          if ($LASTEXITCODE -ne 0) { throw 'Genuine OIDC source attestation not verified' }
+          foreach ($mutation in @('forged-issuer','mismatched-source','substituted-artifact','incorrect-sha')) {
+            if ($mutation -eq 'forged-issuer') {
+              & gh attestation verify $manifest --repo $env:GITHUB_REPOSITORY --signer-workflow 'attacker/fake/.github/workflows/fake.yml' --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA 2>$null
+            } elseif ($mutation -eq 'mismatched-source') {
+              & gh attestation verify $manifest --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/15host-renderer.yml" --source-ref $env:GITHUB_REF --source-digest ('0' * 40) 2>$null
+            } else {
+              $tamper = Join-Path $env:RUNNER_TEMP 'renderer-integrity.json'
+              Copy-Item $manifest $tamper -Force
+              Add-Content -LiteralPath $tamper -Value "forged-$mutation" -NoNewline
+              & gh attestation verify $tamper @policy 2>$null
+            }
+            if ($LASTEXITCODE -eq 0) { throw "Forged attestation unexpectedly accepted: $mutation" }
+          }
+          Write-Host "OIDC signer/ref/source/artifact negative tests PASS (candidate, not authorized release)"
       - name: Validate renderer dependency-tampering regression
         shell: pwsh
         run: |
@@ -196,6 +239,13 @@ jobs:
           }
           cargo test -p cos-app post_verification_managed_dll_swap_and_rename_are_denied_while_guard_is_alive --locked -- --nocapture --test-threads=1
           if ($LASTEXITCODE -ne 0) { throw '15HOST post-attestation malicious DLL swap accepted' }
+      - name: Build 7-surface native screenshot reviewer package (never self-approve)
+        shell: pwsh
+        run: |
+          python -m unittest tools.test_host15_review_package -v
+          if ($LASTEXITCODE -ne 0) { throw '15HOST reviewer-package negative tests failed' }
+          python tools/host15_review_package.py --input apps/windows-renderer/15host-product-candidates --source-sha $env:SOURCE_SHA --environment 'GitHub Actions windows-latest, .NET 8, Rust hosted WebView2, synthetic-only' --output apps/windows-renderer/15host-product-candidates/15host-review-index.json
+          if ($LASTEXITCODE -ne 0) { throw '15HOST reviewer-package provenance rejected' }
       - name: Upload native product-state screenshot candidates (NOT approved goldens)
         if: always()
         uses: actions/upload-artifact@v4
