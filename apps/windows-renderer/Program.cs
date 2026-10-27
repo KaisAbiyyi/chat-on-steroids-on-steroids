@@ -653,6 +653,7 @@ internal sealed class RendererWindow : Form
                 if (pixels.Length <= 0 || pixels.Length > 16_777_216)
                     throw new InvalidDataException("Native E2E preview exceeded byte budget");
                 var pngSha = Convert.ToHexString(SHA256.HashData(pixels.ToArray())).ToLowerInvariant();
+                SaveProductCandidate("math", "single", pixels.ToArray());
                 _ipc!.SendPayload(JsonSerializer.Serialize(new {
                     kind = "renderer-closing", probeComplete = true,
                     historyTotal = 6000, pageLimit = 24,
@@ -666,6 +667,40 @@ internal sealed class RendererWindow : Form
             throw new InvalidDataException("Unexpected synthetic E2E IPC state");
         }
         catch (Exception error) { Fail(error); }
+    }
+
+    // Candidate-only provenance; never promotes implementor captures to
+    // independently approved product goldens.
+    private async Task CaptureProductCandidateAsync(string surface, string profile)
+    {
+        await Task.Delay(200);
+        await using var pixels = new MemoryStream();
+        await _browser.CoreWebView2.CapturePreviewAsync(
+            CoreWebView2CapturePreviewImageFormat.Png, pixels);
+        var bytes = pixels.ToArray();
+        if (bytes.Length == 0 || bytes.Length > 16_777_216)
+            throw new InvalidDataException("Native product-state capture is outside budget");
+        SaveProductCandidate(surface, profile, bytes);
+    }
+
+    private static void SaveProductCandidate(string surface, string profile, byte[] image)
+    {
+        var dir = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
+        if (string.IsNullOrWhiteSpace(dir)) return;
+        if (!Path.IsPathFullyQualified(dir) ||
+            surface is not ("editor" or "terminal" or "pdf" or "math") ||
+            profile is not ("a" or "b" or "single"))
+            throw new InvalidDataException("Invalid synthetic product screenshot destination");
+        Directory.CreateDirectory(dir);
+        var filename = "15host-product-" + surface + "-" + profile;
+        File.WriteAllBytes(Path.Combine(dir, filename + ".png"), image);
+        File.WriteAllText(Path.Combine(dir, filename + ".json"), JsonSerializer.Serialize(new {
+            sourceSha = Environment.GetEnvironmentVariable("SOURCE_SHA"),
+            productState = true, syntheticData = true,
+            surface, profile,
+            pngSha256 = Convert.ToHexString(SHA256.HashData(image)).ToLowerInvariant(),
+            approvedGolden = false, productAccepted = false
+        }));
     }
 
     private async Task ContinueAbProbeAsync(string payloadJson)
@@ -750,10 +785,21 @@ internal sealed class RendererWindow : Form
                         $"synthetic-15host-{_abProfile}-secondary")
                     throw new InvalidDataException("A/B stale revision did not fail closed");
                 _abStep = 5;
-                ProbeIntent(new { kind = "open-rich", surface = "terminal" });
+                ProbeIntent(new { kind = "open-rich", surface = "editor" });
                 return;
             }
             if (_abStep == 5)
+            {
+                if (!state.GetProperty("rich").GetProperty("panels")
+                    .EnumerateArray().Any(panel =>
+                        panel.GetProperty("kind").GetString() == "editor"))
+                    throw new InvalidDataException("Host editor contract missing");
+                await CaptureProductCandidateAsync("editor", _abProfile);
+                _abStep = 6;
+                ProbeIntent(new { kind = "open-rich", surface = "terminal" });
+                return;
+            }
+            if (_abStep == 6)
             {
                 var terminal = state.GetProperty("rich").GetProperty("panels")
                     .EnumerateArray().FirstOrDefault(panel =>
@@ -764,11 +810,12 @@ internal sealed class RendererWindow : Form
                     terminal.GetProperty("output").GetString()!.Contains(
                         $"HOST-TERMINAL-{_abProfile}-primary", StringComparison.Ordinal))
                     throw new InvalidDataException("Host terminal output is not session-isolated");
-                _abStep = 6;
+                await CaptureProductCandidateAsync("terminal", _abProfile);
+                _abStep = 7;
                 ProbeIntent(new { kind = "open-rich", surface = "pdf" });
                 return;
             }
-            if (_abStep == 6)
+            if (_abStep == 7)
             {
                 var asset = state.GetProperty("pdfPage");
                 if (asset.ValueKind != JsonValueKind.Object ||
@@ -777,7 +824,7 @@ internal sealed class RendererWindow : Form
                     !System.Text.RegularExpressions.Regex.IsMatch(
                         asset.GetProperty("sha256").GetString()!, "^[a-f0-9]{64}$"))
                     throw new InvalidDataException("Host PDF page was not authenticated/authorized");
-                _abStep = 7;
+                _abStep = 8;
                 await Task.Delay(450);
                 var script = "(()=>{const rows=document.getElementById('historyCanvas').textContent;" +
                     "const img=document.querySelector('#richSurface .pdf-page img');" +
@@ -788,27 +835,7 @@ internal sealed class RendererWindow : Form
                 var visible = await _browser.CoreWebView2.ExecuteScriptAsync(script);
                 if (visible.Trim() != "true")
                     throw new InvalidDataException("PDF raster failed native render or old session leaked");
-                await using var pixels = new MemoryStream();
-                await _browser.CoreWebView2.CapturePreviewAsync(
-                    CoreWebView2CapturePreviewImageFormat.Png, pixels);
-                var image = pixels.ToArray();
-                if (image.Length == 0 || image.Length > 16_777_216)
-                    throw new InvalidDataException("Product PDF screenshot outside bounds");
-                var candidateDir = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
-                if (!string.IsNullOrWhiteSpace(candidateDir) && Path.IsPathFullyQualified(candidateDir))
-                {
-                    Directory.CreateDirectory(candidateDir);
-                    var filename = "15host-product-pdf-" + _abProfile;
-                    File.WriteAllBytes(Path.Combine(candidateDir, filename + ".png"), image);
-                    File.WriteAllText(Path.Combine(candidateDir, filename + ".json"),
-                        JsonSerializer.Serialize(new {
-                            sourceSha = Environment.GetEnvironmentVariable("SOURCE_SHA"),
-                            productState = true, syntheticData = true,
-                            surface = "pdf", profile = _abProfile,
-                            pngSha256 = Convert.ToHexString(SHA256.HashData(image)).ToLowerInvariant(),
-                            approvedGolden = false, productAccepted = false
-                        }));
-                }
+                await CaptureProductCandidateAsync("pdf", _abProfile);
                 _ipc!.SendPayload(JsonSerializer.Serialize(new {
                     kind = "renderer-closing", probeComplete = true,
                     abIsolation = true, selectedProfile = _abProfile,
