@@ -74,17 +74,23 @@ pub fn launch(
     } else {
         false
     };
+    let ab_probe = if let Some(index) = args.iter().position(|item| item == "--synthetic-15host-ab") {
+        args.remove(index);
+        true
+    } else {
+        false
+    };
     let injection = take_option(&mut args, "--synthetic-15host-inject")?;
     if injection.as_deref().is_some_and(|kind| {
         !matches!(
             kind,
             "hang" | "early-exit" | "malformed" | "replay" | "stale"
         )
-    }) || (synthetic_probe && injection.is_some())
+    }) || ((synthetic_probe || ab_probe) && injection.is_some()) || (synthetic_probe && ab_probe)
     {
         return Err(invalid("Unsupported or conflicting synthetic injection"));
     }
-    if (synthetic_probe || injection.is_some())
+    if (synthetic_probe || ab_probe || injection.is_some())
         && std::fs::read(data_directory.join("15host-synthetic-fixture.marker"))?
             != b"15HOST_SYNTHETIC_CLOUD_E2E_V1"
     {
@@ -128,6 +134,8 @@ pub fn launch(
     command.arg("--authenticated-ipc");
     if synthetic_probe {
         command.arg("--synthetic-probe");
+    } else if ab_probe {
+        command.arg("--synthetic-ab");
     } else if let Some(mode) = injection.as_deref() {
         command.args(["--synthetic-inject", mode]);
     }
@@ -192,7 +200,8 @@ pub fn launch(
             &mut writer,
             &mut authenticator,
             &mut host,
-            synthetic_probe,
+            synthetic_probe || ab_probe,
+            ab_probe,
         )?;
         // An authenticated closing frame does not mean the child exited.
         // Enforce bounded shutdown, and fail if it must be killed.
@@ -208,7 +217,8 @@ pub fn launch(
             "manifestSha256":manifest_sha,
             "sourceBound":true,
             "syntheticOnly":false,
-            "syntheticProbeComplete":synthetic_probe
+            "syntheticProbeComplete":synthetic_probe || ab_probe,
+            "abIsolationComplete":ab_probe
         }))
     })();
     // Close the write end to let a healthy child finish promptly.
@@ -235,6 +245,7 @@ fn renderer_loop(
     authenticator: &mut RendererIpcAuthenticator,
     host: &mut RendererHostState,
     synthetic_probe: bool,
+    ab_probe: bool,
 ) -> io::Result<()> {
     loop {
         if child.try_wait()?.is_some() {
@@ -253,6 +264,9 @@ fn renderer_loop(
         if verified.payload["kind"] == "renderer-closing" {
             if synthetic_probe && verified.payload["probeComplete"] != true {
                 return Err(invalid("Synthetic 15HOST product E2E proof incomplete"));
+            }
+            if ab_probe && verified.payload["abIsolation"] != true {
+                return Err(invalid("Cross-profile production-path E2E proof incomplete"));
             }
             return Ok(());
         }
@@ -1162,6 +1176,54 @@ mod tests {
                 now.elapsed() < Duration::from_secs(12),
                 "hostile {kind} child hung"
             );
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn hosted_two_profile_native_e2e_foreign_denial_and_stale_clearing() {
+        use cos_store::CreateOptions;
+        let exe = match std::env::var("COSOS_15HOST_E2E_EXE") {
+            Ok(value) => value,
+            Err(_) => return,
+        };
+        let exe_sha = std::env::var("COSOS_15HOST_E2E_EXE_SHA").unwrap();
+        let manifest_sha = std::env::var("COSOS_15HOST_E2E_MANIFEST_SHA").unwrap();
+        // Separate explicitly selected profile roots. No owner data.
+        for tag in ["a", "b"] {
+            let fixture = tempfile::tempdir().unwrap();
+            let root = fixture.path();
+            std::fs::write(root.join("15host-synthetic-fixture.marker"),
+                b"15HOST_SYNTHETIC_CLOUD_E2E_V1").unwrap();
+            let store = SessionStore::open(root).unwrap();
+            let other = if tag == "a" { "b" } else { "a" };
+            for role in ["primary", "secondary"] {
+                let id = format!("synthetic-15host-{tag}-{role}");
+                store.create(CreateOptions {
+                    id: Some(id.clone()),
+                    title: Some(format!("Cloud-only {tag} {role}")),
+                    ..Default::default()
+                }).unwrap();
+                for index in 0..24 {
+                    let content = format!("ISOLATED-{tag}-{role}-{index:02}");
+                    store.append(&id, json!({
+                        "kind":"note", "source":"15host-cloud-synthetic",
+                        "time":index + 1,
+                        "message":{"text":content,"truncated":false,"chars":content.len()}
+                    })).unwrap();
+                }
+            }
+            let forbidden = format!("synthetic-15host-{other}-primary");
+            assert!(store.summary(&forbidden).unwrap().is_none());
+            let proof = launch(&store, root, json!({"ui":{"language":"en"}}), vec![
+                "--renderer".into(), exe.clone(),
+                "--renderer-sha256".into(), exe_sha.clone(),
+                "--renderer-manifest-sha256".into(), manifest_sha.clone(),
+                "--synthetic-15host-ab".into(),
+            ]).unwrap();
+            assert_eq!(proof["authenticated"], true);
+            assert_eq!(proof["abIsolationComplete"], true);
+            assert!(store.summary(&forbidden).unwrap().is_none());
         }
     }
 
