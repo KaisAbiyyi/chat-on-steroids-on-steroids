@@ -207,7 +207,8 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
         }
         let path = root.join(&item.path);
         let metadata = fs::symlink_metadata(&path)?;
-        if !metadata.file_type().is_file() || metadata.len() == 0 || metadata.len() > MAX_FILE_BYTES {
+        if !metadata.file_type().is_file() || metadata.len() == 0 || metadata.len() > MAX_FILE_BYTES
+        {
             return Err(denied());
         }
         total = total.checked_add(metadata.len()).ok_or_else(denied)?;
