@@ -286,6 +286,45 @@ internal static class Program
 #endif
     }
 
+    static string Icacls() => Path.Combine(Environment.GetFolderPath(
+        Environment.SpecialFolder.System),"icacls.exe");
+    static void SealTree(string root)
+    {
+        // A user who owns a child file may override its DACL even if the parent
+        // is locked. Assign every installed file/directory owner to the built-in
+        // Administrators group BEFORE the slot or selector becomes active.
+        Inventory(root); // bounded, refuses linked entries before recursive ACL changes
+        RunChecked(Icacls(),root,"/setowner","*S-1-5-32-544","/T");
+        VerifyOwnedTree(root);
+    }
+    static void VerifyOwnedTree(string root)
+    {
+        Inventory(root);
+        var script="$ErrorActionPreference='Stop';$root="+Quote(root)+";"
+            + "$paths=@(Get-Item -LiteralPath $root -Force);"
+            + "$paths+=@(Get-ChildItem -LiteralPath $root -Recurse -Force);"
+            + "foreach($p in $paths){"
+            + "if(($p.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){exit 8};"
+            + "$acl=Get-Acl -LiteralPath $p.FullName;"
+            + "$owner=try{([Security.Principal.NTAccount]$acl.Owner).Translate([Security.Principal.SecurityIdentifier]).Value}catch{$acl.Owner};"
+            + "if($owner -ne 'S-1-5-32-544'){exit 8};"
+            + "foreach($rule in $acl.Access){"
+            + "$sid=try{$rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value}catch{exit 8};"
+            + "if($sid -notin @('S-1-5-32-544','S-1-5-18')){exit 8};"
+            + "}"
+            + "};[Console]::Write('SEALED')";
+        if(PS(script)!="SEALED")
+            throw new InvalidDataException("Installed child file ownership or DACL not protected");
+    }
+    static void SealStateTemp(string path)
+    {
+        // New selector is fully sealed before the atomic swap, so no writable
+        // same-user state is ever selected.
+        RunChecked(Icacls(),path,"/inheritance:r","/grant:r",
+            "*S-1-5-32-544:F","*S-1-5-18:F");
+        RunChecked(Icacls(),path,"/setowner","*S-1-5-32-544");
+    }
+
     static string SelectorPath(string root) => Path.Combine(root,"active.json");
     static bool SlotName(string name) => SlotPattern.IsMatch(name);
     static Selector ReadState(string root, string publisher)
@@ -295,6 +334,8 @@ internal static class Program
         SafeAncestors(path);
         if (!File.Exists(path) || new FileInfo(path).Length > 4096)
             throw new InvalidDataException("Missing or oversized protected state");
+        // Inventory verifies child ownership and permissions, not only root ACL.
+        VerifyOwnedTree(root);
         var state = JsonSerializer.Deserialize<Selector>(File.ReadAllBytes(path))
             ?? throw new InvalidDataException("Invalid transaction state");
         if (!SlotName(state.Active) || state.Previous is not null &&
@@ -309,6 +350,7 @@ internal static class Program
         VerifyProtection(root);
         var tmp = Path.Combine(root,"state-" + Guid.NewGuid().ToString("N") + ".tmp");
         File.WriteAllBytes(tmp,JsonSerializer.SerializeToUtf8Bytes(state));
+        SealStateTemp(tmp);
         File.Move(tmp,SelectorPath(root),true);
     }
 
@@ -387,6 +429,7 @@ internal static class Program
         VerifyProtection(root);
         var slot = Path.Combine(root,"slots",name);
         SafeAncestors(slot);
+        VerifyOwnedTree(slot);
         var proofPath = SignedProof(root,name);
         var proof = VerifyProof(proofPath,publisher);
         var manifest = Path.Combine(slot,"release.json");
@@ -533,6 +576,7 @@ internal static class Program
             Extract(folder,payload);
             var proof = Path.Combine(folder,"authority","issuer.exe");
             CopyFile(Environment.ProcessPath!,proof);
+            SealTree(stage);
             VerifySlot(stage,slot,publisher);
             SyntheticCrash("before_publish");
             var next = install ? new Selector(slot,null,publisher,version,1) :
