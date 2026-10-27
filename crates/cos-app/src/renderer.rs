@@ -76,8 +76,12 @@ pub fn launch(
     };
     let injection = take_option(&mut args, "--synthetic-15host-inject")?;
     if injection.as_deref().is_some_and(|kind| {
-        !matches!(kind, "hang" | "early-exit" | "malformed" | "replay" | "stale")
-    }) || (synthetic_probe && injection.is_some()) {
+        !matches!(
+            kind,
+            "hang" | "early-exit" | "malformed" | "replay" | "stale"
+        )
+    }) || (synthetic_probe && injection.is_some())
+    {
         return Err(invalid("Unsupported or conflicting synthetic injection"));
     }
     if (synthetic_probe || injection.is_some())
@@ -1129,19 +1133,34 @@ mod tests {
         let manifest_sha = std::env::var("COSOS_15HOST_E2E_MANIFEST_SHA").unwrap();
         let fixture = tempfile::tempdir().unwrap();
         let root = fixture.path();
-        std::fs::write(root.join("15host-synthetic-fixture.marker"),
-            b"15HOST_SYNTHETIC_CLOUD_E2E_V1").unwrap();
+        std::fs::write(
+            root.join("15host-synthetic-fixture.marker"),
+            b"15HOST_SYNTHETIC_CLOUD_E2E_V1",
+        )
+        .unwrap();
         let store = SessionStore::open(root).unwrap();
         for kind in ["early-exit", "malformed", "replay", "stale", "hang"] {
             let now = Instant::now();
-            let outcome = launch(&store, root, json!({"ui":{"language":"en"}}), vec![
-                "--renderer".into(), exe.clone(),
-                "--renderer-sha256".into(), exe_sha.clone(),
-                "--renderer-manifest-sha256".into(), manifest_sha.clone(),
-                "--synthetic-15host-inject".into(), kind.into(),
-            ]);
+            let outcome = launch(
+                &store,
+                root,
+                json!({"ui":{"language":"en"}}),
+                vec![
+                    "--renderer".into(),
+                    exe.clone(),
+                    "--renderer-sha256".into(),
+                    exe_sha.clone(),
+                    "--renderer-manifest-sha256".into(),
+                    manifest_sha.clone(),
+                    "--synthetic-15host-inject".into(),
+                    kind.into(),
+                ],
+            );
             assert!(outcome.is_err(), "hostile {kind} child must fail closed");
-            assert!(now.elapsed() < Duration::from_secs(12), "hostile {kind} child hung");
+            assert!(
+                now.elapsed() < Duration::from_secs(12),
+                "hostile {kind} child hung"
+            );
         }
     }
 
