@@ -290,10 +290,13 @@ dependencies = [
  "cos-mcp",
  "cos-store",
  "cos-tools",
+ "serde",
  "serde_json",
  "sha2",
  "tempfile",
  "tokio",
+ "uuid",
+ "zeroize",
 ]
 
 [[package]]

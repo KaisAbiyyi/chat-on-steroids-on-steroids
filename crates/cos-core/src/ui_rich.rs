@@ -121,7 +121,7 @@ pub struct RichSnapshot {
     pub panels: Vec<RichPanel>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "action", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum RichRendererCommand {
     Snapshot {},
@@ -146,7 +146,7 @@ pub enum RichRendererCommand {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RichRendererRequest {
     pub protocol: u32,

@@ -15,11 +15,14 @@ cos-store = { path = "../cos-store" }
 cos-mcp = { path = "../cos-mcp" }
 cos-tools = { path = "../cos-tools" }
 cos-exec = { path = "../cos-exec" }
+serde.workspace = true
 serde_json.workspace = true
 chrono.workspace = true
 tokio.workspace = true
 tempfile.workspace = true
 sha2.workspace = true
+uuid.workspace = true
+zeroize = "1.8.2"
 
 [dev-dependencies]
 tempfile.workspace = true
