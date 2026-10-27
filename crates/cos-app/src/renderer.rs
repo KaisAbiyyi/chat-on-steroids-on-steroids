@@ -22,15 +22,18 @@ use cos_core::{
     ui_snapshots::{CaptureConfig, CaptureDescriptor, CaptureSurface},
 };
 use cos_store::{SessionStore, model};
+use crate::renderer_integrity;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
-use sha2::{Digest, Sha256};
 use std::{
     fs,
     io::{self, BufRead, BufReader, BufWriter, Write},
     path::{Path, PathBuf},
-    process::{Child, ChildStdin, ChildStdout, Command, Stdio},
+    process::{Child, ChildStdin, ChildStdout, Command, Stdio, ExitStatus},
+    sync::mpsc::{self, Receiver, RecvTimeoutError},
+    thread,
+    time::{Duration, Instant},
 };
 use uuid::Uuid;
 use zeroize::Zeroize;
@@ -39,7 +42,9 @@ const HISTORY_WINDOW_LIMIT: usize = 6_000;
 const SESSION_LIST_LIMIT: usize = 100;
 const PAGE_LIMIT: u64 = MAX_CONVERSATION_PAGE_ITEMS as u64;
 const MAX_INTENT_BYTES: usize = 16 * 1024;
-const MAX_RENDERER_BINARY_BYTES: u64 = 256 * 1024 * 1024;
+const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(35);
+const TRANSPORT_IDLE_TIMEOUT: Duration = Duration::from_secs(20);
+const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub fn launch(
     store: &SessionStore,
@@ -57,6 +62,8 @@ pub fn launch(
         .ok_or_else(|| invalid("UI launch requires --renderer <absolute executable>"))?;
     let expected_sha = take_option(&mut args, "--renderer-sha256")?
         .ok_or_else(|| invalid("UI launch requires --renderer-sha256 from the build receipt"))?;
+    let expected_manifest = take_option(&mut args, "--renderer-manifest-sha256")?
+        .ok_or_else(|| invalid("UI launch requires --renderer-manifest-sha256 from trusted receipt"))?;
     if !args.is_empty() {
         return Err(invalid("Unknown UI launch option"));
     }
@@ -68,17 +75,11 @@ pub fn launch(
         return Err(invalid("Renderer path or SHA-256 receipt is invalid"));
     }
     let renderer_path = requested_path.canonicalize()?;
-    let metadata = fs::metadata(&renderer_path)?;
-    if !metadata.is_file() || metadata.len() == 0 || metadata.len() > MAX_RENDERER_BINARY_BYTES {
-        return Err(invalid("Renderer artifact is not a bounded regular file"));
-    }
-    let artifact = fs::read(&renderer_path)?;
-    let actual_sha = format!("{:x}", Sha256::digest(&artifact));
-    if !actual_sha.eq_ignore_ascii_case(&expected_sha) {
-        return Err(invalid(
-            "Renderer artifact SHA-256 does not match the supplied receipt",
-        ));
-    }
+    // Validate the complete framework-dependent .NET application, not only its apphost EXE.
+    // The manifest digest MUST be independently trusted, never read as an
+    // authoritative value from the renderer directory itself.
+    let manifest_sha = renderer_integrity::verify(&renderer_path, &expected_sha, &expected_manifest)?;
+    let actual_sha = expected_sha.to_ascii_lowercase();
 
     let mut key = [0u8; 32];
     key[..16].copy_from_slice(Uuid::new_v4().as_bytes());
@@ -88,102 +89,103 @@ pub fn launch(
         .max(1);
     let mut authenticator = RendererIpcAuthenticator::new(epoch, key)
         .map_err(|_| invalid("Could not initialize renderer authentication"))?;
-    let mut child = Command::new(&renderer_path)
+    // Guard owns kill + reap, including bootstrap, authentication and state
+    // initialization error paths. No raw Child may escape without Drop cleanup.
+    let child = Command::new(&renderer_path)
         .arg("--authenticated-ipc")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()?;
-    let child_input = child
-        .stdin
-        .take()
+    let mut child = ReapedChild(child);
+    let child_input = child.0.stdin.take()
         .ok_or_else(|| invalid("Renderer stdin unavailable"))?;
-    let child_output = child
-        .stdout
-        .take()
+    let child_output = child.0.stdout.take()
         .ok_or_else(|| invalid("Renderer stdout unavailable"))?;
     let mut writer = BufWriter::new(child_input);
-    let mut reader = BufReader::new(child_output);
+    let (frames, reader_thread) = start_bounded_reader(child_output);
 
-    let bootstrap = json!({
-        "kind": "bootstrap",
-        "protocol": RENDERER_IPC_PROTOCOL,
-        "epoch": epoch,
-        "key": encode_hex(&key)
-    });
-    write_json_line(&mut writer, &bootstrap)?;
-    let ready_raw = read_bounded_line(&mut reader, MAX_RENDERER_IPC_FRAME_BYTES)?
-        .ok_or_else(|| invalid("Renderer exited before authenticated ready handshake"))?;
-    let ready = authenticator
-        .verify_inbound(&ready_raw)
-        .map_err(|_| invalid("Renderer ready handshake authentication failed"))?;
-    let nonce = ready.payload["rendererNonce"].as_str().unwrap_or("");
-    if ready.payload["kind"] != "ready"
-        || nonce.len() != 32
-        || !nonce.bytes().all(|b| b.is_ascii_hexdigit())
-    {
-        let _ = child.kill();
-        return Err(invalid("Renderer ready handshake contract rejected"));
-    }
+    let outcome = (|| -> io::Result<Value> {
+        let bootstrap = json!({
+            "kind": "bootstrap",
+            "protocol": RENDERER_IPC_PROTOCOL,
+            "epoch": epoch,
+            "key": encode_hex(&key)
+        });
+        write_json_line(&mut writer, &bootstrap)?;
+        let ready_raw = receive_frame(&frames, HANDSHAKE_TIMEOUT)?
+            .ok_or_else(|| invalid("Renderer exited before authenticated ready handshake"))?;
+        let ready = authenticator.verify_inbound(&ready_raw)
+            .map_err(|_| invalid("Renderer ready handshake authentication failed"))?;
+        let nonce = ready.payload["rendererNonce"].as_str().unwrap_or("");
+        if ready.payload["kind"] != "ready"
+            || nonce.len() != 32
+            || !nonce.bytes().all(|b| b.is_ascii_hexdigit())
+        {
+            return Err(invalid("Renderer ready handshake contract rejected"));
+        }
+        let locale = config["ui"]["language"]
+            .as_str()
+            .or_else(|| config["ui"]["locale"].as_str());
+        let theme = match config["ui"]["theme"].as_str() {
+            Some("light") => Theme::Light,
+            _ => Theme::Dark,
+        };
+        let language = UiLanguage::select(locale);
+        let mut host = RendererHostState::new(epoch, store, theme, language)?;
+        send_state(&mut writer, &mut authenticator, &host)?;
+        renderer_loop(store, &mut child.0, &frames, &mut writer,
+                      &mut authenticator, &mut host)?;
+        // An authenticated closing frame does not mean the child exited.
+        // Enforce bounded shutdown, and fail if it must be killed.
+        let status = child.wait_bounded(SHUTDOWN_TIMEOUT)?;
+        if !status.success() {
+            return Err(invalid("Native renderer exited with a nonzero status"));
+        }
+        Ok(json!({
+            "renderer":"closed",
+            "authenticated":true,
+            "epoch":epoch,
+            "artifactSha256":actual_sha,
+            "manifestSha256":manifest_sha,
+            "sourceBound":true,
+            "syntheticOnly":false
+        }))
+    })();
+    // Close the write end to let a healthy child finish promptly.
+    drop(writer);
+    if outcome.is_err() { child.stop(); }
+    // Reader was bounded by the process lifetime, not an indefinite join.
+    // Kill/reap occurs before the receiver is dropped on failure.
+    drop(frames);
+    if outcome.is_ok() { let _ = reader_thread.join(); }
+    return outcome;
 
-    let locale = config["ui"]["language"]
-        .as_str()
-        .or_else(|| config["ui"]["locale"].as_str());
-    let theme = match config["ui"]["theme"].as_str() {
-        Some("light") => Theme::Light,
-        Some("dark") => Theme::Dark,
-        _ => Theme::Dark,
-    };
-    let language = UiLanguage::select(locale);
-    let mut host = RendererHostState::new(epoch, store, theme, language)?;
-    send_state(&mut writer, &mut authenticator, &host)?;
-
-    let result = renderer_loop(
-        store,
-        &mut child,
-        &mut reader,
-        &mut writer,
-        &mut authenticator,
-        &mut host,
-    );
-    if result.is_err() {
-        let _ = child.kill();
-    }
-    let status = child.wait()?;
-    result?;
-    if !status.success() {
-        return Err(invalid("Native renderer exited with a nonzero status"));
-    }
-    Ok(json!({
-        "renderer": "closed",
-        "authenticated": true,
-        "epoch": epoch,
-        "artifactSha256": actual_sha,
-        "sourceBound": true,
-        "syntheticOnly": false
-    }))
 }
 
 fn renderer_loop(
     store: &SessionStore,
     child: &mut Child,
-    reader: &mut BufReader<ChildStdout>,
+    frames: &Receiver<io::Result<Option<Vec<u8>>>>,
     writer: &mut BufWriter<ChildStdin>,
     authenticator: &mut RendererIpcAuthenticator,
     host: &mut RendererHostState,
 ) -> io::Result<()> {
     loop {
         if child.try_wait()?.is_some() {
-            return Ok(());
+            return Err(invalid("Native renderer exited without authenticated closing"));
         }
-        let Some(raw) = read_bounded_line(reader, MAX_RENDERER_IPC_FRAME_BYTES)? else {
-            return Ok(());
+        let Some(raw) = receive_frame(frames, TRANSPORT_IDLE_TIMEOUT)? else {
+            return Err(invalid("Native renderer pipe closed without authenticated closing"));
         };
         let verified = authenticator.verify_inbound(&raw).map_err(|_| {
             invalid("Renderer IPC authentication, epoch, sequence, or size check failed")
         })?;
         if verified.payload["kind"] == "renderer-closing" {
             return Ok(());
+        }
+        if verified.payload["kind"] == "renderer-heartbeat" {
+            continue;
         }
         if verified.payload["kind"] != "ui-intent" {
             let _ = child.kill();
@@ -199,6 +201,57 @@ fn renderer_loop(
             host.last_error = Some(code.to_owned());
         }
         send_state(writer, authenticator, host)?;
+    }
+}
+
+struct ReapedChild(Child);
+impl ReapedChild {
+    fn stop(&mut self) {
+        if self.0.try_wait().ok().flatten().is_none() {
+            let _ = self.0.kill();
+        }
+        let _ = self.0.wait();
+    }
+    fn wait_bounded(&mut self, timeout: Duration) -> io::Result<ExitStatus> {
+        let deadline = Instant::now() + timeout;
+        loop {
+            if let Some(status) = self.0.try_wait()? { return Ok(status); }
+            if Instant::now() >= deadline {
+                self.stop();
+                return Err(invalid("Native renderer shutdown timed out"));
+            }
+            thread::sleep(Duration::from_millis(25));
+        }
+    }
+}
+impl Drop for ReapedChild {
+    fn drop(&mut self) { self.stop(); }
+}
+
+fn start_bounded_reader(
+    output: ChildStdout
+) -> (Receiver<io::Result<Option<Vec<u8>>>>, thread::JoinHandle<()>) {
+    // A small queue bounds memory even when a compromised child floods stdout.
+    let (sender, receiver) = mpsc::sync_channel(4);
+    let thread = thread::spawn(move || {
+        let mut reader = BufReader::new(output);
+        loop {
+            let frame = read_bounded_line(&mut reader, MAX_RENDERER_IPC_FRAME_BYTES);
+            let terminal = !matches!(frame, Ok(Some(_)));
+            if sender.try_send(frame).is_err() || terminal { break; }
+        }
+    });
+    (receiver, thread)
+}
+
+fn receive_frame(
+    frames: &Receiver<io::Result<Option<Vec<u8>>>>,
+    timeout: Duration
+) -> io::Result<Option<Vec<u8>>> {
+    match frames.recv_timeout(timeout) {
+        Ok(frame) => frame,
+        Err(RecvTimeoutError::Timeout) => Err(invalid("Native renderer IPC deadline exceeded")),
+        Err(RecvTimeoutError::Disconnected) => Err(invalid("Native renderer reader disconnected")),
     }
 }
 
