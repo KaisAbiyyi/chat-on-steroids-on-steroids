@@ -12,7 +12,7 @@ import sys
 
 SURFACES = (
     "editor-a", "editor-b", "terminal-a", "terminal-b",
-    "pdf-a", "pdf-b", "math-single",
+    "pdf-a", "pdf-b", "math-single", "locale-single", "focus-single",
 )
 PREFIX = "15host-product-"
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
@@ -79,7 +79,8 @@ def generate(directory, source_sha, environment, output, compare_dir=None):
             "editor and terminal recorded output (not interactive shell) visible",
             "PDF image is host-authorized pre-rasterized PNG (not native PDF parser)",
             "math is restricted safe MathML (not full TeX)",
-            "A/B profile sentinel isolation, 13 locales and keyboard focus E2E receipts",
+            "A/B profile sentinel isolation and captured last-locale native PNG",
+            "13 native rendered locales and focused MathML activeElement plus native focus PNG",
             "zero unexpected differences from independently approved PRODUCT-state goldens",
         ],
         "surfaceCount": len(records),

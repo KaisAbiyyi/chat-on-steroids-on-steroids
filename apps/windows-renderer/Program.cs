@@ -631,6 +631,9 @@ internal sealed class RendererWindow : Form
                     _probeLocalesChecked++;
                     return;
                 }
+                // Last-locale candidate uses authenticated actual zh-TW DOM,
+                // after the full 13-locale text/render assertions passed.
+                await CaptureProductCandidateAsync("locale", "single");
                 _probeStep = 4;
                 ProbeIntent(new { kind = "focus-event",
                     @event = new { key = "tab", shift = false, ctrl = false, alt = false,
@@ -668,6 +671,7 @@ internal sealed class RendererWindow : Form
                     "if(!area)return false;area.focus();return document.activeElement===area;})()");
                 if (focusDom.Trim() != "true")
                     throw new InvalidDataException("Native WebView2 panel focus semantics failed");
+                await CaptureProductCandidateAsync("focus", "single");
 
                 await using var pixels = new MemoryStream();
                 await _browser.CoreWebView2.CapturePreviewAsync(
@@ -710,7 +714,7 @@ internal sealed class RendererWindow : Form
         var dir = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
         if (string.IsNullOrWhiteSpace(dir)) return;
         if (!Path.IsPathFullyQualified(dir) ||
-            surface is not ("editor" or "terminal" or "pdf" or "math") ||
+            surface is not ("editor" or "terminal" or "pdf" or "math" or "locale" or "focus") ||
             profile is not ("a" or "b" or "single"))
             throw new InvalidDataException("Invalid synthetic product screenshot destination");
         Directory.CreateDirectory(dir);

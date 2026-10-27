@@ -198,6 +198,9 @@ jobs:
             if ($LASTEXITCODE -eq 0) { throw "Forged attestation unexpectedly accepted: $mutation" }
           }
           Write-Host "OIDC signer/ref/source/artifact negative tests PASS (candidate, not authorized release)"
+          # Four expected denials leave a sticky nonzero exit; after asserting
+          # every denial reset it for the successful PowerShell step boundary.
+          $global:LASTEXITCODE = 0
       - name: Validate renderer dependency-tampering regression
         shell: pwsh
         run: |
@@ -239,7 +242,7 @@ jobs:
           }
           cargo test -p cos-app post_verification_managed_dll_swap_and_rename_are_denied_while_guard_is_alive --locked -- --nocapture --test-threads=1
           if ($LASTEXITCODE -ne 0) { throw '15HOST post-attestation malicious DLL swap accepted' }
-      - name: Build 7-surface native screenshot reviewer package (never self-approve)
+      - name: Build 9-surface native screenshot reviewer package (never self-approve)
         shell: pwsh
         run: |
           python -m unittest tools.test_host15_review_package -v

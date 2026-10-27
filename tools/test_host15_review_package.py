@@ -30,9 +30,9 @@ class ReviewEvidenceTests(unittest.TestCase):
     def run_review(self, compare=None):
         return reviewer.generate(self.root, HEAD, "windows-latest", self.root / "index.json", compare)
 
-    def test_seven_candidates_are_validated_but_not_approved(self):
+    def test_nine_candidates_are_validated_but_not_approved(self):
         result = self.run_review()
-        self.assertEqual(result["surfaceCount"], 7)
+        self.assertEqual(result["surfaceCount"], 9)
         self.assertFalse(result["approvedGolden"])
         self.assertFalse(result["productAccepted"])
         self.assertEqual(result["comparison"], "NOT_RUN_NO_INDEPENDENT_APPROVED_BASELINE")
