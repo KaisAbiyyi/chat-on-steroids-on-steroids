@@ -68,6 +68,12 @@ class PackageTests(unittest.TestCase):
         with self.assertRaises(pkg.Refused):
             pkg.verify(self.bundle, SHA)
 
+    def test_windows_reserved_aliases_and_trailing_dots_denied(self):
+        for name in ("CON.txt", "AUX", "runtimes/COM1.dll",
+                     "unsafe/file.", "unsafe/file ", "unsafe/question?.dll"):
+            with self.subTest(path=name):
+                self.assertFalse(pkg.safe_name(name))
+
     def test_version_and_source_refuse(self):
         self.build()
         with self.assertRaises(pkg.Refused):
