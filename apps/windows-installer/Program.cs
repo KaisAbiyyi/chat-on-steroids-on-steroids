@@ -513,8 +513,59 @@ internal static class Program
             throw new InvalidDataException("Unowned files or directories must survive");
         Directory.Delete(directory);
     }
+    static void RecoverStages(string root,string publisher)
+    {
+        // Same install-root basename + random stage ID; never scan other
+        // products, profiles or unrelated D: directories.
+        var parent=Path.GetDirectoryName(root)!;
+        SafeAncestors(parent);
+        var baseName=".cosos-16pkg-"+Path.GetFileName(root)+"-stage-";
+        foreach(var stage in Directory.GetDirectories(parent))
+        {
+            string name=Path.GetFileName(stage);
+            if (!name.StartsWith(baseName,StringComparison.OrdinalIgnoreCase)
+                || !Regex.IsMatch(name.Substring(baseName.Length),"^[a-f0-9]{32}$"))
+                continue;
+            SafeAncestors(stage);
+            VerifyProtection(stage);
+            var inventory=Inventory(stage);
+            var containers=Directory.GetDirectories(Path.Combine(stage,"slots"));
+            if (containers.Length!=1 || !SlotName(Path.GetFileName(containers[0])))
+                throw new InvalidDataException("Unrecognized staged transaction; preserved");
+            var slot=Path.GetFileName(containers[0]);
+            var authority=SignedProof(stage,slot);
+            if (!File.Exists(authority))
+            {
+                if (inventory.Files.Count!=0)
+                    throw new InvalidDataException("Incomplete unsigned stage quarantined");
+                // Empty aborted stage: no file data to remove.
+                foreach(var dir in inventory.Dirs.OrderByDescending(p=>p.Length))
+                    if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
+            }
+            else
+            {
+                // This works even when payload extraction was interrupted.
+                CleanOwnedSlot(stage,slot,publisher);
+                var stateFile=SelectorPath(stage);
+                if (File.Exists(stateFile))
+                {
+                    var selector=ReadState(stage,publisher);
+                    if(selector.Active!=slot || selector.Previous is not null)
+                        throw new InvalidDataException("Staged selector did not belong to release");
+                    File.Delete(stateFile);
+                }
+                var slots=Path.Combine(stage,"slots");
+                if (Directory.Exists(slots) && !Directory.EnumerateFileSystemEntries(slots).Any())
+                    Directory.Delete(slots);
+            }
+            if (Directory.EnumerateFileSystemEntries(stage).Any())
+                throw new InvalidDataException("Unowned staging data preserved");
+            Directory.Delete(stage);
+        }
+    }
     static void Recover(string root,string publisher)
     {
+        RecoverStages(root,publisher);
         var tombstone = root + "-uninstalling";
         if (Directory.Exists(tombstone))
         {
@@ -523,6 +574,7 @@ internal static class Program
             CompleteUninstall(tombstone,publisher);
             return;
         }
+        if (!Directory.Exists(root)) return;
         var state = ReadState(root,publisher);
         VerifySlot(root,state.Active,publisher);
         if (state.Previous is not null) VerifySlot(root,state.Previous,publisher);
@@ -574,9 +626,12 @@ internal static class Program
         {
             Directory.CreateDirectory(stage);
             Protect(stage);
-            Extract(folder,payload);
+            Directory.CreateDirectory(folder);
+            // Install the cryptographic authority first. An interrupted
+            // extraction can then be pruned against the signed embedded index.
             var proof = Path.Combine(folder,"authority","issuer.exe");
             CopyFile(Environment.ProcessPath!,proof);
+            Extract(folder,payload);
             SealTree(stage);
             VerifySlot(stage,slot,publisher);
             SyntheticCrash("before_publish");
