@@ -557,6 +557,7 @@ internal static class Program
         var slot = "slot-" + Guid.NewGuid().ToString("N");
         var folder = Path.Combine(stage,"slots",slot);
         var publishedSlot = false;
+        var selectorPublished = false;
         Selector? previous = null;
         if (!install)
         {
@@ -596,6 +597,7 @@ internal static class Program
                 SyntheticCrash("after_slot_publish");
                 VerifySlot(root,slot,publisher);
                 WriteState(root,next);
+                selectorPublished = true;
                 SyntheticCrash("after_selector_publish");
                 if (Directory.Exists(Path.Combine(stage,"slots")))
                     Directory.Delete(Path.Combine(stage,"slots"));
@@ -617,7 +619,9 @@ internal static class Program
                 if (!Directory.EnumerateFileSystemEntries(stage).Any())
                     Directory.Delete(stage);
             }
-            if (publishedSlot && Directory.Exists(Path.Combine(root,"slots",slot)))
+            // After selector commit the new release is ACTIVE; never clean it
+            // if a subsequent non-critical stage cleanup fails.
+            if (publishedSlot && !selectorPublished && Directory.Exists(Path.Combine(root,"slots",slot)))
                 try { CleanOwnedSlot(root,slot,publisher); } catch { }
             throw;
         }
