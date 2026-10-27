@@ -251,6 +251,34 @@ internal static class Program
         }
     }
 
+    // Walk owned directories without traversing untrusted filesystem links.
+    private static (List<string> Files, List<string> Directories) Inventory(string root)
+    {
+        var files = new List<string>();
+        var dirs = new List<string>();
+        void Visit(string path, int depth)
+        {
+            if (depth > 12) throw new InvalidDataException("Directory depth exceeded");
+            SafeAncestors(path);
+            foreach (var item in Directory.GetFileSystemEntries(path))
+            {
+                SafeAncestors(item);
+                var attrs = File.GetAttributes(item);
+                if ((attrs & FileAttributes.ReparsePoint) != 0)
+                    throw new InvalidDataException("Linked installation entry refused");
+                if ((attrs & FileAttributes.Directory) != 0)
+                {
+                    dirs.Add(item);
+                    Visit(item, depth + 1);
+                }
+                else files.Add(item);
+                if (files.Count > MaxFiles + 8 || dirs.Count > MaxFiles + 8)
+                    throw new InvalidDataException("Installation inventory count exceeded");
+            }
+        }
+        Visit(root, 0);
+        return (files, dirs);
+    }
     private static void VerifySlot(string root, string name)
     {
         if (!SlotName(name)) throw new InvalidDataException("Invalid version slot");
@@ -261,8 +289,8 @@ internal static class Program
         using var doc = JsonDocument.Parse(File.ReadAllBytes(release));
         string source = doc.RootElement.GetProperty("source_sha").GetString() ?? "";
         var indexed = ReadManifest(File.ReadAllBytes(release), source);
-        var files = Directory.GetFiles(slot, "*", SearchOption.AllDirectories);
-        if (files.Length != indexed.Count + 1) throw new InvalidDataException("Slot has extra/unowned files");
+        var files = Inventory(slot).Files;
+        if (files.Count != indexed.Count + 1) throw new InvalidDataException("Slot has extra/unowned files");
         foreach (var (relative, expected) in indexed)
         {
             var file = Path.Combine(slot, relative.Replace('/', Path.DirectorySeparatorChar));
@@ -352,11 +380,24 @@ internal static class Program
             foreach (var path in Directory.GetFiles(folder, "*", SearchOption.AllDirectories))
                 expected.Add(path);
         }
-        var actual = Directory.GetFiles(root, "*", SearchOption.AllDirectories);
+        var inventory = Inventory(root);
+        var actual = inventory.Files;
         if (!expected.SetEquals(actual))
             throw new InvalidDataException("Unowned/modified installation bytes remain; uninstall refused");
+        var expectedDirs = new HashSet<string>(ICase);
+        foreach (var file in expected)
+        {
+            string? dir = Path.GetDirectoryName(file);
+            while (dir is not null && !ICase.Equals(dir, root))
+            {
+                expectedDirs.Add(dir);
+                dir = Path.GetDirectoryName(dir);
+            }
+        }
+        if (!expectedDirs.SetEquals(inventory.Directories))
+            throw new InvalidDataException("Unowned installation directories must survive");
         foreach (var file in actual) { SafeAncestors(file); File.Delete(file); }
-        foreach (var dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories)
+        foreach (var dir in inventory.Directories
                       .OrderByDescending(s => s.Length))
         {
             SafeAncestors(dir);
