@@ -576,12 +576,24 @@ internal sealed class RendererWindow : Form
                 if (state.GetProperty("focus").ValueKind != JsonValueKind.Object)
                     throw new InvalidDataException("Native typed focus state missing");
                 _probeStep = 5;
+                ProbeIntent(new { kind = "open-rich", surface = "math" });
+                return;
+            }
+
+            if (_probeStep == 5)
+            {
+                var richPanels = state.GetProperty("rich").GetProperty("panels");
+                if (!richPanels.EnumerateArray().Any(panel =>
+                    panel.GetProperty("kind").GetString() == "math"))
+                    throw new InvalidDataException("Native 15C math panel not published by Rust");
+                _probeStep = 6;
                 await Task.Delay(200);
                 var js = await _browser.CoreWebView2.ExecuteScriptAsync(
                     "(()=>document.documentElement.lang==='zh-TW'&&" +
                     "document.getElementById('modeBadge').textContent==='AUTHENTICATED'&&" +
                     "document.querySelectorAll('#historyCanvas .message').length<=24&&" +
-                    "document.querySelectorAll('#sessionList button.session').length===1)()");
+                    "document.querySelectorAll('#sessionList button.session').length===1&&" +
+                    "document.querySelectorAll('#richSurface math msup').length===3)()");
                 if (js.Trim() != "true")
                     throw new InvalidDataException("Native WebView2 DOM localization/history proof failed");
 
