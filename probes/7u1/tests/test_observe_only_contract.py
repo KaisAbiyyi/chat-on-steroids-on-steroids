@@ -1,7 +1,10 @@
 """Synthetic-only regressions for the 7U1 observe-only contract model."""
 from dataclasses import replace
+from pathlib import Path
+import sys
 import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from observe_only_contract import (
     MAX_SNAPSHOT_BYTES,
     ObservationContext,
