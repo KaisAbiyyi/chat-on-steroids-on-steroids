@@ -1538,7 +1538,10 @@ mod tests {
                 )
                 .unwrap();
             let state = projection.state_json().unwrap();
-            assert!(state["pdfPage"].is_object(), "Host PDF raster projection absent");
+            assert!(
+                state["pdfPage"].is_object(),
+                "Host PDF raster projection absent"
+            );
             assert_eq!(state["pdfPage"]["format"], "image/png");
             assert!(!state["pdfPage"]["base64"].as_str().unwrap().is_empty());
             let proof = launch(
