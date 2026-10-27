@@ -1479,17 +1479,34 @@
       "status": "todo"
     },
     {
+      "id": "16PKG-01",
+      "title": "Source-pinned native Windows installer and signed release candidate",
+      "depends_on": [
+        "16B",
+        "16C",
+        "16E",
+        "15G"
+      ],
+      "resource_locks": [
+        "release-native-installer"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "claimed"
+    },
+    {
       "id": "16L1",
       "title": "Native clean install/uninstall/updater",
       "depends_on": [
-        "16E"
+        "16E",
+        "16PKG-01"
       ],
       "resource_locks": [
         "windows-installer"
       ],
       "phase": "16",
       "kind": "L",
-      "status": "todo"
+      "status": "blocked"
     },
     {
       "id": "16L2",
