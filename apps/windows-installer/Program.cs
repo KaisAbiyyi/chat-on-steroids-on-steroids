@@ -690,6 +690,17 @@ internal static class Program
     static void CompleteUninstall(string tombstone,string publisher)
     {
         VerifyProtection(tombstone);
+        // The selector is deleted LAST. If terminated between selector
+        // deletion and final rmdir, an ACL-protected empty tombstone may be
+        // safely removed on the next recovery invocation.
+        if (!File.Exists(SelectorPath(tombstone)))
+        {
+            var remaining=Inventory(tombstone);
+            if (remaining.Files.Count!=0 || remaining.Dirs.Count!=0)
+                throw new InvalidDataException("Incomplete tombstone without trusted state");
+            Directory.Delete(tombstone);
+            return;
+        }
         var state=ReadState(tombstone,publisher);
         foreach(var slot in new[]{state.Previous,state.Active})
             if(slot is not null) CleanOwnedSlot(tombstone,slot,publisher);
