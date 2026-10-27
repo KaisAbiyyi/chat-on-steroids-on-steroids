@@ -71,7 +71,9 @@ internal static class Program
             return 17;
         }
 
-        if (args.SequenceEqual(["--authenticated-ipc"]) || args.SequenceEqual(["--authenticated-ipc", "--synthetic-probe"]))
+        if (args.SequenceEqual(["--authenticated-ipc"]) ||
+            args.SequenceEqual(["--authenticated-ipc", "--synthetic-probe"]) ||
+            args.SequenceEqual(["--authenticated-ipc", "--synthetic-ab"]))
         {
             try
             {
@@ -81,7 +83,9 @@ internal static class Program
                     ?? throw new InvalidDataException("Missing renderer bootstrap");
                 using var ipc = RendererIpcClient.FromBootstrap(bootstrap, input, output);
                 ApplicationConfiguration.Initialize();
-                using var window = new RendererWindow(false, ipc, CaptureMode.None, "editor", args.Length == 2);
+                using var window = new RendererWindow(false, ipc, CaptureMode.None, "editor",
+                    args.Length == 2 && args[1] == "--synthetic-probe",
+                    args.Length == 2 && args[1] == "--synthetic-ab");
                 Application.Run(window);
                 return Environment.ExitCode;
             }
@@ -255,6 +259,9 @@ internal sealed class RendererWindow : Form
     private readonly CaptureMode _captureMode;
     private readonly string _captureSurface;
     private readonly bool _syntheticProbe;
+    private readonly bool _abProbe;
+    private string _abProfile = "";
+    private int _abStep;
     private bool _probeClosingSent;
     private int _probeStep;
     private int _probeLocalesChecked;
@@ -276,13 +283,14 @@ internal sealed class RendererWindow : Form
     private string _webErrorStatus = "not-observed";
     private string _phase = "initialization";
 
-    internal RendererWindow(bool capture, RendererIpcClient? ipc, CaptureMode captureMode, string captureSurface, bool syntheticProbe = false)
+    internal RendererWindow(bool capture, RendererIpcClient? ipc, CaptureMode captureMode, string captureSurface, bool syntheticProbe = false, bool abProbe = false)
     {
         _capture = capture;
         _ipc = ipc;
         _captureMode = captureMode;
         _captureSurface = captureSurface;
         _syntheticProbe = syntheticProbe;
+        _abProbe = abProbe;
         Text = "CoSoS 15HOST — Native Renderer";
         ClientSize = capture ? new Size(800, 600) : new Size(1280, 820);
         FormBorderStyle = capture ? FormBorderStyle.None : FormBorderStyle.Sizable;
@@ -480,7 +488,7 @@ internal sealed class RendererWindow : Form
         {
             // The synthetic cloud probe drives only explicit host-bound typed
             // intents. Ignore incidental WebView scroll requests during this test.
-            if (_syntheticProbe) return;
+            if (_syntheticProbe || _abProbe) return;
             if (!RendererDocument.TryValidateIntent(args.WebMessageAsJson, out var payload))
             {
                 _browser.CoreWebView2.PostWebMessageAsJson("{\"kind\":\"error\",\"code\":\"invalid-renderer-intent\"}");
@@ -525,6 +533,7 @@ internal sealed class RendererWindow : Form
                 if (!_ready || IsDisposed) return;
                 _browser.CoreWebView2.PostWebMessageAsJson(payloadJson);
                 if (_syntheticProbe) _ = ContinueProbeAsync(payloadJson);
+                if (_abProbe) _ = ContinueAbProbeAsync(payloadJson);
             }));
         }
         catch (Exception) { OnIpcFailure("invalid-host-state"); }
@@ -655,6 +664,110 @@ internal sealed class RendererWindow : Form
                 return;
             }
             throw new InvalidDataException("Unexpected synthetic E2E IPC state");
+        }
+        catch (Exception error) { Fail(error); }
+    }
+
+    private async Task ContinueAbProbeAsync(string payloadJson)
+    {
+        try
+        {
+            using var parsed = JsonDocument.Parse(payloadJson);
+            var state = parsed.RootElement;
+            if (state.GetProperty("mode").GetString() != "authenticated")
+                throw new InvalidDataException("A/B did not execute authenticated production state");
+            var sessions = state.GetProperty("sessions");
+            var navRevision = state.GetProperty("navigation").GetProperty("revision").GetUInt64();
+            var err = state.GetProperty("lastError");
+            if (_abStep == 0)
+            {
+                if (sessions.GetArrayLength() != 2)
+                    throw new InvalidDataException("A/B profile contains an unexpected number of sessions");
+                _abProfile = sessions.EnumerateArray().Any(x =>
+                    x.GetProperty("id").GetString() == "synthetic-15host-a-primary") ? "a" : "b";
+                var validPrefix = "synthetic-15host-" + _abProfile + "-";
+                if (sessions.EnumerateArray().Any(x =>
+                    !x.GetProperty("id").GetString()!.StartsWith(validPrefix, StringComparison.Ordinal)))
+                    throw new InvalidDataException("Foreign session leaked into A/B catalog");
+                _abStep = 1;
+                var foreign = _abProfile == "a" ? "b" : "a";
+                ProbeIntent(new {
+                    kind = "select-session", sessionId = $"synthetic-15host-{foreign}-primary",
+                    expectedRevision = navRevision
+                });
+                return;
+            }
+            if (_abStep == 1)
+            {
+                if (err.GetString() != "session-not-found" ||
+                    state.GetProperty("historyWindow").GetProperty("total").GetInt32() != 0)
+                    throw new InvalidDataException("Foreign-session selection was not denied");
+                _abStep = 2;
+                ProbeIntent(new {
+                    kind = "select-session",
+                    sessionId = $"synthetic-15host-{_abProfile}-primary",
+                    expectedRevision = navRevision
+                });
+                return;
+            }
+            if (_abStep == 2 || _abStep == 3)
+            {
+                var role = _abStep == 2 ? "primary" : "secondary";
+                var conversation = state.GetProperty("conversation");
+                var page = conversation.GetProperty("page");
+                var entries = page.GetProperty("entries");
+                if (err.ValueKind != JsonValueKind.Null ||
+                    conversation.GetProperty("sessionId").GetString() !=
+                        $"synthetic-15host-{_abProfile}-{role}" ||
+                    state.GetProperty("historyWindow").GetProperty("total").GetInt32() != 24 ||
+                    entries.GetArrayLength() != 24 ||
+                    entries[0].GetProperty("text").GetString() !=
+                        $"ISOLATED-{_abProfile}-{role}-00")
+                    throw new InvalidDataException("Cross-profile history data or switch mismatch");
+                if (_abStep == 2)
+                {
+                    _abStep = 3;
+                    ProbeIntent(new {
+                        kind = "select-session",
+                        sessionId = $"synthetic-15host-{_abProfile}-secondary",
+                        expectedRevision = navRevision
+                    });
+                }
+                else
+                {
+                    _abStep = 4;
+                    ProbeIntent(new {
+                        kind = "load-page", start = 0,
+                        expectedRevision = 0
+                    });
+                }
+                return;
+            }
+            if (_abStep == 4)
+            {
+                if (err.GetString() != "stale-revision" ||
+                    state.GetProperty("conversation").GetProperty("sessionId").GetString() !=
+                        $"synthetic-15host-{_abProfile}-secondary")
+                    throw new InvalidDataException("A/B stale revision did not fail closed");
+                _abStep = 5;
+                await Task.Delay(300);
+                var script = "(()=>{const rows=document.getElementById('historyCanvas').textContent;" +
+                    "return rows.includes('ISOLATED-" + _abProfile + "-secondary-')&&" +
+                    "!rows.includes('ISOLATED-" + _abProfile + "-primary-')&&" +
+                    "document.querySelectorAll('#sessionList button.session').length===2;})()";
+                var visible = await _browser.CoreWebView2.ExecuteScriptAsync(script);
+                if (visible.Trim() != "true")
+                    throw new InvalidDataException("Stale first-session DOM content was not erased");
+                _ipc!.SendPayload(JsonSerializer.Serialize(new {
+                    kind = "renderer-closing", probeComplete = true,
+                    abIsolation = true, selectedProfile = _abProfile,
+                    deniedForeign = true, clearedOldHistory = true, rejectedStale = true
+                }));
+                _probeClosingSent = true;
+                Close();
+                return;
+            }
+            throw new InvalidDataException("Unexpected A/B bridge lifecycle state");
         }
         catch (Exception error) { Fail(error); }
     }
