@@ -43,7 +43,10 @@ jobs:
             try {
               $proc | Wait-Process -Timeout 90 -ErrorAction Stop
               $proc.Refresh()
-              if ($proc.ExitCode -ne 0) { throw "Native WebView2 capture failed for $mode with exit $($proc.ExitCode)" }
+              if ($proc.ExitCode -ne 0) {
+                if (Test-Path $receipt) { Get-Content $receipt -Raw | Write-Host }
+                throw "Native WebView2 capture failed for $mode with exit $($proc.ExitCode)"
+              }
               if (!(Test-Path $receipt)) { throw "Native WebView2 capture receipt missing for $mode" }
               $parsed = Get-Content $receipt -Raw | ConvertFrom-Json
               if (!$parsed.pass -or $parsed.syntheticOnly -ne $true -or $parsed.productAccepted -ne $false) {
@@ -71,6 +74,13 @@ jobs:
           @{ referenceSourceSha256=$reference.referenceSourceSha256; pixelSha256=$candidate.pixelSha256; width=$candidate.width; height=$candidate.height; sourceSha=$env:GITHUB_SHA; comparison='PASS'; productAccepted=$false } |
             ConvertTo-Json | Out-File -FilePath (Join-Path $out '15host-screenshot-comparison.json') -Encoding ascii
           Get-Content (Join-Path $out '15host-screenshot-comparison.json') -Raw | Write-Host
+      - name: Preserve native failure evidence (no false pass)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 15host-native-failure-${{ github.sha }}
+          path: apps/windows-renderer/bin/Release/net8.0-windows/15host-native-smoke.json
+          if-no-files-found: warn
       - name: Hash source-bound Windows artifact
         shell: pwsh
         run: |

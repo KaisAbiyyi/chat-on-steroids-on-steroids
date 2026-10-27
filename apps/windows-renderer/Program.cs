@@ -317,17 +317,23 @@ internal sealed class RendererWindow : Form
         };
         core.WebMessageReceived += (_, e) => OnWebMessage(e);
 
-        _phase = "navigate-owned-document";
-        _awaitingOwnedDocument = true;
+        _phase = "read-owned-document";
         var template = _captureMode == CaptureMode.Golden
             ? RendererDocument.LoadGoldenTemplate()
             : RendererDocument.Html;
+        _phase = "prepare-owned-document";
         var html = RendererDocument.WithNonce(template, _documentNonce);
+        if (Encoding.UTF8.GetByteCount(html) > 2 * 1024 * 1024)
+            throw new InvalidDataException("Owned WebView2 HTML exceeds NavigateToString limit");
+        _awaitingOwnedDocument = true;
+        _phase = "navigate-owned-document-call";
         _browser.NavigateToString(html);
+        _phase = "await-owned-navigation";
         var navigation = await _navigation.Task.WaitAsync(TimeSpan.FromSeconds(30));
         _awaitingOwnedDocument = false;
         if (!navigation.IsSuccess)
             throw new InvalidOperationException("Owned WebView2 navigation failed: " + navigation.WebErrorStatus);
+        _phase = "await-document-ready";
         if (!_documentReady.Task.IsCompleted)
             await _documentReady.Task.WaitAsync(TimeSpan.FromSeconds(15));
         _ready = true;
