@@ -34,7 +34,10 @@ try {
         $out=Join-Path $testHome "setup-$v"
         python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out $zip --source-sha $source --version $v
         if($LASTEXITCODE -ne 0){throw 'Versioned package build failed'}
-        dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" "-p:DefineConstants=COS_16PKG_TEST" -o $out
+        dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" # Framework-dependent SINGLE-FILE exe is used only by hosted CI, so
+        # synthetic test-signer loops do not repeatedly sign 60MB of runtime.
+        # Production installer publish remains self-contained and distinct.
+        "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" "-p:DefineConstants=COS_16PKG_TEST" "-p:SelfContained=false" -o $out
         if($LASTEXITCODE -ne 0){throw 'Native setup compile failed'}
         $exe=Join-Path $out 'CoSoSInstaller.exe'
         Write-Host "16PKG CI TEST: signing version $v"
