@@ -1399,18 +1399,41 @@ mod tests {
                         ..Default::default()
                     })
                     .unwrap();
+                let png_fixture = std::fs::read(
+                    std::env::var("COSOS_15HOST_E2E_PNG").expect("Synthetic PDF page raster fixture missing")
+                ).unwrap();
+                let png_asset = store.write_asset(&id, &png_fixture, "image/png").unwrap();
                 for index in 0..24 {
                     let content = format!("ISOLATED-{tag}-{role}-{index:02}");
-                    store
-                        .append(
-                            &id,
-                            json!({
-                                "kind":"note", "source":"15host-cloud-synthetic",
-                                "time":index + 1,
-                                "message":{"text":content,"truncated":false,"chars":content.len()}
-                            }),
-                        )
-                        .unwrap();
+                    let event = if index == 0 {
+                        json!({
+                            "kind":"note", "source":"15host-cloud-synthetic",
+                            "time":index + 1,
+                            "message":{"text":content,"truncated":false,"chars":content.len()},
+                            "assets":[{
+                                "id":png_asset["id"],"mimeType":"image/png",
+                                "role":"pdf-page","page":1
+                            }]
+                        })
+                    } else if index == 23 {
+                        let result = format!("HOST-TERMINAL-{tag}-{role}");
+                        json!({
+                            "kind":"tool_call", "time":index + 1,
+                            "call":{
+                                "callId":format!("synthetic-call-{tag}-{role}"),
+                                "summary":{"title":"Synthetic recorded terminal"},
+                                "args":{"text":"no execution","truncated":false,"chars":12},
+                                "result":{"text":result,"truncated":false,"chars":result.len()}
+                            }
+                        })
+                    } else {
+                        json!({
+                            "kind":"note", "source":"15host-cloud-synthetic",
+                            "time":index + 1,
+                            "message":{"text":content,"truncated":false,"chars":content.len()}
+                        })
+                    };
+                    store.append(&id, event).unwrap();
                 }
             }
             let forbidden = format!("synthetic-15host-{other}-primary");
