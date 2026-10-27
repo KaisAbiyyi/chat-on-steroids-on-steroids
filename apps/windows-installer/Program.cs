@@ -306,7 +306,12 @@ internal static class Program
     {
 #if COS_16PKG_TEST
         if (Environment.GetEnvironmentVariable("COSOS_16PKG_FAIL_AT") == point)
-            Environment.FailFast("16PKG_SYNTHETIC_TEST_CRASH:" + point);
+        {
+            // Exit bypasses managed finally blocks (power-loss transaction
+            // simulation) without invoking interactive Windows Error Reporting.
+            Console.Error.WriteLine("16PKG_SYNTHETIC_ABRUPT_EXIT:" + point);
+            Environment.Exit(197);
+        }
 #endif
     }
 
