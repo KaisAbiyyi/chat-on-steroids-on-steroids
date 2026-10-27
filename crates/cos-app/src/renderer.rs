@@ -317,10 +317,7 @@ fn start_bounded_reader(output: ChildStdout) -> (RendererReceiver, thread::JoinH
     (receiver, thread)
 }
 
-fn receive_frame(
-    frames: &RendererReceiver,
-    timeout: Duration,
-) -> io::Result<Option<Vec<u8>>> {
+fn receive_frame(frames: &RendererReceiver, timeout: Duration) -> io::Result<Option<Vec<u8>>> {
     match frames.recv_timeout(timeout) {
         Ok(frame) => frame,
         Err(RecvTimeoutError::Timeout) => Err(invalid("Native renderer IPC deadline exceeded")),
