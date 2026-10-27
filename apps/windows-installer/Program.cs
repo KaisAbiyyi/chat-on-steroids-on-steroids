@@ -267,7 +267,7 @@ internal static class Program
         // Inspects *explicit effective* ACL, refusing writable non-admin principals
         // and inherited permissions. OS admin is the documented trust boundary.
         var script = "$a=Get-Acl -LiteralPath " + Quote(directory) + ";"
-            + "$owner=try{$a.Owner.Translate([Security.Principal.SecurityIdentifier]).Value}catch{$a.Owner};"
+            + "$owner=try{([Security.Principal.NTAccount]$a.Owner).Translate([Security.Principal.SecurityIdentifier]).Value}catch{$a.Owner};"
             + "if(!$a.AreAccessRulesProtected -or $owner -ne 'S-1-5-32-544'){exit 5};"
             + "$allowed=@('S-1-5-32-544','S-1-5-18');"
             + "foreach($rule in $a.Access){"
@@ -337,7 +337,14 @@ internal static class Program
     }
     static void CopyFile(string src,string dst)
     {
-        SafeAncestors(src); SafeAncestors(dst);
+        // The invoking, already verified signed installer may reside outside D:.
+        // The installed destination must never escape the bounded D: root.
+        if (!string.Equals(Path.GetFullPath(src),Path.GetFullPath(Environment.ProcessPath!),
+             StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Only this signed installer may authorize a slot");
+        if ((File.GetAttributes(src) & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidDataException("Linked signed installer source refused");
+        SafeAncestors(dst);
         Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
         using var source = new FileStream(src,FileMode.Open,FileAccess.Read,FileShare.Read);
         using var dest = new FileStream(dst,FileMode.CreateNew,FileAccess.Write,FileShare.None);
