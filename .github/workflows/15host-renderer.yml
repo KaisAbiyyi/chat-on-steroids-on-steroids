@@ -21,10 +21,13 @@ on:
       - 'crates/cos-core/tests/ui_renderer_ipc.rs'
       - 'Cargo.toml'
       - 'Cargo.lock'
+      - 'tools/host15_approved_baselines.py'
+      - 'tools/test_host15_approved_baselines.py'
       - '.github/workflows/15host-renderer.yml'
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   id-token: write
   attestations: write
   artifact-metadata: write
@@ -249,6 +252,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw '15HOST reviewer-package negative tests failed' }
           python tools/host15_review_package.py --input apps/windows-renderer/15host-product-candidates --source-sha $env:SOURCE_SHA --environment 'GitHub Actions windows-latest, .NET 8, Rust hosted WebView2, synthetic-only' --output apps/windows-renderer/15host-product-candidates/15host-review-index.json
           if ($LASTEXITCODE -ne 0) { throw '15HOST reviewer-package provenance rejected' }
+      - name: Independently approved nine-surface native baseline regression (fail closed)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m unittest tools.test_host15_approved_baselines -v
+          if ($LASTEXITCODE -ne 0) { throw 'Approved-baseline adversarial regression failed' }
+          python tools/host15_approved_baselines.py --manifest apps/windows-renderer/baselines/15host-approved-v1.json --candidate-dir apps/windows-renderer/15host-product-candidates --baseline-dir "$env:RUNNER_TEMP/15host-checker-approved-baseline" --source-sha $env:SOURCE_SHA --output apps/windows-renderer/15host-product-candidates/15host-approved-baseline-regression.json
+          if ($LASTEXITCODE -ne 0) { throw 'Independent nine-surface native screenshot regression mismatch' }
+      - name: Upload separate independently approved baseline comparison receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 15host-approved-baseline-regression-${{ github.event.pull_request.head.sha || github.sha }}
+          path: apps/windows-renderer/15host-product-candidates/15host-approved-baseline-regression.json
+          if-no-files-found: warn
       - name: Upload native product-state screenshot candidates (NOT approved goldens)
         if: always()
         uses: actions/upload-artifact@v4

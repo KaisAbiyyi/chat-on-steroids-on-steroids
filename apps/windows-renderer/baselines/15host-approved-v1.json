@@ -1,0 +1,26 @@
+{
+  "schema": "15host-independent-approved-baseline-v1",
+  "repo": "KaisAbiyyi/chat-on-steroids-on-steroids",
+  "approvedSourceSha": "d0830f61597c8e32863d5b84333e68d4cf336125",
+  "artifactId": 12739726480,
+  "artifactRunId": 40515496793,
+  "artifactZipSha256": "0735a269cf1c1ad2039ec5af3fbbbb42dabbcdead9fa36e92c14eaeb088c3345",
+  "approvalCommentId": 6444384906,
+  "approvalCommentUrl": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/127#issuecomment-6444384906",
+  "approvalAuthor": "KaisAbiyyi",
+  "approvalCreatedAt": "2026-10-27T14:17:47Z",
+  "status": "checker-approved limited 15HOST reference ONLY; candidate captures not self-approved",
+  "scope": "In-memory editor, recorded output-only terminal, host PNG PDF raster, safe MathML, locale and DOM activeElement focus",
+  "focusLimit": "focus-single and math-single pixel-identical; focus depends on native DOM activeElement regression",
+  "screenshots": {
+    "editor-a": "d30207b9d1b63704fec4f62b0b062535df16a80f2a0d1d4c2ff8432f6ac99a2f",
+    "editor-b": "f293fe0428ba6a7be625e58d0ed6548b0bcc9740ab95655516b04a75ebc4a287",
+    "terminal-a": "ff438f818973313080a417e74c5d7ac969e3dd9efab5f9e2a95926bc08c8fd3b",
+    "terminal-b": "22375d27e33c5a33f0c47f869aeeea5bb92192e3762541f07d3ec5b805757fef",
+    "pdf-a": "63ef9936de5f608a294f09cbda007fa0309709466a862e6014629543a3c86d8a",
+    "pdf-b": "923c36f064f41f665dfd7b224575a7d1263cd511464eaebc0b1e558831420c96",
+    "math-single": "0044ad68cd4fc47650bce398d5ac1cc39345d9af5e6084924898c767a286d5fa",
+    "locale-single": "dc27824b3d851a1888663d9a41b08671724cf894ea96b2e5fc98177d6b620899",
+    "focus-single": "0044ad68cd4fc47650bce398d5ac1cc39345d9af5e6084924898c767a286d5fa"
+  }
+}
