@@ -916,8 +916,16 @@ internal sealed class RendererWindow : Form
         _ready = false;
         try
         {
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "15host-native-smoke.json"),
+            // Keep sanitized failure evidence in the CI-uploaded synthetic probe
+            // directory; the authenticated host otherwise observes only EOF.
+            var output = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
+            var receiptDirectory = (_syntheticProbe || _abProbe) &&
+                !string.IsNullOrWhiteSpace(output) && Path.IsPathFullyQualified(output)
+                ? output : AppContext.BaseDirectory;
+            Directory.CreateDirectory(receiptDirectory);
+            File.WriteAllText(Path.Combine(receiptDirectory, "15host-native-smoke.json"),
                 JsonSerializer.Serialize(new {
+                    sourceSha = Environment.GetEnvironmentVariable("SOURCE_SHA"),
                     pass = false, phase = _phase, failure = error.GetType().Name,
                     syntheticProbePhase = _syntheticProbe ? _probeStep : -1,
                     syntheticAbPhase = _abProbe ? _abStep : -1,
