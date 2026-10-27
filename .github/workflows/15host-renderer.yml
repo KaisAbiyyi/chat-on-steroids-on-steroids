@@ -79,7 +79,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 15host-native-failure-${{ github.sha }}
-          path: apps/windows-renderer/bin/Release/net8.0-windows/15host-native-smoke.json
+          path: |
+            apps/windows-renderer/bin/Release/net8.0-windows/15host-native-smoke.json
+            apps/windows-renderer/bin/Release/net8.0-windows/15host-reference.json
+            apps/windows-renderer/bin/Release/net8.0-windows/15host-candidate.json
+            apps/windows-renderer/bin/Release/net8.0-windows/15host-reference.png
+            apps/windows-renderer/bin/Release/net8.0-windows/15host-candidate.png
           if-no-files-found: warn
       - name: Hash source-bound Windows artifact
         shell: pwsh
