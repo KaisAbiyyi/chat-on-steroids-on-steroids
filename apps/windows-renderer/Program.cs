@@ -848,15 +848,31 @@ internal sealed class RendererWindow : Form
                     throw new InvalidDataException("Host PDF page was not authenticated/authorized");
                 _abStep = 8;
                 await Task.Delay(450);
+                // Verify the actual active PDF surface, decoded image, and
+                // native session DOM. Return only synthetic-proof booleans.
                 var script = "(()=>{const rows=document.getElementById('historyCanvas').textContent;" +
                     "const img=document.querySelector('#richSurface .pdf-page img');" +
-                    "return rows.includes('ISOLATED-" + _abProfile + "-secondary-')&&" +
-                    "!rows.includes('ISOLATED-" + _abProfile + "-primary-')&&" +
-                    "document.querySelectorAll('#sessionList button.session').length===2&&" +
-                    "img&&img.complete&&img.naturalWidth>0;})()";
-                var visible = await _browser.CoreWebView2.ExecuteScriptAsync(script);
-                if (visible.Trim() != "true")
-                    throw new InvalidDataException("PDF raster failed native render or old session leaked");
+                    "const active=document.querySelector('#richTabs button.active');" +
+                    "return {secondaryVisible:rows.includes('ISOLATED-" + _abProfile + "-secondary-')," +
+                    "primaryVisible:rows.includes('ISOLATED-" + _abProfile + "-primary-')," +
+                    "twoSessions:document.querySelectorAll('#sessionList button.session').length===2," +
+                    "pdfActive:active?.textContent==='PDF'," +
+                    "imagePresent:!!img,imageDecoded:!!img&&img.complete&&img.naturalWidth>0};})()";
+                var nativeAudit = await _browser.CoreWebView2.ExecuteScriptAsync(script);
+                using var auditDoc = JsonDocument.Parse(nativeAudit);
+                var audit = auditDoc.RootElement;
+                bool secondaryVisible = audit.GetProperty("secondaryVisible").GetBoolean();
+                bool primaryVisible = audit.GetProperty("primaryVisible").GetBoolean();
+                bool twoSessions = audit.GetProperty("twoSessions").GetBoolean();
+                bool pdfActive = audit.GetProperty("pdfActive").GetBoolean();
+                bool imagePresent = audit.GetProperty("imagePresent").GetBoolean();
+                bool imageDecoded = audit.GetProperty("imageDecoded").GetBoolean();
+                if (!secondaryVisible || primaryVisible || !twoSessions || !pdfActive ||
+                    !imagePresent || !imageDecoded)
+                    throw new InvalidDataException(
+                        $"Native PDF DOM isolation denied: secondary={secondaryVisible} " +
+                        $"primaryLeak={primaryVisible} twoSessions={twoSessions} " +
+                        $"pdfActive={pdfActive} imagePresent={imagePresent} imageDecoded={imageDecoded}");
                 await CaptureProductCandidateAsync("pdf", _abProfile);
                 _ipc!.SendPayload(JsonSerializer.Serialize(new {
                     kind = "renderer-closing", probeComplete = true,
@@ -1145,7 +1161,7 @@ function renderRich(){
  const title=document.createElement('p');title.className='panel-title';title.textContent=String(panel.title||names[panel.kind]||'Panel');surface.append(title);
  if(panel.kind==='editor'){
   const editor=document.createElement('textarea');editor.className='editor';editor.spellcheck=false;editor.setAttribute('aria-label','Editor');
-  editor.value=String(panel.text||'');editor.readOnly=Boolean(panel.readOnly);
+  editor.value=String(panel.text||'');editor.readOnly=Boolean(state?.mode==='authenticated'?panel.read_only:panel.readOnly);
   editor.addEventListener('change',()=>send({kind:'rich-command',command:{action:'replace-editor',key:panel.key,expectedRevision:rich.revision,text:editor.value.slice(0,8192)}}));
   surface.append(editor);
  }else if(panel.kind==='terminal'||panel.kind==='code'){
@@ -1153,7 +1169,7 @@ function renderRich(){
  }else if(panel.kind==='pdf'){
   const page=document.createElement('div');page.className='pdf-page';
   const asset=state?.pdfPage;
-  if(asset&&asset.format==='image/png'&&asset.assetId===panel.assetId&&asset.page===panel.page&&
+  if(asset&&asset.format==='image/png'&&asset.assetId===(state?.mode==='authenticated'?panel.asset_id:panel.assetId)&&asset.page===panel.page&&
      /^[a-f0-9]{64}$/.test(String(asset.sha256||''))&&
      typeof asset.base64==='string'&&asset.base64.length<=131072&&
      /^[A-Za-z0-9+/]*={0,2}$/.test(asset.base64)){
@@ -1167,7 +1183,7 @@ function renderRich(){
   }
   surface.append(page);
   const controls=document.createElement('div');
-  for(const [label,value] of [['Previous',Math.max(1,panel.page-1)],['Next',Math.min(panel.pageCount,panel.page+1)]]){
+  for(const [label,value] of [['Previous',Math.max(1,panel.page-1)],['Next',Math.min(state?.mode==='authenticated'?panel.page_count:panel.pageCount,panel.page+1)]]){
    const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=value===panel.page;
    button.addEventListener('click',()=>send({kind:'rich-command',command:{action:'set-pdf-page',key:panel.key,expectedRevision:rich.revision,page:value}}));controls.append(button);
   }
