@@ -411,22 +411,64 @@ internal static class Program
 
     static void CleanOwnedSlot(string root,string slot,string publisher)
     {
-        // Reject unowned files *before* any deletion. Refuse mutation. The
-        // signed authority is deleted last so interruption can be resumed.
-        VerifySlot(root,slot,publisher);
-        var folder = Path.Combine(root,"slots",slot);
-        var manifest = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(folder,"release.json")));
-        var index = Index(File.ReadAllBytes(Path.Combine(folder,"release.json")),
-            manifest.RootElement.GetProperty("source_sha").GetString()!).Files;
-        foreach (var file in index.Keys)
-            File.Delete(Path.Combine(folder,file.Replace('/','\\')));
-        File.Delete(Path.Combine(folder,"release.json"));
-        File.Delete(SignedProof(root,slot));
-        foreach (var directory in Inventory(folder).Dirs.OrderByDescending(s => s.Length))
-            if (!Directory.EnumerateFileSystemEntries(directory).Any()) Directory.Delete(directory);
-        if (Directory.EnumerateFileSystemEntries(folder).Any())
-            throw new InvalidDataException("Unowned directories/files survive");
-        Directory.Delete(folder);
+        // Idempotent deletion supports recovery after sudden termination at
+        // any deletion step. A missing file is okay ONLY when it was listed
+        // in the trusted manifest embedded in an issuer-signed installer.
+        VerifyProtection(root);
+        if (!SlotName(slot)) throw new InvalidDataException("Invalid slot cleanup id");
+        string directory=Path.Combine(root,"slots",slot);
+        if (!Directory.Exists(directory)) return;
+        SafeAncestors(directory);
+        string authority=SignedProof(root,slot);
+        var inventory=Inventory(directory);
+        if (!File.Exists(authority))
+        {
+            // Signed proof is deleted LAST. Only empty directories can remain.
+            if (inventory.Files.Count != 0)
+                throw new InvalidDataException("Untrusted files remain without signed issuer proof");
+        }
+        else
+        {
+            var proof=VerifyProof(authority,publisher);
+            var manifest=Convert.FromBase64String(RunChecked(authority,"--signed-manifest"));
+            if (Hash(manifest) != proof.ManifestSha)
+                throw new InvalidDataException("Deleted-slot source manifest not signed");
+            var index=Index(manifest,proof.Source);
+            if (index.Version != proof.Version)
+                throw new InvalidDataException("Deleted-slot version mismatch");
+            var allowed=new HashSet<string>(IC) {authority,Path.Combine(directory,"release.json")};
+            foreach(var name in index.Files.Keys)
+                allowed.Add(Path.Combine(directory,name.Replace('/','\\')));
+            if (inventory.Files.Any(path=>!allowed.Contains(path)))
+                throw new InvalidDataException("Unexpected files during slot cleanup");
+            string installedManifest=Path.Combine(directory,"release.json");
+            if (File.Exists(installedManifest) && FileHash(installedManifest)!=proof.ManifestSha)
+                throw new InvalidDataException("Installed release.json modified during cleanup");
+            foreach(var (name,item) in index.Files)
+            {
+                var path=Path.Combine(directory,name.Replace('/','\\'));
+                SafeAncestors(path);
+                if (!File.Exists(path)) continue;
+                if (new FileInfo(path).Length!=item.Size || !IC.Equals(FileHash(path),item.Hash))
+                    throw new InvalidDataException("Installed package mutated during cleanup");
+            }
+            // Complete preflight precedes ALL deletion; no unowned data touched.
+            foreach(var name in index.Files.Keys)
+            {
+                var file=Path.Combine(directory,name.Replace('/','\\'));
+                if (File.Exists(file)) File.Delete(file);
+            }
+            if (File.Exists(installedManifest)) File.Delete(installedManifest);
+            File.Delete(authority);
+        }
+        foreach(var child in Inventory(directory).Dirs.OrderByDescending(x=>x.Length))
+        {
+            if (!Directory.EnumerateFileSystemEntries(child).Any()) Directory.Delete(child);
+            else throw new InvalidDataException("Unowned directory could not be removed");
+        }
+        if (Directory.EnumerateFileSystemEntries(directory).Any())
+            throw new InvalidDataException("Unowned files or directories must survive");
+        Directory.Delete(directory);
     }
     static void Recover(string root,string publisher)
     {
