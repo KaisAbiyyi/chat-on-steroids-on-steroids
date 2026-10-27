@@ -816,6 +816,12 @@ internal sealed class RendererWindow : Form
                     .EnumerateArray().Any(panel =>
                         panel.GetProperty("kind").GetString() == "editor"))
                     throw new InvalidDataException("Host editor contract missing");
+                await Task.Delay(100);
+                var editorDom = await _browser.CoreWebView2.ExecuteScriptAsync(
+                    "(()=>document.querySelector('#richSurface textarea.editor')!==null&&" +
+                    "document.querySelector('#richTabs button.active')?.textContent==='Editor')()");
+                if (editorDom.Trim() != "true")
+                    throw new InvalidDataException("Authenticated editor is not active in native DOM");
                 await CaptureProductCandidateAsync("editor", _abProfile);
                 _abStep = 6;
                 ProbeIntent(new { kind = "open-rich", surface = "terminal" });
@@ -832,6 +838,16 @@ internal sealed class RendererWindow : Form
                     terminal.GetProperty("output").GetString()!.Contains(
                         $"HOST-TERMINAL-{_abProfile}-primary", StringComparison.Ordinal))
                     throw new InvalidDataException("Host terminal output is not session-isolated");
+                await Task.Delay(100);
+                var terminalJs = "(()=>{const output=document.querySelector('#richSurface pre.output');" +
+                    "return document.querySelector('#richTabs button.active')?.textContent==='Terminal'&&" +
+                    "!!output&&output.textContent.includes(" +
+                    JsonSerializer.Serialize($"HOST-TERMINAL-{_abProfile}-secondary") + ")&&" +
+                    "!output.textContent.includes(" +
+                    JsonSerializer.Serialize($"HOST-TERMINAL-{_abProfile}-primary") + ");})()";
+                var terminalDom = await _browser.CoreWebView2.ExecuteScriptAsync(terminalJs);
+                if (terminalDom.Trim() != "true")
+                    throw new InvalidDataException("Authenticated terminal is not isolated/active in native DOM");
                 await CaptureProductCandidateAsync("terminal", _abProfile);
                 _abStep = 7;
                 ProbeIntent(new { kind = "open-rich", surface = "pdf" });
@@ -853,11 +869,17 @@ internal sealed class RendererWindow : Form
                 var script = "(()=>{const rows=document.getElementById('historyCanvas').textContent;" +
                     "const img=document.querySelector('#richSurface .pdf-page img');" +
                     "const active=document.querySelector('#richTabs button.active');" +
+                    "const allText=document.body.textContent;" +
+                    "const inputText=Array.from(document.querySelectorAll('textarea'),x=>x.value).join(' ');" +
                     "return {secondaryVisible:rows.includes('ISOLATED-" + _abProfile + "-secondary-')," +
-                    "primaryVisible:rows.includes('ISOLATED-" + _abProfile + "-primary-')," +
+                    "primaryVisible:allText.includes('ISOLATED-" + _abProfile + "-primary-')||" +
+                    "allText.includes('HOST-TERMINAL-" + _abProfile + "-primary')||" +
+                    "inputText.includes('ISOLATED-" + _abProfile + "-primary-')," +
                     "twoSessions:document.querySelectorAll('#sessionList button.session').length===2," +
                     "pdfActive:active?.textContent==='PDF'," +
-                    "imagePresent:!!img,imageDecoded:!!img&&img.complete&&img.naturalWidth>0};})()";
+                    "imagePresent:!!img,imageDecoded:!!img&&img.complete&&img.naturalWidth>0," +
+                    "imageShaMatches:!!img&&img.getAttribute('data-pdf-sha256')===" +
+                    JsonSerializer.Serialize(asset.GetProperty("sha256").GetString()) + "};})()";
                 var nativeAudit = await _browser.CoreWebView2.ExecuteScriptAsync(script);
                 using var auditDoc = JsonDocument.Parse(nativeAudit);
                 var audit = auditDoc.RootElement;
@@ -867,12 +889,14 @@ internal sealed class RendererWindow : Form
                 bool pdfActive = audit.GetProperty("pdfActive").GetBoolean();
                 bool imagePresent = audit.GetProperty("imagePresent").GetBoolean();
                 bool imageDecoded = audit.GetProperty("imageDecoded").GetBoolean();
+                bool imageShaMatches = audit.GetProperty("imageShaMatches").GetBoolean();
                 if (!secondaryVisible || primaryVisible || !twoSessions || !pdfActive ||
-                    !imagePresent || !imageDecoded)
+                    !imagePresent || !imageDecoded || !imageShaMatches)
                     throw new InvalidDataException(
                         $"Native PDF DOM isolation denied: secondary={secondaryVisible} " +
                         $"primaryLeak={primaryVisible} twoSessions={twoSessions} " +
-                        $"pdfActive={pdfActive} imagePresent={imagePresent} imageDecoded={imageDecoded}");
+                        $"pdfActive={pdfActive} imagePresent={imagePresent} " +
+                        $"imageDecoded={imageDecoded} imageShaMatches={imageShaMatches}");
                 await CaptureProductCandidateAsync("pdf", _abProfile);
                 _ipc!.SendPayload(JsonSerializer.Serialize(new {
                     kind = "renderer-closing", probeComplete = true,
