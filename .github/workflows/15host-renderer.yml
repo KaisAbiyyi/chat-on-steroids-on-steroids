@@ -133,18 +133,38 @@ jobs:
             apps/windows-renderer/bin/Release/net8.0-windows/15host-reference.png
             apps/windows-renderer/bin/Release/net8.0-windows/15host-candidate.png
           if-no-files-found: warn
-      - name: Hash source-bound Windows artifact
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Publish complete source-bound .NET renderer payload
         shell: pwsh
         run: |
-          $exe = 'apps/windows-renderer/bin/Release/net8.0-windows/WindowsRenderer.exe'
-          if (!(Test-Path $exe)) { throw 'Missing renderer executable' }
-          $sha = (Get-FileHash -Algorithm SHA256 $exe).Hash
-          "$env:SOURCE_SHA  $sha  WindowsRenderer.exe" | Out-File -FilePath 'apps/windows-renderer/sha256-manifest.txt' -Encoding ascii
+          dotnet publish apps/windows-renderer/WindowsRenderer.csproj -c Release --no-restore -o apps/windows-renderer/renderer-package
+          if ($LASTEXITCODE -ne 0) { throw 'Renderer publish failed' }
+          $root = (Resolve-Path 'apps/windows-renderer/renderer-package').Path
+          $files = @(Get-ChildItem -LiteralPath $root -File -Recurse -Force | Sort-Object FullName)
+          $entries = @($files | ForEach-Object {
+            if (($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Renderer package contains a symlink' }
+            @{ path=$_.FullName.Substring($root.Length + 1).Replace('\','/'); sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
+          })
+          $required = @('WindowsRenderer.exe','WindowsRenderer.dll','WindowsRenderer.deps.json','WindowsRenderer.runtimeconfig.json')
+          foreach ($name in $required) { if ($name -notin @($entries | ForEach-Object { $_.path })) { throw "Renderer package missing $name" } }
+          if ($entries.Count -gt 128) { throw 'Renderer package exceeds file count bound' }
+          $json = @{ format=1; files=$entries } | ConvertTo-Json -Depth 6 -Compress
+          $manifest = Join-Path $root 'renderer-integrity.json'
+          [IO.File]::WriteAllText($manifest, $json, (New-Object Text.UTF8Encoding($false)))
+          $manifestSha = (Get-FileHash -LiteralPath $manifest -Algorithm SHA256).Hash.ToLowerInvariant()
+          $exeSha = (Get-FileHash -LiteralPath (Join-Path $root 'WindowsRenderer.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$env:SOURCE_SHA $exeSha $manifestSha" | Out-File -FilePath 'apps/windows-renderer/sha256-manifest.txt' -Encoding ascii
+          Write-Host "Attested renderer payload: $($entries.Count) files; manifest SHA256 $manifestSha; EXE SHA256 $exeSha"
+      - name: Validate renderer dependency-tampering regression
+        shell: pwsh
+        run: |
+          cargo test -p cos-app renderer_integrity --locked -- --nocapture
+          if ($LASTEXITCODE -ne 0) { throw '15HOST renderer integrity negative regression failed' }
       - uses: actions/upload-artifact@v4
         with:
           name: 15host-windows-synthetic-renderer-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
-            apps/windows-renderer/bin/Release/net8.0-windows/
+            apps/windows-renderer/renderer-package/
             apps/windows-renderer/sha256-manifest.txt
           if-no-files-found: error
   ubuntu-cross-compile:
