@@ -877,6 +877,25 @@ internal sealed class RendererWindow : Form
     {
         if (_readerCancellation.IsCancellationRequested) return;
         Environment.ExitCode = 1;
+        if (_syntheticProbe || _abProbe)
+        {
+            try
+            {
+                var output = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
+                if (!string.IsNullOrWhiteSpace(output) && Path.IsPathFullyQualified(output))
+                {
+                    Directory.CreateDirectory(output);
+                    File.WriteAllText(Path.Combine(output, "15host-ipc-failure.json"),
+                        JsonSerializer.Serialize(new {
+                            sourceSha = Environment.GetEnvironmentVariable("SOURCE_SHA"),
+                            syntheticOnly = true, abStep = _abProbe ? _abStep : -1,
+                            phase = _phase, code, pass = false
+                        }));
+                }
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
         try
         {
             if (IsHandleCreated && !IsDisposed)
