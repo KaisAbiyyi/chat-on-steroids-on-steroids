@@ -452,7 +452,7 @@ internal static class Program
         return proof;
     }
 
-    static void CleanOwnedSlot(string root,string slot,string publisher)
+    static void CleanOwnedSlot(string root,string slot,string publisher,bool stagingOnly=false)
     {
         // Idempotent deletion supports recovery after sudden termination at
         // any deletion step. A missing file is okay ONLY when it was listed
@@ -492,8 +492,11 @@ internal static class Program
                 var path=Path.Combine(directory,name.Replace('/','\\'));
                 SafeAncestors(path);
                 if (!File.Exists(path)) continue;
-                if (new FileInfo(path).Length!=item.Size || !IC.Equals(FileHash(path),item.Hash))
+                if (!stagingOnly && (new FileInfo(path).Length!=item.Size || !IC.Equals(FileHash(path),item.Hash)))
                     throw new InvalidDataException("Installed package mutated during cleanup");
+                // A never-published staging copy may contain truncated bytes
+                // after power loss; signed proof still authenticates allowed PATHS,
+                // and the admin-only staging root owns all of them.
             }
             // Complete preflight precedes ALL deletion; no unowned data touched.
             foreach(var name in index.Files.Keys)
@@ -538,6 +541,16 @@ internal static class Program
                 continue;
             }
             var containers=Directory.GetDirectories(stagingSlots);
+            // A crash just after slot promotion leaves only this empty
+            // staging shell; the signer-verified promoted slot is handled
+            // as an orphan under the target root below.
+            if (containers.Length==0 && inventory.Files.Count==0 &&
+                inventory.Dirs.Count==1 && IC.Equals(inventory.Dirs[0],stagingSlots))
+            {
+                Directory.Delete(stagingSlots);
+                Directory.Delete(stage);
+                continue;
+            }
             if (containers.Length!=1 || !SlotName(Path.GetFileName(containers[0])))
                 throw new InvalidDataException("Unrecognized staged transaction; preserved");
             var slot=Path.GetFileName(containers[0]);
@@ -553,7 +566,7 @@ internal static class Program
             else
             {
                 // This works even when payload extraction was interrupted.
-                CleanOwnedSlot(stage,slot,publisher);
+                CleanOwnedSlot(stage,slot,publisher,stagingOnly:true);
                 var stateFile=SelectorPath(stage);
                 if (File.Exists(stateFile))
                 {
