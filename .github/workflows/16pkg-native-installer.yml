@@ -22,7 +22,7 @@ jobs:
           dotnet-version: '8.0.x'
       - uses: dtolnay/rust-toolchain@stable
       - name: Run package negative tests
-        run: python -m unittest -v tools.test_release_16pkg
+        run: python -m unittest -v tools.test_release_16b tools.test_release_16c tools.test_release_16e
       - name: Build production Rust CLI
         run: cargo build --release --locked -p cos-app
       - name: Publish real Windows renderer
