@@ -61,6 +61,7 @@ jobs:
           $global:LASTEXITCODE=0
       - name: Native install, update, rollback, reinstall, uninstall and tamper with TEST signer
         shell: pwsh
+        timeout-minutes: 15
         run: .github/scripts/16pkg-native-e2e.ps1
       - name: Exact SHA-256 receipt
         shell: pwsh
