@@ -171,6 +171,19 @@ jobs:
           $env:COSOS_15HOST_E2E_EXE = (Resolve-Path 'apps/windows-renderer/renderer-package/WindowsRenderer.exe').Path
           $env:COSOS_15HOST_E2E_EXE_SHA = $identity[1]
           $env:COSOS_15HOST_E2E_MANIFEST_SHA = $identity[2]
+          Add-Type -AssemblyName System.Drawing
+          $png = Join-Path $PWD 'apps/windows-renderer/15host-fixture-page.png'
+          $bitmap = [Drawing.Bitmap]::new(64,64)
+          $graphics = [Drawing.Graphics]::FromImage($bitmap)
+          try {
+            $graphics.Clear([Drawing.Color]::LightGoldenrodYellow)
+            $bitmap.Save($png,[Drawing.Imaging.ImageFormat]::Png)
+          } finally {
+            $graphics.Dispose()
+            $bitmap.Dispose()
+          }
+          $env:COSOS_15HOST_E2E_PNG = $png
+          $env:COSOS_15HOST_SCREENSHOT_OUT_DIR = Join-Path $PWD 'apps/windows-renderer/15host-product-candidates'
           cargo test -p cos-app hosted_native_product_path_synthetic_six_thousand --locked -- --nocapture --test-threads=1
           if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST authenticated product E2E FAIL' }
           cargo test -p cos-app hostile_native_child_bootstrap_failure_matrix --locked -- --nocapture --test-threads=1
@@ -179,6 +192,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST cross-profile isolation product E2E FAIL' }
           cargo test -p cos-app post_verification_managed_dll_swap_and_rename_are_denied_while_guard_is_alive --locked -- --nocapture --test-threads=1
           if ($LASTEXITCODE -ne 0) { throw '15HOST post-attestation malicious DLL swap accepted' }
+      - name: Upload native product-state screenshot candidates (NOT approved goldens)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 15host-product-state-candidates-${{ github.event.pull_request.head.sha || github.sha }}
+          path: apps/windows-renderer/15host-product-candidates/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: 15host-windows-synthetic-renderer-${{ github.event.pull_request.head.sha || github.sha }}
