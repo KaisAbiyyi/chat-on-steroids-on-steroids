@@ -32,7 +32,7 @@ try {
         $out=Join-Path $home "setup-$v"
         python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out $zip --source-sha $source --version $v
         if($LASTEXITCODE -ne 0){throw 'Versioned package build failed'}
-        dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" -o $out
+        dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" "-p:DefineConstants=COS_16PKG_TEST" -o $out
         if($LASTEXITCODE -ne 0){throw 'Native setup compile failed'}
         $exe=Join-Path $out 'CoSoSInstaller.exe'
         $signed=Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256
@@ -42,15 +42,51 @@ try {
         $setups[$v]=$exe
     }
     ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
+    # Abrupt crash after a complete signed slot rename, before state publish.
+    # Root must retain old active slot; --recover removes verified orphan.
+    $env:COSOS_16PKG_FAIL_AT='after_slot_publish'
+    & $setups['0.2.0'] --update $root --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate update'}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.2.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
-    ExpectOk $setups['0.2.0'] @('--rollback',$root,'--publisher',$cert.Thumbprint)
+    $env:COSOS_16PKG_FAIL_AT='after_rollback_publish'
+    & $setups['0.2.0'] --rollback $root --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate rollback'}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    ExpectOk $setups['0.2.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--finalize',$root,'--publisher',$cert.Thumbprint)
-    ExpectOk $setups['0.3.0'] @('--uninstall',$root,'--publisher',$cert.Thumbprint)
-    if(Test-Path $root){throw 'Uninstall left owned root'}
+    $env:COSOS_16PKG_FAIL_AT='after_uninstall_rename'
+    & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate uninstall'}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    if(Test-Path $root -or (Test-Path "$root-uninstalling")){throw 'Recovery left uninstall tombstone'}
     ExpectOk $setups['0.1.0'] @('--install',$dirty,'--publisher',$cert.Thumbprint)
     $sel=Get-Content (Join-Path $dirty 'active.json') -Raw | ConvertFrom-Json
+    $statePath=Join-Path $dirty 'active.json'
+    $stateBytes=[IO.File]::ReadAllBytes($statePath)
+    $bad=$sel
+    $bad.Publisher=('F' * 40)
+    [IO.File]::WriteAllText($statePath,($bad | ConvertTo-Json -Compress))
+    & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Tampered state accepted'}
+    [IO.File]::WriteAllBytes($statePath,$stateBytes)
+    $release=Join-Path $dirty "slots\$($sel.Active)\release.json"
+    $releaseBytes=[IO.File]::ReadAllBytes($release)
+    Add-Content -LiteralPath $release -Value 'tamper-manifest' -NoNewline
+    & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Tampered release manifest accepted'}
+    [IO.File]::WriteAllBytes($release,$releaseBytes)
+    $external=Join-Path $home 'disposable-junction-target'
+    New-Item -ItemType Directory -Force -Path $external | Out-Null
+    $junction=Join-Path $dirty 'unowned-link'
+    New-Item -ItemType Junction -Path $junction -Target $external | Out-Null
+    & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Junction in installed root accepted'}
+    Remove-Item -LiteralPath $junction -Force
     $binary=Join-Path $dirty "slots\$($sel.Active)\bin\cos-rust.exe"
     Add-Content -LiteralPath $binary -Value 'test-tamper' -NoNewline
     & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
@@ -59,7 +95,8 @@ try {
     @{sourceSha=$source;testPublisher=$cert.Thumbprint;testOnly=$true;productionSigned=$false;native16L1Accepted=$false;cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';finalize='PASS';uninstall='PASS';binaryTamperRejected=$true} | ConvertTo-Json | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
 }
 finally {
-    foreach($p in @($root,$dirty)){
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
+    foreach($p in @($root,$dirty,"$root-uninstalling")){
         if($p -like 'D:\16pkg-ci-*' -and (Test-Path $p)){
             Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue
         }
