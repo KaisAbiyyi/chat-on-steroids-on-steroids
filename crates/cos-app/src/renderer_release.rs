@@ -18,7 +18,8 @@ use std::{
 };
 
 const REPO: &str = "KaisAbiyyi/chat-on-steroids-on-steroids";
-const SIGNER: &str = "KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/15host-renderer.yml";
+const SIGNER: &str =
+    "KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/15host-renderer.yml";
 const AUTHORIZED_SOURCE_REF: &str = "refs/heads/main";
 const GH_EXE: &str = r"C:\Program Files\GitHub CLI\gh.exe";
 const VERIFY_TIMEOUT: Duration = Duration::from_secs(35);
@@ -55,7 +56,9 @@ pub fn verify_trusted_release(
     manifest_source_sha: Option<&str>,
     expected_source_sha: Option<&str>,
 ) -> io::Result<()> {
-    let source = expected_source_sha.filter(|v| sha_is_valid(v)).ok_or_else(denied)?;
+    let source = expected_source_sha
+        .filter(|v| sha_is_valid(v))
+        .ok_or_else(denied)?;
     if manifest_source_sha != Some(source) {
         return Err(denied());
     }
@@ -66,7 +69,10 @@ pub fn verify_trusted_release(
     if !gh_metadata.is_file() || gh_metadata.file_type().is_symlink() {
         return Err(denied());
     }
-    let manifest = renderer.parent().ok_or_else(denied)?.join("renderer-integrity.json");
+    let manifest = renderer
+        .parent()
+        .ok_or_else(denied)?
+        .join("renderer-integrity.json");
     let mut child = Command::new(gh_path)
         .args(arguments(&manifest, source))
         .stdin(Stdio::null())
@@ -77,7 +83,13 @@ pub fn verify_trusted_release(
     let start = Instant::now();
     loop {
         match child.try_wait() {
-            Ok(Some(status)) => return if status.success() { Ok(()) } else { Err(denied()) },
+            Ok(Some(status)) => {
+                return if status.success() {
+                    Ok(())
+                } else {
+                    Err(denied())
+                };
+            }
             Err(_) => {
                 let _ = child.kill();
                 let _ = child.wait();
@@ -99,11 +111,21 @@ mod tests {
 
     #[test]
     fn release_policy_is_pinned_not_caller_selected() {
-        let args = arguments(Path::new("renderer-integrity.json"), "a".repeat(40).as_str());
+        let args = arguments(
+            Path::new("renderer-integrity.json"),
+            "a".repeat(40).as_str(),
+        );
         assert!(args.windows(2).any(|w| w == ["--repo", REPO]));
         assert!(args.windows(2).any(|w| w == ["--signer-workflow", SIGNER]));
-        assert!(args.windows(2).any(|w| w == ["--source-ref", "refs/heads/main"]));
-        assert!(!args.iter().any(|a| a == "refs/heads/work/15host-production-renderer-20261026"));
+        assert!(
+            args.windows(2)
+                .any(|w| w == ["--source-ref", "refs/heads/main"])
+        );
+        assert!(
+            !args
+                .iter()
+                .any(|a| a == "refs/heads/work/15host-production-renderer-20261026")
+        );
     }
 
     #[test]

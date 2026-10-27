@@ -195,9 +195,11 @@ pub fn verify(executable: &Path, exe_sha: &str, manifest_sha: &str) -> io::Resul
     {
         return Err(denied());
     }
-    if manifest.source_sha.as_deref().is_some_and(|sha| {
-        sha.len() != 40 || !sha.bytes().all(|value| value.is_ascii_hexdigit())
-    }) {
+    if manifest
+        .source_sha
+        .as_deref()
+        .is_some_and(|sha| sha.len() != 40 || !sha.bytes().all(|value| value.is_ascii_hexdigit()))
+    {
         return Err(denied());
     }
     let source_sha = manifest.source_sha.clone();
