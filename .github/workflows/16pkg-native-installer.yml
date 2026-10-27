@@ -59,10 +59,9 @@ jobs:
           & installer-package/CoSoSInstaller.exe --install 'D:\16pkg-unsigned-rejection' --publisher ('A' * 40)
           if($LASTEXITCODE -eq 0){throw 'Unsigned app gained authority'}
           $global:LASTEXITCODE=0
-      - name: Native install, update, rollback, reinstall, uninstall and tamper with TEST signer
-        shell: pwsh
-        timeout-minutes: 15
-        run: .github/scripts/16pkg-native-e2e.ps1
+      # Positive test-signer native acceptance runs in the separate fast
+      # 16pkg-installer-lifecycle workflow against the SAME checked-out C# source.
+      # Production binary packaging in this job does NOT import any test signer.
       - name: Exact SHA-256 receipt
         shell: pwsh
         run: |
@@ -100,5 +99,4 @@ jobs:
             candidate.zip
             installer-package/CoSoSInstaller.exe
             package-receipt.json
-            16pkg-native-test-receipt.json
           if-no-files-found: error
