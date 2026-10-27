@@ -26,11 +26,12 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::{
     fs,
-    io::{self, BufRead, BufReader, BufWriter, Read, Write},
+    io::{self, BufRead, BufReader, BufWriter, Write},
     path::{Path, PathBuf},
     process::{Child, ChildStdin, ChildStdout, Command, Stdio},
 };
 use uuid::Uuid;
+use zeroize::Zeroize;
 
 const HISTORY_WINDOW_LIMIT: usize = 6_000;
 const SESSION_LIST_LIMIT: usize = 100;
@@ -159,6 +160,9 @@ fn renderer_loop(
         };
         let verified = authenticator.verify_inbound(&raw)
             .map_err(|_| invalid("Renderer IPC authentication, epoch, sequence, or size check failed"))?;
+        if verified.payload["kind"] == "renderer-closing" {
+            return Ok(());
+        }
         if verified.payload["kind"] != "ui-intent" {
             let _ = child.kill();
             return Err(invalid("Renderer sent an unknown authenticated frame type"));
@@ -281,7 +285,7 @@ impl RendererHostState {
             "route": format!("{:?}", projection.route).to_lowercase(),
             "focus": format!("{:?}", projection.focus).to_lowercase(),
             "dialogOpen": projection.dialog_open,
-            "richActive": projection.rich_active.map(|kind| format!("{kind:?}").to_lowercase()),
+            "richActive": projection.rich_active.as_ref().map(|kind| format!("{kind:?}").to_lowercase()),
             "richCount": projection.rich_count,
             "conversationRows": projection.conversation_rows,
             "conversationHasOlder": projection.conversation_has_older,
@@ -389,6 +393,16 @@ impl RendererHostState {
                 self.language = language;
                 Ok(())
             }
+            "dialog-action" => {
+                let request: DialogIntent = decode_intent(intent)?;
+                if request.kind != "dialog-action" { return Err("invalid-intent"); }
+                match request.action.as_str() {
+                    "open" => self.focus.open_dialog().map_err(|error| error.code())?,
+                    "confirm" | "cancel" => self.focus.close_dialog().map_err(|error| error.code())?,
+                    _ => return Err("invalid-dialog-action"),
+                }
+                Ok(())
+            }
             "open-rich" => {
                 let request: OpenRichIntent = decode_intent(intent)?;
                 if request.kind != "open-rich" { return Err("invalid-intent"); }
@@ -440,7 +454,7 @@ impl RendererHostState {
 
         // Erase the prior visible page and cache before touching the new
         // session. A failed read cannot leave previous-session text visible.
-        self.history.clear();
+        self.clear_history();
         self.active_history_session = Some(session_id.to_owned());
         let ticket = self.conversation.open_from_host(session_id).map_err(|error| error.code())?;
         let events = match store.recent(session_id, HISTORY_WINDOW_LIMIT, None) {
@@ -456,6 +470,15 @@ impl RendererHostState {
         let page = page_at(&self.history, start).ok_or("history-page-invalid")?;
         self.conversation.publish_from_host(&ticket, session_id, page).map_err(|error| error.code())?;
         Ok(())
+    }
+
+    fn clear_history(&mut self) {
+        for entry in &mut self.history {
+            entry.text.zeroize();
+            entry.message_id.zeroize();
+            if let Some(turn_id) = &mut entry.turn_id { turn_id.zeroize(); }
+        }
+        self.history.clear();
     }
 
     fn move_to_page(&mut self, target: u64, expected_revision: u64) -> Result<(), &'static str> {
@@ -523,6 +546,9 @@ struct FocusIntent { kind: String, event: UiKeyEvent }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct LocaleIntent { kind: String, tag: String }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DialogIntent { kind: String, action: String }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct OpenRichIntent { kind: String, surface: String }
@@ -714,5 +740,22 @@ mod tests {
         assert!(!projected.contains('\u{202e}'));
         assert!(!projected.contains('\u{0000}'));
         assert!(projected.len() <= 10);
+    }
+}
+
+impl Drop for RendererHostState {
+    fn drop(&mut self) {
+        self.clear_history();
+        if let Some(session_id) = &mut self.active_history_session { session_id.zeroize(); }
+        for session in &mut self.sessions { zeroize_json(session); }
+    }
+}
+
+fn zeroize_json(value: &mut Value) {
+    match value {
+        Value::String(text) => text.zeroize(),
+        Value::Array(items) => items.iter_mut().for_each(zeroize_json),
+        Value::Object(items) => items.values_mut().for_each(zeroize_json),
+        _ => {}
     }
 }

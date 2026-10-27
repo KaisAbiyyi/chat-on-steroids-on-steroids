@@ -7,6 +7,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
+use zeroize::Zeroize;
 
 use crate::ui_contract::MAX_JS_SAFE_INTEGER;
 
@@ -75,13 +76,16 @@ pub struct RendererIpcAuthenticator {
 }
 
 impl RendererIpcAuthenticator {
-    pub fn new(epoch: u64, key: [u8; MAC_BYTES]) -> Result<Self, RendererIpcError> {
+    pub fn new(epoch: u64, mut key: [u8; MAC_BYTES]) -> Result<Self, RendererIpcError> {
         if epoch == 0 || epoch > MAX_JS_SAFE_INTEGER {
+            key.zeroize();
             return Err(RendererIpcError::Epoch);
         }
+        let stored_key = key;
+        key.zeroize();
         Ok(Self {
             epoch,
-            key,
+            key: stored_key,
             inbound_sequence: 0,
             outbound_sequence: 0,
         })
@@ -93,11 +97,7 @@ impl RendererIpcAuthenticator {
 
     /// Retire every in-flight frame on a renderer restart or host rebind.
     /// The caller must provide a new random per-process key.
-    pub fn rebind(
-        &mut self,
-        epoch: u64,
-        key: [u8; MAC_BYTES],
-    ) -> Result<(), RendererIpcError> {
+    pub fn rebind(&mut self, epoch: u64, mut key: [u8; MAC_BYTES]) -> Result<(), RendererIpcError> {
         if epoch <= self.epoch || epoch > MAX_JS_SAFE_INTEGER {
             return Err(RendererIpcError::Epoch);
         }
@@ -110,10 +110,7 @@ impl RendererIpcAuthenticator {
 
     /// Sign a compact JSON payload for the renderer. Invalid JSON and payloads
     /// over the strict byte budget are rejected before consuming a sequence.
-    pub fn sign_outbound(
-        &mut self,
-        payload_json: &str,
-    ) -> Result<String, RendererIpcError> {
+    pub fn sign_outbound(&mut self, payload_json: &str) -> Result<String, RendererIpcError> {
         let payload = payload_json.as_bytes();
         if payload.len() > MAX_RENDERER_IPC_PAYLOAD_BYTES {
             return Err(RendererIpcError::Oversize);
@@ -251,8 +248,7 @@ fn decode_hex(value: &str) -> Option<[u8; MAC_BYTES]> {
     let bytes = value.as_bytes();
     let mut decoded = [0u8; MAC_BYTES];
     for index in 0..MAC_BYTES {
-        decoded[index] = (hex_nibble(bytes[index * 2])? << 4)
-            | hex_nibble(bytes[index * 2 + 1])?;
+        decoded[index] = (hex_nibble(bytes[index * 2])? << 4) | hex_nibble(bytes[index * 2 + 1])?;
     }
     Some(decoded)
 }
@@ -263,5 +259,11 @@ fn hex_nibble(value: u8) -> Option<u8> {
         b'a'..=b'f' => Some(value - b'a' + 10),
         b'A'..=b'F' => Some(value - b'A' + 10),
         _ => None,
+    }
+}
+
+impl Drop for RendererIpcAuthenticator {
+    fn drop(&mut self) {
+        self.key.zeroize();
     }
 }
