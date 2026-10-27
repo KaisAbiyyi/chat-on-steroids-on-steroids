@@ -31,10 +31,10 @@ internal static class Program
                     + " payload_sha256=" + Hash(bytes));
                 return 0;
             }
-            if (args.Length != 5 || args[0] is not ("--install" or "--update" or "--rollback" or "--uninstall")
-                || args[3] != "--publisher")
+            if (args.Length != 4 || args[0] is not ("--install" or "--update" or "--rollback" or "--uninstall")
+                || args[2] != "--publisher")
                 throw new InvalidDataException("Usage: CoSoSInstaller --verify OR --install|--update|--rollback|--uninstall D:\\path --publisher TRUSTED_THUMBPRINT");
-            string operation = args[0], root = SafeRoot(args[1]), expectedSigner = args[4].ToUpperInvariant();
+            string operation = args[0], root = SafeRoot(args[1]), expectedSigner = args[3].ToUpperInvariant();
             if (!Thumb.IsMatch(expectedSigner))
                 throw new InvalidDataException("Trusted publisher certificate thumbprint required");
             VerifyAuthenticode(Environment.ProcessPath!, expectedSigner);
@@ -287,6 +287,8 @@ internal static class Program
             if (!ICase.Equals(before.Publisher, publisher))
                 throw new InvalidDataException("Release publisher changed");
             VerifySlot(root, before.Active);
+            if (before.Previous is not null)
+                throw new InvalidDataException("Upgrade history limit reached; rollback or uninstall first");
             using var old = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(root, "slots", before.Active, "release.json")));
             using var next = JsonDocument.Parse(payload["release.json"]);
             Version current = Version.Parse(old.RootElement.GetProperty("version").GetString()!);
