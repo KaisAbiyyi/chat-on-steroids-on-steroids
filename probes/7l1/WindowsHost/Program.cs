@@ -19,6 +19,16 @@ internal static class Program
             return;
         }
 #if COS_8L1_PRODUCT
+        if (args.Length == 1 && args[0] == "--8p-policy-self-test")
+        {
+            GateForm.Run8PPolicyTests();
+            return;
+        }
+        if (args.Length == 1 && args[0] == "--8p-native-differential-v1")
+        {
+            GateForm.Write8PTwoPhaseDifferentialVectors();
+            return;
+        }
         if (args.Length == 1 && args[0] == "--8l1-authority-self-test")
         {
             GateForm.Run8L1PolicyTests();
@@ -42,7 +52,7 @@ internal sealed partial class GateForm : Form
     private readonly string? _artifactRoot;
     private readonly string? _retained8L1ProfileRoot;
     private readonly bool _reuse8L1Profile;
-    private readonly bool _idle, _cdpPreflight, _l2, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
+    private readonly bool _idle, _cdpPreflight, _l2, _host8P, _host8PHandoffProbe, _host8L1, _host8L1CrashProbe, _host8L1ConsentProbe, _host8L1ProfileActionsProbe;
     private readonly Dictionary<WebView2, Browser> _browsers = new(ReferenceEqualityComparer.Instance);
     private readonly SemaphoreSlim _rustIo = new(1, 1);
     private Process? _bridge;
@@ -71,11 +81,19 @@ internal sealed partial class GateForm : Form
         public string SessionId { get; set; } = "";
         public ulong SessionEpoch { get; set; } = 1;
         public ulong BoundNavigation { get; set; }
+        // Increments synchronously on every native 8P lifetime invalidation.
+        // The epoch alone does not cover a ProcessFailed without navigation.
+        public ulong BindingRevocationGeneration { get; set; }
         public bool Revoked { get; set; }
         public bool WorkerDestroyedEventObserved { get; set; }
         public int InFlightLedgerWrites { get; set; }
         public int RefusedOrigins { get; set; }
         public bool RetireScheduled { get; set; }
+        // Host-attested production document URL only. Never set from web
+        // messages, renderer events, or worker-supplied content.
+        public bool Production8P { get; init; }
+        public string? ProductionUrl { get; set; }
+        public string? ProductionOrigin { get; set; }
         public Task<bool>? RetirementTask { get; set; }
     }
 
@@ -84,8 +102,8 @@ internal sealed partial class GateForm : Form
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++)
         {
-            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
-            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root") ||
+            if (args[i] is "--native-idle" or "--cdp-preflight" or "--7l2" or "--8l1" or "--8p" or "--8p-handoff-probe" or "--8l1-crash" or "--8l1-consent" or "--8l1-profile-actions" or "--reuse-8l1-profile") { options.Add(args[i], "true"); continue; }
+            if (args[i] is not ("--out" or "--repo" or "--bridge" or "--artifact-root" or "--profile-root" or "--8p-config" or "--8p-provider") ||
                 i + 1 == args.Length)
                 throw new ArgumentException("Use --out D:\\... --repo D:\\... --bridge D:\\... --artifact-root D:\\... [--native-idle]");
             options.Add(args[i], args[++i]);
@@ -101,6 +119,18 @@ internal sealed partial class GateForm : Form
         _idle = options.ContainsKey("--native-idle");
         _cdpPreflight = options.ContainsKey("--cdp-preflight");
         _host8L1 = options.ContainsKey("--8l1");
+        _host8P = options.ContainsKey("--8p");
+        _host8PHandoffProbe = options.ContainsKey("--8p-handoff-probe");
+        if (_host8PHandoffProbe && !_host8P)
+            throw new ArgumentException("8P handoff probe requires explicit --8p");
+#if COS_8L1_PRODUCT
+        _host8PConfig = options.GetValueOrDefault("--8p-config");
+        _host8PProvider = options.GetValueOrDefault("--8p-provider");
+        if (_host8P && (_host8L1 || _cdpPreflight || _idle || options.ContainsKey("--7l2")))
+            throw new ArgumentException("8P is a separate isolated product origin gate");
+#else
+        if (_host8P) throw new ArgumentException("8P only available in product host");
+#endif
         _host8L1CrashProbe = options.ContainsKey("--8l1-crash");
         _host8L1ConsentProbe = options.ContainsKey("--8l1-consent");
         _host8L1ProfileActionsProbe = options.ContainsKey("--8l1-profile-actions");
@@ -128,7 +158,7 @@ internal sealed partial class GateForm : Form
         }
         if ((_host8L1CrashProbe || _host8L1ConsentProbe || _host8L1ProfileActionsProbe) && !_host8L1)
             throw new ArgumentException("Native crash probe requires the 8L1 host");
-        _l2 = options.ContainsKey("--7l2") || _host8L1;
+        _l2 = options.ContainsKey("--7l2") || _host8L1 || _host8P;
         if (_l2 && (_cdpPreflight || _idle || (options.ContainsKey("--7l2") && _host8L1)))
             throw new ArgumentException("7L2 is a distinct source-pinned native gate");
         if (!_cdpPreflight &&
@@ -138,7 +168,8 @@ internal sealed partial class GateForm : Form
             RejectReparseAncestors(path);
         if (_artifactRoot is not null)
             RejectReparseAncestors(_artifactRoot);
-        Text = _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
+        Text = _host8P ? "CoSoS 8P production origin native consent gate" :
+            _host8L1 ? "CoSoS 8L1 source-owned privileged native host" :
             _l2 ? "CoSoS 7L2 real WebView2 debugger native gate" :
             "CoSoS 7L1 native Rust-MV3 bridge, isolated synthetic acceptance";
         Width = 1200;
@@ -230,7 +261,7 @@ internal sealed partial class GateForm : Form
             "extension/companion/ledger.mjs", "crates/cos-core/src/native_browser_bridge.rs",
             "crates/cos-core/examples/7l1_bridge.rs",
             "crates/cos-core/examples/7l2_bridge.rs",
-            "apps/windows-host", "probes/8l1",
+            "apps/windows-host", "probes/8l1", "probes/8p",
             "extension/adapter/browser-lifecycle.mjs",
             "extension/adapter/profile-session.mjs");
         if (dirty.Length != 0)
@@ -550,12 +581,17 @@ internal sealed partial class GateForm : Form
             string.IsNullOrWhiteSpace(b.WorkerTargetId) ||
             !string.Equals(Path.GetFullPath(b.View.CoreWebView2.Profile.ProfilePath),
                 b.ProfilePath, StringComparison.OrdinalIgnoreCase) ||
-            !string.Equals(b.View.CoreWebView2.Source, StartUrl, StringComparison.Ordinal))
+            !string.Equals(b.View.CoreWebView2.Source,
+                b.Production8P ? b.ProductionUrl : StartUrl, StringComparison.Ordinal) ||
+            (b.Production8P && (b.ProductionUrl is null || b.ProductionOrigin is null ||
+                !string.Equals(new Uri(b.ProductionUrl!).GetLeftPart(UriPartial.Authority),
+                    b.ProductionOrigin, StringComparison.Ordinal))))
             throw new UnauthorizedAccessException("stale controller/profile/page");
         var page = await CdpAsync(b, "Target.getTargetInfo", new { });
         var pageInfo = Field(page, "targetInfo");
         if (pageInfo.GetProperty("type").GetString() != "page" ||
-            pageInfo.GetProperty("url").GetString() != StartUrl)
+            pageInfo.GetProperty("url").GetString() !=
+                (b.Production8P ? b.ProductionUrl : StartUrl))
             throw new UnauthorizedAccessException("current real page target changed");
         var worker = await CdpAsync(b, "Target.getTargetInfo",
             new { targetId = b.WorkerTargetId });
@@ -566,7 +602,8 @@ internal sealed partial class GateForm : Form
                 $"chrome-extension://{b.ExtensionId}/sw.mjs")
             throw new UnauthorizedAccessException("foreign/replaced MV3 worker target");
         if (b.View.IsDisposed || b.Revoked || b.NavigationEpoch != b.BoundNavigation ||
-            !string.Equals(b.View.CoreWebView2.Source, StartUrl, StringComparison.Ordinal))
+            !string.Equals(b.View.CoreWebView2.Source,
+                b.Production8P ? b.ProductionUrl : StartUrl, StringComparison.Ordinal))
             throw new UnauthorizedAccessException("controller revoked during asynchronous target verification");
     }
 
@@ -619,14 +656,22 @@ internal sealed partial class GateForm : Form
             documentId = b.DocumentId, navigationEpoch = b.NavigationEpoch,
             sessionId = b.SessionId, sessionEpoch = b.SessionEpoch, workerGeneration = b.WorkerGeneration
         },
-        origin = Origin,
+        origin = b.Production8P ? b.ProductionOrigin : Origin,
         hostGeneration = b.HostGeneration
     };
 
     private void RevokeAndRetire(Browser browser)
     {
         // Runs synchronously from WebView2 lifetime events, so the stale
-        // channel cannot start another privileged evaluation.
+        // channel cannot start another privileged evaluation. Revoke a
+        // REGISTERING 8P channel too: its eventual continuation must not
+        // publish a channel/worker after this generation has advanced.
+        if (browser.Production8P)
+        {
+            if (browser.BindingRevocationGeneration == ulong.MaxValue)
+                throw new UnauthorizedAccessException("8P binding lease generation exhausted");
+            browser.BindingRevocationGeneration++;
+        }
         browser.Revoked = true;
         _native8L1Authority?.Revoke(browser);
         if (browser.ChannelId != 0 && !browser.RetireScheduled)
@@ -709,34 +754,129 @@ internal sealed partial class GateForm : Form
     private async Task<JsonElement> RustAllowAsync(object command) =>
         RequireSuccess(await RustAsync(command));
 
+    // Source-executed in the production register/rebind handler and Windows
+    // cloud negative regressions. The registration's native lifetime ticket is
+    // NOT an authorization credential; it only rejects stale async results.
+    private static bool Accept8PBindingLease(
+        ulong initialRevocation, ulong actualRevocation,
+        ulong initialNavigation, ulong actualNavigation,
+        string? initialUrl, string? actualUrl, string? sourceUrl,
+        string? initialOrigin, string? actualOrigin,
+        bool disposed) =>
+        initialRevocation == actualRevocation &&
+        initialNavigation == actualNavigation &&
+        initialUrl is not null && initialOrigin is not null &&
+        !disposed &&
+        string.Equals(initialUrl, actualUrl, StringComparison.Ordinal) &&
+        string.Equals(initialOrigin, actualOrigin, StringComparison.Ordinal) &&
+        string.Equals(initialUrl, sourceUrl, StringComparison.Ordinal);
+
+    // A source-executed gate between the asynchronous Rust register response
+    // and the first native publication of that channel to a mutable Browser.
+    // One stale/unknown channel is retired before any key/worker handoff.
+    private static async Task<ulong> Adopt8PRegisteredChannelAsync(
+        ulong channelId, Func<bool> nativeLeaseCurrent,
+        Func<ulong, Task<bool>> retire)
+    {
+        if (channelId == 0)
+            throw new UnauthorizedAccessException("8P invalid Rust channel");
+        if (!nativeLeaseCurrent())
+        {
+            if (!await retire(channelId))
+                throw new UnauthorizedAccessException(
+                    "8P uncertain stale Rust registration retirement");
+            throw new UnauthorizedAccessException("8P registered after native revocation");
+        }
+        return channelId;
+    }
+
     private async Task<JsonElement> BindAsync(Browser b, string sessionId)
     {
+        // Existing 8L1 synthetic binds keep their accepted semantics.
+        // For production 8P, acquire an immutable native lifetime ticket
+        // AFTER any prior channel retirement. A ProcessFailed, navigation or
+        // dispose invalidates it even when Rust register is still in flight.
         if (b.ChannelId != 0 && !b.RetireScheduled)
             RevokeAndRetire(b);
         if (b.RetireScheduled)
             await RequireRetirementAsync(b);
-        b.SessionId = sessionId;
-        b.HostGeneration++;
-        b.WorkerGeneration++;
-        await AttachWorkerAsync(b);
-        var registration = await RustAllowAsync(new { op = "register", host = Host(b) });
-        b.ChannelId = registration.GetProperty("channelId").GetUInt64();
-        var spec = new
+        var revocation = b.BindingRevocationGeneration;
+        var documentEpoch = b.NavigationEpoch;
+        var documentUrl = b.ProductionUrl;
+        var documentOrigin = b.ProductionOrigin;
+        bool BindingCurrent() =>
+            !b.Production8P || Accept8PBindingLease(
+                revocation, b.BindingRevocationGeneration,
+                documentEpoch, b.NavigationEpoch,
+                documentUrl, b.ProductionUrl, b.View.CoreWebView2.Source,
+                documentOrigin, b.ProductionOrigin, b.View.IsDisposed);
+        if (!BindingCurrent())
+            throw new UnauthorizedAccessException("8P stale initial document binding");
+        var registering = false;
+        try
         {
-            channelId = b.ChannelId, hostGeneration = b.HostGeneration,
-            challenge = registration.GetProperty("challenge").GetString(),
-            key = registration.GetProperty("key").GetString(),
-            context = Context(b)
-        };
-        // A one-use key is delivered ONLY to the pinned chrome-extension
-        // service_worker CDP session, never to ExecuteScript/page/WebMessage.
-        var worker = await WorkerAsync(b, Js("bootstrap", spec));
-        b.WorkerInstance = worker.GetProperty("workerInstance").GetString();
-        return await RustAllowAsync(new
+            b.SessionId = sessionId;
+            b.HostGeneration++;
+            b.WorkerGeneration++;
+            await AttachWorkerAsync(b);
+            if (!BindingCurrent() || b.Revoked)
+                throw new UnauthorizedAccessException("8P document retired during worker attach");
+
+            registering = true;
+            var registration = await RustAllowAsync(new { op = "register", host = Host(b) });
+            var registeredChannel = registration.GetProperty("channelId").GetUInt64();
+            // Registration may return after native revocation while ChannelId
+            // was 0. The source-tested admission/retirement helper rejects it
+            // BEFORE a worker key is handed out or Browser channel published.
+            if (b.Production8P)
+                registeredChannel = await Adopt8PRegisteredChannelAsync(
+                    registeredChannel, () => BindingCurrent() && !b.Revoked,
+                    RetireAsync);
+            b.ChannelId = registeredChannel;
+            registering = false; // Only now do we own a retireable channel ID.
+            var spec = new
+            {
+                channelId = registeredChannel, hostGeneration = b.HostGeneration,
+                challenge = registration.GetProperty("challenge").GetString(),
+                key = registration.GetProperty("key").GetString(),
+                context = Context(b)
+            };
+            // Native-only CDP service-worker session; NEVER via page scripts,
+            // WebMessage, or renderer callbacks.
+            var worker = await WorkerAsync(b, Js("bootstrap", spec));
+            if (!BindingCurrent() || b.Revoked || b.ChannelId != registeredChannel)
+                throw new UnauthorizedAccessException("8P stale worker bootstrap");
+            b.WorkerInstance = worker.GetProperty("workerInstance").GetString();
+            var handshake = await RustAllowAsync(new
+            {
+                op = "handshake", host = Host(b), channelId = registeredChannel,
+                generation = b.HostGeneration, proof = worker.GetProperty("proof").GetString()
+            });
+            if (!BindingCurrent() || b.Revoked || b.ChannelId != registeredChannel)
+                throw new UnauthorizedAccessException("8P stale handshake continuation");
+            return handshake;
+        }
+        catch
         {
-            op = "handshake", host = Host(b), channelId = b.ChannelId,
-            generation = b.HostGeneration, proof = worker.GetProperty("proof").GetString()
-        });
+            // A failed register with no trustworthy channel ID is an uncertain
+            // remote-commit boundary: kill the private Rust authority process
+            // rather than guessing which lease to retire or reviving a sibling.
+            if (b.Production8P && registering)
+            {
+                try
+                {
+                    if (_bridge is { HasExited: false })
+                        _bridge.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException) { }
+                catch (System.ComponentModel.Win32Exception) { }
+            }
+            // The next bind always awaits any in-flight Rust retirement.
+            // Even if worker/Rust registration failed halfway, never restore
+            // the revoked browser or reuse its channel.
+            if (b.Production8P) RevokeAndRetire(b);
+            throw;
+        }
     }
 
     private async Task<JsonElement> ObserveAsync(Browser b)
@@ -808,6 +948,9 @@ internal sealed partial class GateForm : Form
 
     private async Task ExecuteAsync()
     {
+#if COS_8L1_PRODUCT
+        if (_host8P) { await Execute8PAsync(); return; }
+#endif
         if (_host8L1) { await Execute8L1Async(); return; }
         if (_l2) { await Execute7L2Async(); return; }
         var exit = 2;

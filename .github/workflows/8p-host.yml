@@ -1,0 +1,113 @@
+name: 8P-HOST native production provider origin gate (bounded)
+on:
+  pull_request:
+    paths:
+      - 'apps/windows-host/**'
+      - 'probes/7l1/WindowsHost/**'
+      - 'probes/8p/**'
+      - 'crates/cos-core/**'
+      - 'extension/adapter/**'
+      - '.github/workflows/8p-host.yml'
+      - 'docs/implementation-summary/2026-10-25-8p-host.md'
+  push:
+    branches: ['work/8p-host-*', 'main']
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  contract-and-security:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+          components: rustfmt, clippy
+      - run: cargo fmt --all --check
+      - run: cargo clippy --locked -p cos-core --all-targets -- -D warnings
+      - run: cargo test --locked -p cos-core --lib native_browser_bridge
+      - run: cargo test --locked -p cos-core --example 7l2_bridge
+      - run: node --test extension/adapter/tests/profile-session.test.mjs
+      - run: node --test extension/adapter/tests/browser-lifecycle.test.mjs
+      - run: node --test probes/8p/production-contract.test.mjs
+      - run: node --test probes/8p/worker-attestation.test.mjs
+      - run: node --test probes/7l1/tests/worker-auth.test.mjs
+        env:
+          COS_TEST_TMP: ${{ runner.temp }}
+
+  windows-source-bound-artifact:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile product native host (strict)
+        run: dotnet build apps/windows-host/WindowsHost.csproj -c Release -warnaserror
+      - name: Windows regression — Microsoft WebView2 built-in and foreign extension inventory
+        shell: pwsh
+        run: dotnet run --project probes/8l1/PolicyTests/PolicyTests.csproj --configuration Release
+      - name: Windows 8P production inventory and origin policy selftests (no browser/account)
+        shell: pwsh
+        run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8p-policy-self-test
+      - name: Compiled C# production method vs accepted JS 8B differential (synthetic only)
+        run: node --test probes/8p/native-contract-differential.test.mjs
+      - name: Preserve synthetic 8L1 authority regression
+        run: dotnet apps/windows-host/bin/Release/net8.0-windows/WindowsHost.dll --8l1-authority-self-test
+      - name: Compile authenticated Rust bridge
+        run: cargo build --locked -p cos-core --example 7l2_bridge --release
+      - name: Hosted cross-component C# contract, real Rust IPC and MV3 first-proof/failure regression
+        run: node --test probes/8p/native-rust-mv3-integration.test.mjs
+      - name: Check opt-in runner parses
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path probes/8p/run-native.ps1), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count) { $errors | Out-String | Write-Error; exit 1 }
+      - name: Source-SHA and all binary files SHA256 manifest
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force gate/host | Out-Null
+          Copy-Item target/release/examples/7l2_bridge.exe gate/7l2_bridge.exe
+          Copy-Item apps/windows-host/bin/Release/net8.0-windows/* gate/host/ -Recurse
+          (git rev-parse HEAD).Trim() | Set-Content gate/source.sha -NoNewline
+          $root = (Resolve-Path gate).Path
+          $files = @(Get-ChildItem gate -File -Recurse | Where-Object { $_.Name -ne 'hashes.json' } | ForEach-Object {
+            [pscustomobject]@{
+              path = $_.FullName.Substring($root.Length + 1).Replace('\','/')
+              sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            }
+          })
+          if ($files.Count -lt 5) { throw 'Incomplete 8P artifact' }
+          ConvertTo-Json -InputObject $files -Depth 4 | Set-Content gate/hashes.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cos-8p-host-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: gate/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Never conflate cloud tests with signed-in native acceptance
+        shell: pwsh
+        run: |
+          Write-Output 'Cloud checks validate origin policy and compilation only.'
+          Write-Output 'Provider login, signed-in observation, authenticated Rust/MV3 rebind and physical 7U1 stay NOT_RUN.'

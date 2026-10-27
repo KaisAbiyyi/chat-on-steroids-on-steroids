@@ -1,0 +1,1460 @@
+using System.Text.Json;
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
+
+namespace CoSoS.Probe7L1.WindowsHost;
+
+// Production provider navigation is native owned. It intentionally DOES NOT
+// use the synthetic WebView2/CDP/MV3 observation authority. Navigating an
+// approved provider is not an authenticated or reattested signed-in channel.
+internal sealed partial class GateForm
+{
+    private string? _host8PConfig;
+    private string? _host8PProvider;
+
+    private sealed record ProviderSpec(string Id, string Origin, HashSet<string> Origins,
+        HashSet<string> CallbackUrls);
+
+    private sealed class ProviderPolicy
+    {
+        private readonly Dictionary<string, ProviderSpec> _providers;
+
+        private ProviderPolicy(Dictionary<string, ProviderSpec> providers) => _providers = providers;
+
+        private static void Deny(string reason) => throw new UnauthorizedAccessException("8P provider policy: " + reason);
+        private static bool ExactKeys(JsonElement value, params string[] names) =>
+            value.ValueKind == JsonValueKind.Object &&
+            value.EnumerateObject().Count() == names.Length &&
+            value.EnumerateObject().All(p => names.Contains(p.Name, StringComparer.Ordinal));
+
+        // Reject noncanonical URL text rather than silently fixing it.
+        private static bool ExactHttpsOrigin(string? raw)
+        {
+            if (string.IsNullOrEmpty(raw) || raw.Length > 253 || raw.EndsWith("/", StringComparison.Ordinal) ||
+                raw.Contains('\\') || raw.Contains('@') || raw.Contains('%') ||
+                !Uri.TryCreate(raw, UriKind.Absolute, out var uri) ||
+                uri.Scheme != Uri.UriSchemeHttps || uri.UserInfo.Length != 0 ||
+                uri.Query.Length != 0 || uri.Fragment.Length != 0 ||
+                !uri.IsDefaultPort || !string.Equals(uri.AbsoluteUri, raw + "/", StringComparison.Ordinal) ||
+                !string.Equals(uri.GetLeftPart(UriPartial.Authority), raw, StringComparison.Ordinal))
+                return false;
+            var host = uri.IdnHost;
+            if (!string.Equals(uri.Host, host, StringComparison.Ordinal) ||
+                host.Length > 253 || !host.Contains('.', StringComparison.Ordinal) ||
+                host.StartsWith(".", StringComparison.Ordinal) || host.EndsWith(".", StringComparison.Ordinal))
+                return false;
+            return host.Split('.').All(label => label.Length is > 0 and <= 63 &&
+                label[0] != '-' && label[^1] != '-' &&
+                label.All(c => (c >= 'a' && c <= 'z') ||
+                    (c >= '0' && c <= '9') || c == '-'));
+        }
+
+        public static ProviderPolicy Parse(string json)
+        {
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+            if (!ExactKeys(root, "providers")) { Deny("shape"); }
+            var values = root.GetProperty("providers");
+            if (values.ValueKind != JsonValueKind.Array || values.GetArrayLength() is < 1 or > 16)
+                Deny("provider-count");
+            var parsed = new Dictionary<string, ProviderSpec>(StringComparer.Ordinal);
+            foreach (var entry in values.EnumerateArray())
+            {
+                if (!ExactKeys(entry, "id", "origin", "redirectOrigins") &&
+                    !ExactKeys(entry, "id", "origin", "redirectOrigins", "callbackUrls"))
+                    Deny("entry-shape");
+                var idElement = entry.GetProperty("id");
+                var originElement = entry.GetProperty("origin");
+                var redirects = entry.GetProperty("redirectOrigins");
+                if (idElement.ValueKind != JsonValueKind.String ||
+                    originElement.ValueKind != JsonValueKind.String ||
+                    redirects.ValueKind != JsonValueKind.Array ||
+                    redirects.GetArrayLength() > 16) Deny("types");
+                var id = idElement.GetString() ?? "";
+                var origin = originElement.GetString() ?? "";
+                if (id.Length is < 1 or > 40 ||
+                    !id.All(c => (c >= 'a' && c <= 'z') ||
+                        (c >= '0' && c <= '9') || c == '-') ||
+                    !ExactHttpsOrigin(origin)) Deny("provider-id-origin");
+                var allowed = new HashSet<string>(StringComparer.Ordinal) { origin };
+                foreach (var redirect in redirects.EnumerateArray())
+                {
+                    if (redirect.ValueKind != JsonValueKind.String ||
+                        !ExactHttpsOrigin(redirect.GetString()) ||
+                        !allowed.Add(redirect.GetString()!)) Deny("redirect-origin");
+                }
+                var callbacks = new HashSet<string>(StringComparer.Ordinal);
+                if (entry.TryGetProperty("callbackUrls", out var callbackList))
+                {
+                    if (callbackList.ValueKind != JsonValueKind.Array ||
+                        callbackList.GetArrayLength() > 8) Deny("callback-shape");
+                    foreach (var item in callbackList.EnumerateArray())
+                    {
+                        if (item.ValueKind != JsonValueKind.String) Deny("callback-type");
+                        var callbackRaw = item.GetString() ?? "";
+                        if (!Uri.TryCreate(callbackRaw, UriKind.Absolute, out var callback) ||
+                            callback.Scheme != Uri.UriSchemeHttps ||
+                            callback.UserInfo.Length != 0 || callback.Query.Length != 0 ||
+                            callback.Fragment.Length != 0 || callbackRaw.Contains('\\') ||
+                            callbackRaw.Contains('@') || callbackRaw.Contains('%') ||
+                            !string.Equals(callback.AbsoluteUri, callbackRaw,
+                                StringComparison.Ordinal) ||
+                            callback.AbsolutePath == "/" ||
+                            !allowed.Contains(callback.GetLeftPart(UriPartial.Authority)) ||
+                            !callbacks.Add(callbackRaw))
+                            Deny("callback-url");
+                    }
+                }
+                if (!parsed.TryAdd(id, new ProviderSpec(id, origin, allowed, callbacks)))
+                    Deny("duplicate-provider");
+            }
+            return new ProviderPolicy(parsed);
+        }
+
+        public string Landing(string providerId)
+        {
+            if (!_providers.TryGetValue(providerId, out var provider)) { Deny("unlisted-provider"); }
+            return provider!.Origin + "/";
+        }
+
+        // A URL from WebView2 is untrusted: a permitted HTTPS origin does not
+        // authorize user/session identity or any native/MV3 capability.
+        // OAuth authorization *requests* may contain a bounded PKCE query, but
+        // credential-bearing callbacks and fragment/implicit-token flows are
+        // denied until a separately native-attested one-use callback is built.
+        private static readonly HashSet<string> OAuthRequestKeys = new(StringComparer.Ordinal)
+        {
+            "response_type", "client_id", "redirect_uri", "scope", "state",
+            "nonce", "code_challenge", "code_challenge_method", "prompt",
+            "audience"
+        };
+
+        private static bool SafeOAuthRequest(ProviderSpec provider, string query)
+        {
+            if (query.Length is < 2 or > 2049 || query[0] != '?') return false;
+            var args = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in query[1..].Split('&'))
+            {
+                var split = pair.IndexOf('=');
+                if (split <= 0 || split == pair.Length - 1) return false;
+                var key = pair[..split];
+                var raw = pair[(split + 1)..];
+                // Only the value may use percent encoding; keys are exact and
+                // unambiguous. No encoded delimiters, controls or double
+                // decoding are ever treated as authority.
+                if (!OAuthRequestKeys.Contains(key) || !args.TryAdd(key, raw) ||
+                    raw.Length > 1024 || raw.Contains('+') ||
+                    raw.Any(c => c <= 0x20 || c >= 0x7f || c == '#' || c == '\\' ||
+                        c == '@')) return false;
+                for (var i = 0; i < raw.Length; i++)
+                {
+                    if (raw[i] != '%') continue;
+                    if (i + 2 >= raw.Length ||
+                        !Uri.IsHexDigit(raw[i + 1]) || !Uri.IsHexDigit(raw[i + 2]))
+                        return false;
+                    i += 2;
+                }
+                var decoded = Uri.UnescapeDataString(raw);
+                if (decoded.Length > 1024 ||
+                    decoded.Any(c => char.IsControl(c) || c == '\\'))
+                    return false;
+            }
+            // The request is just a browser navigation, not an OAuth result.
+            // Native code never receives/logs the verifier, state or code.
+            if (!args.TryGetValue("response_type", out var responseType) ||
+                responseType != "code" ||
+                !args.TryGetValue("code_challenge_method", out var method) ||
+                method != "S256" ||
+                !args.TryGetValue("client_id", out var client) ||
+                client.Length is < 1 or > 128 ||
+                !args.TryGetValue("state", out var state) ||
+                state.Length is < 16 or > 256 ||
+                !args.TryGetValue("code_challenge", out var challenge) ||
+                challenge.Length is < 43 or > 128 ||
+                !args.TryGetValue("redirect_uri", out var encodedRedirect))
+                return false;
+            var redirectText = Uri.UnescapeDataString(encodedRedirect);
+            if (!Uri.TryCreate(redirectText, UriKind.Absolute, out var redirect) ||
+                redirect.Scheme != Uri.UriSchemeHttps ||
+                redirect.UserInfo.Length != 0 || redirect.Query.Length != 0 ||
+                redirect.Fragment.Length != 0 || redirectText.Contains('\\') ||
+                redirectText.Contains('@') ||
+                !provider.Origins.Contains(redirect.GetLeftPart(UriPartial.Authority)))
+                return false;
+            return provider.CallbackUrls.Contains(redirectText);
+        }
+
+        public bool Allows(string providerId, string url)
+        {
+            if (!_providers.TryGetValue(providerId, out var provider) ||
+                string.IsNullOrEmpty(url) || url.Length > 4096 ||
+                url.Contains('\\') || url.Contains('@') ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
+                parsed.Scheme != Uri.UriSchemeHttps || parsed.UserInfo.Length != 0 ||
+                parsed.Fragment.Length != 0 ||
+                !string.Equals(parsed.AbsoluteUri, url, StringComparison.Ordinal) ||
+                !provider.Origins.Contains(parsed.GetLeftPart(UriPartial.Authority)))
+                return false;
+            if (parsed.AbsolutePath.Contains('%') || parsed.AbsolutePath.Contains(';'))
+                return false;
+            if (parsed.Query.Length == 0) return true;
+            return SafeOAuthRequest(provider, parsed.Query);
+        }
+
+        // These methods only parse host-configured flow transitions. The
+        // provider page owns its OAuth request; none of these values are
+        // credentials or proof of authentication.
+        public bool TryAuthorizationRequest(string providerId, string url,
+            out string state, out string callback)
+        {
+            state = callback = "";
+            if (!Allows(providerId, url) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
+                parsed.Query.Length == 0) return false;
+            var query = parsed.Query[1..].Split('&')
+                .Select(value => value.Split('=', 2))
+                .ToDictionary(parts => parts[0], parts => parts[1],
+                    StringComparer.Ordinal);
+            state = Uri.UnescapeDataString(query["state"]);
+            callback = Uri.UnescapeDataString(query["redirect_uri"]);
+            return true;
+        }
+
+        public bool IsCallbackCandidate(string providerId, string url)
+        {
+            if (!_providers.TryGetValue(providerId, out var provider) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                uri.Scheme != Uri.UriSchemeHttps || uri.UserInfo.Length != 0)
+                return false;
+            return provider.CallbackUrls.Contains(uri.GetLeftPart(UriPartial.Path));
+        }
+
+        public bool TryCallback(string providerId, string url,
+            out string state)
+        {
+            state = "";
+            if (!IsCallbackCandidate(providerId, url) ||
+                !Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
+                parsed.Fragment.Length != 0 || parsed.Query.Length is < 2 or > 2049 ||
+                url.Contains('\\') || url.Contains('@')) return false;
+            var pieces = parsed.Query[1..].Split('&');
+            if (pieces.Length != 2) return false;
+            var values = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in pieces)
+            {
+                var split = pair.IndexOf('=');
+                if (split <= 0 || split == pair.Length - 1) return false;
+                var key = pair[..split];
+                var value = pair[(split + 1)..];
+                if (key is not ("state" or "code") ||
+                    !values.TryAdd(key, value) || value.Length > 1024 ||
+                    value.Contains('+') || value.Any(ch => ch <= 0x20 ||
+                        ch >= 0x7f || ch == '#' || ch == '@' || ch == '\\'))
+                    return false;
+                for (var i = 0; i < value.Length; i++)
+                {
+                    if (value[i] != '%') continue;
+                    if (i + 2 >= value.Length ||
+                        !Uri.IsHexDigit(value[i + 1]) ||
+                        !Uri.IsHexDigit(value[i + 2])) return false;
+                    i += 2;
+                }
+            }
+            if (!values.TryGetValue("state", out var encodedState) ||
+                !values.TryGetValue("code", out var code) ||
+                code.Length is < 1 or > 1024) return false;
+            state = Uri.UnescapeDataString(encodedState);
+            return state.Length is >= 16 and <= 256 &&
+                state.All(ch => (ch >= 'a' && ch <= 'z') ||
+                    (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= '0' && ch <= '9') || ch is '-' or '_');
+        }
+
+        public string PrimaryOrigin(string providerId)
+        {
+            if (!_providers.TryGetValue(providerId, out var provider))
+                Deny("unknown-provider");
+            return provider!.Origin;
+        }
+
+        public static void SelfTest()
+        {
+            const string config = """{"providers":[{"id":"chatgpt","origin":"https://chatgpt.com","redirectOrigins":["https://auth.openai.com"],"callbackUrls":["https://chatgpt.com/auth/callback"]},{"id":"gemini","origin":"https://gemini.google.com","redirectOrigins":[],"callbackUrls":[]}]}""";
+            var p = Parse(config);
+            static void Check(bool value) { if (!value) throw new InvalidOperationException("8P origin policy regression"); }
+            Check(p.Landing("chatgpt") == "https://chatgpt.com/");
+            Check(p.Allows("chatgpt", "https://chatgpt.com/") &&
+                  p.Allows("chatgpt", "https://auth.openai.com/login") &&
+                  p.Allows("gemini", "https://gemini.google.com/"));
+            foreach (var rejected in new[] {
+                "http://chatgpt.com/", "https://chatgpt.com.evil.test/",
+                "https://user@chatgpt.com/", "https://chatgpt.com@evil.test/",
+                "https://chatgpt.com/?token=secret", "https://chatgpt.com/#access_token",
+                "javascript:alert(1)", "file:///C:/secret", "https://auth.openai.com.evil.test/",
+                "https://chatgpt.com/%2f", "https://gemini.google.com/"
+            }) Check(!p.Allows("chatgpt", rejected));
+            // Safe authorization-code + PKCE request is navigation-only.
+            // Callback codes, bearer tokens, unsolicited state and open
+            // redirect_uri hosts never pass the production origin gate.
+            var query = "?response_type=code&client_id=public-web" +
+                "&state=abcdefghijklmnop0123456789" +
+                "&code_challenge=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ" +
+                "&code_challenge_method=S256" +
+                "&redirect_uri=https%3A%2F%2Fchatgpt.com%2Fauth%2Fcallback";
+            Check(p.Allows("chatgpt", "https://auth.openai.com/authorize" + query));
+            Check(p.TryAuthorizationRequest("chatgpt",
+                "https://auth.openai.com/authorize" + query,
+                out var requestState, out var requestCallback) &&
+                requestState == "abcdefghijklmnop0123456789" &&
+                requestCallback == "https://chatgpt.com/auth/callback");
+            Check(p.TryCallback("chatgpt",
+                "https://chatgpt.com/auth/callback?code=one-use&state=abcdefghijklmnop0123456789",
+                out var callbackState) &&
+                callbackState == requestState);
+            Check(!p.TryCallback("chatgpt",
+                "https://chatgpt.com/auth/callback?access_token=evil&state=abcdefghijklmnop0123456789",
+                out _));
+            Check(!p.TryCallback("chatgpt",
+                "https://chatgpt.com/auth/callback?code=one&state=abcdefghijklmnop0123456789&code=two",
+                out _));
+
+            foreach (var suffix in new[] {
+                "?code=credential", "?access_token=secret", "?state=guess",
+                "?response_type=token", query + "&code=credential",
+                query.Replace("chatgpt.com%2Fauth", "attacker.test%2Fauth"),
+                query.Replace("chatgpt.com%2Fauth%2Fcallback",
+                    "chatgpt.com%2Fnot-an-allowed-callback"),
+                query.Replace("state=abcdefghijklmnop0123456789", "state=x"),
+                query.Replace("code_challenge_method=S256", "code_challenge_method=plain"),
+                query + "&state=duplicate"
+            }) Check(!p.Allows("chatgpt", "https://auth.openai.com/authorize" + suffix));
+            Check(!p.Allows("unlisted", "https://chatgpt.com/"));
+            foreach (var invalid in new[] {
+                """{"providers":[]}""",
+                """{"providers":[{"id":"bad","origin":"http://example.com","redirectOrigins":[]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://user@example.com","redirectOrigins":[]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com/path","redirectOrigins":[]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com/","redirectOrigins":[]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com.evil/","redirectOrigins":["http://example.com"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://evil.example/callback"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["http://example.com/callback"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://example.com/"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://example.com/callback?code=raw"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"callbackUrls":["https://example.com/callback","https://example.com/callback"]}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[],"unsafe":true}]}""",
+                """{"providers":[{"id":"bad","origin":"https://example.com","redirectOrigins":[]},{"id":"bad","origin":"https://example.com","redirectOrigins":[]}]}"""
+            })
+            {
+                try { Parse(invalid); throw new InvalidOperationException("8P invalid config admitted"); }
+                catch (UnauthorizedAccessException) { }
+            }
+        }
+    }
+
+    // Native, memory-only correlation for a provider-managed OAuth redirect.
+    // A matching code callback is consumed ONCE and navigation is canceled:
+    // no token exchange, browser-history persistence, account observation or
+    // provider authentication is implied. All values remain private to host.
+    private sealed class OAuthNavigationGate
+    {
+        private sealed record Pending(string Provider, string Profile,
+            string Session, string Callback, ulong Epoch, DateTimeOffset Started);
+        private readonly Dictionary<string, Pending> _pending =
+            new(StringComparer.Ordinal);
+        private readonly HashSet<string> _consumed = new(StringComparer.Ordinal);
+        private static string Digest(string value) =>
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes(value)));
+
+        public bool Begin(string provider, string profile, string session,
+            string state, string callback, ulong epoch, DateTimeOffset now)
+        {
+            if (state.Length is < 16 or > 256 || epoch == 0 ||
+                state.Any(ch => !((ch >= 'a' && ch <= 'z') ||
+                    (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= '0' && ch <= '9') || ch is '-' or '_')))
+                return false;
+            Prune(now);
+            var digest = Digest(state);
+            // Never evict replay tombstones during this host session; when
+            // exhausted, fail closed rather than permitting an old state again.
+            if (_consumed.Contains(digest) || _pending.ContainsKey(digest) ||
+                _pending.Count >= 16 || _consumed.Count >= 1024) return false;
+            _pending.Add(digest, new Pending(provider, profile, session,
+                callback, epoch, now));
+            return true;
+        }
+
+        public bool Consume(string provider, string profile, string session,
+            string callback, string state, ulong epoch, DateTimeOffset now)
+        {
+            Prune(now);
+            var digest = Digest(state);
+            if (!_pending.TryGetValue(digest, out var pending) ||
+                _consumed.Contains(digest) ||
+                !string.Equals(pending.Provider, provider, StringComparison.Ordinal) ||
+                !string.Equals(pending.Profile, profile, StringComparison.Ordinal) ||
+                !string.Equals(pending.Session, session, StringComparison.Ordinal) ||
+                !string.Equals(pending.Callback, callback, StringComparison.Ordinal) ||
+                epoch <= pending.Epoch) return false;
+            _pending.Remove(digest);
+            _consumed.Add(digest);
+            return true;
+        }
+
+        public void InvalidateProfile(string profile)
+        {
+            foreach (var pair in _pending.ToArray())
+                if (string.Equals(pair.Value.Profile, profile,
+                    StringComparison.Ordinal))
+                {
+                    _pending.Remove(pair.Key);
+                    _consumed.Add(pair.Key);
+                }
+        }
+
+        private void Prune(DateTimeOffset now)
+        {
+            foreach (var pair in _pending.ToArray())
+                if (now < pair.Value.Started ||
+                    now - pair.Value.Started > TimeSpan.FromMinutes(5))
+                {
+                    _pending.Remove(pair.Key);
+                    _consumed.Add(pair.Key);
+                }
+        }
+
+        public static void SelfTest()
+        {
+            static void Check(bool value)
+            {
+                if (!value) throw new InvalidOperationException(
+                    "8P OAuth one-use state regression");
+            }
+            var now = DateTimeOffset.UtcNow;
+            var gate = new OAuthNavigationGate();
+            const string state = "abcdefghijklmnop0123456789";
+            const string callback = "https://chatgpt.com/auth/callback";
+            Check(gate.Begin("chatgpt", "profile-A", "session-A", state,
+                callback, 2, now));
+            Check(!gate.Begin("chatgpt", "profile-A", "session-A", state,
+                callback, 2, now));
+            Check(!gate.Consume("chatgpt", "profile-B", "session-A", callback,
+                state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-B", callback,
+                state, 3, now));
+            Check(!gate.Consume("gemini", "profile-A", "session-A", callback,
+                state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-A",
+                "https://chatgpt.com/evil", state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-A", callback,
+                state, 2, now));
+            Check(gate.Consume("chatgpt", "profile-A", "session-A", callback,
+                state, 3, now));
+            Check(!gate.Consume("chatgpt", "profile-A", "session-A", callback,
+                state, 4, now));
+            Check(!gate.Begin("chatgpt", "profile-A", "session-A", state,
+                callback, 4, now));
+            var other = new OAuthNavigationGate();
+            Check(other.Begin("chatgpt", "profile-A", "session-A",
+                "different_state_1234567890", callback, 1, now));
+            Check(!other.Consume("chatgpt", "profile-A", "session-A", callback,
+                "different_state_1234567890", 2, now.AddMinutes(6)));
+        }
+    }
+
+    // A CoreWebView2 NavigationCompleted event never grants a binding on its
+    // own: it must consume the *specific* browser NavigationStarting admission.
+    // Redirects can reuse a navigation ID but every new start invalidates the
+    // previous epoch; cancelled/forbidden starts never arm a completion.
+    private sealed class NativeNavigationAdmission
+    {
+        private ulong _navigationId;
+        private ulong _epoch;
+        private bool _admitted;
+
+        public void Invalidate() => _admitted = false;
+
+        public void Arm(ulong navigationId, ulong epoch)
+        {
+            _admitted = navigationId != 0 && epoch != 0;
+            _navigationId = navigationId;
+            _epoch = epoch;
+        }
+
+        public bool Consume(ulong navigationId, ulong epoch)
+        {
+            var accepted = _admitted && navigationId == _navigationId &&
+                epoch == _epoch;
+            _admitted = false;
+            return accepted;
+        }
+
+        public static void SelfTest()
+        {
+            static void Require(bool value)
+            {
+                if (!value) throw new InvalidOperationException(
+                    "8P native WebView2 navigation admission regression");
+            }
+            var fence = new NativeNavigationAdmission();
+            Require(!fence.Consume(1, 1)); // unsolicited completion
+            fence.Arm(10, 1);
+            Require(!fence.Consume(9, 1)); // stale completion consumes grant
+            Require(!fence.Consume(10, 1)); // cannot reuse stale admission
+            fence.Arm(10, 1);
+            fence.Invalidate(); // disallowed redirect / user cancel / crash
+            Require(!fence.Consume(10, 1));
+            fence.Arm(11, 2);
+            Require(!fence.Consume(11, 3)); // epoch changed
+            fence.Arm(11, 3);
+            Require(fence.Consume(11, 3));
+            Require(!fence.Consume(11, 3)); // replay
+            fence.Arm(12, 4);
+            fence.Arm(12, 5); // same NavigationId, a new redirected start
+            Require(!fence.Consume(12, 4));
+            fence.Arm(12, 5);
+            Require(fence.Consume(12, 5));
+            fence.Arm(0, 6);
+            Require(!fence.Consume(0, 6));
+        }
+    }
+
+    // 8P shares the same compiled, fail-closed Microsoft WebView2 runtime
+    // inventory policy as 8L1. The caller MUST derive verifiedRuntime from
+    // the actual browser process Authenticode/path check, never page input.
+    // Before installing our MV3 extension, only the two exact runtime-owned
+    // components (or an empty inventory) may exist in a FRESH host-owned profile.
+    private static bool Accept8PInventory(
+        IEnumerable<string> ids, bool verifiedRuntime, string? ownedExtensionId) =>
+        NativeProfileExtensions.Accepts(ids, verifiedRuntime, ownedExtensionId);
+
+    private static void Verify8PInventoryPolicy()
+    {
+        static void Require(bool result, string description)
+        {
+            if (!result) throw new InvalidOperationException(
+                "8P Windows WebView2 built-in inventory regression: " + description);
+        }
+        const string clipboard = "dgiklkfkllikcanfonkcabmbdfmgleag";
+        const string pdf = "mhjfbmdgcfjbbpaeojofohoefgiehjai";
+        const string owned = "abcdefghijklmnopabcdefghijklmnop";
+        const string foreign = "pppppppppppppppppppppppppppppppp";
+        Require(Accept8PInventory([], true, null), "empty signed fresh runtime");
+        Require(Accept8PInventory([clipboard, pdf], true, null),
+            "both pinned WebView2 components before install");
+        Require(Accept8PInventory([pdf, clipboard], true, null),
+            "order of runtime-owned components not trusted");
+        Require(Accept8PInventory([clipboard, pdf, owned], true, owned),
+            "only exact installed CoSoS extension after install");
+        Require(!Accept8PInventory([clipboard, pdf], false, null),
+            "unsigned or foreign browser process");
+        Require(!Accept8PInventory([], false, null),
+            "empty inventory never bypasses runtime attestation");
+        Require(!Accept8PInventory([owned], true, null),
+            "pre-existing CoSoS ID is not preauthorized");
+        Require(!Accept8PInventory([clipboard, foreign], true, null),
+            "foreign unpacked extension before install");
+        Require(!Accept8PInventory([clipboard, pdf, foreign], true, owned),
+            "foreign extension cannot replace CoSoS");
+        Require(!Accept8PInventory([clipboard, pdf, owned, foreign], true, owned),
+            "foreign extension after install");
+        Require(!Accept8PInventory([clipboard, clipboard], true, null),
+            "duplicate runtime component");
+        Require(!Accept8PInventory([clipboard, pdf, owned, owned], true, owned),
+            "duplicate owned extension");
+        Require(!Accept8PInventory([clipboard, pdf], true, owned),
+            "missing CoSoS extension after install");
+        Require(!Accept8PInventory([clipboard, pdf, owned], false, owned),
+            "unsigned runtime cannot install CoSoS");
+        Require(!Accept8PInventory([clipboard, pdf, owned.ToUpperInvariant()],
+            true, owned), "uppercase extension ID is not canonical");
+        Require(!Accept8PInventory([clipboard, pdf, owned], true, clipboard),
+            "built-in ID cannot masquerade as source-owned extension");
+    }
+
+    // Shared by the production post-Rust-commit path and compiled negative tests.
+    // Rust commit ACK alone is NEVER authority to release a session.
+    private sealed class Native8PCommitProofGate
+    {
+        private bool _committed;
+        private bool _sourceProved;
+        private bool _targetProved;
+        private bool _poisoned;
+        public void CommitAcknowledged()
+        {
+            if (_poisoned || _committed)
+                throw new UnauthorizedAccessException("8P invalid commit state");
+            _committed = true;
+        }
+        public void FirstProof(bool source)
+        {
+            if (_poisoned || !_committed || (source ? _sourceProved : _targetProved))
+                throw new UnauthorizedAccessException("8P stale/duplicate postcommit proof");
+            if (source) _sourceProved = true;
+            else _targetProved = true;
+        }
+        public bool CanRelease => _committed && _sourceProved &&
+            _targetProved && !_poisoned;
+        // The browser can navigate/crash between asynchronous source and target
+        // Rust first-proofs. A successful earlier proof is NOT a live lease.
+        // Call on the UI thread only after both awaits, with freshly validated
+        // native scopes; failed admission irrevocably poisons this transfer.
+        public bool ReleaseIfScopesCurrent(bool sourceCurrent, bool targetCurrent)
+        {
+            if (!CanRelease || !sourceCurrent || !targetCurrent)
+            {
+                Poison();
+                return false;
+            }
+            return true;
+        }
+        public void Poison() => _poisoned = true;
+    }
+
+    internal static void Run8PPolicyTests()
+    {
+        ProviderPolicy.SelfTest();
+        OAuthNavigationGate.SelfTest();
+        NativeNavigationAdmission.SelfTest();
+        Verify8PInventoryPolicy();
+        static void Verify(bool ok)
+        {
+            if (!ok) throw new InvalidOperationException(
+                "8P native 8B profile/session handoff policy regression");
+        }
+        // Exercises the SAME lease predicate used immediately after native
+        // Rust register/worker bootstrap/handshake continuations.
+        const string source = "https://chatgpt.com/";
+        const string origin = "https://chatgpt.com";
+        static bool Lease(ulong revocation, ulong navigation,
+            string? actualUrl = source, string? actualSource = source,
+            string? actualOrigin = origin, bool disposed = false) =>
+            Accept8PBindingLease(3, revocation, 11, navigation,
+                source, actualUrl, actualSource, origin, actualOrigin, disposed);
+        Verify(Lease(3, 11));
+        Verify(!Lease(4, 11)); // process failure invalidates without navigation
+        Verify(!Lease(3, 12)); // navigation during delayed Rust register
+        Verify(!Lease(3, 11, actualUrl: null)); // revoked document
+        Verify(!Lease(3, 11, actualSource: "https://evil.example/"));
+        Verify(!Lease(3, 11, actualOrigin: "https://evil.example"));
+        Verify(!Lease(3, 11, disposed: true));
+        // The stale lease MUST never publish a newly returned channel, even
+        // if it would have matched the old unrevoked document identity.
+        // Test the exact async channel ADOPTION code used after production
+        // Rust register, including delayed navigation/process-failed poison,
+        // one-use retirement and an ambiguous failed retire.
+        var retireCalls = 0;
+        var nativeCurrent = true;
+        Task<bool> RetireSimulated(ulong channel)
+        {
+            retireCalls++;
+            return Task.FromResult(channel == 41);
+        }
+        Verify(Adopt8PRegisteredChannelAsync(41, () => nativeCurrent,
+            RetireSimulated).GetAwaiter().GetResult() == 41);
+        Verify(retireCalls == 0); // valid first registration is not retired
+        nativeCurrent = false; // native navigation during delayed register
+        try
+        {
+            _ = Adopt8PRegisteredChannelAsync(41, () => nativeCurrent,
+                RetireSimulated).GetAwaiter().GetResult();
+            throw new InvalidOperationException("accepted stale Rust channel");
+        }
+        catch (UnauthorizedAccessException) { }
+        Verify(retireCalls == 1);
+        try
+        {
+            _ = Adopt8PRegisteredChannelAsync(43, () => nativeCurrent,
+                RetireSimulated).GetAwaiter().GetResult();
+            throw new InvalidOperationException("accepted uncertain retired Rust channel");
+        }
+        catch (UnauthorizedAccessException) { }
+        Verify(retireCalls == 2); // caller must poison Rust authority on failure
+        try
+        {
+            _ = Adopt8PRegisteredChannelAsync(0, () => true,
+                RetireSimulated).GetAwaiter().GetResult();
+            throw new InvalidOperationException("accepted zero Rust channel");
+        }
+        catch (UnauthorizedAccessException) { }
+        Verify(retireCalls == 2);
+        var failAfterRustCommit = new Native8PCommitProofGate();
+        failAfterRustCommit.CommitAcknowledged();
+        Verify(!failAfterRustCommit.CanRelease);
+        failAfterRustCommit.Poison(); // injected failure immediately after Rust ACK
+        Verify(!failAfterRustCommit.CanRelease);
+        try
+        {
+            failAfterRustCommit.FirstProof(true);
+            throw new InvalidOperationException("8P accepted proof after fault");
+        }
+        catch (UnauthorizedAccessException) { }
+        var failAfterAProof = new Native8PCommitProofGate();
+        failAfterAProof.CommitAcknowledged();
+        failAfterAProof.FirstProof(true);
+        Verify(!failAfterAProof.CanRelease); // injected B worker failure
+        failAfterAProof.Poison();
+        Verify(!failAfterAProof.CanRelease);
+        var goodProofs = new Native8PCommitProofGate();
+        goodProofs.CommitAcknowledged();
+        goodProofs.FirstProof(true);
+        Verify(!goodProofs.CanRelease);
+        goodProofs.FirstProof(false);
+        Verify(goodProofs.CanRelease);
+        Verify(goodProofs.ReleaseIfScopesCurrent(true, true));
+        var sourceNavigationAfterProof = new Native8PCommitProofGate();
+        sourceNavigationAfterProof.CommitAcknowledged();
+        sourceNavigationAfterProof.FirstProof(true);
+        sourceNavigationAfterProof.FirstProof(false);
+        Verify(!sourceNavigationAfterProof.ReleaseIfScopesCurrent(false, true));
+        Verify(!sourceNavigationAfterProof.CanRelease);
+        var targetCrashAfterProof = new Native8PCommitProofGate();
+        targetCrashAfterProof.CommitAcknowledged();
+        targetCrashAfterProof.FirstProof(true);
+        targetCrashAfterProof.FirstProof(false);
+        Verify(!targetCrashAfterProof.ReleaseIfScopesCurrent(true, false));
+        Verify(!targetCrashAfterProof.CanRelease);
+        goodProofs.Poison();
+        Verify(!goodProofs.CanRelease);
+        var first = new Native8PSessionSnapshot("8p-A",
+            @"D:\\projects\\CoS-Rust\\a", "https://chatgpt.com",
+            "session-A", 1, "doc-A", 1, 1, 1, 1,
+            "extension-A", "worker-target-A", "worker-instance-A");
+        var second = first with {
+            Profile = "8p-B",
+            ProfilePath = @"D:\\projects\\CoS-Rust\\b",
+            SessionId = "session-B",
+            DocumentId = "doc-B",
+            ChannelId = 2
+        };
+        Verify(Eligible8PHandoff(first, second, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, first, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second with {
+            ProfilePath = first.ProfilePath
+        }, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second with {
+            SessionId = first.SessionId
+        }, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second with {
+            Origin = "https://auth.openai.com"
+        }, "https://chatgpt.com"));
+        Verify(!Eligible8PHandoff(first, second,
+            "https://wrong.example"));
+        var rebound = first with {
+            SessionId = "8p-empty-new", SessionEpoch = 2,
+            DocumentId = "doc-new-A", NavigationEpoch = 2,
+            HostGeneration = 2, WorkerGeneration = 2, ChannelId = 3,
+            WorkerTargetId = "new-worker-target"
+        };
+        Verify(Fresh8PPostHandoff(first, rebound, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            ProfilePath = second.ProfilePath
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            ExtensionId = "foreign-extension"
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            DocumentId = first.DocumentId
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            ChannelId = first.ChannelId
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            HostGeneration = first.HostGeneration
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            WorkerGeneration = first.WorkerGeneration
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            SessionId = first.SessionId
+        }, "8p-empty-new", 2));
+        Verify(!Fresh8PPostHandoff(first, rebound with {
+            SessionEpoch = first.SessionEpoch
+        }, "8p-empty-new", 2));
+    }
+
+    private void BuildProductionExtension()
+    {
+        var source = Path.Combine(_repo, "probes", "8p", "extension");
+        var destination = Path.Combine(_root, "extension");
+        Directory.CreateDirectory(destination);
+        foreach (var file in new[] { "manifest.json", "sw.mjs" })
+        {
+            var input = Path.Combine(source, file);
+            var output = Path.Combine(destination, file);
+            RejectReparseAncestors(input);
+            RejectReparseAncestors(output);
+            if (File.Exists(output))
+                throw new UnauthorizedAccessException("8P extension output is not fresh");
+            File.Copy(input, output);
+        }
+    }
+
+    private async Task Prove8PSessionAsync(Browser browser)
+    {
+        // Signed identity only: the 8P MV3 worker has no provider host grants
+        // and exposes no snapshot, observation or browser tool API.
+        var proof = await WorkerAsync(browser, Js("attestSession", new { }));
+        var observed = await RustAllowAsync(new
+        {
+            op = "observe", host = Host(browser),
+            channelId = browser.ChannelId,
+            generation = browser.HostGeneration, sequence = 1,
+            payload = proof.GetProperty("payload").GetString(),
+            mac = proof.GetProperty("mac").GetString()
+        });
+        // An authenticated non-first observation is NOT sufficient for either
+        // handoff phase. Require Rust's exact first-document identity verdict.
+        if (!string.Equals(observed.GetProperty("observation").GetString(),
+                "FirstProof", StringComparison.Ordinal))
+            throw new UnauthorizedAccessException("8P missing fresh Rust first-proof");
+    }
+
+    private sealed record Native8PSessionSnapshot(
+        string Profile, string ProfilePath, string Origin,
+        string SessionId, ulong SessionEpoch, string DocumentId,
+        ulong NavigationEpoch, ulong HostGeneration, ulong WorkerGeneration,
+        ulong ChannelId, string ExtensionId, string WorkerTargetId,
+        string WorkerInstance);
+
+    private static Native8PSessionSnapshot Snapshot8P(Browser browser)
+    {
+        if (!browser.Production8P || browser.Revoked ||
+            browser.ChannelId == 0 || browser.ProductionOrigin is null ||
+            browser.ProductionUrl is null || browser.WorkerSession is null ||
+            string.IsNullOrWhiteSpace(browser.WorkerTargetId) ||
+            string.IsNullOrWhiteSpace(browser.WorkerInstance) ||
+            string.IsNullOrWhiteSpace(browser.ExtensionId) ||
+            browser.View.IsDisposed ||
+            !string.Equals(browser.View.CoreWebView2.Source,
+                browser.ProductionUrl, StringComparison.Ordinal) ||
+            !string.Equals(browser.ProfilePath,
+                Path.GetFullPath(browser.View.CoreWebView2.Profile.ProfilePath),
+                StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("8P handoff scope unbound");
+        return new(browser.Profile, browser.ProfilePath,
+            browser.ProductionOrigin, browser.SessionId, browser.SessionEpoch,
+            browser.DocumentId, browser.NavigationEpoch, browser.HostGeneration,
+            browser.WorkerGeneration, browser.ChannelId, browser.ExtensionId,
+            browser.WorkerTargetId!, browser.WorkerInstance!);
+    }
+
+    private static bool Same8P(Browser b, Native8PSessionSnapshot s)
+    {
+        try { return Snapshot8P(b) == s; }
+        catch (UnauthorizedAccessException) { return false; }
+    }
+
+    private static bool Eligible8PHandoff(
+        Native8PSessionSnapshot a, Native8PSessionSnapshot b,
+        string primaryOrigin) =>
+        a.Profile != b.Profile &&
+        !string.Equals(a.ProfilePath,b.ProfilePath,StringComparison.OrdinalIgnoreCase) &&
+        a.Origin == b.Origin && a.Origin == primaryOrigin &&
+        a.SessionId != b.SessionId && a.SessionEpoch > 0 &&
+        b.SessionEpoch > 0 &&
+        a.SessionEpoch < 9_007_199_254_740_989UL &&
+        b.SessionEpoch < 9_007_199_254_740_989UL;
+
+    // Native-specific two-phase postcondition. JS 8B handoff preserves an
+    // existing channel, whereas 8P Rust explicitly requires both channels
+    // retired; therefore require a *genuinely new* 8C document/worker/channel
+    // proof without changing either OS partition or installed MV3 extension.
+    // This is a stronger native requirement, not a claim of literal JS parity.
+    private static bool Fresh8PPostHandoff(
+        Native8PSessionSnapshot prior, Native8PSessionSnapshot next,
+        string expectedSession, ulong expectedSessionEpoch) =>
+        prior.Profile == next.Profile &&
+        string.Equals(prior.ProfilePath, next.ProfilePath,
+            StringComparison.OrdinalIgnoreCase) &&
+        prior.Origin == next.Origin &&
+        prior.ExtensionId == next.ExtensionId &&
+        next.SessionId == expectedSession &&
+        next.SessionEpoch == expectedSessionEpoch &&
+        next.DocumentId != prior.DocumentId &&
+        next.NavigationEpoch > prior.NavigationEpoch &&
+        next.HostGeneration > prior.HostGeneration &&
+        next.WorkerGeneration > prior.WorkerGeneration &&
+        next.ChannelId != prior.ChannelId && next.ChannelId != 0 &&
+        !string.IsNullOrWhiteSpace(next.WorkerInstance) &&
+        !string.IsNullOrWhiteSpace(next.WorkerTargetId);
+
+    // VERSIONED native production protocol, deliberately distinct from
+    // JS 8B's *single-phase* stable-document postcondition:
+    // 8P/native-two-phase/v1 = validated and one-use Rust handoff on retired
+    // channels, followed by NEW native WebView2 document/worker/channel proofs.
+    // This method is used by production *and* compiled C# differential vectors.
+    private const string Native8PContractVersion = "CoSoS/8P/native-two-phase/v1";
+
+    private static bool Verified8PTwoPhaseResult(
+        Native8PSessionSnapshot priorA, Native8PSessionSnapshot priorB,
+        Native8PSessionSnapshot nextA, Native8PSessionSnapshot nextB,
+        string primaryOrigin, string newSourceSession) =>
+        Eligible8PHandoff(priorA, priorB, primaryOrigin) &&
+        newSourceSession != priorA.SessionId &&
+        newSourceSession != priorB.SessionId &&
+        Fresh8PPostHandoff(priorA, nextA,
+            newSourceSession, priorA.SessionEpoch + 1) &&
+        Fresh8PPostHandoff(priorB, nextB,
+            priorA.SessionId, Math.Max(priorA.SessionEpoch, priorB.SessionEpoch) + 1) &&
+        nextA.SessionId != nextB.SessionId &&
+        nextA.Profile != nextB.Profile &&
+        !string.Equals(nextA.ProfilePath, nextB.ProfilePath,
+            StringComparison.OrdinalIgnoreCase);
+
+    // Deterministic, SYNTHETIC inputs; executes the exact same compiled native
+    // postcondition function as the production WebView2 path. The JS differential
+    // harness consumes this program's output and exercises unmodified JS 8B.
+    // It proves the expected divergence; it is NOT physical browser acceptance.
+    internal static void Write8PTwoPhaseDifferentialVectors()
+    {
+        var a = new Native8PSessionSnapshot("8p-A",
+            @"D:\projects\CoS-Rust\synthetic\A", "https://chatgpt.com",
+            "session-A", 1, "doc-A", 1, 1, 1, 101,
+            "ext-A", "worker-target-A", "worker-instance-A");
+        var b = a with {
+            Profile = "8p-B", ProfilePath = @"D:\projects\CoS-Rust\synthetic\B",
+            SessionId = "session-B", DocumentId = "doc-B", ChannelId = 102,
+            ExtensionId = "ext-B", WorkerTargetId = "worker-target-B",
+            WorkerInstance = "worker-instance-B"
+        };
+        var reboundA = a with {
+            SessionId = "empty-A", SessionEpoch = 2,
+            DocumentId = "fresh-A", NavigationEpoch = 2,
+            HostGeneration = 2, WorkerGeneration = 2, ChannelId = 201,
+            WorkerTargetId = "worker-target-fresh-A",
+            WorkerInstance = "worker-instance-fresh-A"
+        };
+        var reboundB = b with {
+            SessionId = a.SessionId, SessionEpoch = 2,
+            DocumentId = "fresh-B", NavigationEpoch = 2,
+            HostGeneration = 2, WorkerGeneration = 2, ChannelId = 202,
+            WorkerTargetId = "worker-target-fresh-B",
+            WorkerInstance = "worker-instance-fresh-B"
+        };
+        var stableA = a with { SessionId = "empty-A", SessionEpoch = 2 };
+        var stableB = b with { SessionId = a.SessionId, SessionEpoch = 2 };
+        var cases = new (string Id, Native8PSessionSnapshot A,
+            Native8PSessionSnapshot B, Native8PSessionSnapshot NextA,
+            Native8PSessionSnapshot NextB, bool ExpectedNative, bool ExpectedJs)[]
+        {
+            ("native-two-phase-fresh", a, b, reboundA, reboundB, true, false),
+            ("js-8b-stable-postcondition", a, b, stableA, stableB, false, true),
+            ("foreign-profile-path", a, b, reboundA,
+                reboundB with { ProfilePath = a.ProfilePath }, false, false),
+            ("foreign-extension-id", a, b, reboundA,
+                reboundB with { ExtensionId = a.ExtensionId }, false, false),
+            ("stale-document", a, b,
+                reboundA with { DocumentId = a.DocumentId }, reboundB, false, false),
+            ("stale-navigation-epoch", a, b,
+                reboundA with { NavigationEpoch = a.NavigationEpoch }, reboundB,
+                false, false),
+            ("stale-rust-channel", a, b, reboundA,
+                reboundB with { ChannelId = b.ChannelId }, false, false),
+            ("stale-worker-generation", a, b,
+                reboundA with { WorkerGeneration = a.WorkerGeneration }, reboundB,
+                false, false),
+            ("stale-host-generation", a, b, reboundA,
+                reboundB with { HostGeneration = b.HostGeneration }, false, false),
+            ("foreign-target-session", a, b, reboundA,
+                reboundB with { SessionId = "other-session" }, false, false),
+            ("replayed-session-epoch", a, b,
+                reboundA with { SessionEpoch = a.SessionEpoch }, reboundB,
+                false, false),
+            ("shared-partition-before", a,
+                b with { ProfilePath = a.ProfilePath }, reboundA, reboundB,
+                false, false),
+            ("foreign-origin", a, b, reboundA,
+                reboundB with { Origin = "https://foreign.invalid" },
+                false, false)
+        };
+        var output = cases.Select(v => new {
+            id = v.Id,
+            beforeA = v.A, beforeB = v.B, afterA = v.NextA, afterB = v.NextB,
+            sourceSessionTicket = "empty-A",
+            nativeAccepted = Verified8PTwoPhaseResult(
+                v.A, v.B, v.NextA, v.NextB, "https://chatgpt.com", "empty-A"),
+            expectedNative = v.ExpectedNative,
+            expectedJs8B = v.ExpectedJs
+        }).ToArray();
+        if (output.Any(v => v.nativeAccepted != v.expectedNative))
+            throw new InvalidOperationException(
+                "native two-phase contract differential expectation regressed");
+        Console.WriteLine(JsonSerializer.Serialize(new {
+            version = Native8PContractVersion, browserPhysical = false,
+            rustBridgePhysical = false, cases = output
+        }));
+    }
+
+    private async Task<(bool Committed, string NewSourceSession)> Execute8PHandoffProbeAsync(
+        Browser a, Browser b, string primaryOrigin)
+    {
+        // Both profiles are host-created and MV3/Rust-bound. No page can
+        // request this operation. Consent is a native default-No modal.
+        var first = Snapshot8P(a);
+        var second = Snapshot8P(b);
+        if (!Eligible8PHandoff(first, second, primaryOrigin))
+            throw new UnauthorizedAccessException("8P foreign/shared handoff");
+        var decision = MessageBox.Show(this,
+            "Transfer ONLY the CoSoS logical application session from profile A " +
+            "to profile B? Browser logins, cookies, storage and files stay separated. " +
+            "Both Rust channels will be retired. This action cannot be retried.",
+            "8P-HOST one-use cross-profile handoff",
+            MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2);
+        if (decision != DialogResult.Yes) return (false, "");
+        if (!Same8P(a, first) || !Same8P(b, second))
+            throw new UnauthorizedAccessException("8P handoff scope changed during consent");
+        // Exactly one signed first-proof per native scope before the transaction.
+        await Prove8PSessionAsync(a);
+        await Prove8PSessionAsync(b);
+        if (!Same8P(a, first) || !Same8P(b, second))
+            throw new UnauthorizedAccessException("8P handoff proof raced navigation");
+        var oldA = Host(a);
+        var oldB = Host(b);
+        var empty = "8p-empty-" + Guid.NewGuid().ToString("N");
+        var newSourceEpoch = first.SessionEpoch + 1;
+        var newTargetEpoch = Math.Max(first.SessionEpoch, second.SessionEpoch) + 1;
+        RevokeAndRetire(a);
+        RevokeAndRetire(b);
+        await RequireRetirementAsync(a);
+        await RequireRetirementAsync(b);
+        // After retirement, C# must still own exactly the old document and
+        // profile; failures keep both channels revoked (never retry/rollback
+        // ambiguously committed Rust transactions).
+        bool Stable(Browser v, Native8PSessionSnapshot s) =>
+            v.Revoked && v.ChannelId == 0 &&
+            v.SessionId == s.SessionId && v.SessionEpoch == s.SessionEpoch &&
+            v.DocumentId == s.DocumentId &&
+            v.NavigationEpoch == s.NavigationEpoch &&
+            !v.View.IsDisposed &&
+            string.Equals(v.ProductionOrigin,s.Origin,StringComparison.Ordinal) &&
+            string.Equals(Path.GetFullPath(v.View.CoreWebView2.Profile.ProfilePath),
+                s.ProfilePath, StringComparison.OrdinalIgnoreCase);
+        if (!Stable(a, first) || !Stable(b, second))
+            throw new UnauthorizedAccessException("8P handoff changed after retirement");
+        var committed = await RustAllowAsync(new
+        {
+            op = "handoff", source = oldA, target = oldB,
+            contractVersion = Native8PContractVersion,
+            newSourceSessionId = empty,
+            sourceNextSessionEpoch = newSourceEpoch,
+            targetNextSessionEpoch = newTargetEpoch
+        });
+        if (!committed.GetProperty("committed").GetBoolean() ||
+            !Stable(a, first) || !Stable(b, second))
+            throw new UnauthorizedAccessException("8P native/Rust commit uncertain");
+        // No await between second native precommit recheck and paired updates.
+        a.SessionId = empty;
+        a.SessionEpoch = newSourceEpoch;
+        b.SessionId = first.SessionId;
+        b.SessionEpoch = newTargetEpoch;
+        var replayDenied = await RustDeniedAsync(new
+        {
+            op = "handoff", source = oldA, target = oldB,
+            contractVersion = Native8PContractVersion,
+            newSourceSessionId = empty,
+            sourceNextSessionEpoch = newSourceEpoch,
+            targetNextSessionEpoch = newTargetEpoch
+        });
+        if (!replayDenied)
+            throw new UnauthorizedAccessException("8P handoff replay unexpectedly accepted");
+        // The next proof MUST originate from a real new WebView2 document.
+        // The caller navigates both profiles after dropping its native
+        // transaction lock. Never fabricate a documentId/navigationEpoch.
+        if (a.SessionId != empty || b.SessionId != first.SessionId ||
+            a.SessionEpoch != newSourceEpoch ||
+            b.SessionEpoch != newTargetEpoch ||
+            a.ProfilePath == b.ProfilePath)
+            throw new UnauthorizedAccessException("8P native handoff postcondition");
+        return (true, empty);
+    }
+
+    private async Task Execute8PAsync()
+    {
+        // This opt-in source-owned navigation entrypoint is NOT the 7U1 sign-in
+        // gate, an MV3/host rebind, or permission approval. No account data,
+        // cookies, form input, history or tokens are read or exported here.
+        if (_host8PConfig is null || _host8PProvider is null)
+            throw new ArgumentException("8P requires --8p-config and --8p-provider");
+        var providerId = _host8PProvider ??
+            throw new ArgumentException("8P provider required");
+        RejectReparseAncestors(_host8PConfig);
+        if (!IsUnderProject(_host8PConfig) || !File.Exists(_host8PConfig))
+            throw new UnauthorizedAccessException("8P configuration must be an existing D: host file");
+        if (Directory.Exists(_root) && Directory.EnumerateFileSystemEntries(_root).Any())
+            throw new IOException("8P needs a fresh isolated D: output directory");
+        Directory.CreateDirectory(_root);
+        VerifySourceArtifact();
+        var policy = ProviderPolicy.Parse(File.ReadAllText(_host8PConfig));
+        var oauth = new OAuthNavigationGate();
+        var landing = policy.Landing(providerId); // rejects unlisted provider before navigation
+        var decision = MessageBox.Show(this,
+            "Navigate the isolated CoSoS profile to the configured provider " +
+            providerId + "?\nNo sign-in, observation, or permission is authorized by this action.",
+            "8P-HOST native provider consent", MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+        if (decision != DialogResult.Yes) { Close(); return; }
+
+        // This is a private host-to-installed-extension bootstrap. The probe
+        // worker has NO provider host permission, page listener, content script,
+        // or access to provider cookies/content. It only authenticates the
+        // native Rust channel; actual signed-in 7U1 observation stays disabled.
+        BuildProductionExtension();
+        if (!File.Exists(_bridgePath))
+            throw new FileNotFoundException("source-bound Rust bridge not installed");
+        var psi = new System.Diagnostics.ProcessStartInfo(_bridgePath)
+        {
+            UseShellExecute = false, RedirectStandardInput = true,
+            RedirectStandardOutput = true, RedirectStandardError = true,
+            CreateNoWindow = true, WorkingDirectory = _root
+        };
+        psi.Environment["TEMP"] = _root;
+        psi.Environment["TMP"] = _root;
+        _bridge = System.Diagnostics.Process.Start(psi) ??
+            throw new InvalidOperationException("8P Rust child process missing");
+        var refused = 0;
+        var oauthCallbacksConsumed = 0;
+        var bound = 0;
+        var handoffPassed = false;
+        var handoffLocked = false;
+        var handoffAwaitingPostCommitProof = false;
+        var handoffQuarantined = false;
+        // Irreversible failure fence for an ambiguous Rust commit/rebind.
+        // This poisons the child authority and keeps subsequent nav denied.
+        void Quarantine8PHandoff()
+        {
+            handoffQuarantined = true;
+            handoffLocked = true;
+            handoffAwaitingPostCommitProof = false;
+            foreach (var item in _browsers.Values.Where(b => b.Production8P))
+                RevokeAndRetire(item);
+            try
+            {
+                if (_bridge is { HasExited: false })
+                    _bridge.Kill(entireProcessTree: true);
+            }
+            catch (InvalidOperationException) { }
+            catch (System.ComponentModel.Win32Exception) { }
+        }
+        async Task<(Browser Browser, TaskCompletionSource<bool> Ready)> SetupProductionAsync(
+            WebView2 view, string label, uint tab)
+        {
+            var profile = Path.Combine(_root, "8p-isolated-profile-" + label);
+            RejectReparseAncestors(profile);
+            // Profile creation is host-owned and MUST be new/empty before the
+            // Microsoft runtime supplies its own two built-in components.
+            // An existing user profile is never an admissible extension source.
+            if (Directory.Exists(profile) &&
+                Directory.EnumerateFileSystemEntries(profile).Any())
+                throw new UnauthorizedAccessException("8P needs a fresh empty profile");
+            var env = await CoreWebView2Environment.CreateAsync(null, profile,
+                new CoreWebView2EnvironmentOptions {
+                    AreBrowserExtensionsEnabled = true
+                });
+            await view.EnsureCoreWebView2Async(env);
+            var effectiveProfile = Path.GetFullPath(view.CoreWebView2.Profile.ProfilePath);
+            RejectReparseAncestors(effectiveProfile);
+            var expectedRoot = Path.GetFullPath(profile).TrimEnd(Path.DirectorySeparatorChar);
+            if (!IsUnderProject(effectiveProfile) ||
+                !(effectiveProfile.Equals(expectedRoot, StringComparison.OrdinalIgnoreCase) ||
+                  effectiveProfile.StartsWith(expectedRoot + Path.DirectorySeparatorChar,
+                      StringComparison.OrdinalIgnoreCase)))
+                throw new UnauthorizedAccessException("foreign 8P profile");
+            using var runtimeProcess = System.Diagnostics.Process.GetProcessById(
+                checked((int)view.CoreWebView2.BrowserProcessId));
+            var runtimeExecutable = runtimeProcess.MainModule?.FileName;
+            var verifiedRuntime = runtimeExecutable is not null &&
+                NativeProfileExtensions.VerifiedMicrosoftRuntime(runtimeExecutable);
+            var priorExtensions = await view.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            if (!Accept8PInventory(priorExtensions.Select(e => e.Id), verifiedRuntime, null))
+                throw new UnauthorizedAccessException(
+                    "8P unexpected extension or unverified WebView2 runtime");
+            var extension = await view.CoreWebView2.Profile.AddBrowserExtensionAsync(
+                Path.Combine(_root, "extension"));
+            var installedExtensions = await view.CoreWebView2.Profile.GetBrowserExtensionsAsync();
+            if (!extension.IsEnabled ||
+                !Accept8PInventory(installedExtensions.Select(e => e.Id),
+                    verifiedRuntime, extension.Id) ||
+                installedExtensions.Count(e => e.Id == extension.Id && e.IsEnabled) != 1)
+                throw new UnauthorizedAccessException(
+                    "8P native MV3 extension identity/inventory mismatch");
+            var browser = new Browser
+            {
+                View = view, Profile = "8p-" + label,
+                ProfilePath = effectiveProfile, ExtensionId = extension.Id,
+                TabId = tab, SessionId = "8p-session-" + label,
+                Production8P = true
+            };
+            _browsers.Add(view, browser);
+            var rebindLock = new SemaphoreSlim(1, 1);
+            var navigationAdmission = new NativeNavigationAdmission();
+            var ready = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            view.CoreWebView2.PermissionRequested += (_, e) =>
+            {
+                e.State = CoreWebView2PermissionState.Deny;
+                e.SavesInProfile = false;
+                e.Handled = true;
+            };
+            view.CoreWebView2.NewWindowRequested += (_, e) => e.Handled = true;
+            view.CoreWebView2.ProcessFailed += (_, _) =>
+            {
+                navigationAdmission.Invalidate();
+                RevokeAndRetire(browser);
+                oauth.InvalidateProfile(browser.Profile);
+                browser.ProductionUrl = null;
+                browser.ProductionOrigin = null;
+                ready.TrySetResult(false);
+                if (handoffAwaitingPostCommitProof)
+                    Quarantine8PHandoff();
+            };
+            view.CoreWebView2.NavigationStarting += (_, e) =>
+            {
+                // Native consent/Rust transfer cannot receive reentrant
+                // navigation or a stale async completion from a prior page.
+                navigationAdmission.Invalidate();
+                if (handoffLocked || handoffQuarantined)
+                {
+                    RevokeAndRetire(browser);
+                    browser.ProductionUrl = null;
+                    browser.ProductionOrigin = null;
+                    e.Cancel = true;
+                    refused++;
+                    return;
+                }
+                RevokeAndRetire(browser);
+                browser.ProductionUrl = null;
+                browser.ProductionOrigin = null;
+                browser.NavigationEpoch++;
+                browser.DocumentId = "doc-" + Guid.NewGuid().ToString("N");
+                if (policy.IsCallbackCandidate(providerId, e.Uri))
+                {
+                    var callbackPath = new Uri(e.Uri).GetLeftPart(UriPartial.Path);
+                    if (policy.TryCallback(providerId, e.Uri,
+                            out var callbackState) &&
+                        oauth.Consume(providerId, browser.Profile,
+                            browser.SessionId, callbackPath, callbackState,
+                            browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                        oauthCallbacksConsumed++;
+                    else
+                        refused++;
+                    e.Cancel = true; // never load the code-bearing page
+                    return;
+                }
+                if (!policy.Allows(providerId, e.Uri))
+                {
+                    refused++;
+                    oauth.InvalidateProfile(browser.Profile);
+                    e.Cancel = true;
+                    return;
+                }
+                if (policy.TryAuthorizationRequest(providerId, e.Uri,
+                        out var state, out var callback))
+                {
+                    var currentUrl = view.CoreWebView2.Source;
+                    if (!Uri.TryCreate(currentUrl, UriKind.Absolute,
+                            out var current) ||
+                        !string.Equals(current.GetLeftPart(UriPartial.Authority),
+                            policy.PrimaryOrigin(providerId),
+                            StringComparison.Ordinal) ||
+                        !oauth.Begin(providerId, browser.Profile,
+                            browser.SessionId, state, callback,
+                            browser.NavigationEpoch, DateTimeOffset.UtcNow))
+                    {
+                        refused++;
+                        e.Cancel = true;
+                    }
+                }
+                if (!e.Cancel)
+                    navigationAdmission.Arm(e.NavigationId, browser.NavigationEpoch);
+            };
+            view.CoreWebView2.NavigationCompleted += async (_, e) =>
+            {
+                // Never allow a deferred event to rebind while the owner
+                // modal/Rust two-profile transaction holds exclusive control.
+                if (handoffLocked || handoffQuarantined)
+                {
+                    navigationAdmission.Invalidate();
+                    RevokeAndRetire(browser);
+                    ready.TrySetResult(false);
+                    return;
+                }
+                if (!e.IsSuccess || view.IsDisposed)
+                {
+                    navigationAdmission.Invalidate();
+                    ready.TrySetResult(false);
+                    return;
+                }
+                if (!navigationAdmission.Consume(
+                        e.NavigationId, browser.NavigationEpoch))
+                {
+                    // A cancelled, foreign or superseded completion must not
+                    // revive a document's previously retired Rust authority.
+                    RevokeAndRetire(browser);
+                    return;
+                }
+                var epoch = browser.NavigationEpoch;
+                var url = view.CoreWebView2.Source;
+                if (!policy.Allows(providerId, url))
+                {
+                    RevokeAndRetire(browser);
+                    ready.TrySetResult(false);
+                    return;
+                }
+                await rebindLock.WaitAsync();
+                try
+                {
+                    if (view.IsDisposed || browser.NavigationEpoch != epoch ||
+                        !string.Equals(view.CoreWebView2.Source, url,
+                            StringComparison.Ordinal)) return;
+                    browser.ProductionUrl = url;
+                    browser.ProductionOrigin =
+                        new Uri(url).GetLeftPart(UriPartial.Authority);
+                    var response = await BindAsync(browser, browser.SessionId);
+                    if (!response.GetProperty("authenticated").GetBoolean() ||
+                        browser.NavigationEpoch != epoch || browser.Revoked ||
+                        browser.ChannelId == 0)
+                        throw new UnauthorizedAccessException("8P stale worker");
+                    bound++;
+                    ready.TrySetResult(true);
+                }
+                catch
+                {
+                    RevokeAndRetire(browser);
+                    ready.TrySetResult(false);
+                }
+                finally { rebindLock.Release(); }
+            };
+            view.Disposed += (_, _) => RevokeAndRetire(browser);
+            return (browser, ready);
+        }
+
+        FormClosed += (_, _) =>
+        {
+            foreach (var item in _browsers.Values) RevokeAndRetire(item);
+            try
+            {
+                if (_bridge is { HasExited: false })
+                    _bridge.Kill(entireProcessTree: true);
+            }
+            catch (InvalidOperationException) { }
+            finally { _bridge?.Dispose(); _bridge = null; }
+        };
+        var first = await SetupProductionAsync(_a, "A", 1);
+        var second = _host8PHandoffProbe ?
+            await SetupProductionAsync(_b, "B", 2) : default;
+        _a.CoreWebView2.Navigate(landing);
+        if (_host8PHandoffProbe) _b.CoreWebView2.Navigate(landing);
+        var firstSettled = await Task.WhenAny(first.Ready.Task,
+            Task.Delay(TimeSpan.FromSeconds(60)));
+        var success = firstSettled == first.Ready.Task &&
+            await first.Ready.Task;
+        if (_host8PHandoffProbe)
+        {
+            var secondSettled = await Task.WhenAny(second.Ready!.Task,
+                Task.Delay(TimeSpan.FromSeconds(60)));
+            success = success && secondSettled == second.Ready.Task &&
+                await second.Ready.Task;
+            if (success)
+            {
+                handoffLocked = true; // blocks reentrant WebView2 nav during modal
+                handoffAwaitingPostCommitProof = true;
+                var postcommit = new Native8PCommitProofGate();
+                try
+                {
+                    var priorA = Snapshot8P(first.Browser);
+                    var priorB = Snapshot8P(second.Browser!);
+                    var result = await Execute8PHandoffProbeAsync(
+                        first.Browser, second.Browser,
+                        policy.PrimaryOrigin(providerId));
+                    handoffPassed = result.Committed;
+                    if (handoffPassed)
+                    {
+                        postcommit.CommitAcknowledged();
+                        handoffLocked = false; // allow ONLY fresh document rebind
+                        var startBound = bound;
+                        _a.CoreWebView2.Navigate(landing);
+                        _b.CoreWebView2.Navigate(landing);
+                        for (var attempt = 0; attempt < 150 &&
+                            bound < startBound + 2 && !handoffQuarantined; attempt++)
+                            await Task.Delay(100);
+                        var afterA = Snapshot8P(first.Browser);
+                        var afterB = Snapshot8P(second.Browser);
+                        var afterARevocation = first.Browser.BindingRevocationGeneration;
+                        var afterBRevocation = second.Browser.BindingRevocationGeneration;
+                        if (handoffQuarantined || bound < startBound + 2 ||
+                            !Verified8PTwoPhaseResult(priorA, priorB, afterA,
+                                afterB, policy.PrimaryOrigin(providerId),
+                                result.NewSourceSession))
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit native v1 rebind incomplete");
+                        await Prove8PSessionAsync(first.Browser);
+                        if (handoffQuarantined || first.Browser.Revoked)
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit source first-proof revoked");
+                        postcommit.FirstProof(true);
+                        await Prove8PSessionAsync(second.Browser);
+                        if (handoffQuarantined || second.Browser.Revoked)
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit target first-proof revoked");
+                        postcommit.FirstProof(false);
+                        // Observe BOTH scopes again after the final async Rust
+                        // response. A NavigationStarting/ProcessFailed event can
+                        // revoke A while B's first-proof is still in flight.
+                        // Never release using only the earlier proof booleans.
+                        if (!postcommit.ReleaseIfScopesCurrent(
+                                !handoffQuarantined &&
+                                    first.Browser.BindingRevocationGeneration == afterARevocation &&
+                                    Same8P(first.Browser, afterA),
+                                !handoffQuarantined &&
+                                    second.Browser.BindingRevocationGeneration == afterBRevocation &&
+                                    Same8P(second.Browser, afterB)))
+                            throw new UnauthorizedAccessException(
+                                "8P postcommit proof scopes changed or incomplete");
+                        handoffAwaitingPostCommitProof = false;
+                    }
+                    else
+                    {
+                        // Native owner declined consent, so no Rust commit.
+                        handoffAwaitingPostCommitProof = false;
+                        handoffLocked = false;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Includes ambiguous Rust ACK, replay failure, navigation,
+                    // crash, and failure after either fresh MV3 proof.
+                    postcommit.Poison();
+                    handoffPassed = false;
+                    Quarantine8PHandoff();
+                }
+                success = handoffPassed && !handoffQuarantined;
+            }
+        }
+        // Never include page URLs, account metadata, OAuth parameters, secrets
+        // or worker key/challenge in a source-attested receipt.
+        var receipt = new
+        {
+            sourceSha = _verifiedSourceSha, providerId = providerId,
+            navigationAllowed = success, navigationEpoch = first.Browser.NavigationEpoch,
+            deniedNavigationCount = refused, oauthCallbacksConsumed,
+            nativeWorkerRebinds = bound, crossProfileHandoffPassed = handoffPassed,
+            rustChannelActive = success && !first.Browser.Revoked &&
+                first.Browser.ChannelId != 0,
+            mv3WorkerAttested = success && !first.Browser.Revoked &&
+                first.Browser.WorkerTargetId is not null &&
+                first.Browser.WorkerSession is not null,
+            permissionPolicy = "Deny (nonpersistent)", authenticated = false,
+            native8PAccepted = false, owner7U1Accepted = false
+        };
+        File.WriteAllText(Path.Combine(_root, "8p-navigation-receipt.json"),
+            JsonSerializer.Serialize(receipt, new JsonSerializerOptions { WriteIndented = true }));
+        Environment.ExitCode = success ? 0 : 1;
+        // Keep owner-controlled WebView2 open for HTTPS redirect navigation.
+        // Each completed document must obtain a *different* Rust/MV3 channel.
+        // No content observation, tool request or permission is enabled here.
+
+    }
+}
