@@ -473,15 +473,27 @@ impl RendererHostState {
             "conversationHasNewer": projection.conversation_has_newer
         });
         let selected_pdf = rich.panels.iter().find_map(|panel| {
-            if let RichPanel::Pdf {key,asset_id,page,..} = panel {
+            if let RichPanel::Pdf {
+                key,
+                asset_id,
+                page,
+                ..
+            } = panel
+            {
                 if rich.active_key.as_deref() == Some(key.as_str()) {
-                    return self.pdf_pages.iter().find(|item| item.page == *page).map(|item| json!({
-                        "assetId":asset_id,
-                        "page":item.page,
-                        "format":"image/png",
-                        "sha256":format!("{:x}", Sha256::digest(&item.bytes)),
-                        "base64":base64_encode_png(&item.bytes)
-                    }));
+                    return self
+                        .pdf_pages
+                        .iter()
+                        .find(|item| item.page == *page)
+                        .map(|item| {
+                            json!({
+                                "assetId":asset_id,
+                                "page":item.page,
+                                "format":"image/png",
+                                "sha256":format!("{:x}", Sha256::digest(&item.bytes)),
+                                "base64":base64_encode_png(&item.bytes)
+                            })
+                        });
                 }
             }
             None
@@ -651,9 +663,11 @@ impl RendererHostState {
                             output: terminal_output_for_session(store, session)
                                 .map_err(|_| "terminal-output-unavailable")?,
                         }
-                    },
+                    }
                     "pdf" => {
-                        let session = self.active_history_session.clone()
+                        let session = self
+                            .active_history_session
+                            .clone()
                             .ok_or("no-active-session")?;
                         self.clear_pdf_pages();
                         let pages = authorized_pdf_pages(store, &session)
@@ -670,7 +684,7 @@ impl RendererHostState {
                             page: 1,
                             page_count,
                         }
-                    },
+                    }
                     "math" => RichPanel::Math {
                         key: "math-preview".into(),
                         title: "Math preview".into(),
@@ -1054,10 +1068,15 @@ fn authorized_pdf_pages(store: &SessionStore, id: &str) -> io::Result<Vec<Author
                 if asset["role"] != "pdf-page" || asset["mimeType"] != "image/png" {
                     continue;
                 }
-                let Some(page) = asset["page"].as_u64().filter(|n| *n > 0 && *n <= MAX_AUTHORIZED_PDF_PAGES as u64) else {
+                let Some(page) = asset["page"]
+                    .as_u64()
+                    .filter(|n| *n > 0 && *n <= MAX_AUTHORIZED_PDF_PAGES as u64)
+                else {
                     continue;
                 };
-                let Some(asset_id) = asset["id"].as_str() else { continue };
+                let Some(asset_id) = asset["id"].as_str() else {
+                    continue;
+                };
                 // Last entry is authoritative within this selected session.
                 ids.insert(page as u32, asset_id.to_owned());
             }
@@ -1067,34 +1086,47 @@ fn authorized_pdf_pages(store: &SessionStore, id: &str) -> io::Result<Vec<Author
         return Ok(Vec::new());
     }
     let mut pages = Vec::new();
-    for (index,(page,asset_id)) in ids.iter().enumerate() {
+    for (index, (page, asset_id)) in ids.iter().enumerate() {
         if *page as usize != index + 1 {
             return Err(invalid("PDF page raster indices must be contiguous"));
         }
-        let bytes = store.read_asset(id, asset_id, Some(MAX_PDF_PNG_BYTES))?
+        let bytes = store
+            .read_asset(id, asset_id, Some(MAX_PDF_PNG_BYTES))?
             .ok_or_else(|| invalid("PDF page asset unavailable in authorized session"))?;
-        if bytes.len() < 33 || !bytes.starts_with(b"\x89PNG\r\n\x1a\n") ||
-            &bytes[12..16] != b"IHDR" ||
-            u32::from_be_bytes(bytes[16..20].try_into().unwrap()) == 0 ||
-            u32::from_be_bytes(bytes[20..24].try_into().unwrap()) == 0 ||
-            u32::from_be_bytes(bytes[16..20].try_into().unwrap()) > 2048 ||
-            u32::from_be_bytes(bytes[20..24].try_into().unwrap()) > 2048 {
+        if bytes.len() < 33
+            || !bytes.starts_with(b"\x89PNG\r\n\x1a\n")
+            || &bytes[12..16] != b"IHDR"
+            || u32::from_be_bytes(bytes[16..20].try_into().unwrap()) == 0
+            || u32::from_be_bytes(bytes[20..24].try_into().unwrap()) == 0
+            || u32::from_be_bytes(bytes[16..20].try_into().unwrap()) > 2048
+            || u32::from_be_bytes(bytes[20..24].try_into().unwrap()) > 2048
+        {
             return Err(invalid("PDF page asset is not a bounded PNG raster"));
         }
-        pages.push(AuthorizedPdfPage {page:*page,bytes});
+        pages.push(AuthorizedPdfPage { page: *page, bytes });
     }
     Ok(pages)
 }
 
 fn base64_encode_png(bytes: &[u8]) -> String {
-    const T: &[u8;64]=b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut out=String::with_capacity(bytes.len().div_ceil(3)*4);
+    const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
     for chunk in bytes.chunks(3) {
-        let b0=chunk[0]; let b1=*chunk.get(1).unwrap_or(&0); let b2=*chunk.get(2).unwrap_or(&0);
-        out.push(T[(b0>>2) as usize] as char);
-        out.push(T[(((b0 & 3)<<4)|(b1>>4)) as usize] as char);
-        out.push(if chunk.len()>1 {T[(((b1 & 15)<<2)|(b2>>6)) as usize] as char} else {'='});
-        out.push(if chunk.len()>2 {T[(b2&63) as usize] as char} else {'='});
+        let b0 = chunk[0];
+        let b1 = *chunk.get(1).unwrap_or(&0);
+        let b2 = *chunk.get(2).unwrap_or(&0);
+        out.push(T[(b0 >> 2) as usize] as char);
+        out.push(T[(((b0 & 3) << 4) | (b1 >> 4)) as usize] as char);
+        out.push(if chunk.len() > 1 {
+            T[(((b1 & 15) << 2) | (b2 >> 6)) as usize] as char
+        } else {
+            '='
+        });
+        out.push(if chunk.len() > 2 {
+            T[(b2 & 63) as usize] as char
+        } else {
+            '='
+        });
     }
     out
 }
@@ -1114,7 +1146,9 @@ fn terminal_output_for_session(store: &SessionStore, session_id: &str) -> io::Re
         if item["kind"] != "tool_call" {
             continue;
         }
-        let title = item["call"]["summary"]["title"].as_str().unwrap_or("Tool output");
+        let title = item["call"]["summary"]["title"]
+            .as_str()
+            .unwrap_or("Tool output");
         let result = item["call"]["result"]["text"].as_str().unwrap_or("");
         let title = safe_text(title, 128);
         let redacted = cos_core::logging::redact_credentials(result);
@@ -1274,29 +1308,39 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         let store = SessionStore::open(temp.path()).unwrap();
         for id in ["synthetic-terminal-a", "synthetic-terminal-b"] {
-            store.create(CreateOptions {
-                id: Some(id.into()),
-                ..Default::default()
-            }).unwrap();
+            store
+                .create(CreateOptions {
+                    id: Some(id.into()),
+                    ..Default::default()
+                })
+                .unwrap();
         }
         for (id, word) in [
             ("synthetic-terminal-a", "private-output-a"),
             ("synthetic-terminal-b", "private-output-b"),
         ] {
-            store.append(id, json!({
-                "kind":"tool_call", "time":10, "call":{
-                    "callId": format!("run-{word}"),
-                    "summary":{"title":"Run synthetic command"},
-                    "args":{"text":"safe","truncated":false,"chars":4},
-                    "result":{"text":word,"truncated":false,"chars":word.len()}
-                }
-            })).unwrap();
+            store
+                .append(
+                    id,
+                    json!({
+                        "kind":"tool_call", "time":10, "call":{
+                            "callId": format!("run-{word}"),
+                            "summary":{"title":"Run synthetic command"},
+                            "args":{"text":"safe","truncated":false,"chars":4},
+                            "result":{"text":word,"truncated":false,"chars":word.len()}
+                        }
+                    }),
+                )
+                .unwrap();
         }
         let a = terminal_output_for_session(&store, "synthetic-terminal-a").unwrap();
         assert!(a.contains("private-output-a"));
         assert!(!a.contains("private-output-b"));
-        assert!(terminal_output_for_session(&store, "synthetic-terminal-b")
-            .unwrap().contains("private-output-b"));
+        assert!(
+            terminal_output_for_session(&store, "synthetic-terminal-b")
+                .unwrap()
+                .contains("private-output-b")
+        );
         assert!(terminal_output_for_session(&store, "synthetic-terminal-foreign").is_err());
     }
 
@@ -1400,8 +1444,10 @@ mod tests {
                     })
                     .unwrap();
                 let png_fixture = std::fs::read(
-                    std::env::var("COSOS_15HOST_E2E_PNG").expect("Synthetic PDF page raster fixture missing")
-                ).unwrap();
+                    std::env::var("COSOS_15HOST_E2E_PNG")
+                        .expect("Synthetic PDF page raster fixture missing"),
+                )
+                .unwrap();
                 let png_asset = store.write_asset(&id, &png_fixture, "image/png").unwrap();
                 for index in 0..24 {
                     let content = format!("ISOLATED-{tag}-{role}-{index:02}");
