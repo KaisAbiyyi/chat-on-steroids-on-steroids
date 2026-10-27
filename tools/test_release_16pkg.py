@@ -38,6 +38,36 @@ class PackageTests(unittest.TestCase):
         with self.assertRaises(pkg.Refused):
             self.build()
 
+    def test_byte_reproducibility_with_distinct_version(self):
+        self.build()
+        with self.assertRaises(pkg.Refused):
+            self.build()
+
+    def test_reject_unindexed_file_and_case_collision(self):
+        from zipfile import ZipFile, ZIP_DEFLATED
+        self.build()
+        with ZipFile(self.bundle) as archive:
+            rows = [(item.filename, archive.read(item)) for item in archive.infolist()]
+        self.bundle.unlink()
+        with ZipFile(self.bundle, "w", ZIP_DEFLATED) as archive:
+            for name, data in rows:
+                archive.writestr(name, data)
+            archive.writestr("BIN/cos-rust.exe", b"alias")
+        with self.assertRaises(pkg.Refused):
+            pkg.verify(self.bundle, SHA)
+
+    def test_reject_modified_runtime_content(self):
+        from zipfile import ZipFile, ZIP_DEFLATED
+        self.build()
+        with ZipFile(self.bundle) as archive:
+            rows = [(item.filename, archive.read(item)) for item in archive.infolist()]
+        self.bundle.unlink()
+        with ZipFile(self.bundle, "w", ZIP_DEFLATED) as archive:
+            for name, data in rows:
+                archive.writestr(name, b"changed" if name == "bin/cos-rust.exe" else data)
+        with self.assertRaises(pkg.Refused):
+            pkg.verify(self.bundle, SHA)
+
     def test_version_and_source_refuse(self):
         self.build()
         with self.assertRaises(pkg.Refused):
