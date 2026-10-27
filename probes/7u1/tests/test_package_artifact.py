@@ -1,4 +1,4 @@
-"""Cloud regression for immutable synthetic 7L2 build packaging."""
+"""Cloud regression for immutable 7U1-PREP artifact packaging."""
 import json
 from pathlib import Path
 import subprocess
@@ -7,7 +7,11 @@ from tempfile import TemporaryDirectory
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from package_artifact import package
+from package_artifact import (
+    PRODUCTION_HANDSHAKE_KIND,
+    SYNTHETIC_KIND,
+    package,
+)
 from preflight import Refused, report, verify_manifest
 
 
@@ -37,7 +41,7 @@ class PackageTests(unittest.TestCase):
             "7l2_bridge.exe",
         })
         receipt = report(self.repo, self.art, sha, "chatgpt", "7u1-isolated-test01",
-                         True)
+                         False)
         self.assertEqual(receipt["preflightStatus"], "BLOCKED")
         self.assertEqual(receipt["checks"]["artifact_manifest"]["status"], "PASS")
         self.assertEqual(receipt["checks"]["product_native_adapter"]["status"], "BLOCKED")
@@ -46,8 +50,60 @@ class PackageTests(unittest.TestCase):
         self.assertIsNone(receipt["outgoingSendCount"])
         self.assertEqual(
             json.loads((self.art / "artifact-kind.json").read_text())["kind"],
-            "synthetic-7l2-only"
+            SYNTHETIC_KIND
         )
+
+    def test_production_handshake_bundle_is_source_bound_but_not_7u1(self):
+        source_map = {
+            "apps/windows-host/Native8P.cs": "source/Native8P.cs",
+            "crates/cos-core/src/native_browser_bridge.rs": "source/native_browser_bridge.rs",
+            "probes/8p/extension/manifest.json": "source/extension/manifest.json",
+            "probes/8p/extension/sw.mjs": "source/extension/sw.mjs",
+        }
+        for relative in source_map:
+            path = self.repo / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("synthetic source fixture without observe-only API", encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.repo), "add", "."], check=True)
+        subprocess.run(
+            ["git", "-C", str(self.repo), "-c", "user.name=CI",
+             "-c", "user.email=ci@example.invalid", "commit", "-q",
+             "-m", "add synthetic production-source audit fixtures"],
+            check=True
+        )
+        self.art = self.temp.name and Path(self.temp.name) / "production-artifact"
+        (self.art / "host").mkdir(parents=True)
+        (self.art / "host" / "WindowsHost.dll").write_bytes(b"host build fixture")
+        (self.art / "7l2_bridge.exe").write_bytes(b"rust build fixture")
+        for source, staged in source_map.items():
+            target = self.art / staged
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((self.repo / source).read_bytes())
+        sha = subprocess.run(
+            ["git", "-C", str(self.repo), "rev-parse", "HEAD"],
+            check=True, capture_output=True, text=True
+        ).stdout.strip()
+        (self.art / "production-host-audit.json").write_text(json.dumps({
+            "sourceSha": sha,
+            "productionObservationStatus": "BLOCKED",
+            "owner7U1Status": "NOT_RUN",
+            "humanConsentSimulated": False,
+            "providerAccessPerformed": False,
+        }), encoding="utf-8")
+        packaged_sha = package(self.repo, self.art, PRODUCTION_HANDSHAKE_KIND)
+        self.assertEqual(packaged_sha, sha)
+        manifest = verify_manifest(self.art, sha)
+        self.assertIn("host/WindowsHost.dll", manifest)
+        self.assertIn("7l2_bridge.exe", manifest)
+        self.assertEqual(json.loads((self.art / "artifact-kind.json").read_text())["kind"],
+                         PRODUCTION_HANDSHAKE_KIND)
+        receipt = report(self.repo, self.art, sha, "chatgpt", "7u1-isolated-test01",
+                         False)
+        self.assertEqual(receipt["preflightStatus"], "BLOCKED")
+        self.assertEqual(receipt["checks"]["artifact_manifest"]["status"], "PASS")
+        self.assertEqual(receipt["checks"]["product_native_adapter"]["status"], "BLOCKED")
+        self.assertEqual(receipt["owner7U1Status"], "NOT_RUN")
+        self.assertIsNone(receipt["outgoingSendCount"])
 
     def test_rerun_refuses_overwrite(self):
         package(self.repo, self.art)
@@ -62,7 +118,7 @@ class PackageTests(unittest.TestCase):
 
     def test_forged_product_named_binary_refused(self):
         (self.art / "host" / "CoSoSProductBrowser.dll").write_bytes(b"fake")
-        with self.assertRaisesRegex(Refused, "forbidden"):
+        with self.assertRaisesRegex(Refused, "invented product-named"):
             package(self.repo, self.art)
 
     def test_missing_synthetic_component_refused(self):

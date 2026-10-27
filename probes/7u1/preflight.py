@@ -8,11 +8,13 @@ import re
 import subprocess
 import sys
 
+from audit_production_host import audit as audit_production_host
+
 PROVIDERS = {"chatgpt": "https://chatgpt.com", "claude": "https://claude.ai",
              "gemini": "https://gemini.google.com"}
-SHA40 = re.compile(r"[0-9a-f]{40}")
-SHA64 = re.compile(r"[0-9a-f]{64}")
-PORTABLE_PART = re.compile(r"[A-Za-z0-9_.-]+")
+SHA40 = re.compile(r"[0-9a-f]{40}\Z")
+SHA64 = re.compile(r"[0-9a-f]{64}\Z")
+PORTABLE_PART = re.compile(r"[A-Za-z0-9_.-]+\Z")
 WINDOWS_RESERVED = {"con", "prn", "aux", "nul", *(f"com{i}" for i in range(1, 10)), *(f"lpt{i}" for i in range(1, 10))}
 
 
@@ -94,20 +96,20 @@ def verify_manifest(artifact, expected_sha):
     return seen
 
 
-def verify_product_adapter(repo, files, provider):
+def verify_product_adapter(repo, artifact, files, provider, expected_sha, observed_sha=None):
     if "artifact-kind.json" in files:
-        # This file is emitted only for the CI synthetic 7L2 build.
-        # A deceptive product-integration.json never upgrades that artifact.
-        raise Refused("synthetic 7L2 artifact is not a provider product adapter")
+        kind = strict_json(artifact / "artifact-kind.json")
+        label = kind.get("kind", "unknown") if isinstance(kind, dict) else "unknown"
+        raise Refused("artifact kind " + str(label) + " is not a 7U1 observe-only product runner")
     declaration = repo / "probes" / "7u1" / "product-integration.json"
     if not declaration.is_file():
-        raise Refused("reviewed production 8P host and restricted 7U1 observation adapter missing (#123/#124)")
+        raise Refused("reviewed production 8P read-only adapter missing")
     value = strict_json(declaration)
     expected = {
         "schema": "cosos.7u1.product-integration.v1",
         "kind": "product-webview2-rust-mv3",
-        "host": "host/CoSoSProductBrowser.dll",
-        "bridge": "7u1_product_bridge.exe",
+        "host": "host/WindowsHost.dll",
+        "bridge": "7l2_bridge.exe",
         "allowedOrigins": [PROVIDERS[provider]],
         "allowedOps": ["attach", "snapshot", "detach"],
         "captureLimitBytes": 65536,
@@ -120,8 +122,19 @@ def verify_product_adapter(repo, files, provider):
     if value != expected:
         raise Refused("unsupported/insecure product adapter declaration")
     if expected["host"] not in files or expected["bridge"] not in files:
-        raise Refused("real product host and Rust bridge absent from SHA256 manifest")
-    # Metadata is never accepted as proof of the native implementation.
+        raise Refused("actual product host and Rust bridge absent from SHA256 manifest")
+    for relative in (
+        "source/Native8P.cs", "source/native_browser_bridge.rs",
+        "source/extension/manifest.json", "source/extension/sw.mjs",
+    ):
+        if relative not in files:
+            raise Refused("production host/Rust/MV3 source missing from manifest: " + relative)
+    source_audit = audit_production_host(repo, expected_sha=expected_sha,
+                                         observed_sha=observed_sha)
+    if source_audit["productionObservationStatus"] != "API_SURFACE_PRESENT_REVIEW_REQUIRED":
+        missing = ", ".join(source_audit["missingCapabilities"])
+        raise Refused("production 8P host is handshake-only; read-only API missing: " + missing)
+    # This is a preflight for independent review, not a security approval or owner acceptance.
 
 
 def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
@@ -144,7 +157,6 @@ def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
         if not SHA40.fullmatch(sha or "") or head != sha:
             raise Refused("source SHA mismatch")
         if observed_sha is None:
-            # The whole checkout (including native 8P and extension files) must be clean.
             status = subprocess.run(
                 ["git", "-C", str(repo), "status", "--porcelain", "--untracked-files=all"],
                 capture_output=True, text=True, check=True, timeout=10
@@ -152,23 +164,23 @@ def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
             if status.stdout.strip():
                 raise Refused("dirty security-critical source files")
         check("source_provenance", "PASS", "Git HEAD matches expected source SHA")
-    except (Refused, OSError, subprocess.SubprocessError) as e:
-        check("source_provenance", "FAIL", str(e))
+    except (Refused, OSError, subprocess.SubprocessError) as error:
+        check("source_provenance", "FAIL", str(error))
     files = None
     try:
         if checks["source_provenance"]["status"] != "PASS":
             raise Refused("source not attested")
         files = verify_manifest(artifact, sha)
         check("artifact_manifest", "PASS", "Full SHA256 coverage and source pin")
-    except (Refused, OSError, ValueError) as e:
-        check("artifact_manifest", "BLOCKED", str(e))
+    except (Refused, OSError, ValueError) as error:
+        check("artifact_manifest", "BLOCKED", str(error))
     try:
         if files is None or provider not in PROVIDERS:
             raise Refused("source and artifact proof required")
-        verify_product_adapter(repo, files, provider)
-        check("product_native_adapter", "PASS", "Metadata only; native review required")
-    except (Refused, OSError, ValueError) as e:
-        check("product_native_adapter", "BLOCKED", str(e))
+        verify_product_adapter(repo, artifact, files, provider, sha, observed_sha)
+        check("product_native_adapter", "PASS", "API surface present; independent review required")
+    except (Refused, OSError, ValueError) as error:
+        check("product_native_adapter", "BLOCKED", str(error))
 
     for key, why in (
         ("native_8l1_acceptance", "Real integrated Windows host gate not run"),
@@ -177,7 +189,7 @@ def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
         ("zero_outgoing_send", "No provider launched: zero Send is NOT proven"),
     ):
         check(key, "NOT_RUN", why)
-    prep = all(checks[k]["status"] == "PASS" for k in (
+    prep = all(checks[key]["status"] == "PASS" for key in (
         "origin_allowlist", "isolated_profile_id", "explicit_owner_opt_in",
         "source_provenance", "artifact_manifest", "product_native_adapter"))
     return {
@@ -191,16 +203,16 @@ def report(repo, artifact, sha, provider, profile, consent, observed_sha=None):
 
 
 def main():
-    p = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__)
     for arg in ("repo", "artifact", "receipt"):
-        p.add_argument("--" + arg, required=True, type=Path)
+        parser.add_argument("--" + arg, required=True, type=Path)
     for arg in ("expected-sha", "provider", "profile"):
-        p.add_argument("--" + arg, required=True)
-    p.add_argument("--owner-consent", action="store_true")
-    a = p.parse_args()
-    result = report(a.repo, a.artifact, a.expected_sha, a.provider,
-                    a.profile, a.owner_consent)
-    a.receipt.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        parser.add_argument("--" + arg, required=True)
+    parser.add_argument("--owner-consent", action="store_true")
+    args = parser.parse_args()
+    result = report(args.repo, args.artifact, args.expected_sha, args.provider,
+                    args.profile, args.owner_consent)
+    args.receipt.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(result["preflightStatus"], "owner7U1Status=NOT_RUN")
     return 0 if result["preflightStatus"] == "PREP_READY_REVIEW_REQUIRED" else 2
 
