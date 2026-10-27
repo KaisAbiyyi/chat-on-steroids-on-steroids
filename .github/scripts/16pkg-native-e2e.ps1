@@ -55,6 +55,10 @@ try {
     if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate rollback'}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.2.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    # High-water version cannot be reset just by rolling back to an older slot.
+    & $setups['0.2.0'] --update $root --publisher $cert.Thumbprint 2>$null
+    if($LASTEXITCODE -eq 0){throw 'Same-version replay after rollback accepted'}
+    $global:LASTEXITCODE=0
     ExpectOk $setups['0.3.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--finalize',$root,'--publisher',$cert.Thumbprint)
@@ -96,6 +100,13 @@ try {
 }
 finally {
     Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
+    # The only quarantines allowed to be cleaned here are tied to this CI
+    # root's exact run/attempt prefix. Never glob unrelated stage directories.
+    foreach($stage in @(Get-ChildItem -LiteralPath 'D:\' -Directory -Force -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -like ('.cosos-16pkg-'+(Split-Path $root -Leaf)+'-stage-*') -or
+                        $_.Name -like ('.cosos-16pkg-'+(Split-Path $dirty -Leaf)+'-stage-*') })){
+        Remove-Item -LiteralPath $stage.FullName -Recurse -Force -ErrorAction SilentlyContinue
+    }
     foreach($p in @($root,$dirty,"$root-uninstalling")){
         if($p -like 'D:\16pkg-ci-*' -and (Test-Path $p)){
             Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue
