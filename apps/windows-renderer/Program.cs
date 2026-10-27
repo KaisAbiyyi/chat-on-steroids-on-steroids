@@ -30,6 +30,47 @@ internal static class Program
             }
         }
 
+        // Hostile frames are only emitted when the Rust launcher explicitly
+        // chooses a marked synthetic cloud fixture. No provider/profile access.
+        if (args.Length == 3 && args[0] == "--authenticated-ipc" && args[1] == "--synthetic-inject")
+        {
+            var mode = args[2];
+            if (mode == "early-exit") return 17;
+            if (mode == "hang")
+            {
+                Thread.Sleep(Timeout.Infinite);
+                return 17;
+            }
+            if (mode is not ("malformed" or "replay" or "stale")) return 17;
+            var input = new BufferedStream(Console.OpenStandardInput());
+            var output = new BufferedStream(Console.OpenStandardOutput());
+            var bootstrap = RendererIpcClient.ReadBoundedLine(input, 4096);
+            if (bootstrap is null) return 17;
+            if (mode == "malformed")
+            {
+                var malformed = Encoding.UTF8.GetBytes("{\n");
+                output.Write(malformed);
+                output.Flush();
+                Thread.Sleep(1500);
+                return 17;
+            }
+            using var ipc = RendererIpcClient.FromBootstrap(bootstrap, input, output);
+            const string ready = "{\"kind\":\"ready\",\"rendererNonce\":\"00112233445566778899aabbccddeeff\"}";
+            var signed = ipc.SignOutbound(ready);
+            if (mode == "stale")
+            {
+                using var parsed = JsonDocument.Parse(signed);
+                var epoch = parsed.RootElement.GetProperty("epoch").GetUInt64();
+                signed = signed.Replace("\"epoch\":" + epoch, "\"epoch\":0", StringComparison.Ordinal);
+            }
+            var frames = mode == "replay" ? signed + "\n" + signed + "\n" : signed + "\n";
+            var bytes = Encoding.UTF8.GetBytes(frames);
+            output.Write(bytes);
+            output.Flush();
+            Thread.Sleep(1500);
+            return 17;
+        }
+
         if (args.SequenceEqual(["--authenticated-ipc"]) || args.SequenceEqual(["--authenticated-ipc", "--synthetic-probe"]))
         {
             try
