@@ -30,7 +30,7 @@ internal static class Program
             }
         }
 
-        if (args.SequenceEqual(["--authenticated-ipc"]))
+        if (args.SequenceEqual(["--authenticated-ipc"]) || args.SequenceEqual(["--authenticated-ipc", "--synthetic-probe"]))
         {
             try
             {
@@ -40,7 +40,7 @@ internal static class Program
                     ?? throw new InvalidDataException("Missing renderer bootstrap");
                 using var ipc = RendererIpcClient.FromBootstrap(bootstrap, input, output);
                 ApplicationConfiguration.Initialize();
-                using var window = new RendererWindow(false, ipc, CaptureMode.None, "editor");
+                using var window = new RendererWindow(false, ipc, CaptureMode.None, "editor", args.Length == 2);
                 Application.Run(window);
                 return Environment.ExitCode;
             }
@@ -213,6 +213,11 @@ internal sealed class RendererWindow : Form
     private readonly RendererIpcClient? _ipc;
     private readonly CaptureMode _captureMode;
     private readonly string _captureSurface;
+    private readonly bool _syntheticProbe;
+    private bool _probeClosingSent;
+    private int _probeStep;
+    private int _probeLocalesChecked;
+    private static readonly string[] ProbeLocales = ["en", "de", "es", "fr", "pt-BR", "pt-PT", "ru", "tr", "vi", "ja", "ko", "zh-CN", "zh-TW"];
     private readonly CancellationTokenSource _readerCancellation = new();
     private readonly System.Windows.Forms.Timer _ipcHeartbeat = new() { Interval = 3000 };
     private readonly TaskCompletionSource<NavigationOutcome> _navigation =
@@ -230,12 +235,13 @@ internal sealed class RendererWindow : Form
     private string _webErrorStatus = "not-observed";
     private string _phase = "initialization";
 
-    internal RendererWindow(bool capture, RendererIpcClient? ipc, CaptureMode captureMode, string captureSurface)
+    internal RendererWindow(bool capture, RendererIpcClient? ipc, CaptureMode captureMode, string captureSurface, bool syntheticProbe = false)
     {
         _capture = capture;
         _ipc = ipc;
         _captureMode = captureMode;
         _captureSurface = captureSurface;
+        _syntheticProbe = syntheticProbe;
         Text = "CoSoS 15HOST — Native Renderer";
         ClientSize = capture ? new Size(800, 600) : new Size(1280, 820);
         FormBorderStyle = capture ? FormBorderStyle.None : FormBorderStyle.Sizable;
@@ -254,7 +260,7 @@ internal sealed class RendererWindow : Form
         };
         FormClosing += (_, _) =>
         {
-            if (_ipc is not null && _ready)
+            if (_ipc is not null && _ready && !_probeClosingSent)
             {
                 try { _ipc.SendPayload("{\"kind\":\"renderer-closing\"}"); }
                 catch (Exception) { Environment.ExitCode = 1; }
@@ -431,6 +437,9 @@ internal sealed class RendererWindow : Form
 
         if (_ipc is not null)
         {
+            // The synthetic cloud probe drives only explicit host-bound typed
+            // intents. Ignore incidental WebView scroll requests during this test.
+            if (_syntheticProbe) return;
             if (!RendererDocument.TryValidateIntent(args.WebMessageAsJson, out var payload))
             {
                 _browser.CoreWebView2.PostWebMessageAsJson("{\"kind\":\"error\",\"code\":\"invalid-renderer-intent\"}");
@@ -474,9 +483,127 @@ internal sealed class RendererWindow : Form
             {
                 if (!_ready || IsDisposed) return;
                 _browser.CoreWebView2.PostWebMessageAsJson(payloadJson);
+                if (_syntheticProbe) _ = ContinueProbeAsync(payloadJson);
             }));
         }
         catch (Exception) { OnIpcFailure("invalid-host-state"); }
+    }
+
+    private void ProbeIntent(object intent)
+    {
+        if (_ipc is null) throw new InvalidOperationException("Missing authenticated probe IPC");
+        _ipc.SendPayload(JsonSerializer.Serialize(new { kind = "ui-intent", intent }));
+    }
+
+    // This instrumentation requires an explicit Rust-verified marker in an
+    // isolated synthetic profile and runs through the same production IPC
+    // transport and actual native WebView2 renderer. It is NOT owner testing.
+    private async Task ContinueProbeAsync(string payloadJson)
+    {
+        try
+        {
+            using var parsed = JsonDocument.Parse(payloadJson);
+            var state = parsed.RootElement;
+            if (state.GetProperty("mode").GetString() != "authenticated" ||
+                state.GetProperty("syntheticOnly").GetBoolean())
+                throw new InvalidDataException("Cloud E2E did not use production UI state");
+
+            if (_probeStep == 0)
+            {
+                var sessions = state.GetProperty("sessions");
+                if (sessions.GetArrayLength() != 1 ||
+                    sessions[0].GetProperty("id").GetString() != "synthetic-15host-e2e" ||
+                    state.GetProperty("availableLocales").GetArrayLength() != 13)
+                    throw new InvalidDataException("Synthetic E2E profile isolation/locales failed");
+                _probeStep = 1;
+                ProbeIntent(new {
+                    kind = "select-session", sessionId = "synthetic-15host-e2e",
+                    expectedRevision = state.GetProperty("navigation").GetProperty("revision").GetUInt64()
+                });
+                return;
+            }
+
+            if (_probeStep is 1 or 2)
+            {
+                var window = state.GetProperty("historyWindow");
+                var conversation = state.GetProperty("conversation");
+                var page = conversation.GetProperty("page");
+                var entries = page.GetProperty("entries");
+                var expectedStart = _probeStep == 1 ? 5976 : 0;
+                if (window.GetProperty("total").GetInt32() != 6000 ||
+                    page.GetProperty("start").GetInt32() != expectedStart ||
+                    entries.GetArrayLength() != 24 ||
+                    entries[0].GetProperty("text").GetString() !=
+                        $"SYNTHETIC-15HOST-E2E-{expectedStart:0000}")
+                    throw new InvalidDataException("Native product history/window contract failed");
+                if (_probeStep == 1)
+                {
+                    _probeStep = 2;
+                    ProbeIntent(new {
+                        kind = "load-page", start = 0,
+                        expectedRevision = conversation.GetProperty("revision").GetUInt64()
+                    });
+                }
+                else
+                {
+                    _probeStep = 3;
+                    ProbeIntent(new { kind = "set-locale", tag = ProbeLocales[0] });
+                    _probeLocalesChecked = 1;
+                }
+                return;
+            }
+
+            if (_probeStep == 3)
+            {
+                var locale = state.GetProperty("localization").GetProperty("tag").GetString();
+                if (locale != ProbeLocales[_probeLocalesChecked - 1])
+                    throw new InvalidDataException("Native locale selection/state mismatch");
+                if (_probeLocalesChecked < ProbeLocales.Length)
+                {
+                    ProbeIntent(new { kind = "set-locale", tag = ProbeLocales[_probeLocalesChecked] });
+                    _probeLocalesChecked++;
+                    return;
+                }
+                _probeStep = 4;
+                ProbeIntent(new { kind = "focus-event",
+                    @event = new { key = "tab", shift = false, ctrl = false, alt = false,
+                                   meta = false, composing = false } });
+                return;
+            }
+
+            if (_probeStep == 4)
+            {
+                if (state.GetProperty("focus").ValueKind != JsonValueKind.Object)
+                    throw new InvalidDataException("Native typed focus state missing");
+                _probeStep = 5;
+                await Task.Delay(200);
+                var js = await _browser.CoreWebView2.ExecuteScriptAsync(
+                    "(()=>document.documentElement.lang==='zh-TW'&&" +
+                    "document.getElementById('modeBadge').textContent==='AUTHENTICATED'&&" +
+                    "document.querySelectorAll('#historyCanvas .message').length<=24&&" +
+                    "document.querySelectorAll('#sessionList button.session').length===1)()");
+                if (js.Trim() != "true")
+                    throw new InvalidDataException("Native WebView2 DOM localization/history proof failed");
+
+                await using var pixels = new MemoryStream();
+                await _browser.CoreWebView2.CapturePreviewAsync(
+                    CoreWebView2CapturePreviewImageFormat.Png, pixels);
+                if (pixels.Length <= 0 || pixels.Length > 16_777_216)
+                    throw new InvalidDataException("Native E2E preview exceeded byte budget");
+                var pngSha = Convert.ToHexString(SHA256.HashData(pixels.ToArray())).ToLowerInvariant();
+                _ipc!.SendPayload(JsonSerializer.Serialize(new {
+                    kind = "renderer-closing", probeComplete = true,
+                    historyTotal = 6000, pageLimit = 24,
+                    localesChecked = _probeLocalesChecked,
+                    nativeWebView2PngSha256 = pngSha
+                }));
+                _probeClosingSent = true;
+                Close();
+                return;
+            }
+            throw new InvalidDataException("Unexpected synthetic E2E IPC state");
+        }
+        catch (Exception error) { Fail(error); }
     }
 
     private void OnIpcFailure(string code)
