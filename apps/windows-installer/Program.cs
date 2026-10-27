@@ -437,11 +437,13 @@ internal static class Program
             throw new InvalidDataException("Target exists; never overwrite");
         if (!install && !Directory.Exists(root))
             throw new InvalidDataException("Installed target missing");
-        var stage = install ? Path.Combine(Path.GetDirectoryName(root)!,
-            "cosos-16pkg-stage-" + Guid.NewGuid().ToString("N")) : root;
+        // Updates are prepared in an isolated sibling directory. A crash during
+        // copy never leaves a partial, untrusted slot under the active root.
+        var stage = Path.Combine(Path.GetDirectoryName(root)!,
+            "cosos-16pkg-stage-" + Guid.NewGuid().ToString("N"));
         var slot = "slot-" + Guid.NewGuid().ToString("N");
         var folder = Path.Combine(stage,"slots",slot);
-        var created = false;
+        var publishedSlot = false;
         Selector? previous = null;
         if (!install)
         {
@@ -456,39 +458,50 @@ internal static class Program
         }
         try
         {
-            if (install) { Directory.CreateDirectory(stage); Protect(stage); created = true; }
-            else VerifyProtection(root);
+            Directory.CreateDirectory(stage);
+            Protect(stage);
             Extract(folder,payload);
             var proof = Path.Combine(folder,"authority","issuer.exe");
             CopyFile(Environment.ProcessPath!,proof);
             VerifySlot(stage,slot,publisher);
             var next = install ? new Selector(slot,null,publisher,version,1) :
                 new Selector(slot,previous!.Active,publisher,version,previous.Generation + 1);
-            WriteState(stage,next);
             if (install)
             {
+                WriteState(stage,next);
                 SafeAncestors(root);
                 Directory.Move(stage,root);
                 VerifyProtection(root);
             }
+            else
+            {
+                VerifyProtection(root);
+                Directory.Move(folder,Path.Combine(root,"slots",slot));
+                publishedSlot = true;
+                VerifySlot(root,slot,publisher);
+                WriteState(root,next);
+                if (Directory.Exists(Path.Combine(stage,"slots")))
+                    Directory.Delete(Path.Combine(stage,"slots"));
+                Directory.Delete(stage);
+            }
         }
         catch
         {
-            if (created && Directory.Exists(stage))
+            // In-flight stage remains disconnected from active slot selector.
+            // Only delete fully signer-verified owned files; do not recursively
+            // remove untrusted data. A crash may leave a sibling quarantine.
+            if (Directory.Exists(stage))
             {
-                // Do not recursively remove if the attacker injected an
-                // unexpected item; leave isolated staged directory for inspection.
                 if (Directory.Exists(folder))
-                {
                     try { CleanOwnedSlot(stage,slot,publisher); } catch { }
-                }
+                var nested = Path.Combine(stage,"slots");
+                if (Directory.Exists(nested) && !Directory.EnumerateFileSystemEntries(nested).Any())
+                    Directory.Delete(nested);
                 if (!Directory.EnumerateFileSystemEntries(stage).Any())
                     Directory.Delete(stage);
             }
-            else if (Directory.Exists(folder))
-            {
+            if (publishedSlot && Directory.Exists(Path.Combine(root,"slots",slot)))
                 try { CleanOwnedSlot(root,slot,publisher); } catch { }
-            }
             throw;
         }
     }
