@@ -26,11 +26,16 @@ internal static class Program
     {
         try
         {
-            if (args.Length == 1 && (args[0] == "--verify" || args[0] == "--identity"))
+            if (args.Length == 1 && (args[0] == "--verify" || args[0] == "--identity" || args[0] == "--signed-manifest"))
             {
                 var source = Source();
                 var payload = Archive();
                 var data = VerifyBundle(payload, source);
+                if (args[0] == "--signed-manifest")
+                {
+                    Console.WriteLine(Convert.ToBase64String(data["release.json"]));
+                    return 0;
+                }
                 var version = VersionOf(data["release.json"]);
                 var proof = new Identity(source, version, Hash(data["release.json"]), 
                     ResourceText("CoSoS.TrustedPublisher", optional: true));
@@ -222,7 +227,7 @@ internal static class Program
             throw new InvalidDataException("Verifier timeout");
         }
         var output = process.StandardOutput.ReadToEnd();
-        if (process.ExitCode != 0 || output.Length > 8192)
+        if (process.ExitCode != 0 || output.Length > 256 * 1024)
             throw new InvalidDataException("Trusted Windows operation refused");
         return output.Trim();
     }
@@ -271,6 +276,14 @@ internal static class Program
             + "[Console]::Write('ACL_OK')";
         if (PS(script) != "ACL_OK")
             throw new InvalidDataException("Install directory ACL is not admin/SYSTEM-only");
+    }
+
+    static void SyntheticCrash(string point)
+    {
+#if COS_16PKG_TEST
+        if (Environment.GetEnvironmentVariable("COSOS_16PKG_FAIL_AT") == point)
+            Environment.FailFast("16PKG_SYNTHETIC_TEST_CRASH:" + point);
+#endif
     }
 
     static string SelectorPath(string root) => Path.Combine(root,"active.json");
@@ -464,6 +477,7 @@ internal static class Program
             var proof = Path.Combine(folder,"authority","issuer.exe");
             CopyFile(Environment.ProcessPath!,proof);
             VerifySlot(stage,slot,publisher);
+            SyntheticCrash("before_publish");
             var next = install ? new Selector(slot,null,publisher,version,1) :
                 new Selector(slot,previous!.Active,publisher,version,previous.Generation + 1);
             if (install)
@@ -478,8 +492,10 @@ internal static class Program
                 VerifyProtection(root);
                 Directory.Move(folder,Path.Combine(root,"slots",slot));
                 publishedSlot = true;
+                SyntheticCrash("after_slot_publish");
                 VerifySlot(root,slot,publisher);
                 WriteState(root,next);
+                SyntheticCrash("after_selector_publish");
                 if (Directory.Exists(Path.Combine(stage,"slots")))
                     Directory.Delete(Path.Combine(stage,"slots"));
                 Directory.Delete(stage);
@@ -526,6 +542,7 @@ internal static class Program
         VerifySlot(root,state.Previous,publisher);
         WriteState(root,state with { Active = state.Previous, Previous = state.Active,
                                      Generation = state.Generation + 1 });
+        SyntheticCrash("after_rollback_publish");
         // High-water remains the highest version even after rollback.
     }
     static void Uninstall(string root,string publisher)
