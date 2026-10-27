@@ -582,7 +582,7 @@ impl RendererHostState {
             return Err("stale-revision");
         }
         if target > self.history.len() as u64
-            || target % PAGE_LIMIT != 0
+            || !target.is_multiple_of(PAGE_LIMIT)
             || (target == self.history.len() as u64 && !self.history.is_empty())
         {
             return Err("invalid-history-page");
@@ -775,7 +775,7 @@ fn history_entry(index: usize, event: &Value) -> ConversationEntry {
 
 fn page_at(history: &[ConversationEntry], start: u64) -> Option<ConversationPage> {
     let total = history.len() as u64;
-    if start > total || (total > 0 && start == total) || start % PAGE_LIMIT != 0 {
+    if start > total || (total > 0 && start == total) || !start.is_multiple_of(PAGE_LIMIT) {
         return None;
     }
     let end = start.saturating_add(PAGE_LIMIT).min(total);
@@ -913,6 +913,27 @@ fn invalid(message: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
 
+impl Drop for RendererHostState {
+    fn drop(&mut self) {
+        self.clear_history();
+        if let Some(session_id) = &mut self.active_history_session {
+            session_id.zeroize();
+        }
+        for session in &mut self.sessions {
+            zeroize_json(session);
+        }
+    }
+}
+
+fn zeroize_json(value: &mut Value) {
+    match value {
+        Value::String(text) => text.zeroize(),
+        Value::Array(items) => items.iter_mut().for_each(zeroize_json),
+        Value::Object(items) => items.values_mut().for_each(zeroize_json),
+        _ => {}
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -945,26 +966,5 @@ mod tests {
         assert!(!projected.contains('\u{202e}'));
         assert!(!projected.contains('\u{0000}'));
         assert!(projected.len() <= 10);
-    }
-}
-
-impl Drop for RendererHostState {
-    fn drop(&mut self) {
-        self.clear_history();
-        if let Some(session_id) = &mut self.active_history_session {
-            session_id.zeroize();
-        }
-        for session in &mut self.sessions {
-            zeroize_json(session);
-        }
-    }
-}
-
-fn zeroize_json(value: &mut Value) {
-    match value {
-        Value::String(text) => text.zeroize(),
-        Value::Array(items) => items.iter_mut().for_each(zeroize_json),
-        Value::Object(items) => items.values_mut().for_each(zeroize_json),
-        _ => {}
     }
 }
