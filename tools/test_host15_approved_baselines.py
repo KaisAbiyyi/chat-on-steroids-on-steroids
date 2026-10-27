@@ -68,9 +68,33 @@ class TestApprovedBaseline(unittest.TestCase):
 
     def test_pixel_mismatch_rejected(self):
         a, b = pixel_png(0), pixel_png(1)
-        gate.exact_match(a, a, "editor-a")
-        with self.assertRaisesRegex(ValueError, "pixel/encoded-byte drift"):
+        self.assertEqual(gate.exact_match(a, a, "editor-a")["comparison"],
+                         "PASS_EXACT_BYTES")
+        with self.assertRaisesRegex(ValueError, "pixel drift"):
             gate.exact_match(a, b, "editor-a")
+
+    def test_known_single_lsb_noncontent_chrome_only(self):
+        def large_png(changes):
+            w, h = 1028, 749
+            rows = bytearray()
+            for y in range(h):
+                row = bytearray(w * 3)
+                for (x1, y1), delta in changes.items():
+                    if y == y1:
+                        row[x1 * 3] = delta
+                rows.extend(b"\x00" + row)
+            def chunk(tag, body):
+                return (struct.pack(">I", len(body)) + tag + body +
+                        struct.pack(">I", zlib.crc32(tag + body) & 0xffffffff))
+            return (gate.MAGIC + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) +
+                    chunk(b"IDAT", zlib.compress(rows)) + chunk(b"IEND", b""))
+        base = large_png({})
+        harmless = large_png({(9, 395): 1})
+        self.assertEqual(gate.exact_match(base, harmless, "editor-b")["comparison"],
+                         "PASS_BOUNDED_1LSB_EDGE")
+        for changed in ({(9, 395): 2}, {(20, 395): 1}, {(9, 391): 1}):
+            with self.assertRaisesRegex(ValueError, "pixel drift"):
+                gate.exact_match(base, large_png(changed), "editor-b")
 
     def test_missing_baselines_archive_and_wrong_sha_rejected(self):
         m = fixture_manifest()

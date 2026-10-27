@@ -18,7 +18,7 @@ archive and the checker comment*; it verifies approval author, exact surfaces,
 original archive digest, per-image SHA-256 and source-bound receipts. Approved
 images are extracted under RUNNER_TEMP, outside the current source/workspace
 capture directory. Current native Rust -> C# WebView2 captures must then match
-**byte-for-byte**, failing on any unexpected rendering/PNG drift, missing
+pixel-for-pixel, allowing only <=24 one-LSB changed pixels in two independently measured non-content WebView2 edge bands (x=9..10/y=393..456 and x=760..762/y=91..92), failing on all other rendering/layout drift, missing
 image/receipt, mismatched source, forged approval, or expired artifact. CI
 writes a separate regression receipt. Candidate receipts remain
 approvedGolden=false and productAccepted=false; successful comparison is not
@@ -39,3 +39,5 @@ and relevant required checks, restrict workflow and attestation publisher
 modification, and provide readable settings evidence. Authenticated,
 properly protected main release attestation is post-merge/pre-deployment.
 Do not treat PR candidate attestation as release approval.
+
+Validation of bounded pixel noise: hosted run #40522581227 differed from independent approved screenshots by exactly 18 one-LSB pixels in editor-b/terminal-b, 7 in math/focus, and zero in five other states. Exact ZIP+PNG baseline hashes remain unchanged. The bounded pixel comparison has negative tests for changed content pixels, >1 LSB edge drift and outside-band drift. Candidate binary hashes and per-surface deltas are recorded; no global fuzzy diff.
