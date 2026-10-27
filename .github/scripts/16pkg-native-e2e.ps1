@@ -34,10 +34,18 @@ try {
         $out=Join-Path $testHome "setup-$v"
         python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out $zip --source-sha $source --version $v
         if($LASTEXITCODE -ne 0){throw 'Versioned package build failed'}
-        dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" # Framework-dependent SINGLE-FILE exe is used only by hosted CI, so
-        # synthetic test-signer loops do not repeatedly sign 60MB of runtime.
-        # Production installer publish remains self-contained and distinct.
-        "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" "-p:DefineConstants=COS_16PKG_TEST" "-p:SelfContained=false" -o $out
+        # Framework-dependent single-file TEST fixture; production is separate.
+        $publishArgs = @(
+            'publish', 'apps/windows-installer/CoSoSInstaller.csproj',
+            '-c', 'Release', '-r', 'win-x64',
+            "-p:BundlePath=$zip",
+            "-p:SourceShaPath=$shaFile",
+            "-p:PublisherThumbprintPath=$publisher",
+            '-p:DefineConstants=COS_16PKG_TEST',
+            '-p:SelfContained=false',
+            '-o', $out
+        )
+        & dotnet @publishArgs
         if($LASTEXITCODE -ne 0){throw 'Native setup compile failed'}
         $exe=Join-Path $out 'CoSoSInstaller.exe'
         Write-Host "16PKG CI TEST: signing version $v"
@@ -46,6 +54,17 @@ try {
         $id=(& $exe --identity | ConvertFrom-Json)
         if($LASTEXITCODE -ne 0 -or $id.Source -ne $source -or $id.Version -ne $v -or $id.Publisher -ne $cert.Thumbprint){throw 'Signed identity mismatch'}
         $setups[$v]=$exe
+    }
+    Write-Host '16PKG CI TEST: bounded child-process regressions'
+    foreach($case in @('large-stdout','large-stderr','oversized-stdout','oversized-stderr','hang','failure','malformed')){
+        ExpectOk $setups['0.1.0'] @('--test-runchecked',$case)
+    }
+    $manifestB64 = & $setups['0.1.0'] --signed-manifest
+    if ($LASTEXITCODE -ne 0 -or $manifestB64.Length -lt 65536) {
+        throw 'Signed manifest too small to exercise redirected pipe'
+    }
+    if ([Convert]::FromBase64String($manifestB64).Length -gt 131072) {
+        throw 'Signed manifest exceeded legitimate bound'
     }
     Write-Host '16PKG CI TEST: starting signed native lifecycle'
     $env:COSOS_16PKG_FAIL_AT='after_stage_mkdir'

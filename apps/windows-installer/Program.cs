@@ -26,6 +26,14 @@ internal static class Program
     {
         try
         {
+#if COS_16PKG_TEST
+            if (args.Length == 2 && args[0] == "--test-child") return TestChild(args[1]);
+            if (args.Length == 2 && args[0] == "--test-runchecked")
+            {
+                TestRunChecked(args[1]);
+                return 0;
+            }
+#endif
             if (args.Length == 1 && (args[0] == "--verify" || args[0] == "--identity" || args[0] == "--signed-manifest"))
             {
                 var source = Source();
@@ -239,22 +247,105 @@ internal static class Program
 
     static string Powershell() => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\powershell.exe");
-    static string RunChecked(string binary, params string[] args)
+    // A valid <=128KiB manifest encodes to <175KiB of base64 stdout.
+    // Read BOTH redirected pipes concurrently while the process runs.
+    static string RunChecked(string binary, params string[] args) =>
+        RunCheckedBounded(binary, TimeSpan.FromSeconds(30), args);
+
+    static string RunCheckedBounded(string binary, TimeSpan timeout, params string[] args)
     {
         var psi = new ProcessStartInfo(binary) { UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var a in args) psi.ArgumentList.Add(a);
-        using var process = Process.Start(psi) ?? throw new InvalidDataException("Required Windows verifier unavailable");
-        if (!process.WaitForExit(30000))
+        using var process = Process.Start(psi) ??
+            throw new InvalidDataException("Required Windows verifier unavailable");
+        using var deadline = new CancellationTokenSource(timeout);
+        async Task<string> Drain(StreamReader reader, int limit, CancellationToken ct)
         {
-            process.Kill(true);
-            throw new InvalidDataException("Verifier timeout");
+            var output = new StringBuilder();
+            var buffer = new char[8192];
+            while (true)
+            {
+                int n = await reader.ReadAsync(buffer.AsMemory(), ct);
+                if (n == 0) return output.ToString();
+                if (n > limit - output.Length)
+                {
+                    deadline.Cancel();
+                    throw new InvalidDataException("Verifier output exceeded bound");
+                }
+                output.Append(buffer, 0, n);
+            }
         }
-        var output = process.StandardOutput.ReadToEnd();
-        if (process.ExitCode != 0 || output.Length > 256 * 1024)
-            throw new InvalidDataException("Trusted Windows operation refused");
-        return output.Trim();
+        var stdout = Drain(process.StandardOutput, 256 * 1024, deadline.Token);
+        var stderr = Drain(process.StandardError, 64 * 1024, deadline.Token);
+        try
+        {
+            Task.WhenAll(process.WaitForExitAsync(deadline.Token), stdout, stderr)
+                .GetAwaiter().GetResult();
+            if (process.ExitCode != 0)
+                throw new InvalidDataException("Trusted Windows operation refused");
+            return stdout.GetAwaiter().GetResult().Trim();
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested)
+        {
+            throw new InvalidDataException("Verifier timeout or oversized output");
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                try { process.Kill(entireProcessTree: true); }
+                catch (InvalidOperationException) { /* already exited */ }
+                catch (System.ComponentModel.Win32Exception) { /* checked by reap */ }
+                if (!process.WaitForExit(5000))
+                    throw new InvalidDataException("Verifier failed to reap after kill");
+            }
+        }
     }
+#if COS_16PKG_TEST
+    // Test fixture operations compile only when COS_16PKG_TEST is explicitly set.
+    static int TestChild(string mode)
+    {
+        switch (mode)
+        {
+            case "large-stdout": Console.Out.Write(new string('x', 200 * 1024)); break;
+            case "large-stderr":
+                Console.Error.Write(new string('e', 48 * 1024));
+                Console.Out.Write("ACCEPTABLE");
+                break;
+            case "oversized-stdout": Console.Out.Write(new string('x', 512 * 1024)); break;
+            case "oversized-stderr": Console.Error.Write(new string('e', 128 * 1024)); break;
+            case "hang": Thread.Sleep(TimeSpan.FromMinutes(1)); break;
+            case "failure": Console.Out.Write("ACCEPTABLE"); return 7;
+            case "malformed": Console.Out.Write("not-json"); break;
+            default: throw new InvalidDataException("Unknown test mode");
+        }
+        return 0;
+    }
+    static void TestRunChecked(string mode)
+    {
+        bool mustReject = mode is "oversized-stdout" or "oversized-stderr" or "hang" or "failure" or "malformed";
+        var watch = Stopwatch.StartNew();
+        try
+        {
+            var result = RunCheckedBounded(Environment.ProcessPath!,
+                mode == "hang" ? TimeSpan.FromSeconds(2) : TimeSpan.FromSeconds(10),
+                "--test-child", mode);
+            if (mode == "malformed") _ = JsonSerializer.Deserialize<Identity>(result);
+            if (mustReject || mode == "large-stdout" && result.Length != 200 * 1024
+                || mode == "large-stderr" && result != "ACCEPTABLE")
+                throw new InvalidOperationException("Verifier self-test expectation failed");
+        }
+        catch (Exception ex) when (mustReject && ex is InvalidDataException or JsonException)
+        {
+            // Refused outputs, processes, and responses never authorize a mutation.
+        }
+        if (mode == "hang" && watch.Elapsed > TimeSpan.FromSeconds(8))
+            throw new InvalidOperationException("Timeout child was not reaped promptly");
+        Console.WriteLine("COSOS_16PKG_RUN_CHECKED_PASS:" + mode);
+    }
+#endif
+
     static string PS(string script) => RunChecked(Powershell(), "-NoProfile","-NonInteractive",
         "-EncodedCommand",Convert.ToBase64String(Encoding.Unicode.GetBytes(script)));
     static string Quote(string value) => "'" + value.Replace("'","''") + "'";
