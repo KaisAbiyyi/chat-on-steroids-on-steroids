@@ -895,6 +895,10 @@ internal sealed class RendererWindow : Form
             File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "15host-native-smoke.json"),
                 JsonSerializer.Serialize(new {
                     pass = false, phase = _phase, failure = error.GetType().Name,
+                    syntheticProbePhase = _syntheticProbe ? _probeStep : -1,
+                    syntheticAbPhase = _abProbe ? _abStep : -1,
+                    syntheticError = (_syntheticProbe || _abProbe) &&
+                        error is InvalidDataException ? error.Message : "redacted",
                     hresult = error.HResult, navigationId = _observedNavigationId,
                     expectedNavigationId = _expectedNavigationId, webErrorStatus = _webErrorStatus,
                     navigationEvents = _navigationEvents.ToArray(),
