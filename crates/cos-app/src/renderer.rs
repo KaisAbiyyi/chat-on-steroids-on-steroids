@@ -653,10 +653,10 @@ impl RendererHostState {
                         }
                     },
                     "pdf" => {
-                        let session = self.active_history_session.as_deref()
+                        let session = self.active_history_session.clone()
                             .ok_or("no-active-session")?;
                         self.clear_pdf_pages();
-                        let pages = authorized_pdf_pages(store, session)
+                        let pages = authorized_pdf_pages(store, &session)
                             .map_err(|_| "pdf-asset-unavailable")?;
                         if pages.is_empty() {
                             return Err("pdf-asset-unavailable");
