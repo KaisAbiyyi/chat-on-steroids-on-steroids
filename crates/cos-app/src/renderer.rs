@@ -1514,9 +1514,10 @@ mod tests {
                 RendererHostState::new(12345, &store, Theme::Dark, UiLanguage::select(Some("en")))
                     .unwrap();
             let selected = format!("synthetic-15host-{tag}-secondary");
+            let expected_revision = projection.navigation.snapshot().revision;
             projection.handle_intent(&store, json!({
                 "kind":"select-session", "sessionId":selected,
-                "expectedRevision":projection.navigation.snapshot().revision
+                "expectedRevision":expected_revision
             })).unwrap();
             projection.handle_intent(&store, json!({
                 "kind":"open-rich","surface":"pdf"
