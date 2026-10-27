@@ -622,10 +622,17 @@ impl RendererHostState {
                         text: String::new(),
                         read_only: false,
                     },
-                    "terminal" => RichPanel::Terminal {
-                        key: "terminal-preview".into(),
-                        title: "Terminal output".into(),
-                        output: "Output-only preview. No process is attached.".into(),
+                    "terminal" => {
+                        let session = self
+                            .active_history_session
+                            .as_deref()
+                            .ok_or("no-active-session")?;
+                        RichPanel::Terminal {
+                            key: "host-terminal-output".into(),
+                            title: "Recorded session terminal output".into(),
+                            output: terminal_output_for_session(store, session)
+                                .map_err(|_| "terminal-output-unavailable")?,
+                        }
                     },
                     "pdf" => RichPanel::Pdf {
                         key: "pdf-preview".into(),
@@ -984,6 +991,46 @@ fn next_counter(counter: &mut u64) -> Result<u64, &'static str> {
         .ok_or("counter-exhausted")?;
     *counter = next;
     Ok(next)
+}
+
+/// An output-only terminal surface. The Rust host projects recorded tool-call
+/// results from the *selected* SessionStore; C#/WebView2 cannot execute commands.
+fn terminal_output_for_session(store: &SessionStore, session_id: &str) -> io::Result<String> {
+    const MAX_RECORDS: usize = 64;
+    const MAX_TERMINAL_BYTES: usize = 16 * 1024;
+    if !model::session_id(session_id) || store.summary(session_id)?.is_none() {
+        return Err(invalid("Terminal session is outside the selected profile"));
+    }
+    let events = store.recent(session_id, MAX_RECORDS, None)?;
+    let mut lines = Vec::new();
+    let mut remaining = MAX_TERMINAL_BYTES;
+    for item in events {
+        if item["kind"] != "tool_call" {
+            continue;
+        }
+        let title = item["call"]["summary"]["title"].as_str().unwrap_or("Tool output");
+        let result = item["call"]["result"]["text"].as_str().unwrap_or("");
+        let title = safe_text(title, 128);
+        let redacted = cos_core::logging::redact_credentials(result);
+        let cleaned = safe_text(&redacted, remaining.min(4096));
+        if cleaned.is_empty() {
+            continue;
+        }
+        let line = format!("{title}\n{cleaned}");
+        if line.len() > remaining {
+            break;
+        }
+        remaining -= line.len();
+        lines.push(line);
+        if remaining < 256 {
+            break;
+        }
+    }
+    Ok(if lines.is_empty() {
+        "No terminal output recorded in this session".to_owned()
+    } else {
+        lines.join("\n\n")
+    })
 }
 
 fn take_option(args: &mut Vec<String>, option: &str) -> io::Result<Option<String>> {
