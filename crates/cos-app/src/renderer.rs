@@ -74,7 +74,13 @@ pub fn launch(
     } else {
         false
     };
-    if synthetic_probe
+    let injection = take_option(&mut args, "--synthetic-15host-inject")?;
+    if injection.as_deref().is_some_and(|kind| {
+        !matches!(kind, "hang" | "early-exit" | "malformed" | "replay" | "stale")
+    }) || (synthetic_probe && injection.is_some()) {
+        return Err(invalid("Unsupported or conflicting synthetic injection"));
+    }
+    if (synthetic_probe || injection.is_some())
         && std::fs::read(data_directory.join("15host-synthetic-fixture.marker"))?
             != b"15HOST_SYNTHETIC_CLOUD_E2E_V1"
     {
@@ -114,6 +120,8 @@ pub fn launch(
     command.arg("--authenticated-ipc");
     if synthetic_probe {
         command.arg("--synthetic-probe");
+    } else if let Some(mode) = injection.as_deref() {
+        command.args(["--synthetic-inject", mode]);
     }
     let child = command
         .stdin(Stdio::piped())
@@ -142,7 +150,12 @@ pub fn launch(
             "key": encode_hex(&key)
         });
         write_json_line(&mut writer, &bootstrap)?;
-        let ready_raw = receive_frame(&frames, HANDSHAKE_TIMEOUT)?
+        let handshake_deadline = if injection.is_some() {
+            Duration::from_secs(3)
+        } else {
+            HANDSHAKE_TIMEOUT
+        };
+        let ready_raw = receive_frame(&frames, handshake_deadline)?
             .ok_or_else(|| invalid("Renderer exited before authenticated ready handshake"))?;
         let ready = authenticator
             .verify_inbound(&ready_raw)
@@ -1103,6 +1116,33 @@ mod tests {
         let mut child = ReapedChild(command.spawn().unwrap());
         assert!(child.wait_bounded(Duration::from_millis(50)).is_err());
         assert!(child.0.try_wait().unwrap().is_some());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn hostile_native_child_bootstrap_failure_matrix() {
+        let exe = match std::env::var("COSOS_15HOST_E2E_EXE") {
+            Ok(path) => path,
+            Err(_) => return,
+        };
+        let exe_sha = std::env::var("COSOS_15HOST_E2E_EXE_SHA").unwrap();
+        let manifest_sha = std::env::var("COSOS_15HOST_E2E_MANIFEST_SHA").unwrap();
+        let fixture = tempfile::tempdir().unwrap();
+        let root = fixture.path();
+        std::fs::write(root.join("15host-synthetic-fixture.marker"),
+            b"15HOST_SYNTHETIC_CLOUD_E2E_V1").unwrap();
+        let store = SessionStore::open(root).unwrap();
+        for kind in ["early-exit", "malformed", "replay", "stale", "hang"] {
+            let now = Instant::now();
+            let outcome = launch(&store, root, json!({"ui":{"language":"en"}}), vec![
+                "--renderer".into(), exe.clone(),
+                "--renderer-sha256".into(), exe_sha.clone(),
+                "--renderer-manifest-sha256".into(), manifest_sha.clone(),
+                "--synthetic-15host-inject".into(), kind.into(),
+            ]);
+            assert!(outcome.is_err(), "hostile {kind} child must fail closed");
+            assert!(now.elapsed() < Duration::from_secs(12), "hostile {kind} child hung");
+        }
     }
 
     #[cfg(windows)]
