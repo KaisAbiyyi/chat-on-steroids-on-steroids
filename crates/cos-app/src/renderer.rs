@@ -1162,6 +1162,38 @@ mod tests {
         assert!(projected.len() <= 10);
     }
     #[test]
+    fn host_terminal_output_is_selected_session_only_and_bounded() {
+        use cos_store::CreateOptions;
+        let temp = tempfile::tempdir().unwrap();
+        let store = SessionStore::open(temp.path()).unwrap();
+        for id in ["synthetic-terminal-a", "synthetic-terminal-b"] {
+            store.create(CreateOptions {
+                id: Some(id.into()),
+                ..Default::default()
+            }).unwrap();
+        }
+        for (id, word) in [
+            ("synthetic-terminal-a", "private-output-a"),
+            ("synthetic-terminal-b", "private-output-b"),
+        ] {
+            store.append(id, json!({
+                "kind":"tool_call", "time":10, "call":{
+                    "callId": format!("run-{word}"),
+                    "summary":{"title":"Run synthetic command"},
+                    "args":{"text":"safe","truncated":false,"chars":4},
+                    "result":{"text":word,"truncated":false,"chars":word.len()}
+                }
+            })).unwrap();
+        }
+        let a = terminal_output_for_session(&store, "synthetic-terminal-a").unwrap();
+        assert!(a.contains("private-output-a"));
+        assert!(!a.contains("private-output-b"));
+        assert!(terminal_output_for_session(&store, "synthetic-terminal-b")
+            .unwrap().contains("private-output-b"));
+        assert!(terminal_output_for_session(&store, "synthetic-terminal-foreign").is_err());
+    }
+
+    #[test]
     fn bounded_reader_timeout_is_not_silently_accepted() {
         let (sender, receiver) = mpsc::channel::<io::Result<Option<Vec<u8>>>>();
         assert!(receive_frame(&receiver, Duration::from_millis(20)).is_err());
