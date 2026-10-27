@@ -31,10 +31,15 @@ class Refused(ValueError):
 
 
 def safe_name(name):
-    return (isinstance(name, str) and 0 < len(name) <= 240
-            and not any(c in name for c in ("\\", ":", "\0"))
-            and all(p not in ("", ".", "..") for p in name.split("/"))
-            and not name.startswith("/"))
+    if not isinstance(name, str) or not 0 < len(name) <= 240 or name.startswith("/"):
+        return False
+    for part in name.split("/"):
+        if (part in ("", ".", "..") or part.endswith((".", " "))
+                or any(ord(c) < 32 or c in '<>:"\\|?*' for c in part)
+                or re.fullmatch(r"(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])",
+                                part.split(".", 1)[0], re.IGNORECASE)):
+            return False
+    return True
 
 
 def digest(data):
