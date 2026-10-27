@@ -13,5 +13,6 @@
   <ItemGroup>
     <EmbeddedResource Include="$(BundlePath)" LogicalName="CoSoS.Payload" Condition="'$(BundlePath)' != ''" />
     <EmbeddedResource Include="$(SourceShaPath)" LogicalName="CoSoS.Source" Condition="'$(SourceShaPath)' != ''" />
+    <EmbeddedResource Include="$(PublisherThumbprintPath)" LogicalName="CoSoS.TrustedPublisher" Condition="&apos;$(PublisherThumbprintPath)&apos; != &apos;&apos;" />
   </ItemGroup>
 </Project>
