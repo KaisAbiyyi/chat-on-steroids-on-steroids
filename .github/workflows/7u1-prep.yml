@@ -148,6 +148,7 @@ jobs:
           Copy-Item -LiteralPath crates/cos-core/Cargo.toml -Destination (Join-Path $sourceDir 'cos-core-Cargo.toml')
           Copy-Item -LiteralPath crates/cos-core/examples/7l2_bridge.rs -Destination (Join-Path $sourceDir '7l2_bridge.rs')
           Copy-Item -LiteralPath crates/cos-core/src/native_browser_bridge.rs -Destination (Join-Path $sourceDir 'native_browser_bridge.rs')
+          Copy-Item -LiteralPath crates/cos-core/src/browser_tools.rs -Destination (Join-Path $sourceDir 'browser_tools.rs')
           Copy-Item -LiteralPath probes/8p/extension/manifest.json -Destination (Join-Path $extensionDir 'manifest.json')
           Copy-Item -LiteralPath probes/8p/extension/sw.mjs -Destination (Join-Path $extensionDir 'sw.mjs')
           $sha = (git rev-parse HEAD).Trim()
