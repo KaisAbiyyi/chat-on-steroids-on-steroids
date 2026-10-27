@@ -203,8 +203,10 @@ pub fn launch(
             &mut writer,
             &mut authenticator,
             &mut host,
-            synthetic_probe || ab_probe,
-            ab_probe,
+            RendererProbe {
+                synthetic: synthetic_probe || ab_probe,
+                ab_isolation: ab_probe,
+            },
         )?;
         // An authenticated closing frame does not mean the child exited.
         // Enforce bounded shutdown, and fail if it must be killed.
@@ -240,6 +242,11 @@ pub fn launch(
     outcome
 }
 
+struct RendererProbe {
+    synthetic: bool,
+    ab_isolation: bool,
+}
+
 fn renderer_loop(
     store: &SessionStore,
     child: &mut Child,
@@ -247,8 +254,7 @@ fn renderer_loop(
     writer: &mut BufWriter<ChildStdin>,
     authenticator: &mut RendererIpcAuthenticator,
     host: &mut RendererHostState,
-    synthetic_probe: bool,
-    ab_probe: bool,
+    probe: RendererProbe,
 ) -> io::Result<()> {
     loop {
         if child.try_wait()?.is_some() {
@@ -265,10 +271,10 @@ fn renderer_loop(
             invalid("Renderer IPC authentication, epoch, sequence, or size check failed")
         })?;
         if verified.payload["kind"] == "renderer-closing" {
-            if synthetic_probe && verified.payload["probeComplete"] != true {
+            if probe.synthetic && verified.payload["probeComplete"] != true {
                 return Err(invalid("Synthetic 15HOST product E2E proof incomplete"));
             }
-            if ab_probe && verified.payload["abIsolation"] != true {
+            if probe.ab_isolation && verified.payload["abIsolation"] != true {
                 return Err(invalid(
                     "Cross-profile production-path E2E proof incomplete",
                 ));
@@ -479,22 +485,21 @@ impl RendererHostState {
                 page,
                 ..
             } = panel
+                && rich.active_key.as_deref() == Some(key.as_str())
             {
-                if rich.active_key.as_deref() == Some(key.as_str()) {
-                    return self
-                        .pdf_pages
-                        .iter()
-                        .find(|item| item.page == *page)
-                        .map(|item| {
-                            json!({
-                                "assetId":asset_id,
-                                "page":item.page,
-                                "format":"image/png",
-                                "sha256":format!("{:x}", Sha256::digest(&item.bytes)),
-                                "base64":base64_encode_png(&item.bytes)
-                            })
-                        });
-                }
+                return self
+                    .pdf_pages
+                    .iter()
+                    .find(|item| item.page == *page)
+                    .map(|item| {
+                        json!({
+                            "assetId":asset_id,
+                            "page":item.page,
+                            "format":"image/png",
+                            "sha256":format!("{:x}", Sha256::digest(&item.bytes)),
+                            "base64":base64_encode_png(&item.bytes)
+                        })
+                    });
             }
             None
         });
