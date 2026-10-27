@@ -17,4 +17,7 @@
       <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
     </ItemGroup>
   </Target>
+  <ItemGroup>
+    <None Update="goldens/shell-reference.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

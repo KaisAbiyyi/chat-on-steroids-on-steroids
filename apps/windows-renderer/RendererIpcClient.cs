@@ -271,19 +271,11 @@ internal sealed class RendererIpcClient : IDisposable
         }
 
         using var receiver = CreateForTest(7, key);
-        if (!receiver.TryVerifyInbound(frame, out var payload, out _) ||
-            payload != ready || !receiver.TryVerifyInbound(frame, out _, out var replayCode) ||
-            replayCode.Length == 0)
-        {
-            // The first call must pass and the second must be rejected.
-            // Keep this explicit below so a replay cannot accidentally pass.
-        }
-        if (!receiver.TryVerifyInbound(frame, out payload, out _) || payload != ready)
+        if (!receiver.TryVerifyInbound(frame, out var payload, out _) || payload != ready)
             throw new InvalidOperationException("15HOST authenticated frame verification failed");
-        if (receiver.TryVerifyInbound(frame, out _, out var replay))
+        if (receiver.TryVerifyInbound(frame, out _, out var replayCode) ||
+            replayCode != "invalid-renderer-sequence")
             throw new InvalidOperationException("15HOST replay regression failed");
-        if (replay != "invalid-renderer-sequence")
-            throw new InvalidOperationException("15HOST replay failure code changed");
 
         using var stale = CreateForTest(8, key);
         if (stale.TryVerifyInbound(frame, out _, out var staleCode) || staleCode != "stale-renderer-epoch")
@@ -298,14 +290,30 @@ internal sealed class RendererIpcClient : IDisposable
         if (receiver.TryVerifyInbound(downgrade, out _, out var downgradeCode) ||
             downgradeCode != "unsupported-renderer-protocol")
             throw new InvalidOperationException("15HOST protocol downgrade regression failed");
-
         if (receiver.TryVerifyInbound("{", out _, out _))
             throw new InvalidOperationException("15HOST malformed frame regression failed");
         if (receiver.TryVerifyInbound(new string('x', MaximumFrameBytes + 1), out _, out var oversizeCode) ||
             oversizeCode != "renderer-frame-too-large")
             throw new InvalidOperationException("15HOST oversized frame regression failed");
-        if (sender.SignOutbound("{").Length != 0)
+
+        using var rebound = CreateForTest(7, key);
+        if (!rebound.TryVerifyInbound(frame, out _, out _))
+            throw new InvalidOperationException("15HOST rebind fixture setup failed");
+        rebound.Rebind(8, Enumerable.Repeat((byte)0x0d, 32).ToArray());
+        if (rebound.TryVerifyInbound(frame, out _, out var retiredCode) || retiredCode != "stale-renderer-epoch")
+            throw new InvalidOperationException("15HOST rebind did not retire old frames");
+        var fresh = rebound.SignOutbound(ready);
+        using var freshFrame = JsonDocument.Parse(fresh);
+        if (freshFrame.RootElement.GetProperty("sequence").GetUInt64() != 1 ||
+            freshFrame.RootElement.GetProperty("epoch").GetUInt64() != 8)
+            throw new InvalidOperationException("15HOST rebind sequence reset failed");
+
+        try
+        {
+            sender.SignOutbound("{");
             throw new InvalidOperationException("15HOST malformed payload encoder regression failed");
+        }
+        catch (InvalidDataException) { }
     }
 
     private static byte[] MacInput(uint protocol, ulong epoch, ulong sequence, byte[] payload)

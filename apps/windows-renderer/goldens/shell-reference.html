@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-__DOCUMENT_NONCE__'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; frame-src 'none'; img-src 'none'; object-src 'none'; worker-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{font:13px system-ui,sans-serif;color:#e6edf7;background:#10151c;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;overflow:hidden}
+header{height:54px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #303947;background:#121923}
+.brand{font-size:14px;font-weight:700;letter-spacing:.2px}.brand span{color:#94a3b8;font-weight:500}
+.badge{font-size:10px;color:#a7f3d0;border:1px solid #245c4a;border-radius:4px;padding:4px 6px}
+header .spacer{flex:1}select,button,textarea{font:inherit;color:inherit;background:#151e2a;border:1px solid #344256;border-radius:4px}
+select{height:28px;padding:0 6px;max-width:84px}button{cursor:pointer;padding:6px 8px}button:hover{background:#202c3b}
+button.active{background:#26364b;border-color:#526984}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #8ab4f8;outline-offset:1px}
+.layout{display:grid;grid-template-columns:160px minmax(0,1fr) 280px;height:calc(100vh - 54px);min-height:0}
+nav{padding:12px 9px;border-right:1px solid #303947;overflow:hidden;min-width:0}
+.nav-title,.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:#8796aa;margin:5px 6px 9px}
+#navItems{display:grid;gap:4px}#navItems button{display:block;width:100%;text-align:left;border-color:transparent;background:transparent;padding:7px 8px}
+#navItems button.active{background:#202d3d;border-color:#344256}
+#sessionList{display:grid;gap:4px;margin-top:6px}.session{width:100%;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.muted{color:#8796aa;font-size:11px}.section-title{margin-top:18px}
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.toolbar{height:40px;flex:0 0 40px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid #263140}
+.toolbar strong{font-size:12px}.toolbar .spacer{flex:1}.toolbar button{font-size:10px;padding:4px 6px}
+#historyViewport{flex:1;min-height:0;overflow:auto;position:relative;contain:strict}
+#historyCanvas{position:relative;height:360000px}
+.message{position:absolute;left:8px;right:8px;height:60px;border-bottom:1px solid #243040;padding:9px 8px;overflow:hidden}
+.role{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#8292a7}
+.message p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:16px}
+section{min-height:0}.surface{padding:10px 0;border-bottom:1px solid #303947}
+aside{padding:12px 10px;border-left:1px solid #303947;min-width:0;overflow:hidden;display:flex;flex-direction:column;gap:9px}
+.panel-heading{display:flex;align-items:center;justify-content:space-between}
+h2{font-size:12px;margin:0;color:#b0becf}.panel-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+.panel-tabs button{font-size:10px;padding:6px 2px;min-width:0}
+#richSurface{flex:1;min-height:0;overflow:hidden;border:1px solid #303947;border-radius:5px;padding:8px;display:flex;flex-direction:column;gap:8px}
+.panel-title{font-size:11px;color:#b0becf;margin:0}.panel-note{font-size:10px;line-height:15px;color:#8796aa}
+.editor{width:100%;height:100%;min-height:150px;resize:none;padding:8px;border-color:#344256;background:#0c1118;font:11px ui-monospace,Consolas,monospace;line-height:16px}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;font:11px ui-monospace,Consolas,monospace;color:#cbd5e1;margin:0}
+.pdf-page{flex:1;display:grid;place-items:center;border:1px dashed #435064;background:#121923;color:#b0becf;text-align:center;padding:12px}
+.math-source{font:11px ui-monospace,Consolas,monospace;padding:7px;min-height:54px;resize:vertical}
+.math-preview{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;padding:12px;border:1px solid #344256;border-radius:4px}
+.panel-footer{font-size:10px;color:#7f8ea3;line-height:14px}
+dialog{background:#151e2a;color:#e6edf7;border:1px solid #526984;border-radius:6px;max-width:300px}
+dialog::backdrop{background:#0009}dialog button{margin-right:6px}
+</style></head><body>
+<header><div class="brand">CoSoS <span>/ 15HOST</span></div><div class="badge">SYNTHETIC FIXTURE</div><div class="spacer"></div><label class="muted" for="locale">Locale</label><select id="locale" aria-label="Locale"><option selected>en</option><option>de</option><option>es</option><option>fr</option><option>pt-BR</option><option>pt-PT</option><option>ru</option><option>tr</option><option>vi</option><option>ja</option><option>ko</option><option>zh-CN</option><option>zh-TW</option></select></header>
+<div class="layout">
+<nav id="navigation" tabindex="0" aria-label="Navigation"><div class="nav-title" id="navigationLabel">Navigation</div><div id="navItems">
+<button class="active">Home</button><button>Projects</button><button>Agents</button><button>Skills</button><button>Plugins</button><button>Settings</button><button>Activity</button>
+</div><div class="section-title" id="conversationsLabel">Conversations</div><div id="sessionList"><button class="session active" disabled>Synthetic fixture</button></div></nav>
+<main id="main" tabindex="0" aria-label="Main content"><div class="toolbar"><strong id="routeTitle">Home</strong><span class="muted" id="historyCount">6,000 synthetic messages</span><div class="spacer"></div><button id="openDialog">Confirm…</button></div><div id="historyViewport"><div id="historyCanvas">
+<article class="message user" style="top:0px"><span class="role">user</span><p>Synthetic history message 0000</p></article>
+<article class="message assistant" style="top:60px"><span class="role">assistant</span><p>Synthetic history message 0001</p></article>
+<article class="message user" style="top:120px"><span class="role">user</span><p>Synthetic history message 0002</p></article>
+<article class="message assistant" style="top:180px"><span class="role">assistant</span><p>Synthetic history message 0003</p></article>
+<article class="message user" style="top:240px"><span class="role">user</span><p>Synthetic history message 0004</p></article>
+<article class="message assistant" style="top:300px"><span class="role">assistant</span><p>Synthetic history message 0005</p></article>
+<article class="message user" style="top:360px"><span class="role">user</span><p>Synthetic history message 0006</p></article>
+<article class="message assistant" style="top:420px"><span class="role">assistant</span><p>Synthetic history message 0007</p></article>
+<article class="message user" style="top:480px"><span class="role">user</span><p>Synthetic history message 0008</p></article>
+<article class="message assistant" style="top:540px"><span class="role">assistant</span><p>Synthetic history message 0009</p></article>
+<article class="message user" style="top:600px"><span class="role">user</span><p>Synthetic history message 0010</p></article>
+<article class="message assistant" style="top:660px"><span class="role">assistant</span><p>Synthetic history message 0011</p></article>
+<article class="message user" style="top:720px"><span class="role">user</span><p>Synthetic history message 0012</p></article>
+</div></div></main>
+<aside id="panelRoot"><div class="panel-heading"><h2 id="panelsLabel">Panels</h2><span class="muted">host-owned</span></div>
+<div id="richTabs" class="panel-tabs"><button class="active">Editor</button><button>Terminal</button><button>PDF</button><button>Math</button></div>
+<div id="richSurface"><p class="panel-title">Untitled editor</p><textarea class="editor" aria-label="Editor" readonly spellcheck="false">Synthetic editor preview only.</textarea></div>
+<div class="panel-footer">Terminal is output-only. Editor changes remain in memory; PDF assets are host-owned.</div></aside>
+</div><dialog id="confirmDialog"><p id="dialogText">Confirm this presentation-only action?</p><button id="dialog-confirm">Confirm</button><button id="dialog-cancel">Cancel</button></dialog>
+<script nonce="__DOCUMENT_NONCE__">(()=>{const nonce='__DOCUMENT_NONCE__';document.getElementById('navigation').focus({preventScroll:true});chrome.webview.postMessage({kind:'document-ready',nonce});requestAnimationFrame(()=>requestAnimationFrame(()=>chrome.webview.postMessage({kind:'capture-ready',nonce})));})();</script>
+</body></html>
