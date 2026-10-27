@@ -47,7 +47,7 @@ const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub fn launch(
     store: &SessionStore,
-    _data_directory: &Path,
+    data_directory: &Path,
     config: Value,
     mut args: Vec<String>,
 ) -> io::Result<Value> {
@@ -65,6 +65,18 @@ pub fn launch(
         take_option(&mut args, "--renderer-manifest-sha256")?.ok_or_else(|| {
             invalid("UI launch requires --renderer-manifest-sha256 from trusted receipt")
         })?;
+    let synthetic_probe = if let Some(position) = args.iter().position(|option| option == "--synthetic-15host-probe") {
+        args.remove(position);
+        true
+    } else {
+        false
+    };
+    if synthetic_probe
+        && std::fs::read(data_directory.join("15host-synthetic-fixture.marker"))?
+            != b"15HOST_SYNTHETIC_CLOUD_E2E_V1"
+    {
+        return Err(invalid("15HOST cloud probe requires an explicit synthetic fixture marker"));
+    }
     if !args.is_empty() {
         return Err(invalid("Unknown UI launch option"));
     }
@@ -93,8 +105,12 @@ pub fn launch(
         .map_err(|_| invalid("Could not initialize renderer authentication"))?;
     // Guard owns kill + reap, including bootstrap, authentication and state
     // initialization error paths. No raw Child may escape without Drop cleanup.
-    let child = Command::new(&renderer_path)
-        .arg("--authenticated-ipc")
+    let mut command = Command::new(&renderer_path);
+    command.arg("--authenticated-ipc");
+    if synthetic_probe {
+        command.arg("--synthetic-probe");
+    }
+    let child = command
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
@@ -150,6 +166,7 @@ pub fn launch(
             &mut writer,
             &mut authenticator,
             &mut host,
+            synthetic_probe,
         )?;
         // An authenticated closing frame does not mean the child exited.
         // Enforce bounded shutdown, and fail if it must be killed.
@@ -164,7 +181,8 @@ pub fn launch(
             "artifactSha256":actual_sha,
             "manifestSha256":manifest_sha,
             "sourceBound":true,
-            "syntheticOnly":false
+            "syntheticOnly":false,
+            "syntheticProbeComplete":synthetic_probe
         }))
     })();
     // Close the write end to let a healthy child finish promptly.
@@ -188,6 +206,7 @@ fn renderer_loop(
     writer: &mut BufWriter<ChildStdin>,
     authenticator: &mut RendererIpcAuthenticator,
     host: &mut RendererHostState,
+    synthetic_probe: bool,
 ) -> io::Result<()> {
     loop {
         if child.try_wait()?.is_some() {
@@ -204,6 +223,9 @@ fn renderer_loop(
             invalid("Renderer IPC authentication, epoch, sequence, or size check failed")
         })?;
         if verified.payload["kind"] == "renderer-closing" {
+            if synthetic_probe && verified.payload["probeComplete"] != true {
+                return Err(invalid("Synthetic 15HOST product E2E proof incomplete"));
+            }
             return Ok(());
         }
         if verified.payload["kind"] == "renderer-heartbeat" {
@@ -1051,4 +1073,71 @@ mod tests {
         assert!(!projected.contains('\u{0000}'));
         assert!(projected.len() <= 10);
     }
+    #[test]
+    fn bounded_reader_timeout_is_not_silently_accepted() {
+        let (sender, receiver) = mpsc::channel::<io::Result<Option<Vec<u8>>>>();
+        assert!(receive_frame(&receiver, Duration::from_millis(20)).is_err());
+        drop(sender);
+        assert!(receive_frame(&receiver, Duration::from_millis(20)).is_err());
+    }
+
+    #[test]
+    fn child_shutdown_timeout_kills_and_reaps() {
+        #[cfg(windows)]
+        let mut command = {
+            let mut command = Command::new("cmd");
+            command.args(["/C", "ping 127.0.0.1 -n 20 > NUL"]);
+            command
+        };
+        #[cfg(not(windows))]
+        let mut command = {
+            let mut command = Command::new("sleep");
+            command.arg("20");
+            command
+        };
+        let mut child = ReapedChild(command.spawn().unwrap());
+        assert!(child.wait_bounded(Duration::from_millis(50)).is_err());
+        assert!(child.0.try_wait().unwrap().is_some());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn hosted_native_product_path_synthetic_six_thousand() {
+        use cos_store::CreateOptions;
+        let exe = match std::env::var("COSOS_15HOST_E2E_EXE") {
+            Ok(path) => path,
+            Err(_) => return, // General workspace tests do not have the Windows artifact.
+        };
+        let exe_sha = std::env::var("COSOS_15HOST_E2E_EXE_SHA").expect("E2E EXE hash required");
+        let manifest_sha = std::env::var("COSOS_15HOST_E2E_MANIFEST_SHA").expect("E2E manifest digest required");
+        let fixture = tempfile::tempdir().unwrap();
+        let root = fixture.path();
+        std::fs::write(root.join("15host-synthetic-fixture.marker"),
+            b"15HOST_SYNTHETIC_CLOUD_E2E_V1").unwrap();
+        let store = SessionStore::open(root).unwrap();
+        let session_id = "synthetic-15host-e2e";
+        store.create(CreateOptions {
+            id: Some(session_id.into()),
+            title: Some("15HOST cloud-only synthetic session".into()),
+            ..Default::default()
+        }).unwrap();
+        for index in 0..HISTORY_WINDOW_LIMIT {
+            let content = format!("SYNTHETIC-15HOST-E2E-{index:04}");
+            store.append(session_id, json!({
+                "kind":"note", "source":"15host-cloud-synthetic", "time":index + 1,
+                "message":{"text":content,"truncated":false,"chars":content.len()}
+            })).unwrap();
+        }
+        let reply = launch(&store, root, json!({"ui":{"language":"en","theme":"dark"}}),
+            vec![
+                "--renderer".into(),exe,
+                "--renderer-sha256".into(),exe_sha,
+                "--renderer-manifest-sha256".into(),manifest_sha,
+                "--synthetic-15host-probe".into()
+            ]).unwrap();
+        assert_eq!(reply["authenticated"], true);
+        assert_eq!(reply["syntheticProbeComplete"], true);
+    }
+
+
 }
