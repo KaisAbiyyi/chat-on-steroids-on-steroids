@@ -2,8 +2,8 @@
 $ErrorActionPreference='Stop'
 $source=(git rev-parse HEAD).Trim()
 if($source -ne $env:PR_HEAD_SHA){throw 'Exact source SHA mismatch'}
-$home=Join-Path $env:RUNNER_TEMP 'cosos-16pkg-disposable'
-New-Item -ItemType Directory -Force -Path $home | Out-Null
+$testHome=Join-Path $env:RUNNER_TEMP 'cosos-16pkg-disposable'
+New-Item -ItemType Directory -Force -Path $testHome | Out-Null
 $mapped=$false
 $cert=$null
 $root="D:\16pkg-ci-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
@@ -14,22 +14,22 @@ function ExpectOk([string]$exe,[string[]]$options){
 }
 try {
     if(!(Test-Path 'D:\')){
-        & "$env:SystemRoot\System32\subst.exe" D: $home
+        & "$env:SystemRoot\System32\subst.exe" D: $testHome
         if($LASTEXITCODE -ne 0){throw 'Disposable D drive unavailable'}
         $mapped=$true
     }
     $cert=New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=CoSoS-16PKG-TEST-ONLY-NOT-PRODUCTION' -CertStoreLocation 'Cert:\CurrentUser\My' -HashAlgorithm SHA256 -NotAfter (Get-Date).AddHours(2)
-    $public=Join-Path $home 'test-only.cer'
+    $public=Join-Path $testHome 'test-only.cer'
     Export-Certificate -Cert $cert -FilePath $public | Out-Null
     Import-Certificate -FilePath $public -CertStoreLocation 'Cert:\CurrentUser\Root' | Out-Null
     Import-Certificate -FilePath $public -CertStoreLocation 'Cert:\CurrentUser\TrustedPublisher' | Out-Null
-    $publisher=Join-Path $home 'publisher-test-only.txt'
+    $publisher=Join-Path $testHome 'publisher-test-only.txt'
     [IO.File]::WriteAllText($publisher,$cert.Thumbprint,[Text.UTF8Encoding]::new($false))
     $shaFile=(Resolve-Path source-sha.txt).Path
     $setups=@{}
     foreach($v in @('0.1.0','0.2.0','0.3.0')){
-        $zip=Join-Path $home "bundle-$v.zip"
-        $out=Join-Path $home "setup-$v"
+        $zip=Join-Path $testHome "bundle-$v.zip"
+        $out=Join-Path $testHome "setup-$v"
         python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out $zip --source-sha $source --version $v
         if($LASTEXITCODE -ne 0){throw 'Versioned package build failed'}
         dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$zip" "-p:SourceShaPath=$shaFile" "-p:PublisherThumbprintPath=$publisher" "-p:DefineConstants=COS_16PKG_TEST" -o $out
@@ -80,7 +80,7 @@ try {
     & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
     if($LASTEXITCODE -eq 0){throw 'Tampered release manifest accepted'}
     [IO.File]::WriteAllBytes($release,$releaseBytes)
-    $external=Join-Path $home 'disposable-junction-target'
+    $external=Join-Path $testHome 'disposable-junction-target'
     New-Item -ItemType Directory -Force -Path $external | Out-Null
     $junction=Join-Path $dirty 'unowned-link'
     New-Item -ItemType Junction -Path $junction -Target $external | Out-Null
