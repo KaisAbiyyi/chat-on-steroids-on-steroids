@@ -1,5 +1,4 @@
-# CoSoS 16PKG native cloud workflow
-name: 16PKG Windows package candidate
+name: 16PKG Windows native installer source and signer qualification
 on:
   pull_request:
     paths:
@@ -7,53 +6,73 @@ on:
       - 'tools/test_release_16pkg.py'
       - 'apps/windows-installer/**'
       - '.github/workflows/16pkg-native-installer.yml'
+      - '.github/scripts/16pkg-native-e2e.ps1'
   workflow_dispatch:
+    inputs:
+      release_version:
+        type: string
+        required: true
+        default: '0.1.0'
 permissions:
   contents: read
 jobs:
   package:
     runs-on: windows-latest
+    env:
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      RELEASE_VERSION: ${{ inputs.release_version || '0.1.0' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
           dotnet-version: '8.0.x'
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Run package negative tests
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - name: Release regressions
         run: python -m unittest -v tools.test_release_16pkg tools.test_release_16b tools.test_release_16c tools.test_release_16e
-      - name: Build production Rust CLI
+      - name: Build Rust runtime
         run: cargo build --release --locked -p cos-app
-      - name: Publish real Windows renderer
+      - name: Publish WebView2 renderer
         run: dotnet publish apps/windows-renderer/WindowsRenderer.csproj -c Release -o renderer-package
-      - name: Build source-pinned candidate ZIP
+      - name: Generate source-pinned unsigned preview
         shell: pwsh
         run: |
-          $sha = (git rev-parse HEAD).Trim()
-          if ($sha -ne '${{ github.event.pull_request.head.sha || github.sha }}') { throw 'Unpinned source' }
-          python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out candidate.zip --source-sha $sha --version 0.1.0
-          if ($LASTEXITCODE -ne 0) { throw 'Bundle build failed' }
+          $sha=(git rev-parse HEAD).Trim()
+          if($sha -ne $env:PR_HEAD_SHA){throw 'Unpinned Git checkout'}
+          if($env:RELEASE_VERSION -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'){throw 'Invalid version'}
+          python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out candidate.zip --source-sha $sha --version $env:RELEASE_VERSION
+          if($LASTEXITCODE -ne 0){throw 'Invalid source-bound bundle'}
           $sha | Out-File -FilePath source-sha.txt -NoNewline -Encoding ascii
-      - name: Compile actual Windows setup
+      - name: Publish unsigned setup and negative proof
         shell: pwsh
         run: |
-          dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 -p:BundlePath="$((Resolve-Path candidate.zip).Path)" -p:SourceShaPath="$((Resolve-Path source-sha.txt).Path)" -o installer-package
-          if ($LASTEXITCODE -ne 0) { throw 'Native setup build failed' }
+          dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$((Resolve-Path candidate.zip).Path)" "-p:SourceShaPath=$((Resolve-Path source-sha.txt).Path)" -o installer-package
+          if($LASTEXITCODE -ne 0){throw 'Installer build failed'}
           & installer-package/CoSoSInstaller.exe --verify
-          if ($LASTEXITCODE -ne 0) { throw 'Installer payload digest invalid' }
-          & installer-package/CoSoSInstaller.exe --install 'D:\\projects\\CoSoS-16PKG-smoke' --publisher ('A' * 40)
-          if ($LASTEXITCODE -eq 0) { throw 'Unsigned candidate installed unexpectedly' }
-          $global:LASTEXITCODE = 0
-      - name: Record artifact digests
+          if($LASTEXITCODE -ne 0){throw 'Payload verification failed'}
+          & installer-package/CoSoSInstaller.exe --install 'D:\16pkg-unsigned-rejection' --publisher ('A' * 40)
+          if($LASTEXITCODE -eq 0){throw 'Unsigned app gained authority'}
+          $global:LASTEXITCODE=0
+      - name: Native install, update, rollback, reinstall, uninstall and tamper with TEST signer
+        shell: pwsh
+        run: .github/scripts/16pkg-native-e2e.ps1
+      - name: Exact SHA-256 receipt
         shell: pwsh
         run: |
-          @{ sourceSha=(git rev-parse HEAD).Trim(); signed=$false; native16L1Accepted=$false; zipSha256=(Get-FileHash candidate.zip -Algorithm SHA256).Hash; setupSha256=(Get-FileHash installer-package/CoSoSInstaller.exe -Algorithm SHA256).Hash } | ConvertTo-Json | Out-File -Encoding utf8 package-receipt.json
-      - uses: actions/upload-artifact@v4
+          @{sourceSha=(git rev-parse HEAD).Trim();releaseVersion=$env:RELEASE_VERSION;
+          signed=$false;native16L1Accepted=$false;
+          zipSha256=(Get-FileHash candidate.zip -Algorithm SHA256).Hash.ToLowerInvariant();
+          setupSha256=(Get-FileHash installer-package/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          } | ConvertTo-Json | Set-Content -Encoding utf8 package-receipt.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: cosos-16pkg-unsigned-candidate-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             candidate.zip
             installer-package/CoSoSInstaller.exe
             package-receipt.json
+            16pkg-native-test-receipt.json
           if-no-files-found: error
