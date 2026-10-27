@@ -59,6 +59,7 @@ def renderer_payload(renderer_dir, source_sha):
     if is_link(Path(renderer_dir)):
         raise Refused("linked renderer root")
     entries = {}
+    existing_manifest = None
     for path in sorted(root.rglob("*")):
         if is_link(path):
             raise Refused("linked renderer member")
@@ -68,7 +69,8 @@ def renderer_payload(renderer_dir, source_sha):
             raise Refused("nonfile renderer member")
         relative = path.relative_to(root).as_posix()
         if relative == "renderer-integrity.json":
-            raise Refused("external renderer manifest must not be silently trusted")
+            existing_manifest = source_file(path)
+            continue
         if not safe_name(relative):
             raise Refused("unsafe renderer path")
         entries[relative] = source_file(path)
@@ -81,8 +83,29 @@ def renderer_payload(renderer_dir, source_sha):
     manifest = {"format": 1, "sourceSha": source_sha,
                 "files": [{"path": name, "sha256": digest(contents)}
                           for name, contents in sorted(entries.items())]}
-    entries["renderer-integrity.json"] = json.dumps(
-        manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    if existing_manifest is not None:
+        try:
+            supplied = json.loads(existing_manifest)
+            if (not isinstance(supplied, dict)
+                    or set(supplied) != {"format", "sourceSha", "files"}
+                    or supplied["format"] != 1 or supplied["sourceSha"] != source_sha
+                    or not isinstance(supplied["files"], list)
+                    or len(supplied["files"]) != len(entries)):
+                raise Refused("supplied renderer manifest identity mismatch")
+            seen = set()
+            for item in supplied["files"]:
+                if (not isinstance(item, dict) or set(item) != {"path", "sha256"}
+                        or item["path"] in seen or item["path"] not in entries
+                        or digest(entries[item["path"]]) != item["sha256"]):
+                    raise Refused("supplied renderer manifest content mismatch")
+                seen.add(item["path"])
+        except (KeyError, TypeError, ValueError) as ex:
+            raise Refused("invalid supplied renderer manifest") from ex
+        entries["renderer-integrity.json"] = existing_manifest
+    else:
+        # This generated manifest has NO issuer attestation and is a CI candidate.
+        entries["renderer-integrity.json"] = json.dumps(
+            manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return {"renderer/" + name: data for name, data in entries.items()}
 
 
