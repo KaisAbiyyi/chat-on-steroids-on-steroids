@@ -750,18 +750,70 @@ internal sealed class RendererWindow : Form
                         $"synthetic-15host-{_abProfile}-secondary")
                     throw new InvalidDataException("A/B stale revision did not fail closed");
                 _abStep = 5;
-                await Task.Delay(300);
+                ProbeIntent(new { kind = "open-rich", surface = "terminal" });
+                return;
+            }
+            if (_abStep == 5)
+            {
+                var terminal = state.GetProperty("rich").GetProperty("panels")
+                    .EnumerateArray().FirstOrDefault(panel =>
+                        panel.GetProperty("kind").GetString() == "terminal");
+                if (terminal.ValueKind != JsonValueKind.Object ||
+                    !terminal.GetProperty("output").GetString()!.Contains(
+                        $"HOST-TERMINAL-{_abProfile}-secondary", StringComparison.Ordinal) ||
+                    terminal.GetProperty("output").GetString()!.Contains(
+                        $"HOST-TERMINAL-{_abProfile}-primary", StringComparison.Ordinal))
+                    throw new InvalidDataException("Host terminal output is not session-isolated");
+                _abStep = 6;
+                ProbeIntent(new { kind = "open-rich", surface = "pdf" });
+                return;
+            }
+            if (_abStep == 6)
+            {
+                var asset = state.GetProperty("pdfPage");
+                if (asset.ValueKind != JsonValueKind.Object ||
+                    asset.GetProperty("format").GetString() != "image/png" ||
+                    asset.GetProperty("page").GetInt32() != 1 ||
+                    !System.Text.RegularExpressions.Regex.IsMatch(
+                        asset.GetProperty("sha256").GetString()!, "^[a-f0-9]{64}$"))
+                    throw new InvalidDataException("Host PDF page was not authenticated/authorized");
+                _abStep = 7;
+                await Task.Delay(450);
                 var script = "(()=>{const rows=document.getElementById('historyCanvas').textContent;" +
+                    "const img=document.querySelector('#richSurface .pdf-page img');" +
                     "return rows.includes('ISOLATED-" + _abProfile + "-secondary-')&&" +
                     "!rows.includes('ISOLATED-" + _abProfile + "-primary-')&&" +
-                    "document.querySelectorAll('#sessionList button.session').length===2;})()";
+                    "document.querySelectorAll('#sessionList button.session').length===2&&" +
+                    "img&&img.complete&&img.naturalWidth>0;})()";
                 var visible = await _browser.CoreWebView2.ExecuteScriptAsync(script);
                 if (visible.Trim() != "true")
-                    throw new InvalidDataException("Stale first-session DOM content was not erased");
+                    throw new InvalidDataException("PDF raster failed native render or old session leaked");
+                await using var pixels = new MemoryStream();
+                await _browser.CoreWebView2.CapturePreviewAsync(
+                    CoreWebView2CapturePreviewImageFormat.Png, pixels);
+                var image = pixels.ToArray();
+                if (image.Length == 0 || image.Length > 16_777_216)
+                    throw new InvalidDataException("Product PDF screenshot outside bounds");
+                var candidateDir = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
+                if (!string.IsNullOrWhiteSpace(candidateDir) && Path.IsPathFullyQualified(candidateDir))
+                {
+                    Directory.CreateDirectory(candidateDir);
+                    var filename = "15host-product-pdf-" + _abProfile;
+                    File.WriteAllBytes(Path.Combine(candidateDir, filename + ".png"), image);
+                    File.WriteAllText(Path.Combine(candidateDir, filename + ".json"),
+                        JsonSerializer.Serialize(new {
+                            sourceSha = Environment.GetEnvironmentVariable("SOURCE_SHA"),
+                            productState = true, syntheticData = true,
+                            surface = "pdf", profile = _abProfile,
+                            pngSha256 = Convert.ToHexString(SHA256.HashData(image)).ToLowerInvariant(),
+                            approvedGolden = false, productAccepted = false
+                        }));
+                }
                 _ipc!.SendPayload(JsonSerializer.Serialize(new {
                     kind = "renderer-closing", probeComplete = true,
                     abIsolation = true, selectedProfile = _abProfile,
-                    deniedForeign = true, clearedOldHistory = true, rejectedStale = true
+                    deniedForeign = true, clearedOldHistory = true, rejectedStale = true,
+                    terminalHostOutput = true, pdfAuthorizedRaster = true
                 }));
                 _probeClosingSent = true;
                 Close();
