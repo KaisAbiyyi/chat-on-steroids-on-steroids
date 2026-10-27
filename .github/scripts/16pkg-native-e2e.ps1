@@ -19,26 +19,40 @@ try {
         $mapped=$true
     }
     Write-Host '16PKG CI TEST: generating ephemeral certificate'
-    Write-Host '16PKG CI TEST: opening bounded TEST-only issuer creation job'
-    $certJob=Start-Job -ScriptBlock {
-        $ErrorActionPreference='Stop'
-        $created=New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=CoSoS-16PKG-TEST-ONLY-NOT-PRODUCTION' -CertStoreLocation 'Cert:\CurrentUser\My' -HashAlgorithm SHA256 -KeyAlgorithm RSA -KeyLength 2048 -NotAfter (Get-Date).AddHours(2)
-        $created.Thumbprint
+    # All identity material lives only on an ephemeral GitHub-hosted runner.
+    # Managed X.509 APIs avoid interactive certificate issuance wizards.
+    Write-Host '16PKG CI TEST: creating ephemeral .NET test-only code signer'
+    $rsa=[Security.Cryptography.RSA]::Create(2048)
+    $request=[Security.Cryptography.X509Certificates.CertificateRequest]::new(
+        'CN=CoSoS-16PKG-TEST-ONLY-NOT-PRODUCTION',
+        $rsa,[Security.Cryptography.HashAlgorithmName]::SHA256,
+        [Security.Cryptography.RSASignaturePadding]::Pkcs1)
+    $oidCollection=[Security.Cryptography.OidCollection]::new()
+    [void]$oidCollection.Add([Security.Cryptography.Oid]::new('1.3.6.1.5.5.7.3.3'))
+    $request.CertificateExtensions.Add(
+        [Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension]::new(
+            $oidCollection,$false))
+    $request.CertificateExtensions.Add(
+        [Security.Cryptography.X509Certificates.X509KeyUsageExtension]::new(
+            [Security.Cryptography.X509Certificates.X509KeyUsageFlags]::DigitalSignature,$true))
+    $generated=$request.CreateSelfSigned(
+        [DateTimeOffset]::UtcNow.AddMinutes(-5),[DateTimeOffset]::UtcNow.AddHours(2))
+    $pfx=$generated.Export([Security.Cryptography.X509Certificates.X509ContentType]::Pfx,'')
+    $keyFlags=[Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet -bor
+        [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::UserKeySet -bor
+        [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
+    $cert=[Security.Cryptography.X509Certificates.X509Certificate2]::new($pfx,'',$keyFlags)
+    if (!$cert.HasPrivateKey -or $cert.Thumbprint -notmatch '^[0-9A-F]{40}$') {
+        throw 'Managed TEST certificate cannot sign'
     }
+    $myStore=[Security.Cryptography.X509Certificates.X509Store]::new(
+        'My',[Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
     try {
-        if (!(Wait-Job -Job $certJob -Timeout 90)) {
-            Stop-Job -Job $certJob
-            throw 'TEST certificate provisioning timed out after 90 seconds'
-        }
-        $thumb = @(Receive-Job -Job $certJob -ErrorAction Stop)[0]
-        if ($certJob.State -ne 'Completed' -or $thumb -notmatch '^[0-9A-F]{40}$') {
-            throw 'TEST certificate provisioning failed'
-        }
+        $myStore.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+        $myStore.Add($cert)
     }
-    finally { Remove-Job -Job $certJob -Force -ErrorAction SilentlyContinue }
-    $cert=Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumb" -ErrorAction Stop
-    if (!$cert.HasPrivateKey) { throw 'TEST certificate private key unavailable' }
-    Write-Host '16PKG CI TEST: ephemeral certificate created'
+    finally { $myStore.Close() }
+    Write-Host '16PKG CI TEST: test signer generated and persisted only in CurrentUser/My'
     $public=Join-Path $testHome 'test-only.cer'
     Export-Certificate -Cert $cert -FilePath $public | Out-Null
     Write-Host '16PKG CI TEST: exported ephemeral TEST public certificate'
