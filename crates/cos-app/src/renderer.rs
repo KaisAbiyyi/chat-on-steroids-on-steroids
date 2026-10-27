@@ -4,6 +4,7 @@
 //! selected CoSoS profile and authorizes session reads. The child receives
 //! bounded presentation snapshots over authenticated redirected stdio; it is
 //! never granted filesystem, process, provider, or account authority.
+use crate::renderer_integrity;
 use cos_core::{
     ui_contract::{UI_PROTOCOL_VERSION, UiCommand, UiNavigation, UiRequest, UiRoute},
     ui_conversation::{
@@ -22,7 +23,6 @@ use cos_core::{
     ui_snapshots::{CaptureConfig, CaptureDescriptor, CaptureSurface},
 };
 use cos_store::{SessionStore, model};
-use crate::renderer_integrity;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
@@ -61,8 +61,10 @@ pub fn launch(
         .ok_or_else(|| invalid("UI launch requires --renderer <absolute executable>"))?;
     let expected_sha = take_option(&mut args, "--renderer-sha256")?
         .ok_or_else(|| invalid("UI launch requires --renderer-sha256 from the build receipt"))?;
-    let expected_manifest = take_option(&mut args, "--renderer-manifest-sha256")?
-        .ok_or_else(|| invalid("UI launch requires --renderer-manifest-sha256 from trusted receipt"))?;
+    let expected_manifest =
+        take_option(&mut args, "--renderer-manifest-sha256")?.ok_or_else(|| {
+            invalid("UI launch requires --renderer-manifest-sha256 from trusted receipt")
+        })?;
     if !args.is_empty() {
         return Err(invalid("Unknown UI launch option"));
     }
@@ -77,7 +79,8 @@ pub fn launch(
     // Validate the complete framework-dependent .NET application, not only its apphost EXE.
     // The manifest digest MUST be independently trusted, never read as an
     // authoritative value from the renderer directory itself.
-    let manifest_sha = renderer_integrity::verify(&renderer_path, &expected_sha, &expected_manifest)?;
+    let manifest_sha =
+        renderer_integrity::verify(&renderer_path, &expected_sha, &expected_manifest)?;
     let actual_sha = expected_sha.to_ascii_lowercase();
 
     let mut key = [0u8; 32];
@@ -97,9 +100,15 @@ pub fn launch(
         .stderr(Stdio::null())
         .spawn()?;
     let mut child = ReapedChild(child);
-    let child_input = child.0.stdin.take()
+    let child_input = child
+        .0
+        .stdin
+        .take()
         .ok_or_else(|| invalid("Renderer stdin unavailable"))?;
-    let child_output = child.0.stdout.take()
+    let child_output = child
+        .0
+        .stdout
+        .take()
         .ok_or_else(|| invalid("Renderer stdout unavailable"))?;
     let mut writer = BufWriter::new(child_input);
     let (frames, reader_thread) = start_bounded_reader(child_output);
@@ -114,7 +123,8 @@ pub fn launch(
         write_json_line(&mut writer, &bootstrap)?;
         let ready_raw = receive_frame(&frames, HANDSHAKE_TIMEOUT)?
             .ok_or_else(|| invalid("Renderer exited before authenticated ready handshake"))?;
-        let ready = authenticator.verify_inbound(&ready_raw)
+        let ready = authenticator
+            .verify_inbound(&ready_raw)
             .map_err(|_| invalid("Renderer ready handshake authentication failed"))?;
         let nonce = ready.payload["rendererNonce"].as_str().unwrap_or("");
         if ready.payload["kind"] != "ready"
@@ -134,7 +144,12 @@ pub fn launch(
         let mut host = RendererHostState::new(epoch, store, theme, language)?;
         send_state(&mut writer, &mut authenticator, &host)?;
         renderer_loop(
-            store, &mut child.0, &frames, &mut writer, &mut authenticator, &mut host,
+            store,
+            &mut child.0,
+            &frames,
+            &mut writer,
+            &mut authenticator,
+            &mut host,
         )?;
         // An authenticated closing frame does not mean the child exited.
         // Enforce bounded shutdown, and fail if it must be killed.
@@ -154,11 +169,15 @@ pub fn launch(
     })();
     // Close the write end to let a healthy child finish promptly.
     drop(writer);
-    if outcome.is_err() { child.stop(); }
+    if outcome.is_err() {
+        child.stop();
+    }
     // Reader was bounded by the process lifetime, not an indefinite join.
     // Kill/reap occurs before the receiver is dropped on failure.
     drop(frames);
-    if outcome.is_ok() { let _ = reader_thread.join(); }
+    if outcome.is_ok() {
+        let _ = reader_thread.join();
+    }
     outcome
 }
 
@@ -172,10 +191,14 @@ fn renderer_loop(
 ) -> io::Result<()> {
     loop {
         if child.try_wait()?.is_some() {
-            return Err(invalid("Native renderer exited without authenticated closing"));
+            return Err(invalid(
+                "Native renderer exited without authenticated closing",
+            ));
         }
         let Some(raw) = receive_frame(frames, TRANSPORT_IDLE_TIMEOUT)? else {
-            return Err(invalid("Native renderer pipe closed without authenticated closing"));
+            return Err(invalid(
+                "Native renderer pipe closed without authenticated closing",
+            ));
         };
         let verified = authenticator.verify_inbound(&raw).map_err(|_| {
             invalid("Renderer IPC authentication, epoch, sequence, or size check failed")
@@ -214,7 +237,9 @@ impl ReapedChild {
     fn wait_bounded(&mut self, timeout: Duration) -> io::Result<ExitStatus> {
         let deadline = Instant::now() + timeout;
         loop {
-            if let Some(status) = self.0.try_wait()? { return Ok(status); }
+            if let Some(status) = self.0.try_wait()? {
+                return Ok(status);
+            }
             if Instant::now() >= deadline {
                 self.stop();
                 return Err(invalid("Native renderer shutdown timed out"));
@@ -224,12 +249,17 @@ impl ReapedChild {
     }
 }
 impl Drop for ReapedChild {
-    fn drop(&mut self) { self.stop(); }
+    fn drop(&mut self) {
+        self.stop();
+    }
 }
 
 fn start_bounded_reader(
-    output: ChildStdout
-) -> (Receiver<io::Result<Option<Vec<u8>>>>, thread::JoinHandle<()>) {
+    output: ChildStdout,
+) -> (
+    Receiver<io::Result<Option<Vec<u8>>>>,
+    thread::JoinHandle<()>,
+) {
     // A small queue bounds memory even when a compromised child floods stdout.
     let (sender, receiver) = mpsc::sync_channel(4);
     let thread = thread::spawn(move || {
@@ -237,7 +267,9 @@ fn start_bounded_reader(
         loop {
             let frame = read_bounded_line(&mut reader, MAX_RENDERER_IPC_FRAME_BYTES);
             let terminal = !matches!(frame, Ok(Some(_)));
-            if sender.try_send(frame).is_err() || terminal { break; }
+            if sender.try_send(frame).is_err() || terminal {
+                break;
+            }
         }
     });
     (receiver, thread)
@@ -245,7 +277,7 @@ fn start_bounded_reader(
 
 fn receive_frame(
     frames: &Receiver<io::Result<Option<Vec<u8>>>>,
-    timeout: Duration
+    timeout: Duration,
 ) -> io::Result<Option<Vec<u8>>> {
     match frames.recv_timeout(timeout) {
         Ok(frame) => frame,
