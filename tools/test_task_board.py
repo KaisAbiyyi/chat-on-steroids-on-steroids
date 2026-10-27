@@ -52,8 +52,8 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_all_work_units_preserved(self):
         kinds = {k: sum(t["kind"] == k for t in self.data["tasks"]) for k in "CLU"}
-        self.assertEqual(kinds, {"C": 78, "L": 30, "U": 15})
-        self.assertEqual(len(self.tasks), 123)
+        self.assertEqual(kinds, {"C": 79, "L": 30, "U": 15})
+        self.assertEqual(len(self.tasks), 124)
 
     def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
         ready, _ = board.readiness(self.data)
