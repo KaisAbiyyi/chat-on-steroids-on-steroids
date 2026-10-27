@@ -27,10 +27,9 @@ use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
 use std::{
-    fs,
     io::{self, BufRead, BufReader, BufWriter, Write},
     path::{Path, PathBuf},
-    process::{Child, ChildStdin, ChildStdout, Command, Stdio, ExitStatus},
+    process::{Child, ChildStdin, ChildStdout, Command, ExitStatus, Stdio},
     sync::mpsc::{self, Receiver, RecvTimeoutError},
     thread,
     time::{Duration, Instant},
@@ -134,8 +133,9 @@ pub fn launch(
         let language = UiLanguage::select(locale);
         let mut host = RendererHostState::new(epoch, store, theme, language)?;
         send_state(&mut writer, &mut authenticator, &host)?;
-        renderer_loop(store, &mut child.0, &frames, &mut writer,
-                      &mut authenticator, &mut host)?;
+        renderer_loop(
+            store, &mut child.0, &frames, &mut writer, &mut authenticator, &mut host,
+        )?;
         // An authenticated closing frame does not mean the child exited.
         // Enforce bounded shutdown, and fail if it must be killed.
         let status = child.wait_bounded(SHUTDOWN_TIMEOUT)?;
@@ -159,8 +159,7 @@ pub fn launch(
     // Kill/reap occurs before the receiver is dropped on failure.
     drop(frames);
     if outcome.is_ok() { let _ = reader_thread.join(); }
-    return outcome;
-
+    outcome
 }
 
 fn renderer_loop(
