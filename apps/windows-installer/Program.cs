@@ -579,17 +579,26 @@ internal static class Program
                 throw new InvalidDataException("Unrecognized staged transaction; preserved");
             var slot=Path.GetFileName(containers[0]);
             var authority=SignedProof(stage,slot);
-            if (!File.Exists(authority))
+            if (!File.Exists(authority) ||
+                (inventory.Files.Count==1 && IC.Equals(inventory.Files[0],authority)))
             {
-                if (inventory.Files.Count!=0)
-                    throw new InvalidDataException("Incomplete unsigned stage quarantined");
-                // Empty aborted stage: no file data to remove.
+                // An interruption during the initial authority-file copy can
+                // leave a partial/unsigned proof. Since the protected unique
+                // staging directory contains no payload files, only this
+                // specifically named owned temporary authority is removable.
+                if(inventory.Files.Any(p=>!IC.Equals(p,authority)))
+                    throw new InvalidDataException("Unrecognized data in unsigned stage");
+                if(File.Exists(authority)) File.Delete(authority);
                 foreach(var dir in inventory.Dirs.OrderByDescending(p=>p.Length))
+                {
                     if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
+                    else throw new InvalidDataException("Unrecognized staged directory preserved");
+                }
             }
             else
             {
-                // This works even when payload extraction was interrupted.
+                // A signed authority proves the exact allowlist even if the
+                // staged payload's individual file copy was interrupted.
                 CleanOwnedSlot(stage,slot,publisher,stagingOnly:true);
                 var stateFile=SelectorPath(stage);
                 if (File.Exists(stateFile))
