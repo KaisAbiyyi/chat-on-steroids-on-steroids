@@ -553,7 +553,7 @@ internal static class Program
         // Updates are prepared in an isolated sibling directory. A crash during
         // copy never leaves a partial, untrusted slot under the active root.
         var stage = Path.Combine(Path.GetDirectoryName(root)!,
-            "cosos-16pkg-stage-" + Guid.NewGuid().ToString("N"));
+            ".cosos-16pkg-" + Path.GetFileName(root) + "-stage-" + Guid.NewGuid().ToString("N"));
         var slot = "slot-" + Guid.NewGuid().ToString("N");
         var folder = Path.Combine(stage,"slots",slot);
         var publishedSlot = false;
