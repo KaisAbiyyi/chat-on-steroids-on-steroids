@@ -160,6 +160,19 @@ jobs:
         run: |
           cargo test -p cos-app renderer_integrity --locked -- --nocapture
           if ($LASTEXITCODE -ne 0) { throw '15HOST renderer integrity negative regression failed' }
+      - name: Hosted Windows Rust to real C# WebView2 product-path synthetic E2E
+        shell: pwsh
+        timeout-minutes: 30
+        run: |
+          $identity = @((Get-Content 'apps/windows-renderer/sha256-manifest.txt' -Raw).Trim() -split '\s+')
+          if ($identity.Length -ne 3 -or $identity[0] -ne $env:SOURCE_SHA) {
+            throw 'Unexpected renderer integrity receipt'
+          }
+          $env:COSOS_15HOST_E2E_EXE = (Resolve-Path 'apps/windows-renderer/renderer-package/WindowsRenderer.exe').Path
+          $env:COSOS_15HOST_E2E_EXE_SHA = $identity[1]
+          $env:COSOS_15HOST_E2E_MANIFEST_SHA = $identity[2]
+          cargo test -p cos-app hosted_native_product_path_synthetic_six_thousand --locked -- --nocapture --test-threads=1
+          if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST authenticated product E2E FAIL' }
       - uses: actions/upload-artifact@v4
         with:
           name: 15host-windows-synthetic-renderer-${{ github.event.pull_request.head.sha || github.sha }}
