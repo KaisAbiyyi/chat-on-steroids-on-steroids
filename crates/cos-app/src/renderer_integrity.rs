@@ -62,7 +62,7 @@ fn digest_file(path: &Path) -> io::Result<String> {
 fn safe_parts(path: &str) -> bool {
     !path.is_empty()
         && path.len() <= 240
-        && !path.contains(['\\', ':', '\0'])
+        && !path.bytes().any(|value| matches!(value, b'\\' | b':' | b'\0'))
         && path.split('/').all(|part| !part.is_empty() && part != "." && part != "..")
 }
 
