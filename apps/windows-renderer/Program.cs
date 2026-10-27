@@ -463,7 +463,12 @@ internal sealed class RendererWindow : Form
                 approvedGolden = false, referenceSourceSha256 = referenceSha,
                 navigationId = _observedNavigationId, webErrorStatus = _webErrorStatus
             };
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "15host-native-smoke.json"),
+            var probeDir = Environment.GetEnvironmentVariable("COSOS_15HOST_SCREENSHOT_OUT_DIR");
+            var evidenceDir = (_syntheticProbe || _abProbe) &&
+                !string.IsNullOrWhiteSpace(probeDir) && Path.IsPathFullyQualified(probeDir)
+                ? probeDir : AppContext.BaseDirectory;
+            Directory.CreateDirectory(evidenceDir);
+            File.WriteAllText(Path.Combine(evidenceDir, "15host-native-smoke.json"),
                 JsonSerializer.Serialize(receipt));
             Close();
         }
