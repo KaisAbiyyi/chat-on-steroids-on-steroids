@@ -1,0 +1,44 @@
+name: 16PKG fast native transaction security matrix (SYNTHETIC PAYLOAD)
+on:
+  pull_request:
+    paths:
+      - 'apps/windows-installer/**'
+      - '.github/scripts/16pkg-native-e2e.ps1'
+      - '.github/workflows/16pkg-installer-lifecycle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-transaction-security:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '8.0.x'
+      - name: Prepare clearly SYNTHETIC native installer payload fixture
+        shell: pwsh
+        run: |
+          $sha=(git rev-parse HEAD).Trim()
+          if ($sha -ne $env:PR_HEAD_SHA) { throw 'Source mismatch' }
+          New-Item -ItemType Directory -Force -Path 'target/release','renderer-package' | Out-Null
+          [IO.File]::WriteAllBytes((Join-Path $PWD 'target/release/cos-rust.exe'), [Text.Encoding]::UTF8.GetBytes('SYNTHETIC_NOT_AN_EXECUTABLE'))
+          foreach($name in @('WindowsRenderer.exe','WindowsRenderer.dll','WindowsRenderer.deps.json','WindowsRenderer.runtimeconfig.json')){
+            [IO.File]::WriteAllBytes((Join-Path $PWD "renderer-package/$name"),[Text.Encoding]::UTF8.GetBytes("SYNTHETIC_$name"))
+          }
+          $sha | Out-File source-sha.txt -Encoding ascii -NoNewline
+      - name: Run real signed TEST-certificate Windows install/update/recover/uninstall
+        shell: pwsh
+        timeout-minutes: 15
+        run: .github/scripts/16pkg-native-e2e.ps1
+      - name: Report synthetic qualification without release claims
+        shell: pwsh
+        run: |
+          $r=Get-Content 16pkg-native-test-receipt.json -Raw | ConvertFrom-Json
+          if (!$r.testOnly -or $r.productionSigned -or $r.native16L1Accepted) { throw 'Unsafe qualification receipt' }
+          Get-Content 16pkg-native-test-receipt.json -Raw | Write-Host
