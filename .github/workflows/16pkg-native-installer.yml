@@ -86,7 +86,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $source=(git rev-parse HEAD).Trim()
-          gh attestation verify package-receipt.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $source
+          $receipt=Get-Content package-receipt.json -Raw | ConvertFrom-Json
+          if($receipt.sourceSha -ne $source -or $source -ne $env:PR_HEAD_SHA){throw 'Candidate receipt checkout mismatch'}
+          # GitHub OIDC signs the event SHA (PR synthetic merge ref on pull_request).
+          # The signed receipt separately binds the checked-out EXACT PR HEAD
+          # bytes; only protected-main refs could ever qualify as a release.
+          gh attestation verify package-receipt.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
           if($LASTEXITCODE -ne 0){throw 'OIDC candidate provenance invalid'}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
