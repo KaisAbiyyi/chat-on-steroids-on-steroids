@@ -20,8 +20,17 @@ on:
 jobs:
   windows-contract-and-binary:
     runs-on: windows-latest
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact 15HOST PR HEAD source checkout
+        shell: pwsh
+        run: |
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $env:SOURCE_SHA) { throw "15HOST checkout SHA mismatch: expected $env:SOURCE_SHA, actual $actual" }
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
@@ -108,7 +117,7 @@ jobs:
           }
           @{ referenceSourceSha256=$reference.referenceSourceSha256; referencePixelSha256=$reference.pixelSha256;
              candidatePixelSha256=$candidate.pixelSha256; differingPixels=$differingPixels;
-             width=$candidate.width; height=$candidate.height; sourceSha=$env:GITHUB_SHA;
+             width=$candidate.width; height=$candidate.height; sourceSha=$env:SOURCE_SHA;
              comparison=$comparison; approvedGolden=$false; productAccepted=$false } |
             ConvertTo-Json | Out-File -FilePath (Join-Path $out '15host-screenshot-comparison.json') -Encoding ascii
           Get-Content (Join-Path $out '15host-screenshot-comparison.json') -Raw | Write-Host
@@ -116,7 +125,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: 15host-native-failure-${{ github.sha }}
+          name: 15host-native-failure-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             apps/windows-renderer/bin/Release/net8.0-windows/15host-native-smoke.json
             apps/windows-renderer/bin/Release/net8.0-windows/15host-reference.json
@@ -130,18 +139,22 @@ jobs:
           $exe = 'apps/windows-renderer/bin/Release/net8.0-windows/WindowsRenderer.exe'
           if (!(Test-Path $exe)) { throw 'Missing renderer executable' }
           $sha = (Get-FileHash -Algorithm SHA256 $exe).Hash
-          "$env:GITHUB_SHA  $sha  WindowsRenderer.exe" | Out-File -FilePath 'apps/windows-renderer/sha256-manifest.txt' -Encoding ascii
+          "$env:SOURCE_SHA  $sha  WindowsRenderer.exe" | Out-File -FilePath 'apps/windows-renderer/sha256-manifest.txt' -Encoding ascii
       - uses: actions/upload-artifact@v4
         with:
-          name: 15host-windows-synthetic-renderer-${{ github.sha }}
+          name: 15host-windows-synthetic-renderer-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             apps/windows-renderer/bin/Release/net8.0-windows/
             apps/windows-renderer/sha256-manifest.txt
           if-no-files-found: error
   ubuntu-cross-compile:
     runs-on: ubuntu-latest
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
