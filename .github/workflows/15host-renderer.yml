@@ -175,6 +175,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST authenticated product E2E FAIL' }
           cargo test -p cos-app hostile_native_child_bootstrap_failure_matrix --locked -- --nocapture --test-threads=1
           if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST native hostile-child failure injection FAIL' }
+          cargo test -p cos-app hosted_two_profile_native_e2e_foreign_denial_and_stale_clearing --locked -- --nocapture --test-threads=1
+          if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST cross-profile isolation product E2E FAIL' }
+          cargo test -p cos-app post_verification_managed_dll_swap_and_rename_are_denied_while_guard_is_alive --locked -- --nocapture --test-threads=1
+          if ($LASTEXITCODE -ne 0) { throw '15HOST post-attestation malicious DLL swap accepted' }
       - uses: actions/upload-artifact@v4
         with:
           name: 15host-windows-synthetic-renderer-${{ github.event.pull_request.head.sha || github.sha }}
