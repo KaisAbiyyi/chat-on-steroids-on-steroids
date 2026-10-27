@@ -35,8 +35,10 @@ internal static class Program
                 || args[2] != "--publisher")
                 throw new InvalidDataException("Usage: CoSoSInstaller --verify OR --install|--update|--rollback|--uninstall D:\\path --publisher TRUSTED_THUMBPRINT");
             string operation = args[0], root = SafeRoot(args[1]), expectedSigner = args[3].ToUpperInvariant();
-            if (!Thumb.IsMatch(expectedSigner))
-                throw new InvalidDataException("Trusted publisher certificate thumbprint required");
+            string pinnedPublisher = Encoding.UTF8.GetString(Resource("CoSoS.TrustedPublisher")).Trim().ToUpperInvariant();
+            if (!Thumb.IsMatch(expectedSigner) || !Thumb.IsMatch(pinnedPublisher)
+                || !ICase.Equals(pinnedPublisher, expectedSigner))
+                throw new InvalidDataException("Release publisher is unconfigured or differs from the pinned signer");
             VerifyAuthenticode(Environment.ProcessPath!, expectedSigner);
             if (operation == "--install" || operation == "--update")
             {
