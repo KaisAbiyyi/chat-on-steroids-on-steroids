@@ -173,6 +173,8 @@ jobs:
           $env:COSOS_15HOST_E2E_MANIFEST_SHA = $identity[2]
           cargo test -p cos-app hosted_native_product_path_synthetic_six_thousand --locked -- --nocapture --test-threads=1
           if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST authenticated product E2E FAIL' }
+          cargo test -p cos-app hostile_native_child_bootstrap_failure_matrix --locked -- --nocapture --test-threads=1
+          if ($LASTEXITCODE -ne 0) { throw 'Hosted 15HOST native hostile-child failure injection FAIL' }
       - uses: actions/upload-artifact@v4
         with:
           name: 15host-windows-synthetic-renderer-${{ github.event.pull_request.head.sha || github.sha }}
