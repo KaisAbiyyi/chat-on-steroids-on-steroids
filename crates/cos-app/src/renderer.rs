@@ -74,7 +74,8 @@ pub fn launch(
     } else {
         false
     };
-    let ab_probe = if let Some(index) = args.iter().position(|item| item == "--synthetic-15host-ab") {
+    let ab_probe = if let Some(index) = args.iter().position(|item| item == "--synthetic-15host-ab")
+    {
         args.remove(index);
         true
     } else {
@@ -86,7 +87,8 @@ pub fn launch(
             kind,
             "hang" | "early-exit" | "malformed" | "replay" | "stale"
         )
-    }) || ((synthetic_probe || ab_probe) && injection.is_some()) || (synthetic_probe && ab_probe)
+    }) || ((synthetic_probe || ab_probe) && injection.is_some())
+        || (synthetic_probe && ab_probe)
     {
         return Err(invalid("Unsupported or conflicting synthetic injection"));
     }
@@ -266,7 +268,9 @@ fn renderer_loop(
                 return Err(invalid("Synthetic 15HOST product E2E proof incomplete"));
             }
             if ab_probe && verified.payload["abIsolation"] != true {
-                return Err(invalid("Cross-profile production-path E2E proof incomplete"));
+                return Err(invalid(
+                    "Cross-profile production-path E2E proof incomplete",
+                ));
             }
             return Ok(());
         }
@@ -1193,34 +1197,53 @@ mod tests {
         for tag in ["a", "b"] {
             let fixture = tempfile::tempdir().unwrap();
             let root = fixture.path();
-            std::fs::write(root.join("15host-synthetic-fixture.marker"),
-                b"15HOST_SYNTHETIC_CLOUD_E2E_V1").unwrap();
+            std::fs::write(
+                root.join("15host-synthetic-fixture.marker"),
+                b"15HOST_SYNTHETIC_CLOUD_E2E_V1",
+            )
+            .unwrap();
             let store = SessionStore::open(root).unwrap();
             let other = if tag == "a" { "b" } else { "a" };
             for role in ["primary", "secondary"] {
                 let id = format!("synthetic-15host-{tag}-{role}");
-                store.create(CreateOptions {
-                    id: Some(id.clone()),
-                    title: Some(format!("Cloud-only {tag} {role}")),
-                    ..Default::default()
-                }).unwrap();
+                store
+                    .create(CreateOptions {
+                        id: Some(id.clone()),
+                        title: Some(format!("Cloud-only {tag} {role}")),
+                        ..Default::default()
+                    })
+                    .unwrap();
                 for index in 0..24 {
                     let content = format!("ISOLATED-{tag}-{role}-{index:02}");
-                    store.append(&id, json!({
-                        "kind":"note", "source":"15host-cloud-synthetic",
-                        "time":index + 1,
-                        "message":{"text":content,"truncated":false,"chars":content.len()}
-                    })).unwrap();
+                    store
+                        .append(
+                            &id,
+                            json!({
+                                "kind":"note", "source":"15host-cloud-synthetic",
+                                "time":index + 1,
+                                "message":{"text":content,"truncated":false,"chars":content.len()}
+                            }),
+                        )
+                        .unwrap();
                 }
             }
             let forbidden = format!("synthetic-15host-{other}-primary");
             assert!(store.summary(&forbidden).unwrap().is_none());
-            let proof = launch(&store, root, json!({"ui":{"language":"en"}}), vec![
-                "--renderer".into(), exe.clone(),
-                "--renderer-sha256".into(), exe_sha.clone(),
-                "--renderer-manifest-sha256".into(), manifest_sha.clone(),
-                "--synthetic-15host-ab".into(),
-            ]).unwrap();
+            let proof = launch(
+                &store,
+                root,
+                json!({"ui":{"language":"en"}}),
+                vec![
+                    "--renderer".into(),
+                    exe.clone(),
+                    "--renderer-sha256".into(),
+                    exe_sha.clone(),
+                    "--renderer-manifest-sha256".into(),
+                    manifest_sha.clone(),
+                    "--synthetic-15host-ab".into(),
+                ],
+            )
+            .unwrap();
             assert_eq!(proof["authenticated"], true);
             assert_eq!(proof["abIsolationComplete"], true);
             assert!(store.summary(&forbidden).unwrap().is_none());
