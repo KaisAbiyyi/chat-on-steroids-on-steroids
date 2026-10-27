@@ -157,12 +157,14 @@ jobs:
           $status = $LASTEXITCODE
           if ($status -ne 2) { throw "Expected production 7U1 gate BLOCKED (exit 2); got $status" }
           $result = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
+          Write-Host ($result | ConvertTo-Json -Depth 8)
           if ($result.preflightStatus -ne 'BLOCKED' -or $result.owner7U1Status -ne 'NOT_RUN' -or
               $result.owner7U1Accepted -or $null -ne $result.outgoingSendCount -or
               $result.checks.artifact_manifest.status -ne 'PASS' -or
               $result.checks.product_native_adapter.status -ne 'BLOCKED') {
             throw 'Production handshake-only artifact must never receive 7U1 acceptance'
           }
+          exit 0
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: 7u1-prep-production-8p-handshake-only-not-7u1
