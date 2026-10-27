@@ -123,10 +123,20 @@ internal static class Program
             throw new InvalidDataException("Only canonical x.y.z version allowed");
         return Version.Parse(text);
     }
-    static bool SafeMember(string name) =>
-        name.Length is > 0 and <= 240 && !name.StartsWith('/') && 
-        name.IndexOfAny(new[] { '\\', ':', '\0' }) < 0 &&
-        name.Split('/').All(part => part.Length != 0 && part is not "." and not "..");
+    static bool SafeMember(string name)
+    {
+        if (name.Length is < 1 or > 240 || name.StartsWith('/')) return false;
+        foreach(var part in name.Split('/'))
+        {
+            if (part.Length==0 || part is "." or ".." || part.EndsWith('.') ||
+                part.EndsWith(' ') || part.Any(ch=>ch<32 || "<>:\\\"|?*".Contains(ch)) ||
+                Regex.IsMatch(part.Split('.')[0],
+                    @"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$",
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                return false;
+        }
+        return true;
+    }
 
     static void SafeAncestors(string full)
     {
