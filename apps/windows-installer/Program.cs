@@ -508,6 +508,19 @@ internal static class Program
                 allowed.Add(Path.Combine(directory,name.Replace('/','\\')));
             if (inventory.Files.Any(path=>!allowed.Contains(path)))
                 throw new InvalidDataException("Unexpected files during slot cleanup");
+            var allowedDirs=new HashSet<string>(IC);
+            foreach(var path in allowed)
+            {
+                var parent=Path.GetDirectoryName(path);
+                while(parent is not null && !IC.Equals(parent,directory))
+                {
+                    allowedDirs.Add(parent);
+                    parent=Path.GetDirectoryName(parent);
+                }
+            }
+            if (inventory.Dirs.Any(path=>!allowedDirs.Contains(path)) ||
+                (!stagingOnly && !allowedDirs.SetEquals(inventory.Dirs)))
+                throw new InvalidDataException("Unexpected empty/unowned directory during cleanup");
             string installedManifest=Path.Combine(directory,"release.json");
             if (!stagingOnly && File.Exists(installedManifest) && FileHash(installedManifest)!=proof.ManifestSha)
                 throw new InvalidDataException("Installed release.json modified during cleanup");
