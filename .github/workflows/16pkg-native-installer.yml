@@ -1,4 +1,4 @@
-name: 16PKG Windows native installer source and signer qualification
+name: 16PKG real unsigned Windows native product and source qualification
 on:
   pull_request:
     paths:
@@ -7,6 +7,7 @@ on:
       - 'apps/windows-installer/**'
       - '.github/workflows/16pkg-native-installer.yml'
       - '.github/scripts/16pkg-native-e2e.ps1'
+      - '.github/scripts/16pkg-unsigned-native-e2e.ps1'
   workflow_dispatch:
     inputs:
       release_version:
@@ -62,6 +63,19 @@ jobs:
           & installer-package/CoSoSInstaller.exe --install 'D:\16pkg-unsigned-rejection' --publisher ('A' * 40)
           if($LASTEXITCODE -eq 0){throw 'Unsigned app gained authority'}
           $global:LASTEXITCODE=0
+      - name: Parse unsigned lifecycle test before execution
+        shell: pwsh
+        run: |
+          $tokens=$null
+          $issues=$null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path '.github/scripts/16pkg-unsigned-native-e2e.ps1').Path,
+            [ref]$tokens,[ref]$issues) | Out-Null
+          if ($issues.Count -ne 0) { throw 'Unsigned native E2E syntax refused' }
+      - name: Real unsigned production-path installer lifecycle and security
+        shell: pwsh
+        timeout-minutes: 20
+        run: .github/scripts/16pkg-unsigned-native-e2e.ps1
       # Positive test-signer native acceptance runs in the separate fast
       # 16pkg-installer-lifecycle workflow against the SAME checked-out C# source.
       # Production binary packaging in this job does NOT import any test signer.
@@ -71,8 +85,23 @@ jobs:
           @{sourceSha=(git rev-parse HEAD).Trim();releaseVersion=$env:RELEASE_VERSION;
           signed=$false;native16L1Accepted=$false;
           zipSha256=(Get-FileHash candidate.zip -Algorithm SHA256).Hash.ToLowerInvariant();
-          setupSha256=(Get-FileHash installer-package/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          setupSha256=(Get-FileHash installer-package/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          rustSha256=(Get-FileHash target/release/cos-rust.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererHostSha256=(Get-FileHash renderer-package/WindowsRenderer.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererDllSha256=(Get-FileHash renderer-package/WindowsRenderer.dll -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererManifestSha256=(Get-FileHash renderer-package/renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant()
+          
           } | ConvertTo-Json | Set-Content -Encoding utf8 package-receipt.json
+      - name: Record executed unsigned product security assertions
+        shell: pwsh
+        run: |
+          $r=Get-Content 16pkg-unsigned-native-receipt.json -Raw | ConvertFrom-Json
+          if (!$r.nativeProduct -or $r.testCertificateUsed -or $r.physical16L1Accepted -or
+              $r.sourceSha -ne $env:PR_HEAD_SHA -or
+              $r.assertions.'no-certificate-store-modification' -ne 'PASS') {
+            throw 'Unsigned product qualification receipt invalid'
+          }
+          Get-Content 16pkg-unsigned-native-receipt.json -Raw | Write-Host
       - name: Log exact candidate digests and source receipt
         shell: pwsh
         run: Get-Content package-receipt.json -Raw | Write-Host
@@ -82,6 +111,14 @@ jobs:
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
         with:
           subject-path: package-receipt.json
+      - name: Attest actual unsigned installer binary (GitHub Sigstore)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: installer-package/CoSoSInstaller.exe
+      - name: Attest actual source-bound payload archive (GitHub Sigstore)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: candidate.zip
       - name: Verify genuine CI OIDC issuer and exact source
         shell: pwsh
         env:
@@ -95,11 +132,20 @@ jobs:
           # bytes; only protected-main refs could ever qualify as a release.
           gh attestation verify package-receipt.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
           if($LASTEXITCODE -ne 0){throw 'OIDC candidate provenance invalid'}
+          gh attestation verify installer-package/CoSoSInstaller.exe --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+          if($LASTEXITCODE -ne 0){throw 'Unsigned binary attestation invalid'}
+          gh attestation verify candidate.zip --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+          if($LASTEXITCODE -ne 0){throw 'Product payload attestation invalid'}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: cosos-16pkg-unsigned-candidate-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             candidate.zip
             installer-package/CoSoSInstaller.exe
+            candidate-0.2.0.zip
+            candidate-0.3.0.zip
+            installer-unsigned-0.2.0/CoSoSInstaller.exe
+            installer-unsigned-0.3.0/CoSoSInstaller.exe
             package-receipt.json
+            16pkg-unsigned-native-receipt.json
           if-no-files-found: error
