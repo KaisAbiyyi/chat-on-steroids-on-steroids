@@ -147,10 +147,24 @@ try {
     if ([Convert]::FromBase64String($manifestB64).Length -gt 131072) {
         throw 'Signed manifest exceeded legitimate bound'
     }
+    # Production CheckSignature uses inbox Windows PowerShell 5.1. Confirm
+    # both the signer identity and trusted Status under that same engine.
+    $env:COSOS_16PKG_SIGCHECK_PATH=$setups['0.1.0']
+    try {
+        $winPs=Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+        $check='$s=Get-AuthenticodeSignature -LiteralPath $env:COSOS_16PKG_SIGCHECK_PATH;[Console]::WriteLine("WINPS_SIGNATURE_STATUS="+$s.Status+" SIGNER_MATCH="+($s.SignerCertificate.Thumbprint -eq $env:COSOS_16PKG_EXPECTED_SIGNER));if($s.Status -ne "Valid" -or $s.SignerCertificate.Thumbprint -ne $env:COSOS_16PKG_EXPECTED_SIGNER){exit 23}'
+        $env:COSOS_16PKG_EXPECTED_SIGNER=$cert.Thumbprint
+        $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($check))
+        & $winPs -NoProfile -NonInteractive -EncodedCommand $encoded
+        if($LASTEXITCODE -ne 0) { throw 'Inbox Windows PowerShell Authenticode trust differs from TEST signing engine' }
+    } finally {
+        Remove-Item Env:\COSOS_16PKG_SIGCHECK_PATH -ErrorAction SilentlyContinue
+        Remove-Item Env:\COSOS_16PKG_EXPECTED_SIGNER -ErrorAction SilentlyContinue
+    }
     Write-Host '16PKG CI TEST: starting signed native lifecycle'
     $env:COSOS_16PKG_FAIL_AT='after_stage_mkdir'
     & $setups['0.1.0'] --install $root --publisher $cert.Thumbprint 2>$null
-    if ($LASTEXITCODE -eq 0) { throw 'Unsealed stage crash injection did not terminate' }
+    if ($LASTEXITCODE -ne 197) { throw "Expected synthetic stage exit 197; got $LASTEXITCODE" }
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
@@ -158,13 +172,13 @@ try {
     # Root must retain old active slot; --recover removes verified orphan.
     $env:COSOS_16PKG_FAIL_AT='after_slot_publish'
     & $setups['0.2.0'] --update $root --publisher $cert.Thumbprint 2>$null
-    if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate update'}
+    if($LASTEXITCODE -ne 197){throw "Expected synthetic update exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.2.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
     $env:COSOS_16PKG_FAIL_AT='after_rollback_publish'
     & $setups['0.2.0'] --rollback $root --publisher $cert.Thumbprint 2>$null
-    if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate rollback'}
+    if($LASTEXITCODE -ne 197){throw "Expected synthetic rollback exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.2.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     # High-water version cannot be reset just by rolling back to an older slot.
@@ -177,7 +191,7 @@ try {
     Write-Host '16PKG CI TEST: crash recovery and atomic uninstall'
     $env:COSOS_16PKG_FAIL_AT='after_uninstall_rename'
     & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint 2>$null
-    if($LASTEXITCODE -eq 0){throw 'Fault injection did not terminate uninstall'}
+    if($LASTEXITCODE -ne 197){throw "Expected synthetic uninstall exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     if(Test-Path $root -or (Test-Path "$root-uninstalling")){throw 'Recovery left uninstall tombstone'}
