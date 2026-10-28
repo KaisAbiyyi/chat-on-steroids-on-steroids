@@ -153,6 +153,29 @@ try {
         ExpectOk $setups[$version] @('--test-signed-issuer')
     }
     $env:PSModulePath=$originalPsModules
+    # Compile the *production* preprocessor path independently with the same
+    # TEST signer. It must reject this otherwise trusted self-signed identity.
+    Write-Host '16PKG CI TEST: production binary rejects trusted TEST signer'
+    $prodOut=Join-Path $testHome 'production-policy-rejection'
+    $prodArgs=@('publish','apps/windows-installer/CoSoSInstaller.csproj',
+        '-c','Release','-r','win-x64',
+        "-p:BundlePath=$(Join-Path $testHome 'bundle-0.1.0.zip')",
+        "-p:SourceShaPath=$shaFile",
+        "-p:PublisherThumbprintPath=$publisher",
+        '-p:DefineConstants=',
+        '-p:SelfContained=false',
+        '-o',$prodOut)
+    & dotnet @prodArgs
+    if($LASTEXITCODE -ne 0){throw 'Production policy fixture build failed'}
+    $prodExe=Join-Path $prodOut 'CoSoSInstaller.exe'
+    $prodSigned=Set-AuthenticodeSignature -FilePath $prodExe -Certificate $cert -HashAlgorithm SHA256
+    if($prodSigned.Status -ne 'Valid'){throw 'Production-policy negative fixture not Authenticode valid'}
+    $prodProof=(& $prodExe --identity | ConvertFrom-Json)
+    if($LASTEXITCODE -ne 0 -or $prodProof.Source -ne $source -or $prodProof.Publisher -ne $cert.Thumbprint){
+        throw 'Production-policy fixture identity invalid'
+    }
+    ExpectDenied $prodExe @('--install',$root,'--publisher',$cert.Thumbprint)
+    if(Test-Path -LiteralPath $root){throw 'Production binary authorized disposable self-signed TEST publisher'}
     Write-Host '16PKG CI TEST: bounded child-process regressions'
     foreach($case in @('large-stdout','large-stderr','oversized-stdout','oversized-stderr','hang','failure','malformed')){
         ExpectOk $setups['0.1.0'] @('--test-runchecked',$case)
@@ -303,6 +326,7 @@ try {
         oversizedStdoutRefused='PASS';oversizedStderrRefused='PASS';hungChildReaped='PASS';
         abnormalExitRefused='PASS';malformedResponseRefused='PASS';
         wrongPublisherRefused='PASS';unsignedInstallerRefused='PASS';unsafeRootRefused='PASS';
+        productionRejectsTrustedTestSigner='PASS';
         unownedFilePreserved='PASS';unownedEmptyDirectoryPreserved='PASS';
         protectedRootAcl='PASS';stateTamperRefused='PASS';manifestTamperRefused='PASS';
         junctionRefused='PASS';foreignProofRefused='PASS';binaryTamperRefused='PASS';
@@ -325,14 +349,36 @@ finally {
         }
     }
     if($cert){
+        $cleanupOk=$true
         foreach($store in @('TrustedPublisher','Root')){
             if($store -in $trustedStores){
                 try { Invoke-HostedCertutil -Options @('-f','-delstore',$store,$cert.Thumbprint) }
-                catch { Write-Warning "Disposable LocalMachine/$store TEST cleanup failed" }
+                catch {
+                    Write-Warning "Disposable LocalMachine/$store TEST cleanup failed"
+                    $cleanupOk=$false
+                }
             }
         }
         Get-Item "Cert:\CurrentUser\My\$($cert.Thumbprint)" -ErrorAction SilentlyContinue |
             Remove-Item -ErrorAction SilentlyContinue
+        foreach($store in @('Root','TrustedPublisher')){
+            if(Test-Path -LiteralPath "Cert:\LocalMachine\$store\$($cert.Thumbprint)"){
+                Write-Warning "TEST issuer persisted in LocalMachine/$store"
+                $cleanupOk=$false
+            }
+        }
+        if(Test-Path -LiteralPath "Cert:\CurrentUser\My\$($cert.Thumbprint)"){
+            Write-Warning 'TEST signing key persists in CurrentUser/My'
+            $cleanupOk=$false
+        }
+        if(Test-Path -LiteralPath '16pkg-native-test-receipt.json'){
+            $receipt=Get-Content -LiteralPath '16pkg-native-test-receipt.json' -Raw |
+                ConvertFrom-Json -AsHashtable
+            $receipt['certificateCleanup']=if($cleanupOk){'PASS'}else{'FAIL'}
+            $receipt | ConvertTo-Json -Depth 8 |
+                Set-Content -LiteralPath '16pkg-native-test-receipt.json' -Encoding utf8
+            if(!$cleanupOk){throw 'Disposable TEST certificate cleanup incomplete'}
+        }
     }
     if($mapped){& "$env:SystemRoot\System32\subst.exe" D: /D}
 }
