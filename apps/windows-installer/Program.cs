@@ -33,6 +33,15 @@ internal static class Program
                 TestRunChecked(args[1]);
                 return 0;
             }
+            // Use the identical production signature/proof implementation
+            // before mutating a disposable test root.
+            if (args.Length == 1 && args[0] == "--test-signed-issuer")
+            {
+                var pin = ResourceText("CoSoS.TrustedPublisher", false).ToUpperInvariant();
+                var issuer = VerifyProof(Environment.ProcessPath!, pin);
+                Console.WriteLine("COSOS_16PKG_SIGNED_ISSUER_PASS:" + issuer.Version);
+                return 0;
+            }
 #endif
             if (args.Length == 1 && (args[0] == "--verify" || args[0] == "--identity" || args[0] == "--signed-manifest"))
             {

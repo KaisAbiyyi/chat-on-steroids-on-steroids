@@ -134,6 +134,10 @@ try {
         if($LASTEXITCODE -ne 0 -or $id.Source -ne $source -or $id.Version -ne $v -or $id.Publisher -ne $cert.Thumbprint){throw 'Signed identity mismatch'}
         $setups[$v]=$exe
     }
+    Write-Host '16PKG CI TEST: independently checking production signature/proof path'
+    foreach($version in @('0.1.0','0.2.0','0.3.0')){
+        ExpectOk $setups[$version] @('--test-signed-issuer')
+    }
     Write-Host '16PKG CI TEST: bounded child-process regressions'
     foreach($case in @('large-stdout','large-stderr','oversized-stdout','oversized-stderr','hang','failure','malformed')){
         ExpectOk $setups['0.1.0'] @('--test-runchecked',$case)
@@ -163,7 +167,7 @@ try {
     }
     Write-Host '16PKG CI TEST: starting signed native lifecycle'
     $env:COSOS_16PKG_FAIL_AT='after_stage_mkdir'
-    & $setups['0.1.0'] --install $root --publisher $cert.Thumbprint 2>$null
+    & $setups['0.1.0'] --install $root --publisher $cert.Thumbprint
     if ($LASTEXITCODE -ne 197) { throw "Expected synthetic stage exit 197; got $LASTEXITCODE" }
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
@@ -171,13 +175,13 @@ try {
     # Abrupt crash after a complete signed slot rename, before state publish.
     # Root must retain old active slot; --recover removes verified orphan.
     $env:COSOS_16PKG_FAIL_AT='after_slot_publish'
-    & $setups['0.2.0'] --update $root --publisher $cert.Thumbprint 2>$null
+    & $setups['0.2.0'] --update $root --publisher $cert.Thumbprint
     if($LASTEXITCODE -ne 197){throw "Expected synthetic update exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.2.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
     $env:COSOS_16PKG_FAIL_AT='after_rollback_publish'
-    & $setups['0.2.0'] --rollback $root --publisher $cert.Thumbprint 2>$null
+    & $setups['0.2.0'] --rollback $root --publisher $cert.Thumbprint
     if($LASTEXITCODE -ne 197){throw "Expected synthetic rollback exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.2.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
@@ -190,7 +194,7 @@ try {
     ExpectOk $setups['0.3.0'] @('--finalize',$root,'--publisher',$cert.Thumbprint)
     Write-Host '16PKG CI TEST: crash recovery and atomic uninstall'
     $env:COSOS_16PKG_FAIL_AT='after_uninstall_rename'
-    & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint 2>$null
+    & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint
     if($LASTEXITCODE -ne 197){throw "Expected synthetic uninstall exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
