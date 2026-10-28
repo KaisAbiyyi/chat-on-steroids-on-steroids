@@ -1,5 +1,8 @@
 # CoSoS 16F — Security and provenance closure (cloud-only)
 
+> **Owner policy supersession — 2026-10-28:** This dated 16F report is historical evidence for the earlier signed-only 16B/16F baseline. Publisher Authenticode is now OPTIONAL under [owner policy](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/130#issuecomment-6469786860) and [ADR PR #132](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/132). Current 16PKG-01 unsigned acceptance instead requires externally verified source/installer attestations, explicitly supplied SHA-256, admin-only protected slots and real lifecycle validation. The prior TEST-signed receipts remain valid only in their original scope. Physical 16L1 is still NOT RUN.
+
+
 Task: [16F](https://app.notion.com/p/400c4a6aaf7381c685aaea92e95f639a) · exclusive [cloud claim #121](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/121). Branch `work/16f-release-provenance-20261025`. Exclusive lock `release-closure`. Source baseline `9ab33009aafdd24ebd4ec093e7c46f4e45985846`.
 
 ## Release verdict
