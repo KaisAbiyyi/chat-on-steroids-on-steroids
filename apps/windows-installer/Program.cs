@@ -37,8 +37,8 @@ internal static class Program
             // before mutating a disposable test root.
             if (args.Length == 1 && args[0] == "--test-signed-issuer")
             {
-                var pin = ResourceText("CoSoS.TrustedPublisher", false).ToUpperInvariant();
-                var issuer = VerifyProof(Environment.ProcessPath!, pin);
+                var testIssuerPin = ResourceText("CoSoS.TrustedPublisher", false).ToUpperInvariant();
+                var issuer = VerifyProof(Environment.ProcessPath!, testIssuerPin);
                 Console.WriteLine("COSOS_16PKG_SIGNED_ISSUER_PASS:" + issuer.Version);
                 return 0;
             }
