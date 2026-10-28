@@ -1,5 +1,13 @@
 # CoS-Rust current backend checkpoint
 
+## Independent security review #5684556516 — scoped cloud correction (2026-10-28)
+
+The 16PKG-01 source under Draft PR #131 was independently reviewed at `74013072b9c8a0da8969a272f1e32e32808f83a6`. All 15 associated workflows were successful; actual unsigned native E2E ran 30 assertions. The independent reviewer identified three bounded handoff gaps: local junction/unsafe ancestor handling, PR workflow/run/attestation attribution, and packaging triggers that missed Rust/renderer changes.
+
+This correction adds fail-closed NTFS D: local workspace checks (owner, broad-write ACL, reparse ancestors and all extracted descendants); verifies a successful run and its exact PR #131 source head/artifact; verifies the attested PR synthetic merge ref/digest and GitHub run attempt; and expands the hosted package triggers to runtime/renderer/dependency inputs. Hosted PowerShell tests use only temporary directories and deliberately wrong linked paths, event, source, artifact run and attestation invocation. They never run 16L1 on the owner's machine.
+
+**Cloud acceptance remains pending at this documentation checkpoint.** The original artifact from source `74013072...` remains historical evidence and must not be presented as the output of this correction. Record new exact commit/run IDs, bundle digests, attestation verification and final independent re-review after actual hosted CI passes. Physical 16L1 remains BLOCKED / NOT_RUN; publisher signing is optional; both Draft PRs #131/#132 remain unmerged.
+
 ## 16PKG-01 unsigned release receipt correction — 2026-10-28
 
 - **Reclaim:** owner authorized cloud continuation of [Draft PR #131](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/131), same branch and `release-native-installer` lock. Last prior HEAD `fd1aa1432d21a33a69511da6c0f5e7f07d90cc3d` had 14/15 cloud workflows PASS; the [unsigned E2E run 40698538946](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40698538946) executed the native product lifecycle successfully but failed AFTER that test at the package SHA receipt.

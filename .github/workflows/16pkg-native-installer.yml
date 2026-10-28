@@ -5,6 +5,16 @@ on:
       - 'tools/release_16pkg.py'
       - 'tools/test_release_16pkg.py'
       - 'apps/windows-installer/**'
+      - 'apps/windows-renderer/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/**'
+      - 'rust-toolchain*'
+      - 'LICENSE'
+      - '.github/scripts/16pkg-16l1-local-qualification.ps1'
+      - '.github/scripts/16pkg-16l1-guards.ps1'
+      - '.github/scripts/16pkg-16l1-preflight.tests.ps1'
       - '.github/workflows/16pkg-native-installer.yml'
       - '.github/scripts/16pkg-native-e2e.ps1'
       - '.github/scripts/16pkg-unsigned-native-e2e.ps1'
@@ -40,6 +50,19 @@ jobs:
           toolchain: 1.91.0
       - name: Release regressions
         run: python -m unittest -v tools.test_release_16pkg tools.test_release_16b tools.test_release_16c tools.test_release_16e
+      - name: Parse local 16L1 handoff and run isolated negative security regressions
+        shell: pwsh
+        run: |
+          foreach($path in @('.github/scripts/16pkg-16l1-local-qualification.ps1',
+              '.github/scripts/16pkg-16l1-guards.ps1',
+              '.github/scripts/16pkg-16l1-preflight.tests.ps1')){
+            $tokens=$null
+            $issues=$null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+                (Resolve-Path $path).Path,[ref]$tokens,[ref]$issues) | Out-Null
+            if($issues.Count -ne 0){throw "Invalid local 16L1 syntax: $path"}
+          }
+          & .github/scripts/16pkg-16l1-preflight.tests.ps1
       - name: Build Rust runtime
         run: cargo build --release --locked -p cos-app
       - name: Publish WebView2 renderer

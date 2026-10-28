@@ -11,15 +11,12 @@ $ErrorActionPreference = 'Stop'
 $repository='KaisAbiyyi/chat-on-steroids-on-steroids'
 $workflow="$repository/.github/workflows/16pkg-native-installer.yml"
 if ($SourceSha -cnotmatch '^[a-f0-9]{40}$') { throw 'Full exact source SHA required' }
-if (!(Test-Path -LiteralPath 'D:\projects\CoS-Rust')) { throw 'D: CoS-Rust workspace unavailable' }
-$workspacePath=[IO.Path]::GetFullPath($Workspace).TrimEnd('\')
-$allowedPrefix='D:\projects\CoS-Rust\qualification\'
-if (!$workspacePath.StartsWith($allowedPrefix,[StringComparison]::OrdinalIgnoreCase) -or
-    $workspacePath.Contains('..') -or $workspacePath.Length -lt ($allowedPrefix.Length+20)) {
-    throw 'Refusing workspace outside isolated D: qualification root'
-}
-# Verification-only preflight may be resumed once for an explicit execution pass.
-$existing = Test-Path -LiteralPath $workspacePath
+. "$PSScriptRoot/16pkg-16l1-guards.ps1"
+$workspacePath=[IO.Path]::GetFullPath($Workspace).TrimEnd('\\')
+$boundary='D:\\projects\\CoS-Rust\\qualification'
+# Inspect every existing ancestor before making directories, downloading, or elevating.
+[void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
+$existing=Test-Path -LiteralPath $workspacePath
 if ($existing -and (!$Execute -or (Test-Path -LiteralPath (Join-Path $workspacePath 'evidence')) -or
     !(Test-Path -LiteralPath (Join-Path $workspacePath 'downloads/package-receipt.json')))) {
     throw 'Workspace already used or incomplete; preserve evidence and select a new workspace'
@@ -34,20 +31,31 @@ if ($Execute) {
 foreach ($tool in @('gh','git')) {
     if (!(Get-Command $tool -ErrorAction SilentlyContinue)) { throw "Missing required $tool CLI" }
 }
-$run=gh run view $RunId --repo $repository --json conclusion,event,workflowName | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0 -or $run.conclusion -ne 'success') {
-    throw 'GitHub run is not successful'
-}
+# gh run's head_sha is the PR source HEAD, while attestation source-digest
+# identifies the synthetic refs/pull/131/merge commit from GitHub's OIDC event.
+$run=gh api "repos/$repository/actions/runs/$RunId" | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect candidate workflow run' }
+$pull=gh api "repos/$repository/pulls/131" | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect reviewed PR HEAD' }
+$artifacts=gh api "repos/$repository/actions/runs/$RunId/artifacts" | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect run artifact list' }
+Assert-16L1RunOrigin $run $pull $artifacts $RunId $SourceSha $repository
+$sourceRef='refs/pull/131/merge'
+$sourceDigest=$pull.merge_commit_sha
 if (!$existing) {
-    New-Item -ItemType Directory -Path $workspacePath | Out-Null
+    New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
+    [void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
 }
 $download=Join-Path $workspacePath 'downloads'
 if (!$existing) {
     New-Item -ItemType Directory -Path $download | Out-Null
+    [void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
     $artifact="cosos-16pkg-unsigned-candidate-$SourceSha"
     gh run download $RunId --repo $repository --name $artifact --dir $download
     if ($LASTEXITCODE -ne 0) { throw 'Exact-run source artifact download failed' }
 }
+# Reject any linked archive member, altered ancestor or unsafe ACL after extraction.
+[void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
 $receiptPath=Join-Path $download 'package-receipt.json'
 $setup=Join-Path $download 'installer-package\CoSoSInstaller.exe'
 $archive=Join-Path $download 'candidate.zip'
@@ -57,8 +65,10 @@ if (!(Test-Path -LiteralPath $receiptPath) -or !(Test-Path -LiteralPath $setup))
 foreach ($file in @($receiptPath,$setup,$archive,
     (Join-Path $download 'installer-unsigned-0.2.0\CoSoSInstaller.exe'),
     (Join-Path $download 'installer-unsigned-0.3.0\CoSoSInstaller.exe'))) {
-    gh attestation verify $file --repo $repository --signer-workflow $workflow
-    if ($LASTEXITCODE -ne 0) { throw "Independent attestation verification failed: $file" }
+    $verified=gh attestation verify $file --repo $repository --signer-workflow $workflow `
+        --source-ref $sourceRef --source-digest $sourceDigest --format json | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or !$verified) { throw "Independent attestation verification failed: $file" }
+    Assert-16L1AttestationRun @($verified) $RunId ([int]$run.run_attempt) $repository
 }
 $receipt=Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
 if ($receipt.sourceSha -ne $SourceSha) { throw 'Attested source mismatch' }
@@ -125,9 +135,12 @@ if (!$Execute) {
 }
 $root=Join-Path $workspacePath 'installed'
 $evidence=Join-Path $workspacePath 'evidence'
+[void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
 New-Item -ItemType Directory -Path $evidence | Out-Null
+[void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
 if (Test-Path -LiteralPath $root) { throw 'Existing installation root refused' }
 function Invoke-Setup([string]$bin,[string]$op,[string]$hash) {
+    [void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
     & $bin $op $root --unsigned-sha256 $hash
     if ($LASTEXITCODE -ne 0) { throw "Physical $op FAIL, exit=$LASTEXITCODE" }
 }
