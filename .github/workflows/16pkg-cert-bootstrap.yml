@@ -1,0 +1,93 @@
+name: 16PKG disposable Windows TEST-certificate diagnostic
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/16pkg-cert-bootstrap.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certificate-trust:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe LocalMachine test trust on an ephemeral GitHub-hosted runner
+        shell: pwsh
+        timeout-minutes: 4
+        run: |
+          $ErrorActionPreference='Stop'
+          if($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted'){
+            throw 'Refuse certificate-store mutation outside disposable GitHub-hosted CI'
+          }
+          $id=[Security.Principal.WindowsIdentity]::GetCurrent()
+          $admin=[Security.Principal.WindowsPrincipal]::new($id).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          Write-Host "CI identity=$($id.Name); elevated=$admin; OS=$([Environment]::OSVersion.VersionString); PS=$($PSVersionTable.PSVersion)"
+          if(!$admin){throw 'Hosted runner does not provide elevated test token'}
+          function Invoke-Certutil([string[]]$Options){
+            $psi=[Diagnostics.ProcessStartInfo]::new((Join-Path $env:SystemRoot 'System32\certutil.exe'))
+            $psi.UseShellExecute=$false
+            $psi.CreateNoWindow=$true
+            $psi.RedirectStandardOutput=$true
+            $psi.RedirectStandardError=$true
+            foreach($option in $Options){[void]$psi.ArgumentList.Add($option)}
+            $p=[Diagnostics.Process]::Start($psi)
+            if(!$p){throw 'certutil cannot start'}
+            try{
+              $stdout=$p.StandardOutput.ReadToEndAsync()
+              $stderr=$p.StandardError.ReadToEndAsync()
+              if(!$p.WaitForExit(12000)){
+                $p.Kill($true)
+                [void]$p.WaitForExit(5000)
+                throw "certutil timed out: $($Options[1]) $($Options[2])"
+              }
+              [void][Threading.Tasks.Task]::WaitAll(@($stdout,$stderr),5000)
+              Write-Host "certutil operation=$($Options[1]) store=$($Options[2]) exit=$($p.ExitCode), stdoutChars=$($stdout.Result.Length), stderrChars=$($stderr.Result.Length)"
+              if($p.ExitCode -ne 0){throw 'Certutil returned non-zero'}
+            } finally { $p.Dispose() }
+          }
+          $rsa=[Security.Cryptography.RSA]::Create(2048)
+          $req=[Security.Cryptography.X509Certificates.CertificateRequest]::new(
+            'CN=CoSoS-16PKG-TEST-ONLY-NOT-PRODUCTION',$rsa,
+            [Security.Cryptography.HashAlgorithmName]::SHA256,
+            [Security.Cryptography.RSASignaturePadding]::Pkcs1)
+          $oids=[Security.Cryptography.OidCollection]::new()
+          [void]$oids.Add([Security.Cryptography.Oid]::new('1.3.6.1.5.5.7.3.3'))
+          $req.CertificateExtensions.Add(
+            [Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension]::new($oids,$false))
+          $generated=$req.CreateSelfSigned([DateTimeOffset]::UtcNow.AddMinutes(-5),[DateTimeOffset]::UtcNow.AddMinutes(45))
+          $public=Join-Path $env:RUNNER_TEMP '16pkg-trust-probe.cer'
+          [IO.File]::WriteAllBytes($public,$generated.Export([Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+          $thumb=$generated.Thumbprint
+          $attempted=$false
+          try {
+            foreach($store in @('Root','TrustedPublisher')){
+              $attempted=$true
+              Write-Host "Attempt LocalMachine/$store TEST certificate import"
+              Invoke-Certutil @('-f','-addstore',$store,$public)
+              $x=[Security.Cryptography.X509Certificates.X509Store]::new(
+                $store,[Security.Cryptography.X509Certificates.StoreLocation]::LocalMachine)
+              try {
+                $x.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadOnly)
+                if(!$x.Certificates.Find([Security.Cryptography.X509Certificates.X509FindType]::FindByThumbprint,$thumb,$false).Count){
+                  throw "Test identity absent from LocalMachine/$store"
+                }
+              } finally { $x.Close() }
+            }
+            $test=Join-Path $env:RUNNER_TEMP '16pkg-ephemeral-probe.ps1'
+            [IO.File]::WriteAllText($test,'# Disposable Authenticode trust probe')
+            $signed=Set-AuthenticodeSignature -FilePath $test -Certificate $generated -HashAlgorithm SHA256
+            $verified=Get-AuthenticodeSignature -LiteralPath $test
+            Write-Host "Windows Authenticode signed=$($signed.Status) verified=$($verified.Status) signerMatches=$($verified.SignerCertificate.Thumbprint -eq $thumb)"
+            if($verified.Status -ne 'Valid' -or $verified.SignerCertificate.Thumbprint -ne $thumb){
+              throw 'Valid TEST Authenticode verification was not established'
+            }
+          } finally {
+            if($attempted){
+              foreach($store in @('TrustedPublisher','Root')){
+                try { Invoke-Certutil @('-f','-delstore',$store,$thumb) }
+                catch { Write-Warning "Cleanup of disposable LocalMachine/$store failed; hosted VM disposal is final containment" }
+              }
+            }
+            $generated.Dispose()
+            $rsa.Dispose()
+          }
