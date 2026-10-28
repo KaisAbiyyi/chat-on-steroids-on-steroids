@@ -29,37 +29,122 @@ try {
         throw 'Foreign test data was changed'
     }
     Remove-Item -LiteralPath $linked -Force
-    $sha = 'a'*40
+    # Real GitHub REST shapes observed in run 40710902296 *after* merge:
+    # workflow_run.pull_requests is EMPTY; run.head_sha is checked-out PR HEAD,
+    # while the OIDC certificate sourceRepositoryDigest is a DIFFERENT PR merge SHA.
+    $sha='9939ea0a9fdc592e6821296e07eb0b7db3653adb'
     $repo='KaisAbiyyi/chat-on-steroids-on-steroids'
-    $head = [pscustomobject]@{ref='work/16pkg-01-native-installer-20261027';sha=$sha;repo=[pscustomobject]@{full_name=$repo}}
-    $base = [pscustomobject]@{ref='main'}
-    $run=[pscustomobject]@{id=42;status='completed';conclusion='success';event='pull_request';
-        path='.github/workflows/16pkg-native-installer.yml';repository=[pscustomobject]@{full_name=$repo};
-        head_branch=$head.ref;head_sha=$sha;run_attempt=1;pull_requests=@([pscustomobject]@{number=131;head=$head;base=$base})}
-    $pr=[pscustomobject]@{number=131;state='open';head=$head;base=$base;merge_commit_sha=('b'*40)}
-    $art=[pscustomobject]@{artifacts=@([pscustomobject]@{name="cosos-16pkg-unsigned-candidate-$sha";
-        workflow_run=[pscustomobject]@{id=42};expired=$false;size_in_bytes=32})}
-    Assert-16L1RunOrigin $run $pr $art 42 $sha $repo
-    $badRun=$run.PSObject.Copy()
-    $badRun.event='workflow_dispatch'
-    Refused { Assert-16L1RunOrigin $badRun $pr $art 42 $sha $repo } 'wrong event'
-    $badRun=$run.PSObject.Copy()
-    $badRun.head_sha='c'*40
-    Refused { Assert-16L1RunOrigin $badRun $pr $art 42 $sha $repo } 'wrong run source'
-    $badPr=$pr.PSObject.Copy()
-    $badPr.head=[pscustomobject]@{ref=$head.ref;sha=('d'*40);repo=$head.repo}
-    Refused { Assert-16L1RunOrigin $run $badPr $art 42 $sha $repo } 'changed reviewed PR'
-    $badArt=[pscustomobject]@{artifacts=@([pscustomobject]@{name="cosos-16pkg-unsigned-candidate-$sha";
-        workflow_run=[pscustomobject]@{id=13};expired=$false;size_in_bytes=32})}
-    Refused { Assert-16L1RunOrigin $run $pr $badArt 42 $sha $repo } 'artifact from another run'
-    $valid=[pscustomobject]@{verificationResult=[pscustomobject]@{statement=[pscustomobject]@{
-        predicate=[pscustomobject]@{runDetails=[pscustomobject]@{metadata=[pscustomobject]@{
-            invocationId="https://github.com/$repo/actions/runs/42/attempts/1"
-        }}}}}}
-    Assert-16L1AttestationRun @($valid) 42 1 $repo
-    Refused { Assert-16L1AttestationRun @($valid) 43 1 $repo } 'attestation signed in another run'
-    Refused { Assert-16L1AttestationRun @($valid) 42 2 $repo } 'attestation signed in another attempt'
-    Write-Host '16L1 security negative regressions PASS: linked ancestor/child, run/event/head/artifact and attestation mismatch'
+    $branch='work/16pkg-01-native-installer-20261027'
+    $head=[pscustomobject]@{ref=$branch;sha=$sha;repo=[pscustomobject]@{full_name=$repo}}
+    $run=[pscustomobject]@{
+        id=40710902296L;run_attempt=1;status='completed';conclusion='success';event='pull_request'
+        path='.github/workflows/16pkg-native-installer.yml';workflow_id=398496557
+        repository=[pscustomobject]@{full_name=$repo;id=1424422098}
+        head_repository=[pscustomobject]@{full_name=$repo;id=1424422098}
+        head_branch=$branch;head_sha=$sha;head_commit=[pscustomobject]@{id=$sha}
+        pull_requests=@()
+    }
+    $pr=[pscustomobject]@{
+        number=131;state='closed';merged=$true;merged_at='2026-10-28T17:00:00Z'
+        head=$head;base=[pscustomobject]@{ref='main'}
+        merge_commit_sha=('f'*40) # deliberately changed current PR metadata
+    }
+    $merge=[pscustomobject]@{
+        sha='be2727fe437f7878f023ddd3422b1c6ae4f70907'
+        parents=@([pscustomobject]@{sha=('a'*40)},[pscustomobject]@{sha=$sha})
+    }
+    $compare=[pscustomobject]@{status='ahead';behind_by=0;
+        base_commit=[pscustomobject]@{sha=$sha};merge_base_commit=[pscustomobject]@{sha=$sha}}
+    $art=[pscustomobject]@{artifacts=@([pscustomobject]@{
+        id=12827415031L;name="cosos-16pkg-unsigned-candidate-$sha";
+        digest='sha256:38fc612236c093cde03d8134173b9c8f8d76c58203ec8614c80122e23e6b60b7'
+        workflow_run=[pscustomobject]@{id=40710902296L;repository_id=1424422098;head_sha=$sha}
+        expired=$false;size_in_bytes=124913556
+    })}
+    $origin=@{Run=$run;Pull=$pr;MergedCommit=$merge;Compare=$compare;Artifacts=$art;
+        RunId=40710902296L;RunAttempt=1;SourceSha=$sha;Repository=$repo}
+    Assert-16L1RunOrigin @origin
+    $changedPr=$pr.PSObject.Copy()
+    $changedPr.merge_commit_sha='0'*40
+    $origin.Pull=$changedPr
+    Assert-16L1RunOrigin @origin  # neither old nor new PR merge SHA is trusted
+    $origin.Pull=$pr
+    $badRun=$run.PSObject.Copy();$badRun.event='workflow_dispatch'
+    $origin.Run=$badRun
+    Refused { Assert-16L1RunOrigin @origin } 'wrong run event'
+    $badRun=$run.PSObject.Copy();$badRun.head_sha='c'*40
+    $origin.Run=$badRun
+    Refused { Assert-16L1RunOrigin @origin } 'wrong checkout source SHA'
+    $badRun=$run.PSObject.Copy();$badRun.run_attempt=2
+    $origin.Run=$badRun
+    Refused { Assert-16L1RunOrigin @origin } 'wrong run attempt'
+    $badRun=$run.PSObject.Copy();$badRun.id=40710902297L
+    $origin.Run=$badRun
+    Refused { Assert-16L1RunOrigin @origin } 'wrong run identity'
+    $badRun=$run.PSObject.Copy();$badRun.workflow_id=398496558
+    $origin.Run=$badRun
+    Refused { Assert-16L1RunOrigin @origin } 'wrong workflow identity'
+    $badRun=$run.PSObject.Copy();$badRun.repository=[pscustomobject]@{id=999;full_name=$repo}
+    $origin.Run=$badRun
+    Refused { Assert-16L1RunOrigin @origin } 'wrong repository ID'
+    $origin.Run=$run
+    $badPr=$pr.PSObject.Copy();$badPr.merged=$false
+    $origin.Pull=$badPr
+    Refused { Assert-16L1RunOrigin @origin } 'source never merged'
+    $origin.Pull=$pr
+    $badMerge=$merge.PSObject.Copy();$badMerge.parents=@([pscustomobject]@{sha=('a'*40)})
+    $origin.MergedCommit=$badMerge
+    Refused { Assert-16L1RunOrigin @origin } 'source absent from approved merge'
+    $origin.MergedCommit=$merge
+    $badCompare=$compare.PSObject.Copy()
+    $badCompare.merge_base_commit=[pscustomobject]@{sha=('b'*40)}
+    $origin.Compare=$badCompare
+    Refused { Assert-16L1RunOrigin @origin } 'source not in main DAG'
+    $origin.Compare=$compare
+    $badArt=[pscustomobject]@{artifacts=@([pscustomobject]@{
+        id=12827415032L;name="cosos-16pkg-unsigned-candidate-$sha"
+        digest='sha256:38fc612236c093cde03d8134173b9c8f8d76c58203ec8614c80122e23e6b60b7'
+        workflow_run=[pscustomobject]@{id=40710902296L;repository_id=1424422098;head_sha=$sha}
+        expired=$false;size_in_bytes=124913556
+    })}
+    $origin.Artifacts=$badArt
+    Refused { Assert-16L1RunOrigin @origin } 'wrong artifact ID'
+    $badArt.artifacts[0].id=12827415031L
+    $badArt.artifacts[0].digest='sha256:'+('a'*64)
+    Refused { Assert-16L1RunOrigin @origin } 'wrong immutable artifact SHA256'
+    $origin.Artifacts=$art
+    $expected="https://github.com/$repo/actions/runs/40710902296/attempts/1"
+    $eventDigest='e'*40
+    $cert=[pscustomobject]@{
+        runInvocationURI=$expected;sourceRepositoryIdentifier='1424422098'
+        sourceRepositoryRef='refs/pull/131/merge';sourceRepositoryDigest=$eventDigest
+        githubWorkflowTrigger='pull_request'
+    }
+    $statement=[pscustomobject]@{
+        predicateType='https://slsa.dev/provenance/v1'
+        predicate=[pscustomobject]@{runDetails=[pscustomobject]@{
+            metadata=[pscustomobject]@{invocationId=$expected}}}
+    }
+    $verification=[pscustomobject]@{verificationResult=[pscustomobject]@{
+        signature=[pscustomobject]@{certificate=$cert};statement=$statement}}
+    $actual=Assert-16L1AttestationRun @($verification) 40710902296 1 $repo
+    if ($actual -cne $eventDigest) { throw 'Original event digest extraction failed' }
+    Refused { Assert-16L1AttestationRun @() 40710902296 1 $repo } 'missing attestation'
+    Refused { Assert-16L1AttestationRun @($verification) 40710902297 1 $repo } 'wrong attested run'
+    Refused { Assert-16L1AttestationRun @($verification) 40710902296 2 $repo } 'wrong attested attempt'
+    Refused { Assert-16L1AttestationRun @($verification) 40710902296 1 $repo ('d'*40) } 'wrong original PR event SHA'
+    $badCert=$cert.PSObject.Copy();$badCert.sourceRepositoryRef='refs/heads/main'
+    $badVerification=[pscustomobject]@{verificationResult=[pscustomobject]@{
+        signature=[pscustomobject]@{certificate=$badCert};statement=$statement}}
+    Refused { Assert-16L1AttestationRun @($badVerification) 40710902296 1 $repo } 'wrong signed source ref'
+    $badCert=$cert.PSObject.Copy();$badCert.sourceRepositoryIdentifier='111'
+    $badVerification.verificationResult.signature.certificate=$badCert
+    Refused { Assert-16L1AttestationRun @($badVerification) 40710902296 1 $repo } 'wrong signed repo ID'
+    $badStatement=$statement.PSObject.Copy();$badStatement.predicateType='https://example.invalid'
+    $badVerification.verificationResult.signature.certificate=$cert
+    $badVerification.verificationResult.statement=$badStatement
+    Refused { Assert-16L1AttestationRun @($badVerification) 40710902296 1 $repo } 'invalid SLSA type'
+    Write-Host '16L1 security regressions PASS: merged PR/history/source, run/attempt/artifact/digest/OIDC and NTFS junction rejection'
 } finally {
     if (Test-Path -LiteralPath $qual) {
         # Remove reparse children as links before removing only test-owned directories.
