@@ -70,6 +70,13 @@ function RequireDigest([string]$file,[string]$expected) {
 }
 RequireDigest $setup $receipt.setupSha256
 RequireDigest $archive $receipt.zipSha256
+$releaseManifest=Join-Path $download 'installer-release-manifest.json'
+RequireDigest $releaseManifest $receipt.releaseManifestSha256
+$manifest=Get-Content -LiteralPath $releaseManifest -Raw | ConvertFrom-Json
+if($manifest.source_sha -ne $SourceSha -or $manifest.version -ne '0.1.0' -or
+    $manifest.product -ne 'CoSoS' -or $manifest.platform -ne 'windows-x64') {
+    throw 'Attested release manifest identity mismatch'
+}
 $up2=Join-Path $download 'installer-unsigned-0.2.0\CoSoSInstaller.exe'
 $up3=Join-Path $download 'installer-unsigned-0.3.0\CoSoSInstaller.exe'
 RequireDigest $up2 $receipt.update02SetupSha256
