@@ -42,12 +42,15 @@ foreach ($check in $checks) {
     $file=$check.path
     if (!(Test-Path -LiteralPath $file -PathType Leaf)) { throw "Required attested file missing: $file" }
     $params=@($file,'--repo',$repo,'--signer-workflow',$workflow,'--source-ref','refs/pull/131/merge','--format','json')
-    if ($eventDigest) { $params+=@('--source-digest',$eventDigest) }
+    # The original pull_request GITHUB_SHA was observed in signed OIDC evidence,
+    # NOT calculated from the now-merged PR metadata or workflow_run.head_sha.
+    $params+=@('--source-digest',$approved.OriginalEventSha)
     # CLI checks signature/certificate, SLSA predicate, actual file digest, ref and workflow.
     $verified=@(gh attestation verify @params | ConvertFrom-Json)
     if ($LASTEXITCODE -ne 0 -or $verified.Count -lt 1) { throw "GitHub Sigstore attestation failed: $file" }
     $signedDigest=Assert-16L1AttestationRun -Verification $verified -RunId $RunId -RunAttempt $attempt -Repository $repo -EventDigest $eventDigest
     if (!$eventDigest) { $eventDigest=$signedDigest }
+    if ($eventDigest -cne $approved.OriginalEventSha) { throw 'Original signed event SHA is not the approved historical SHA' }
     if ($signedDigest -cne $eventDigest) { throw 'Original PR event SHA differs among attestations' }
     if (!$receipt) {
         $receipt=Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
