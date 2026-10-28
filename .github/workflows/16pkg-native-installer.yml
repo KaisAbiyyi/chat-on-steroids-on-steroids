@@ -79,19 +79,49 @@ jobs:
       # Positive test-signer native acceptance runs in the separate fast
       # 16pkg-installer-lifecycle workflow against the SAME checked-out C# source.
       # Production binary packaging in this job does NOT import any test signer.
-      - name: Extract exact release manifest for independent digest
+      - name: Extract and cross-check actual package manifests
         shell: pwsh
         run: |
+          # release_16pkg.py generates renderer-integrity.json inside the
+          # source-bound ZIP. dotnet publish does not write it to renderer-package.
           $archive=[IO.Compression.ZipFile]::OpenRead((Resolve-Path candidate.zip).Path)
           try {
-            $entry=$archive.GetEntry('release.json')
-            if(!$entry -or $entry.Length -gt 131072){throw 'Missing/oversized product release manifest'}
-            $stream=$entry.Open()
-            try {
-              $output=[IO.File]::Create((Join-Path $PWD 'installer-release-manifest.json'))
-              try {$stream.CopyTo($output)} finally {$output.Dispose()}
-            } finally {$stream.Dispose()}
+            foreach($item in @(
+              @{entry='release.json';output='installer-release-manifest.json'},
+              @{entry='renderer/renderer-integrity.json';output='installer-renderer-integrity.json'}
+            )){
+              $entry=$archive.GetEntry($item.entry)
+              if(!$entry -or $entry.Length -le 0 -or $entry.Length -gt 131072){
+                throw "Missing/oversized package manifest: $($item.entry)"
+              }
+              $stream=$entry.Open()
+              try {
+                $output=[IO.File]::Create((Join-Path $PWD $item.output))
+                try {$stream.CopyTo($output)} finally {$output.Dispose()}
+              } finally {$stream.Dispose()}
+            }
           } finally {$archive.Dispose()}
+          $source=(git rev-parse HEAD).Trim()
+          $release=Get-Content installer-release-manifest.json -Raw | ConvertFrom-Json
+          $renderer=Get-Content installer-renderer-integrity.json -Raw | ConvertFrom-Json
+          if($source -cne $env:PR_HEAD_SHA -or $release.source_sha -cne $source -or
+              $release.version -cne $env:RELEASE_VERSION -or $renderer.format -ne 1 -or
+              $renderer.sourceSha -cne $source){throw 'Extracted manifest source/version mismatch'}
+          $rendererHash=(Get-FileHash installer-renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant()
+          $index=@($release.files | Where-Object { $_.path -ceq 'renderer/renderer-integrity.json' })
+          if($index.Count -ne 1 -or $index[0].sha256 -cne $rendererHash -or
+              [long]$index[0].bytes -ne (Get-Item installer-renderer-integrity.json).Length){
+            throw 'Renderer manifest differs from source-bound release index'
+          }
+          foreach($name in @('WindowsRenderer.exe','WindowsRenderer.dll')){
+            $actual=(Get-FileHash "renderer-package/$name" -Algorithm SHA256).Hash.ToLowerInvariant()
+            $inner=@($renderer.files | Where-Object { $_.path -ceq $name })
+            $outer=@($release.files | Where-Object { $_.path -ceq "renderer/$name" })
+            if($inner.Count -ne 1 -or $outer.Count -ne 1 -or
+                $inner[0].sha256 -cne $actual -or $outer[0].sha256 -cne $actual){
+              throw "Renderer binary not bound to both package manifests: $name"
+            }
+          }
       - name: Exact SHA-256 receipt
         shell: pwsh
         run: |
@@ -103,7 +133,7 @@ jobs:
           rendererHostSha256=(Get-FileHash renderer-package/WindowsRenderer.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           rendererDllSha256=(Get-FileHash renderer-package/WindowsRenderer.dll -Algorithm SHA256).Hash.ToLowerInvariant();
           releaseManifestSha256=(Get-FileHash installer-release-manifest.json -Algorithm SHA256).Hash.ToLowerInvariant();
-          rendererManifestSha256=(Get-FileHash renderer-package/renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererManifestSha256=(Get-FileHash installer-renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant();
           update02SetupSha256=(Get-FileHash installer-unsigned-0.2.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           update03SetupSha256=(Get-FileHash installer-unsigned-0.3.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           update02ZipSha256=(Get-FileHash candidate-0.2.0.zip -Algorithm SHA256).Hash.ToLowerInvariant();
@@ -176,5 +206,6 @@ jobs:
             installer-unsigned-0.3.0/CoSoSInstaller.exe
             package-receipt.json
             installer-release-manifest.json
+            installer-renderer-integrity.json
             16pkg-unsigned-native-receipt.json
           if-no-files-found: error
