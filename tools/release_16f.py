@@ -99,7 +99,8 @@ def make_report(expected_head, actual_head, ancestors, sources):
         },
         "tracked_contracts": hashes,
         "security_review": {
-            "updater_signer": "16B_REQUIRES_NATIVE_AUTHENTICODE_NOT_ATTESTED_HERE",
+            "updater_signer": "16B_OPTIONAL_SIGNED_COMPATIBILITY_NOT_ATTESTED_HERE",
+            "unsigned_installer_trust": "16PKG-01_MANUAL_SHA256_AND_EXTERNAL_GITHUB_ATTESTATION_REQUIRED",
             "bundle_signature": "16C_UNSIGNED_HEADLESS_ONLY",
             "license_inventory": "16C_LOCKED_DEPENDENCY_CONTRACT_NOT_EXTERNAL_LEGAL_CERTIFICATION",
             "migration": "16A_COPY_ONLY_NO_PRIVATE_DATA",
