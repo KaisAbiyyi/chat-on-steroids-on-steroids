@@ -1,65 +1,38 @@
-# 7U1-PREP — source-attested, fail-closed owner test preparation
+# 7U1-PREP — source-attested observe-only owner-runner preparation
 
-## Result and exact blocker
+## Current result and production audit
 
-The cloud deliverable here is a preflight security contract and Windows D:
-entrypoint, **NOT** a signed-in 7U1 product browser or owner qualification.
-Source-attested physical 7L2 PASS proves the synthetic WebView2/MV3/Rust
-bridge, not a provider account. Existing WindowsHost binds to
-https://synthetic.cos.test, and cos-app is still a CLI. Native 8L1 issue #71
-lacks a product-owned privileged WebView2 profile/controller adapter.
+As of 2026-10-27, main includes the 8P-HOST merge at 16037935afcb45950f4a085c4da4a914ffbd5517. The production host source is now available in apps/windows-host/Native8P.cs and apps/windows-host/WindowsHost.csproj. The source audit confirms that this is a real-provider navigation and native Rust/MV3 handshake path, but it does not expose a safe read-only attach/snapshot/detach API.
 
-Until 8L1 is fixed, the tool must report BLOCKED. The missing
-probes/7u1/product-integration.json is intentional, not a broken CI fixture.
+The production 8P path remains handshake-only for this purpose. It does not invoke the synthetic host's ObserveAsync, ledger, or CDP tool capture; the production MV3 worker is transport-only. An allowed HTTPS origin and a successful Rust/MV3 handshake are not permission to read page content or evidence of a signed-in session.
 
-## Cloud coverage
+Therefore this PR does not claim a real 7U1 runner. It must remain Draft and the 7U1-PREP issue must remain open until the product host provides a reviewed read-only API. No 8P runtime file is modified by this PR. The owner gate issue #91 remains BLOCKED / NOT_RUN.
 
-- SHA-pinned repository HEAD and SHA256 full-artifact manifest (no loose
-  binaries/dependencies and no symlink/junction entries).
-- Exact provider HTTPS origin allowlist: chatgpt.com, claude.ai or gemini.google.com.
-- Human opt-in and distinct 7u1-prefixed dedicated test profile.
-- Reviewed integration contract for a real product-owned WebView2 host
-  at host/CoSoSProductBrowser.dll plus 7u1_product_bridge.exe, not the
-  existing synthetic WindowsHost.dll/7l2_bridge.exe.
-- Restricted operations: attach, snapshot, detach only, max 65536 capture
-  bytes, no persistence, no Send capability, no automatic navigation.
-- Sanitized JSON receipt with distinct BLOCKED/PASS/NOT_RUN per check.
-  Even successful metadata preflight never sets owner7U1Accepted=true or
-  outgoingSendCount=0. Native behavior still needs real evidence.
+## Exact missing contract
 
-The self-tests use synthetic binary bytes only to test **metadata rejection**.
-They do not verify a Windows executable or its truthfully claimed abilities.
+The production host, Rust bridge and MV3 worker need a shared, source-bound observe-only contract that provides only:
 
-## Future native integration prerequisite (8L1 #71)
+- Attach a one-use lease to the exact configured HTTPS provider origin and the host-attested profile/partition, tab, document, navigation, worker and host generations.
+- Return a bounded snapshot of at most 65536 bytes with no persistence and no arbitrary script/CDP access.
+- Detach and revoke the lease on navigation, tab close, renderer crash, host restart/rebind, worker retirement, or explicit detach.
+- Reject stale handles, stale snapshots, replay, source/binary mismatch, provider/origin mismatch, partition reuse across profiles and generation rollback.
+- Expose no outgoing Send, click, submit, cookie, credential or token capability.
+- Bind the native host, Rust bridge, MV3 worker and every loadable binary to an immutable source SHA and complete SHA256 manifest.
 
-The separate native integration owner must implement a real product entrypoint
-that privately connects the built Rust bridge and WebView2/MV3 companion,
-with strict origin/profile/tab/frame/document/navigation/worker/host
-generation and MAC/sequence authority. Need observe-only bounded DOM
-snapshot, lease release on navigation/close/crash/restart/worker retirement,
-cross-profile rejection, no arbitrary CDP, JS, Send, click, submit, cookie
-or credential capture, and a reproducible exact-SHA binary manifest.
+The static source audit looks for the required host/Rust/MV3 API surface. At this HEAD the required methods are absent, so the production audit reports BLOCKED. A declaration file or product-looking filename is not evidence of integration.
 
-Once actual native implementation passes source-diff security review and
-hosted tests, the native 8L1 Windows gate needs physical PASS. Only then
-create/review a distinct **interactive** 7U1 signed-in owner test runner
-with the above provenance. A JSON declaration by itself is NOT security
-proof and is never permission to sign in automatically.
+## Cloud-only coverage
 
-## Owner preflight example — only after native adapter exists
+- The existing preflight and full SHA256 manifest checks remain in place; exact-head Windows and Ubuntu CI must run again after every change.
+- The synthetic reference adapter in observe_only_contract.py exercises the contract's validation and revocation rules entirely in memory. It does not connect to WebView2, Rust or MV3, access a provider, read an account, simulate human consent, or persist snapshot data.
+- Regression vectors cover source SHA and binary-manifest mismatch, exact provider origin, profile/partition isolation, stale document/worker generations, replay, bounded snapshots, navigation/close/crash/rebind/worker retirement, detach revocation, and the absence of Send capability.
+- The Windows production-host audit job builds the actual apps/windows-host project and Rust bridge, copies the linked C# entrypoint and lifecycle sources plus the actual MV3 source and Rust build inputs, verifies every staged source copy byte-for-byte against the pinned checkout, and publishes a SHA256-manifested production 8P handshake-only artifact. Its kind marker explicitly says it is not a 7U1 runner; preflight must keep product_native_adapter BLOCKED.
+- A separate synthetic 7L2 artifact remains labelled synthetic-only. It must never be renamed or treated as the product runner.
 
-PowerShell:
+Both artifacts are source-bound diagnostic evidence only. The production handshake-only artifact is not safe for owner sign-in and is not a substitute for the missing read-only API.
 
-    .\probes\7u1\run-preflight.ps1 -Repo 'D:\projects\CoS-Rust' -ArtifactRoot 'D:\projects\CoS-Rust\artifacts\7u1-product' -Out 'D:\projects\CoS-Rust\.test-tmp\7u1\preflight01' -Provider chatgpt -ProfileId '7u1-freshprofile01' -OwnerConsent
+## Owner preflight and human gate
 
-Requires an empty/new Out folder on D:. Currently this intentionally fails
-BLOCKED. No account login, provider navigation, browser launch or Send occurs.
+The PowerShell preflight is metadata-only and intentionally remains BLOCKED until the production observation adapter exists. CI never passes the owner-consent flag. No account login, provider navigation, credentials, cookies, tokens, or Send is performed by this cloud work.
 
-## Human 7U1 gate (issue #91) — NOT_RUN
-
-Owner separately opts in, manually signs in with a distinct test profile,
-opens only a deliberately safe conversation, verifies bounded read-only
-observation and signed authority, navigates/closes/restarts, confirms stale
-handles refused and zero outgoing Send. Evidence is sanitized per-check
-PASS/FAIL/NOT_RUN without private chat, credentials, cookies, 2FA or tokens.
-Synthetic and hosted tests cannot upgrade this to PASS.
+Issue #91 remains BLOCKED / NOT_RUN until the owner independently runs the signed-in observe-only test with explicit consent, after the real read-only adapter is implemented and independently reviewed. CI success can never be labelled owner acceptance.

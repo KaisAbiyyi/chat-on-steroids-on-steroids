@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from preflight import report
+from preflight import PRODUCTION_SOURCE_COPIES, report
 
 
 class TestOwnerPreflight(unittest.TestCase):
@@ -22,14 +22,14 @@ class TestOwnerPreflight(unittest.TestCase):
         self.art = root / "artifact"
         (self.art / "host").mkdir(parents=True)
         (self.art / "source.sha").write_text(self.SHA, encoding="utf-8")
-        (self.art / "host" / "CoSoSProductBrowser.dll").write_bytes(b"test-only")
-        (self.art / "7u1_product_bridge.exe").write_bytes(b"test-only")
+        (self.art / "host" / "WindowsHost.dll").write_bytes(b"test-only")
+        (self.art / "7l2_bridge.exe").write_bytes(b"test-only")
         (self.repo / "probes" / "7u1").mkdir(parents=True)
         self.contract = dict(
             schema="cosos.7u1.product-integration.v1",
             kind="product-webview2-rust-mv3",
-            host="host/CoSoSProductBrowser.dll",
-            bridge="7u1_product_bridge.exe",
+            host="host/WindowsHost.dll",
+            bridge="7l2_bridge.exe",
             allowedOrigins=["https://chatgpt.com"],
             allowedOps=["attach", "snapshot", "detach"],
             captureLimitBytes=65536,
@@ -48,30 +48,47 @@ class TestOwnerPreflight(unittest.TestCase):
 
     def rehash(self):
         entries = []
-        for p in sorted(self.art.rglob("*")):
-            if p.is_file() and p.name != "hashes.json":
-                entries.append({"path": p.relative_to(self.art).as_posix(),
-                                "sha256": hashlib.sha256(p.read_bytes()).hexdigest()})
+        for path in sorted(self.art.rglob("*")):
+            if path.is_file() and path.name != "hashes.json":
+                entries.append({"path": path.relative_to(self.art).as_posix(),
+                                "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
         (self.art / "hashes.json").write_text(json.dumps(entries), encoding="utf-8")
 
-    def gate(self, provider="chatgpt", profile="7u1-fresh001", consent=True, sha=None):
+    def gate(self, provider="chatgpt", profile="7u1-fresh001", consent=False, sha=None):
         return report(self.repo, self.art, sha or self.SHA, provider, profile,
                       consent, observed_sha=self.SHA)
 
-    def test_metadata_pass_never_fakes_real_owner(self):
-        x = self.gate()
-        self.assertEqual(x["preflightStatus"], "PREP_READY_REVIEW_REQUIRED")
-        self.assertFalse(x["owner7U1Accepted"])
-        self.assertEqual(x["owner7U1Status"], "NOT_RUN")
-        self.assertIsNone(x["outgoingSendCount"])
+    def test_metadata_never_fakes_product_or_owner_acceptance(self):
+        result = self.gate()
+        self.assertEqual(result["preflightStatus"], "BLOCKED")
+        self.assertEqual(result["checks"]["product_native_adapter"]["status"], "BLOCKED")
+        self.assertFalse(result["owner7U1Accepted"])
+        self.assertEqual(result["owner7U1Status"], "NOT_RUN")
+        self.assertIsNone(result["outgoingSendCount"])
 
     def test_missing_native_product_integration_blocked(self):
         (self.repo / "probes" / "7u1" / "product-integration.json").unlink()
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
 
+    def test_staged_source_copy_mismatch_is_denied_after_manifest_rehash(self):
+        for staged, source in PRODUCTION_SOURCE_COPIES.items():
+            source_path = self.repo / source
+            source_path.parent.mkdir(parents=True, exist_ok=True)
+            source_path.write_text("synthetic source fixture: " + source, encoding="utf-8")
+            staged_path = self.art / staged
+            staged_path.parent.mkdir(parents=True, exist_ok=True)
+            staged_path.write_bytes(source_path.read_bytes())
+        (self.art / "source/Native8P.cs").write_text(
+            "different source than pinned checkout", encoding="utf-8")
+        self.rehash()
+        result = self.gate()
+        self.assertEqual(result["preflightStatus"], "BLOCKED")
+        self.assertIn("source/binary mismatch",
+                      result["checks"]["product_native_adapter"]["evidence"])
+
     def test_synthetic_7l2_bridge_not_product(self):
-        self.contract["host"] = "host/WindowsHost.dll"
-        self.contract["bridge"] = "7l2_bridge.exe"
+        self.contract["host"] = "host/synthetic-WindowsHost.dll"
+        self.contract["bridge"] = "synthetic-7l2_bridge.exe"
         self.save()
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
 
@@ -84,7 +101,7 @@ class TestOwnerPreflight(unittest.TestCase):
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
 
     def test_no_foreign_origin(self):
-        self.contract["allowedOrigins"] = ["https://attacker.test"]
+        self.contract["allowedOrigins"] = ["https://attacker.invalid"]
         self.save()
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
         self.assertEqual(self.gate(provider="attacker")["preflightStatus"], "BLOCKED")
@@ -103,7 +120,7 @@ class TestOwnerPreflight(unittest.TestCase):
         self.assertEqual(self.gate(consent=False)["preflightStatus"], "BLOCKED")
 
     def test_manifest_file_mutation_and_unlisted_file(self):
-        (self.art / "7u1_product_bridge.exe").write_bytes(b"modified")
+        (self.art / "7l2_bridge.exe").write_bytes(b"modified")
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
         self.rehash()
         (self.art / "unknown.dll").write_bytes(b"extra")
@@ -132,14 +149,55 @@ class TestOwnerPreflight(unittest.TestCase):
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
 
     def test_symlink_artifact_denied(self):
-        p = self.art / "host" / "CoSoSProductBrowser.dll"
-        p.unlink()
+        path = self.art / "host" / "WindowsHost.dll"
+        path.unlink()
         try:
-            p.symlink_to(self.art / "7u1_product_bridge.exe")
+            path.symlink_to(self.art / "7l2_bridge.exe")
         except (OSError, NotImplementedError):
-            self.skipTest("Windows runner disallows symlink creation")
+            self.skipTest("runner disallows symlink creation")
         self.rehash()
         self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
+    def test_json_duplicate_keys_blocked_in_manifest_and_contract(self):
+        manifest = self.art / "hashes.json"
+        raw = manifest.read_text(encoding="utf-8")
+        raw = raw.replace('"sha256":', '"path": "shadow.dll", "sha256":', 1)
+        manifest.write_text(raw, encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        declaration = self.repo / "probes" / "7u1" / "product-integration.json"
+        raw = declaration.read_text(encoding="utf-8")
+        declaration.write_text(raw.replace('"kind":', '"kind": "other", "kind":', 1),
+                               encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
+    def test_windows_colliding_paths_and_reserved_names_denied(self):
+        path = self.art / "hashes.json"
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries.append({"path": entries[0]["path"].upper(),
+                        "sha256": entries[0]["sha256"]})
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries[0]["path"] = "CON.dll"
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+        self.rehash()
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        entries[0]["path"] = "host/trailing."
+        path.write_text(json.dumps(entries), encoding="utf-8")
+        self.assertEqual(self.gate()["preflightStatus"], "BLOCKED")
+
+    def test_tagged_synthetic_bundle_never_product(self):
+        (self.art / "artifact-kind.json").write_text(
+            json.dumps({"schema": "cosos.7u1.artifact-kind.v1",
+                        "kind": "synthetic-7l2-only"}), encoding="utf-8")
+        self.rehash()
+        result = self.gate()
+        self.assertEqual(result["checks"]["artifact_manifest"]["status"], "PASS")
+        self.assertEqual(result["checks"]["product_native_adapter"]["status"], "BLOCKED")
+        self.assertEqual(result["owner7U1Status"], "NOT_RUN")
 
 
 if __name__ == "__main__":
