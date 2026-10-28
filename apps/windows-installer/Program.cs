@@ -396,9 +396,17 @@ internal static class Program
     static void CheckSignature(string path, string pinned)
     {
         if (path.StartsWith(@"D:\",StringComparison.OrdinalIgnoreCase)) SafeAncestors(path);
+        // Trusted TEST certificates can be used for disposable acceptance,
+        // but can never become authorized production release signers.
+        // Production requires a real trusted CA-backed code signing identity.
+        var signerPolicy = "";
+#if !COS_16PKG_TEST
+        signerPolicy = "if($s.SignerCertificate.Subject -eq $s.SignerCertificate.Issuer"
+            + " -or $s.SignerCertificate.Subject -match 'TEST[-_ ]?ONLY'){exit 9};";
+#endif
         var result = PS("$ErrorActionPreference='Stop';$s=Get-AuthenticodeSignature -LiteralPath "
               + Quote(path) + ";if($s.Status -ne 'Valid' -or !$s.SignerCertificate){exit 7};"
-              + "[Console]::Out.Write($s.SignerCertificate.Thumbprint)");
+              + signerPolicy + "[Console]::Out.Write($s.SignerCertificate.Thumbprint)");
         if (!IC.Equals(result,pinned)) throw new InvalidDataException("Untrusted code signing publisher");
     }
     static void RequireAdmin()
