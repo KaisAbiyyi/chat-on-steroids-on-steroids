@@ -88,6 +88,7 @@ $script:16L1Approved = @{
     Repository='KaisAbiyyi/chat-on-steroids-on-steroids'
     RepositoryId=1424422098
     SourceSha='9939ea0a9fdc592e6821296e07eb0b7db3653adb'
+    OriginalEventSha='247e57638a8f5afce93d87fc6d671ce54eaf3ccd'
     MergeCommit='be2727fe437f7878f023ddd3422b1c6ae4f70907'
     PrNumber=131
     RunId=40710902296L
@@ -167,6 +168,7 @@ function Assert-16L1AttestationRun {
         $cert.githubWorkflowTrigger -ceq 'pull_request' -and
         $cert.sourceRepositoryDigest -cmatch '^[a-f0-9]{40}$' -and
         $cert.sourceRepositoryDigest -cne $approved.SourceSha -and
+        $cert.sourceRepositoryDigest -ceq $approved.OriginalEventSha -and
         (!$EventDigest -or $cert.sourceRepositoryDigest -ceq $EventDigest) -and
         $statement.predicateType -ceq 'https://slsa.dev/provenance/v1' -and
         $statement.predicate.runDetails.metadata.invocationId -ceq $expected
