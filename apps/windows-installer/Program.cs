@@ -180,6 +180,11 @@ internal static class Program
     static string SafeRoot(string value)
     {
         if (!Path.IsPathFullyQualified(value)) throw new InvalidDataException("Absolute path required");
+        // Reject explicit traversal before GetFullPath erases the original
+        // components. A valid absolute installer root is never a relative walk.
+        if (value.Replace('/', '\\').Split('\\', StringSplitOptions.RemoveEmptyEntries)
+                .Any(part => part is "." or ".."))
+            throw new InvalidDataException("Traversal components refused");
         var full = Path.GetFullPath(value).TrimEnd('\\');
         SafeAncestors(full);
         if (full.Length < 9) throw new InvalidDataException("Refuse drive/top-level installation");
