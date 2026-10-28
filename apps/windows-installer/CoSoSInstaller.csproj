@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>CoSoSInstaller</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(BundlePath)" LogicalName="CoSoS.Payload" Condition="'$(BundlePath)' != ''" />
+    <EmbeddedResource Include="$(SourceShaPath)" LogicalName="CoSoS.Source" Condition="'$(SourceShaPath)' != ''" />
+    <EmbeddedResource Include="$(PublisherThumbprintPath)" LogicalName="CoSoS.TrustedPublisher" Condition="&apos;$(PublisherThumbprintPath)&apos; != &apos;&apos;" />
+  </ItemGroup>
+</Project>

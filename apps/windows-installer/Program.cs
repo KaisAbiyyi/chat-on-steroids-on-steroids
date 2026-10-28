@@ -1,0 +1,1098 @@
+// 16PKG: signed release-authority installer. Production operations require OS administrator,
+// a pinned trusted Authenticode issuer and administrator-only NTFS installation slots.
+// CI uses disposable, self-signed TEST certificates. Neither passes release acceptance.
+using System.Diagnostics;
+using System.IO.Compression;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Security.Principal;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+
+internal static class Program
+{
+    const string UnsignedChannel = "UNSIGNED-MANUAL-SHA256";
+    static string? VerifiedManualDigest;
+    const int MaxFiles = 254;
+    const long MaxFile = 512L * 1024 * 1024;
+    const long MaxTotal = 1024L * 1024 * 1024;
+    static readonly StringComparer IC = StringComparer.OrdinalIgnoreCase;
+    static readonly Regex Hex40 = new("^[a-f0-9]{40}$", RegexOptions.CultureInvariant);
+    static readonly Regex Fingerprint = new("^[0-9A-F]{40,64}$", RegexOptions.CultureInvariant);
+    static readonly Regex SlotPattern = new("^slot-[a-f0-9]{32}$", RegexOptions.CultureInvariant);
+    record Identity(string Source, string Version, string ManifestSha, string Publisher);
+    record Selector(string Active, string? Previous, string Publisher, string HighWater, long Generation);
+
+    static int Main(string[] args)
+    {
+        try
+        {
+#if COS_16PKG_TEST
+            if (args.Length == 2 && args[0] == "--test-child") return TestChild(args[1]);
+            if (args.Length == 2 && args[0] == "--test-runchecked")
+            {
+                TestRunChecked(args[1]);
+                return 0;
+            }
+            // Use the identical production signature/proof implementation
+            // before mutating a disposable test root.
+            if (args.Length == 1 && args[0] == "--test-signed-issuer")
+            {
+                var testIssuerPin = ResourceText("CoSoS.TrustedPublisher", false).ToUpperInvariant();
+                Console.WriteLine("COSOS_16PKG_TEST_SIGNER_PHASE:signature");
+                CheckSignature(Environment.ProcessPath!, testIssuerPin);
+                Console.WriteLine("COSOS_16PKG_TEST_SIGNER_PHASE:embedded-identity");
+                var checkedIdentity = RunChecked(Environment.ProcessPath!, "--identity");
+                _ = JsonSerializer.Deserialize<Identity>(checkedIdentity)
+                    ?? throw new InvalidDataException("TEST issuer identity absent");
+                Console.WriteLine("COSOS_16PKG_TEST_SIGNER_PHASE:complete-proof");
+                var issuer = VerifyProof(Environment.ProcessPath!, testIssuerPin);
+                Console.WriteLine("COSOS_16PKG_SIGNED_ISSUER_PASS:" + issuer.Version);
+                return 0;
+            }
+#endif
+            if (args.Length == 1 && (args[0] == "--verify" || args[0] == "--identity" || args[0] == "--signed-manifest"))
+            {
+                var source = Source();
+                var payload = Archive();
+                var data = VerifyBundle(payload, source);
+                if (args[0] == "--signed-manifest")
+                {
+                    Console.WriteLine(Convert.ToBase64String(data["release.json"]));
+                    return 0;
+                }
+                var version = VersionOf(data["release.json"]);
+                var proof = new Identity(source, version, Hash(data["release.json"]), 
+                    ResourceText("CoSoS.TrustedPublisher", optional: true));
+                if (args[0] == "--identity")
+                    Console.WriteLine(JsonSerializer.Serialize(proof));
+                else Console.WriteLine(JsonSerializer.Serialize(new {
+                    status = "UNSIGNED_CANDIDATE_VERIFIED_ONLY", source, version,
+                    bundleSha256 = Hash(payload), accepted = false
+                }));
+                return 0;
+            }
+            if (args.Length != 4 || args[2] is not ("--publisher" or "--unsigned-sha256") ||
+                args[0] is not ("--install" or "--update" or "--rollback" or "--uninstall" or "--recover" or "--finalize"))
+                throw new InvalidDataException("Usage: --verify|--identity OR --install|--update|--rollback|--uninstall|--recover|--finalize D:\\owned-path (--publisher PIN | --unsigned-sha256 INDEPENDENT_SHA256)");
+            var op = args[0];
+            var path = SafeRoot(args[1]);
+            bool unsigned = args[2] == "--unsigned-sha256";
+            var caller = args[3].ToUpperInvariant();
+            var pin = unsigned ? UnsignedChannel :
+                ResourceText("CoSoS.TrustedPublisher", optional: false).ToUpperInvariant();
+            if (unsigned)
+            {
+                // Caller obtains this digest from independently verified release
+                // provenance. A hash advertised by this executable is not authority.
+                if (!Regex.IsMatch(caller, "^[0-9A-F]{64}$") ||
+                    !IC.Equals(caller, ExecutableHash(Environment.ProcessPath!)))
+                    throw new InvalidDataException("Unsigned installer did not match supplied SHA-256");
+                VerifiedManualDigest = caller.ToLowerInvariant();
+                Console.WriteLine("COSOS_UNSIGNED_MANUAL_HASH_ACKNOWLEDGED");
+            }
+            else if (!Fingerprint.IsMatch(caller) || !IC.Equals(caller, pin))
+                throw new InvalidDataException("Approved code signing publisher not configured or mismatched");
+            RequireAdmin();
+            if (!unsigned) CheckSignature(Environment.ProcessPath!, pin);
+            // Serialize all root mutations, including recovery, update, rollback
+            // and uninstall. The mutex is acquired only after elevation and
+            // publisher identity verification; multi-process races refuse.
+            var mutexName = @"Global\CoSoS-16PKG-" + Hash(Encoding.UTF8.GetBytes(
+                path.ToUpperInvariant())).Substring(0,48);
+            using var mutex = new Mutex(false,mutexName);
+            bool locked;
+            try { locked = mutex.WaitOne(TimeSpan.FromSeconds(30)); }
+            catch(AbandonedMutexException) { locked = true; }
+            if (!locked) throw new InvalidOperationException("Installer root is busy");
+            try
+            {
+            if (op == "--install" || op == "--update")
+                InstallOrUpdate(path, op == "--install", pin);
+            else if (op == "--rollback") Rollback(path, pin);
+            else if (op == "--finalize") FinalizePrevious(path, pin);
+            else if (op == "--recover") Recover(path, pin);
+            else Uninstall(path, pin);
+            }
+            finally { mutex.ReleaseMutex(); }
+            Console.WriteLine("COSOS_NATIVE_TRANSACTION_OK:" + op);
+            return 0;
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException
+             or ArgumentException or System.ComponentModel.Win32Exception or CryptographicException
+             or JsonException or InvalidOperationException)
+        {
+            Console.Error.WriteLine("COSOS_NATIVE_REFUSED:" + ex.GetType().Name + ":" + ex.Message);
+            return 3;
+        }
+    }
+
+    static byte[] Resource(string name)
+    {
+        using var input = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
+        if (input is null) throw new InvalidDataException("Required signed-build resource absent: " + name);
+        using var output = new MemoryStream();
+        input.CopyTo(output);
+        if (output.Length == 0 || output.Length > MaxTotal) throw new InvalidDataException("Resource size refused");
+        return output.ToArray();
+    }
+    static string ResourceText(string name, bool optional) =>
+        optional && Assembly.GetExecutingAssembly().GetManifestResourceStream(name) is null
+        ? "" : Encoding.UTF8.GetString(Resource(name)).Trim();
+    static string Source()
+    {
+        var sha = ResourceText("CoSoS.Source", false);
+        if (!Hex40.IsMatch(sha)) throw new InvalidDataException("Signed source id invalid");
+        return sha;
+    }
+    static byte[] Archive() => Resource("CoSoS.Payload");
+    static string Hash(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+    static string ExecutableHash(string file)
+    {
+        if ((File.GetAttributes(file) & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidDataException("Linked executable refused");
+        using var input = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+        if (input.Length <= 0 || input.Length > MaxTotal)
+            throw new InvalidDataException("Executable size refused");
+        return Convert.ToHexString(SHA256.HashData(input)).ToLowerInvariant();
+    }
+    static string UnsignedMarker(string proof) => proof + ".sha256";
+    static void VerifyUnsignedMarker(string proof)
+    {
+        var marker = UnsignedMarker(proof);
+        SafeAncestors(marker);
+        if (!File.Exists(marker) || new FileInfo(marker).Length != 64)
+            throw new InvalidDataException("Unsigned slot digest marker missing");
+        var expected = File.ReadAllText(marker).Trim();
+        if (!Regex.IsMatch(expected, "^[a-f0-9]{64}$") ||
+            !IC.Equals(expected, ExecutableHash(proof)))
+            throw new InvalidDataException("Protected unsigned slot executable digest mismatch");
+    }
+    static string FileHash(string file)
+    {
+        SafeAncestors(file);
+        using var input = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+        if (input.Length == 0 || input.Length > MaxFile) throw new InvalidDataException("File size refused");
+        return Convert.ToHexString(SHA256.HashData(input)).ToLowerInvariant();
+    }
+    static Version Semver(string text)
+    {
+        if (!Regex.IsMatch(text, @"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"))
+            throw new InvalidDataException("Only canonical x.y.z version allowed");
+        return Version.Parse(text);
+    }
+    static bool SafeMember(string name)
+    {
+        if (name.Length is < 1 or > 240 || name.StartsWith('/')) return false;
+        foreach(var part in name.Split('/'))
+        {
+            if (part.Length==0 || part is "." or ".." || part.EndsWith('.') ||
+                part.EndsWith(' ') || part.Any(ch=>ch<32 || "<>:\\\"|?*".Contains(ch)) ||
+                Regex.IsMatch(part.Split('.')[0],
+                    @"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$",
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                return false;
+        }
+        return true;
+    }
+
+    static void SafeAncestors(string full)
+    {
+        full = Path.GetFullPath(full);
+        if (!IC.Equals(Path.GetPathRoot(full), @"D:\"))
+            throw new InvalidDataException("Only physical or disposable D: task-owned paths are allowed");
+        string walk = @"D:\";
+        foreach (var component in full.Substring(3).Split('\\', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (component is "." or "..") throw new InvalidDataException("Unsafe ancestor");
+            walk = Path.Combine(walk, component);
+            if ((File.Exists(walk) || Directory.Exists(walk)) &&
+                (File.GetAttributes(walk) & FileAttributes.ReparsePoint) != 0)
+                throw new InvalidDataException("Linked ancestor refused");
+        }
+    }
+    static string SafeRoot(string value)
+    {
+        if (!Path.IsPathFullyQualified(value)) throw new InvalidDataException("Absolute path required");
+        // Reject explicit traversal before GetFullPath erases the original
+        // components. A valid absolute installer root is never a relative walk.
+        if (value.Replace('/', '\\').Split('\\', StringSplitOptions.RemoveEmptyEntries)
+                .Any(part => part is "." or ".."))
+            throw new InvalidDataException("Traversal components refused");
+        var full = Path.GetFullPath(value).TrimEnd('\\');
+        SafeAncestors(full);
+        if (full.Length < 9) throw new InvalidDataException("Refuse drive/top-level installation");
+        return full;
+    }
+
+    static (Dictionary<string, (string Hash, long Size)> Files, string Version) Index(byte[] manifest, string source)
+    {
+        if (manifest.Length > 128 * 1024) throw new InvalidDataException("Manifest oversized");
+        using var parsed = JsonDocument.Parse(manifest);
+        var root = parsed.RootElement;
+        if (root.ValueKind != JsonValueKind.Object || root.EnumerateObject().Count() != 6
+            || root.GetProperty("schema").GetString() != "cosos.release.v1"
+            || root.GetProperty("product").GetString() != "CoSoS"
+            || root.GetProperty("platform").GetString() != "windows-x64"
+            || root.GetProperty("source_sha").GetString() != source || !Hex40.IsMatch(source))
+            throw new InvalidDataException("Release index identity invalid");
+        var ver = root.GetProperty("version").GetString() ?? "";
+        Semver(ver);
+        var entries = root.GetProperty("files");
+        if (entries.ValueKind != JsonValueKind.Array || entries.GetArrayLength() is < 5 or > MaxFiles)
+            throw new InvalidDataException("Invalid release index count");
+        var files = new Dictionary<string, (string, long)>(IC);
+        foreach (var element in entries.EnumerateArray())
+        {
+            if (element.EnumerateObject().Count() != 3) throw new InvalidDataException("Unexpected entry schema");
+            string path = element.GetProperty("path").GetString() ?? "";
+            string digest = element.GetProperty("sha256").GetString() ?? "";
+            long bytes = element.GetProperty("bytes").GetInt64();
+            if (!SafeMember(path) || digest.Length != 64 || !digest.All(Uri.IsHexDigit)
+                || bytes <= 0 || bytes > MaxFile || !files.TryAdd(path, (digest, bytes)))
+                throw new InvalidDataException("Bad index path/digest");
+        }
+        foreach (var required in new[] { "bin/cos-rust.exe","renderer/WindowsRenderer.exe",
+                 "renderer/WindowsRenderer.dll","renderer/renderer-integrity.json","LICENSE.txt" })
+            if (!files.ContainsKey(required)) throw new InvalidDataException("Incomplete desktop app payload");
+        return (files, ver);
+    }
+    static string VersionOf(byte[] manifest)
+    {
+        using var j = JsonDocument.Parse(manifest);
+        var v = j.RootElement.GetProperty("version").GetString() ?? "";
+        Semver(v);
+        return v;
+    }
+
+    static Dictionary<string, byte[]> VerifyBundle(byte[] archive, string source)
+    {
+        var payload = new Dictionary<string, byte[]>(IC);
+        using var zip = new ZipArchive(new MemoryStream(archive, false), ZipArchiveMode.Read);
+        long total = 0;
+        if (zip.Entries.Count > MaxFiles + 1) throw new InvalidDataException("ZIP count refused");
+        foreach (var e in zip.Entries)
+        {
+            if (!SafeMember(e.FullName) || e.FullName.EndsWith('/') || e.Length is <= 0 or > MaxFile
+                || (e.ExternalAttributes >> 16 & 0xF000) == 0xA000)
+                throw new InvalidDataException("Unsafe archive member");
+            total += e.Length;
+            if (total > MaxTotal) throw new InvalidDataException("Expanded ZIP exceeded bound");
+            using var stream = e.Open();
+            using var result = new MemoryStream();
+            stream.CopyTo(result);
+            if (result.Length != e.Length || !payload.TryAdd(e.FullName, result.ToArray()))
+                throw new InvalidDataException("Duplicated or truncated ZIP member");
+        }
+        if (!payload.TryGetValue("release.json", out var manifest))
+            throw new InvalidDataException("Missing release manifest");
+        var index = Index(manifest, source).Files;
+        if (index.Count != payload.Count - 1) throw new InvalidDataException("Unexpected ZIP member");
+        foreach (var (name, pair) in index)
+        {
+            if (!payload.TryGetValue(name, out var bytes) || bytes.LongLength != pair.Size
+                || !IC.Equals(Hash(bytes), pair.Hash))
+                throw new InvalidDataException("Payload hash mismatch");
+        }
+        using var inner = JsonDocument.Parse(payload["renderer/renderer-integrity.json"]);
+        if (inner.RootElement.GetProperty("sourceSha").GetString() != source)
+            throw new InvalidDataException("15HOST renderer source mismatch");
+        return payload;
+    }
+
+    static string Powershell() => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\powershell.exe");
+    // A valid <=128KiB manifest encodes to <175KiB of base64 stdout.
+    // Read BOTH redirected pipes concurrently while the process runs.
+    static string RunChecked(string binary, params string[] args) =>
+        RunCheckedBounded(binary, TimeSpan.FromSeconds(30), args);
+
+    static string RunCheckedBounded(string binary, TimeSpan timeout, params string[] args)
+    {
+        var psi = new ProcessStartInfo(binary) { UseShellExecute = false, CreateNoWindow = true,
+            RedirectStandardOutput = true, RedirectStandardError = true };
+        // Windows PowerShell 5.1 must load its OS-supplied security module.
+        // The parent launcher can inherit a PowerShell 7 or attacker-selected
+        // PSModulePath; never trust it for Authenticode verification.
+        if (string.Equals(binary, Powershell(), StringComparison.OrdinalIgnoreCase))
+        {
+            var systemModules = Path.Combine(Environment.GetFolderPath(
+                Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\Modules");
+            if (!Directory.Exists(systemModules))
+                throw new InvalidDataException("System signature-verification modules unavailable");
+            psi.Environment["PSModulePath"] = systemModules;
+        }
+        foreach (var a in args) psi.ArgumentList.Add(a);
+        using var process = Process.Start(psi) ??
+            throw new InvalidDataException("Required Windows verifier unavailable");
+        using var deadline = new CancellationTokenSource(timeout);
+        async Task<string> Drain(StreamReader reader, int limit, CancellationToken ct)
+        {
+            var output = new StringBuilder();
+            var buffer = new char[8192];
+            while (true)
+            {
+                int n = await reader.ReadAsync(buffer.AsMemory(), ct);
+                if (n == 0) return output.ToString();
+                if (n > limit - output.Length)
+                {
+                    deadline.Cancel();
+                    throw new InvalidDataException("Verifier output exceeded bound");
+                }
+                output.Append(buffer, 0, n);
+            }
+        }
+        var stdout = Drain(process.StandardOutput, 256 * 1024, deadline.Token);
+        var stderr = Drain(process.StandardError, 64 * 1024, deadline.Token);
+        try
+        {
+            Task.WhenAll(process.WaitForExitAsync(deadline.Token), stdout, stderr)
+                .GetAwaiter().GetResult();
+            if (process.ExitCode != 0)
+            {
+#if COS_16PKG_TEST
+                Console.Error.WriteLine("COSOS_16PKG_TEST_CHILD_REJECTED:" +
+                    Path.GetFileName(binary) + ":exit=" + process.ExitCode);
+                // Redact drive-root paths and truncate; TEST-only evidence.
+                var errText = stderr.GetAwaiter().GetResult();
+                var redacted = Regex.Replace(errText, @"[A-Za-z]:\\[^\s""']+", "<path>")
+                    .Replace('\r',' ').Replace('\n',' ');
+                Console.Error.WriteLine("COSOS_16PKG_TEST_CHILD_ERROR:" +
+                    redacted.Substring(0, Math.Min(redacted.Length, 600)));
+#endif
+                throw new InvalidDataException("Trusted Windows operation refused");
+            }
+            return stdout.GetAwaiter().GetResult().Trim();
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested)
+        {
+            throw new InvalidDataException("Verifier timeout or oversized output");
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                try { process.Kill(entireProcessTree: true); }
+                catch (InvalidOperationException) { /* already exited */ }
+                catch (System.ComponentModel.Win32Exception) { /* checked by reap */ }
+                if (!process.WaitForExit(5000))
+                    throw new InvalidDataException("Verifier failed to reap after kill");
+            }
+        }
+    }
+#if COS_16PKG_TEST
+    // Test fixture operations compile only when COS_16PKG_TEST is explicitly set.
+    static int TestChild(string mode)
+    {
+        switch (mode)
+        {
+            case "large-stdout": Console.Out.Write(new string('x', 200 * 1024)); break;
+            case "large-stderr":
+                Console.Error.Write(new string('e', 48 * 1024));
+                Console.Out.Write("ACCEPTABLE");
+                break;
+            case "oversized-stdout": Console.Out.Write(new string('x', 512 * 1024)); break;
+            case "oversized-stderr": Console.Error.Write(new string('e', 128 * 1024)); break;
+            case "hang": Thread.Sleep(TimeSpan.FromMinutes(1)); break;
+            case "failure": Console.Out.Write("ACCEPTABLE"); return 7;
+            case "malformed": Console.Out.Write("not-json"); break;
+            default: throw new InvalidDataException("Unknown test mode");
+        }
+        return 0;
+    }
+    static void TestRunChecked(string mode)
+    {
+        bool mustReject = mode is "oversized-stdout" or "oversized-stderr" or "hang" or "failure" or "malformed";
+        var watch = Stopwatch.StartNew();
+        try
+        {
+            var result = RunCheckedBounded(Environment.ProcessPath!,
+                mode == "hang" ? TimeSpan.FromSeconds(2) : TimeSpan.FromSeconds(10),
+                "--test-child", mode);
+            if (mode == "malformed") _ = JsonSerializer.Deserialize<Identity>(result);
+            if (mustReject || mode == "large-stdout" && result.Length != 200 * 1024
+                || mode == "large-stderr" && result != "ACCEPTABLE")
+                throw new InvalidOperationException("Verifier self-test expectation failed");
+        }
+        catch (Exception ex) when (mustReject && ex is InvalidDataException or JsonException)
+        {
+            // Refused outputs, processes, and responses never authorize a mutation.
+        }
+        if (mode == "hang" && watch.Elapsed > TimeSpan.FromSeconds(8))
+            throw new InvalidOperationException("Timeout child was not reaped promptly");
+        Console.WriteLine("COSOS_16PKG_RUN_CHECKED_PASS:" + mode);
+    }
+#endif
+
+    static string PS(string script) => RunChecked(Powershell(), "-NoProfile","-NonInteractive",
+        "-EncodedCommand",Convert.ToBase64String(Encoding.Unicode.GetBytes(script)));
+    static string Quote(string value) => "'" + value.Replace("'","''") + "'";
+    static void CheckSignature(string path, string pinned)
+    {
+        if (path.StartsWith(@"D:\",StringComparison.OrdinalIgnoreCase)) SafeAncestors(path);
+        // Trusted TEST certificates can be used for disposable acceptance,
+        // but can never become authorized production release signers.
+        // Production requires a real trusted CA-backed code signing identity.
+        var signerPolicy = "";
+#if !COS_16PKG_TEST
+        signerPolicy = "if($s.SignerCertificate.Subject -eq $s.SignerCertificate.Issuer"
+            + " -or $s.SignerCertificate.Subject -match 'TEST[-_ ]?ONLY'){exit 9};";
+#endif
+        var result = PS("$ErrorActionPreference='Stop';$s=Get-AuthenticodeSignature -LiteralPath "
+              + Quote(path) + ";if($s.Status -ne 'Valid' -or !$s.SignerCertificate){exit 7};"
+              + signerPolicy + "[Console]::Out.Write($s.SignerCertificate.Thumbprint)");
+        if (!IC.Equals(result,pinned)) throw new InvalidDataException("Untrusted code signing publisher");
+    }
+    static void RequireAdmin()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        if (!new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator))
+            throw new InvalidDataException("Administrator token required: same-user slot security boundary");
+    }
+    static void Protect(string directory)
+    {
+        SafeAncestors(directory);
+        if (!Directory.Exists(directory)) throw new InvalidDataException("Missing protected root");
+        // icacls ACL establishes NTFS admin/system ownership boundary. Never grants
+        // Users, Authenticated Users, Creator Owner, Everyone, or inherited ACEs.
+        string icacls = Path.Combine(Environment.GetFolderPath(
+            Environment.SpecialFolder.System), "icacls.exe");
+        RunChecked(icacls, directory, "/inheritance:r", "/grant:r",
+            "*S-1-5-32-544:(OI)(CI)F", "*S-1-5-18:(OI)(CI)F");
+        RunChecked(icacls, directory, "/setowner", "*S-1-5-32-544");
+        VerifyProtection(directory);
+    }
+    static void VerifyProtection(string directory)
+    {
+        SafeAncestors(directory);
+        // Inspects *explicit effective* ACL, refusing writable non-admin principals
+        // and inherited permissions. OS admin is the documented trust boundary.
+        var script = "$a=Get-Acl -LiteralPath " + Quote(directory) + ";"
+            + "$owner=try{([Security.Principal.NTAccount]$a.Owner).Translate([Security.Principal.SecurityIdentifier]).Value}catch{$a.Owner};"
+            + "if(!$a.AreAccessRulesProtected -or $owner -ne 'S-1-5-32-544'){exit 5};"
+            + "$allowed=@('S-1-5-32-544','S-1-5-18');"
+            + "foreach($rule in $a.Access){"
+            + "$sid=try{$rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value}catch{exit 5};"
+            + "if($sid -notin $allowed){exit 5};}"
+            + "[Console]::Write('ACL_OK')";
+        if (PS(script) != "ACL_OK")
+            throw new InvalidDataException("Install directory ACL is not admin/SYSTEM-only");
+    }
+
+    static void SyntheticCrash(string point)
+    {
+#if COS_16PKG_TEST
+        if (Environment.GetEnvironmentVariable("COSOS_16PKG_FAIL_AT") == point)
+        {
+            // Exit bypasses managed finally blocks (power-loss transaction
+            // simulation) without invoking interactive Windows Error Reporting.
+            Console.Error.WriteLine("16PKG_SYNTHETIC_ABRUPT_EXIT:" + point);
+            Environment.Exit(197);
+        }
+#endif
+    }
+
+    static string Icacls() => Path.Combine(Environment.GetFolderPath(
+        Environment.SpecialFolder.System),"icacls.exe");
+    static void SealTree(string root)
+    {
+        // A user who owns a child file may override its DACL even if the parent
+        // is locked. Assign every installed file/directory owner to the built-in
+        // Administrators group BEFORE the slot or selector becomes active.
+        Inventory(root); // bounded, refuses linked entries before recursive ACL changes
+        RunChecked(Icacls(),root,"/setowner","*S-1-5-32-544","/T");
+        VerifyOwnedTree(root);
+    }
+    static void VerifyOwnedTree(string root)
+    {
+        Inventory(root);
+        var script="$ErrorActionPreference='Stop';$root="+Quote(root)+";"
+            + "$paths=@(Get-Item -LiteralPath $root -Force);"
+            + "$paths+=@(Get-ChildItem -LiteralPath $root -Recurse -Force);"
+            + "foreach($p in $paths){"
+            + "if(($p.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){exit 8};"
+            + "$acl=Get-Acl -LiteralPath $p.FullName;"
+            + "$owner=try{([Security.Principal.NTAccount]$acl.Owner).Translate([Security.Principal.SecurityIdentifier]).Value}catch{$acl.Owner};"
+            + "if($owner -ne 'S-1-5-32-544'){exit 8};"
+            + "foreach($rule in $acl.Access){"
+            + "$sid=try{$rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value}catch{exit 8};"
+            + "if($sid -notin @('S-1-5-32-544','S-1-5-18')){exit 8};"
+            + "}"
+            + "};[Console]::Write('SEALED')";
+        if(PS(script)!="SEALED")
+            throw new InvalidDataException("Installed child file ownership or DACL not protected");
+    }
+    static void SealStateTemp(string path)
+    {
+        // New selector is fully sealed before the atomic swap, so no writable
+        // same-user state is ever selected.
+        RunChecked(Icacls(),path,"/inheritance:r","/grant:r",
+            "*S-1-5-32-544:F","*S-1-5-18:F");
+        RunChecked(Icacls(),path,"/setowner","*S-1-5-32-544");
+    }
+
+    static string SelectorPath(string root) => Path.Combine(root,"active.json");
+    static bool SlotName(string name) => SlotPattern.IsMatch(name);
+    static Selector ReadState(string root, string publisher)
+    {
+        VerifyProtection(root);
+        var path = SelectorPath(root);
+        SafeAncestors(path);
+        if (!File.Exists(path) || new FileInfo(path).Length > 4096)
+            throw new InvalidDataException("Missing or oversized protected state");
+        // Inventory verifies child ownership and permissions, not only root ACL.
+        VerifyOwnedTree(root);
+        var state = JsonSerializer.Deserialize<Selector>(File.ReadAllBytes(path))
+            ?? throw new InvalidDataException("Invalid transaction state");
+        if (!SlotName(state.Active) || state.Previous is not null &&
+             (!SlotName(state.Previous) || state.Previous == state.Active)
+             || state.Publisher != publisher || state.Generation < 1)
+            throw new InvalidDataException("Invalid state/publisher");
+        Semver(state.HighWater);
+        return state;
+    }
+    static void WriteState(string root, Selector state)
+    {
+        VerifyProtection(root);
+        var tmp = Path.Combine(root,"state-" + Guid.NewGuid().ToString("N") + ".tmp");
+        File.WriteAllBytes(tmp,JsonSerializer.SerializeToUtf8Bytes(state));
+        SealStateTemp(tmp);
+        File.Move(tmp,SelectorPath(root),true);
+    }
+
+    static (List<string> Files, List<string> Dirs) Inventory(string root)
+    {
+        var files = new List<string>();
+        var dirs = new List<string>();
+        void Walk(string parent,int depth)
+        {
+            if (depth > 12) throw new InvalidDataException("Directory depth exceeded");
+            SafeAncestors(parent);
+            foreach (var item in Directory.GetFileSystemEntries(parent))
+            {
+                SafeAncestors(item);
+                var attr = File.GetAttributes(item);
+                if ((attr & FileAttributes.ReparsePoint) != 0)
+                    throw new InvalidDataException("Junction or symlink refused");
+                if ((attr & FileAttributes.Directory) != 0) { dirs.Add(item); Walk(item,depth+1); }
+                else files.Add(item);
+                if (files.Count > MaxFiles*4 || dirs.Count > MaxFiles*4)
+                    throw new InvalidDataException("Inventory bound exceeded");
+            }
+        }
+        Walk(root,0);
+        return (files,dirs);
+    }
+    static void CopyFile(string src,string dst)
+    {
+        // The invoking, already verified signed installer may reside outside D:.
+        // The installed destination must never escape the bounded D: root.
+        if (!string.Equals(Path.GetFullPath(src),Path.GetFullPath(Environment.ProcessPath!),
+             StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Only this signed installer may authorize a slot");
+        if ((File.GetAttributes(src) & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidDataException("Linked signed installer source refused");
+        SafeAncestors(dst);
+        Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+        using var source = new FileStream(src,FileMode.Open,FileAccess.Read,FileShare.Read);
+        using var dest = new FileStream(dst,FileMode.CreateNew,FileAccess.Write,FileShare.None);
+        source.CopyTo(dest);
+    }
+    static void Extract(string directory,Dictionary<string,byte[]> payload)
+    {
+        Directory.CreateDirectory(directory);
+        foreach (var (name,bytes) in payload)
+        {
+            var file = Path.GetFullPath(Path.Combine(directory,name.Replace('/','\\')));
+            if (!file.StartsWith(directory + "\\",StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("Extraction escaped release slot");
+            SafeAncestors(file);
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+            using var outFile = new FileStream(file,FileMode.CreateNew,FileAccess.Write,FileShare.None);
+            outFile.Write(bytes);
+        }
+    }
+    static string SignedProof(string root,string slot) => Path.Combine(root,"slots",slot,"authority","issuer.exe");
+    static Identity VerifyProof(string path,string publisher)
+    {
+        if (publisher == UnsignedChannel) VerifyUnsignedMarker(path);
+        else CheckSignature(path,publisher);
+        // Signed *proof executable* carries immutable embedded release manifest,
+        // source commit, and publisher binding. Never trust a writable D: JSON.
+        var raw = RunChecked(path,"--identity");
+        var proof = JsonSerializer.Deserialize<Identity>(raw)
+            ?? throw new InvalidDataException("Signed installer identity absent");
+        if (!Hex40.IsMatch(proof.Source) ||
+            (publisher == UnsignedChannel ? proof.Publisher != "" :
+                !Fingerprint.IsMatch(proof.Publisher) || proof.Publisher != publisher) ||
+            proof.ManifestSha.Length != 64
+            || !proof.ManifestSha.All(Uri.IsHexDigit))
+            throw new InvalidDataException("Issuer proof identity/source invalid");
+        Semver(proof.Version);
+        if (publisher == UnsignedChannel) VerifyUnsignedMarker(path);
+        else CheckSignature(path,publisher);
+        return proof;
+    }
+    static Identity VerifySlot(string root,string name,string publisher)
+    {
+        if (!SlotName(name)) throw new InvalidDataException("Bad slot id");
+        VerifyProtection(root);
+        var slot = Path.Combine(root,"slots",name);
+        SafeAncestors(slot);
+        VerifyOwnedTree(slot);
+        var proofPath = SignedProof(root,name);
+        var proof = VerifyProof(proofPath,publisher);
+        var manifest = Path.Combine(slot,"release.json");
+        if (FileHash(manifest) != proof.ManifestSha)
+            throw new InvalidDataException("Installed manifest not authorized by signed issuer");
+        var indexed = Index(File.ReadAllBytes(manifest),proof.Source);
+        if (indexed.Version != proof.Version)
+            throw new InvalidDataException("Manifest version differs from issuer proof");
+        var files = Inventory(slot).Files;
+        if (files.Count != indexed.Files.Count + (publisher == UnsignedChannel ? 3 : 2))
+            throw new InvalidDataException("Unexpected installed slot contents");
+        foreach (var (relative,info) in indexed.Files)
+        {
+            var file = Path.Combine(slot,relative.Replace('/','\\'));
+            SafeAncestors(file);
+            if (!File.Exists(file) || new FileInfo(file).Length != info.Size
+                || !IC.Equals(FileHash(file),info.Hash))
+                throw new InvalidDataException("Installed binary/manifest mismatch");
+        }
+        return proof;
+    }
+
+    static void CleanOwnedSlot(string root,string slot,string publisher,bool stagingOnly=false)
+    {
+        // Idempotent deletion supports recovery after sudden termination at
+        // any deletion step. A missing file is okay ONLY when it was listed
+        // in the trusted manifest embedded in an issuer-signed installer.
+        VerifyProtection(root);
+        if (!SlotName(slot)) throw new InvalidDataException("Invalid slot cleanup id");
+        string directory=Path.Combine(root,"slots",slot);
+        if (!Directory.Exists(directory)) return;
+        SafeAncestors(directory);
+        string authority=SignedProof(root,slot);
+        var inventory=Inventory(directory);
+        if (!File.Exists(authority))
+        {
+            // Interrupted unsigned issuer removal can leave only its sealed marker.
+            var marker = UnsignedMarker(authority);
+            // If an interruption removed the final proof, the only legitimate
+            // remaining directory is authority/. Refuse ALL other directories
+            // (including unowned empty ones) before deleting the marker.
+            var authorityDirectory = Path.GetDirectoryName(authority)!;
+            if (inventory.Dirs.Any(p=>!IC.Equals(p,authorityDirectory)))
+                throw new InvalidDataException("Unowned directories without issuer proof");
+            if (publisher == UnsignedChannel && inventory.Files.Count == 1 &&
+                IC.Equals(inventory.Files[0],marker))
+                File.Delete(marker);
+            else if (inventory.Files.Count != 0)
+                throw new InvalidDataException("Untrusted files remain without issuer proof");
+        }
+        else
+        {
+            var proof=VerifyProof(authority,publisher);
+            var manifest=Convert.FromBase64String(RunChecked(authority,"--signed-manifest"));
+            if (Hash(manifest) != proof.ManifestSha)
+                throw new InvalidDataException("Deleted-slot source manifest not signed");
+            var index=Index(manifest,proof.Source);
+            if (index.Version != proof.Version)
+                throw new InvalidDataException("Deleted-slot version mismatch");
+            var allowed=new HashSet<string>(IC) {authority,Path.Combine(directory,"release.json")};
+            if (publisher == UnsignedChannel) allowed.Add(UnsignedMarker(authority));
+            foreach(var name in index.Files.Keys)
+                allowed.Add(Path.Combine(directory,name.Replace('/','\\')));
+            if (inventory.Files.Any(path=>!allowed.Contains(path)))
+                throw new InvalidDataException("Unexpected files during slot cleanup");
+            var allowedDirs=new HashSet<string>(IC);
+            foreach(var path in allowed)
+            {
+                var parent=Path.GetDirectoryName(path);
+                while(parent is not null && !IC.Equals(parent,directory))
+                {
+                    allowedDirs.Add(parent);
+                    parent=Path.GetDirectoryName(parent);
+                }
+            }
+            // Crash-recovery may have already pruned legitimate empty children
+            // while the issuer remained. An independently verified issuer and
+            // the still-sealed ACL authorize only this subset, never new dirs.
+            if (inventory.Dirs.Any(path=>!allowedDirs.Contains(path)))
+                throw new InvalidDataException("Unexpected empty/unowned directory during cleanup");
+            string installedManifest=Path.Combine(directory,"release.json");
+            if (!stagingOnly && File.Exists(installedManifest) && FileHash(installedManifest)!=proof.ManifestSha)
+                throw new InvalidDataException("Installed release.json modified during cleanup");
+            foreach(var (name,item) in index.Files)
+            {
+                var path=Path.Combine(directory,name.Replace('/','\\'));
+                SafeAncestors(path);
+                if (!File.Exists(path)) continue;
+                if (!stagingOnly && (new FileInfo(path).Length!=item.Size || !IC.Equals(FileHash(path),item.Hash)))
+                    throw new InvalidDataException("Installed package mutated during cleanup");
+                // A never-published staging copy may contain truncated bytes
+                // after power loss; signed proof still authenticates allowed PATHS,
+                // and the admin-only staging root owns all of them.
+            }
+            // Complete preflight precedes ALL deletion; no unowned data touched.
+            foreach(var name in index.Files.Keys)
+            {
+                var file=Path.Combine(directory,name.Replace('/','\\'));
+                if (File.Exists(file)) File.Delete(file);
+            }
+            if (File.Exists(installedManifest)) File.Delete(installedManifest);
+            // Prune known emptied payload folders while the verified issuer
+            // still survives. If the process stops after deleting authority,
+            // recovery can only remove its one allowlisted empty directory.
+            var authorityDirectory = Path.GetDirectoryName(authority)!;
+            foreach (var child in Inventory(directory).Dirs.OrderByDescending(x=>x.Length))
+            {
+                if (IC.Equals(child,authorityDirectory)) continue;
+                if (!Directory.EnumerateFileSystemEntries(child).Any()) Directory.Delete(child);
+                else throw new InvalidDataException("Unowned nonempty child preserved");
+            }
+            File.Delete(authority);
+            if (publisher == UnsignedChannel && File.Exists(UnsignedMarker(authority)))
+                File.Delete(UnsignedMarker(authority));
+        }
+        foreach(var child in Inventory(directory).Dirs.OrderByDescending(x=>x.Length))
+        {
+            if (!Directory.EnumerateFileSystemEntries(child).Any()) Directory.Delete(child);
+            else throw new InvalidDataException("Unowned directory could not be removed");
+        }
+        if (Directory.EnumerateFileSystemEntries(directory).Any())
+            throw new InvalidDataException("Unowned files or directories must survive");
+        Directory.Delete(directory);
+    }
+    static void RecoverStages(string root,string publisher)
+    {
+        // Same install-root basename + random stage ID; never scan other
+        // products, profiles or unrelated D: directories.
+        var parent=Path.GetDirectoryName(root)!;
+        SafeAncestors(parent);
+        var baseName=".cosos-16pkg-"+Path.GetFileName(root)+"-stage-";
+        foreach(var stage in Directory.GetDirectories(parent))
+        {
+            string name=Path.GetFileName(stage);
+            if (!name.StartsWith(baseName,StringComparison.OrdinalIgnoreCase)
+                || !Regex.IsMatch(name.Substring(baseName.Length),"^[a-f0-9]{32}$"))
+                continue;
+            SafeAncestors(stage);
+            // Name alone is never an ownership proof. An unprotected empty
+            // sibling could have been created by someone else on writable D:.
+            // An interruption before Protect is quarantined for explicit
+            // inspection; only ACL-sealed task stages can be deleted.
+            VerifyProtection(stage);
+            if (!Directory.EnumerateFileSystemEntries(stage).Any())
+            {
+                Directory.Delete(stage);
+                continue;
+            }
+            var inventory=Inventory(stage);
+            var stagingSlots=Path.Combine(stage,"slots");
+            if(!Directory.Exists(stagingSlots))
+            {
+                if(inventory.Files.Count!=0 || inventory.Dirs.Count!=0)
+                    throw new InvalidDataException("Unrecognized incomplete stage quarantined");
+                Directory.Delete(stage);
+                continue;
+            }
+            var containers=Directory.GetDirectories(stagingSlots);
+            // A crash just after slot promotion leaves only this empty
+            // staging shell; the signer-verified promoted slot is handled
+            // as an orphan under the target root below.
+            if (containers.Length==0 && inventory.Files.Count==0 &&
+                inventory.Dirs.Count==1 && IC.Equals(inventory.Dirs[0],stagingSlots))
+            {
+                Directory.Delete(stagingSlots);
+                Directory.Delete(stage);
+                continue;
+            }
+            if (containers.Length!=1 || !SlotName(Path.GetFileName(containers[0])))
+                throw new InvalidDataException("Unrecognized staged transaction; preserved");
+            var slot=Path.GetFileName(containers[0]);
+            var authority=SignedProof(stage,slot);
+            if (!File.Exists(authority) ||
+                (inventory.Files.Count==1 && IC.Equals(inventory.Files[0],authority)))
+            {
+                // An interruption during the initial authority-file copy can
+                // leave a partial/unsigned proof. Since the protected unique
+                // staging directory contains no payload files, only this
+                // specifically named owned temporary authority is removable.
+                if(inventory.Files.Any(p=>!IC.Equals(p,authority)))
+                    throw new InvalidDataException("Unrecognized data in unsigned stage");
+                if(File.Exists(authority)) File.Delete(authority);
+                foreach(var dir in inventory.Dirs.OrderByDescending(p=>p.Length))
+                {
+                    if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
+                    else throw new InvalidDataException("Unrecognized staged directory preserved");
+                }
+            }
+            else
+            {
+                // A signed authority proves the exact allowlist even if the
+                // staged payload's individual file copy was interrupted.
+                CleanOwnedSlot(stage,slot,publisher,stagingOnly:true);
+                var stateFile=SelectorPath(stage);
+                if (File.Exists(stateFile))
+                {
+                    var selector=ReadState(stage,publisher);
+                    if(selector.Active!=slot || selector.Previous is not null)
+                        throw new InvalidDataException("Staged selector did not belong to release");
+                    File.Delete(stateFile);
+                }
+                var slots=Path.Combine(stage,"slots");
+                if (Directory.Exists(slots) && !Directory.EnumerateFileSystemEntries(slots).Any())
+                    Directory.Delete(slots);
+            }
+            if (Directory.EnumerateFileSystemEntries(stage).Any())
+                throw new InvalidDataException("Unowned staging data preserved");
+            Directory.Delete(stage);
+        }
+    }
+    static void Recover(string root,string publisher)
+    {
+        RecoverStages(root,publisher);
+        var tombstone = root + "-uninstalling";
+        if (Directory.Exists(tombstone))
+        {
+            if (Directory.Exists(root))
+                throw new InvalidDataException("Ambiguous live and uninstalling roots");
+            CompleteUninstall(tombstone,publisher);
+            return;
+        }
+        if (!Directory.Exists(root)) return;
+        var state = ReadState(root,publisher);
+        VerifySlot(root,state.Active,publisher);
+        if (state.Previous is not null) VerifySlot(root,state.Previous,publisher);
+        var slots = Path.Combine(root,"slots");
+        foreach (var directory in Directory.GetDirectories(slots))
+        {
+            var name = Path.GetFileName(directory);
+            if (!SlotName(name)) throw new InvalidDataException("Unexpected slot directory");
+            if (name == state.Active || name == state.Previous) continue;
+            // Orphan from before atomic publish; only delete if completely
+            // verified by its own signed issuer proof. Never delete unowned.
+            CleanOwnedSlot(root,name,publisher);
+        }
+    }
+    static void InstallOrUpdate(string root,bool install,string publisher)
+    {
+        var payload = VerifyBundle(Archive(),Source());
+        var manifest = payload["release.json"];
+        var version = VersionOf(manifest);
+        if (publisher == UnsignedChannel &&
+            (VerifiedManualDigest is null ||
+             !IC.Equals(ExecutableHash(Environment.ProcessPath!),VerifiedManualDigest)))
+            throw new InvalidDataException("Unsigned executable changed after verification");
+        var signedCurrent = publisher == UnsignedChannel
+            ? new Identity(Source(),version,Hash(manifest),"")
+            : VerifyProof(Environment.ProcessPath!,publisher);
+        if (signedCurrent.Source != Source() || signedCurrent.Version != version ||
+            signedCurrent.ManifestSha != Hash(manifest))
+            throw new InvalidDataException("Self signed release manifest/source mismatch");
+        if (Directory.Exists(root+"-uninstalling") || File.Exists(root+"-uninstalling"))
+            throw new InvalidDataException("Incomplete protected uninstall must be recovered first");
+        if (install && (Directory.Exists(root) || File.Exists(root)))
+            throw new InvalidDataException("Target exists; never overwrite");
+        if (!install && !Directory.Exists(root))
+            throw new InvalidDataException("Installed target missing");
+        // Updates are prepared in an isolated sibling directory. A crash during
+        // copy never leaves a partial, untrusted slot under the active root.
+        var stage = Path.Combine(Path.GetDirectoryName(root)!,
+            ".cosos-16pkg-" + Path.GetFileName(root) + "-stage-" + Guid.NewGuid().ToString("N"));
+        var slot = "slot-" + Guid.NewGuid().ToString("N");
+        var folder = Path.Combine(stage,"slots",slot);
+        var publishedSlot = false;
+        var selectorPublished = false;
+        Selector? previous = null;
+        if (!install)
+        {
+            Recover(root,publisher);
+            previous = ReadState(root,publisher);
+            var active = VerifySlot(root,previous.Active,publisher);
+            if (Semver(version) <= Semver(previous.HighWater) || Semver(version) <= Semver(active.Version))
+                throw new InvalidDataException("Downgrade/replay refused by high-water version");
+            if (previous.Previous is not null)
+                FinalizePrevious(root,publisher);
+            previous = ReadState(root,publisher);
+        }
+        try
+        {
+            Directory.CreateDirectory(stage);
+            Protect(stage);
+            // Only an ACL-authenticated stage can be autonomously recovered.
+            SyntheticCrash("after_stage_protect");
+            Directory.CreateDirectory(folder);
+            // Install the cryptographic authority first. An interrupted
+            // extraction can then be pruned against the signed embedded index.
+            var proof = Path.Combine(folder,"authority","issuer.exe");
+            CopyFile(Environment.ProcessPath!,proof);
+            if (publisher == UnsignedChannel)
+            {
+                if (!IC.Equals(ExecutableHash(proof),VerifiedManualDigest))
+                    throw new InvalidDataException("Copied unsigned executable changed");
+                File.WriteAllText(UnsignedMarker(proof),VerifiedManualDigest!);
+            }
+            Extract(folder,payload);
+            SealTree(stage);
+            VerifySlot(stage,slot,publisher);
+            SyntheticCrash("before_publish");
+            var next = install ? new Selector(slot,null,publisher,version,1) :
+                new Selector(slot,previous!.Active,publisher,version,previous.Generation + 1);
+            if (install)
+            {
+                WriteState(stage,next);
+                SafeAncestors(root);
+                Directory.Move(stage,root);
+                VerifyProtection(root);
+            }
+            else
+            {
+                VerifyProtection(root);
+                Directory.Move(folder,Path.Combine(root,"slots",slot));
+                publishedSlot = true;
+                SyntheticCrash("after_slot_publish");
+                VerifySlot(root,slot,publisher);
+                WriteState(root,next);
+                selectorPublished = true;
+                SyntheticCrash("after_selector_publish");
+                if (Directory.Exists(Path.Combine(stage,"slots")))
+                    Directory.Delete(Path.Combine(stage,"slots"));
+                Directory.Delete(stage);
+            }
+        }
+        catch
+        {
+            // In-flight stage remains disconnected from active slot selector.
+            // Only delete fully signer-verified owned files; do not recursively
+            // remove untrusted data. A crash may leave a sibling quarantine.
+            if (Directory.Exists(stage))
+            {
+                if (Directory.Exists(folder))
+                    try { CleanOwnedSlot(stage,slot,publisher); } catch { }
+                var nested = Path.Combine(stage,"slots");
+                if (Directory.Exists(nested) && !Directory.EnumerateFileSystemEntries(nested).Any())
+                    Directory.Delete(nested);
+                if (!Directory.EnumerateFileSystemEntries(stage).Any())
+                {
+                    VerifyProtection(stage);
+                    Directory.Delete(stage);
+                }
+            }
+            // After selector commit the new release is ACTIVE; never clean it
+            // if a subsequent non-critical stage cleanup fails.
+            if (publishedSlot && !selectorPublished && Directory.Exists(Path.Combine(root,"slots",slot)))
+                try { CleanOwnedSlot(root,slot,publisher); } catch { }
+            throw;
+        }
+    }
+    static void FinalizePrevious(string root,string publisher)
+    {
+        Recover(root,publisher);
+        var state=ReadState(root,publisher);
+        if (state.Previous is null) return;
+        // Publish selector first, then clean known old slot. Orphan cleanup is
+        // idempotent after an interruption.
+        var other=state.Previous;
+        VerifySlot(root,other,publisher);
+        WriteState(root,state with { Previous = null, Generation = state.Generation + 1 });
+        CleanOwnedSlot(root,other,publisher);
+    }
+    static void Rollback(string root,string publisher)
+    {
+        Recover(root,publisher);
+        var state = ReadState(root,publisher);
+        if (state.Previous is null) throw new InvalidDataException("No previous signed release");
+        VerifySlot(root,state.Active,publisher);
+        VerifySlot(root,state.Previous,publisher);
+        WriteState(root,state with { Active = state.Previous, Previous = state.Active,
+                                     Generation = state.Generation + 1 });
+        SyntheticCrash("after_rollback_publish");
+        // High-water remains the highest version even after rollback.
+    }
+    static void Uninstall(string root,string publisher)
+    {
+        string tombstone=root+"-uninstalling";
+        SafeAncestors(tombstone);
+        if (Directory.Exists(tombstone))
+        {
+            if (Directory.Exists(root))
+                throw new InvalidDataException("Ambiguous pending uninstall and active root");
+            CompleteUninstall(tombstone,publisher);
+            return;
+        }
+        Recover(root,publisher);
+        var state=ReadState(root,publisher);
+        var inventory=Inventory(root);
+        var files=new HashSet<string>(IC){SelectorPath(root)};
+        foreach(var slot in new[]{state.Active,state.Previous})
+        {
+            if(slot is null) continue;
+            VerifySlot(root,slot,publisher);
+            foreach(var path in Inventory(Path.Combine(root,"slots",slot)).Files)
+                files.Add(path);
+        }
+        if (!files.SetEquals(inventory.Files))
+            throw new InvalidDataException("Unowned install files must survive");
+        // Reject even unowned EMPTY directories before deleting anything.
+        var expectedDirs=new HashSet<string>(IC);
+        foreach(var file in files)
+        {
+            var parent=Path.GetDirectoryName(file);
+            while(parent is not null && !IC.Equals(parent,root))
+            {
+                expectedDirs.Add(parent);
+                parent=Path.GetDirectoryName(parent);
+            }
+        }
+        if(!expectedDirs.SetEquals(inventory.Dirs))
+            throw new InvalidDataException("Unowned directory would be deleted");
+        Directory.Move(root,tombstone); // same-volume atomic "do not launch" boundary
+        SyntheticCrash("after_uninstall_rename");
+        CompleteUninstall(tombstone,publisher);
+    }
+    static void CompleteUninstall(string tombstone,string publisher)
+    {
+        VerifyProtection(tombstone);
+        // The selector is deleted LAST. If terminated between selector
+        // deletion and final rmdir, an ACL-protected empty tombstone may be
+        // safely removed on the next recovery invocation.
+        if (!File.Exists(SelectorPath(tombstone)))
+        {
+            var remaining=Inventory(tombstone);
+            if (remaining.Files.Count!=0 || remaining.Dirs.Count!=0)
+                throw new InvalidDataException("Incomplete tombstone without trusted state");
+            Directory.Delete(tombstone);
+            return;
+        }
+        var state=ReadState(tombstone,publisher);
+        foreach(var slot in new[]{state.Previous,state.Active})
+            if(slot is not null) CleanOwnedSlot(tombstone,slot,publisher);
+        var selector=SelectorPath(tombstone);
+        var slots=Path.Combine(tombstone,"slots");
+        // Keep authenticated state until every allowlisted slot and its empty
+        // container are pruned. A crash after selector deletion must leave
+        // ONLY the empty ACL-protected tombstone, never an untrusted slot shell.
+        var remainder=Inventory(tombstone);
+        if (remainder.Files.Count!=1 || !IC.Equals(remainder.Files[0],selector) ||
+            remainder.Dirs.Any(folder=>!IC.Equals(folder,slots)))
+            throw new InvalidDataException("Unowned uninstall residue preserved");
+        if (Directory.Exists(slots))
+        {
+            if (Directory.EnumerateFileSystemEntries(slots).Any())
+                throw new InvalidDataException("Nonempty slots container preserved");
+            Directory.Delete(slots);
+        }
+        SyntheticCrash("before_uninstall_selector_delete");
+        if (Directory.EnumerateFileSystemEntries(tombstone).Any(path=>!IC.Equals(path,selector)))
+            throw new InvalidDataException("Unowned uninstall data preserved before selector removal");
+        File.Delete(selector);
+        SyntheticCrash("after_uninstall_selector_delete");
+        if(Directory.EnumerateFileSystemEntries(tombstone).Any())
+            throw new InvalidDataException("Unowned uninstall file preserved");
+        Directory.Delete(tombstone);
+    }
+
+}

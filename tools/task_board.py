@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 
 REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
-EXPECTED = {"C": 78, "L": 30, "U": 15}
+EXPECTED = {"C": 79, "L": 30, "U": 15}
 STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
 PHASES = {"1-6", *(str(n) for n in range(7, 17))}
 NOTICE = (

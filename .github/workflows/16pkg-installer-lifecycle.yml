@@ -1,0 +1,79 @@
+name: 16PKG fast native transaction security matrix (SYNTHETIC PAYLOAD)
+on:
+  pull_request:
+    paths:
+      - 'apps/windows-installer/**'
+      - '.github/scripts/16pkg-native-e2e.ps1'
+      - '.github/workflows/16pkg-installer-lifecycle.yml'
+      - 'tools/release_16pkg.py'
+      - 'tools/test_release_16pkg.py'
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  native-transaction-security:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '8.0.x'
+      - name: Parse native PowerShell E2E before running fixture
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $issues = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path '.github/scripts/16pkg-native-e2e.ps1').Path,
+            [ref]$tokens, [ref]$issues) | Out-Null
+          if ($issues.Count -gt 0) {
+            $issues | ForEach-Object { Write-Host $_.ToString() }
+            throw 'Native E2E parser validation failed'
+          }
+      - name: Validate release-builder bounds and tamper regressions
+        shell: pwsh
+        run: python -m unittest tools.test_release_16pkg -v
+      - name: Prepare clearly SYNTHETIC native installer payload fixture
+        shell: pwsh
+        run: |
+          $sha=(git rev-parse HEAD).Trim()
+          if ($sha -ne $env:PR_HEAD_SHA) { throw 'Source mismatch' }
+          New-Item -ItemType Directory -Force -Path 'target/release','renderer-package' | Out-Null
+          [IO.File]::WriteAllBytes((Join-Path $PWD 'target/release/cos-rust.exe'), [Text.Encoding]::UTF8.GetBytes('SYNTHETIC_NOT_AN_EXECUTABLE'))
+          foreach($name in @('WindowsRenderer.exe','WindowsRenderer.dll','WindowsRenderer.deps.json','WindowsRenderer.runtimeconfig.json')){
+            [IO.File]::WriteAllBytes((Join-Path $PWD "renderer-package/$name"),[Text.Encoding]::UTF8.GetBytes("SYNTHETIC_$name"))
+          }
+          # Four required members + 123 synthetic assets exercise the exact
+          # 127-renderer-entry maximum; the independent child test covers
+          # output >64KiB without violating the production package bound.
+          foreach($i in 0..122) {
+            $name=('large-manifest-{0:D3}-' -f $i) + ('x' * 184) + '.dat'
+            [IO.File]::WriteAllBytes((Join-Path $PWD "renderer-package/$name"),
+              [Text.Encoding]::UTF8.GetBytes("SYNTHETIC_$i"))
+          }
+          $sha | Out-File source-sha.txt -Encoding ascii -NoNewline
+      - name: Run real signed TEST-certificate Windows install/update/recover/uninstall
+        shell: pwsh
+        timeout-minutes: 15
+        run: .github/scripts/16pkg-native-e2e.ps1
+      - name: Report synthetic qualification without release claims
+        shell: pwsh
+        run: |
+          $r=Get-Content 16pkg-native-test-receipt.json -Raw | ConvertFrom-Json
+          if (!$r.testOnly -or $r.productionSigned -or $r.native16L1Accepted) { throw 'Unsafe qualification receipt' }
+          Get-Content 16pkg-native-test-receipt.json -Raw | Write-Host
+      - name: Preserve exact-SHA executed native TEST evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cosos-16pkg-native-e2e-test-${{ github.event.pull_request.head.sha || github.sha }}
+          path: 16pkg-native-test-receipt.json
+          if-no-files-found: error
+          retention-days: 14

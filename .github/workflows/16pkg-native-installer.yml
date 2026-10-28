@@ -1,0 +1,234 @@
+name: 16PKG real unsigned Windows native product and source qualification
+on:
+  pull_request:
+    paths:
+      - 'tools/release_16pkg.py'
+      - 'tools/test_release_16pkg.py'
+      - 'apps/windows-installer/**'
+      - 'apps/windows-renderer/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/**'
+      - 'rust-toolchain*'
+      - 'LICENSE'
+      - '.github/scripts/16pkg-16l1-local-qualification.ps1'
+      - '.github/scripts/16pkg-16l1-guards.ps1'
+      - '.github/scripts/16pkg-16l1-preflight.tests.ps1'
+      - '.github/workflows/16pkg-native-installer.yml'
+      - '.github/scripts/16pkg-native-e2e.ps1'
+      - '.github/scripts/16pkg-unsigned-native-e2e.ps1'
+  workflow_dispatch:
+    inputs:
+      release_version:
+        type: string
+        required: true
+        default: '0.1.0'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+jobs:
+  package:
+    runs-on: windows-latest
+    env:
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      RELEASE_VERSION: ${{ inputs.release_version || '0.1.0' }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '8.0.x'
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.91.0
+      - name: Release regressions
+        run: python -m unittest -v tools.test_release_16pkg tools.test_release_16b tools.test_release_16c tools.test_release_16e
+      - name: Parse local 16L1 handoff and run isolated negative security regressions
+        shell: pwsh
+        run: |
+          foreach($path in @('.github/scripts/16pkg-16l1-local-qualification.ps1',
+              '.github/scripts/16pkg-16l1-guards.ps1',
+              '.github/scripts/16pkg-16l1-preflight.tests.ps1')){
+            $tokens=$null
+            $issues=$null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+                (Resolve-Path $path).Path,[ref]$tokens,[ref]$issues) | Out-Null
+            if($issues.Count -ne 0){throw "Invalid local 16L1 syntax: $path"}
+          }
+          & .github/scripts/16pkg-16l1-preflight.tests.ps1
+      - name: Build Rust runtime
+        run: cargo build --release --locked -p cos-app
+      - name: Publish WebView2 renderer
+        run: dotnet publish apps/windows-renderer/WindowsRenderer.csproj -c Release -o renderer-package
+      - name: Generate source-pinned unsigned preview
+        shell: pwsh
+        run: |
+          $sha=(git rev-parse HEAD).Trim()
+          if($sha -ne $env:PR_HEAD_SHA){throw 'Unpinned Git checkout'}
+          if($env:RELEASE_VERSION -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'){throw 'Invalid version'}
+          python tools/release_16pkg.py build --binary target/release/cos-rust.exe --renderer-dir renderer-package --license LICENSE --out candidate.zip --source-sha $sha --version $env:RELEASE_VERSION
+          if($LASTEXITCODE -ne 0){throw 'Invalid source-bound bundle'}
+          $sha | Out-File -FilePath source-sha.txt -NoNewline -Encoding ascii
+      - name: Publish unsigned setup and negative proof
+        shell: pwsh
+        run: |
+          dotnet publish apps/windows-installer/CoSoSInstaller.csproj -c Release -r win-x64 "-p:BundlePath=$((Resolve-Path candidate.zip).Path)" "-p:SourceShaPath=$((Resolve-Path source-sha.txt).Path)" -o installer-package
+          if($LASTEXITCODE -ne 0){throw 'Installer build failed'}
+          & installer-package/CoSoSInstaller.exe --verify
+          if($LASTEXITCODE -ne 0){throw 'Payload verification failed'}
+          & installer-package/CoSoSInstaller.exe --install 'D:\16pkg-unsigned-rejection' --publisher ('A' * 40)
+          if($LASTEXITCODE -eq 0){throw 'Unsigned app gained authority'}
+          $global:LASTEXITCODE=0
+      - name: Parse unsigned lifecycle test before execution
+        shell: pwsh
+        run: |
+          $tokens=$null
+          $issues=$null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path '.github/scripts/16pkg-unsigned-native-e2e.ps1').Path,
+            [ref]$tokens,[ref]$issues) | Out-Null
+          if ($issues.Count -ne 0) { throw 'Unsigned native E2E syntax refused' }
+      - name: Real unsigned production-path installer lifecycle and security
+        shell: pwsh
+        timeout-minutes: 20
+        run: .github/scripts/16pkg-unsigned-native-e2e.ps1
+      # Positive test-signer native acceptance runs in the separate fast
+      # 16pkg-installer-lifecycle workflow against the SAME checked-out C# source.
+      # Production binary packaging in this job does NOT import any test signer.
+      - name: Extract and cross-check actual package manifests
+        shell: pwsh
+        run: |
+          # release_16pkg.py generates renderer-integrity.json inside the
+          # source-bound ZIP. dotnet publish does not write it to renderer-package.
+          $archive=[IO.Compression.ZipFile]::OpenRead((Resolve-Path candidate.zip).Path)
+          try {
+            foreach($item in @(
+              @{entry='release.json';output='installer-release-manifest.json'},
+              @{entry='renderer/renderer-integrity.json';output='installer-renderer-integrity.json'}
+            )){
+              $entry=$archive.GetEntry($item.entry)
+              if(!$entry -or $entry.Length -le 0 -or $entry.Length -gt 131072){
+                throw "Missing/oversized package manifest: $($item.entry)"
+              }
+              $stream=$entry.Open()
+              try {
+                $output=[IO.File]::Create((Join-Path $PWD $item.output))
+                try {$stream.CopyTo($output)} finally {$output.Dispose()}
+              } finally {$stream.Dispose()}
+            }
+          } finally {$archive.Dispose()}
+          $source=(git rev-parse HEAD).Trim()
+          $release=Get-Content installer-release-manifest.json -Raw | ConvertFrom-Json
+          $renderer=Get-Content installer-renderer-integrity.json -Raw | ConvertFrom-Json
+          if($source -cne $env:PR_HEAD_SHA -or $release.source_sha -cne $source -or
+              $release.version -cne $env:RELEASE_VERSION -or $renderer.format -ne 1 -or
+              $renderer.sourceSha -cne $source){throw 'Extracted manifest source/version mismatch'}
+          $rendererHash=(Get-FileHash installer-renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant()
+          $index=@($release.files | Where-Object { $_.path -ceq 'renderer/renderer-integrity.json' })
+          if($index.Count -ne 1 -or $index[0].sha256 -cne $rendererHash -or
+              [long]$index[0].bytes -ne (Get-Item installer-renderer-integrity.json).Length){
+            throw 'Renderer manifest differs from source-bound release index'
+          }
+          foreach($name in @('WindowsRenderer.exe','WindowsRenderer.dll')){
+            $actual=(Get-FileHash "renderer-package/$name" -Algorithm SHA256).Hash.ToLowerInvariant()
+            $inner=@($renderer.files | Where-Object { $_.path -ceq $name })
+            $outer=@($release.files | Where-Object { $_.path -ceq "renderer/$name" })
+            if($inner.Count -ne 1 -or $outer.Count -ne 1 -or
+                $inner[0].sha256 -cne $actual -or $outer[0].sha256 -cne $actual){
+              throw "Renderer binary not bound to both package manifests: $name"
+            }
+          }
+      - name: Exact SHA-256 receipt
+        shell: pwsh
+        run: |
+          @{sourceSha=(git rev-parse HEAD).Trim();releaseVersion=$env:RELEASE_VERSION;
+          signed=$false;native16L1Accepted=$false;
+          zipSha256=(Get-FileHash candidate.zip -Algorithm SHA256).Hash.ToLowerInvariant();
+          setupSha256=(Get-FileHash installer-package/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          rustSha256=(Get-FileHash target/release/cos-rust.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererHostSha256=(Get-FileHash renderer-package/WindowsRenderer.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererDllSha256=(Get-FileHash renderer-package/WindowsRenderer.dll -Algorithm SHA256).Hash.ToLowerInvariant();
+          releaseManifestSha256=(Get-FileHash installer-release-manifest.json -Algorithm SHA256).Hash.ToLowerInvariant();
+          rendererManifestSha256=(Get-FileHash installer-renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant();
+          update02SetupSha256=(Get-FileHash installer-unsigned-0.2.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          update03SetupSha256=(Get-FileHash installer-unsigned-0.3.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          update02ZipSha256=(Get-FileHash candidate-0.2.0.zip -Algorithm SHA256).Hash.ToLowerInvariant();
+          update03ZipSha256=(Get-FileHash candidate-0.3.0.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          
+          } | ConvertTo-Json | Set-Content -Encoding utf8 package-receipt.json
+      - name: Record executed unsigned product security assertions
+        shell: pwsh
+        run: |
+          $r=Get-Content 16pkg-unsigned-native-receipt.json -Raw | ConvertFrom-Json
+          if (!$r.nativeProduct -or $r.testCertificateUsed -or $r.physical16L1Accepted -or
+              $r.sourceSha -ne $env:PR_HEAD_SHA -or
+              $r.assertions.'no-certificate-store-modification' -ne 'PASS') {
+            throw 'Unsigned product qualification receipt invalid'
+          }
+          Get-Content 16pkg-unsigned-native-receipt.json -Raw | Write-Host
+      - name: Log exact candidate digests and source receipt
+        shell: pwsh
+        run: Get-Content package-receipt.json -Raw | Write-Host
+      # PR provenance signs candidate bytes via OIDC, not an Authenticode release.
+      # Protected-main issuer authorization is a separate downstream gate.
+      - name: GitHub OIDC provenance for unsigned release candidate receipt
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: package-receipt.json
+      - name: Attest actual unsigned installer binary (GitHub Sigstore)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: installer-package/CoSoSInstaller.exe
+      - name: Attest actual source-bound payload archive (GitHub Sigstore)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: candidate.zip
+      - name: Attest unsigned upgrade and re-update executables
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: |
+            installer-unsigned-0.2.0/CoSoSInstaller.exe
+            installer-unsigned-0.3.0/CoSoSInstaller.exe
+      - name: Verify genuine CI OIDC issuer and exact source
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $source=(git rev-parse HEAD).Trim()
+          $receipt=Get-Content package-receipt.json -Raw | ConvertFrom-Json
+          if($receipt.sourceSha -ne $source -or $source -ne $env:PR_HEAD_SHA){throw 'Candidate receipt checkout mismatch'}
+          # GitHub OIDC signs the event SHA (PR synthetic merge ref on pull_request).
+          # The signed receipt separately binds the checked-out EXACT PR HEAD
+          # bytes; only protected-main refs could ever qualify as a release.
+          gh attestation verify package-receipt.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+          if($LASTEXITCODE -ne 0){throw 'OIDC candidate provenance invalid'}
+          gh attestation verify installer-package/CoSoSInstaller.exe --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+          if($LASTEXITCODE -ne 0){throw 'Unsigned binary attestation invalid'}
+          gh attestation verify candidate.zip --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+          if($LASTEXITCODE -ne 0){throw 'Product payload attestation invalid'}
+          foreach($file in @('installer-unsigned-0.2.0/CoSoSInstaller.exe','installer-unsigned-0.3.0/CoSoSInstaller.exe')){
+            gh attestation verify $file --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+            if($LASTEXITCODE -ne 0){throw "Unsigned upgrade attestation invalid: $file"}
+          }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cosos-16pkg-unsigned-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            candidate.zip
+            installer-package/CoSoSInstaller.exe
+            candidate-0.2.0.zip
+            candidate-0.3.0.zip
+            installer-unsigned-0.2.0/CoSoSInstaller.exe
+            installer-unsigned-0.3.0/CoSoSInstaller.exe
+            package-receipt.json
+            installer-release-manifest.json
+            installer-renderer-integrity.json
+            16pkg-unsigned-native-receipt.json
+          if-no-files-found: error
