@@ -1,0 +1,56 @@
+name: 16L1 targeted post-merge provenance preflight
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/16pkg-16l1-guards.ps1'
+      - '.github/scripts/16pkg-16l1-local-qualification.ps1'
+      - '.github/scripts/16pkg-16l1-artifact-provenance.ps1'
+      - '.github/scripts/16pkg-16l1-preflight.tests.ps1'
+      - '.github/workflows/16l1-provenance-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+jobs:
+  historical-provenance:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout only (no native compilation)
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Parse changed PowerShell + hosted fail-closed regression tests
+        shell: pwsh
+        run: |
+          foreach ($path in @(
+            '.github/scripts/16pkg-16l1-guards.ps1',
+            '.github/scripts/16pkg-16l1-local-qualification.ps1',
+            '.github/scripts/16pkg-16l1-artifact-provenance.ps1',
+            '.github/scripts/16pkg-16l1-preflight.tests.ps1'
+          )) {
+            $tokens=$null
+            $issues=$null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $path).Path,[ref]$tokens,[ref]$issues) | Out-Null
+            if ($issues.Count -ne 0) { throw "PowerShell syntax rejected: $path - $issues" }
+          }
+          & .github/scripts/16pkg-16l1-preflight.tests.ps1
+          if (!$?) { throw 'Hosted negative security test failed' }
+      - name: Download only previously verified historical artifact
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $root=Join-Path $env:RUNNER_TEMP '16l1-historical'
+          New-Item -ItemType Directory -Path $root -Force | Out-Null
+          gh run download 40710902296 --repo "$env:GITHUB_REPOSITORY" --name cosos-16pkg-unsigned-candidate-9939ea0a9fdc592e6821296e07eb0b7db3653adb --dir $root
+          if ($LASTEXITCODE -ne 0) { throw 'Historical artifact download failed' }
+          "ARTIFACT_ROOT=$root" >> $env:GITHUB_ENV
+      - name: Live GitHub API + Sigstore/OIDC preflight (READ ONLY)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          & .github/scripts/16pkg-16l1-artifact-provenance.ps1 -RunId 40710902296 -SourceSha 9939ea0a9fdc592e6821296e07eb0b7db3653adb -ArtifactRoot $env:ARTIFACT_ROOT
+          if (!$?) { throw 'Real historical attestation preflight rejected' }
+          Write-Host 'CLOUD VERIFICATION ONLY PASS; installer never executed; physical D: never accessed.'
