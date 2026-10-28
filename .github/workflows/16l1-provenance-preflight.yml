@@ -54,3 +54,24 @@ jobs:
           & .github/scripts/16pkg-16l1-artifact-provenance.ps1 -RunId 40710902296 -SourceSha 9939ea0a9fdc592e6821296e07eb0b7db3653adb -ArtifactRoot $env:ARTIFACT_ROOT
           if (!$?) { throw 'Real historical attestation preflight rejected' }
           Write-Host 'CLOUD VERIFICATION ONLY PASS; installer never executed; physical D: never accessed.'
+      - name: Live Sigstore rejection of tampered bytes and wrong source/workflow
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $global:PSNativeCommandUseErrorActionPreference=$false
+          $repo=$env:GITHUB_REPOSITORY
+          $exe=Join-Path $env:ARTIFACT_ROOT 'installer-package/CoSoSInstaller.exe'
+          $tampered=Join-Path $env:RUNNER_TEMP 'tampered-unsigned-installer.exe'
+          Copy-Item -LiteralPath $exe -Destination $tampered
+          [IO.File]::AppendAllText($tampered,'UNTRUSTED_TAMPER')
+          function MustRefuse([string[]]$VerifyArguments,[string]$Reason) {
+            & gh attestation verify @VerifyArguments 2>$null | Out-Null
+            if ($LASTEXITCODE -eq 0) { throw "Sigstore negative case accepted: $Reason" }
+          }
+          $valid=@('--repo',$repo,'--signer-workflow',"$repo/.github/workflows/16pkg-native-installer.yml")
+          MustRefuse (@($tampered)+$valid) 'changed unsigned binary digest'
+          MustRefuse (@($exe)+$valid+@('--source-ref','refs/heads/main')) 'wrong original source ref'
+          MustRefuse (@($exe)+$valid+@('--source-digest',('f'*40))) 'wrong original source digest'
+          MustRefuse (@($exe,'--repo',$repo,'--signer-workflow',"$repo/.github/workflows/ci.yml")) 'wrong signed workflow'
+          Write-Host 'LIVE SIGSTORE NEGATIVE PROOFS PASS; no installer executed.'
