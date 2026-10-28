@@ -89,7 +89,11 @@ jobs:
           rustSha256=(Get-FileHash target/release/cos-rust.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           rendererHostSha256=(Get-FileHash renderer-package/WindowsRenderer.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           rendererDllSha256=(Get-FileHash renderer-package/WindowsRenderer.dll -Algorithm SHA256).Hash.ToLowerInvariant();
-          rendererManifestSha256=(Get-FileHash renderer-package/renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant()
+          rendererManifestSha256=(Get-FileHash renderer-package/renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant();
+          update02SetupSha256=(Get-FileHash installer-unsigned-0.2.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          update03SetupSha256=(Get-FileHash installer-unsigned-0.3.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
+          update02ZipSha256=(Get-FileHash candidate-0.2.0.zip -Algorithm SHA256).Hash.ToLowerInvariant();
+          update03ZipSha256=(Get-FileHash candidate-0.3.0.zip -Algorithm SHA256).Hash.ToLowerInvariant()
           
           } | ConvertTo-Json | Set-Content -Encoding utf8 package-receipt.json
       - name: Record executed unsigned product security assertions
@@ -119,6 +123,12 @@ jobs:
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
         with:
           subject-path: candidate.zip
+      - name: Attest unsigned upgrade and re-update executables
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: |
+            installer-unsigned-0.2.0/CoSoSInstaller.exe
+            installer-unsigned-0.3.0/CoSoSInstaller.exe
       - name: Verify genuine CI OIDC issuer and exact source
         shell: pwsh
         env:
@@ -136,6 +146,10 @@ jobs:
           if($LASTEXITCODE -ne 0){throw 'Unsigned binary attestation invalid'}
           gh attestation verify candidate.zip --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
           if($LASTEXITCODE -ne 0){throw 'Product payload attestation invalid'}
+          foreach($file in @('installer-unsigned-0.2.0/CoSoSInstaller.exe','installer-unsigned-0.3.0/CoSoSInstaller.exe')){
+            gh attestation verify $file --repo $env:GITHUB_REPOSITORY --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref $env:GITHUB_REF --source-digest $env:GITHUB_SHA
+            if($LASTEXITCODE -ne 0){throw "Unsigned upgrade attestation invalid: $file"}
+          }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: cosos-16pkg-unsigned-candidate-${{ github.event.pull_request.head.sha || github.sha }}
