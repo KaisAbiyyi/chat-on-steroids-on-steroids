@@ -303,6 +303,12 @@ internal static class Program
 #if COS_16PKG_TEST
                 Console.Error.WriteLine("COSOS_16PKG_TEST_CHILD_REJECTED:" +
                     Path.GetFileName(binary) + ":exit=" + process.ExitCode);
+                // Redact drive-root paths and truncate; TEST-only evidence.
+                var errText = stderr.GetAwaiter().GetResult();
+                var redacted = Regex.Replace(errText, @"[A-Za-z]:\\[^\s""']+", "<path>")
+                    .Replace('\r',' ').Replace('\n',' ');
+                Console.Error.WriteLine("COSOS_16PKG_TEST_CHILD_ERROR:" +
+                    redacted.Substring(0, Math.Min(redacted.Length, 600)));
 #endif
                 throw new InvalidDataException("Trusted Windows operation refused");
             }
