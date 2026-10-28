@@ -134,10 +134,17 @@ try {
         if($LASTEXITCODE -ne 0 -or $id.Source -ne $source -or $id.Version -ne $v -or $id.Publisher -ne $cert.Thumbprint){throw 'Signed identity mismatch'}
         $setups[$v]=$exe
     }
+    # An untrusted caller-controlled module path must not affect the real
+    # production Authenticode verifier used inside this TEST-compiled binary.
+    $originalPsModules=$env:PSModulePath
+    $poisonModules=Join-Path $testHome 'untrusted-test-module-path'
+    New-Item -ItemType Directory -Path $poisonModules -Force | Out-Null
+    $env:PSModulePath=$poisonModules
     Write-Host '16PKG CI TEST: independently checking production signature/proof path'
     foreach($version in @('0.1.0','0.2.0','0.3.0')){
         ExpectOk $setups[$version] @('--test-signed-issuer')
     }
+    $env:PSModulePath=$originalPsModules
     Write-Host '16PKG CI TEST: bounded child-process regressions'
     foreach($case in @('large-stdout','large-stderr','oversized-stdout','oversized-stderr','hang','failure','malformed')){
         ExpectOk $setups['0.1.0'] @('--test-runchecked',$case)

@@ -272,6 +272,17 @@ internal static class Program
     {
         var psi = new ProcessStartInfo(binary) { UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardOutput = true, RedirectStandardError = true };
+        // Windows PowerShell 5.1 must load its OS-supplied security module.
+        // The parent launcher can inherit a PowerShell 7 or attacker-selected
+        // PSModulePath; never trust it for Authenticode verification.
+        if (string.Equals(binary, Powershell(), StringComparison.OrdinalIgnoreCase))
+        {
+            var systemModules = Path.Combine(Environment.GetFolderPath(
+                Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\Modules");
+            if (!Directory.Exists(systemModules))
+                throw new InvalidDataException("System signature-verification modules unavailable");
+            psi.Environment["PSModulePath"] = systemModules;
+        }
         foreach (var a in args) psi.ArgumentList.Add(a);
         using var process = Process.Start(psi) ??
             throw new InvalidDataException("Required Windows verifier unavailable");
