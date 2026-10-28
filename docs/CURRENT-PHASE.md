@@ -1,5 +1,12 @@
 # CoS-Rust current backend checkpoint
 
+## 16PKG-01 unsigned release receipt correction — 2026-10-28
+
+- **Reclaim:** owner authorized cloud continuation of [Draft PR #131](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/131), same branch and `release-native-installer` lock. Last prior HEAD `fd1aa1432d21a33a69511da6c0f5e7f07d90cc3d` had 14/15 cloud workflows PASS; the [unsigned E2E run 40698538946](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40698538946) executed the native product lifecycle successfully but failed AFTER that test at the package SHA receipt.
+- **Root cause:** `tools/release_16pkg.py` generates the source-pinned renderer integrity manifest inside `candidate.zip` at `renderer/renderer-integrity.json`. `dotnet publish` has no `renderer-package/renderer-integrity.json`. The final receipt was hashing the nonexistent publish path.
+- **Correction:** extract the actual, nonempty, bounded renderer manifest from the verified source-bound ZIP; independently check release/renderer source IDs, release-index hash, renderer EXE/DLL digests, and pin it to the receipt and uploaded artifact. The 16L1 verification-only preflight also checks that renderer digest, Rust/renderer binary indexes and manifest agree before execution. No synthetic/empty manifest or omitted integrity gate. Existing unsigned native lifecycle/security controls and TEST-signed regression remain intact.
+- **Qualification:** exact-new-HEAD Windows unsigned E2E, signed TEST fixture, strict Rust Windows/Ubuntu, OIDC attestations and genuine artifact hashes remain **PENDING** until GitHub runs finish. 16PKG stays Review / 02 Now / Pending, PR Draft/unmerged. 16L1 remains Blocked / 03 Up Next / physical NOT_RUN. Publisher Authenticode remains optional under owner policy, and PR #132 is separately open with no overlapping changed files.
+
 ## 16PKG-01 unsigned native release channel — implementation pending CI, 2026-10-28
 
 - **Owner decision:** Authenticode publisher signing is optional for Windows personal qualification and clearly disclosed unsigned public beta distribution. [Issue #130 policy](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/130#issuecomment-6469786860); [policy Draft PR #132](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/132) is separate and unmerged. This supersedes historical signed-only Phase 16 wording without rewriting old receipts.
