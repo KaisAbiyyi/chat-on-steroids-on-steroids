@@ -9,27 +9,26 @@ $cert=$null
 $trustedStores=@()
 $root="D:\16pkg-ci-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
 $dirty="$root-dirty"
-
 function Invoke-HostedCertutil([string[]]$Options){
-    $psi=[Diagnostics.ProcessStartInfo]::new((Join-Path $env:SystemRoot 'System32\\certutil.exe'))
+    $psi=[Diagnostics.ProcessStartInfo]::new((Join-Path $env:SystemRoot 'System32\certutil.exe'))
     $psi.UseShellExecute=$false
     $psi.CreateNoWindow=$true
     $psi.RedirectStandardOutput=$true
     $psi.RedirectStandardError=$true
     foreach($option in $Options){[void]$psi.ArgumentList.Add($option)}
     $child=[Diagnostics.Process]::Start($psi)
-    if(!$child){throw 'TEST trust certutil unavailable'}
+    if(!$child){throw 'Hosted TEST certutil unavailable'}
     try {
         $stdout=$child.StandardOutput.ReadToEndAsync()
         $stderr=$child.StandardError.ReadToEndAsync()
         if(!$child.WaitForExit(15000)){
             $child.Kill($true)
             [void]$child.WaitForExit(5000)
-            throw "TEST trust certutil timeout during $($Options[1]) $($Options[2])"
+            throw "TEST certutil timeout: $($Options[1]) $($Options[2])"
         }
         [void][Threading.Tasks.Task]::WaitAll(@($stdout,$stderr),5000)
-        Write-Host "16PKG TEST trust: $($Options[1]) LocalMachine/$($Options[2]) exit=$($child.ExitCode)"
-        if($child.ExitCode -ne 0){throw 'TEST trust certutil refused operation'}
+        Write-Host "16PKG TEST trust $($Options[1]) LocalMachine/$($Options[2]) exit=$($child.ExitCode)"
+        if($child.ExitCode -ne 0){throw 'Hosted TEST certutil refused operation'}
     } finally { $child.Dispose() }
 }
 function ExpectOk([string]$exe,[string[]]$options){
@@ -61,21 +60,38 @@ try {
             [Security.Cryptography.X509Certificates.X509KeyUsageFlags]::DigitalSignature,$true))
     $generated=$request.CreateSelfSigned(
         [DateTimeOffset]::UtcNow.AddMinutes(-5),[DateTimeOffset]::UtcNow.AddHours(2))
-    $pfx=$generated.Export([Security.Cryptography.X509Certificates.X509Co
-    # An isolated GitHub-hosted Windows runner is disposable and elevated.
-    # CurrentUser/Root caused an interactive trust prompt; the independently
-    # proven LocalMachine/Root path is noninteractive on this runner.
-    if($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted'){
-        throw 'Refuse TEST trust changes outside disposable hosted CI'
+    $pfx=$generated.Export([Security.Cryptography.X509Certificates.X509ContentType]::Pfx,'')
+    $keyFlags=[Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet -bor
+        [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::UserKeySet -bor
+        [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
+    $cert=[Security.Cryptography.X509Certificates.X509Certificate2]::new($pfx,'',$keyFlags)
+    if (!$cert.HasPrivateKey -or $cert.Thumbprint -notmatch '^[0-9A-F]{40}$') {
+        throw 'Managed TEST certificate cannot sign'
     }
-    $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
-    $elevated=[Security.Principal.WindowsPrincipal]::new($identity).IsInRole(
+    $myStore=[Security.Cryptography.X509Certificates.X509Store]::new(
+        'My',[Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser)
+    try {
+        $myStore.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+        $myStore.Add($cert)
+    }
+    finally { $myStore.Close() }
+    Write-Host '16PKG CI TEST: test signer generated and persisted only in CurrentUser/My'
+    $public=Join-Path $testHome 'test-only.cer'
+    Export-Certificate -Cert $cert -FilePath $public | Out-Null
+    Write-Host '16PKG CI TEST: exported ephemeral TEST public certificate'
+    # Separate hosted diagnostic 40642249837 proved LocalMachine Root and
+    # TrustedPublisher noninteractive import, Authenticode Valid and cleanup.
+    if($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted'){
+        throw 'TEST trust changes require disposable GitHub-hosted Windows'
+    }
+    $id=[Security.Principal.WindowsIdentity]::GetCurrent()
+    $admin=[Security.Principal.WindowsPrincipal]::new($id).IsInRole(
         [Security.Principal.WindowsBuiltInRole]::Administrator)
-    Write-Host "16PKG TEST trust: elevated=$elevated OS=$([Environment]::OSVersion.VersionString)"
-    if(!$elevated){throw 'Isolated TEST trust requires elevated runner'}
+    Write-Host "16PKG CI TEST: admin=$admin OS=$([Environment]::OSVersion.VersionString)"
+    if(!$admin){throw 'TEST trust requires elevated disposable runner'}
     foreach($storeName in @('Root','TrustedPublisher')){
         Invoke-HostedCertutil -Options @('-f','-addstore',$storeName,$public)
-        $trustedStores+= $storeName
+        $trustedStores += $storeName
         $store=[Security.Cryptography.X509Certificates.X509Store]::new(
             $storeName,[Security.Cryptography.X509Certificates.StoreLocation]::LocalMachine)
         try {
@@ -83,34 +99,9 @@ try {
             if(!$store.Certificates.Find(
                     [Security.Cryptography.X509Certificates.X509FindType]::FindByThumbprint,
                     $cert.Thumbprint,$false).Count){
-                throw 'TEST root trust store identity mismatch'
+                throw 'TEST certificate not found in scoped machine store'
             }
         } finally { $store.Close() }
-    }
-timeout.
-    $certutil=Join-Path $env:SystemRoot 'System32\certutil.exe'
-    foreach($storeName in @('Root','TrustedPublisher')){
-        Write-Host "16PKG CI TEST: noninteractive trust import CurrentUser/$storeName"
-        $psi=[Diagnostics.ProcessStartInfo]::new($certutil)
-        $psi.UseShellExecute=$false
-        $psi.CreateNoWindow=$true
-        foreach($argument in @('-user','-f','-addstore',$storeName,$public)) {
-            [void]$psi.ArgumentList.Add($argument)
-        }
-        $child=[Diagnostics.Process]::Start($psi)
-        if(!$child){throw 'Windows certutil not available'}
-        try {
-            if(!$child.WaitForExit(20000)) {
-                $child.Kill($true)
-                [void]$child.WaitForExit(5000)
-                throw "Hosted Windows certificate trust import timed out in $storeName"
-            }
-            if($child.ExitCode -ne 0) {
-                throw "Hosted Windows certutil refused CurrentUser/$storeName"
-            }
-        }
-        finally { $child.Dispose() }
-        Write-Host "16PKG CI TEST: CurrentUser/$storeName trusted TEST issuer"
     }
     $publisher=Join-Path $testHome 'publisher-test-only.txt'
     [IO.File]::WriteAllText($publisher,$cert.Thumbprint,[Text.UTF8Encoding]::new($false))
@@ -254,15 +245,14 @@ finally {
             Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
-
     if($cert){
         foreach($store in @('TrustedPublisher','Root')){
             if($store -in $trustedStores){
                 try { Invoke-HostedCertutil -Options @('-f','-delstore',$store,$cert.Thumbprint) }
-                catch { Write-Warning "Could not remove TEST issuer from disposable LocalMachine/$store" }
+                catch { Write-Warning "Disposable LocalMachine/$store TEST cleanup failed" }
             }
         }
-        Get-Item "Cert:\\CurrentUser\\My\\$($cert.Thumbprint)" -ErrorAction SilentlyContinue |
+        Get-Item "Cert:\CurrentUser\My\$($cert.Thumbprint)" -ErrorAction SilentlyContinue |
             Remove-Item -ErrorAction SilentlyContinue
     }
     if($mapped){& "$env:SystemRoot\System32\subst.exe" D: /D}
