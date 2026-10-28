@@ -1,25 +1,53 @@
-# 16PKG native release and security boundaries
+# 16PKG — Windows native installer trust and qualification
 
-16PKG builds the actual `cos-rust.exe` + C#/WebView2 renderer and an offline `CoSoSInstaller.exe`. The PR workflow publishes an **unsigned source-bound preview** with GitHub OIDC candidate provenance; no PR-produced artifact is an authorized production release.
+16PKG packages the **real** Rust runtime, C#/WebView2 host and renderer assets, their dependencies and license into a Windows x64 installer. It supports two explicit transaction modes. The owner approved transparent **unsigned** personal and public-beta distribution on 2026-10-28. Authenticode publisher signing is optional.
 
-## Production trust policy
+## Unsigned manual-digest channel
 
-- Mutations require a Windows administrator token, a valid Windows Authenticode signature on the executing setup binary, and a thumbprint pinned into that **already-signed** binary at release build time. Thumbprint is not selected by the caller.
-- Every installed slot retains the exact publisher-signed installer under `authority/issuer.exe`. During any update, rollback, recovery or uninstall the executable is verified with Windows Authenticode and queried for its immutable embedded release manifest digest, exact source commit, version and publisher. Hashes read from a writable `release.json` never alone authorize installed bytes.
-- Installer state and all child files/directories use admin/SYSTEM-only NTFS ACLs with their owner set to built-in Administrators. Non-elevated users, including a split-token instance of the same Windows account, do not own the installed files. An administrator-equivalent adversary able to replace ACLs, the system verifier or the approved signing keys is **outside the claimed threat boundary**.
-- A named OS mutex serializes mutations per absolute installation root; symlinks/junctions and unexpected children fail closed. File indexes and embedded issuer hashes are reverified before publication and deletion. Rust 15HOST continues to independently require the authorized protected-main GitHub OIDC attestation of the exact renderer-integrity manifest.
-- Updates enforce a monotonic high-water version even after rollback. Previous slots can be finalized and pruned. Interrupted stages, orphaned signed slots and uninstall tombstones have fail-closed recovery. Unowned files and unexpected directories cause refusal rather than deletion.
+The installer uses \`--unsigned-sha256 EXPECTED_EXE_SHA256\` with each mutation: \`--install\`, \`--update\`, \`--rollback\`, \`--finalize\`, \`--recover\` and \`--uninstall\`. This is an affirmative per-invocation acknowledgment of unsigned software. The digest must have been obtained **independently** from trusted GitHub artifact/source provenance before running the EXE. The installer compares that caller-provided digest against its own current executable; incorrect hashes fail before an install-root mutation. There is no background or silent remote updater. Do not use an installer-reported hash as its own approval.
 
-## Cloud CI qualification
+To establish trust, obtain the artifact through a known legitimate repository/workflow, verify the GitHub Sigstore/SLSA attestation for the **installer bytes** and **candidate ZIP**, check the signer workflow and the source claim, verify the separately attested \`package-receipt.json\`, then compare the actual installer and archive SHA-256 hashes with the receipt. The attestation is an externally anchored GitHub Actions workflow identity; it is **not** publisher identity, code signing, or automatically proof that a PR build should be trusted. Independently review the exact source commit and release authorization before distributing it. In particular, \`pull_request\` attestations show a CI candidate: they do **not** prove a reviewed, protected-main production release.
 
-`.github/workflows/16pkg-native-installer.yml` runs Windows native compilation, full 16B/16C/16E regression suites and separate **positive** disposable install/update/rollback/re-update/uninstall tests using a CI-generated test-only code-signing certificate. Only on an **elevated disposable GitHub-hosted Windows runner**, the synthetic certificate's public portion is temporarily trusted in **`LocalMachine\\Root` and `LocalMachine\\TrustedPublisher`**; the temporary signing key resides in `CurrentUser\\My`. The workflow verifies both trust stores and the actual Authenticode status, then explicitly removes the TEST issuer from both machine stores and the user-key store, checks removal, and records `certificateCleanup`. These trust changes are **TEST-only**: the separately compiled production-policy executable rejects a trusted self-signed TEST publisher, and production release signing requires an independently approved Authenticode signer and protected release provenance. GitHub OIDC only attests the **unsigned candidate receipt**, not production Authenticode signing. Test fixtures and D: paths are synthetic; this is **not** vendor code-signing authorization and is **not** a 16L1 physical qualification. The candidate bundle, setup EXE, exact commit, artifact hashes, test-only issuer receipt and OIDC candidate evidence are retained in the workflow artifacts/logs.
+Example with the **verified exact-head Actions run and artifact name** (substitute real values; never infer SHA-256 from the EXE itself):
 
-`workflow_dispatch` accepts only canonical `x.y.z` versions; a new authorized production update must be strictly greater than the installed high-water version. No synthetic fixture can authorize a real release.
+\`\`\`powershell
+gh run download <VERIFIED_RUN_ID> --repo KaisAbiyyi/chat-on-steroids-on-steroids --name <EXACT_SHA_ARTIFACT_NAME> --dir D:\projects\CoS-Rust\qualification\unsigned
+Set-Location D:\projects\CoS-Rust\qualification\unsigned
+gh attestation verify .\package-receipt.json --repo KaisAbiyyi/chat-on-steroids-on-steroids --signer-workflow KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/16pkg-native-installer.yml
+gh attestation verify .\installer-package\CoSoSInstaller.exe --repo KaisAbiyyi/chat-on-steroids-on-steroids --signer-workflow KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/16pkg-native-installer.yml
+gh attestation verify .\candidate.zip --repo KaisAbiyyi/chat-on-steroids-on-steroids --signer-workflow KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/16pkg-native-installer.yml
+$receipt=Get-Content .\package-receipt.json -Raw | ConvertFrom-Json
+$actual=(Get-FileHash .\installer-package\CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+if($receipt.sourceSha -ne '<INDEPENDENTLY_REVIEWED_SOURCE_SHA>' -or $actual -ne $receipt.setupSha256){throw 'Source or setup digest mismatch'}
+$trustedDigest=$receipt.setupSha256
+\`\`\`
 
-## Required external production gates
+Only after independent verification, in an elevated disposable Windows console and an owner-approved isolated D: test path:
 
-1. An authorized and protected publisher certificate / managed code-signing provider, with independently approved thumbprint and no secrets in repository, logs or test fixture.
-2. The actual protected-`main` release workflow identity and attested renderer manifest (15HOST) bound to the exact release commit, plus approved code-signature verification for all executable components per 16B.
-3. Review of the exact head, dedicated issuer/provenance build evidence, and real physical Windows 16L1 install/uninstall/updater/rollback using **disposable** profiles, with owner acceptance.
+\`\`\`powershell
+$setup=(Resolve-Path .\installer-package\CoSoSInstaller.exe).Path
+$root='D:\projects\CoS-Rust\qualification\unsigned\installed'
+& $setup --install $root --unsigned-sha256 $trustedDigest
+# Later: verify a NEW >high-water version's own attested installer and digest.
+& $newSetup --update $root --unsigned-sha256 $newTrustedDigest
+& $newSetup --rollback $root --unsigned-sha256 $newTrustedDigest
+& $newSetup --recover $root --unsigned-sha256 $newTrustedDigest
+& $newSetup --finalize $root --unsigned-sha256 $newTrustedDigest
+& $newSetup --uninstall $root --unsigned-sha256 $newTrustedDigest
+\`\`\`
 
-Until all three are satisfied, keep PR #131 **Draft**, task 16PKG-01 **Review/Pending**, and 16L1 **Blocked/NOT_RUN**. Do not merge or promote the preview ZIP and test-signed fixtures to production.
+Windows may display an **Unknown Publisher** warning or SmartScreen protection for unsigned binaries. Do not disable Defender/SmartScreen, weaken UAC, install TEST roots, or import any certificate for this channel. If Windows blocks the file, stop and record the refusal. Installing does not migrate or access existing CoS/CoSoS profiles.
+
+The unsigned channel stores a SHA-256 marker next to each exact copied release issuer inside the administrator/SYSTEM-owned protected slot. The marker + embedded bundle checks detect post-install modifications and bind cleanup to the original file allowlist. Protected \`active.json\` preserves high-water version state; the mutex, safe D: ancestry, denied reparse points, ACL tests, atomic moves, rollback, recovery and refusal of foreign data remain required. Older signed installations are a separate trust domain: their state publisher must match; the unsigned channel cannot silently adopt them.
+
+**Security limits:** A raw SHA-256 is an integrity check, not independent authentication unless the expected value was obtained out of band. A digest and manifest both supplied by the same untrusted package are insufficient. A compromised GitHub maintainer/workflow can produce an attested malicious build. An administrator able to take ownership or replace verifier/OS ACLs lies outside the documented security boundary. Unsigned binaries lack Authenticode publisher identity and may be blocked by Windows SmartScreen. No guarantee is claimed against administrators or an altered host OS.
+
+## Compatibility: optional Authenticode mode
+
+The original \`--publisher PIN\` path still requires a valid publisher-signed executable, compile-time pinned thumbprint, issuer-signed installed slots and exact identity. It does not import or trust test certificates for production. Synthetic signed-TEST CI uses an elevated disposable GitHub-hosted Windows runner, temporary LocalMachine Root/TrustedPublisher trust and CurrentUser My key, with explicit cleanup and separate evidence; no private Windows machine is modified.
+
+## Cloud evidence and physical gate
+
+\`.github/workflows/16pkg-native-installer.yml\` builds the real source-bound Rust + WebView2 desktop bundle, the actual unsigned installer, real unsigned native lifecycle assertions, SHA-256 receipts and separate GitHub OIDC attestations for the EXE/ZIP/receipt. The companion \`.github/workflows/16pkg-installer-lifecycle.yml\` preserves historical signed-TEST synthetic lifecycle coverage. Confirm final **exact-head** CI and artifacts before claiming either gate PASS.
+
+The physical \`16L1\` remains **NOT RUN** until reviewed code is merged, the exact installer digest/provenance is verified and the designated local Windows qualification agent runs an isolated D: test. CI does not attest user-device security, interactive SmartScreen/UAC behavior, or native physical acceptance. Use the checked-in local handoff script and its exact commit-bound receipt for that separate step.
