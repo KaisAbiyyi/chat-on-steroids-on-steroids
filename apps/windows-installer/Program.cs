@@ -12,6 +12,8 @@ using System.Text.RegularExpressions;
 
 internal static class Program
 {
+    const string UnsignedChannel = "UNSIGNED-MANUAL-SHA256";
+    static string? VerifiedManualDigest;
     const int MaxFiles = 254;
     const long MaxFile = 512L * 1024 * 1024;
     const long MaxTotal = 1024L * 1024 * 1024;
@@ -71,17 +73,29 @@ internal static class Program
                 }));
                 return 0;
             }
-            if (args.Length != 4 || args[2] != "--publisher" ||
+            if (args.Length != 4 || args[2] is not ("--publisher" or "--unsigned-sha256") ||
                 args[0] is not ("--install" or "--update" or "--rollback" or "--uninstall" or "--recover" or "--finalize"))
-                throw new InvalidDataException("Usage: --verify|--identity OR --install|--update|--rollback|--uninstall|--recover|--finalize D:\\owned-path --publisher PIN");
+                throw new InvalidDataException("Usage: --verify|--identity OR --install|--update|--rollback|--uninstall|--recover|--finalize D:\\owned-path (--publisher PIN | --unsigned-sha256 INDEPENDENT_SHA256)");
             var op = args[0];
             var path = SafeRoot(args[1]);
+            bool unsigned = args[2] == "--unsigned-sha256";
             var caller = args[3].ToUpperInvariant();
-            var pin = ResourceText("CoSoS.TrustedPublisher", optional: false).ToUpperInvariant();
-            if (!Fingerprint.IsMatch(caller) || !IC.Equals(caller, pin))
+            var pin = unsigned ? UnsignedChannel :
+                ResourceText("CoSoS.TrustedPublisher", optional: false).ToUpperInvariant();
+            if (unsigned)
+            {
+                // Caller obtains this digest from independently verified release
+                // provenance. A hash advertised by this executable is not authority.
+                if (!Regex.IsMatch(caller, "^[0-9A-F]{64}$") ||
+                    !IC.Equals(caller, ExecutableHash(Environment.ProcessPath!)))
+                    throw new InvalidDataException("Unsigned installer did not match supplied SHA-256");
+                VerifiedManualDigest = caller.ToLowerInvariant();
+                Console.WriteLine("COSOS_UNSIGNED_MANUAL_HASH_ACKNOWLEDGED");
+            }
+            else if (!Fingerprint.IsMatch(caller) || !IC.Equals(caller, pin))
                 throw new InvalidDataException("Approved code signing publisher not configured or mismatched");
             RequireAdmin();
-            CheckSignature(Environment.ProcessPath!, pin);
+            if (!unsigned) CheckSignature(Environment.ProcessPath!, pin);
             // Serialize all root mutations, including recovery, update, rollback
             // and uninstall. The mutex is acquired only after elevation and
             // publisher identity verification; multi-process races refuse.
@@ -134,6 +148,27 @@ internal static class Program
     }
     static byte[] Archive() => Resource("CoSoS.Payload");
     static string Hash(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+    static string ExecutableHash(string file)
+    {
+        if ((File.GetAttributes(file) & FileAttributes.ReparsePoint) != 0)
+            throw new InvalidDataException("Linked executable refused");
+        using var input = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+        if (input.Length <= 0 || input.Length > MaxTotal)
+            throw new InvalidDataException("Executable size refused");
+        return Convert.ToHexString(SHA256.HashData(input)).ToLowerInvariant();
+    }
+    static string UnsignedMarker(string proof) => proof + ".sha256";
+    static void VerifyUnsignedMarker(string proof)
+    {
+        var marker = UnsignedMarker(proof);
+        SafeAncestors(marker);
+        if (!File.Exists(marker) || new FileInfo(marker).Length != 64)
+            throw new InvalidDataException("Unsigned slot digest marker missing");
+        var expected = File.ReadAllText(marker).Trim();
+        if (!Regex.IsMatch(expected, "^[a-f0-9]{64}$") ||
+            !IC.Equals(expected, ExecutableHash(proof)))
+            throw new InvalidDataException("Protected unsigned slot executable digest mismatch");
+    }
     static string FileHash(string file)
     {
         SafeAncestors(file);
@@ -581,18 +616,22 @@ internal static class Program
     static string SignedProof(string root,string slot) => Path.Combine(root,"slots",slot,"authority","issuer.exe");
     static Identity VerifyProof(string path,string publisher)
     {
-        CheckSignature(path,publisher);
+        if (publisher == UnsignedChannel) VerifyUnsignedMarker(path);
+        else CheckSignature(path,publisher);
         // Signed *proof executable* carries immutable embedded release manifest,
         // source commit, and publisher binding. Never trust a writable D: JSON.
         var raw = RunChecked(path,"--identity");
         var proof = JsonSerializer.Deserialize<Identity>(raw)
             ?? throw new InvalidDataException("Signed installer identity absent");
-        if (!Hex40.IsMatch(proof.Source) || !Fingerprint.IsMatch(proof.Publisher)
-            || proof.Publisher != publisher || proof.ManifestSha.Length != 64
+        if (!Hex40.IsMatch(proof.Source) ||
+            (publisher == UnsignedChannel ? proof.Publisher != "" :
+                !Fingerprint.IsMatch(proof.Publisher) || proof.Publisher != publisher) ||
+            proof.ManifestSha.Length != 64
             || !proof.ManifestSha.All(Uri.IsHexDigit))
             throw new InvalidDataException("Issuer proof identity/source invalid");
         Semver(proof.Version);
-        CheckSignature(path,publisher);
+        if (publisher == UnsignedChannel) VerifyUnsignedMarker(path);
+        else CheckSignature(path,publisher);
         return proof;
     }
     static Identity VerifySlot(string root,string name,string publisher)
@@ -611,7 +650,7 @@ internal static class Program
         if (indexed.Version != proof.Version)
             throw new InvalidDataException("Manifest version differs from issuer proof");
         var files = Inventory(slot).Files;
-        if (files.Count != indexed.Files.Count + 2)
+        if (files.Count != indexed.Files.Count + (publisher == UnsignedChannel ? 3 : 2))
             throw new InvalidDataException("Unexpected installed slot contents");
         foreach (var (relative,info) in indexed.Files)
         {
@@ -638,9 +677,13 @@ internal static class Program
         var inventory=Inventory(directory);
         if (!File.Exists(authority))
         {
-            // Signed proof is deleted LAST. Only empty directories can remain.
-            if (inventory.Files.Count != 0)
-                throw new InvalidDataException("Untrusted files remain without signed issuer proof");
+            // Interrupted unsigned issuer removal can leave only its sealed marker.
+            var marker = UnsignedMarker(authority);
+            if (publisher == UnsignedChannel && inventory.Files.Count == 1 &&
+                IC.Equals(inventory.Files[0],marker))
+                File.Delete(marker);
+            else if (inventory.Files.Count != 0)
+                throw new InvalidDataException("Untrusted files remain without issuer proof");
         }
         else
         {
@@ -652,6 +695,7 @@ internal static class Program
             if (index.Version != proof.Version)
                 throw new InvalidDataException("Deleted-slot version mismatch");
             var allowed=new HashSet<string>(IC) {authority,Path.Combine(directory,"release.json")};
+            if (publisher == UnsignedChannel) allowed.Add(UnsignedMarker(authority));
             foreach(var name in index.Files.Keys)
                 allowed.Add(Path.Combine(directory,name.Replace('/','\\')));
             if (inventory.Files.Any(path=>!allowed.Contains(path)))
@@ -691,6 +735,8 @@ internal static class Program
             }
             if (File.Exists(installedManifest)) File.Delete(installedManifest);
             File.Delete(authority);
+            if (publisher == UnsignedChannel && File.Exists(UnsignedMarker(authority)))
+                File.Delete(UnsignedMarker(authority));
         }
         foreach(var child in Inventory(directory).Dirs.OrderByDescending(x=>x.Length))
         {
@@ -818,7 +864,13 @@ internal static class Program
         var payload = VerifyBundle(Archive(),Source());
         var manifest = payload["release.json"];
         var version = VersionOf(manifest);
-        var signedCurrent = VerifyProof(Environment.ProcessPath!,publisher);
+        if (publisher == UnsignedChannel &&
+            (VerifiedManualDigest is null ||
+             !IC.Equals(ExecutableHash(Environment.ProcessPath!),VerifiedManualDigest)))
+            throw new InvalidDataException("Unsigned executable changed after verification");
+        var signedCurrent = publisher == UnsignedChannel
+            ? new Identity(Source(),version,Hash(manifest),"")
+            : VerifyProof(Environment.ProcessPath!,publisher);
         if (signedCurrent.Source != Source() || signedCurrent.Version != version ||
             signedCurrent.ManifestSha != Hash(manifest))
             throw new InvalidDataException("Self signed release manifest/source mismatch");
@@ -859,6 +911,12 @@ internal static class Program
             // extraction can then be pruned against the signed embedded index.
             var proof = Path.Combine(folder,"authority","issuer.exe");
             CopyFile(Environment.ProcessPath!,proof);
+            if (publisher == UnsignedChannel)
+            {
+                if (!IC.Equals(ExecutableHash(proof),VerifiedManualDigest))
+                    throw new InvalidDataException("Copied unsigned executable changed");
+                File.WriteAllText(UnsignedMarker(proof),VerifiedManualDigest!);
+            }
             Extract(folder,payload);
             SealTree(stage);
             VerifySlot(stage,slot,publisher);
