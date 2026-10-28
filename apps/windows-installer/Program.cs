@@ -679,6 +679,12 @@ internal static class Program
         {
             // Interrupted unsigned issuer removal can leave only its sealed marker.
             var marker = UnsignedMarker(authority);
+            // If an interruption removed the final proof, the only legitimate
+            // remaining directory is authority/. Refuse ALL other directories
+            // (including unowned empty ones) before deleting the marker.
+            var authorityDirectory = Path.GetDirectoryName(authority)!;
+            if (inventory.Dirs.Any(p=>!IC.Equals(p,authorityDirectory)))
+                throw new InvalidDataException("Unowned directories without issuer proof");
             if (publisher == UnsignedChannel && inventory.Files.Count == 1 &&
                 IC.Equals(inventory.Files[0],marker))
                 File.Delete(marker);
@@ -710,8 +716,10 @@ internal static class Program
                     parent=Path.GetDirectoryName(parent);
                 }
             }
-            if (inventory.Dirs.Any(path=>!allowedDirs.Contains(path)) ||
-                (!stagingOnly && !allowedDirs.SetEquals(inventory.Dirs)))
+            // Crash-recovery may have already pruned legitimate empty children
+            // while the issuer remained. An independently verified issuer and
+            // the still-sealed ACL authorize only this subset, never new dirs.
+            if (inventory.Dirs.Any(path=>!allowedDirs.Contains(path)))
                 throw new InvalidDataException("Unexpected empty/unowned directory during cleanup");
             string installedManifest=Path.Combine(directory,"release.json");
             if (!stagingOnly && File.Exists(installedManifest) && FileHash(installedManifest)!=proof.ManifestSha)
@@ -734,6 +742,16 @@ internal static class Program
                 if (File.Exists(file)) File.Delete(file);
             }
             if (File.Exists(installedManifest)) File.Delete(installedManifest);
+            // Prune known emptied payload folders while the verified issuer
+            // still survives. If the process stops after deleting authority,
+            // recovery can only remove its one allowlisted empty directory.
+            var authorityDirectory = Path.GetDirectoryName(authority)!;
+            foreach (var child in Inventory(directory).Dirs.OrderByDescending(x=>x.Length))
+            {
+                if (IC.Equals(child,authorityDirectory)) continue;
+                if (!Directory.EnumerateFileSystemEntries(child).Any()) Directory.Delete(child);
+                else throw new InvalidDataException("Unowned nonempty child preserved");
+            }
             File.Delete(authority);
             if (publisher == UnsignedChannel && File.Exists(UnsignedMarker(authority)))
                 File.Delete(UnsignedMarker(authority));
