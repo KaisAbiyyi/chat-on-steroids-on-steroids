@@ -5,6 +5,8 @@ on:
       - 'apps/windows-installer/**'
       - '.github/scripts/16pkg-native-e2e.ps1'
       - '.github/workflows/16pkg-installer-lifecycle.yml'
+      - 'tools/release_16pkg.py'
+      - 'tools/test_release_16pkg.py'
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -36,6 +38,9 @@ jobs:
             $issues | ForEach-Object { Write-Host $_.ToString() }
             throw 'Native E2E parser validation failed'
           }
+      - name: Validate release-builder bounds and tamper regressions
+        shell: pwsh
+        run: python -m unittest tools.test_release_16pkg -v
       - name: Prepare clearly SYNTHETIC native installer payload fixture
         shell: pwsh
         run: |
@@ -46,10 +51,11 @@ jobs:
           foreach($name in @('WindowsRenderer.exe','WindowsRenderer.dll','WindowsRenderer.deps.json','WindowsRenderer.runtimeconfig.json')){
             [IO.File]::WriteAllBytes((Join-Path $PWD "renderer-package/$name"),[Text.Encoding]::UTF8.GetBytes("SYNTHETIC_$name"))
           }
-          # 206 synthetic renderer assets force a >64KiB base64 signed
-          # manifest through RunChecked during real cleanup/recovery.
-          foreach($i in 0..205) {
-            $name=('large-manifest-{0:D3}-' -f $i) + ('x' * 110) + '.dat'
+          # Four required members + 123 synthetic assets exercise the exact
+          # 127-renderer-entry maximum; the independent child test covers
+          # output >64KiB without violating the production package bound.
+          foreach($i in 0..122) {
+            $name=('large-manifest-{0:D3}-' -f $i) + ('x' * 184) + '.dat'
             [IO.File]::WriteAllBytes((Join-Path $PWD "renderer-package/$name"),
               [Text.Encoding]::UTF8.GetBytes("SYNTHETIC_$i"))
           }

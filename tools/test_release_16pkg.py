@@ -33,6 +33,21 @@ class PackageTests(unittest.TestCase):
         self.build()
         self.assertEqual(self.bundle.read_bytes(),original)
 
+    def test_exact_renderer_limit_and_one_over_rejected(self):
+        # Four required renderer files plus 123 additional = 127 legitimate
+        # entries. The 128th must fail before any ZIP can be issued.
+        for i in range(123):
+            name = f"large-manifest-{i:03d}-" + "x" * 184 + ".dat"
+            (self.renderer / name).write_bytes(b"fixture")
+        result = self.build()
+        self.assertEqual(result["files"], 130)  # 127 renderers + integrity + bin + license
+        self.assertGreater(self.bundle.stat().st_size, 0)
+        self.bundle.unlink()
+        (self.renderer / "one-over-bound.dat").write_bytes(b"extra")
+        with self.assertRaisesRegex(pkg.Refused, "renderer exceeds Rust payload bound"):
+            self.build()
+        self.assertFalse(self.bundle.exists())
+
     def test_missing_renderer_refuses(self):
         (self.renderer / "WindowsRenderer.dll").unlink()
         with self.assertRaises(pkg.Refused):
