@@ -209,7 +209,20 @@ try {
     if ($LASTEXITCODE -ne 197) { throw "Expected synthetic stage exit 197; got $LASTEXITCODE" }
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    # Complete signed stage, not yet promoted or selected: recovery must
+    # authenticate the orphaned issuer and remove only its owned files.
+    $env:COSOS_16PKG_FAIL_AT='before_publish'
+    & $setups['0.1.0'] --install $root --publisher $cert.Thumbprint
+    if($LASTEXITCODE -ne 197){throw "Expected before_publish crash 197; got $LASTEXITCODE"}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    if(Test-Path -LiteralPath $root){throw 'before_publish recovery unexpectedly activated a release'}
     ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
+    $initialState=Get-Content -LiteralPath (Join-Path $root 'active.json') -Raw | ConvertFrom-Json
+    if($initialState.HighWater -ne '0.1.0' -or $initialState.Previous){
+        throw 'Initial selector or high-water invalid'
+    }
     # Abrupt crash after a complete signed slot rename, before state publish.
     # Root must retain old active slot; --recover removes verified orphan.
     $env:COSOS_16PKG_FAIL_AT='after_slot_publish'
@@ -217,7 +230,30 @@ try {
     if($LASTEXITCODE -ne 197){throw "Expected synthetic update exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
-    ExpectOk $setups['0.2.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
+    # Selector already commits the newer signed slot; only stale stage-shell
+    # cleanup remains. Recovery must retain both active and previous slots.
+    $env:COSOS_16PKG_FAIL_AT='after_selector_publish'
+    & $setups['0.2.0'] --update $root --publisher $cert.Thumbprint
+    if($LASTEXITCODE -ne 197){throw "Expected after_selector_publish crash 197; got $LASTEXITCODE"}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    $published=Get-Content -LiteralPath (Join-Path $root 'active.json') -Raw | ConvertFrom-Json
+    if($published.HighWater -ne '0.2.0' -or
+       $published.Previous -ne $initialState.Active -or
+       $published.Active -eq $published.Previous -or
+       $published.Generation -le $initialState.Generation){
+        throw 'Selector crash corrupted previous/active/high-water state'
+    }
+    ExpectOk $setups['0.2.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    ExpectOk $setups['0.2.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    $recovered=Get-Content -LiteralPath (Join-Path $root 'active.json') -Raw | ConvertFrom-Json
+    if($recovered.Active -ne $published.Active -or
+       $recovered.Previous -ne $published.Previous -or
+       $recovered.HighWater -ne $published.HighWater -or
+       $recovered.Generation -ne $published.Generation){
+        throw 'Repeated selector recovery mutated committed state'
+    }
+    ExpectDenied $setups['0.2.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
+    ExpectDenied $setups['0.1.0'] @('--update',$root,'--publisher',$cert.Thumbprint)
     $env:COSOS_16PKG_FAIL_AT='after_rollback_publish'
     & $setups['0.2.0'] --rollback $root --publisher $cert.Thumbprint
     if($LASTEXITCODE -ne 197){throw "Expected synthetic rollback exit 197; got $LASTEXITCODE"}
@@ -239,22 +275,52 @@ try {
     if((Test-Path -LiteralPath $root) -or (Test-Path -LiteralPath "$root-uninstalling")) {
         throw 'Recovery left uninstall tombstone'
     }
-    # P1 RED baseline: crash after deleting state but before removing the
-    # last empty slots shell. The uncorrected control flow must fail recovery.
+    # Crash after slot pruning but BEFORE deleting authenticated selector:
+    # recovery still has original state and must be idempotent.
+    ExpectOk $setups['0.3.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
+    $env:COSOS_16PKG_FAIL_AT='before_uninstall_selector_delete'
+    & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint
+    if($LASTEXITCODE -ne 197){throw "Expected pre-selector crash 197; got $LASTEXITCODE"}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    $tombstone="$root-uninstalling"
+    if (!(Test-Path -LiteralPath (Join-Path $tombstone 'active.json')) -or
+        (Test-Path -LiteralPath (Join-Path $tombstone 'slots'))) {
+        throw 'Pre-selector crash did not retain state with already-pruned slots'
+    }
+    ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    if ((Test-Path -LiteralPath $root) -or (Test-Path -LiteralPath $tombstone)){
+        throw 'Pre-selector recovery left owned tombstone'
+    }
+    # P1 RED=>GREEN regression: crash AFTER state deletion, before final
+    # tombstone rmdir. No empty slots directory may remain at this boundary.
     ExpectOk $setups['0.3.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
     $env:COSOS_16PKG_FAIL_AT='after_uninstall_selector_delete'
     & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint
     if($LASTEXITCODE -ne 197){throw "Expected selector-deletion crash 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
-    $tombstone="$root-uninstalling"
-    if (!(Test-Path -LiteralPath (Join-Path $tombstone 'slots')) -or
+    if (!(Test-Path -LiteralPath $tombstone) -or
+        (Test-Path -LiteralPath (Join-Path $tombstone 'slots')) -or
         (Test-Path -LiteralPath (Join-Path $tombstone 'active.json'))) {
-        throw 'RED fixture did not reach selector-deleted/slots-present boundary'
+        throw 'GREEN fixture did not reach empty selector-deleted tombstone'
     }
+    # No-selector recovery MUST refuse unexpected foreign data rather than
+    # sweeping a directory based only on the tombstone's trusted root name.
+    $foreignMarker=Join-Path $tombstone 'unowned-keep.txt'
+    [IO.File]::WriteAllText($foreignMarker,'FOREIGN_SURVIVES')
+    $foreignEmpty=Join-Path $tombstone 'unowned-empty'
+    New-Item -ItemType Directory -Path $foreignEmpty | Out-Null
+    ExpectDenied $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    if(!(Test-Path -LiteralPath $foreignEmpty) -or
+       [IO.File]::ReadAllText($foreignMarker) -ne 'FOREIGN_SURVIVES'){
+       throw 'Recovery removed or modified foreign tombstone data'
+    }
+    Remove-Item -LiteralPath $foreignMarker -Force
+    Remove-Item -LiteralPath $foreignEmpty
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     if ((Test-Path -LiteralPath $root) -or (Test-Path -LiteralPath $tombstone)) {
-        throw 'Repeated recovery left uninstall tombstone'
+        throw 'Post-selector recovery left uninstall tombstone'
     }
     Write-Host '16PKG CI TEST: unsigned, wrong publisher, and unsafe path denials'
     ExpectDenied (Join-Path $testHome 'unsigned-installer.exe') @('--install',$root,'--publisher',$cert.Thumbprint)
@@ -345,7 +411,11 @@ try {
       assertions=@{cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';
         finalize='PASS';uninstall='PASS';interruptedInstallRecovery='PASS';
         interruptedUpdateRecovery='PASS';interruptedRollbackRecovery='PASS';
-        interruptedUninstallRecovery='PASS';signedProofVersions='PASS';rendererLimit127='PASS';
+        interruptedUninstallRecovery='PASS';uninstallPreSelectorRecovery='PASS';
+        uninstallPostSelectorRecovery='PASS';foreignTombstoneDataPreserved='PASS';
+        beforePublishRecovery='PASS';afterSelectorPublishRecovery='PASS';
+        repeatedRecoveryIdempotent='PASS';committedSelectorRetained='PASS';
+        retainedPreviousSlotIntegrity='PASS';signedProofVersions='PASS';rendererLimit127='PASS';
         oversizedRenderer128Refused='PASS';largeStdout='PASS';largeStderr='PASS';
         oversizedStdoutRefused='PASS';oversizedStderrRefused='PASS';hungChildReaped='PASS';
         abnormalExitRefused='PASS';malformedResponseRefused='PASS';

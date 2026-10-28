@@ -995,13 +995,25 @@ internal static class Program
         foreach(var slot in new[]{state.Previous,state.Active})
             if(slot is not null) CleanOwnedSlot(tombstone,slot,publisher);
         var selector=SelectorPath(tombstone);
-        if(File.Exists(selector)) File.Delete(selector);
-        SyntheticCrash("after_uninstall_selector_delete");
-        foreach(var folder in Inventory(tombstone).Dirs.OrderByDescending(x=>x.Length))
+        var slots=Path.Combine(tombstone,"slots");
+        // Keep authenticated state until every allowlisted slot and its empty
+        // container are pruned. A crash after selector deletion must leave
+        // ONLY the empty ACL-protected tombstone, never an untrusted slot shell.
+        var remainder=Inventory(tombstone);
+        if (remainder.Files.Count!=1 || !IC.Equals(remainder.Files[0],selector) ||
+            remainder.Dirs.Any(folder=>!IC.Equals(folder,slots)))
+            throw new InvalidDataException("Unowned uninstall residue preserved");
+        if (Directory.Exists(slots))
         {
-            if(!Directory.EnumerateFileSystemEntries(folder).Any()) Directory.Delete(folder);
-            else throw new InvalidDataException("Unowned uninstall directory preserved");
+            if (Directory.EnumerateFileSystemEntries(slots).Any())
+                throw new InvalidDataException("Nonempty slots container preserved");
+            Directory.Delete(slots);
         }
+        SyntheticCrash("before_uninstall_selector_delete");
+        if (Directory.EnumerateFileSystemEntries(tombstone).Any(path=>!IC.Equals(path,selector)))
+            throw new InvalidDataException("Unowned uninstall data preserved before selector removal");
+        File.Delete(selector);
+        SyntheticCrash("after_uninstall_selector_delete");
         if(Directory.EnumerateFileSystemEntries(tombstone).Any())
             throw new InvalidDataException("Unowned uninstall file preserved");
         Directory.Delete(tombstone);
