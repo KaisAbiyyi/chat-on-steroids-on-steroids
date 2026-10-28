@@ -144,6 +144,60 @@ try {
     Assert (!(Test-Path $root) -and !(Test-Path "$root-uninstalling")) 'complete-uninstall'
     Ok $setups['0.3.0'] --recover $digests['0.3.0'] $root
     $checks['repeat-post-uninstall-recovery'] = 'PASS'
+    # Kill the *actual release-build executable* in a protected staging
+    # window. This does not compile test-only crash hooks into production.
+    $crashRoot = "$root-crash"
+    function InterruptTransaction([string]$exe,[string]$op,[string]$digest) {
+        $stagePrefix = ".cosos-16pkg-$(Split-Path $crashRoot -Leaf)-stage-"
+        $stdout=Join-Path $testHome "$op-stdout.txt"
+        $stderr=Join-Path $testHome "$op-stderr.txt"
+        $process=Start-Process -FilePath $exe -ArgumentList @($op,$crashRoot,'--unsigned-sha256',$digest) -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+        $interrupted=$false
+        try {
+            for($probe=0;$probe -lt 400;$probe++) {
+                $stage=@(Get-ChildItem -LiteralPath 'D:\' -Directory -Force |
+                    Where-Object { $_.Name.StartsWith($stagePrefix,[StringComparison]::OrdinalIgnoreCase) })
+                foreach($entry in $stage) {
+                    try {
+                        $acl=Get-Acl -LiteralPath $entry.FullName
+                        $process.Refresh()
+                        if($acl.AreAccessRulesProtected -and !$process.HasExited) {
+                            Stop-Process -Id $process.Id -Force
+                            $interrupted=$true
+                            break
+                        }
+                    } catch [System.IO.IOException] { }
+                }
+                if($interrupted) { break }
+                $process.Refresh()
+                if($process.HasExited) { break }
+                Start-Sleep -Milliseconds 50
+            }
+            if(!$interrupted) {
+                throw "No observable protected-stage interruption for $op"
+            }
+            $process.WaitForExit()
+        } finally {
+            $process.Dispose()
+        }
+    }
+    InterruptTransaction $setups['0.1.0'] '--install' $digests['0.1.0']
+    Ok $setups['0.1.0'] --recover $digests['0.1.0'] $crashRoot
+    if(Test-Path $crashRoot) {
+        $crashState=ActiveState $crashRoot
+        Assert ($crashState.HighWater -eq '0.1.0') 'interrupted-install-committed-state-valid'
+    } else {
+        $checks['interrupted-install-isolated-state']='PASS'
+        Ok $setups['0.1.0'] --install $digests['0.1.0'] $crashRoot
+    }
+    $checks['real-process-interrupted-install-recovery']='PASS'
+    InterruptTransaction $setups['0.2.0'] '--update' $digests['0.2.0']
+    Ok $setups['0.2.0'] --recover $digests['0.2.0'] $crashRoot
+    $afterCrash=ActiveState $crashRoot
+    Assert ($afterCrash.HighWater -in @('0.1.0','0.2.0')) 'interrupted-update-state-valid'
+    Ok $setups['0.2.0'] --uninstall $digests['0.2.0'] $crashRoot
+    Assert (!(Test-Path $crashRoot)) 'interrupted-update-clean-uninstall'
+    $checks['real-process-interrupted-update-recovery']='PASS'
     $afterStores = ProtectedStore
     Assert ($beforeStores -ceq $afterStores) 'no-certificate-store-modification'
     @{
