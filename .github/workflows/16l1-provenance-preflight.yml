@@ -74,4 +74,7 @@ jobs:
           MustRefuse (@($exe)+$valid+@('--source-ref','refs/heads/main')) 'wrong original source ref'
           MustRefuse (@($exe)+$valid+@('--source-digest',('f'*40))) 'wrong original source digest'
           MustRefuse (@($exe,'--repo',$repo,'--signer-workflow',"$repo/.github/workflows/ci.yml")) 'wrong signed workflow'
+          # The last expected gh rejection has exit=1. It was asserted above;
+          # clear the native process status so the PowerShell action is not falsely red.
+          $global:LASTEXITCODE=0
           Write-Host 'LIVE SIGSTORE NEGATIVE PROOFS PASS; no installer executed.'
