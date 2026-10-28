@@ -204,7 +204,7 @@ try {
         Remove-Item Env:\COSOS_16PKG_EXPECTED_SIGNER -ErrorAction SilentlyContinue
     }
     Write-Host '16PKG CI TEST: starting signed native lifecycle'
-    $env:COSOS_16PKG_FAIL_AT='after_stage_mkdir'
+    $env:COSOS_16PKG_FAIL_AT='after_stage_protect'
     & $setups['0.1.0'] --install $root --publisher $cert.Thumbprint
     if ($LASTEXITCODE -ne 197) { throw "Expected synthetic stage exit 197; got $LASTEXITCODE" }
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
@@ -247,6 +247,13 @@ try {
     if(Test-Path -LiteralPath $root){throw 'Denied installer modified clean target'}
     Write-Host '16PKG CI TEST: negative signed-slot tamper matrix'
     ExpectOk $setups['0.1.0'] @('--install',$dirty,'--publisher',$cert.Thumbprint)
+    # A matching stage-shaped sibling can belong to somebody else. The
+    # recovery scanner must preserve it unless ACL ownership is authenticated.
+    $foreignStage=Join-Path 'D:\' ('.cosos-16pkg-'+(Split-Path $dirty -Leaf)+'-stage-'+('b'*32))
+    New-Item -ItemType Directory -Path $foreignStage | Out-Null
+    ExpectDenied $setups['0.1.0'] @('--recover',$dirty,'--publisher',$cert.Thumbprint)
+    if(!(Test-Path -LiteralPath $foreignStage)){throw 'Unowned empty staging directory deleted'}
+    Remove-Item -LiteralPath $foreignStage
     $rootAcl=Get-Acl -LiteralPath $dirty
     if(!$rootAcl.AreAccessRulesProtected) {throw 'Installed root still inherits writable ACLs'}
     $owned=Join-Path $dirty 'unowned-keep.bin'
@@ -328,6 +335,7 @@ try {
         wrongPublisherRefused='PASS';unsignedInstallerRefused='PASS';unsafeRootRefused='PASS';
         productionRejectsTrustedTestSigner='PASS';
         unownedFilePreserved='PASS';unownedEmptyDirectoryPreserved='PASS';
+        unownedStageSiblingPreserved='PASS';
         protectedRootAcl='PASS';stateTamperRefused='PASS';manifestTamperRefused='PASS';
         junctionRefused='PASS';foreignProofRefused='PASS';binaryTamperRefused='PASS';
         jointBinaryManifestStateTamperRefused='PASS';downgradeReplayRefused='PASS'};

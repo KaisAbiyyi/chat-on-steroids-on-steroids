@@ -715,15 +715,16 @@ internal static class Program
                 || !Regex.IsMatch(name.Substring(baseName.Length),"^[a-f0-9]{32}$"))
                 continue;
             SafeAncestors(stage);
-            // Crash between mkdir and ACL protection: the uniquely scoped
-            // empty stage can be removed without ever touching user data.
-            // Any nonempty unprotected directory remains quarantined.
+            // Name alone is never an ownership proof. An unprotected empty
+            // sibling could have been created by someone else on writable D:.
+            // An interruption before Protect is quarantined for explicit
+            // inspection; only ACL-sealed task stages can be deleted.
+            VerifyProtection(stage);
             if (!Directory.EnumerateFileSystemEntries(stage).Any())
             {
                 Directory.Delete(stage);
                 continue;
             }
-            VerifyProtection(stage);
             var inventory=Inventory(stage);
             var stagingSlots=Path.Combine(stage,"slots");
             if(!Directory.Exists(stagingSlots))
@@ -850,8 +851,9 @@ internal static class Program
         try
         {
             Directory.CreateDirectory(stage);
-            SyntheticCrash("after_stage_mkdir");
             Protect(stage);
+            // Only an ACL-authenticated stage can be autonomously recovered.
+            SyntheticCrash("after_stage_protect");
             Directory.CreateDirectory(folder);
             // Install the cryptographic authority first. An interrupted
             // extraction can then be pruned against the signed embedded index.
@@ -898,7 +900,10 @@ internal static class Program
                 if (Directory.Exists(nested) && !Directory.EnumerateFileSystemEntries(nested).Any())
                     Directory.Delete(nested);
                 if (!Directory.EnumerateFileSystemEntries(stage).Any())
+                {
+                    VerifyProtection(stage);
                     Directory.Delete(stage);
+                }
             }
             // After selector commit the new release is ACTIVE; never clean it
             // if a subsequent non-critical stage cleanup fails.
