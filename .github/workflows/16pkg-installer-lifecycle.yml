@@ -70,3 +70,10 @@ jobs:
           $r=Get-Content 16pkg-native-test-receipt.json -Raw | ConvertFrom-Json
           if (!$r.testOnly -or $r.productionSigned -or $r.native16L1Accepted) { throw 'Unsafe qualification receipt' }
           Get-Content 16pkg-native-test-receipt.json -Raw | Write-Host
+      - name: Preserve exact-SHA executed native TEST evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cosos-16pkg-native-e2e-test-${{ github.event.pull_request.head.sha || github.sha }}
+          path: 16pkg-native-test-receipt.json
+          if-no-files-found: error
+          retention-days: 14
