@@ -31,17 +31,13 @@ if ($Execute) {
 foreach ($tool in @('gh','git')) {
     if (!(Get-Command $tool -ErrorAction SilentlyContinue)) { throw "Missing required $tool CLI" }
 }
-# gh run's head_sha is the PR source HEAD, while attestation source-digest
-# identifies the synthetic refs/pull/131/merge commit from GitHub's OIDC event.
-$run=gh api "repos/$repository/actions/runs/$RunId" | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect candidate workflow run' }
-$pull=gh api "repos/$repository/pulls/131" | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect reviewed PR HEAD' }
-$artifacts=gh api "repos/$repository/actions/runs/$RunId/artifacts" | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect run artifact list' }
-Assert-16L1RunOrigin $run $pull $artifacts $RunId $SourceSha $repository
-$sourceRef='refs/pull/131/merge'
-$sourceDigest=$pull.merge_commit_sha
+# Select only the owner-reviewed, merged and independently pinned candidate.
+# API provenance, including the original synthetic PR SHA, is checked by the
+# shared read-only verifier *after* download and before any binary is executed.
+if ($SourceSha -cne $script:16L1Approved.SourceSha -or
+    $RunId -ne $script:16L1Approved.RunId) {
+    throw 'Unapproved historical candidate; no download or physical execution'
+}
 if (!$existing) {
     New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
     [void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
@@ -62,14 +58,10 @@ $archive=Join-Path $download 'candidate.zip'
 if (!(Test-Path -LiteralPath $receiptPath) -or !(Test-Path -LiteralPath $setup)) {
     throw 'Incomplete downloaded installer or receipt'
 }
-foreach ($file in @($receiptPath,$setup,$archive,
-    (Join-Path $download 'installer-unsigned-0.2.0\CoSoSInstaller.exe'),
-    (Join-Path $download 'installer-unsigned-0.3.0\CoSoSInstaller.exe'))) {
-    $verified=gh attestation verify $file --repo $repository --signer-workflow $workflow `
-        --source-ref $sourceRef --source-digest $sourceDigest --format json | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or !$verified) { throw "Independent attestation verification failed: $file" }
-    Assert-16L1AttestationRun @($verified) $RunId ([int]$run.run_attempt) $repository
-}
+# Verification-only reusable on both hosted CI and physical D: handoff.
+# No current pull request merge_commit_sha or mutable run.pull_requests lookup.
+& "$PSScriptRoot/16pkg-16l1-artifact-provenance.ps1" -RunId $RunId -SourceSha $SourceSha -ArtifactRoot $download
+if (!$?) { throw 'Independent provenance preflight failed' }
 $receipt=Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
 if ($receipt.sourceSha -ne $SourceSha) { throw 'Attested source mismatch' }
 function RequireDigest([string]$file,[string]$expected) {
