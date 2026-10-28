@@ -114,7 +114,7 @@ try {
     Refused { Assert-16L1RunOrigin @origin } 'wrong immutable artifact SHA256'
     $origin.Artifacts=$art
     $expected="https://github.com/$repo/actions/runs/40710902296/attempts/1"
-    $eventDigest='e'*40
+    $eventDigest='247e57638a8f5afce93d87fc6d671ce54eaf3ccd'
     $cert=[pscustomobject]@{
         runInvocationURI=$expected;sourceRepositoryIdentifier='1424422098'
         sourceRepositoryRef='refs/pull/131/merge';sourceRepositoryDigest=$eventDigest
