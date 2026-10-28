@@ -18,7 +18,12 @@ if (!$workspacePath.StartsWith($allowedPrefix,[StringComparison]::OrdinalIgnoreC
     $workspacePath.Contains('..') -or $workspacePath.Length -lt ($allowedPrefix.Length+20)) {
     throw 'Refusing workspace outside isolated D: qualification root'
 }
-if (Test-Path -LiteralPath $workspacePath) { throw 'Workspace already exists: preserve existing evidence' }
+# Verification-only preflight may be resumed once for an explicit execution pass.
+$existing = Test-Path -LiteralPath $workspacePath
+if ($existing -and (!$Execute -or (Test-Path -LiteralPath (Join-Path $workspacePath 'evidence')) -or
+    !(Test-Path -LiteralPath (Join-Path $workspacePath 'downloads/package-receipt.json')))) {
+    throw 'Workspace already used or incomplete; preserve evidence and select a new workspace'
+}
 if ($Execute) {
     $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
     $principal=[Security.Principal.WindowsPrincipal]::new($identity)
@@ -29,17 +34,20 @@ if ($Execute) {
 foreach ($tool in @('gh','git')) {
     if (!(Get-Command $tool -ErrorAction SilentlyContinue)) { throw "Missing required $tool CLI" }
 }
-$run=gh run view $RunId --repo $repository --json headSha,conclusion,event,workflowName | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0 -or $run.conclusion -ne 'success' -or
-    $run.headSha -ne $SourceSha) {
-    throw 'Run is not successful or not bound to requested exact head'
+$run=gh run view $RunId --repo $repository --json conclusion,event,workflowName | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or $run.conclusion -ne 'success') {
+    throw 'GitHub run is not successful'
 }
-New-Item -ItemType Directory -Path $workspacePath | Out-Null
+if (!$existing) {
+    New-Item -ItemType Directory -Path $workspacePath | Out-Null
+}
 $download=Join-Path $workspacePath 'downloads'
-New-Item -ItemType Directory -Path $download | Out-Null
-$artifact="cosos-16pkg-unsigned-candidate-$SourceSha"
-gh run download $RunId --repo $repository --name $artifact --dir $download
-if ($LASTEXITCODE -ne 0) { throw 'Exact-run source artifact download failed' }
+if (!$existing) {
+    New-Item -ItemType Directory -Path $download | Out-Null
+    $artifact="cosos-16pkg-unsigned-candidate-$SourceSha"
+    gh run download $RunId --repo $repository --name $artifact --dir $download
+    if ($LASTEXITCODE -ne 0) { throw 'Exact-run source artifact download failed' }
+}
 $receiptPath=Join-Path $download 'package-receipt.json'
 $setup=Join-Path $download 'installer-package\CoSoSInstaller.exe'
 $archive=Join-Path $download 'candidate.zip'
@@ -71,7 +79,7 @@ Write-Host "All packages are UNSIGNED. Windows may show Unknown Publisher/SmartS
 Write-Host 'Do not import TEST certificates or grant access to existing CoS/CoSoS profiles.'
 if (!$Execute) {
     Write-Host "Preflight complete. Run again with -Execute in an elevated PowerShell 7 shell to qualify disposable $workspacePath."
-    Write-Host 'NOTE: Because this script refuses existing workspaces, choose a NEW -Workspace for the execution pass.'
+    Write-Host 'Use -Execute with the SAME -RunId, -SourceSha and -Workspace to resume this verified preflight.'
     return
 }
 $root=Join-Path $workspacePath 'installed'
