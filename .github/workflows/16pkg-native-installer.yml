@@ -79,6 +79,19 @@ jobs:
       # Positive test-signer native acceptance runs in the separate fast
       # 16pkg-installer-lifecycle workflow against the SAME checked-out C# source.
       # Production binary packaging in this job does NOT import any test signer.
+      - name: Extract exact release manifest for independent digest
+        shell: pwsh
+        run: |
+          $archive=[IO.Compression.ZipFile]::OpenRead((Resolve-Path candidate.zip).Path)
+          try {
+            $entry=$archive.GetEntry('release.json')
+            if(!$entry -or $entry.Length -gt 131072){throw 'Missing/oversized product release manifest'}
+            $stream=$entry.Open()
+            try {
+              $output=[IO.File]::Create((Join-Path $PWD 'installer-release-manifest.json'))
+              try {$stream.CopyTo($output)} finally {$output.Dispose()}
+            } finally {$stream.Dispose()}
+          } finally {$archive.Dispose()}
       - name: Exact SHA-256 receipt
         shell: pwsh
         run: |
@@ -89,6 +102,7 @@ jobs:
           rustSha256=(Get-FileHash target/release/cos-rust.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           rendererHostSha256=(Get-FileHash renderer-package/WindowsRenderer.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           rendererDllSha256=(Get-FileHash renderer-package/WindowsRenderer.dll -Algorithm SHA256).Hash.ToLowerInvariant();
+          releaseManifestSha256=(Get-FileHash installer-release-manifest.json -Algorithm SHA256).Hash.ToLowerInvariant();
           rendererManifestSha256=(Get-FileHash renderer-package/renderer-integrity.json -Algorithm SHA256).Hash.ToLowerInvariant();
           update02SetupSha256=(Get-FileHash installer-unsigned-0.2.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
           update03SetupSha256=(Get-FileHash installer-unsigned-0.3.0/CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant();
@@ -161,5 +175,6 @@ jobs:
             installer-unsigned-0.2.0/CoSoSInstaller.exe
             installer-unsigned-0.3.0/CoSoSInstaller.exe
             package-receipt.json
+            installer-release-manifest.json
             16pkg-unsigned-native-receipt.json
           if-no-files-found: error
