@@ -38,6 +38,13 @@ internal static class Program
             if (args.Length == 1 && args[0] == "--test-signed-issuer")
             {
                 var testIssuerPin = ResourceText("CoSoS.TrustedPublisher", false).ToUpperInvariant();
+                Console.WriteLine("COSOS_16PKG_TEST_SIGNER_PHASE:signature");
+                CheckSignature(Environment.ProcessPath!, testIssuerPin);
+                Console.WriteLine("COSOS_16PKG_TEST_SIGNER_PHASE:embedded-identity");
+                var checkedIdentity = RunChecked(Environment.ProcessPath!, "--identity");
+                _ = JsonSerializer.Deserialize<Identity>(checkedIdentity)
+                    ?? throw new InvalidDataException("TEST issuer identity absent");
+                Console.WriteLine("COSOS_16PKG_TEST_SIGNER_PHASE:complete-proof");
                 var issuer = VerifyProof(Environment.ProcessPath!, testIssuerPin);
                 Console.WriteLine("COSOS_16PKG_SIGNED_ISSUER_PASS:" + issuer.Version);
                 return 0;
@@ -292,7 +299,13 @@ internal static class Program
             Task.WhenAll(process.WaitForExitAsync(deadline.Token), stdout, stderr)
                 .GetAwaiter().GetResult();
             if (process.ExitCode != 0)
+            {
+#if COS_16PKG_TEST
+                Console.Error.WriteLine("COSOS_16PKG_TEST_CHILD_REJECTED:" +
+                    Path.GetFileName(binary) + ":exit=" + process.ExitCode);
+#endif
                 throw new InvalidDataException("Trusted Windows operation refused");
+            }
             return stdout.GetAwaiter().GetResult().Trim();
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested)
