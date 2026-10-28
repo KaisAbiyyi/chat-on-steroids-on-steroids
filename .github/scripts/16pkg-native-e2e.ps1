@@ -35,6 +35,11 @@ function ExpectOk([string]$exe,[string[]]$options){
     & $exe @options
     if($LASTEXITCODE -ne 0){throw "Installer rejected valid fixture operation $($options[0])"}
 }
+function ExpectDenied([string]$exe,[string[]]$options){
+    & $exe @options 2>$null
+    if($LASTEXITCODE -eq 0){throw "Installer accepted forbidden operation $($options[0])"}
+    $global:LASTEXITCODE=0
+}
 try {
     if(!(Test-Path 'D:\')){
         & "$env:SystemRoot\System32\subst.exe" D: $testHome
@@ -127,6 +132,9 @@ try {
         & dotnet @publishArgs
         if($LASTEXITCODE -ne 0){throw 'Native setup compile failed'}
         $exe=Join-Path $out 'CoSoSInstaller.exe'
+        if($v -eq '0.1.0'){
+            Copy-Item -LiteralPath $exe -Destination (Join-Path $testHome 'unsigned-installer.exe')
+        }
         Write-Host "16PKG CI TEST: signing version $v"
         $signed=Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256
         if($signed.Status -ne 'Valid'){throw "Test signer failed: $($signed.Status)"}
@@ -205,9 +213,32 @@ try {
     if($LASTEXITCODE -ne 197){throw "Expected synthetic uninstall exit 197; got $LASTEXITCODE"}
     Remove-Item Env:\COSOS_16PKG_FAIL_AT
     ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
-    if(Test-Path $root -or (Test-Path "$root-uninstalling")){throw 'Recovery left uninstall tombstone'}
+    if((Test-Path -LiteralPath $root) -or (Test-Path -LiteralPath "$root-uninstalling")) {
+        throw 'Recovery left uninstall tombstone'
+    }
+    Write-Host '16PKG CI TEST: unsigned, wrong publisher, and unsafe path denials'
+    ExpectDenied (Join-Path $testHome 'unsigned-installer.exe') @('--install',$root,'--publisher',$cert.Thumbprint)
+    ExpectDenied $setups['0.1.0'] @('--install',$root,'--publisher',('F'*40))
+    ExpectDenied $setups['0.1.0'] @('--install','D:\','--publisher',$cert.Thumbprint)
+    ExpectDenied $setups['0.1.0'] @('--install',("D:\outside\..\task"),'--publisher',$cert.Thumbprint)
+    if(Test-Path -LiteralPath $root){throw 'Denied installer modified clean target'}
     Write-Host '16PKG CI TEST: negative signed-slot tamper matrix'
     ExpectOk $setups['0.1.0'] @('--install',$dirty,'--publisher',$cert.Thumbprint)
+    $rootAcl=Get-Acl -LiteralPath $dirty
+    if(!$rootAcl.AreAccessRulesProtected) {throw 'Installed root still inherits writable ACLs'}
+    $owned=Join-Path $dirty 'unowned-keep.bin'
+    [IO.File]::WriteAllBytes($owned,[Text.Encoding]::UTF8.GetBytes('UNOWNED_KEPT'))
+    ExpectDenied $setups['0.1.0'] @('--uninstall',$dirty,'--publisher',$cert.Thumbprint)
+    if(!(Test-Path -LiteralPath $dirty) -or
+        [Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes($owned)) -ne 'UNOWNED_KEPT') {
+        throw 'Unowned file lost or changed after refused uninstall'
+    }
+    Remove-Item -LiteralPath $owned -Force
+    $empty=Join-Path $dirty 'unowned-empty-directory'
+    New-Item -ItemType Directory -Path $empty | Out-Null
+    ExpectDenied $setups['0.1.0'] @('--uninstall',$dirty,'--publisher',$cert.Thumbprint)
+    if(!(Test-Path -LiteralPath $empty)){throw 'Unowned directory deleted on refused uninstall'}
+    Remove-Item -LiteralPath $empty
     $sel=Get-Content (Join-Path $dirty 'active.json') -Raw | ConvertFrom-Json
     $statePath=Join-Path $dirty 'active.json'
     $stateBytes=[IO.File]::ReadAllBytes($statePath)
@@ -254,7 +285,30 @@ try {
     & $setups['0.3.0'] --recover $dirty --publisher $cert.Thumbprint 2>$null
     if($LASTEXITCODE -eq 0){throw 'Rehashed binary+manifest+state improperly trusted'}
     $global:LASTEXITCODE=0
-    @{sourceSha=$source;testPublisher=$cert.Thumbprint;testOnly=$true;productionSigned=$false;native16L1Accepted=$false;cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';finalize='PASS';uninstall='PASS';binaryTamperRejected=$true;samePublisherWrongReleaseRefused=$true;jointSlotStateManifestTamperRejected=$true} | ConvertTo-Json | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
+    $setupHashes=@{}
+    foreach($v in @('0.1.0','0.2.0','0.3.0')){
+        $setupHashes[$v]=(Get-FileHash -LiteralPath $setups[$v] -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+    @{schema='cosos.16pkg.native-test.v1';sourceSha=$source;testPublisher=$cert.Thumbprint;
+      windowsVersion=[Environment]::OSVersion.VersionString;powerShellVersion=$PSVersionTable.PSVersion.ToString();
+      testOnly=$true;productionSigned=$false;native16L1Accepted=$false;
+      testTrustScope='Disposable GitHub-hosted LocalMachine Root/TrustedPublisher';
+      testCompiledAuthorization=$true;
+      setupSha256=$setupHashes;
+      assertions=@{cleanInstall='PASS';upgrade='PASS';rollback='PASS';reUpdate='PASS';
+        finalize='PASS';uninstall='PASS';interruptedInstallRecovery='PASS';
+        interruptedUpdateRecovery='PASS';interruptedRollbackRecovery='PASS';
+        interruptedUninstallRecovery='PASS';signedProofVersions='PASS';rendererLimit127='PASS';
+        oversizedRenderer128Refused='PASS';largeStdout='PASS';largeStderr='PASS';
+        oversizedStdoutRefused='PASS';oversizedStderrRefused='PASS';hungChildReaped='PASS';
+        abnormalExitRefused='PASS';malformedResponseRefused='PASS';
+        wrongPublisherRefused='PASS';unsignedInstallerRefused='PASS';unsafeRootRefused='PASS';
+        unownedFilePreserved='PASS';unownedEmptyDirectoryPreserved='PASS';
+        protectedRootAcl='PASS';stateTamperRefused='PASS';manifestTamperRefused='PASS';
+        junctionRefused='PASS';foreignProofRefused='PASS';binaryTamperRefused='PASS';
+        jointBinaryManifestStateTamperRefused='PASS';downgradeReplayRefused='PASS'};
+      gates=@{cloudNativeE2E='PASS';productionSigning='BLOCKED';physical16L1='NOT_RUN'};
+    } | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 16pkg-native-test-receipt.json
 }
 finally {
     Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
