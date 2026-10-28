@@ -77,6 +77,40 @@ if($manifest.source_sha -ne $SourceSha -or $manifest.version -ne '0.1.0' -or
     $manifest.product -ne 'CoSoS' -or $manifest.platform -ne 'windows-x64') {
     throw 'Attested release manifest identity mismatch'
 }
+# The renderer manifest was generated inside candidate.zip and exported by
+# the release workflow; verify the detached bytes against BOTH manifests and
+# the source-bound receipt before trusting unsigned installed components.
+$rendererPath=Join-Path $download 'installer-renderer-integrity.json'
+RequireDigest $rendererPath $receipt.rendererManifestSha256
+$renderer=Get-Content -LiteralPath $rendererPath -Raw | ConvertFrom-Json
+if($renderer.format -ne 1 -or $renderer.sourceSha -cne $SourceSha){
+    throw 'Renderer manifest source identity mismatch'
+}
+$rendererEntry=@($manifest.files | Where-Object { $_.path -ceq 'renderer/renderer-integrity.json' })
+if($rendererEntry.Count -ne 1 -or
+    $rendererEntry[0].sha256 -cne $receipt.rendererManifestSha256 -or
+    [long]$rendererEntry[0].bytes -ne (Get-Item -LiteralPath $rendererPath).Length){
+    throw 'Renderer manifest does not match source-bound release index'
+}
+foreach($spec in @(
+    @{entry='bin/cos-rust.exe';digest=$receipt.rustSha256},
+    @{entry='renderer/WindowsRenderer.exe';digest=$receipt.rendererHostSha256},
+    @{entry='renderer/WindowsRenderer.dll';digest=$receipt.rendererDllSha256}
+)){
+    $indexed=@($manifest.files | Where-Object { $_.path -ceq $spec.entry })
+    if($indexed.Count -ne 1 -or $indexed[0].sha256 -cne $spec.digest){
+        throw "Receipt/release payload digest mismatch: $($spec.entry)"
+    }
+}
+foreach($spec in @(
+    @{name='WindowsRenderer.exe';digest=$receipt.rendererHostSha256},
+    @{name='WindowsRenderer.dll';digest=$receipt.rendererDllSha256}
+)){
+    $indexed=@($renderer.files | Where-Object { $_.path -ceq $spec.name })
+    if($indexed.Count -ne 1 -or $indexed[0].sha256 -cne $spec.digest){
+        throw "Renderer manifest/receipt digest mismatch: $($spec.name)"
+    }
+}
 $up2=Join-Path $download 'installer-unsigned-0.2.0\CoSoSInstaller.exe'
 $up3=Join-Path $download 'installer-unsigned-0.3.0\CoSoSInstaller.exe'
 RequireDigest $up2 $receipt.update02SetupSha256
