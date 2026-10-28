@@ -996,6 +996,7 @@ internal static class Program
             if(slot is not null) CleanOwnedSlot(tombstone,slot,publisher);
         var selector=SelectorPath(tombstone);
         if(File.Exists(selector)) File.Delete(selector);
+        SyntheticCrash("after_uninstall_selector_delete");
         foreach(var folder in Inventory(tombstone).Dirs.OrderByDescending(x=>x.Length))
         {
             if(!Directory.EnumerateFileSystemEntries(folder).Any()) Directory.Delete(folder);

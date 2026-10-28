@@ -239,6 +239,23 @@ try {
     if((Test-Path -LiteralPath $root) -or (Test-Path -LiteralPath "$root-uninstalling")) {
         throw 'Recovery left uninstall tombstone'
     }
+    # P1 RED baseline: crash after deleting state but before removing the
+    # last empty slots shell. The uncorrected control flow must fail recovery.
+    ExpectOk $setups['0.3.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
+    $env:COSOS_16PKG_FAIL_AT='after_uninstall_selector_delete'
+    & $setups['0.3.0'] --uninstall $root --publisher $cert.Thumbprint
+    if($LASTEXITCODE -ne 197){throw "Expected selector-deletion crash 197; got $LASTEXITCODE"}
+    Remove-Item Env:\COSOS_16PKG_FAIL_AT
+    $tombstone="$root-uninstalling"
+    if (!(Test-Path -LiteralPath (Join-Path $tombstone 'slots')) -or
+        (Test-Path -LiteralPath (Join-Path $tombstone 'active.json'))) {
+        throw 'RED fixture did not reach selector-deleted/slots-present boundary'
+    }
+    ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    ExpectOk $setups['0.3.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
+    if ((Test-Path -LiteralPath $root) -or (Test-Path -LiteralPath $tombstone)) {
+        throw 'Repeated recovery left uninstall tombstone'
+    }
     Write-Host '16PKG CI TEST: unsigned, wrong publisher, and unsafe path denials'
     ExpectDenied (Join-Path $testHome 'unsigned-installer.exe') @('--install',$root,'--publisher',$cert.Thumbprint)
     ExpectDenied $setups['0.1.0'] @('--install',$root,'--publisher',('F'*40))
