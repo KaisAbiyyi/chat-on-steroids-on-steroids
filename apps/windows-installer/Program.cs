@@ -134,9 +134,12 @@ internal static class Program
     // Failure logging never authorizes any new filesystem mutation.
     static string ErrorDetail(Exception ex)
     {
-        var code = ex is System.ComponentModel.Win32Exception win
-            ? win.NativeErrorCode : ex.HResult & 0xFFFF;
-        return $"type={ex.GetType().Name};win32={code};hresult=0x{ex.HResult:X8};message={ex.Message}";
+        // Most managed HRESULTs are NOT Win32 errors. Do not mislabel them.
+        var facilityWin32 = ((uint)ex.HResult & 0xFFFF0000u) == 0x80070000u;
+        string native = ex is System.ComponentModel.Win32Exception win
+            ? win.NativeErrorCode.ToString() : facilityWin32
+            ? (ex.HResult & 0xFFFF).ToString() : "unavailable";
+        return $"type={ex.GetType().Name};win32={native};hresult=0x{ex.HResult:X8};message={ex.Message}";
     }
     static void Operation(string action,string source,string destination,Action work)
     {

@@ -57,6 +57,18 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Unable to disable protected boundary inheritance' }
     & $icacls $boundary '/grant:r' ('*'+$owner+':(OI)(CI)F') '*S-1-5-32-544:(OI)(CI)F' '*S-1-5-18:(OI)(CI)F' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Unable to grant trusted protected boundary ACL' }
+    # Fresh CI-owned directory: remove default CREATOR OWNER/Users ACEs
+    # that Windows may install as explicit even after /inheritance:r.
+    # Never apply this operation to any pre-existing owner boundary.
+    $trusted=@($owner,'S-1-5-32-544','S-1-5-18')
+    $initialAcl=Get-Acl -LiteralPath $boundary
+    $extras=@($initialAcl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]) |
+        Where-Object { $_.IdentityReference.Value -notin $trusted } |
+        ForEach-Object { $_.IdentityReference.Value } | Select-Object -Unique)
+    foreach($sid in $extras) {
+        & $icacls $boundary '/remove' ('*'+$sid) | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "Cannot remove CI-only untrusted ACE $sid" }
+    }
     $protectedAcl=Get-Acl -LiteralPath $boundary
     if (!$protectedAcl.AreAccessRulesProtected -or
         $protectedAcl.GetOwner([Security.Principal.SecurityIdentifier]).Value -cne $owner) {
