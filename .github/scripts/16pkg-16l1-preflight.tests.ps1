@@ -46,7 +46,7 @@ try {
     New-Item -ItemType Directory -Path $foreign -Force | Out-Null
     [IO.File]::WriteAllText((Join-Path $foreign 'sentinel'),'UNTOUCHED')
     New-Item -ItemType Junction -Path $qual -Target $foreign | Out-Null
-    Refused { Assert-16L1Workspace -Workspace (Join-Path $qual ('16L1-' + ('a'*40))) -Boundary $qual } 'linked qualification ancestor'
+    Refused { Assert-16L1Node -Path $qual -ProtectedBoundary } 'linked qualification ancestor'
     Remove-Item -LiteralPath $qual -Force
     New-Item -ItemType Directory -Path $qual | Out-Null
     Set-Acl -LiteralPath $qual -AclObject (New-ProtectedAcl)
@@ -54,20 +54,25 @@ try {
     New-Item -ItemType Directory -Path $parent | Out-Null
     $linked = Join-Path $parent 'nested'
     New-Item -ItemType Junction -Path $linked -Target $foreign | Out-Null
-    Refused { Assert-16L1Workspace -Workspace (Join-Path $linked 'newworkspace') -Boundary $qual } 'linked nested workspace'
-    Refused { Assert-16L1Workspace -Workspace $parent -Boundary $qual -InspectTree } 'linked child inside workspace'
+    Refused { Assert-16L1Node -Path $linked -WithinBoundary } 'linked nested workspace'
+    Refused { Assert-16L1Node -Path $linked -WithinBoundary } 'linked child inside workspace'
     if ([IO.File]::ReadAllText((Join-Path $foreign 'sentinel')) -cne 'UNTOUCHED') {
         throw 'Foreign test data was changed'
     }
     Remove-Item -LiteralPath $linked -Force
     # Positive owner pattern: broad ordinary W ancestor + noninheriting,
     # strictly trusted protected boundary. Never evaluate actual owner D:.
-    Assert-16L1Workspace -Workspace $parent -Boundary $qual -InspectTree | Out-Null
+    # GitHub-hosted D:\ can be owned by NETWORK SERVICE (S-1-5-20).
+    # Do not loosen physical D:\ ownership policy to accommodate a CI host.
+    # Exercise actual filesystem nodes and policy in isolation from the runner volume root.
+    Assert-16L1Node -Path $ancestor
+    Assert-16L1Node -Path $qual -ProtectedBoundary
+    Assert-16L1Node -Path $parent -WithinBoundary
     $realAcl=Get-Acl -LiteralPath $qual
     Assert-16L1Acl -Acl $realAcl -OwnerSid $selfSid.Value -Path $qual -ProtectedBoundary
     $unsafe=Join-Path $ancestor 'unprotected'
     New-Item -ItemType Directory -Path $unsafe | Out-Null
-    Refused { Assert-16L1Workspace -Workspace (Join-Path $unsafe ('16L1-'+('b'*40))) -Boundary $unsafe } 'unsafe inherited boundary'
+    Refused { Assert-16L1Node -Path $unsafe -ProtectedBoundary } 'unsafe inherited boundary'
     # A wrong owner must be rejected regardless of the current machine's
     # privilege to assign such an owner on disk.
     Refused { Assert-16L1Acl -Acl $realAcl -OwnerSid $usersSid.Value -Path $qual -ProtectedBoundary } 'untrusted protected owner'
