@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 
 REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
-EXPECTED = {"C": 79, "L": 30, "U": 15}
+EXPECTED = {"C": 80, "L": 31, "U": 15}
 STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
 PHASES = {"1-6", *(str(n) for n in range(7, 17))}
 NOTICE = (
@@ -29,6 +29,92 @@ def load(path: Path = REGISTRY) -> dict:
 
 def index(data: dict) -> dict[str, dict]:
     return {task["id"]: task for task in data["tasks"]}
+
+
+
+FRESH_CHECKS = (
+    "fresh_init", "isolated_storage", "synthetic_only",
+    "existing_profiles_untouched", "no_leakage", "rollback",
+    "failure_isolation", "owned_cleanup",
+)
+
+
+def fresh_receipt_valid(receipt: object) -> bool:
+    """Structural preflight ONLY; independent reviewer verifies external evidence.
+
+    No self-authored JSON, hash or URL is by itself proof of a physical run.
+    """
+    if not isinstance(receipt, dict):
+        return False
+    def sha(value: object, length: int) -> bool:
+        return isinstance(value, str) and len(value) == length and all(
+            c in "0123456789abcdef" for c in value
+        )
+    source = receipt.get("source_sha")
+    return (
+        receipt.get("schema_version") == 1
+        and receipt.get("kind") == "owner-local-synthetic-fresh-start"
+        and receipt.get("profile_scope") == "new-disposable-empty"
+        and receipt.get("migration") == "none"
+        and receipt.get("host") == "owner-local-windows"
+        and sha(source, 40)
+        and sha(receipt.get("artifact_sha256"), 64)
+        and sha(receipt.get("receipt_sha256"), 64)
+        and isinstance(receipt.get("local_session_id"), str)
+        and len(receipt["local_session_id"]) >= 12
+        and isinstance(receipt.get("receipt_url"), str)
+        and receipt["receipt_url"].startswith(
+            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/"
+        )
+        and isinstance(receipt.get("review_url"), str)
+        and receipt["review_url"].startswith(
+            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/"
+        )
+        and receipt.get("reviewed_source_sha") == source
+        and receipt.get("independent_review_verdict") == "PASS"
+        and isinstance(receipt.get("checks"), dict)
+        and set(receipt["checks"]) == set(FRESH_CHECKS)
+        and all(receipt["checks"][name] == "PASS" for name in FRESH_CHECKS)
+    )
+
+
+def private_migration_authorized(tasks: dict[str, dict]) -> bool:
+    owner = tasks["16U1"]
+    consent = owner.get("consent_receipt")
+    return (
+        owner.get("migration_consent") == "granted"
+        and owner.get("owner_decision") == "approved_private_copy"
+        and isinstance(consent, dict)
+        and consent.get("explicit_owner_approval") is True
+        and isinstance(consent.get("scope"), str)
+        and bool(consent["scope"].strip())
+        and isinstance(consent.get("approval_url"), str)
+        and consent["approval_url"].startswith("https://")
+    )
+
+
+def accepted(tasks: dict[str, dict], task_id: str) -> bool:
+    task = tasks[task_id]
+    if task.get("status") != "done":
+        return False
+    if task_id == "16L2":
+        evidence = task.get("private_migration_receipt")
+        return private_migration_authorized(tasks) and isinstance(evidence, dict) and (
+            evidence.get("scope") == "approved-copy-only"
+            and evidence.get("independent_review_verdict") == "PASS"
+            and evidence.get("physical_windows") is True
+        )
+    if task_id == "16LF-01":
+        return fresh_receipt_valid(task.get("evidence"))
+    return True
+
+
+def missing_dependencies(task: dict, tasks: dict[str, dict]) -> list[str]:
+    missing = [dep for dep in task["depends_on"] if not accepted(tasks, dep)]
+    for group in task.get("any_of", []):
+        if not any(accepted(tasks, dep) for dep in group):
+            missing.append("one_of(" + "|".join(group) + ")")
+    return missing
 
 
 def validate(data: dict) -> list[str]:
@@ -64,8 +150,37 @@ def validate(data: dict) -> list[str]:
                 problems.append(f"{task_id}: dangling prerequisite {dep}")
             if dep == task_id:
                 problems.append(f"{task_id}: self dependency")
-            if t.get("status") == "done" and tasks_by_id.get(dep, {}).get("status") != "done":
+            if t.get("status") == "done" and not accepted(tasks_by_id, dep):
                 problems.append(f"{task_id}: cannot be done before {dep}")
+    # This OR group is intentional. Every other dependency remains mandatory.
+    l3 = tasks_by_id.get("16L3", {})
+    if l3.get("depends_on") != ["16F", "16L1"] or l3.get("any_of") != [["16L2", "16LF-01"]]:
+        problems.append("16L3: required 16F + 16L1 AND (16L2 OR 16LF-01) gate changed")
+    if tasks_by_id.get("16U1", {}).get("migration_consent") == "declined":
+        if tasks_by_id.get("16L2", {}).get("status") == "done":
+            problems.append("16L2: owner declined private migration; cannot accept")
+    for protected in ("16L2", "16LF-01"):
+        if protected in tasks_by_id and tasks_by_id[protected]["status"] == "done":
+            if not accepted(tasks_by_id, protected):
+                problems.append(f"{protected}: missing authorized, reviewed physical evidence")
+    for t in tasks:
+        groups = t.get("any_of", [])
+        if t["id"] != "16L3" and groups:
+            problems.append(f"{t['id']}: unexpected OR prerequisite")
+        if not isinstance(groups, list):
+            problems.append(f"{t['id']}: invalid OR prerequisites")
+            continue
+        for group in groups:
+            if not isinstance(group, list) or len(group) < 2 or len(group) != len(set(group)):
+                problems.append(f"{t['id']}: invalid OR group")
+                continue
+            for dep in group:
+                if dep not in tasks_by_id:
+                    problems.append(f"{t['id']}: dangling OR prerequisite {dep}")
+                elif dep == t["id"]:
+                    problems.append(f"{t['id']}: self OR dependency")
+        if t["status"] == "done" and missing_dependencies(t, tasks_by_id):
+            problems.append(f"{t['id']}: cannot be done before all required release gates")
     color: dict[str, int] = {}
     def visit(name: str, chain: list[str]) -> None:
         if color.get(name) == 2:
@@ -76,7 +191,10 @@ def validate(data: dict) -> list[str]:
         if name not in tasks_by_id:
             return
         color[name] = 1
-        for dep in tasks_by_id[name].get("depends_on", []):
+        edges = tasks_by_id[name].get("depends_on", []) + [
+            dep for group in tasks_by_id[name].get("any_of", []) for dep in group
+        ]
+        for dep in edges:
             if dep in tasks_by_id:
                 visit(dep, [*chain, name])
         color[name] = 2
@@ -101,6 +219,9 @@ def validate(data: dict) -> list[str]:
         "CL-L3": ["CL-06B", "CL-07B"],
         "CL-10": ["CL-04B", "CL-04C", "CL-L2", "CL-L3", "CL-L4", "CL-L5"],
         "CL-L6": ["CL-10"],
+        "16FS-01": ["16U1", "16L1", "16F"],
+        "16LF-01": ["16FS-01", "16U1", "16L1"],
+        "16U2": ["16L3"],
     }
     for task_id, expected in expected_edges.items():
         if sorted(tasks_by_id.get(task_id, {}).get("depends_on", [])) != sorted(expected):
@@ -126,7 +247,7 @@ def readiness(data: dict) -> tuple[list[dict], list[dict]]:
     for task in data["tasks"]:
         if task["status"] == "done":
             continue
-        missing = [dep for dep in task["depends_on"] if tasks[dep]["status"] != "done"]
+        missing = missing_dependencies(task, tasks)
         item = {**task, "missing_prerequisites": missing}
         if task["status"] == "todo" and not missing:
             ready.append(item)
@@ -142,15 +263,18 @@ def explain(data: dict, task_id: str) -> dict:
     task = tasks[task_id]
     visited: set[str] = set()
     def blockers(node: str) -> None:
-        for dep in tasks[node]["depends_on"]:
-            if tasks[dep]["status"] != "done" and dep not in visited:
+        edges = tasks[node]["depends_on"] + [
+            dep for group in tasks[node].get("any_of", []) for dep in group
+        ]
+        for dep in edges:
+            if not accepted(tasks, dep) and dep not in visited:
                 visited.add(dep)
                 blockers(dep)
     blockers(task_id)
-    missing_direct = [d for d in task["depends_on"] if tasks[d]["status"] != "done"]
+    missing_direct = missing_dependencies(task, tasks)
     return {
         **task,
-        "state": "DONE" if task["status"] == "done" else
+        "state": "DONE" if accepted(tasks, task_id) else
                  "HOLD" if task["status"] == "hold" else
                  "CLAIMED" if task["status"] == "claimed" else
                  "READY_CANDIDATE" if task["status"] == "todo" and not missing_direct else
@@ -170,7 +294,10 @@ def waves(data: dict) -> list[list[dict]]:
     accepted = {t["id"] for t in data["tasks"] if t["status"] == "done"}
     result = []
     while pending:
-        candidates = [t for t in pending.values() if all(d in accepted for d in t["depends_on"])]
+        candidates = [t for t in pending.values() if
+                      all(d in accepted for d in t["depends_on"]) and
+                      all(any(d in accepted and d not in ("16L2", "16LF-01")
+                              for d in group) for group in t.get("any_of", []))]
         if not candidates:
             break  # blocked/claimed/stale snapshot, never assume accepted
         # Each wave is a resource-conflict-free possible simultaneous set.
@@ -200,7 +327,7 @@ def main() -> int:
             print("ERROR " + error, file=sys.stderr)
         return 1
     if args.command == "check":
-        print(f"VALID: {len(data['tasks'])} nodes; 72 cloud, 28 local, 15 human; no dangling/cyclic edges")
+        print(f"VALID: {len(data['tasks'])} nodes; validated AND/OR gates and no dependency cycles")
         return 0
     if args.command == "ready":
         ready, blocked = readiness(data)

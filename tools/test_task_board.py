@@ -37,7 +37,7 @@ class TaskBoardTests(unittest.TestCase):
             desired = "DONE" if task["status"] == "done" else ("HOLD" if task["status"] == "hold" else ("CLAIMED" if task["status"] == "claimed" else (
                 "**READY · PARALLEL**" if not any(
                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
-                ) and task["status"] == "todo" else "BLOCKED"
+                ) and task["status"] == "todo" and not task.get("any_of") else "BLOCKED"
             )))
             self.assertEqual(cols[5], desired, task_id)
 
@@ -52,8 +52,8 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_all_work_units_preserved(self):
         kinds = {k: sum(t["kind"] == k for t in self.data["tasks"]) for k in "CLU"}
-        self.assertEqual(kinds, {"C": 79, "L": 30, "U": 15})
-        self.assertEqual(len(self.tasks), 124)
+        self.assertEqual(kinds, {"C": 80, "L": 31, "U": 15})
+        self.assertEqual(len(self.tasks), 126)
 
     def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
         ready, _ = board.readiness(self.data)
@@ -113,7 +113,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("8U1", ready_ids)
         self.assertNotIn("15B", ready_ids)
         self.assertEqual(board.explain(self.data, "15B")["state"], "DONE")
-        self.assertEqual(self.tasks["16L3"]["status"], "todo")
+        self.assertEqual(self.tasks["16L3"]["status"], "blocked")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
         hypothetical = copy.deepcopy(self.data)
@@ -256,6 +256,100 @@ class TaskBoardTests(unittest.TestCase):
         offered = {t["id"] for t in ready}
         self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A", "CL-05B", "CL-06B", "CL-09B", "CL-09C", "CL-07B", "CL-08B"}.isdisjoint(offered))
 
+
+
+    def _fresh_scenario(self):
+        data = copy.deepcopy(self.data)
+        tasks = board.index(data)
+        # Purely hypothetical source-pinned fixture. Never a native acceptance.
+        for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01"):
+            tasks[key]["status"] = "done"
+        # This fixture is for conditional readiness only, not graph validator,
+        # because historical registry prerequisites still need reconciling.
+        tasks["16L3"]["status"] = "todo"
+        tasks["16LF-01"]["status"] = "done"
+        sha = "a" * 40
+        tasks["16LF-01"]["evidence"] = {
+            "schema_version": 1, "kind": "owner-local-synthetic-fresh-start",
+            "host": "owner-local-windows", "profile_scope": "new-disposable-empty",
+            "migration": "none", "source_sha": sha, "reviewed_source_sha": sha,
+            "artifact_sha256": "b" * 64, "receipt_sha256": "c" * 64,
+            "local_session_id": "synthetic-test-fixture-only",
+            "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
+            "review_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/999#pullrequestreview-1",
+            "independent_review_verdict": "PASS",
+            "checks": {k: "PASS" for k in board.FRESH_CHECKS},
+        }
+        return data, tasks
+
+    def test_fresh_start_positive_hypothetical_fixture_only(self):
+        data, tasks = self._fresh_scenario()
+        self.assertTrue(board.fresh_receipt_valid(tasks["16LF-01"]["evidence"]))
+        self.assertFalse(board.accepted(tasks, "16L2"))
+        self.assertEqual(board.missing_dependencies(tasks["16L3"], tasks), [])
+        # Actual canonical release remains blocked and is never auto-promoted.
+        self.assertEqual(board.explain(self.data, "16L3")["state"], "BLOCKED")
+
+    def test_owner_declined_never_grants_private_profile_access(self):
+        data, tasks = self._fresh_scenario()
+        self.assertEqual(tasks["16U1"]["migration_consent"], "declined")
+        tasks["16L2"]["status"] = "done"
+        tasks["16L2"]["private_migration_receipt"] = {
+            "scope": "approved-copy-only", "physical_windows": True,
+            "independent_review_verdict": "PASS",
+        }
+        self.assertFalse(board.accepted(tasks, "16L2"))
+        self.assertTrue(any("16L2" in e for e in board.validate(data)))
+
+    def test_missing_freshstart_evidence_and_dependency_bypass_rejected(self):
+        data, tasks = self._fresh_scenario()
+        tasks["16LF-01"]["evidence"] = None
+        self.assertIn("one_of(16L2|16LF-01)", board.missing_dependencies(tasks["16L3"], tasks))
+        self.assertTrue(any("16LF-01" in e for e in board.validate(data)))
+        tasks["16L3"]["any_of"] = []
+        self.assertTrue(any("16L3:" in e for e in board.validate(data)))
+        tasks["16L3"]["any_of"] = [["16LF-01", "16L2"]]
+        self.assertTrue(any("16L3:" in e for e in board.validate(data)))
+
+    def test_incomplete_and_forged_freshstart_proofs_fail_closed(self):
+        data, tasks = self._fresh_scenario()
+        good = tasks["16LF-01"]["evidence"]
+        for field, value in [
+            ("source_sha", "fake"),
+            ("reviewed_source_sha", "d" * 40),
+            ("artifact_sha256", "broken"),
+            ("independent_review_verdict", "PENDING"),
+            ("review_url", "https://evil.invalid/review"),
+            ("host", "github-hosted-windows"),
+            ("migration", "private-copy"),
+        ]:
+            broken = copy.deepcopy(good)
+            broken[field] = value
+            self.assertFalse(board.fresh_receipt_valid(broken), field)
+        broken = copy.deepcopy(good)
+        broken["checks"]["rollback"] = "FAIL"
+        self.assertFalse(board.fresh_receipt_valid(broken))
+        broken = copy.deepcopy(good)
+        del broken["checks"]["owned_cleanup"]
+        self.assertFalse(board.fresh_receipt_valid(broken))
+
+    def test_release_gate_preserves_16f_16l1_16u2_and_physical_gate(self):
+        data, tasks = self._fresh_scenario()
+        for prereq in ("16F", "16L1"):
+            tasks[prereq]["status"] = "todo"
+            self.assertIn(prereq, board.missing_dependencies(tasks["16L3"], tasks))
+            tasks[prereq]["status"] = "done"
+        tasks["16LF-01"]["status"] = "blocked"
+        self.assertIn("one_of(16L2|16LF-01)", board.missing_dependencies(tasks["16L3"], tasks))
+        self.assertFalse(board.accepted(tasks, "16LF-01"))
+        self.assertEqual(tasks["16U2"]["depends_on"], ["16L3"])
+        self.assertEqual(tasks["16L3"]["status"], "todo")
+        self.assertEqual(board.explain(self.data, "16U2")["state"], "BLOCKED")
+
+    def test_freshstart_or_edge_cycles_are_rejected(self):
+        data = copy.deepcopy(self.data)
+        board.index(data)["16LF-01"]["depends_on"].append("16L3")
+        self.assertTrue(any("cycle" in e.lower() for e in board.validate(data)))
 
 if __name__ == "__main__":
     unittest.main()

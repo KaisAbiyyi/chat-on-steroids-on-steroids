@@ -178,9 +178,11 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | BLOCKED |
 | `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | CLAIMED |
 | `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | BLOCKED |
-| `16L2` | Only owner-approved profile copy migration | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
+| `16L2` | Only owner-approved profile copy migration (not authorized) | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
 | `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | BLOCKED |
-| `16L3` | Full Windows release/startup/size proof | `16F`, `16L1`, `16L2` | `windows-release` | L (Windows) | BLOCKED |
+| `16FS-01` | Fresh-start acceptance policy / dependency amendment | `16U1`, `16L1`, `16F` | `release-freshstart-contract` | C (cloud) | CLAIMED |
+| `16LF-01` | Disposable first-run native isolation + rollback qualification | `16FS-01`, `16U1`, `16L1` | `windows-freshstart` | L (Windows) | BLOCKED |
+| `16L3` | Full Windows release/startup/size proof; plus accepted migration OR fresh-start local evidence | `16F`, `16L1` | `windows-release` | L (Windows) | BLOCKED |
 | `16U2` | Owner guided final release decision | `16L3` | `human-release` | U (owner) | BLOCKED |
 
 | `PERF-00` | Cloud performance measurement harness, workload matrix and process-tree accounting | `15G` | `perf-methodology` | C (cloud) | **READY · PARALLEL** |
@@ -190,6 +192,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `PERF-04` | Tab/worker lifecycle and terminal/process buffer resource limits | `PERF-00` | `perf-worker-lifecycle` | C (cloud) | BLOCKED |
 | `PERF-05` | Native Windows product endurance and total process-tree RAM comparison | `PERF-01`, `PERF-02`, `PERF-03`, `PERF-04`, `8L1`, `15L3` | `windows-perf-endurance` | L (Windows) | BLOCKED |
 | `PERF-06` | Freeze measured resource budgets and CI/native regression policy | `PERF-05`, `16D` | `perf-release-gates` | C (cloud) | BLOCKED |
+
+> **16L3 conditional acceptance (16FS-01 proposal):** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. The table lists the unconditional `depends_on` only. 16L2 private migration remains `NOT_RUN / NOT_AUTHORIZED`; 16LF-01 is a distinct `NOT_RUN` physical Windows gate; neither is waived by an owner decision or cloud CI. Notion acceptance and exact-source external receipts govern promotion. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
 
 ## Parallel execution lanes
 

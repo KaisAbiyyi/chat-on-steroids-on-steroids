@@ -3,7 +3,7 @@
   "description": "CoSoS 16-phase historical DAG plus cross-cutting P0 performance-first tasks; feature parity is not the mandatory product goal; statuses are snapshots.",
   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16; PERF-00..06 cross-cutting Phase 16 identifiers scheduled early by AND dependencies.",
   "readiness_policy": "Performance-first, ChatGPT coding-focused product scope supersedes mandatory full CoS parity. Security, ownership, durability and native/owner gates cannot be waived. An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed. Owner resumed physical 7P-L1 on 2026-10-23: the real Windows embedded browser feasibility gate can be accepted through the separate SHA-bound native qualifier after all required synthetic browser/ownership, installed-package, candidate distribution and resource measurements pass. Real product release acceptance remains at 16L3, signed-in accounts at 7U1/8U1 and OS IME is separately owner-deferred. Native 7L1 still requires both accepted 7C and accepted 7P-L1; it must independently qualify real extension bridge integration.",
-  "task_status_source": "2026-10-28: owner explicitly approved unsigned Windows installers with independently verified GitHub provenance; Authenticode publisher signing is optional. 16PKG-01 remains claimed/Review until real unsigned product cloud lifecycle, security self-review, exact-head checks, and approved merge. 16L1 remains blocked/NOT_RUN until accepted artifact and physical Windows session. Previous TEST-signed receipts remain historical only. 2026-10-24: Phase 15B/15C/15D/15E/15F/15G cloud merge receipts reconciled to Done (Notion exact-head PRs #77/#72/#73/#74/#79/#84 respectively); 15L1 and 15L2 retain native Blocked at issue #85. 15L3 is Local Gate without real product-RAM PASS; PERF-00 can now be a candidate. 2026-10-24 7L2 native accepted on 74d4460 owner run03; 7U1-PREP read-only product runner outstanding; native 8L1 and 15L1/2 unaccepted; PERF tasks added NOT_RUN; historical status follows. 2026-10-24: reconciled accepted cloud 8B PR #61, 8C PR #65 and 15A PR #67 from live merged SHAs/checks. 8L1 physical Windows claim #71 found missing native integration and is BLOCKED, never Done; 8U1 remains blocked. 15B/15C/15D/15E are prerequisite-ready cloud candidates only, subject to live claims/locks. Earlier history follows. 2026-10-23: 8A merged PR #59 at eb91712d3c92c74f8714ef5f573939ad4fb19575 with reported 12 exact-head CI checks and same-implementor review; 8B claimed by ChatGPT GPT-6 Cloud generation 1 under browser-profiles lock, issue #60, branch work/8b-isolated-profiles-session-20261023, not accepted until own CI and self-review. Earlier history follows. 2026-10-23: 7E source-wire differential PR #57 merged at f5b27921d54c005cd027f3afdb8af9e11d736557 after 13 exact-head CI checks and direct implementor self-review; 8A Cloud eligible (claimed generation 1, 2026-10-23) and remains todo until accepted. Prior record follows. 2026-10-23: 7L1 integrated Rust-WebView2-MV3 synthetic native gate accepted after PR #51 at exact physical source 2590decb7c618ace066795c2aeb6b4e5e2612405 (21 PASS, 0 FAIL, real worker forced restart PASS after 65-second idle observation, optional natural idle NOT_RUN). Source, Rust exit, companion claim/ACK/recovery, physical tab/profile/navigation fencing and provenance all verified. 7A/7B/7C and scoped 7P-L1 prerequisites were already Done. 7L1 Done unlocks 7D as a Cloud READY_CANDIDATE (unclaimed), with 7E still waiting on 7D. Real provider OAuth and full production release remain later separate gates. See docs/implementation-summary/2026-10-23-7l1-integrated-native-acceptance.md and PR #51 merge receipt.",
+  "task_status_source": "2026-10-28: owner explicitly approved unsigned Windows installers with independently verified GitHub provenance; Authenticode publisher signing is optional. 16PKG-01 remains claimed/Review until real unsigned product cloud lifecycle, security self-review, exact-head checks, and approved merge. 16L1 remains blocked/NOT_RUN until accepted artifact and physical Windows session. Previous TEST-signed receipts remain historical only. 2026-10-24: Phase 15B/15C/15D/15E/15F/15G cloud merge receipts reconciled to Done (Notion exact-head PRs #77/#72/#73/#74/#79/#84 respectively); 15L1 and 15L2 retain native Blocked at issue #85. 15L3 is Local Gate without real product-RAM PASS; PERF-00 can now be a candidate. 2026-10-24 7L2 native accepted on 74d4460 owner run03; 7U1-PREP read-only product runner outstanding; native 8L1 and 15L1/2 unaccepted; PERF tasks added NOT_RUN; historical status follows. 2026-10-24: reconciled accepted cloud 8B PR #61, 8C PR #65 and 15A PR #67 from live merged SHAs/checks. 8L1 physical Windows claim #71 found missing native integration and is BLOCKED, never Done; 8U1 remains blocked. 15B/15C/15D/15E are prerequisite-ready cloud candidates only, subject to live claims/locks. Earlier history follows. 2026-10-23: 8A merged PR #59 at eb91712d3c92c74f8714ef5f573939ad4fb19575 with reported 12 exact-head CI checks and same-implementor review; 8B claimed by ChatGPT GPT-6 Cloud generation 1 under browser-profiles lock, issue #60, branch work/8b-isolated-profiles-session-20261023, not accepted until own CI and self-review. Earlier history follows. 2026-10-23: 7E source-wire differential PR #57 merged at f5b27921d54c005cd027f3afdb8af9e11d736557 after 13 exact-head CI checks and direct implementor self-review; 8A Cloud eligible (claimed generation 1, 2026-10-23) and remains todo until accepted. Prior record follows. 2026-10-23: 7L1 integrated Rust-WebView2-MV3 synthetic native gate accepted after PR #51 at exact physical source 2590decb7c618ace066795c2aeb6b4e5e2612405 (21 PASS, 0 FAIL, real worker forced restart PASS after 65-second idle observation, optional natural idle NOT_RUN). Source, Rust exit, companion claim/ACK/recovery, physical tab/profile/navigation fencing and provenance all verified. 7A/7B/7C and scoped 7P-L1 prerequisites were already Done. 7L1 Done unlocks 7D as a Cloud READY_CANDIDATE (unclaimed), with 7E still waiting on 7D. Real provider OAuth and full production release remain later separate gates. See docs/implementation-summary/2026-10-23-7l1-integrated-native-acceptance.md and PR #51 merge receipt. 2026-10-29 (16FS-01 proposed): live Notion 16U1 decision Done (fresh start; private consent declined), 16L1/16E/16F accepted; the registry retains older historical status snapshots for unrelated tasks. 16L2 remains blocked/not authorized. 16LF-01 is a new blocked physical synthetic gate, NOT_RUN. 16L3 requires 16F+16L1 AND (authorized 16L2 OR reviewed 16LF-01); no gate is accepted by this branch alone.",
   "tasks": [
     {
       "id": "CL-01",
@@ -1476,7 +1476,9 @@
       ],
       "phase": "16",
       "kind": "U",
-      "status": "todo"
+      "status": "todo",
+      "migration_consent": "declined",
+      "owner_decision": "fresh_start"
     },
     {
       "id": "16PKG-01",
@@ -1520,7 +1522,8 @@
       ],
       "phase": "16",
       "kind": "L",
-      "status": "todo"
+      "status": "blocked",
+      "private_migration_status": "NOT_RUN / NOT_AUTHORIZED"
     },
     {
       "id": "16F",
@@ -1537,19 +1540,58 @@
       "status": "todo"
     },
     {
+      "id": "16FS-01",
+      "title": "Fresh-start release acceptance and alternate 16L2 dependency contract",
+      "depends_on": [
+        "16U1",
+        "16L1",
+        "16F"
+      ],
+      "resource_locks": [
+        "release-freshstart-contract"
+      ],
+      "phase": "16",
+      "kind": "C",
+      "status": "claimed",
+      "scope": "contract-only; no private-profile migration or physical test",
+      "claim_owner": "gpt6-cloud-16fs01-20261029-2020wib"
+    },
+    {
+      "id": "16LF-01",
+      "title": "Owner-local fresh disposable profile initialization, isolation and rollback proof",
+      "depends_on": [
+        "16FS-01",
+        "16U1",
+        "16L1"
+      ],
+      "resource_locks": [
+        "windows-freshstart"
+      ],
+      "phase": "16",
+      "kind": "L",
+      "status": "blocked",
+      "evidence": null,
+      "acceptance": "NOT_RUN; owner-local Windows synthetic-only; external independent review required"
+    },
+    {
       "id": "16L3",
       "title": "Full Windows release/startup/size proof",
       "depends_on": [
         "16F",
-        "16L1",
-        "16L2"
+        "16L1"
       ],
       "resource_locks": [
         "windows-release"
       ],
       "phase": "16",
       "kind": "L",
-      "status": "todo"
+      "status": "blocked",
+      "any_of": [
+        [
+          "16L2",
+          "16LF-01"
+        ]
+      ]
     },
     {
       "id": "16U2",
