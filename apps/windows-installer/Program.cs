@@ -169,6 +169,14 @@ internal static class Program
                 throw new InvalidDataException("Stage missing or installation destination already exists");
             try
             {
+#if COS_16PKG_TEST
+                // Deterministic negative fault injection never compiled in release.
+                var injected = Environment.GetEnvironmentVariable("COSOS_16PKG_FAIL_AT");
+                if (injected == "publish_access_denied_always" ||
+                    (attempt == 0 && injected == "publish_access_denied_once"))
+                    throw new IOException("TEST_ONLY_SYNTHETIC_PUBLISH_ACCESS_DENIED",
+                        unchecked((int)0x80070005));
+#endif
                 Directory.Move(stage,root);
                 Operation("VERIFY_PUBLISHED_ROOT",root,root,() => VerifyProtection(root));
                 return;
@@ -968,8 +976,6 @@ internal static class Program
             ".cosos-16pkg-" + Path.GetFileName(root) + "-stage-" + Guid.NewGuid().ToString("N"));
         var slot = "slot-" + Guid.NewGuid().ToString("N");
         var folder = Path.Combine(stage,"slots",slot);
-        var publishedSlot = false;
-        var selectorPublished = false;
         Selector? previous = null;
         if (!install)
         {
@@ -984,30 +990,30 @@ internal static class Program
         }
         try
         {
-            Directory.CreateDirectory(stage);
-            Protect(stage);
+            Operation("CREATE_STAGE",stage,stage,() => Directory.CreateDirectory(stage));
+            Operation("PROTECT_STAGE",stage,stage,() => Protect(stage));
             // Only an ACL-authenticated stage can be autonomously recovered.
             SyntheticCrash("after_stage_protect");
-            Directory.CreateDirectory(folder);
+            Operation("CREATE_SLOT",stage,folder,() => Directory.CreateDirectory(folder));
             // Install the cryptographic authority first. An interrupted
             // extraction can then be pruned against the signed embedded index.
             var proof = Path.Combine(folder,"authority","issuer.exe");
-            CopyFile(Environment.ProcessPath!,proof);
+            Operation("COPY_ISSUER",Environment.ProcessPath!,proof,() => CopyFile(Environment.ProcessPath!,proof));
             if (publisher == UnsignedChannel)
             {
                 if (!IC.Equals(ExecutableHash(proof),VerifiedManualDigest))
                     throw new InvalidDataException("Copied unsigned executable changed");
                 File.WriteAllText(UnsignedMarker(proof),VerifiedManualDigest!);
             }
-            Extract(folder,payload);
-            SealTree(stage);
-            VerifySlot(stage,slot,publisher);
+            Operation("EXTRACT",stage,folder,() => Extract(folder,payload));
+            Operation("SEAL_STAGE",stage,stage,() => SealTree(stage));
+            Operation("VERIFY_SLOT",stage,folder,() => { _ = VerifySlot(stage,slot,publisher); });
             SyntheticCrash("before_publish");
             var next = install ? new Selector(slot,null,publisher,version,1) :
                 new Selector(slot,previous!.Active,publisher,version,previous.Generation + 1);
             if (install)
             {
-                WriteState(stage,next);
+                Operation("WRITE_STAGED_SELECTOR",stage,SelectorPath(stage),() => WriteState(stage,next));
                 Operation("PREPARE_PUBLISH_ROOT",stage,root,() => SafeAncestors(root));
                 PublishPreparedInstall(stage,root);
             }
@@ -1015,11 +1021,9 @@ internal static class Program
             {
                 VerifyProtection(root);
                 Directory.Move(folder,Path.Combine(root,"slots",slot));
-                publishedSlot = true;
                 SyntheticCrash("after_slot_publish");
                 VerifySlot(root,slot,publisher);
                 WriteState(root,next);
-                selectorPublished = true;
                 SyntheticCrash("after_selector_publish");
                 if (Directory.Exists(Path.Combine(stage,"slots")))
                     Directory.Delete(Path.Combine(stage,"slots"));
@@ -1033,7 +1037,7 @@ internal static class Program
             // left only active.json, obscuring the original Access Denied.
             // Quarantine any task-named stage; never remove foreign files or
             // alter the already-active installation root here.
-            Console.Error.WriteLine("COSOS_NATIVE_STAGE_PRESERVED:" + stage);
+            Console.Error.WriteLine("COSOS_NATIVE_STAGE_PRESERVED:" + (Directory.Exists(stage) ? stage : "NONE"));
             Console.Error.WriteLine("COSOS_NATIVE_PRIMARY:" + ErrorDetail(primary));
             throw;
         }

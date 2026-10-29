@@ -218,7 +218,42 @@ try {
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     ExpectOk $setups['0.1.0'] @('--recover',$root,'--publisher',$cert.Thumbprint)
     if(Test-Path -LiteralPath $root){throw 'before_publish recovery unexpectedly activated a release'}
-    ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
+    # A single transient Win32 ACCESS_DENIED is retried without widening ACLs.
+    $env:COSOS_16PKG_FAIL_AT='publish_access_denied_once'
+    try {
+        ExpectOk $setups['0.1.0'] @('--install',$root,'--publisher',$cert.Thumbprint)
+    } finally {
+        Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
+    }
+    # Persistent failure reports the precise publish phase and retains the
+    # complete signed stage, not just active.json after destructive cleanup.
+    $failedRoot="$root-publish-refused"
+    $failureLog=Join-Path $testHome 'publish-refused.stderr'
+    $env:COSOS_16PKG_FAIL_AT='publish_access_denied_always'
+    try {
+        & $setups['0.1.0'] --install $failedRoot --publisher $cert.Thumbprint 2> $failureLog
+        if ($LASTEXITCODE -ne 3) { throw "Expected publish failure exit 3, got $LASTEXITCODE" }
+    } finally {
+        Remove-Item Env:\COSOS_16PKG_FAIL_AT -ErrorAction SilentlyContinue
+    }
+    $failureText=Get-Content -LiteralPath $failureLog -Raw
+    if ($failureText -notmatch 'COSOS_NATIVE_STAGE_PRESERVED:' -or
+        $failureText -notmatch '16PKG_PUBLISH_FAILED' -or $failureText -notmatch 'win32=5') {
+        throw "No actionable native publish failure: $failureText"
+    }
+    $prefix=".cosos-16pkg-$(Split-Path $failedRoot -Leaf)-stage-"
+    $stages=@(Get-ChildItem -LiteralPath (Split-Path $failedRoot -Parent) -Directory -Force |
+        Where-Object { $_.Name.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase) })
+    if ($stages.Count -ne 1 -or (Test-Path -LiteralPath $failedRoot) -or
+        !(Test-Path -LiteralPath (Join-Path $stages[0].FullName 'active.json')) -or
+        !(Test-Path -LiteralPath (Join-Path $stages[0].FullName 'slots'))) {
+        throw 'Failed publication destroyed evidence or created final root'
+    }
+    ExpectDenied $setups['0.1.0'] @('--recover',$failedRoot,'--publisher',$cert.Thumbprint)
+    if (!(Test-Path -LiteralPath (Join-Path $stages[0].FullName 'active.json'))) {
+        throw 'Recovery silently removed failed publication evidence'
+    }
+    Write-Host '16PKG_PROTECTED_PUBLISH_PASS: retry, permanent refusal, preserved stage and quarantined recovery'
     $initialState=Get-Content -LiteralPath (Join-Path $root 'active.json') -Raw | ConvertFrom-Json
     if($initialState.HighWater -ne '0.1.0' -or $initialState.Previous){
         throw 'Initial selector or high-water invalid'
