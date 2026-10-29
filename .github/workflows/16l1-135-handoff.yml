@@ -1,0 +1,120 @@
+name: 16L1 PR135 postmerge tooling security preflight
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/16pkg-16l1-135-*'
+      - '.github/workflows/16l1-135-handoff.yml'
+      - 'docs/implementation-summary/2026-10-29-16l1-135-postmerge-handoff.md'
+  workflow_dispatch:
+concurrency:
+  group: 16l1-135-handoff-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+jobs:
+  targeted-handoff:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Parse isolated scripts and execute hosted negative security fixtures
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach($path in @(
+            '.github/scripts/16pkg-16l1-135-guards.ps1',
+            '.github/scripts/16pkg-16l1-135-artifact-provenance.ps1',
+            '.github/scripts/16pkg-16l1-135-local-qualification.ps1',
+            '.github/scripts/16pkg-16l1-135-owner-bootstrap.ps1',
+            '.github/scripts/16pkg-16l1-135-security.tests.ps1',
+            '.github/scripts/16pkg-16l1-135-bootstrap.tests.ps1'
+          )){
+            $tokens=$null;$errors=$null
+            [Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
+            if ($errors.Count -ne 0) { throw "Invalid verified script syntax: $path $errors" }
+          }
+          & .github/scripts/16pkg-16l1-135-security.tests.ps1
+          if (!$?) { throw '16L1-135 hosted negative fixtures failed' }
+          & .github/scripts/16pkg-16l1-135-bootstrap.tests.ps1
+          if (!$?) { throw 'Protected PR135 bootstrap security tests failed' }
+          Write-Host 'HOSTED PR135 FAIL-CLOSED TESTS PASS'
+      - name: Discover signed original PR event identity from already attested artifact
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP '16l1-135-immutable'
+          New-Item -ItemType Directory -Path $root | Out-Null
+          gh run download 40808144696 --repo "$env:GITHUB_REPOSITORY" --name cosos-16pkg-unsigned-candidate-fb1d97a040a28abe74ccbcf5f92e2d33064b85ad --dir $root
+          if ($LASTEXITCODE -ne 0) { throw 'Immutable PR135 artifact unavailable' }
+          "ARTIFACT_ROOT=$root" >> $env:GITHUB_ENV
+          $file=Join-Path $root 'installer-package/CoSoSInstaller.exe'
+          if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -cne '66adbc6160f99730b029d6f8866aba0291ec98f55a48fa08458954faa29cc76b') {
+            throw 'PR135 installer source hash changed'
+          }
+          $verified=@(gh attestation verify $file --repo "$env:GITHUB_REPOSITORY" --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref refs/pull/135/merge --format json | ConvertFrom-Json)
+          if ($LASTEXITCODE -ne 0 -or $verified.Count -lt 1) { throw 'No signed PR135 OIDC proof' }
+          $cert=$verified[0].verificationResult.signature.certificate
+          if ($cert.sourceRepositoryRef -cne 'refs/pull/135/merge' -or
+              $cert.githubWorkflowTrigger -cne 'pull_request' -or
+              $cert.runInvocationURI -cne 'https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40808144696/attempts/1' -or
+              [string]$cert.sourceRepositoryIdentifier -cne '1424422098' -or
+              [string]$cert.sourceRepositoryDigest -cnotmatch '^[a-f0-9]{40}$') {
+              throw 'Signed PR135 certificate identity invalid'
+          }
+          Write-Host "SIGNED_PR135_ORIGINAL_EVENT_SHA=$($cert.sourceRepositoryDigest)"
+          Write-Host 'READ ONLY ORIGINAL PR EVENT DISCOVERY PASS; no installer run'
+
+      - name: Require no owner writes; verify original PR135 Sigstore identity and tamper rejection
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $global:PSNativeCommandUseErrorActionPreference=$false
+          $repo=$env:GITHUB_REPOSITORY
+          $root=$env:ARTIFACT_ROOT
+          $file=Join-Path $root 'installer-package/CoSoSInstaller.exe'
+          $known=@('--repo',$repo,'--signer-workflow',"$repo/.github/workflows/16pkg-native-installer.yml", '--source-ref','refs/pull/135/merge','--source-digest','b903132e2c8a32cde5143d40696813fb3233d11d')
+          & gh attestation verify $file @known | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Exact original OIDC signer evidence unavailable' }
+          $tampered=Join-Path $env:RUNNER_TEMP 'pr135-tampered.exe'
+          Copy-Item -LiteralPath $file -Destination $tampered
+          [IO.File]::AppendAllText($tampered,'TAMPERED')
+          function Denied([string[]]$Args,[string]$Reason) {
+            & gh attestation verify @Args 2>$null | Out-Null
+            if ($LASTEXITCODE -eq 0) { throw "Unsigned PR135 false approval: $Reason" }
+          }
+          Denied (@($tampered)+$known) 'changed installer bytes'
+          Denied (@($file)+@('--repo',$repo,'--signer-workflow',"$repo/.github/workflows/16pkg-native-installer.yml",'--source-ref','refs/heads/main')) 'wrong PR ref'
+          Denied (@($file)+@('--repo',$repo,'--signer-workflow',"$repo/.github/workflows/16pkg-native-installer.yml",'--source-digest',('0'*40))) 'wrong signed event SHA'
+          Denied (@($file)+@('--repo',$repo,'--signer-workflow',"$repo/.github/workflows/ci.yml")) 'wrong signed workflow'
+          $global:LASTEXITCODE=0
+          Write-Host 'PR135 LIVE SIGSTORE NEGATIVE MATRIX PASS; no installer executed'
+      - name: Postmerge-only owner artifact provenance gate
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $repo=$env:GITHUB_REPOSITORY
+          $pr=gh api "repos/$repo/pulls/135" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot determine dependency merge state' }
+          if ($pr.merged) {
+            & .github/scripts/16pkg-16l1-135-artifact-provenance.ps1 -SourceSha fb1d97a040a28abe74ccbcf5f92e2d33064b85ad -RunId 40808144696 -ArtifactRoot $env:ARTIFACT_ROOT
+            if (!$?) { throw 'Merged-source artifact verification failed' }
+            Write-Host 'MERGED PR135 NEW ARTIFACT PREFLIGHT PASS; physical 16L1 still BLOCKED'
+          } else {
+            $refused=$false
+            try {
+              & .github/scripts/16pkg-16l1-135-artifact-provenance.ps1 -SourceSha fb1d97a040a28abe74ccbcf5f92e2d33064b85ad -RunId 40808144696 -ArtifactRoot $env:ARTIFACT_ROOT
+            } catch {
+              if ($_.Exception.Message -match 'PR135 is not merged') { $refused=$true }
+              else { throw }
+            }
+            if (!$refused) { throw 'Unmerged PR135 was incorrectly approved for physical use' }
+            Write-Host 'EXPECTED BLOCKED: source PR135 still unmerged. Negative merge gate PASS; no physical permission'
+          }
