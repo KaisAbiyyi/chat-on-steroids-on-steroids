@@ -23,8 +23,17 @@ function Assert-16L1Node {
     }
     $acl=Get-Acl -LiteralPath $Path -ErrorAction Stop
     $owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value
+    Assert-16L1Acl -Acl $acl -OwnerSid $owner -Path $Path -ProtectedBoundary:$ProtectedBoundary -WithinBoundary:$WithinBoundary
+    return $true
+}
+# Pure ACL evaluator is used by the filesystem guard and hostile hosted fixtures.
+function Assert-16L1Acl {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)]$Acl,[Parameter(Mandatory)][string]$OwnerSid,
+          [Parameter(Mandatory)][string]$Path,
+          [switch]$ProtectedBoundary,[switch]$WithinBoundary)
     $trusted=@(Get-16L1TrustedSids)
-    if ($owner -notin $trusted) { throw "Untrusted qualification NTFS owner: $Path ($owner)" }
+    if ($OwnerSid -notin $trusted) { throw "Untrusted qualification NTFS owner: $Path ($OwnerSid)" }
     if ($ProtectedBoundary -and !$acl.AreAccessRulesProtected) {
         throw "Protected qualification boundary inherits ACLs: $Path"
     }
