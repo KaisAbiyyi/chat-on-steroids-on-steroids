@@ -15,6 +15,8 @@ function Refused([scriptblock]$Work,[string]$Reason) {
 }
 function New-Root([string]$Path) {
     New-Item -ItemType Directory -Path $Path -ErrorAction Stop | Out-Null
+    & icacls $Path '/setowner' ('*'+$owner) | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Fixture owner assignment failed' }
     & icacls $Path '/inheritance:r' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Fixture protect failed' }
     $grant='*'+$owner+':(OI)(CI)F'
