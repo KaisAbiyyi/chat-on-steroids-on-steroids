@@ -1,114 +1,126 @@
-# 16L1 protected physical ACL handoff (cloud-only change, physical NOT_RUN)
+# 16L1 physical ACL — protected, resumable owner bootstrap
 
-All commands here are for the owner ONLY AFTER independent security review and merge.
-Do not execute physical installer from hosted CI. No existing CoS/CoSoS profiles.
-The historical artifact is unchanged: source 9939ea0a9fdc592e6821296e07eb0b7db3653adb,
-run 40710902296 attempt 1, artifact 12827415031, archive SHA-256
-38fc612236c093cde03d8134173b9c8f8d76c58203ec8614c80122e23e6b60b7.
+> **STOP: PR #134 is DRAFT / UNMERGED and its independent review is NOT complete.**
+> Do not execute ANY owner-local bootstrap/preflight/physical commands yet.
+> No approved MERGED tooling SHA exists. Never use the current PR HEAD as
+> the tooling SHA or execute the literal placeholder. This handoff only
+> becomes actionable after fresh independent review and explicit merge.
+> Physical 16L1 status remains BLOCKED / NOT_RUN.
 
-## 1. Owner: create a new isolated boundary (ELEVATED PowerShell 7)
+Historical unchanged installer provenance:
+- Source SHA: 9939ea0a9fdc592e6821296e07eb0b7db3653adb
+- Workflow ID: 398496557; run: 40710902296 attempt 1
+- Artifact ID: 12827415031; SHA-256:
+  38fc612236c093cde03d8134173b9c8f8d76c58203ec8614c80122e23e6b60b7
 
-Stop if the directory already exists; do not blindly trust or reuse it.
-Only the NEW dedicated directory is modified. No icacls /reset, no changes
-to D:\ or D:\projects, no Defender/SmartScreen/UAC adjustments.
+## Recovery policy
+
+The owner already has D:\CoSoS-16L1-Qualification and an empty scripts folder
+from an interrupted setup. **Do not delete, reset, or rename these directories.**
+The bootstrap validates their exact owner SID, protected NTFS ACL with only
+owner/SYSTEM/Administrators Full Control, reparse protection, expected path,
+existing children and approved Git blob identities. An empty scripts folder,
+a subset of already approved script files, or exact fully written staging
+members are safe to resume. Successful repetition is idempotent.
+
+An unexpected file, changed/half-written script, bad owner, inherited ACL,
+unsafe identity or junction **aborts without modifying or deleting it**.
+No automatic destructive cleanup. On a failure, preserve the path for review.
+For a new boundary only, a narrowly scoped icacls fallback replaces the
+earlier Set-Acl approach that raised SeSecurityPrivilege; it modifies
+only the newly created D:\CoSoS-16L1-Qualification folder.
+Do not modify D:\, D:\projects or existing CoS/CoSoS trees.
+
+## Owner-only verified bootstrap AFTER REVIEW AND MERGE
+
+Use ONE fail-fast PowerShell 7 invocation, not separate interactive lines:
+the entire block starts at pwsh -NoProfile -Command and executes only when
+the closing brace is entered. Supply the exact 40-character lowercase
+SHA of the independently reviewed **MERGED PR #134** in the $trusted value.
+This is a *tooling* commit, not the historical installer source.
+The bootstrap code is downloaded from that pinned immutable commit,
+verified against its Git tree/blob identities, and executed in memory
+rather than executing code stored in the sandbox-writable CoS-Rust tree.
+The bootstrap then independently pins all three local verification scripts,
+uses non-overwriting atomic staging and reports PASS only after full verification.
 
 ~~~powershell
-$ErrorActionPreference='Stop'
-$boundary='D:\CoSoS-16L1-Qualification'
-if ((Get-Volume -DriveLetter D).FileSystem -ne 'NTFS') { throw 'D: must be NTFS' }
-if (Test-Path -LiteralPath $boundary) { throw 'Boundary already exists: STOP' }
-$identity=[Security.Principal.WindowsIdentity]::GetCurrent()
-if (!([Security.Principal.WindowsPrincipal]::new($identity).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))) { throw 'Elevated pwsh 7 required' }
-$me=$identity.User
-$acl=[Security.AccessControl.DirectorySecurity]::new()
-$acl.SetAccessRuleProtection($true,$false)
-$acl.SetOwner($me)
-$inherit=[Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit
-foreach ($sid in @($me,[Security.Principal.SecurityIdentifier]::new('S-1-5-18'),[Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))) {
-    $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($sid,[Security.AccessControl.FileSystemRights]::FullControl,$inherit,[Security.AccessControl.PropagationFlags]::None,[Security.AccessControl.AccessControlType]::Allow))
-}
-New-Item -ItemType Directory -Path $boundary -ErrorAction Stop | Out-Null
-Set-Acl -LiteralPath $boundary -AclObject $acl -ErrorAction Stop
-$check=Get-Acl -LiteralPath $boundary
-if (!$check.AreAccessRulesProtected -or $check.GetOwner([Security.Principal.SecurityIdentifier]).Value -cne $me.Value) { throw 'Protected boundary ACL failed' }
-icacls $boundary
-~~~
-
-If interrupted, STOP and investigate; do not run from reused/untrusted path.
-
-## 2. Owner: stage verified GitHub scripts, with exact REVIEWED tooling commit
-
-Fill in $trustedCommit with the full reviewed commit SHA after independent
-review and merge. It is NOT the historical installer source SHA. GitHub's
-immutable commit/tree identities and every downloaded Git blob digest are checked
-before any downloaded script is executed. Never stage from mutable main,
-sandbox-writable CoS-Rust, or a PR branch not yet approved.
-
-~~~powershell
-$ErrorActionPreference='Stop'
-$trustedCommit='<REVIEWED_MERGED_TOOLING_COMMIT_40_HEX>'
-if ($trustedCommit -cnotmatch '^[a-f0-9]{40}$') { throw 'Full tooling commit required' }
-$repo='KaisAbiyyi/chat-on-steroids-on-steroids'
-$boundary='D:\CoSoS-16L1-Qualification'
-$commit=gh api "repos/$repo/git/commits/$trustedCommit" | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0 -or $commit.sha -cne $trustedCommit) { throw 'Commit identity failure' }
-$tree=gh api "repos/$repo/git/trees/$($commit.tree.sha)?recursive=1" | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0 -or $tree.sha -cne $commit.tree.sha -or $tree.truncated) { throw 'Tree identity failure' }
-$scripts=Join-Path $boundary 'scripts'
-if (Test-Path -LiteralPath $scripts) { throw 'Scripts already exist: STOP' }
-New-Item -ItemType Directory -Path $scripts -ErrorAction Stop | Out-Null
-foreach ($name in @('16pkg-16l1-guards.ps1','16pkg-16l1-artifact-provenance.ps1','16pkg-16l1-local-qualification.ps1')) {
-    $repoPath=".github/scripts/$name"
-    $match=@($tree.tree | Where-Object { $_.path -ceq $repoPath -and $_.type -ceq 'blob' })
-    if ($match.Count -ne 1) { throw "Missing pinned script: $name" }
-    $remote=gh api "repos/$repo/contents/$($repoPath)?ref=$trustedCommit" | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or $remote.sha -cne $match[0].sha -or $remote.encoding -cne 'base64') { throw "Wrong script source: $name" }
-    $bytes=[Convert]::FromBase64String($remote.content)
+pwsh -NoProfile -Command {
+    $ErrorActionPreference='Stop'
+    $trusted='<REVIEWED_MERGED_TOOLING_COMMIT_40_HEX>'
+    if ($trusted -cnotmatch '^[a-f0-9]{40}$') {
+        throw 'STOP: reviewed merged tooling SHA required'
+    }
+    $repo='KaisAbiyyi/chat-on-steroids-on-steroids'
+    function Api([string]$path) {
+        $result=& gh api $path
+        if ($LASTEXITCODE -ne 0 -or !$result) {
+            throw "GitHub API failed: $path"
+        }
+        return ($result | ConvertFrom-Json -ErrorAction Stop)
+    }
+    $pr=Api "repos/$repo/pulls/134"
+    if (!$pr.merged -or !$pr.merged_at -or
+        $pr.base.ref -cne 'main' -or $pr.merge_commit_sha -cne $trusted) {
+        throw 'STOP: approved PR #134 not merged at supplied tooling SHA'
+    }
+    $commit=Api "repos/$repo/git/commits/$trusted"
+    if ($commit.sha -cne $trusted) { throw 'Commit mismatch' }
+    $tree=Api "repos/$repo/git/trees/$($commit.tree.sha)?recursive=1"
+    if ($tree.truncated -or $tree.sha -cne $commit.tree.sha) {
+        throw 'Git tree mismatch'
+    }
+    $path='.github/scripts/16pkg-16l1-owner-bootstrap.ps1'
+    $matches=@($tree.tree | Where-Object {
+        $_.path -ceq $path -and $_.type -ceq 'blob'
+    })
+    if ($matches.Count -ne 1) { throw 'Missing reviewed bootstrap blob' }
+    $entry=Api "repos/$repo/contents/$($path)?ref=$trusted"
+    if ($entry.encoding -cne 'base64' -or $entry.sha -cne $matches[0].sha) {
+        throw 'Bootstrap Git object mismatch'
+    }
+    $bytes=[Convert]::FromBase64String($entry.content)
     $prefix=[Text.Encoding]::ASCII.GetBytes("blob $($bytes.Length)$([char]0)")
-    $buffer=[byte[]]::new($prefix.Length+$bytes.Length)
-    [Array]::Copy($prefix,0,$buffer,0,$prefix.Length)
-    [Array]::Copy($bytes,0,$buffer,$prefix.Length,$bytes.Length)
-    $blob=[Convert]::ToHexString([Security.Cryptography.SHA1]::HashData($buffer)).ToLowerInvariant()
-    if ($blob -cne $match[0].sha) { throw "Downloaded bytes mismatch: $name" }
-    [IO.File]::WriteAllBytes((Join-Path $scripts $name),$bytes)
+    $all=[byte[]]::new($prefix.Length+$bytes.Length)
+    [Array]::Copy($prefix,0,$all,0,$prefix.Length)
+    [Array]::Copy($bytes,0,$all,$prefix.Length,$bytes.Length)
+    $hash=[Convert]::ToHexString([Security.Cryptography.SHA1]::HashData($all)).ToLowerInvariant()
+    if ($hash -cne $entry.sha) { throw 'Untrusted bootstrap bytes' }
+    & ([ScriptBlock]::Create([Text.Encoding]::UTF8.GetString($bytes))) -TrustedCommit $trusted
+    if (!$?) { throw 'Owner bootstrap failed; no success claim' }
 }
-Write-Host "Reviewed scripts staged from $trustedCommit; installer not executed"
 ~~~
 
-The runner independently verifies ALL THREE scripts again against GitHub's exact
-commit/tree/blob identity before any artifact download. No scripts stored in a
-sandbox-writable checkout are trusted. This assumes GitHub API/TLS, reviewed
-commit identity, owner/admin/SYSTEM and host OS are trustworthy; local admins
-capable of changing ACLs are outside the sandbox threat boundary. Git blob hash
-is not a substitute for independent commit review or publisher signing.
+Run the block from a separately elevated PowerShell 7 session, after
+independent security review and merge only. This wrapper has no file writes
+of its own; it never uses a local untrusted script as a trust anchor.
+The owner bootstrap checks that the supplied merged PR SHA is an ancestor
+of main and verifies all THREE scripts before staging.
 
-## 3. Owner: READ-ONLY preflight (PowerShell 7, no installer execution)
+**Only the terminal message BOOTSTRAP PASS indicates success.**
+Any GH 404, invalid SHA, missing scripts, ACL error, stopped command, or
+partial write means STOP, no success. The owner's earlier transcript
+was NOT a successful bootstrap.
+
+## Owner-local preflight after bootstrap PASS (not installer execution)
+
+Use this single command only after staging succeeds. Substitute the SAME
+reviewed merged tooling SHA, not the historical source SHA.
 
 ~~~powershell
-$source='9939ea0a9fdc592e6821296e07eb0b7db3653adb'
-$run=40710902296
-$trustedCommit='<REVIEWED_MERGED_TOOLING_COMMIT_40_HEX>'
-$runner='D:\CoSoS-16L1-Qualification\scripts\16pkg-16l1-local-qualification.ps1'
-pwsh -NoProfile -File $runner -RunId $run -SourceSha $source -TrustedCommit $trustedCommit
+pwsh -NoProfile -File 'D:\CoSoS-16L1-Qualification\scripts\16pkg-16l1-local-qualification.ps1' -RunId 40710902296 -SourceSha '9939ea0a9fdc592e6821296e07eb0b7db3653adb' -TrustedCommit '<REVIEWED_MERGED_TOOLING_COMMIT_40_HEX>'
 ~~~
 
-This step verifies NTFS ACL, owners, reparse paths, approved merged source,
-exact GitHub run/workflow, artifact ID and digest, verified signed OIDC origin,
-and local package hashes. Stop on any failure. Preflight PASS is NOT physical PASS.
+## Separately approved physical installer qualification
 
-## 4. Owner: PHYSICAL qualification (only after independent review and approval)
-
-Run in an elevated PowerShell 7 console, only after the read-only preflight
-succeeds, the owner approves installation and protection prompts, and independent
-security review is complete.
+Only after an owner-local read-only preflight PASS, explicit physical owner
+authorization, and independent security review. Keep Windows Defender,
+SmartScreen and UAC enabled. Stop and record any Windows refusal.
 
 ~~~powershell
 pwsh -NoProfile -File 'D:\CoSoS-16L1-Qualification\scripts\16pkg-16l1-local-qualification.ps1' -RunId 40710902296 -SourceSha '9939ea0a9fdc592e6821296e07eb0b7db3653adb' -TrustedCommit '<REVIEWED_MERGED_TOOLING_COMMIT_40_HEX>' -Execute
 ~~~
 
-Same workspace and immutable tuple. Executes only disposable installation/profile
-under protected D:\CoSoS-16L1-Qualification, tests install, smoke, update,
-rollback, recovery, finalize, uninstall and records evidence\qualification.json.
-No existing CoS/CoSoS profiles, certificate import, SmartScreen bypass or
-global ACL edits. Preserve evidence for independent owner review.
-Physical status is BLOCKED / NOT_RUN until actually passed and reviewed.
+Use disposable protected workspaces only, never existing CoS/CoSoS profiles.
+Review the physical evidence/qualification.json before acceptance; hosted
+Windows CI is not physical 16L1 qualification. No installer runs in cloud CI.
