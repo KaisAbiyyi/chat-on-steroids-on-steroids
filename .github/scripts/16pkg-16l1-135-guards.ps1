@@ -176,6 +176,27 @@ function Assert-16L1TrustedScripts {
     }
     if (!(Get-Command gh -ErrorAction SilentlyContinue)) { throw 'GitHub CLI needed for independent commit blob verification' }
     $repo=$script:16L1Approved.Repository
+    $toolingRaw=gh api "repos/$repo/pulls/136"
+    if ($LASTEXITCODE -ne 0 -or !$toolingRaw) { throw 'Tooling PR136 status unavailable' }
+    $tooling=$toolingRaw | ConvertFrom-Json
+    $sourceRaw=gh api "repos/$repo/pulls/135"
+    if ($LASTEXITCODE -ne 0 -or !$sourceRaw) { throw 'Installer PR135 status unavailable' }
+    $installer=$sourceRaw | ConvertFrom-Json
+    if (!$tooling.merged -or !$tooling.merged_at -or
+        $tooling.base.ref -cne 'main' -or
+        $tooling.merge_commit_sha -cne $TrustedCommit -or
+        !$installer.merged -or !$installer.merged_at -or
+        $installer.base.ref -cne 'main' -or
+        $installer.head.sha -cne $script:16L1Approved.SourceSha) {
+        throw 'STOP: exact PR135 source + PR136 tooling must be reviewed/merged'
+    }
+    $ancestryRaw=gh api "repos/$repo/compare/$TrustedCommit...main"
+    if ($LASTEXITCODE -ne 0 -or !$ancestryRaw) { throw 'Tooling merge ancestry unavailable' }
+    $ancestry=$ancestryRaw | ConvertFrom-Json
+    if ($ancestry.merge_base_commit.sha -cne $TrustedCommit -or
+        [int]$ancestry.behind_by -ne 0) {
+        throw 'Reviewed tooling merge is not on protected main'
+    }
     $commitJson=gh api "repos/$repo/git/commits/$TrustedCommit"
     if ($LASTEXITCODE -ne 0 -or !$commitJson) { throw 'Cannot verify pinned tooling commit via GitHub' }
     $commit=$commitJson | ConvertFrom-Json
