@@ -123,11 +123,73 @@ internal static class Program
              or ArgumentException or System.ComponentModel.Win32Exception or CryptographicException
              or JsonException or InvalidOperationException)
         {
-            Console.Error.WriteLine("COSOS_NATIVE_REFUSED:" + ex.GetType().Name + ":" + ex.Message);
+            Console.Error.WriteLine("COSOS_NATIVE_REFUSED:" + ErrorDetail(ex));
+            if (ex.InnerException is not null)
+                Console.Error.WriteLine("COSOS_NATIVE_CAUSE:" + ErrorDetail(ex.InnerException));
             return 3;
         }
     }
 
+    // This wrapper retains the exact failed operation and native/HRESULT diagnostics.
+    // Failure logging never authorizes any new filesystem mutation.
+    static string ErrorDetail(Exception ex)
+    {
+        var code = ex is System.ComponentModel.Win32Exception win
+            ? win.NativeErrorCode : ex.HResult & 0xFFFF;
+        return $"type={ex.GetType().Name};win32={code};hresult=0x{ex.HResult:X8};message={ex.Message}";
+    }
+    static void Operation(string action,string source,string destination,Action work)
+    {
+        try { work(); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException
+             or System.ComponentModel.Win32Exception or InvalidDataException or InvalidOperationException)
+        {
+            throw new IOException(
+                $"16PKG_OPERATION_FAILED operation={action} source={source} destination={destination} {ErrorDetail(ex)}",ex);
+        }
+    }
+    static bool IsTransientMoveError(Exception ex)
+    {
+        int code = ex is System.ComponentModel.Win32Exception win
+            ? win.NativeErrorCode : ex.HResult & 0xFFFF;
+        // Windows may temporarily hold a handle to freshly verified executables.
+        // Never treat a permanent ACL failure as success or grant more rights.
+        return code is 5 or 32 or 33;
+    }
+    static void PublishPreparedInstall(string stage,string root)
+    {
+        // Same-volume non-overwriting rename. Recheck the signed/ACL-protected
+        // source and missing destination at EVERY attempt.
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            SafeAncestors(stage);
+            SafeAncestors(root);
+            VerifyProtection(stage);
+            if (!Directory.Exists(stage) || Directory.Exists(root) || File.Exists(root))
+                throw new InvalidDataException("Stage missing or installation destination already exists");
+            try
+            {
+                Directory.Move(stage,root);
+                Operation("VERIFY_PUBLISHED_ROOT",root,root,() => VerifyProtection(root));
+                return;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                if (Directory.Exists(root))
+                {
+                    // A rename may have actually committed before a later failure.
+                    // Never repeat or roll it back blindly.
+                    throw new IOException(
+                        $"16PKG_PUBLISH_AMBIGUOUS attempt={attempt+1} source={stage} destination={root} {ErrorDetail(ex)}",ex);
+                }
+                if (!IsTransientMoveError(ex) || attempt == 2)
+                    throw new IOException(
+                        $"16PKG_PUBLISH_FAILED operation=Directory.Move attempt={attempt+1} source={stage} destination={root} {ErrorDetail(ex)}",ex);
+                Thread.Sleep(200 * (attempt + 1));
+            }
+        }
+        throw new InvalidOperationException("Protected directory publication never completed");
+    }
     static byte[] Resource(string name)
     {
         using var input = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
@@ -790,6 +852,8 @@ internal static class Program
                 continue;
             }
             var inventory=Inventory(stage);
+            if (File.Exists(SelectorPath(stage)))
+                throw new InvalidDataException("Staged selector found: stage quarantined for owner inspection; never silently remove a failed publication");
             var stagingSlots=Path.Combine(stage,"slots");
             if(!Directory.Exists(stagingSlots))
             {
@@ -944,9 +1008,8 @@ internal static class Program
             if (install)
             {
                 WriteState(stage,next);
-                SafeAncestors(root);
-                Directory.Move(stage,root);
-                VerifyProtection(root);
+                Operation("PREPARE_PUBLISH_ROOT",stage,root,() => SafeAncestors(root));
+                PublishPreparedInstall(stage,root);
             }
             else
             {
@@ -963,28 +1026,15 @@ internal static class Program
                 Directory.Delete(stage);
             }
         }
-        catch
+        catch (Exception primary)
         {
-            // In-flight stage remains disconnected from active slot selector.
-            // Only delete fully signer-verified owned files; do not recursively
-            // remove untrusted data. A crash may leave a sibling quarantine.
-            if (Directory.Exists(stage))
-            {
-                if (Directory.Exists(folder))
-                    try { CleanOwnedSlot(stage,slot,publisher); } catch { }
-                var nested = Path.Combine(stage,"slots");
-                if (Directory.Exists(nested) && !Directory.EnumerateFileSystemEntries(nested).Any())
-                    Directory.Delete(nested);
-                if (!Directory.EnumerateFileSystemEntries(stage).Any())
-                {
-                    VerifyProtection(stage);
-                    Directory.Delete(stage);
-                }
-            }
-            // After selector commit the new release is ACTIVE; never clean it
-            // if a subsequent non-critical stage cleanup fails.
-            if (publishedSlot && !selectorPublished && Directory.Exists(Path.Combine(root,"slots",slot)))
-                try { CleanOwnedSlot(root,slot,publisher); } catch { }
+            // A failed publication MUST retain its evidence. In particular,
+            // partial automatic cleanup previously removed a verified slot and
+            // left only active.json, obscuring the original Access Denied.
+            // Quarantine any task-named stage; never remove foreign files or
+            // alter the already-active installation root here.
+            Console.Error.WriteLine("COSOS_NATIVE_STAGE_PRESERVED:" + stage);
+            Console.Error.WriteLine("COSOS_NATIVE_PRIMARY:" + ErrorDetail(primary));
             throw;
         }
     }
