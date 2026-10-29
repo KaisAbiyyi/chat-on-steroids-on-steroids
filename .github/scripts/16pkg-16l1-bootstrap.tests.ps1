@@ -22,6 +22,9 @@ function New-Root([string]$Path) {
     $grant='*'+$owner+':(OI)(CI)F'
     & icacls $Path '/grant:r' $grant '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Fixture grant failed' }
+    & icacls $Path '/remove' '*S-1-3-0' | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Fixture creator-owner cleanup failed' }
+    if ($LASTEXITCODE -ne 0) { throw 'Fixture grant failed' }
     Assert-16L1BootstrapNode -Path $Path -OwnerSid $owner -Directory -Protected
     New-Item -ItemType Directory -Path (Join-Path $Path 'scripts') | Out-Null
     Assert-16L1ChildNames -Path $Path -Allowed @('scripts') -OwnerSid $owner
