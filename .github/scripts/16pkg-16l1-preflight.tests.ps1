@@ -6,29 +6,112 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hoste
 . "$PSScriptRoot/16pkg-16l1-guards.ps1"
 $root = Join-Path $env:RUNNER_TEMP ('16l1-guard-test-' + [guid]::NewGuid().ToString('N'))
 $foreign = Join-Path $root 'foreign'
-$qual = Join-Path $root 'qualification'
+$ancestor = Join-Path $root 'writable-ancestor'
+$qual = Join-Path $ancestor 'qualification'
+$selfSid=[Security.Principal.WindowsIdentity]::GetCurrent().User
+$systemSid=[Security.Principal.SecurityIdentifier]::new('S-1-5-18')
+$adminSid=[Security.Principal.SecurityIdentifier]::new('S-1-5-32-544')
+$usersSid=[Security.Principal.SecurityIdentifier]::new('S-1-5-32-545')
+$everyoneSid=[Security.Principal.SecurityIdentifier]::new('S-1-1-0')
+function New-Access([Security.Principal.SecurityIdentifier]$Sid,
+    [Security.AccessControl.FileSystemRights]$Rights,
+    [Security.AccessControl.InheritanceFlags]$Inherit=[Security.AccessControl.InheritanceFlags]::None) {
+    return [Security.AccessControl.FileSystemAccessRule]::new(
+        $Sid,$Rights,$Inherit,[Security.AccessControl.PropagationFlags]::None,
+        [Security.AccessControl.AccessControlType]::Allow)
+}
+function New-ProtectedAcl {
+    $security=[Security.AccessControl.DirectorySecurity]::new()
+    $security.SetAccessRuleProtection($true,$false)
+    $security.SetOwner($selfSid)
+    foreach($sid in @($selfSid,$systemSid,$adminSid)) {
+        $security.AddAccessRule((New-Access $sid ([Security.AccessControl.FileSystemRights]::FullControl) ([Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit)))
+    }
+    return $security
+}
 function Refused([scriptblock]$Action,[string]$Reason) {
     $blocked = $false
     try { & $Action | Out-Null } catch { $blocked = $true }
     if (!$blocked) { throw "Negative security regression accepted: $Reason" }
 }
 try {
+    New-Item -ItemType Directory -Path $ancestor -Force | Out-Null
+    # Simulates owner D:\ Users:(RX,W) and Everyone:(RX). The ancestor is
+    # intentionally writable; neither ACE permits DeleteChild, ACL edit or takeover.
+    $aAcl=Get-Acl -LiteralPath $ancestor
+    $usersWrite=New-Access $usersSid ([Security.AccessControl.FileSystemRights]::ReadAndExecute -bor [Security.AccessControl.FileSystemRights]::Write)
+    $aAcl.AddAccessRule($usersWrite)
+    $aAcl.AddAccessRule((New-Access $everyoneSid ([Security.AccessControl.FileSystemRights]::ReadAndExecute)))
+    # Real D:\ also has CREATOR OWNER:(OI)(CI)(IO)(F). It must not
+    # count as an effective DeleteChild on D: itself.
+    $creatorSid=[Security.Principal.SecurityIdentifier]::new('S-1-3-0')
+    $aAcl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new(
+        $creatorSid,[Security.AccessControl.FileSystemRights]::FullControl,
+        ([Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit),
+        [Security.AccessControl.PropagationFlags]::InheritOnly,
+        [Security.AccessControl.AccessControlType]::Allow))
+    Set-Acl -LiteralPath $ancestor -AclObject $aAcl
     New-Item -ItemType Directory -Path $foreign -Force | Out-Null
     [IO.File]::WriteAllText((Join-Path $foreign 'sentinel'),'UNTOUCHED')
     New-Item -ItemType Junction -Path $qual -Target $foreign | Out-Null
-    Refused { Assert-16L1Workspace -Workspace (Join-Path $qual ('16L1-' + ('a'*40))) -Boundary $qual } 'linked qualification ancestor'
+    Refused { Assert-16L1Node -Path $qual -ProtectedBoundary } 'linked qualification ancestor'
     Remove-Item -LiteralPath $qual -Force
     New-Item -ItemType Directory -Path $qual | Out-Null
+    Set-Acl -LiteralPath $qual -AclObject (New-ProtectedAcl)
     $parent = Join-Path $qual ('16L1-' + ('a'*40))
     New-Item -ItemType Directory -Path $parent | Out-Null
     $linked = Join-Path $parent 'nested'
     New-Item -ItemType Junction -Path $linked -Target $foreign | Out-Null
-    Refused { Assert-16L1Workspace -Workspace (Join-Path $linked 'newworkspace') -Boundary $qual } 'linked nested workspace'
-    Refused { Assert-16L1Workspace -Workspace $parent -Boundary $qual -InspectTree } 'linked child inside workspace'
+    Refused { Assert-16L1Node -Path $linked -WithinBoundary } 'linked nested workspace'
+    Refused { Assert-16L1Node -Path $linked -WithinBoundary } 'linked child inside workspace'
     if ([IO.File]::ReadAllText((Join-Path $foreign 'sentinel')) -cne 'UNTOUCHED') {
         throw 'Foreign test data was changed'
     }
     Remove-Item -LiteralPath $linked -Force
+    # Positive owner pattern: broad ordinary W ancestor + noninheriting,
+    # strictly trusted protected boundary. Never evaluate actual owner D:.
+    # GitHub-hosted D:\ can be owned by NETWORK SERVICE (S-1-5-20).
+    # Do not loosen physical D:\ ownership policy to accommodate a CI host.
+    # Exercise actual filesystem nodes and policy in isolation from the runner volume root.
+    Assert-16L1Node -Path $ancestor
+    Assert-16L1Node -Path $qual -ProtectedBoundary
+    Assert-16L1Node -Path $parent -WithinBoundary
+    $realAcl=Get-Acl -LiteralPath $qual
+    Assert-16L1Acl -Acl $realAcl -OwnerSid $selfSid.Value -Path $qual -ProtectedBoundary
+    $unsafe=Join-Path $ancestor 'unprotected'
+    New-Item -ItemType Directory -Path $unsafe | Out-Null
+    Refused { Assert-16L1Node -Path $unsafe -ProtectedBoundary } 'unsafe inherited boundary'
+    # A wrong owner must be rejected regardless of the current machine's
+    # privilege to assign such an owner on disk.
+    Refused { Assert-16L1Acl -Acl $realAcl -OwnerSid $usersSid.Value -Path $qual -ProtectedBoundary } 'untrusted protected owner'
+    $mutated=New-ProtectedAcl
+    $mutated.AddAccessRule((New-Access $usersSid ([Security.AccessControl.FileSystemRights]::Modify)))
+    Refused { Assert-16L1Acl -Acl $mutated -OwnerSid $selfSid.Value -Path $qual -ProtectedBoundary } 'sandbox/broad Modify on protected boundary'
+    Refused { Assert-16L1Acl -Acl $mutated -OwnerSid $selfSid.Value -Path $parent -WithinBoundary } 'inherited/broad Modify inside boundary'
+    foreach($right in @([Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles,
+                       [Security.AccessControl.FileSystemRights]::Modify,
+                       [Security.AccessControl.FileSystemRights]::Delete,
+                       [Security.AccessControl.FileSystemRights]::ChangePermissions,
+                       [Security.AccessControl.FileSystemRights]::TakeOwnership)) {
+        $hostile=Get-Acl -LiteralPath $ancestor
+        [void]$hostile.RemoveAccessRuleSpecific($usersWrite)
+        $hostile.AddAccessRule((New-Access $usersSid $right))
+        Refused { Assert-16L1Acl -Acl $hostile -OwnerSid $selfSid.Value -Path $ancestor } "dangerous ancestor right: $right"
+    }
+    # Non-InheritOnly CREATOR OWNER FullControl is effective and unsafe.
+    $effective=Get-Acl -LiteralPath $ancestor
+    $effective.AddAccessRule((New-Access $creatorSid ([Security.AccessControl.FileSystemRights]::FullControl)))
+    Refused { Assert-16L1Acl -Acl $effective -OwnerSid $selfSid.Value -Path $ancestor } 'effective broad creator-owner Modify'
+    $blessed=Get-Acl -LiteralPath $ancestor
+    Assert-16L1Acl -Acl $blessed -OwnerSid $selfSid.Value -Path $ancestor
+    $byteFixture=Join-Path $parent 'git-blob-fixture'
+    [IO.File]::WriteAllText($byteFixture,'approved')
+    $gitHash=Get-16L1GitBlobSha $byteFixture
+    if ($gitHash -cnotmatch '^[a-f0-9]{40}$') { throw 'Invalid Git blob digest' }
+    [IO.File]::WriteAllText($byteFixture,'tampered')
+    if ((Get-16L1GitBlobSha $byteFixture) -ceq $gitHash) {
+        throw 'Changed verification script bytes were accepted'
+    }
     # Real GitHub REST shapes observed in run 40710902296 *after* merge:
     # workflow_run.pull_requests is EMPTY; run.head_sha is checked-out PR HEAD,
     # while the OIDC certificate sourceRepositoryDigest is a DIFFERENT PR merge SHA.
@@ -144,7 +227,7 @@ try {
     $badVerification.verificationResult.signature.certificate=$cert
     $badVerification.verificationResult.statement=$badStatement
     Refused { Assert-16L1AttestationRun @($badVerification) 40710902296 1 $repo } 'invalid SLSA type'
-    Write-Host '16L1 security regressions PASS: merged PR/history/source, run/attempt/artifact/digest/OIDC and NTFS junction rejection'
+    Write-Host '16L1 security regressions PASS: owner-pattern ACLs, dangerous ancestor rights, protected boundary, owners, linked paths, Git blob mutation, origin/artifact/OIDC'
 } finally {
     if (Test-Path -LiteralPath $qual) {
         # Remove reparse children as links before removing only test-owned directories.

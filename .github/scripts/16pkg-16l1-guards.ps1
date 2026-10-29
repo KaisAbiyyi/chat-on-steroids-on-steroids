@@ -1,33 +1,80 @@
 # Security boundary shared by the explicitly authorized local 16L1 runner and hosted negative tests.
 # Loading this file does not touch the filesystem or execute any installation.
-function Assert-16L1Node([string]$Path) {
-    $node = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+$script:16L1Boundary = 'D:\CoSoS-16L1-Qualification'
+function Get-16L1TrustedSids {
+    $self=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    return @($self,'S-1-5-18','S-1-5-32-544')
+}
+function Assert-16L1Node {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path,
+          [switch]$ProtectedBoundary,[switch]$WithinBoundary)
+    $node=Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
     if ($null -eq $node) {
         if (Test-Path -LiteralPath $Path) { throw "Cannot inspect qualification path: $Path" }
+        if ($ProtectedBoundary) { throw "Pre-provisioned protected boundary missing: $Path" }
         return $false
     }
     if (($node.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
         throw "Linked/reparse qualification path refused: $Path"
     }
-    $acl = Get-Acl -LiteralPath $Path -ErrorAction Stop
-    $owner = $acl.GetOwner([Security.Principal.SecurityIdentifier]).Value
-    $self = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-    if ($owner -notin @($self,'S-1-5-18','S-1-5-32-544')) {
-        throw "Qualification ancestor has untrusted NTFS owner: $Path"
+    if ($ProtectedBoundary -and !$node.PSIsContainer) {
+        throw "Qualification boundary is not a directory: $Path"
     }
-    $write = [Security.AccessControl.FileSystemRights]::Write -bor
-        [Security.AccessControl.FileSystemRights]::Modify -bor
-        [Security.AccessControl.FileSystemRights]::FullControl -bor
-        [Security.AccessControl.FileSystemRights]::Delete -bor
-        [Security.AccessControl.FileSystemRights]::ChangePermissions -bor
-        [Security.AccessControl.FileSystemRights]::TakeOwnership
-    foreach ($ace in $acl.Access) {
-        if ($ace.AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or
-            ($ace.FileSystemRights -band $write) -eq 0) { continue }
-        $sid = $ace.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value
-        if ($sid -in @('S-1-1-0','S-1-5-11','S-1-5-32-545','S-1-5-32-546','S-1-5-7')) {
-            throw "Qualification ancestor allows broad write access: $Path"
+    $acl=Get-Acl -LiteralPath $Path -ErrorAction Stop
+    $owner=$acl.GetOwner([Security.Principal.SecurityIdentifier]).Value
+    Assert-16L1Acl -Acl $acl -OwnerSid $owner -Path $Path -ProtectedBoundary:$ProtectedBoundary -WithinBoundary:$WithinBoundary
+    return $true
+}
+# Pure ACL evaluator is used by the filesystem guard and hostile hosted fixtures.
+function Assert-16L1Acl {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)]$Acl,[Parameter(Mandatory)][string]$OwnerSid,
+          [Parameter(Mandatory)][string]$Path,
+          [switch]$ProtectedBoundary,[switch]$WithinBoundary)
+    $trusted=@(Get-16L1TrustedSids)
+    if ($OwnerSid -notin $trusted) { throw "Untrusted qualification NTFS owner: $Path ($OwnerSid)" }
+    if ($ProtectedBoundary -and !$acl.AreAccessRulesProtected) {
+        throw "Protected qualification boundary inherits ACLs: $Path"
+    }
+    # DeleteChild on an ancestor can delete/replace an otherwise protected descendant.
+    # Plain Write (AddFile/AddSubdirectory/WriteAttributes) on D:\ is NOT DeleteChild.
+    $danger=[int64]([Security.AccessControl.FileSystemRights]::DeleteSubdirectoriesAndFiles) -bor
+        [int64]([Security.AccessControl.FileSystemRights]::Delete) -bor
+        [int64]([Security.AccessControl.FileSystemRights]::ChangePermissions) -bor
+        [int64]([Security.AccessControl.FileSystemRights]::TakeOwnership)
+    $aces=$acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])
+    $trustedAllow=0
+    foreach ($ace in $aces) {
+        $sid=$ace.IdentityReference.Value
+        # D:\ commonly has CREATOR OWNER:(OI)(CI)(IO)(F). An inherit-only
+        # ACE grants no access on THIS ancestor; the protected boundary
+        # explicitly disables inheritance so it cannot propagate into it.
+        # Never apply this exception to the boundary or any of its descendants.
+        if (!$ProtectedBoundary -and !$WithinBoundary -and
+            (($ace.PropagationFlags -band [Security.AccessControl.PropagationFlags]::InheritOnly) -ne 0)) {
+            continue
         }
+        if ($ace.AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow) {
+            if ($ProtectedBoundary) { throw "Unexpected protected-boundary deny ACE: $Path" }
+            continue
+        }
+        if ($sid -in $trusted) {
+            $trustedAllow++
+            continue
+        }
+        $rights=[int64]$ace.FileSystemRights
+        if ($ProtectedBoundary -or $WithinBoundary) {
+            # Never allow sandbox or other untrusted ACEs within the hardened tree.
+            throw "Untrusted identity on protected qualification resource: $Path ($sid)"
+        }
+        if (($rights -band $danger) -ne 0) {
+            throw "Qualification ancestor permits deletion/replacement/ACL takeover: $Path ($sid)"
+        }
+    }
+    if ($ProtectedBoundary -and ($trustedAllow -lt 2 -or
+        @($aces | Where-Object { $_.IsInherited }).Count -ne 0)) {
+        throw "Missing trusted explicit ACLs or inherited rules on protected boundary: $Path"
     }
     return $true
 }
@@ -39,48 +86,112 @@ function Assert-16L1Workspace {
         [switch]$RequirePhysicalD,
         [switch]$InspectTree
     )
-    $path = [IO.Path]::GetFullPath($Workspace).TrimEnd('\')
-    $boundaryPath = [IO.Path]::GetFullPath($Boundary).TrimEnd('\')
+    foreach ($value in @($Workspace,$Boundary)) {
+        if ($value -match '(^|[\\/])\.\.?([\\/]|$)' -or $value -match '[. ]([\\/]|$)') {
+            throw 'Ambiguous or traversal qualification path refused'
+        }
+    }
+    $path=[IO.Path]::GetFullPath($Workspace).TrimEnd('\')
+    $boundaryPath=[IO.Path]::GetFullPath($Boundary).TrimEnd('\')
     if (-not $path.StartsWith("$boundaryPath\",[StringComparison]::OrdinalIgnoreCase) -or
         $path.Length -lt ($boundaryPath.Length + 21)) {
         throw 'Workspace must be an isolated child of the qualification boundary'
     }
-    foreach ($segment in $path.Split('\')) {
-        if ($segment -eq '..' -or $segment -eq '.' -or
-            $segment.EndsWith(' ') -or $segment.EndsWith('.')) {
-            throw 'Ambiguous or traversal qualification path refused'
-        }
+    $workspaceParent=[IO.Path]::GetDirectoryName($path).TrimEnd('\')
+    $workspaceName=[IO.Path]::GetFileName($path)
+    if (!$workspaceParent.Equals($boundaryPath,[StringComparison]::OrdinalIgnoreCase) -or
+        $workspaceName -cnotmatch '^16L1-[a-f0-9]{40}(-[a-f0-9]{8,32})?$' -or
+        $path.Substring([IO.Path]::GetPathRoot($path).Length).Contains(':')) {
+        throw 'Only a direct, source-named child workspace is allowed (no ADS or script-tree nesting)'
     }
-    $root = [IO.Path]::GetPathRoot($path)
     if ($RequirePhysicalD) {
-        if ($root -cne 'D:\' -or
+        if ($boundaryPath -cne $script:16L1Boundary -or
+            [IO.Path]::GetPathRoot($path) -cne 'D:\' -or
             -not (Get-Partition -DriveLetter D -ErrorAction SilentlyContinue)) {
-            throw 'Qualification requires a physical D: disk partition (no SUBST/network mapping)'
+            throw 'Qualification requires dedicated physical D: boundary (no SUBST/network mapping)'
         }
-        $disk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='D:'" -ErrorAction Stop
+        $disk=Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='D:'" -ErrorAction Stop
         if (!$disk -or $disk.DriveType -ne 3 -or $disk.FileSystem -ne 'NTFS') {
             throw 'Qualification requires a local NTFS D: volume'
         }
     }
-    [void](Assert-16L1Node $root)
-    $current = $root
+    $root=[IO.Path]::GetPathRoot($path)
+    [void](Assert-16L1Node -Path $root)
+    $current=$root
     foreach ($piece in $path.Substring($root.Length).Split('\')) {
         if (!$piece) { continue }
-        $current = Join-Path $current $piece
-        [void](Assert-16L1Node $current)
+        $current=Join-Path $current $piece
+        $isBoundary=$current.Equals($boundaryPath,[StringComparison]::OrdinalIgnoreCase)
+        $within=$current.StartsWith("$boundaryPath\",[StringComparison]::OrdinalIgnoreCase)
+        [void](Assert-16L1Node -Path $current -ProtectedBoundary:$isBoundary -WithinBoundary:$within)
+    }
+    if (!(Test-Path -LiteralPath $boundaryPath -PathType Container)) {
+        throw "Protected qualification boundary is not pre-provisioned: $boundaryPath"
     }
     if ($InspectTree -and (Test-Path -LiteralPath $path)) {
-        $pending = [Collections.Generic.Stack[string]]::new()
+        $pending=[Collections.Generic.Stack[string]]::new()
         $pending.Push($path)
         while ($pending.Count -gt 0) {
-            $directory = $pending.Pop()
+            $directory=$pending.Pop()
             foreach ($child in @(Get-ChildItem -LiteralPath $directory -Force -ErrorAction Stop)) {
-                [void](Assert-16L1Node $child.FullName)
+                [void](Assert-16L1Node -Path $child.FullName -WithinBoundary)
                 if ($child.PSIsContainer) { $pending.Push($child.FullName) }
             }
         }
     }
     return $path
+}
+function Get-16L1GitBlobSha([string]$File) {
+    $bytes=[IO.File]::ReadAllBytes($File)
+    $prefix=[Text.Encoding]::ASCII.GetBytes("blob $($bytes.Length)$([char]0)")
+    $all=[byte[]]::new($prefix.Length+$bytes.Length)
+    [Array]::Copy($prefix,0,$all,0,$prefix.Length)
+    [Array]::Copy($bytes,0,$all,$prefix.Length,$bytes.Length)
+    return [Convert]::ToHexString([Security.Cryptography.SHA1]::HashData($all)).ToLowerInvariant()
+}
+function Assert-16L1TrustedScripts {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ScriptRoot,
+          [Parameter(Mandatory)][string]$TrustedCommit)
+    if ($TrustedCommit -cnotmatch '^[a-f0-9]{40}$') { throw 'Reviewed full tooling commit SHA required' }
+    $expectedRoot=Join-Path $script:16L1Boundary 'scripts'
+    if (![IO.Path]::GetFullPath($ScriptRoot).TrimEnd('\').Equals($expectedRoot,[StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Verification scripts must run from protected D: scripts directory'
+    }
+    [void](Assert-16L1Workspace -Workspace (Join-Path $script:16L1Boundary ('16L1-' + $script:16L1Approved.SourceSha)) -Boundary $script:16L1Boundary -RequirePhysicalD)
+    [void](Assert-16L1Node -Path $expectedRoot -WithinBoundary)
+    $scriptNames=@('16pkg-16l1-guards.ps1','16pkg-16l1-artifact-provenance.ps1',
+                   '16pkg-16l1-local-qualification.ps1')
+    $existing=@(Get-ChildItem -LiteralPath $expectedRoot -Force -ErrorAction Stop)
+    if ($existing.Count -ne $scriptNames.Count -or
+        @($existing | Where-Object { $_.Name -cnotin $scriptNames }).Count -gt 0) {
+        throw 'Unexpected additional file or incomplete protected verification script tree'
+    }
+    if (!(Get-Command gh -ErrorAction SilentlyContinue)) { throw 'GitHub CLI needed for independent commit blob verification' }
+    $repo=$script:16L1Approved.Repository
+    $commitJson=gh api "repos/$repo/git/commits/$TrustedCommit"
+    if ($LASTEXITCODE -ne 0 -or !$commitJson) { throw 'Cannot verify pinned tooling commit via GitHub' }
+    $commit=$commitJson | ConvertFrom-Json
+    if ($commit.sha -cne $TrustedCommit -or $commit.tree.sha -cnotmatch '^[a-f0-9]{40}$') {
+        throw 'Unexpected trusted tooling commit identity'
+    }
+    $treeJson=gh api "repos/$repo/git/trees/$($commit.tree.sha)?recursive=1"
+    if ($LASTEXITCODE -ne 0 -or !$treeJson) { throw 'Cannot verify pinned tooling tree via GitHub' }
+    $tree=$treeJson | ConvertFrom-Json
+    if ($tree.sha -cne $commit.tree.sha -or $tree.truncated) { throw 'Incomplete or changed tooling tree' }
+    foreach ($name in @('16pkg-16l1-guards.ps1','16pkg-16l1-artifact-provenance.ps1',
+                        '16pkg-16l1-local-qualification.ps1')) {
+        $gitPath=".github/scripts/$name"
+        $matches=@($tree.tree | Where-Object { $_.path -ceq $gitPath -and $_.type -ceq 'blob' })
+        $local=Join-Path $expectedRoot $name
+        if ($matches.Count -ne 1 -or !(Test-Path -LiteralPath $local -PathType Leaf)) {
+            throw "Missing pinned verification script: $name"
+        }
+        [void](Assert-16L1Node -Path $local -WithinBoundary)
+        if ((Get-16L1GitBlobSha $local) -cne $matches[0].sha) {
+            throw "Verification script not identical to reviewed GitHub commit: $name"
+        }
+    }
 }
 # Immutable 16PKG-01 build/approval tuple. Do not infer PR event SHA from
 # mutable pull_request.merge_commit_sha or from workflow_run.head_sha.

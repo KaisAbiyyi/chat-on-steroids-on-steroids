@@ -4,16 +4,26 @@
 param(
     [Parameter(Mandatory)][long]$RunId,
     [Parameter(Mandatory)][string]$SourceSha,
-    [string]$Workspace = "D:\projects\CoS-Rust\qualification\16L1-$SourceSha",
+    [Parameter(Mandatory)][string]$TrustedCommit,
+    [string]$Workspace = "D:\CoSoS-16L1-Qualification\16L1-$SourceSha",
     [switch]$Execute
 )
 $ErrorActionPreference = 'Stop'
 $repository='KaisAbiyyi/chat-on-steroids-on-steroids'
 $workflow="$repository/.github/workflows/16pkg-native-installer.yml"
 if ($SourceSha -cnotmatch '^[a-f0-9]{40}$') { throw 'Full exact source SHA required' }
+# Never dot-source workspace scripts. The owner must stage+verify all files from
+# a reviewed immutable GitHub commit into this protected directory FIRST.
+$scriptDir='D:\CoSoS-16L1-Qualification\scripts'
+if (![IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\').Equals($scriptDir,[StringComparison]::OrdinalIgnoreCase)) {
+    throw 'Refusing local 16L1 runner outside protected scripts directory'
+}
 . "$PSScriptRoot/16pkg-16l1-guards.ps1"
 $workspacePath=[IO.Path]::GetFullPath($Workspace).TrimEnd('\\')
-$boundary='D:\\projects\\CoS-Rust\\qualification'
+$boundary=$script:16L1Boundary
+# Fail closed on any changed local runner/guard/provenance verifier bytes, even
+# when the isolated directory still exists. No mutable main/checkout is trusted.
+Assert-16L1TrustedScripts -ScriptRoot $PSScriptRoot -TrustedCommit $TrustedCommit
 # Inspect every existing ancestor before making directories, downloading, or elevating.
 [void](Assert-16L1Workspace -Workspace $workspacePath -Boundary $boundary -RequirePhysicalD -InspectTree)
 $existing=Test-Path -LiteralPath $workspacePath
