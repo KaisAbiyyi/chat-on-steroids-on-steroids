@@ -6,7 +6,8 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hoste
 }
 $source = (git rev-parse HEAD).Trim()
 if ($source -ne $env:PR_HEAD_SHA) { throw 'Source SHA mismatch' }
-$root = "D:\16pkg-unsigned-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+$boundary = "D:\16l1-publish-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+$root = Join-Path $boundary 'installed'
 $testHome = Join-Path $env:RUNNER_TEMP 'cosos-16pkg-unsigned'
 $mapped = $false
 $checks = [ordered]@{}
@@ -43,6 +44,42 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Unable to map isolated D drive' }
         $mapped = $true
     }
+    if ((Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='D:'").FileSystem -ne 'NTFS') {
+        throw 'Protected 16L1 publish regression requires NTFS'
+    }
+    if (Test-Path -LiteralPath $boundary) { throw 'Unexpected existing protected test boundary' }
+    $owner=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    New-Item -ItemType Directory -Path $boundary -ErrorAction Stop | Out-Null
+    $icacls=Join-Path $env:SystemRoot 'System32\icacls.exe'
+    & $icacls $boundary '/setowner' ('*'+$owner) | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to assign exact protected boundary owner' }
+    & $icacls $boundary '/inheritance:r' | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to disable protected boundary inheritance' }
+    & $icacls $boundary '/grant:r' ('*'+$owner+':(OI)(CI)F') '*S-1-5-32-544:(OI)(CI)F' '*S-1-5-18:(OI)(CI)F' | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to grant trusted protected boundary ACL' }
+    $protectedAcl=Get-Acl -LiteralPath $boundary
+    if (!$protectedAcl.AreAccessRulesProtected -or
+        $protectedAcl.GetOwner([Security.Principal.SecurityIdentifier]).Value -cne $owner) {
+        throw 'Protected boundary owner / inheritance not established'
+    }
+    $expected=@($owner,'S-1-5-32-544','S-1-5-18')
+    foreach ($ace in $protectedAcl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])) {
+        if ($ace.AccessControlType -ne 'Allow' -or $ace.IsInherited -or
+            $ace.IdentityReference.Value -notin $expected) {
+            throw "Unexpected broad protected boundary ACE: $($ace.IdentityReference.Value)"
+        }
+    }
+    # Same-volume, protected stage publication probe independent of installer.
+    $renameStage=Join-Path $boundary '.ci-publish-probe'
+    $renameFinal=Join-Path $boundary 'ci-published-probe'
+    New-Item -ItemType Directory -Path $renameStage | Out-Null
+    [IO.File]::WriteAllText((Join-Path $renameStage 'marker'),'PROTECTED_RENAME')
+    [IO.Directory]::Move($renameStage,$renameFinal)
+    if ([IO.File]::ReadAllText((Join-Path $renameFinal 'marker')) -cne 'PROTECTED_RENAME') {
+        throw 'Protected directory rename did not preserve contents'
+    }
+    Remove-Item -LiteralPath $renameFinal -Recurse -Force
+    $checks['physical-pattern-protected-parent-rename']='PASS'
     if (Test-Path -LiteralPath $root) { throw 'Disposable root unexpectedly exists' }
     $beforeStores = ProtectedStore
     $digests['0.1.0'] = (Get-FileHash $setups['0.1.0'] -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -155,7 +192,7 @@ try {
         $interrupted=$false
         try {
             for($probe=0;$probe -lt 400;$probe++) {
-                $stage=@(Get-ChildItem -LiteralPath 'D:\' -Directory -Force |
+                $stage=@(Get-ChildItem -LiteralPath $boundary -Directory -Force |
                     Where-Object { $_.Name.StartsWith($stagePrefix,[StringComparison]::OrdinalIgnoreCase) })
                 foreach($entry in $stage) {
                     try {
@@ -212,16 +249,11 @@ try {
       assertions=$checks
     } | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 '16pkg-unsigned-native-receipt.json'
 } finally {
-    # This is an ephemeral CI-owned path, bounded to this run/attempt only.
-    if ($root -like 'D:\16pkg-unsigned-*') {
-        foreach ($p in @($root,"$root-uninstalling")) {
-            if (Test-Path -LiteralPath $p) {
-                Remove-Item -LiteralPath $p -Force -Recurse -ErrorAction SilentlyContinue
-            }
+    # Hosted ephemeral task-owned boundary only. Owner D: is never accessed.
+    if ($boundary -like "D:\16l1-publish-$env:GITHUB_RUN_ID-*") {
+        if (Test-Path -LiteralPath $boundary) {
+            Remove-Item -LiteralPath $boundary -Force -Recurse -ErrorAction SilentlyContinue
         }
-        Get-ChildItem -LiteralPath 'D:\' -Directory -Force -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -like ('.cosos-16pkg-'+(Split-Path $root -Leaf)+'-stage-*') } |
-            ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force -Recurse -ErrorAction SilentlyContinue }
     }
     if ($mapped) { & "$env:SystemRoot\System32\subst.exe" D: /D }
 }
