@@ -42,6 +42,14 @@ try {
     $usersWrite=New-Access $usersSid ([Security.AccessControl.FileSystemRights]::ReadAndExecute -bor [Security.AccessControl.FileSystemRights]::Write)
     $aAcl.AddAccessRule($usersWrite)
     $aAcl.AddAccessRule((New-Access $everyoneSid ([Security.AccessControl.FileSystemRights]::ReadAndExecute)))
+    # Real D:\ also has CREATOR OWNER:(OI)(CI)(IO)(F). It must not
+    # count as an effective DeleteChild on D: itself.
+    $creatorSid=[Security.Principal.SecurityIdentifier]::new('S-1-3-0')
+    $aAcl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new(
+        $creatorSid,[Security.AccessControl.FileSystemRights]::FullControl,
+        ([Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit),
+        [Security.AccessControl.PropagationFlags]::InheritOnly,
+        [Security.AccessControl.AccessControlType]::Allow))
     Set-Acl -LiteralPath $ancestor -AclObject $aAcl
     New-Item -ItemType Directory -Path $foreign -Force | Out-Null
     [IO.File]::WriteAllText((Join-Path $foreign 'sentinel'),'UNTOUCHED')
@@ -90,6 +98,10 @@ try {
         $hostile.AddAccessRule((New-Access $usersSid $right))
         Refused { Assert-16L1Acl -Acl $hostile -OwnerSid $selfSid.Value -Path $ancestor } "dangerous ancestor right: $right"
     }
+    # Non-InheritOnly CREATOR OWNER FullControl is effective and unsafe.
+    $effective=Get-Acl -LiteralPath $ancestor
+    $effective.AddAccessRule((New-Access $creatorSid ([Security.AccessControl.FileSystemRights]::FullControl)))
+    Refused { Assert-16L1Acl -Acl $effective -OwnerSid $selfSid.Value -Path $ancestor } 'effective broad creator-owner Modify'
     $blessed=Get-Acl -LiteralPath $ancestor
     Assert-16L1Acl -Acl $blessed -OwnerSid $selfSid.Value -Path $ancestor
     $byteFixture=Join-Path $parent 'git-blob-fixture'
