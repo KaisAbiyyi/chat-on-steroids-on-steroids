@@ -123,11 +123,84 @@ internal static class Program
              or ArgumentException or System.ComponentModel.Win32Exception or CryptographicException
              or JsonException or InvalidOperationException)
         {
-            Console.Error.WriteLine("COSOS_NATIVE_REFUSED:" + ex.GetType().Name + ":" + ex.Message);
+            Console.Error.WriteLine("COSOS_NATIVE_REFUSED:" + ErrorDetail(ex));
+            if (ex.InnerException is not null)
+                Console.Error.WriteLine("COSOS_NATIVE_CAUSE:" + ErrorDetail(ex.InnerException));
             return 3;
         }
     }
 
+    // This wrapper retains the exact failed operation and native/HRESULT diagnostics.
+    // Failure logging never authorizes any new filesystem mutation.
+    static string ErrorDetail(Exception ex)
+    {
+        // Most managed HRESULTs are NOT Win32 errors. Do not mislabel them.
+        var facilityWin32 = ((uint)ex.HResult & 0xFFFF0000u) == 0x80070000u;
+        string native = ex is System.ComponentModel.Win32Exception win
+            ? win.NativeErrorCode.ToString() : facilityWin32
+            ? (ex.HResult & 0xFFFF).ToString() : "unavailable";
+        return $"type={ex.GetType().Name};win32={native};hresult=0x{ex.HResult:X8};message={ex.Message}";
+    }
+    static void Operation(string action,string source,string destination,Action work)
+    {
+        try { work(); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException
+             or System.ComponentModel.Win32Exception or InvalidDataException or InvalidOperationException)
+        {
+            throw new IOException(
+                $"16PKG_OPERATION_FAILED operation={action} source={source} destination={destination} {ErrorDetail(ex)}",ex);
+        }
+    }
+    static bool IsTransientMoveError(Exception ex)
+    {
+        int code = ex is System.ComponentModel.Win32Exception win
+            ? win.NativeErrorCode : ex.HResult & 0xFFFF;
+        // Windows may temporarily hold a handle to freshly verified executables.
+        // Never treat a permanent ACL failure as success or grant more rights.
+        return code is 5 or 32 or 33;
+    }
+    static void PublishPreparedInstall(string stage,string root)
+    {
+        // Same-volume non-overwriting rename. Recheck the signed/ACL-protected
+        // source and missing destination at EVERY attempt.
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            SafeAncestors(stage);
+            SafeAncestors(root);
+            VerifyProtection(stage);
+            if (!Directory.Exists(stage) || Directory.Exists(root) || File.Exists(root))
+                throw new InvalidDataException("Stage missing or installation destination already exists");
+            try
+            {
+#if COS_16PKG_TEST
+                // Deterministic negative fault injection never compiled in release.
+                var injected = Environment.GetEnvironmentVariable("COSOS_16PKG_FAIL_AT");
+                if (injected == "publish_access_denied_always" ||
+                    (attempt == 0 && injected == "publish_access_denied_once"))
+                    throw new IOException("TEST_ONLY_SYNTHETIC_PUBLISH_ACCESS_DENIED",
+                        unchecked((int)0x80070005));
+#endif
+                Directory.Move(stage,root);
+                Operation("VERIFY_PUBLISHED_ROOT",root,root,() => VerifyProtection(root));
+                return;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                if (Directory.Exists(root))
+                {
+                    // A rename may have actually committed before a later failure.
+                    // Never repeat or roll it back blindly.
+                    throw new IOException(
+                        $"16PKG_PUBLISH_AMBIGUOUS attempt={attempt+1} source={stage} destination={root} {ErrorDetail(ex)}",ex);
+                }
+                if (!IsTransientMoveError(ex) || attempt == 2)
+                    throw new IOException(
+                        $"16PKG_PUBLISH_FAILED operation=Directory.Move attempt={attempt+1} source={stage} destination={root} {ErrorDetail(ex)}",ex);
+                Thread.Sleep(200 * (attempt + 1));
+            }
+        }
+        throw new InvalidOperationException("Protected directory publication never completed");
+    }
     static byte[] Resource(string name)
     {
         using var input = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
@@ -790,6 +863,8 @@ internal static class Program
                 continue;
             }
             var inventory=Inventory(stage);
+            if (File.Exists(SelectorPath(stage)))
+                throw new InvalidDataException("Staged selector found: stage quarantined for owner inspection; never silently remove a failed publication");
             var stagingSlots=Path.Combine(stage,"slots");
             if(!Directory.Exists(stagingSlots))
             {
@@ -904,8 +979,6 @@ internal static class Program
             ".cosos-16pkg-" + Path.GetFileName(root) + "-stage-" + Guid.NewGuid().ToString("N"));
         var slot = "slot-" + Guid.NewGuid().ToString("N");
         var folder = Path.Combine(stage,"slots",slot);
-        var publishedSlot = false;
-        var selectorPublished = false;
         Selector? previous = null;
         if (!install)
         {
@@ -920,71 +993,55 @@ internal static class Program
         }
         try
         {
-            Directory.CreateDirectory(stage);
-            Protect(stage);
+            Operation("CREATE_STAGE",stage,stage,() => Directory.CreateDirectory(stage));
+            Operation("PROTECT_STAGE",stage,stage,() => Protect(stage));
             // Only an ACL-authenticated stage can be autonomously recovered.
             SyntheticCrash("after_stage_protect");
-            Directory.CreateDirectory(folder);
+            Operation("CREATE_SLOT",stage,folder,() => Directory.CreateDirectory(folder));
             // Install the cryptographic authority first. An interrupted
             // extraction can then be pruned against the signed embedded index.
             var proof = Path.Combine(folder,"authority","issuer.exe");
-            CopyFile(Environment.ProcessPath!,proof);
+            Operation("COPY_ISSUER",Environment.ProcessPath!,proof,() => CopyFile(Environment.ProcessPath!,proof));
             if (publisher == UnsignedChannel)
             {
                 if (!IC.Equals(ExecutableHash(proof),VerifiedManualDigest))
                     throw new InvalidDataException("Copied unsigned executable changed");
                 File.WriteAllText(UnsignedMarker(proof),VerifiedManualDigest!);
             }
-            Extract(folder,payload);
-            SealTree(stage);
-            VerifySlot(stage,slot,publisher);
+            Operation("EXTRACT",stage,folder,() => Extract(folder,payload));
+            Operation("SEAL_STAGE",stage,stage,() => SealTree(stage));
+            Operation("VERIFY_SLOT",stage,folder,() => { _ = VerifySlot(stage,slot,publisher); });
             SyntheticCrash("before_publish");
             var next = install ? new Selector(slot,null,publisher,version,1) :
                 new Selector(slot,previous!.Active,publisher,version,previous.Generation + 1);
             if (install)
             {
-                WriteState(stage,next);
-                SafeAncestors(root);
-                Directory.Move(stage,root);
-                VerifyProtection(root);
+                Operation("WRITE_STAGED_SELECTOR",stage,SelectorPath(stage),() => WriteState(stage,next));
+                Operation("PREPARE_PUBLISH_ROOT",stage,root,() => SafeAncestors(root));
+                PublishPreparedInstall(stage,root);
             }
             else
             {
                 VerifyProtection(root);
                 Directory.Move(folder,Path.Combine(root,"slots",slot));
-                publishedSlot = true;
                 SyntheticCrash("after_slot_publish");
                 VerifySlot(root,slot,publisher);
                 WriteState(root,next);
-                selectorPublished = true;
                 SyntheticCrash("after_selector_publish");
                 if (Directory.Exists(Path.Combine(stage,"slots")))
                     Directory.Delete(Path.Combine(stage,"slots"));
                 Directory.Delete(stage);
             }
         }
-        catch
+        catch (Exception primary)
         {
-            // In-flight stage remains disconnected from active slot selector.
-            // Only delete fully signer-verified owned files; do not recursively
-            // remove untrusted data. A crash may leave a sibling quarantine.
-            if (Directory.Exists(stage))
-            {
-                if (Directory.Exists(folder))
-                    try { CleanOwnedSlot(stage,slot,publisher); } catch { }
-                var nested = Path.Combine(stage,"slots");
-                if (Directory.Exists(nested) && !Directory.EnumerateFileSystemEntries(nested).Any())
-                    Directory.Delete(nested);
-                if (!Directory.EnumerateFileSystemEntries(stage).Any())
-                {
-                    VerifyProtection(stage);
-                    Directory.Delete(stage);
-                }
-            }
-            // After selector commit the new release is ACTIVE; never clean it
-            // if a subsequent non-critical stage cleanup fails.
-            if (publishedSlot && !selectorPublished && Directory.Exists(Path.Combine(root,"slots",slot)))
-                try { CleanOwnedSlot(root,slot,publisher); } catch { }
+            // A failed publication MUST retain its evidence. In particular,
+            // partial automatic cleanup previously removed a verified slot and
+            // left only active.json, obscuring the original Access Denied.
+            // Quarantine any task-named stage; never remove foreign files or
+            // alter the already-active installation root here.
+            Console.Error.WriteLine("COSOS_NATIVE_STAGE_PRESERVED:" + (Directory.Exists(stage) ? stage : "NONE"));
+            Console.Error.WriteLine("COSOS_NATIVE_PRIMARY:" + ErrorDetail(primary));
             throw;
         }
     }
