@@ -10,6 +10,10 @@ on:
       - 'docs/implementation-summary/2026-10-29-16l1-physical-acl-handoff.md'
       - 'apps/windows-installer/README.md'
   workflow_dispatch:
+# New reviewed HEAD cancels obsolete targeted artifact downloads.
+concurrency:
+  group: 16l1-targeted-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
   actions: read
