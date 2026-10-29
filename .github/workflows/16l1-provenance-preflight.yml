@@ -6,6 +6,8 @@ on:
       - '.github/scripts/16pkg-16l1-local-qualification.ps1'
       - '.github/scripts/16pkg-16l1-artifact-provenance.ps1'
       - '.github/scripts/16pkg-16l1-preflight.tests.ps1'
+      - '.github/scripts/16pkg-16l1-owner-bootstrap.ps1'
+      - '.github/scripts/16pkg-16l1-bootstrap.tests.ps1'
       - '.github/workflows/16l1-provenance-preflight.yml'
       - 'docs/implementation-summary/2026-10-29-16l1-physical-acl-handoff.md'
       - 'apps/windows-installer/README.md'
@@ -32,7 +34,9 @@ jobs:
             '.github/scripts/16pkg-16l1-guards.ps1',
             '.github/scripts/16pkg-16l1-local-qualification.ps1',
             '.github/scripts/16pkg-16l1-artifact-provenance.ps1',
-            '.github/scripts/16pkg-16l1-preflight.tests.ps1'
+            '.github/scripts/16pkg-16l1-preflight.tests.ps1',
+            '.github/scripts/16pkg-16l1-owner-bootstrap.ps1',
+            '.github/scripts/16pkg-16l1-bootstrap.tests.ps1'
           )) {
             $tokens=$null
             $issues=$null
@@ -42,6 +46,8 @@ jobs:
           }
           & .github/scripts/16pkg-16l1-preflight.tests.ps1
           if (!$?) { throw 'Hosted negative security test failed' }
+          & .github/scripts/16pkg-16l1-bootstrap.tests.ps1
+          if (!$?) { throw 'Hosted resumable bootstrap fixture failed' }
       - name: Download only previously verified historical artifact
         shell: pwsh
         env:
