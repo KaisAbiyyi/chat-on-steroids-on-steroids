@@ -306,6 +306,18 @@ class TaskBoardTests(unittest.TestCase):
         self.assertFalse(board.accepted(tasks, "16L2"))
         self.assertTrue(any("16L2" in e for e in board.validate(data)))
 
+    def test_wave_forecast_requires_real_accepted_or_branch(self):
+        data, tasks = self._fresh_scenario()
+        eligible = {t["id"] for wave in board.waves(data) for t in wave}
+        self.assertIn("16L3", eligible)  # accepted local OR branch is sufficient
+        tasks["16LF-01"]["evidence"]["checks"]["rollback"] = "FAIL"
+        blocked = {t["id"] for wave in board.waves(data) for t in wave}
+        self.assertNotIn("16L3", blocked)
+        tasks["16LF-01"]["evidence"]["checks"]["rollback"] = "PASS"
+        tasks["16LF-01"]["status"] = "blocked"
+        blocked = {t["id"] for wave in board.waves(data) for t in wave}
+        self.assertNotIn("16L3", blocked)
+
     def test_missing_freshstart_evidence_and_dependency_bypass_rejected(self):
         data, tasks = self._fresh_scenario()
         tasks["16LF-01"]["evidence"] = None

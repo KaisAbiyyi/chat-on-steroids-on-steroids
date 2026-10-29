@@ -291,13 +291,19 @@ def waves(data: dict) -> list[list[dict]]:
     L and U actions are not performed by this script.
     """
     pending = {t["id"]: t for t in data["tasks"] if t["status"] == "todo"}
-    accepted = {t["id"] for t in data["tasks"] if t["status"] == "done"}
+    tasks = index(data)
+    # Only physically evidenced, accepted local branches may satisfy an OR.
+    # Forecasted future work is never evidence for a 16L2 / 16LF-01 gate.
+    externally_qualified = {
+        task_id for task_id in tasks if accepted(tasks, task_id)
+    }
+    projected = set(externally_qualified)
     result = []
     while pending:
         candidates = [t for t in pending.values() if
-                      all(d in accepted for d in t["depends_on"]) and
-                      all(any(d in accepted and d not in ("16L2", "16LF-01")
-                              for d in group) for group in t.get("any_of", []))]
+                      all(d in projected for d in t["depends_on"]) and
+                      all(any(d in externally_qualified for d in group)
+                          for group in t.get("any_of", []))]
         if not candidates:
             break  # blocked/claimed/stale snapshot, never assume accepted
         # Each wave is a resource-conflict-free possible simultaneous set.
@@ -309,7 +315,7 @@ def waves(data: dict) -> list[list[dict]]:
                 held.update(locks)
         result.append(chosen)
         for task in chosen:
-            accepted.add(task["id"])
+            projected.add(task["id"])
             del pending[task["id"]]
     return result
 
