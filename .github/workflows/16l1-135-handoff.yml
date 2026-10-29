@@ -37,6 +37,34 @@ jobs:
           & .github/scripts/16pkg-16l1-135-security.tests.ps1
           if (!$?) { throw '16L1-135 hosted negative fixtures failed' }
           Write-Host 'HOSTED PR135 FAIL-CLOSED TESTS PASS'
+      - name: Discover signed original PR event identity from already attested artifact
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP '16l1-135-immutable'
+          New-Item -ItemType Directory -Path $root | Out-Null
+          gh run download 40808144696 --repo "$env:GITHUB_REPOSITORY" --name cosos-16pkg-unsigned-candidate-fb1d97a040a28abe74ccbcf5f92e2d33064b85ad --dir $root
+          if ($LASTEXITCODE -ne 0) { throw 'Immutable PR135 artifact unavailable' }
+          "ARTIFACT_ROOT=$root" >> $env:GITHUB_ENV
+          $file=Join-Path $root 'installer-package/CoSoSInstaller.exe'
+          if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -cne '66adbc6160f99730b029d6f8866aba0291ec98f55a48fa08458954faa29cc76b') {
+            throw 'PR135 installer source hash changed'
+          }
+          $verified=@(gh attestation verify $file --repo "$env:GITHUB_REPOSITORY" --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref refs/pull/135/merge --format json | ConvertFrom-Json)
+          if ($LASTEXITCODE -ne 0 -or $verified.Count -lt 1) { throw 'No signed PR135 OIDC proof' }
+          $cert=$verified[0].verificationResult.signature.certificate
+          if ($cert.sourceRepositoryRef -cne 'refs/pull/135/merge' -or
+              $cert.githubWorkflowTrigger -cne 'pull_request' -or
+              $cert.runInvocationURI -cne 'https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40808144696/attempts/1' -or
+              [string]$cert.sourceRepositoryIdentifier -cne '1424422098' -or
+              [string]$cert.sourceRepositoryDigest -cnotmatch '^[a-f0-9]{40}$') {
+              throw 'Signed PR135 certificate identity invalid'
+          }
+          Write-Host "SIGNED_PR135_ORIGINAL_EVENT_SHA=$($cert.sourceRepositoryDigest)"
+          Write-Host 'READ ONLY ORIGINAL PR EVENT DISCOVERY PASS; no installer run'
+
       - name: Require no owner writes; verify original PR135 Sigstore identity and tamper rejection
         shell: pwsh
         env:
@@ -87,30 +115,3 @@ jobs:
             if (!$refused) { throw 'Unmerged PR135 was incorrectly approved for physical use' }
             Write-Host 'EXPECTED BLOCKED: source PR135 still unmerged. Negative merge gate PASS; no physical permission'
           }
-      - name: Discover signed original PR event identity from already attested artifact
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $ErrorActionPreference='Stop'
-          $root=Join-Path $env:RUNNER_TEMP '16l1-135-immutable'
-          New-Item -ItemType Directory -Path $root | Out-Null
-          gh run download 40808144696 --repo "$env:GITHUB_REPOSITORY" --name cosos-16pkg-unsigned-candidate-fb1d97a040a28abe74ccbcf5f92e2d33064b85ad --dir $root
-          if ($LASTEXITCODE -ne 0) { throw 'Immutable PR135 artifact unavailable' }
-          "ARTIFACT_ROOT=$root" >> $env:GITHUB_ENV
-          $file=Join-Path $root 'installer-package/CoSoSInstaller.exe'
-          if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -cne '66adbc6160f99730b029d6f8866aba0291ec98f55a48fa08458954faa29cc76b') {
-            throw 'PR135 installer source hash changed'
-          }
-          $verified=@(gh attestation verify $file --repo "$env:GITHUB_REPOSITORY" --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/16pkg-native-installer.yml" --source-ref refs/pull/135/merge --format json | ConvertFrom-Json)
-          if ($LASTEXITCODE -ne 0 -or $verified.Count -lt 1) { throw 'No signed PR135 OIDC proof' }
-          $cert=$verified[0].verificationResult.signature.certificate
-          if ($cert.sourceRepositoryRef -cne 'refs/pull/135/merge' -or
-              $cert.githubWorkflowTrigger -cne 'pull_request' -or
-              $cert.runInvocationURI -cne 'https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/40808144696/attempts/1' -or
-              [string]$cert.sourceRepositoryIdentifier -cne '1424422098' -or
-              [string]$cert.sourceRepositoryDigest -cnotmatch '^[a-f0-9]{40}$') {
-              throw 'Signed PR135 certificate identity invalid'
-          }
-          Write-Host "SIGNED_PR135_ORIGINAL_EVENT_SHA=$($cert.sourceRepositoryDigest)"
-          Write-Host 'READ ONLY ORIGINAL PR EVENT DISCOVERY PASS; no installer run'
