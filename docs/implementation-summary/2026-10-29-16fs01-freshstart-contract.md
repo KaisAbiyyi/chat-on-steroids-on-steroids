@@ -3,7 +3,7 @@
 - [Claim and source tracking #137](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137)
 - [Notion 16FS-01](https://app.notion.com/p/408c4a6aaf73810e8404e9a06a1c0855)
 - Owner policy (16U1, 2026-10-29): initialize CoSoS from a **new empty profile**; **no authorization** to inspect, read, copy, export, back up or migrate any original/private CoS profile.
-- 16E / 16F / 16L1: accepted per live external Notion/host receipts. Historical registry statuses lag and are not silently bulk-rewritten.
+- 16A–16F, 16PKG-01, 16L1, 16U1: accepted per live Notion/GitHub receipts; only these relevant Phase 16 statuses are selectively reconciled to Done, preserving all unrelated history. Fresh-start acceptance itself and later local gates remain unaccepted.
 - This PR is **not** physical Windows qualification, approval to execute private migration or permission to release. All statuses below are pending independent review.
 
 ## Old vs proposed phase 16 dependency

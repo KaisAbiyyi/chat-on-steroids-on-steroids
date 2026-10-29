@@ -113,7 +113,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("8U1", ready_ids)
         self.assertNotIn("15B", ready_ids)
         self.assertEqual(board.explain(self.data, "15B")["state"], "DONE")
-        self.assertEqual(self.tasks["16L3"]["status"], "todo")
+        self.assertEqual(self.tasks["16L3"]["status"], "blocked")
         # Reopening architecture must also reopen downstream browser probe;
         # the local gate can never be offered before both are accepted.
         hypothetical = copy.deepcopy(self.data)
@@ -195,7 +195,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue({"8L1", "8U1", "9A"}.isdisjoint(forecast))
         self.assertNotIn("15B", forecast)  # 15B cloud scope accepted on merged PR #77
         self.assertIn("PERF-00", forecast)  # 15G cloud scope is now accepted
-        self.assertIn("16A", forecast)  # 16A independent release track remains unclaimed
+        self.assertNotIn("16A", forecast)  # 16A source/Notion acceptance is merged
 
     def test_native_8l1_acceptance_requires_both_physical_round_receipts(self):
         root = Path(__file__).resolve().parents[1] / "audit/2026-10-26/8l1-native-repair"

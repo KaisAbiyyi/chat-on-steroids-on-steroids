@@ -170,16 +170,16 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `15U1` | Owner daily navigation/editor approval | `15L1` | `human-ui` | U (owner) | BLOCKED |
 | `15U2` | Owner keyboard/i18n/accessibility approval | `15L2` | `human-ui` | U (owner) | BLOCKED |
 | `15U3` | Owner feature-completeness acceptance | `15L3` | `human-ui` | U (owner) | BLOCKED |
-| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | **READY · PARALLEL** |
-| `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | BLOCKED |
-| `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | BLOCKED |
-| `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | BLOCKED |
-| `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | BLOCKED |
-| `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | BLOCKED |
-| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | CLAIMED |
-| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | BLOCKED |
+| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | DONE |
+| `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | DONE |
+| `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | DONE |
+| `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | DONE |
+| `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | DONE |
+| `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | DONE |
+| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | DONE |
+| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | DONE |
 | `16L2` | Only owner-approved profile copy migration (not authorized) | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
-| `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | BLOCKED |
+| `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | DONE |
 | `16FS-01` | Fresh-start acceptance policy / dependency amendment | `16U1`, `16L1`, `16F` | `release-freshstart-contract` | C (cloud) | CLAIMED |
 | `16LF-01` | Disposable first-run native isolation + rollback qualification | `16FS-01`, `16U1`, `16L1` | `windows-freshstart` | L (Windows) | BLOCKED |
 | `16L3` | Full Windows release/startup/size proof; plus accepted migration OR fresh-start local evidence | `16F`, `16L1` | `windows-release` | L (Windows) | BLOCKED |
