@@ -1,5 +1,5 @@
 #requires -Version 7.0
-# Read-only verification of approved historical PR artifact. Never executes installers/elevates.
+# Read-only verification of immutable PR135 candidate. Never executes installers/elevates.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][long]$RunId,
@@ -13,7 +13,7 @@ $repo=$approved.Repository
 $workflow="$repo/$($approved.WorkflowPath)"
 $attempt=[int]$approved.RunAttempt
 if ($SourceSha -cne $approved.SourceSha -or $RunId -ne $approved.RunId) {
-    throw 'Only independently authorized historical artifact is supported'
+    throw 'PR135 immutable candidate source/run mismatch'
 }
 if (!(Get-Command gh -ErrorAction SilentlyContinue)) { throw 'Missing GitHub CLI' }
 function Get-GitHubJson([string]$Path) {
@@ -51,7 +51,7 @@ foreach ($check in $checks) {
     if ($LASTEXITCODE -ne 0 -or $verified.Count -lt 1) { throw "GitHub Sigstore attestation failed: $file" }
     $signedDigest=Assert-16L1AttestationRun -Verification $verified -RunId $RunId -RunAttempt $attempt -Repository $repo -EventDigest $eventDigest
     if (!$eventDigest) { $eventDigest=$signedDigest }
-    if ($eventDigest -cne $approved.OriginalEventSha) { throw 'Original signed event SHA is not the approved historical SHA' }
+    if ($eventDigest -cne $approved.OriginalEventSha) { throw 'Original signed event SHA is not the new original signed PR135 event SHA' }
     if ($signedDigest -cne $eventDigest) { throw 'Original PR event SHA differs among attestations' }
     if (!$receipt) {
         if ((Get-FileHash -LiteralPath $receiptPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $check.pin) { throw 'Pinned signed PR135 receipt hash mismatch' }
@@ -65,6 +65,26 @@ foreach ($check in $checks) {
             (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expected) {
             throw "Attested receipt and independently pinned digest mismatch: $file"
         }
+    }
+}
+foreach($entry in @(
+    @{file='candidate-0.2.0.zip';key='update02ZipSha256';pin='eb18b1a5963d85440b88bacb542425d40074e9e5108a8a94a2e0281d7c470aff'},
+    @{file='candidate-0.3.0.zip';key='update03ZipSha256';pin='e02acf99a856b28a9547147cc4f22286e849efb779aee94cc707d9cf1a2132d2'}
+)) {
+    $path=Join-Path $root $entry.file
+    if (!(Test-Path -LiteralPath $path -PathType Leaf) -or
+        [string]$receipt.($entry.key) -cne $entry.pin -or
+        (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -cne $entry.pin) {
+        throw "Pinned updater payload digest mismatch: $path"
+    }
+}
+foreach($entry in @(
+    @{key='rustSha256';pin='c8ead7675c13457dd3b57304f2dd0fc86d0cbf6e00d71f75af33576df8f1a5e8'},
+    @{key='rendererHostSha256';pin='bddec59bc5fc7af92605462c59bf660a3e2cd5d03c2f550254bb3392fa15093e'},
+    @{key='rendererDllSha256';pin='e007030cbf41a457c4bf730465239e766128c4e2f58bf5bee74eaed734ace8c2'}
+)) {
+    if ([string]$receipt.($entry.key) -cne $entry.pin) {
+        throw "Immutable PR135 signed receipt contains altered payload digest: $($entry.key)"
     }
 }
 foreach($entry in @(
