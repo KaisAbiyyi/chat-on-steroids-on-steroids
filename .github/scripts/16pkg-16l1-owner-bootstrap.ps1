@@ -201,6 +201,9 @@ function Invoke-16L1OwnerBootstrap {
         $ownerGrant='*'+$sid+':(OI)(CI)F'
         & icacls $boundary '/grant:r' $ownerGrant '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Failed to grant trusted directory ACL' }
+        & icacls $boundary '/remove' '*S-1-3-0' | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to remove default creator-owner from new directory' }
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to grant trusted directory ACL' }
     }
     # Existing boundary is NEVER auto-repaired; it must be fully trusted.
     Assert-16L1BootstrapNode -Path $boundary -OwnerSid $sid -Directory -Protected
