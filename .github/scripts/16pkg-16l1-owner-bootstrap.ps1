@@ -194,6 +194,8 @@ function Invoke-16L1OwnerBootstrap {
     if (!(Test-Path -LiteralPath $boundary)) {
         New-Item -ItemType Directory -Path $boundary -ErrorAction Stop | Out-Null
         # Scoped icacls avoids Set-Acl SACL/SeSecurityPrivilege problem.
+        & icacls $boundary '/setowner' ('*'+$sid) | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to assign exact owner of new directory' }
         & icacls $boundary '/inheritance:r' | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Failed to protect newly-created directory ACL' }
         $ownerGrant='*'+$sid+':(OI)(CI)F'
