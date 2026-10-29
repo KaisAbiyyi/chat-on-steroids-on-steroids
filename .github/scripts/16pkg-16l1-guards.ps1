@@ -160,6 +160,13 @@ function Assert-16L1TrustedScripts {
     }
     [void](Assert-16L1Workspace -Workspace (Join-Path $script:16L1Boundary ('16L1-' + $script:16L1Approved.SourceSha)) -Boundary $script:16L1Boundary -RequirePhysicalD)
     [void](Assert-16L1Node -Path $expectedRoot -WithinBoundary)
+    $scriptNames=@('16pkg-16l1-guards.ps1','16pkg-16l1-artifact-provenance.ps1',
+                   '16pkg-16l1-local-qualification.ps1')
+    $existing=@(Get-ChildItem -LiteralPath $expectedRoot -Force -ErrorAction Stop)
+    if ($existing.Count -ne $scriptNames.Count -or
+        @($existing | Where-Object { $_.Name -cnotin $scriptNames }).Count -gt 0) {
+        throw 'Unexpected additional file or incomplete protected verification script tree'
+    }
     if (!(Get-Command gh -ErrorAction SilentlyContinue)) { throw 'GitHub CLI needed for independent commit blob verification' }
     $repo=$script:16L1Approved.Repository
     $commitJson=gh api "repos/$repo/git/commits/$TrustedCommit"
