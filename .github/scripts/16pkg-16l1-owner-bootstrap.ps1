@@ -15,6 +15,26 @@ function Get-16L1BlobHash([byte[]]$Bytes) {
     [Array]::Copy($Bytes,0,$all,$prefix.Length,$Bytes.Length)
     return [Convert]::ToHexString([Security.Cryptography.SHA1]::HashData($all)).ToLowerInvariant()
 }
+# Only call on directories CREATED IN THIS INVOCATION. Never repair an existing
+# owner's boundary, ancestor or project. This is scoped removal, not icacls /reset.
+function Remove-16L1NewDirectoryBroadAces {
+    [CmdletBinding()]
+    param([string]$Path,[string]$OwnerSid)
+    $trusted=@($OwnerSid,'S-1-5-18','S-1-5-32-544')
+    $acl=Get-Acl -LiteralPath $Path -ErrorAction Stop
+    if ($acl.GetOwner([Security.Principal.SecurityIdentifier]).Value -cne $OwnerSid) {
+        throw "Refusing ACE cleanup without exact owner: $Path"
+    }
+    $bad=@($acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]) |
+        Where-Object { $_.IdentityReference.Value -notin $trusted } |
+        ForEach-Object { $_.IdentityReference.Value } | Select-Object -Unique)
+    foreach ($sid in $bad) {
+        & icacls $Path '/remove' ('*'+$sid) | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed scoped removal of untrusted new-directory ACE $sid at $Path"
+        }
+    }
+}
 function Assert-16L1BootstrapAcl {
     [CmdletBinding()]
     param($Acl,[string]$OwnerSid,[string]$ExpectedSid,[string]$Path,[switch]$RequireProtected)
@@ -204,8 +224,7 @@ function Invoke-16L1OwnerBootstrap {
         $ownerGrant='*'+$sid+':(OI)(CI)F'
         & icacls $boundary '/grant:r' $ownerGrant '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Failed to grant trusted directory ACL' }
-        & icacls $boundary '/remove' '*S-1-3-0' | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw 'Failed to remove default creator-owner from new directory' }
+        Remove-16L1NewDirectoryBroadAces -Path $boundary -OwnerSid $sid
         if ($LASTEXITCODE -ne 0) { throw 'Failed to grant trusted directory ACL' }
     }
     # Existing boundary is NEVER auto-repaired; it must be fully trusted.
