@@ -94,8 +94,8 @@ def private_migration_authorized(tasks: dict[str, dict]) -> bool:
 
 
 def accepted(tasks: dict[str, dict], task_id: str) -> bool:
-    task = tasks[task_id]
-    if task.get("status") != "done":
+    task = tasks.get(task_id)
+    if task is None or task.get("status") != "done":
         return False
     if task_id == "16L2":
         evidence = task.get("private_migration_receipt")

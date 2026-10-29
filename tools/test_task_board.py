@@ -233,6 +233,11 @@ class TaskBoardTests(unittest.TestCase):
         next(t for t in data["tasks"] if t["id"] == "CL-05A")["depends_on"].append("NEVER-EXISTED")
         self.assertTrue(any("dangling" in e for e in board.validate(data)))
 
+    def test_dangling_or_dependency_is_rejected(self):
+        data = copy.deepcopy(self.data)
+        board.index(data)["16L3"]["any_of"] = [["16L2", "UNKNOWN-OR-GATE"]]
+        self.assertTrue(any("dangling OR" in e for e in board.validate(data)))
+
     def test_cycle_is_rejected(self):
         data = copy.deepcopy(self.data)
         next(t for t in data["tasks"] if t["id"] == "CL-09A")["depends_on"].append("CL-09C")

@@ -15,8 +15,12 @@ def fixture():
         {"id": "16E", "depends_on": [], "kind": "C"},
         {"id": "16F", "depends_on": ["16D", "16E"], "kind": "C"},
         {"id": "16L1", "depends_on": ["16E"], "kind": "L"},
-        {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L"},
-        {"id": "16L3", "depends_on": ["16F", "16L1", "16L2"], "kind": "L"},
+        {"id": "16U1", "depends_on": ["16E"], "kind": "U", "migration_consent": "declined"},
+        {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L", "status": "blocked"},
+        {"id": "16FS-01", "depends_on": ["16U1", "16L1", "16F"], "kind": "C"},
+        {"id": "16LF-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "L"},
+        {"id": "16L3", "depends_on": ["16F", "16L1"], "kind": "L",
+         "any_of": [["16L2", "16LF-01"]]},
     ]}).encode("utf-8")
     return sources
 
@@ -66,7 +70,10 @@ class SourceBoundReportTests(unittest.TestCase):
     def test_dependency_or_kind_drift_denied(self):
         for task, key, value in [
             ("16F", "depends_on", ["16D"]), ("16L3", "depends_on", ["16F"]),
-            ("16F", "kind", "L"), ("16L3", "kind", "C")
+            ("16F", "kind", "L"), ("16L3", "kind", "C"),
+            ("16L3", "any_of", []), ("16L3", "any_of", [["16L2", "16L1"]]),
+            ("16LF-01", "depends_on", ["16U1"]), ("16FS-01", "kind", "L"),
+            ("16U1", "migration_consent", "granted"), ("16L2", "status", "done")
         ]:
             sources = fixture()
             registry = json.loads(sources["docs/task-registry.json"])

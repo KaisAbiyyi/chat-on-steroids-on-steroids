@@ -82,7 +82,17 @@ def make_report(expected_head, actual_head, ancestors, sources):
     tasks = {item["id"]: item for item in registry["tasks"] if isinstance(item, dict) and isinstance(item.get("id"), str)}
     require(len(tasks) == len(registry["tasks"]), "invalid or duplicate task IDs")
     require(set(tasks["16F"]["depends_on"]) == {"16D", "16E"}, "16F dependency contract changed")
-    require(set(tasks["16L3"]["depends_on"]) == {"16F", "16L1", "16L2"}, "16L3 native gate dependencies changed")
+    require(set(tasks["16L3"]["depends_on"]) == {"16F", "16L1"} and
+            tasks["16L3"].get("any_of") == [["16L2", "16LF-01"]],
+            "16L3 required AND/OR native gate dependencies changed")
+    require(tasks.get("16FS-01", {}).get("kind") == "C" and
+            tasks["16FS-01"].get("depends_on") == ["16U1", "16L1", "16F"] and
+            tasks.get("16LF-01", {}).get("kind") == "L" and
+            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"],
+            "16FS-01 / 16LF-01 independent fresh-start gate changed")
+    require(tasks.get("16U1", {}).get("migration_consent") == "declined" and
+            tasks.get("16L2", {}).get("status") == "blocked",
+            "owner no-migration decision or private 16L2 block changed")
     require(tasks["16F"]["kind"] == "C" and tasks["16L3"]["kind"] == "L", "task environment gate changed")
     return {
         "schema": SCHEMA,
