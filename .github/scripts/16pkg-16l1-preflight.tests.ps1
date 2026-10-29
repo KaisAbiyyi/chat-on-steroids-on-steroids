@@ -90,7 +90,12 @@ try {
     $byteFixture=Join-Path $parent 'git-blob-fixture'
     [IO.File]::WriteAllText($byteFixture,'approved')
     $gitHash=Get-16L1GitBlobSha $byteFixture
-    if ($gitHash -cnotmatch '^[a-f0-9]{40}    # Real GitHub REST shapes observed in run 40710902296 *after* merge:
+    if ($gitHash -cnotmatch '^[a-f0-9]{40}$') { throw 'Invalid Git blob digest' }
+    [IO.File]::WriteAllText($byteFixture,'tampered')
+    if ((Get-16L1GitBlobSha $byteFixture) -ceq $gitHash) {
+        throw 'Changed verification script bytes were accepted'
+    }
+    # Real GitHub REST shapes observed in run 40710902296 *after* merge:
     # workflow_run.pull_requests is EMPTY; run.head_sha is checked-out PR HEAD,
     # while the OIDC certificate sourceRepositoryDigest is a DIFFERENT PR merge SHA.
     $sha='9939ea0a9fdc592e6821296e07eb0b7db3653adb'
