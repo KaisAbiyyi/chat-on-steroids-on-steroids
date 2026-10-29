@@ -18,9 +18,12 @@ function Get-16L1BlobHash([byte[]]$Bytes) {
 function Assert-16L1BootstrapAcl {
     [CmdletBinding()]
     param($Acl,[string]$OwnerSid,[string]$ExpectedSid,[string]$Path,[switch]$RequireProtected)
-    if ($OwnerSid -cne $ExpectedSid) { throw "Wrong protected owner: $Path" }
-    if ($RequireProtected -and !$Acl.AreAccessRulesProtected) { throw "Inherited boundary ACL: $Path" }
     $allowed=@($ExpectedSid,'S-1-5-18','S-1-5-32-544')
+    if (($RequireProtected -and $OwnerSid -cne $ExpectedSid) -or
+        (!$RequireProtected -and $OwnerSid -notin $allowed)) {
+        throw "Untrusted protected resource owner: $Path"
+    }
+    if ($RequireProtected -and !$Acl.AreAccessRulesProtected) { throw "Inherited boundary ACL: $Path" }
     $seen=@{}
     foreach($ace in $Acl.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])) {
         $id=$ace.IdentityReference.Value
