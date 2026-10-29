@@ -12,10 +12,9 @@ on:
       - '.cargo/**'
       - 'rust-toolchain*'
       - 'LICENSE'
-      - '.github/scripts/16pkg-16l1-local-qualification.ps1'
-      - '.github/scripts/16pkg-16l1-guards.ps1'
-      - '.github/scripts/16pkg-16l1-preflight.tests.ps1'
       - '.github/workflows/16pkg-native-installer.yml'
+      # 16L1 handoff-only scripts are tested by targeted Windows provenance CI.
+      # Native installer build inputs and this workflow still trigger full package qualification.
       - '.github/scripts/16pkg-native-e2e.ps1'
       - '.github/scripts/16pkg-unsigned-native-e2e.ps1'
   workflow_dispatch:

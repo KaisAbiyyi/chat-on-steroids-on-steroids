@@ -82,41 +82,99 @@ function Assert-16L1Workspace {
     }
     return $path
 }
+# Immutable 16PKG-01 build/approval tuple. Do not infer PR event SHA from
+# mutable pull_request.merge_commit_sha or from workflow_run.head_sha.
+$script:16L1Approved = @{
+    Repository='KaisAbiyyi/chat-on-steroids-on-steroids'
+    RepositoryId=1424422098
+    SourceSha='9939ea0a9fdc592e6821296e07eb0b7db3653adb'
+    OriginalEventSha='247e57638a8f5afce93d87fc6d671ce54eaf3ccd'
+    MergeCommit='be2727fe437f7878f023ddd3422b1c6ae4f70907'
+    PrNumber=131
+    RunId=40710902296L
+    RunAttempt=1
+    WorkflowId=398496557
+    ArtifactId=12827415031L
+    ArtifactDigest='sha256:38fc612236c093cde03d8134173b9c8f8d76c58203ec8614c80122e23e6b60b7'
+    WorkflowPath='.github/workflows/16pkg-native-installer.yml'
+    Branch='work/16pkg-01-native-installer-20261027'
+}
 function Assert-16L1RunOrigin {
-    param($Run,$Pull,$Artifacts,[long]$RunId,[string]$SourceSha,[string]$Repository)
-    if ([long]$Run.id -ne $RunId -or $Run.status -ne 'completed' -or
-        $Run.conclusion -ne 'success' -or $Run.event -ne 'pull_request' -or
-        $Run.path -cne '.github/workflows/16pkg-native-installer.yml' -or
+    [CmdletBinding()]
+    param($Run,$Pull,$Artifacts,$MergedCommit,$Compare,
+        [long]$RunId,[int]$RunAttempt,[string]$SourceSha,[string]$Repository)
+    $approved=$script:16L1Approved
+    if ($Repository -cne $approved.Repository -or $SourceSha -cne $approved.SourceSha -or
+        $RunId -ne $approved.RunId -or $RunAttempt -ne $approved.RunAttempt) {
+        throw 'Unapproved historical build tuple'
+    }
+    if ([long]$Run.id -ne $RunId -or [int]$Run.run_attempt -ne $RunAttempt -or
+        $Run.status -cne 'completed' -or $Run.conclusion -cne 'success' -or
+        $Run.event -cne 'pull_request' -or $Run.path -cne $approved.WorkflowPath -or
+        [long]$Run.workflow_id -ne $approved.WorkflowId -or
         $Run.repository.full_name -cne $Repository -or
-        $Run.head_branch -cne 'work/16pkg-01-native-installer-20261027' -or
-        $Run.head_sha -cne $SourceSha -or [int]$Run.run_attempt -lt 1) {
-        throw 'Unexpected GitHub build run identity/event/source'
+        [long]$Run.repository.id -ne $approved.RepositoryId -or
+        $Run.head_repository.full_name -cne $Repository -or
+        [long]$Run.head_repository.id -ne $approved.RepositoryId -or
+        $Run.head_branch -cne $approved.Branch -or
+        $Run.head_sha -cne $SourceSha -or $Run.head_commit.id -cne $SourceSha) {
+        throw 'Unexpected historical GitHub build run identity/event/attempt/source'
     }
-    if ([int]$Pull.number -ne 131 -or $Pull.state -ne 'open' -or
+    # GitHub legitimately returns pull_requests=[] for some post-merge runs.
+    # The independent approved merge commit and DAG ancestry supersede that
+    # mutable association, never arbitrary empty PR metadata.
+    if ([int]$Pull.number -ne $approved.PrNumber -or !$Pull.merged -or
+        !$Pull.merged_at -or $Pull.base.ref -cne 'main' -or
         $Pull.head.sha -cne $SourceSha -or
-        $Pull.head.ref -cne 'work/16pkg-01-native-installer-20261027' -or
-        $Pull.head.repo.full_name -cne $Repository -or
-        $Pull.base.ref -cne 'main' -or
-        $Pull.merge_commit_sha -cnotmatch '^[a-f0-9]{40}$') {
-        throw 'Expected reviewed PR source SHA/merge ref has changed'
+        $Pull.head.ref -cne $approved.Branch -or
+        $Pull.head.repo.full_name -cne $Repository) {
+        throw 'Source is not the reviewed, merged PR 131 head'
     }
-    $linked = @($Run.pull_requests | Where-Object {
-        [int]$_.number -eq 131 -and $_.head.sha -ceq $SourceSha -and
-        $_.base.ref -ceq 'main'
-    })
-    if ($linked.Count -ne 1) { throw 'Run is not associated with the exact PR head' }
-    $name = "cosos-16pkg-unsigned-candidate-$SourceSha"
-    $matches = @($Artifacts.artifacts | Where-Object {
-        $_.name -ceq $name -and [long]$_.workflow_run.id -eq $RunId -and
+    # Do NOT consume Pull.merge_commit_sha. GitHub changes its meaning on merge.
+    if ($MergedCommit.sha -cne $approved.MergeCommit -or
+        @($MergedCommit.parents | Where-Object { $_.sha -ceq $SourceSha }).Count -ne 1 -or
+        $Compare.base_commit.sha -cne $SourceSha -or
+        $Compare.merge_base_commit.sha -cne $SourceSha -or
+        [int]$Compare.behind_by -ne 0 -or $Compare.status -notin @('ahead','identical')) {
+        throw 'Approved source is not part of the independently pinned merge on main'
+    }
+    $name="cosos-16pkg-unsigned-candidate-$SourceSha"
+    $matches=@($Artifacts.artifacts | Where-Object {
+        [long]$_.id -eq $approved.ArtifactId -and $_.name -ceq $name -and
+        [long]$_.workflow_run.id -eq $RunId -and
+        [long]$_.workflow_run.repository_id -eq $approved.RepositoryId -and
+        $_.workflow_run.head_sha -ceq $SourceSha -and
+        $_.digest -ceq $approved.ArtifactDigest -and
         !$_.expired -and [long]$_.size_in_bytes -gt 0
     })
-    if ($matches.Count -ne 1) { throw 'Exact run does not contain a unique valid source-bound artifact' }
+    if ($matches.Count -ne 1 -or @($Artifacts.artifacts | Where-Object { $_.name -ceq $name }).Count -ne 1) {
+        throw 'Wrong archived artifact ID, immutable SHA-256, origin or expiry'
+    }
 }
 function Assert-16L1AttestationRun {
-    param($Verification,[long]$RunId,[int]$RunAttempt,[string]$Repository)
-    $expected = "https://github.com/$Repository/actions/runs/$RunId/attempts/$RunAttempt"
-    $matched = @($Verification | Where-Object {
-        $_.verificationResult.statement.predicate.runDetails.metadata.invocationId -ceq $expected
+    [CmdletBinding()]
+    param($Verification,[long]$RunId,[int]$RunAttempt,[string]$Repository,
+        [string]$EventDigest='')
+    $approved=$script:16L1Approved
+    $expected="https://github.com/$Repository/actions/runs/$RunId/attempts/$RunAttempt"
+    if ($RunId -ne $approved.RunId -or $RunAttempt -ne $approved.RunAttempt -or
+        $Repository -cne $approved.Repository) { throw 'Unapproved attestation run tuple' }
+    $valid=@($Verification | Where-Object {
+        $cert=$_.verificationResult.signature.certificate
+        $statement=$_.verificationResult.statement
+        $cert.runInvocationURI -ceq $expected -and
+        [string]$cert.sourceRepositoryIdentifier -ceq [string]$approved.RepositoryId -and
+        $cert.sourceRepositoryRef -ceq 'refs/pull/131/merge' -and
+        $cert.githubWorkflowTrigger -ceq 'pull_request' -and
+        $cert.sourceRepositoryDigest -cmatch '^[a-f0-9]{40}$' -and
+        $cert.sourceRepositoryDigest -cne $approved.SourceSha -and
+        $cert.sourceRepositoryDigest -ceq $approved.OriginalEventSha -and
+        (!$EventDigest -or $cert.sourceRepositoryDigest -ceq $EventDigest) -and
+        $statement.predicateType -ceq 'https://slsa.dev/provenance/v1' -and
+        $statement.predicate.runDetails.metadata.invocationId -ceq $expected
     })
-    if ($matched.Count -lt 1) { throw 'Verified attestation invocation does not match the selected GitHub run' }
+    if ($valid.Count -lt 1) {
+        throw 'No valid verified certificate + provenance for original PR run/attempt/ref/digest'
+    }
+    return [string]$valid[0].verificationResult.signature.certificate.sourceRepositoryDigest
 }
