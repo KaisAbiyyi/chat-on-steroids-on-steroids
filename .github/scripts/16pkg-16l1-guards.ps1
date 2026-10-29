@@ -89,6 +89,13 @@ function Assert-16L1Workspace {
         $path.Length -lt ($boundaryPath.Length + 21)) {
         throw 'Workspace must be an isolated child of the qualification boundary'
     }
+    $workspaceParent=[IO.Path]::GetDirectoryName($path).TrimEnd('\')
+    $workspaceName=[IO.Path]::GetFileName($path)
+    if (!$workspaceParent.Equals($boundaryPath,[StringComparison]::OrdinalIgnoreCase) -or
+        $workspaceName -cnotmatch '^16L1-[a-f0-9]{40}(-[a-f0-9]{8,32})?$' -or
+        $path.Substring([IO.Path]::GetPathRoot($path).Length).Contains(':')) {
+        throw 'Only a direct, source-named child workspace is allowed (no ADS or script-tree nesting)'
+    }
     if ($RequirePhysicalD) {
         if ($boundaryPath -cne $script:16L1Boundary -or
             [IO.Path]::GetPathRoot($path) -cne 'D:\' -or
