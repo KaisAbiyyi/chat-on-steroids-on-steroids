@@ -8,33 +8,16 @@ The installer uses `--unsigned-sha256 EXPECTED_EXE_SHA256` with each mutation: `
 
 To establish trust, obtain the artifact through a known legitimate repository/workflow, verify the GitHub Sigstore/SLSA attestation for the **installer bytes** and **candidate ZIP**, check the signer workflow and the source claim, verify the separately attested `package-receipt.json`, then compare the actual installer and archive SHA-256 hashes with the receipt. The attestation is an externally anchored GitHub Actions workflow identity; it is **not** publisher identity, code signing, or automatically proof that a PR build should be trusted. Independently review the exact source commit and release authorization before distributing it. In particular, `pull_request` attestations show a CI candidate: they do **not** prove a reviewed, protected-main production release.
 
-Example with the **verified exact-head Actions run and artifact name** (substitute real values; never infer SHA-256 from the EXE itself):
-
-```powershell
-gh run download <VERIFIED_RUN_ID> --repo KaisAbiyyi/chat-on-steroids-on-steroids --name <EXACT_SHA_ARTIFACT_NAME> --dir D:\projects\CoS-Rust\qualification\unsigned
-Set-Location D:\projects\CoS-Rust\qualification\unsigned
-gh attestation verify .\package-receipt.json --repo KaisAbiyyi/chat-on-steroids-on-steroids --signer-workflow KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/16pkg-native-installer.yml
-gh attestation verify .\installer-package\CoSoSInstaller.exe --repo KaisAbiyyi/chat-on-steroids-on-steroids --signer-workflow KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/16pkg-native-installer.yml
-gh attestation verify .\candidate.zip --repo KaisAbiyyi/chat-on-steroids-on-steroids --signer-workflow KaisAbiyyi/chat-on-steroids-on-steroids/.github/workflows/16pkg-native-installer.yml
-$receipt=Get-Content .\package-receipt.json -Raw | ConvertFrom-Json
-$actual=(Get-FileHash .\installer-package\CoSoSInstaller.exe -Algorithm SHA256).Hash.ToLowerInvariant()
-if($receipt.sourceSha -ne '<INDEPENDENTLY_REVIEWED_SOURCE_SHA>' -or $actual -ne $receipt.setupSha256){throw 'Source or setup digest mismatch'}
-$trustedDigest=$receipt.setupSha256
-```
-
-Only after independent verification, in an elevated disposable Windows console and an owner-approved isolated D: test path:
-
-```powershell
-$setup=(Resolve-Path .\installer-package\CoSoSInstaller.exe).Path
-$root='D:\projects\CoS-Rust\qualification\unsigned\installed'
-& $setup --install $root --unsigned-sha256 $trustedDigest
-# Later: verify a NEW >high-water version's own attested installer and digest.
-& $newSetup --update $root --unsigned-sha256 $newTrustedDigest
-& $newSetup --rollback $root --unsigned-sha256 $newTrustedDigest
-& $newSetup --recover $root --unsigned-sha256 $newTrustedDigest
-& $newSetup --finalize $root --unsigned-sha256 $newTrustedDigest
-& $newSetup --uninstall $root --unsigned-sha256 $newTrustedDigest
-```
+**16L1 owner-local procedure (protected D: boundary):** follow
+[the 16L1 physical ACL handoff](../../docs/implementation-summary/2026-10-29-16l1-physical-acl-handoff.md).
+The current local runner refuses execution from sandbox-writable
+`D:\projects\CoS-Rust` or any other checkout. It must be staged from an
+independently reviewed immutable GitHub tooling commit, checked against Git blob
+identities, and run from protected `D:\CoSoS-16L1-Qualification\scripts`.
+The dedicated directory must be pre-provisioned with inheritance disabled,
+trusted owner and explicit trusted ACLs. Ordinary broad Write on D: alone is not
+DeleteChild, but dangerous ancestor DeleteChild/Modify/TakeOwnership/ACL rights
+are refused. No installer ever executes as part of hosted CI.
 
 Windows may display an **Unknown Publisher** warning or SmartScreen protection for unsigned binaries. Do not disable Defender/SmartScreen, weaken UAC, install TEST roots, or import any certificate for this channel. If Windows blocks the file, stop and record the refusal. Installing does not migrate or access existing CoS/CoSoS profiles.
 
