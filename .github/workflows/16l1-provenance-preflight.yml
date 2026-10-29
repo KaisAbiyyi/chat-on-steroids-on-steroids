@@ -7,6 +7,8 @@ on:
       - '.github/scripts/16pkg-16l1-artifact-provenance.ps1'
       - '.github/scripts/16pkg-16l1-preflight.tests.ps1'
       - '.github/workflows/16l1-provenance-preflight.yml'
+      - 'docs/implementation-summary/2026-10-29-16l1-physical-acl-handoff.md'
+      - 'apps/windows-installer/README.md'
   workflow_dispatch:
 permissions:
   contents: read
