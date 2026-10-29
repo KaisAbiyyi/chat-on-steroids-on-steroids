@@ -28,7 +28,8 @@ jobs:
             '.github/scripts/16pkg-16l1-135-artifact-provenance.ps1',
             '.github/scripts/16pkg-16l1-135-local-qualification.ps1',
             '.github/scripts/16pkg-16l1-135-owner-bootstrap.ps1',
-            '.github/scripts/16pkg-16l1-135-security.tests.ps1'
+            '.github/scripts/16pkg-16l1-135-security.tests.ps1',
+            '.github/scripts/16pkg-16l1-135-bootstrap.tests.ps1'
           )){
             $tokens=$null;$errors=$null
             [Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
@@ -36,6 +37,8 @@ jobs:
           }
           & .github/scripts/16pkg-16l1-135-security.tests.ps1
           if (!$?) { throw '16L1-135 hosted negative fixtures failed' }
+          & .github/scripts/16pkg-16l1-135-bootstrap.tests.ps1
+          if (!$?) { throw 'Protected PR135 bootstrap security tests failed' }
           Write-Host 'HOSTED PR135 FAIL-CLOSED TESTS PASS'
       - name: Discover signed original PR event identity from already attested artifact
         shell: pwsh
