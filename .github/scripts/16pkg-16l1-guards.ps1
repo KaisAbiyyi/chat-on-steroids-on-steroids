@@ -47,6 +47,14 @@ function Assert-16L1Acl {
     $trustedAllow=0
     foreach ($ace in $aces) {
         $sid=$ace.IdentityReference.Value
+        # D:\ commonly has CREATOR OWNER:(OI)(CI)(IO)(F). An inherit-only
+        # ACE grants no access on THIS ancestor; the protected boundary
+        # explicitly disables inheritance so it cannot propagate into it.
+        # Never apply this exception to the boundary or any of its descendants.
+        if (!$ProtectedBoundary -and !$WithinBoundary -and
+            (($ace.PropagationFlags -band [Security.AccessControl.PropagationFlags]::InheritOnly) -ne 0)) {
+            continue
+        }
         if ($ace.AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow) {
             if ($ProtectedBoundary) { throw "Unexpected protected-boundary deny ACE: $Path" }
             continue
