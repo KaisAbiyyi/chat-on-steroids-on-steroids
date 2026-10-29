@@ -209,7 +209,7 @@ function Assert-16L1135BoundaryChildren {
     foreach($child in @(Get-ChildItem -LiteralPath $Boundary -Force -ErrorAction Stop)) {
         if ($child.Name -cne 'scripts' -and $child.Name -cne 'scripts-135' -and
             $child.Name -cne '16L1-9939ea0a9fdc592e6821296e07eb0b7db3653adb' -and
-            $child.Name -cnotmatch '^16L1-[a-f0-9]{40}-[a-f0-9]{16,32}$') {
+            $child.Name -cnotmatch '^16L1-fb1d97a040a28abe74ccbcf5f92e2d33064b85ad-[a-f0-9]{16,32}$') {
             throw "Unexpected qualification boundary content; never delete: $($child.FullName)"
         }
         Assert-16L1BootstrapNode -Path $child.FullName -OwnerSid $OwnerSid -Directory
