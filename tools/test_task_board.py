@@ -71,6 +71,30 @@ def complete_prerequisite_closure(
     return completed
 
 
+def reopen_descendant_closure(data, root_ids):
+    """Reopen roots and all canonical downstream dependents for a forecast fixture."""
+    tasks = board.index(data)
+    reopened = set(root_ids)
+    if not reopened <= set(tasks):
+        raise AssertionError("unknown forecast root")
+    changed = True
+    while changed:
+        changed = False
+        for task_id, task in tasks.items():
+            dependencies = list(task.get("depends_on", []))
+            dependencies.extend(
+                dependency
+                for group in task.get("any_of", [])
+                for dependency in group
+            )
+            if task_id not in reopened and any(dep in reopened for dep in dependencies):
+                reopened.add(task_id)
+                changed = True
+    for task_id in reopened:
+        tasks[task_id]["status"] = "todo"
+    return reopened
+
+
 class TaskBoardTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -230,36 +254,49 @@ class TaskBoardTests(unittest.TestCase):
                     self.assertFalse(
                         set(board.effective_locks(first)) & set(board.effective_locks(second))
                     )
-        # A completed gate is excluded from forecasts. In a hypothetical
-        # reopened native gate, every downstream phase must retain its order.
+        # Reopen only two future gates and their canonical descendants. Keep
+        # the already accepted 16FS-01 prerequisite chain intact.
         future = copy.deepcopy(self.data)
-        # Reopen the complete future browser/UI branch, including blocked
-        # native gates, for this hypothetical successful forecast only.
-        # Live 8L1 remains blocked and is tested separately below.
-        for task in future["tasks"]:
-            if task["id"] == "CL-L6" or task["phase"] in {str(n) for n in range(7, 17)}:
-                task["status"] = "todo"
-        # The private-migration alternative stays blocked until a dedicated
-        # trusted verifier is implemented; the future forecast uses 16LF-01.
+        reopened = reopen_descendant_closure(future, {"CL-L6", "8L1"})
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
-        # The real merged predecessor remains Done, while the future verifier
-        # and both alternatives remain blocked in the forecast fixture.
-        future_tasks["16FS-01"]["status"] = "done"
-        future_tasks["16FS-01"]["accepted_evidence_url"] = (
-            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
-        )
         future_tasks["16LF-01"]["status"] = "blocked"
         future_tasks["16L3"]["status"] = "blocked"
+        self.assertIn("7P-A", reopened)
+        self.assertIn("7P-B", reopened)
+        self.assertIn("7A", reopened)
+        self.assertIn("7P-L1", reopened)
+        self.assertIn("7L1", reopened)
+        self.assertIn("8U1", reopened)
+        self.assertIn("9A", reopened)
+        self.assertEqual(board.validate(future), [])
 
-        # Validate recursive AND/OR prerequisite closure on a separate
-        # hypothetical fixture. It must not contaminate the wave forecast.
-        closure = copy.deepcopy(future)
+        waves = board.waves(future)
+        flat = [task["id"] for wave in waves for task in wave]
+        self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
+        self.assertLess(flat.index("7P-A"), flat.index("7P-B"))
+        self.assertLess(flat.index("7P-B"), flat.index("7A"))
+        self.assertLess(flat.index("7P-L1"), flat.index("7L1"))
+        self.assertLess(flat.index("8L1"), flat.index("8U1"))
+        self.assertLess(flat.index("8U1"), flat.index("9A"))
+        # These are already accepted ancestors of the merged 16FS-01 contract.
+        self.assertNotIn("7E", flat)
+        self.assertNotIn("8A", flat)
+
+        # Separately prove recursive transitive AND closure plus a valid OR
+        # branch for 16L3. The hypothetical closure never changes live status.
+        closure = copy.deepcopy(self.data)
         closure_tasks = board.index(closure)
-        _, receipt_tasks = self._fresh_scenario()
+        for task_id in (
+            "7D", "7E", "8A", "8B", "8C", "15A",
+            "15B", "15C", "15D", "15E", "15F", "15G",
+        ):
+            closure_tasks[task_id]["status"] = "todo"
+        closure_tasks["16FV-01"]["status"] = "todo"
         closure_tasks["16LF-01"]["status"] = "todo"
         closure_tasks["16L3"]["status"] = "todo"
-        closure_tasks["16FV-01"]["status"] = "todo"
+        closure_tasks["16L2"]["status"] = "blocked"
+        _, receipt_tasks = self._fresh_scenario()
         closure_tasks["16LF-01"]["evidence"] = copy.deepcopy(
             receipt_tasks["16LF-01"]["evidence"]
         )
@@ -282,19 +319,12 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue(board.accepted(closure_tasks, "16LF-01", trusted_verifier=verifier))
         self.assertTrue(all(
             closure_tasks[task_id]["status"] == "done"
-            for task_id in ("15B", "15C", "15D", "15E", "15F")
+            for task_id in (
+                "7D", "7E", "8A", "8B", "8C", "15A",
+                "15B", "15C", "15D", "15E", "15F", "15G",
+            )
         ))
         self.assertEqual(board.validate(closure, trusted_verifier=verifier), [])
-
-        # The wave fixture retains its future tasks so dependency order is visible.
-        self.assertEqual(board.validate(future), [])
-        waves = board.waves(future)
-        flat = [t["id"] for wave in waves for t in wave]
-        self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
-        self.assertLess(flat.index("7P-B"), flat.index("7A"))
-        self.assertLess(flat.index("7P-L1"), flat.index("7L1"))
-        self.assertLess(flat.index("7E"), flat.index("8A"))
-        self.assertLess(flat.index("8U1"), flat.index("9A"))
 
     def test_blocked_native_gate_never_enters_forecast(self):
         self.assertEqual(self.tasks["8C"]["status"], "done")
