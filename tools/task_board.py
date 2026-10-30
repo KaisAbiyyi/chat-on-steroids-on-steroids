@@ -40,16 +40,21 @@ FRESH_CHECKS = (
     "existing_profiles_untouched", "no_leakage", "rollback",
     "failure_isolation", "owned_cleanup",
 )
+FRESH_REVIEW_MODE = "GPT6_OWNER_ATTESTED"
+FRESH_RECEIPT_SCHEMA_VERSION = 2
 
 FRESH_VERIFICATION_FIELDS = (
     "receipt_exists",
-    "review_exists",
-    "artifact_exists",
-    "reviewer_identity_verified",
-    "reviewer_independent",
-    "review_verdict_pass",
-    "reviewed_source_matches",
-    "receipt_artifact_digest_matches",
+    "receipt_integrity_verified",
+    "review_report_exists",
+    "review_mode_authorized",
+    "owner_identity_verified",
+    "owner_attestation_exists",
+    "owner_attestation_valid",
+    "gpt6_review_verdict_pass",
+    "reviewed_source_sha_matches",
+    "reviewed_diff_digest_matches",
+    "receipt_review_artifact_digests_match",
     "artifact_provenance_verified",
     "artifact_source_binding_verified",
     "fresh_start_checks_verified",
@@ -57,41 +62,106 @@ FRESH_VERIFICATION_FIELDS = (
 )
 
 
+def _is_hex_digest(value: object, length: int) -> bool:
+    return isinstance(value, str) and len(value) == length and all(
+        char in "0123456789abcdef" for char in value
+    )
+
+
 @dataclass(frozen=True)
 class FreshEvidenceVerification:
     """Facts established by a separately trusted external evidence verifier.
+
+    GPT6_OWNER_ATTESTED is an owner-attested model-review mode, not a GitHub
+    independent reviewer. The verifier must authenticate the owner identity
+    and separate owner attestation, and bind that attestation to the exact
+    GPT-6 report digest and source revision. Model authorship itself is
+    owner-attested, not cryptographically authenticated.
 
     This value must be produced by trusted verifier code, never deserialized
     from task-registry.json or from the owner-local receipt itself.
     """
     receipt_exists: bool
-    review_exists: bool
-    artifact_exists: bool
-    reviewer_identity_verified: bool
-    reviewer_independent: bool
-    review_verdict_pass: bool
-    reviewed_source_matches: bool
-    receipt_artifact_digest_matches: bool
+    receipt_integrity_verified: bool
+    review_report_exists: bool
+    review_mode_authorized: bool
+    owner_identity_verified: bool
+    owner_attestation_exists: bool
+    owner_attestation_valid: bool
+    gpt6_review_verdict_pass: bool
+    reviewed_source_sha_matches: bool
+    reviewed_diff_digest_matches: bool
+    receipt_review_artifact_digests_match: bool
     artifact_provenance_verified: bool
     artifact_source_binding_verified: bool
     fresh_start_checks_verified: bool
     evidence_complete: bool
+    verified_review_mode: str
+    verified_owner_login: str
     verified_receipt_url: str
-    verified_review_url: str
+    verified_receipt_sha256: str
+    verified_review_report_url: str
+    verified_review_report_sha256: str
+    verified_review_report_verdict: str
+    verified_review_report_source_sha: str
+    verified_review_report_diff_sha256: str
+    verified_review_report_receipt_sha256: str
+    verified_review_report_artifact_sha256: str
+    verified_owner_attestation_url: str
+    verified_owner_attestation_sha256: str
+    verified_owner_attested_review_report_sha256: str
+    verified_owner_attested_source_sha: str
     verified_source_sha: str
     verified_reviewed_source_sha: str
+    verified_diff_sha256: str
+    verified_reviewed_diff_sha256: str
+    verified_artifact_id: int
     verified_artifact_sha256: str
-    verified_receipt_sha256: str
+    verified_artifact_source_sha: str
+    verified_artifact_provenance_url: str
+    verified_artifact_provenance_sha256: str
+    verified_fresh_start_checks: tuple[str, ...]
 
     def authoritative_for(self, receipt: dict) -> bool:
         return (
             all(getattr(self, name) is True for name in FRESH_VERIFICATION_FIELDS)
+            and self.verified_review_mode == FRESH_REVIEW_MODE
+            and self.verified_review_mode == receipt.get("review_mode")
+            and self.verified_owner_login == receipt.get("owner_login")
             and self.verified_receipt_url == receipt.get("receipt_url")
-            and self.verified_review_url == receipt.get("review_url")
+            and self.verified_receipt_sha256 == receipt.get("receipt_sha256")
+            and self.verified_review_report_url == receipt.get("review_report_url")
+            and self.verified_review_report_verdict == "PASS"
+            and self.verified_review_report_source_sha == receipt.get("source_sha")
+            and self.verified_review_report_diff_sha256 == receipt.get("diff_sha256")
+            and self.verified_review_report_receipt_sha256 == self.verified_receipt_sha256
+            and self.verified_review_report_artifact_sha256 == self.verified_artifact_sha256
+            and self.verified_owner_attestation_url == receipt.get("owner_attestation_url")
+            and self.verified_owner_attested_review_report_sha256 == self.verified_review_report_sha256
+            and self.verified_owner_attested_source_sha == receipt.get("source_sha")
             and self.verified_source_sha == receipt.get("source_sha")
             and self.verified_reviewed_source_sha == receipt.get("reviewed_source_sha")
+            and self.verified_diff_sha256 == receipt.get("diff_sha256")
+            and self.verified_reviewed_diff_sha256 == receipt.get("reviewed_diff_sha256")
+            and self.verified_artifact_id == receipt.get("artifact_id")
             and self.verified_artifact_sha256 == receipt.get("artifact_sha256")
-            and self.verified_receipt_sha256 == receipt.get("receipt_sha256")
+            and self.verified_artifact_source_sha == receipt.get("artifact_source_sha")
+            and self.verified_artifact_provenance_url == receipt.get("artifact_provenance_url")
+            and self.verified_artifact_provenance_sha256 == receipt.get("artifact_provenance_sha256")
+            and self.verified_fresh_start_checks == FRESH_CHECKS
+            and _is_hex_digest(self.verified_receipt_sha256, 64)
+            and _is_hex_digest(self.verified_review_report_sha256, 64)
+            and _is_hex_digest(self.verified_owner_attestation_sha256, 64)
+            and _is_hex_digest(self.verified_artifact_sha256, 64)
+            and _is_hex_digest(self.verified_artifact_provenance_sha256, 64)
+            and _is_hex_digest(self.verified_source_sha, 40)
+            and _is_hex_digest(self.verified_reviewed_source_sha, 40)
+            and _is_hex_digest(self.verified_owner_attested_source_sha, 40)
+            and _is_hex_digest(self.verified_artifact_source_sha, 40)
+            and _is_hex_digest(self.verified_diff_sha256, 64)
+            and _is_hex_digest(self.verified_reviewed_diff_sha256, 64)
+            and type(self.verified_artifact_id) is int
+            and self.verified_artifact_id > 0
         )
 
 
@@ -101,42 +171,56 @@ FreshEvidenceVerifier = Callable[[dict], FreshEvidenceVerification]
 def fresh_receipt_structurally_valid(receipt: object) -> bool:
     """Validate receipt shape only; this is never an acceptance decision.
 
-    URLs, hashes and PASS strings are user-controlled claims. In particular,
-    this function does not establish that a receipt/review exists, identify its
-    author, prove reviewer independence, verify artifact bytes or authenticate
-    provenance. Those facts belong to a separately trusted verifier.
+    Receipt URLs, hashes, review mode, owner login and PASS checks are
+    self-reported claims. Only a separately trusted verifier can establish
+    actual receipt/report/attestation/artifact existence, identity, verdict,
+    exact source/diff/digest bindings, provenance and physical checks.
     """
     if not isinstance(receipt, dict):
         return False
 
-    def sha(value: object, length: int) -> bool:
-        return isinstance(value, str) and len(value) == length and all(
-            c in "0123456789abcdef" for c in value
+    def repo_url(value: object) -> bool:
+        return (
+            isinstance(value, str)
+            and value.startswith(
+                "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/"
+            )
+            and not any(char.isspace() for char in value)
         )
 
     source = receipt.get("source_sha")
+    diff_digest = receipt.get("diff_sha256")
+    owner_login = receipt.get("owner_login")
+    artifact_id = receipt.get("artifact_id")
     return (
         type(receipt.get("schema_version")) is int
-        and receipt["schema_version"] == 1
+        and receipt["schema_version"] == FRESH_RECEIPT_SCHEMA_VERSION
         and receipt.get("kind") == "owner-local-synthetic-fresh-start"
+        and receipt.get("review_mode") == FRESH_REVIEW_MODE
+        and isinstance(owner_login, str)
+        and 1 <= len(owner_login) <= 39
+        and not any(char.isspace() for char in owner_login)
         and receipt.get("profile_scope") == "new-disposable-empty"
         and receipt.get("migration") == "none"
         and receipt.get("host") == "owner-local-windows"
-        and sha(source, 40)
-        and sha(receipt.get("artifact_sha256"), 64)
-        and sha(receipt.get("receipt_sha256"), 64)
+        and _is_hex_digest(source, 40)
+        and receipt.get("reviewed_source_sha") == source
+        and _is_hex_digest(diff_digest, 64)
+        and receipt.get("reviewed_diff_sha256") == diff_digest
+        and type(artifact_id) is int
+        and artifact_id > 0
+        and _is_hex_digest(receipt.get("artifact_sha256"), 64)
+        and _is_hex_digest(receipt.get("artifact_source_sha"), 40)
+        and repo_url(receipt.get("artifact_provenance_url"))
+        and _is_hex_digest(receipt.get("artifact_provenance_sha256"), 64)
+        and _is_hex_digest(receipt.get("receipt_sha256"), 64)
         and isinstance(receipt.get("local_session_id"), str)
         and len(receipt["local_session_id"]) >= 12
-        and isinstance(receipt.get("receipt_url"), str)
-        and receipt["receipt_url"].startswith(
-            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/"
-        )
-        and isinstance(receipt.get("review_url"), str)
-        and receipt["review_url"].startswith(
-            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/"
-        )
-        and receipt.get("reviewed_source_sha") == source
-        and receipt.get("independent_review_verdict") == "PASS"
+        and repo_url(receipt.get("receipt_url"))
+        and repo_url(receipt.get("review_report_url"))
+        and repo_url(receipt.get("owner_attestation_url"))
+        and "independent_review_verdict" not in receipt
+        and "reviewer_independent" not in receipt
         and isinstance(receipt.get("checks"), dict)
         and set(receipt["checks"]) == set(FRESH_CHECKS)
         and all(receipt["checks"][name] == "PASS" for name in FRESH_CHECKS)
@@ -148,15 +232,17 @@ def fresh_receipt_status(
     *,
     trusted_verifier: FreshEvidenceVerifier | None = None,
 ) -> str:
-    """Return MISSING, INVALID, PENDING_EXTERNAL_VERIFICATION, REJECTED_EXTERNAL_VERIFICATION,
-    VERIFICATION_ERROR, or ACCEPTED.
+    """Return MISSING, INVALID, PENDING_EXTERNAL_VERIFICATION,
+    REJECTED_EXTERNAL_VERIFICATION, VERIFICATION_ERROR, or ACCEPTED.
 
-    No production trust root currently exists in this offline task-board
-    module for GitHub review identity, independent-review status, owner-local
-    receipt existence, artifact digest/provenance and source binding. Therefore
-    the normal CLI supplies no verifier and remains fail-closed. A future
-    integration may pass a verifier only when its trust root is pinned outside
-    the task registry and it verifies every FreshEvidenceVerification fact.
+    The only accepted review mode in this contract is GPT6_OWNER_ATTESTED.
+    The future 16FV-01 verifier must use an owner-controlled trust root to
+    authenticate the owner identity and separate attestation, verify the
+    actual GPT-6 report's PASS verdict and exact source/diff bindings, and
+    check receipt/report/artifact digests plus 16L1 provenance. This offline
+    task-board module deliberately has no production trust root or verifier.
+    Its normal CLI supplies none, so it remains fail-closed. A test-only
+    verifier double is not production authority.
     """
     if receipt is None:
         return "MISSING"
@@ -204,7 +290,7 @@ def accepted(
         return False
     if task_id == "16L2":
         # Consent can authorize starting the copy-only operation, but a
-        # user-editable receipt cannot establish physical/reviewer acceptance.
+        # User-editable receipt fields cannot establish physical acceptance.
         # No trusted private-migration verifier is integrated in this phase.
         return False
     if task_id == "16LF-01":

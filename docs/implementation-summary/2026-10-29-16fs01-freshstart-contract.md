@@ -16,12 +16,12 @@ After GPT-6 technical review, explicit owner acceptance and merge ONLY: \`16L3 <
 
 ## Local synthetic-only 16LF-01 runbook (NOT EXECUTED)
 
-1. Independently review and merge 16FS-01. Pin approved source commit SHA, immutable 16L1 verified artifact plus SHA-256 and original provenance/attestation, reviewer and session ID. Reject unreviewed/changed bytes.
+1. Complete the GPT-6 technical review of 16FS-01 and publish a PASS report bound to the exact source SHA and diff digest. The owner must separately attest acceptance of that exact report digest and source revision. This is GPT6_OWNER_ATTESTED, not GitHub independent approval. Merge only after owner acceptance. Pin the approved source commit SHA, immutable 16L1 verified artifact plus SHA-256 and original provenance/attestation, and local session ID. Reject unreviewed/changed bytes.
 2. Obtain separate owner authorization to use **only a new task-owned disposable Windows workspace**. Establish protected isolation boundaries against all existing CoS/CoSoS profiles before launching. Do **not** enumerate, open, inspect, back up, copy, modify or remove private profiles; no private-path presence checks using private contents. Use a fresh nonce-owned path; fail closed on ACL/ownership/reparse hazards.
 3. Initialize a genuinely **empty** application-owned profile; verify first-run creation and no re-use of prior profile markers or environment defaults. Use synthetic fixture identities/content only; deny network account logins, private credentials and leakage to logs/temp/artifacts.
 4. Induce bounded synthetic failures and rollback; verify preserved unrelated directories and unchanged prior data boundaries without reading their contents; verify recovery and no alias/overlap/cross-profile import.
 5. Clean only task-created disposable files after a validated owned-path check, and preserve protected evidence / failure artifacts until reviewed. Reject broad or recursive cleanup of unknown paths and symlinks.
-6. Produce redacted, source-bound receipt: exact 40-char commit SHA, verified artifact and receipt SHA-256, unique local session ID, GH issue-attached receipt link, native OS/build and checks (\`fresh_init\`, \`isolated_storage\`, \`synthetic_only\`, \`existing_profiles_untouched\`, \`no_leakage\`, \`rollback\`, \`failure_isolation\`, \`owned_cleanup\`), each PASS/FAIL/NOT_RUN. Require an **independent** review URL and matching reviewed source SHA before proposing \`16LF-01=done\`. Missing/forged/incomplete evidence is rejection.
+6. Produce redacted, source-bound receipt: exact 40-char commit SHA, verified artifact and receipt SHA-256, unique local session ID, GH issue-attached receipt link, native OS/build and checks (\`fresh_init\`, \`isolated_storage\`, \`synthetic_only\`, \`existing_profiles_untouched\`, \`no_leakage\`, \`rollback\`, \`failure_isolation\`, \`owned_cleanup\`), each PASS/FAIL/NOT_RUN. Require review mode `GPT6_OWNER_ATTESTED`, an actual GPT-6 review report with PASS bound to the exact source SHA and diff digest, and a separate owner attestation bound to the exact report digest and source revision before proposing `16LF-01=done`. Missing/forged/incomplete evidence is rejection; GPT-6 is not represented as a GitHub independent reviewer.
 7. 16L3 remains its own real native startup, size, RSS, battery/interaction release gate, separately accepted; 16U2 stays a separate owner decision. 16L1's previous 8/8 and 5/5 receipts are immutable historical evidence and are not rerun.
 
 ## Validation boundaries
@@ -41,7 +41,7 @@ No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI ex
 
 - Renamed the receipt check to \`fresh_receipt_structurally_valid()\`; it is explicitly structural-only.
 - Added \`fresh_receipt_status()\` with \`MISSING\`, \`INVALID\`, \`PENDING_EXTERNAL_VERIFICATION\`, \`REJECTED_EXTERNAL_VERIFICATION\`, \`VERIFICATION_ERROR\`, and \`ACCEPTED\` states.
-- Added a typed \`FreshEvidenceVerification\` trust-boundary contract covering actual receipt, review and artifact existence; reviewer identity and independence; actual PASS verdict; reviewed source SHA; exact receipt/review/source/artifact digest binding; receipt-to-artifact digest consistency; artifact provenance and source binding; fresh-start checks; and evidence completeness.
+- Added a typed \`FreshEvidenceVerification\` trust-boundary contract covering actual receipt, review and artifact existence; authorized GPT6_OWNER_ATTESTED mode; verified owner identity; separate owner-attestation existence/validity; actual GPT-6 PASS verdict; exact reviewed source SHA and diff digest; receipt/report/artifact digest consistency; artifact provenance and source binding; fresh-start checks; and evidence completeness.
 - The offline CLI does not provide a verifier because no defensible repository trust root or implementation was found. Therefore structurally valid candidates remain pending external verification, while missing or malformed evidence is separately reported; none can satisfy \`accepted(16LF-01)\`, the 16L3 OR dependency, readiness, validation, or wave forecasting.
 - Tests use a clearly test-only verifier double to exercise the positive integration path; it is not evidence of a real GitHub review, artifact, or Windows physical run.
 
@@ -59,11 +59,24 @@ No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI ex
 - 16L2 remains \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
 - 16LF-01 remains \`BLOCKED / NOT_RUN\`; 16L3 remains \`BLOCKED / NOT_RUN\`; 16U2 remains \`NOT_RUN\`.
 - No owner-local Windows access, installer execution, private-profile access, migration implementation, or release authorization was performed.
-- Candidate acceptance remains pending final exact-HEAD Windows/Ubuntu CI and GPT-6 technical review. Owner acceptance and merge remain separate.
+- Candidate acceptance remains pending final exact-HEAD Windows/Ubuntu CI, GPT-6 technical review report, and the owner's separate acceptance of that exact report/source revision. Owner acceptance and merge remain separate.
 
 
 ### Private migration remains disabled
 
 - 16L2 cannot become ready or enter wave forecasts in this phase, even if owner consent is later changed. A dedicated trusted private-migration verifier is not implemented.
-- Self-reported `physical_windows`, `independent_review_verdict`, or other task-registry receipt fields cannot establish 16L2 acceptance.
+- Self-reported physical, verdict, consent, or other task-registry receipt fields cannot establish 16L2 acceptance.
 - The 16L3 OR alternative is structurally preserved for future policy evolution, but only 16LF-01 is a viable path under the current fresh-start decision and verifier plan.
+
+
+## Owner-attested review contract correction — 2026-10-30
+
+- Replaced the mandatory GitHub-independent-review contract with the single accepted review mode `GPT6_OWNER_ATTESTED`. No GitHub independent approval is required or claimed, and GPT-6 is never represented as a GitHub reviewer.
+- `FreshEvidenceVerification` now requires actual receipt existence/integrity, review-report existence, authorized review mode, verified owner identity, separate owner-attestation existence/validity, actual GPT-6 PASS verdict, exact reviewed source SHA and diff digest, receipt/report/artifact digest consistency, 16L1 provenance and source binding, all eight fresh-start checks, and evidence completeness.
+- The typed result binds the report URL/digest/verdict/source/diff/receipt/artifact digests and separately binds the owner attestation to the exact report digest and source revision. It also binds the actual 16L1 artifact ID, digest, source SHA and provenance digest.
+- Structural receipt validation is schema v2 and shape-only. A self-reported review mode, owner login, URL, digest, PASS check or verification boolean cannot establish acceptance. The production CLI supplies no verifier.
+- The owner-controlled trust root and production verifier remain explicitly out of scope; 16FV-01 (#139) owns that later implementation after 16FS-01 is accepted and merged. Missing trust root, missing/mismatched owner attestation, unsupported mode, source/diff/report/receipt/artifact mismatch, missing provenance, or verifier failure remains pending/rejected.
+- The positive verifier is a test-only double and does not establish production authority. Model authorship is owner-attested, not cryptographically authenticated.
+- Preserved: 16L2 `BLOCKED / NOT_RUN / NOT_AUTHORIZED`; 16LF-01 `BLOCKED / NOT_RUN`; 16L3 `BLOCKED / NOT_RUN`; 16U2 `NOT_RUN`; no private-profile access, installer execution, local Windows qualification, merge or release activation.
+
+**Expected handoff:** READY FOR GPT-6 TECHNICAL REVIEW — NOT MERGED — OWNER ACCEPTANCE PENDING.

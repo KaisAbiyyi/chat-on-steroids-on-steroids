@@ -276,32 +276,66 @@ class TaskBoardTests(unittest.TestCase):
         tasks["16L3"]["status"] = "todo"
         tasks["16LF-01"]["status"] = "done"
         sha = "a" * 40
+        diff = "d" * 64
         tasks["16LF-01"]["evidence"] = {
-            "schema_version": 1, "kind": "owner-local-synthetic-fresh-start",
-            "host": "owner-local-windows", "profile_scope": "new-disposable-empty",
-            "migration": "none", "source_sha": sha, "reviewed_source_sha": sha,
-            "artifact_sha256": "b" * 64, "receipt_sha256": "c" * 64,
+            "schema_version": board.FRESH_RECEIPT_SCHEMA_VERSION,
+            "kind": "owner-local-synthetic-fresh-start",
+            "host": "owner-local-windows",
+            "profile_scope": "new-disposable-empty",
+            "migration": "none",
+            "review_mode": board.FRESH_REVIEW_MODE,
+            "owner_login": "KaisAbiyyi",
+            "source_sha": sha,
+            "reviewed_source_sha": sha,
+            "diff_sha256": diff,
+            "reviewed_diff_sha256": diff,
+            "artifact_id": 123456789,
+            "artifact_sha256": "b" * 64,
+            "artifact_source_sha": "e" * 40,
+            "artifact_provenance_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/129#issuecomment-1",
+            "artifact_provenance_sha256": "f" * 64,
+            "receipt_sha256": "c" * 64,
             "local_session_id": "synthetic-test-fixture-only",
-            "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
-            "review_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/999#pullrequestreview-1",
-            "independent_review_verdict": "PASS",
-            "checks": {k: "PASS" for k in board.FRESH_CHECKS},
+            "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-1",
+            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-1",
+            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-2",
+            "checks": {key: "PASS" for key in board.FRESH_CHECKS},
         }
         return data, tasks
 
     def _trusted_test_verifier(self, **overrides):
-        # Test double for the explicit trusted-verifier boundary only. It does
-        # not authenticate a real GitHub review, artifact or physical run.
+        # Test-only double for the explicit typed boundary. It cannot be
+        # imported by the production CLI and authenticates no real evidence.
         def verify(receipt):
             self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
+            report_sha = "1" * 64
             facts = {name: True for name in board.FRESH_VERIFICATION_FIELDS}
             facts.update({
+                "verified_review_mode": receipt["review_mode"],
+                "verified_owner_login": receipt["owner_login"],
                 "verified_receipt_url": receipt["receipt_url"],
-                "verified_review_url": receipt["review_url"],
+                "verified_receipt_sha256": receipt["receipt_sha256"],
+                "verified_review_report_url": receipt["review_report_url"],
+                "verified_review_report_sha256": report_sha,
+                "verified_review_report_verdict": "PASS",
+                "verified_review_report_source_sha": receipt["source_sha"],
+                "verified_review_report_diff_sha256": receipt["diff_sha256"],
+                "verified_review_report_receipt_sha256": receipt["receipt_sha256"],
+                "verified_review_report_artifact_sha256": receipt["artifact_sha256"],
+                "verified_owner_attestation_url": receipt["owner_attestation_url"],
+                "verified_owner_attestation_sha256": "2" * 64,
+                "verified_owner_attested_review_report_sha256": report_sha,
+                "verified_owner_attested_source_sha": receipt["source_sha"],
                 "verified_source_sha": receipt["source_sha"],
                 "verified_reviewed_source_sha": receipt["reviewed_source_sha"],
+                "verified_diff_sha256": receipt["diff_sha256"],
+                "verified_reviewed_diff_sha256": receipt["reviewed_diff_sha256"],
+                "verified_artifact_id": receipt["artifact_id"],
                 "verified_artifact_sha256": receipt["artifact_sha256"],
-                "verified_receipt_sha256": receipt["receipt_sha256"],
+                "verified_artifact_source_sha": receipt["artifact_source_sha"],
+                "verified_artifact_provenance_url": receipt["artifact_provenance_url"],
+                "verified_artifact_provenance_sha256": receipt["artifact_provenance_sha256"],
+                "verified_fresh_start_checks": board.FRESH_CHECKS,
             })
             facts.update(overrides)
             return board.FreshEvidenceVerification(**facts)
@@ -325,46 +359,76 @@ class TaskBoardTests(unittest.TestCase):
     def test_fresh_receipt_rejects_boolean_or_float_schema_version(self):
         _, tasks = self._fresh_scenario()
         good = copy.deepcopy(tasks["16LF-01"]["evidence"])
-        for invalid in (True, 1.0):
+        for invalid in (True, 2.0):
             broken = copy.deepcopy(good)
             broken["schema_version"] = invalid
             self.assertFalse(board.fresh_receipt_structurally_valid(broken))
 
+    def test_legacy_independent_review_contract_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        receipt["schema_version"] = 1
+        receipt["independent_review_verdict"] = "PASS"
+        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
+
     def test_fabricated_github_review_url_cannot_establish_acceptance(self):
         _, tasks = self._fresh_scenario()
         receipt = tasks["16LF-01"]["evidence"]
-        self.assertIn("/pull/999#", receipt["review_url"])
+        self.assertIn("/pull/138#", receipt["review_report_url"])
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 
-    def test_nonexistent_receipt_or_review_cannot_establish_acceptance(self):
+    def test_missing_trust_root_fails_closed(self):
         _, tasks = self._fresh_scenario()
-        verifier = self._trusted_test_verifier(receipt_exists=False)
+        receipt = tasks["16LF-01"]["evidence"]
         self.assertEqual(
-            board.fresh_receipt_status(
-                tasks["16LF-01"]["evidence"], trusted_verifier=verifier
-            ),
-            "REJECTED_EXTERNAL_VERIFICATION",
+            board.fresh_receipt_status(receipt),
+            "PENDING_EXTERNAL_VERIFICATION",
         )
-        verifier = self._trusted_test_verifier(review_exists=False)
-        self.assertFalse(board.accepted(
-            tasks, "16LF-01", trusted_verifier=verifier
-        ))
-        verifier = self._trusted_test_verifier(review_verdict_pass=False)
-        self.assertFalse(board.accepted(
-            tasks, "16LF-01", trusted_verifier=verifier
-        ))
+        self.assertFalse(board.accepted(tasks, "16LF-01"))
 
-    def test_implementation_author_cannot_establish_independent_acceptance(self):
+    def test_missing_review_report_is_rejected(self):
         _, tasks = self._fresh_scenario()
-        verifier = self._trusted_test_verifier(reviewer_independent=False)
-        self.assertFalse(board.accepted(
-            tasks, "16LF-01", trusted_verifier=verifier
-        ))
+        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        del receipt["review_report_url"]
+        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
+        verifier = self._trusted_test_verifier(review_report_exists=False)
+        self.assertFalse(board.accepted(tasks, "16LF-01", trusted_verifier=verifier))
 
-    def test_unverified_reviewer_identity_cannot_establish_acceptance(self):
+    def test_missing_owner_attestation_is_rejected(self):
         _, tasks = self._fresh_scenario()
-        verifier = self._trusted_test_verifier(reviewer_identity_verified=False)
+        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        del receipt["owner_attestation_url"]
+        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
+        for overrides in (
+            {"owner_attestation_exists": False},
+            {"owner_attestation_valid": False},
+        ):
+            verifier = self._trusted_test_verifier(**overrides)
+            self.assertFalse(board.accepted(
+                tasks, "16LF-01", trusted_verifier=verifier
+            ))
+
+    def test_wrong_owner_identity_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        for overrides in (
+            {"owner_identity_verified": False},
+            {"verified_owner_login": "unauthorized-owner"},
+        ):
+            verifier = self._trusted_test_verifier(**overrides)
+            self.assertFalse(board.accepted(
+                tasks, "16LF-01", trusted_verifier=verifier
+            ))
+
+    def test_unsupported_review_mode_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        receipt["review_mode"] = "GITHUB_INDEPENDENT"
+        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
+        verifier = self._trusted_test_verifier(
+            review_mode_authorized=False,
+            verified_review_mode="GITHUB_INDEPENDENT",
+        )
         self.assertFalse(board.accepted(
             tasks, "16LF-01", trusted_verifier=verifier
         ))
@@ -374,20 +438,39 @@ class TaskBoardTests(unittest.TestCase):
         receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
         receipt["reviewed_source_sha"] = "d" * 40
         self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
-        self.assertEqual(board.fresh_receipt_status(receipt), "INVALID")
-        verifier = self._trusted_test_verifier(reviewed_source_matches=False)
+        verifier = self._trusted_test_verifier(
+            reviewed_source_sha_matches=False,
+            verified_reviewed_source_sha="d" * 40,
+            verified_review_report_source_sha="d" * 40,
+        )
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_wrong_reviewed_diff_digest_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        receipt["reviewed_diff_sha256"] = "e" * 64
+        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
+        verifier = self._trusted_test_verifier(
+            reviewed_diff_digest_matches=False,
+            verified_reviewed_diff_sha256="e" * 64,
+            verified_review_report_diff_sha256="e" * 64,
+        )
         self.assertFalse(board.accepted(
             tasks, "16LF-01", trusted_verifier=verifier
         ))
 
     def test_artifact_digest_mismatch_is_rejected(self):
         _, tasks = self._fresh_scenario()
-        verifier = self._trusted_test_verifier(
-            receipt_artifact_digest_matches=False
-        )
-        self.assertFalse(board.accepted(
-            tasks, "16LF-01", trusted_verifier=verifier
-        ))
+        for overrides in (
+            {"receipt_review_artifact_digests_match": False},
+            {"verified_review_report_artifact_sha256": "e" * 64},
+        ):
+            verifier = self._trusted_test_verifier(**overrides)
+            self.assertFalse(board.accepted(
+                tasks, "16LF-01", trusted_verifier=verifier
+            ))
 
     def test_missing_artifact_is_rejected(self):
         _, tasks = self._fresh_scenario()
@@ -405,24 +488,57 @@ class TaskBoardTests(unittest.TestCase):
                     tasks, "16LF-01", trusted_verifier=verifier
                 ))
 
-    def test_unverified_pass_fields_never_establish_acceptance(self):
+    def test_self_reported_receipt_fields_never_establish_acceptance(self):
         _, tasks = self._fresh_scenario()
         receipt = tasks["16LF-01"]["evidence"]
-        self.assertEqual(receipt["independent_review_verdict"], "PASS")
-        self.assertTrue(all(value == "PASS" for value in receipt["checks"].values()))
-        self.assertFalse(board.accepted(tasks, "16LF-01"))
+        for name in board.FRESH_VERIFICATION_FIELDS:
+            receipt[name] = True
+        self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertEqual(
             board.fresh_receipt_status(receipt),
             "PENDING_EXTERNAL_VERIFICATION",
         )
+        self.assertFalse(board.accepted(tasks, "16LF-01"))
 
-    def test_trusted_verifier_must_bind_review_and_artifact_to_receipt(self):
+    def test_gpt6_owner_attested_mode_is_not_github_independent_review(self):
         _, tasks = self._fresh_scenario()
+        receipt = tasks["16LF-01"]["evidence"]
+        self.assertEqual(receipt["review_mode"], "GPT6_OWNER_ATTESTED")
+        self.assertNotIn("reviewer_independent", board.FRESH_VERIFICATION_FIELDS)
+        self.assertNotIn("independent_review_verdict", receipt)
+
+    def test_every_trusted_verification_fact_is_mandatory(self):
+        _, tasks = self._fresh_scenario()
+        for field in board.FRESH_VERIFICATION_FIELDS:
+            with self.subTest(field=field):
+                verifier = self._trusted_test_verifier(**{field: False})
+                self.assertFalse(board.accepted(
+                    tasks, "16LF-01", trusted_verifier=verifier
+                ))
+
+    def test_trusted_verifier_must_bind_report_owner_attestation_and_artifact(self):
+        _, tasks = self._fresh_scenario()
+        wrong_url = "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/999#issuecomment-9"
         for field, value in [
-            ("verified_review_url", "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/1000#pullrequestreview-2"),
-            ("verified_reviewed_source_sha", "d" * 40),
-            ("verified_artifact_sha256", "e" * 64),
+            ("verified_review_report_url", wrong_url),
+            ("verified_review_report_sha256", "3" * 64),
+            ("verified_review_report_verdict", "FAIL"),
+            ("verified_review_report_source_sha", "d" * 40),
+            ("verified_review_report_diff_sha256", "e" * 64),
+            ("verified_review_report_receipt_sha256", "f" * 64),
+            ("verified_review_report_artifact_sha256", "a" * 64),
+            ("verified_owner_attestation_url", wrong_url),
+            ("verified_owner_attested_review_report_sha256", "2" * 64),
+            ("verified_owner_attested_source_sha", "d" * 40),
             ("verified_receipt_sha256", "f" * 64),
+            ("verified_reviewed_source_sha", "d" * 40),
+            ("verified_reviewed_diff_sha256", "e" * 64),
+            ("verified_artifact_id", 42),
+            ("verified_artifact_sha256", "e" * 64),
+            ("verified_artifact_source_sha", "d" * 40),
+            ("verified_artifact_provenance_url", wrong_url),
+            ("verified_artifact_provenance_sha256", "a" * 64),
+            ("verified_owner_login", "unauthorized-owner"),
         ]:
             with self.subTest(field=field):
                 verifier = self._trusted_test_verifier(**{field: value})
@@ -455,7 +571,7 @@ class TaskBoardTests(unittest.TestCase):
             "REJECTED_EXTERNAL_VERIFICATION",
         )
 
-    def test_trusted_verifier_path_accepts_complete_independent_evidence(self):
+    def test_trusted_verifier_path_accepts_complete_gpt6_owner_attested_evidence(self):
         data, tasks = self._fresh_scenario()
         verifier = self._trusted_test_verifier()
         self.assertEqual(
@@ -629,8 +745,8 @@ class TaskBoardTests(unittest.TestCase):
             ("source_sha", "fake"),
             ("reviewed_source_sha", "d" * 40),
             ("artifact_sha256", "broken"),
-            ("independent_review_verdict", "PENDING"),
-            ("review_url", "https://evil.invalid/review"),
+            ("review_mode", "GITHUB_INDEPENDENT"),
+            ("review_report_url", "https://evil.invalid/review"),
             ("host", "github-hosted-windows"),
             ("migration", "private-copy"),
         ]:
