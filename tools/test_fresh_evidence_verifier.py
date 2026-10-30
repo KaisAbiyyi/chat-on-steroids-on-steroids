@@ -350,6 +350,38 @@ def good_artifact_result(root, _api):
     }
 
 
+class ProductionWorkflowBoundaryTests(unittest.TestCase):
+    def test_production_secret_is_main_only_and_absent_from_pr_workflow(self):
+        root = Path(__file__).resolve().parents[1]
+        production = (
+            root / ".github" / "workflows" / "16fv-production-verify.yml"
+        ).read_text(encoding="utf-8")
+        pull_request = (
+            root / ".github" / "workflows" / "16fv-trusted-evidence-verifier.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("workflow_dispatch:", production)
+        self.assertNotIn("\\n  pull_request:", production)
+        self.assertNotIn("\\n  pull_request_target:", production)
+        self.assertNotIn("\\n  push:", production)
+        self.assertIn(
+            "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+            production,
+        )
+        self.assertIn("environment: fresh-evidence-production", production)
+        for permission in (
+            "contents: read", "pull-requests: read", "issues: read",
+            "actions: read", "attestations: read",
+        ):
+            self.assertIn(permission, production)
+        self.assertNotRegex(production, r":\\s*write\\b")
+        self.assertEqual(
+            production.count("secrets.COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON"), 1
+        )
+        self.assertNotIn("COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON", pull_request)
+        self.assertNotIn("pull_request_target", pull_request)
+
+
 class ProductionTrustRootTests(unittest.TestCase):
     def test_missing_root_is_explicitly_unconfigured_and_fails_closed(self):
         verifier, status = v.production_verifier_from_environment({})
