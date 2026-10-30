@@ -80,3 +80,11 @@ No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI ex
 - Preserved: 16L2 `BLOCKED / NOT_RUN / NOT_AUTHORIZED`; 16LF-01 `BLOCKED / NOT_RUN`; 16L3 `BLOCKED / NOT_RUN`; 16U2 `NOT_RUN`; no private-profile access, installer execution, local Windows qualification, merge or release activation.
 
 **Expected handoff:** READY FOR GPT-6 TECHNICAL REVIEW — NOT MERGED — OWNER ACCEPTANCE PENDING.
+
+
+### GPT-6 final review corrections — 2026-10-30
+
+- The typed verifier now requires canonical provider-native identities for the receipt, GPT-6 review report and owner attestation. The three immutable record identities must be present and pairwise distinct; URL paths and anchors are locations, not proof of record distinctness. Alternate GitHub URL forms for the same comment/review must normalize to the same provider identity and be rejected when reused.
+- The verifier separately records the authorized owner identity and the actual owner-attestation author identity. The latter must be verified and match the authorized owner login. The model-review report and owner acceptance may still be authored under the same owner account; they must be separate immutable records. This does not claim GitHub independent approval or cryptographic proof of model authorship.
+- OR dependency structures are validated before graph traversal. Cycle detection consumes only validated AND edges and validated OR groups. Malformed groups or members produce controlled validation errors; readiness remains blocked and wave forecasting returns no waves for malformed dependency graphs.
+- The production CLI still supplies no verifier or trust root. 16LF-01 remains pending external verification; 16L2 remains BLOCKED / NOT_RUN / NOT_AUTHORIZED; 16L3 remains BLOCKED / NOT_RUN; 16U2 remains NOT_RUN. No private-profile access, migration, physical qualification, merge or release activation is authorized.

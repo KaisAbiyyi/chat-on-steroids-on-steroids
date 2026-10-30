@@ -31,7 +31,16 @@ def load(path: Path = REGISTRY) -> dict:
 
 
 def index(data: dict) -> dict[str, dict]:
-    return {task["id"]: task for task in data["tasks"]}
+    raw_tasks = data.get("tasks", []) if isinstance(data, dict) else []
+    if not isinstance(raw_tasks, list):
+        return {}
+    return {
+        task["id"]: task
+        for task in raw_tasks
+        if isinstance(task, dict)
+        and isinstance(task.get("id"), str)
+        and task["id"]
+    }
 
 
 
@@ -52,6 +61,7 @@ FRESH_VERIFICATION_FIELDS = (
     "owner_identity_verified",
     "owner_attestation_exists",
     "owner_attestation_valid",
+    "owner_attestation_author_identity_verified",
     "gpt6_review_verdict_pass",
     "reviewed_source_sha_matches",
     "reviewed_diff_digest_matches",
@@ -66,6 +76,23 @@ FRESH_VERIFICATION_FIELDS = (
 def _is_hex_digest(value: object, length: int) -> bool:
     return isinstance(value, str) and len(value) == length and all(
         char in "0123456789abcdef" for char in value
+    )
+
+
+def _is_provider_record_identity(value: object) -> bool:
+    """Accept only canonical, provider-native identities supplied by a verifier.
+
+    URLs are locations, not record identities. For GitHub-backed evidence the
+    verifier must normalize alternate URL paths/anchors to the same immutable
+    provider record identity (for example, github:issue-comment:123).
+    """
+    return (
+        isinstance(value, str)
+        and value.startswith("github:")
+        and value.count(":") >= 2
+        and 1 <= len(value) <= 256
+        and value == value.strip()
+        and not any(char.isspace() for char in value)
     )
 
 
@@ -90,6 +117,7 @@ class FreshEvidenceVerification:
     owner_identity_verified: bool
     owner_attestation_exists: bool
     owner_attestation_valid: bool
+    owner_attestation_author_identity_verified: bool
     gpt6_review_verdict_pass: bool
     reviewed_source_sha_matches: bool
     reviewed_diff_digest_matches: bool
@@ -109,6 +137,10 @@ class FreshEvidenceVerification:
     verified_review_report_diff_sha256: str
     verified_review_report_artifact_sha256: str
     verified_owner_attestation_url: str
+    verified_receipt_record_identity: str
+    verified_review_report_record_identity: str
+    verified_owner_attestation_record_identity: str
+    verified_owner_attestation_author_login: str
     verified_owner_attestation_sha256: str
     verified_owner_attested_review_report_sha256: str
     verified_owner_attested_source_sha: str
@@ -124,11 +156,20 @@ class FreshEvidenceVerification:
     verified_fresh_start_checks: tuple[str, ...]
 
     def authoritative_for(self, receipt: dict) -> bool:
+        record_identities = (
+            self.verified_receipt_record_identity,
+            self.verified_review_report_record_identity,
+            self.verified_owner_attestation_record_identity,
+        )
         return (
             all(getattr(self, name) is True for name in FRESH_VERIFICATION_FIELDS)
             and self.verified_review_mode == FRESH_REVIEW_MODE
             and self.verified_review_mode == receipt.get("review_mode")
             and self.verified_owner_login == receipt.get("owner_login")
+            and isinstance(self.verified_owner_login, str)
+            and isinstance(self.verified_owner_attestation_author_login, str)
+            and self.verified_owner_attestation_author_login.casefold()
+            == self.verified_owner_login.casefold()
             and self.verified_receipt_url == receipt.get("receipt_url")
             and self.verified_receipt_sha256 == receipt.get("receipt_sha256")
             and self.verified_review_report_url == receipt.get("review_report_url")
@@ -139,6 +180,8 @@ class FreshEvidenceVerification:
             and self.verified_review_report_diff_sha256 == receipt.get("diff_sha256")
             and self.verified_review_report_artifact_sha256 == self.verified_artifact_sha256
             and self.verified_owner_attestation_url == receipt.get("owner_attestation_url")
+            and all(_is_provider_record_identity(identity) for identity in record_identities)
+            and len(set(record_identities)) == 3
             and self.verified_owner_attested_review_report_sha256 == self.verified_review_report_sha256
             and self.verified_owner_attested_source_sha == receipt.get("source_sha")
             and self.verified_source_sha == receipt.get("source_sha")
@@ -304,16 +347,67 @@ def accepted(
     return True
 
 
+def _validated_and_dependencies(
+    task: dict,
+    tasks: dict[str, dict],
+) -> tuple[list[str], bool]:
+    raw = task.get("depends_on")
+    if not isinstance(raw, list):
+        return [], False
+    if any(not isinstance(dep, str) or not dep for dep in raw):
+        return [], False
+    if len(raw) != len(set(raw)):
+        return [], False
+    if any(dep not in tasks or dep == task.get("id") for dep in raw):
+        return [], False
+    return list(raw), True
+
+
+def _validated_or_groups(
+    task: dict,
+    tasks: dict[str, dict],
+) -> tuple[list[list[str]], bool]:
+    raw_groups = task.get("any_of", [])
+    if not isinstance(raw_groups, list):
+        return [], False
+
+    validated: list[list[str]] = []
+    all_valid = True
+    for group in raw_groups:
+        if not isinstance(group, list) or len(group) < 2:
+            all_valid = False
+            continue
+        # Check types before set()/membership operations: malformed JSON may
+        # contain nulls, nested arrays or objects that are not hashable IDs.
+        if any(not isinstance(dep, str) or not dep for dep in group):
+            all_valid = False
+            continue
+        if len(group) != len(set(group)):
+            all_valid = False
+            continue
+        if any(dep not in tasks or dep == task.get("id") for dep in group):
+            all_valid = False
+            continue
+        validated.append(list(group))
+    return validated, all_valid
+
+
 def missing_dependencies(
     task: dict,
     tasks: dict[str, dict],
     *,
     trusted_verifier: FreshEvidenceVerifier | None = None,
 ) -> list[str]:
-    missing = [
-        dep for dep in task["depends_on"]
-        if not accepted(tasks, dep, trusted_verifier=trusted_verifier)
-    ]
+    missing: list[str] = []
+    dependencies, dependencies_valid = _validated_and_dependencies(task, tasks)
+    if not dependencies_valid:
+        missing.append("invalid_prerequisites")
+    else:
+        missing.extend(
+            dep for dep in dependencies
+            if not accepted(tasks, dep, trusted_verifier=trusted_verifier)
+        )
+
     # The private-migration path stays disabled in this phase. Owner consent
     # is necessary but insufficient: no trusted private-migration verifier is
     # integrated, so the task must not become ready or satisfy the release OR.
@@ -321,7 +415,11 @@ def missing_dependencies(
         if not private_migration_authorized(tasks):
             missing.append("owner_private_migration_consent")
         missing.append("trusted_private_migration_verifier")
-    for group in task.get("any_of", []):
+
+    groups, groups_valid = _validated_or_groups(task, tasks)
+    if not groups_valid:
+        missing.append("invalid_or_prerequisites")
+    for group in groups:
         if not any(
             accepted(tasks, dep, trusted_verifier=trusted_verifier)
             for dep in group
@@ -335,56 +433,109 @@ def validate(
     *,
     trusted_verifier: FreshEvidenceVerifier | None = None,
 ) -> list[str]:
-    problems: list[str] = []
+    if not isinstance(data, dict):
+        return ["Invalid schema/version or tasks array"]
     tasks = data.get("tasks", [])
     if data.get("schema_version") != 1 or not isinstance(tasks, list):
         return ["Invalid schema/version or tasks array"]
-    ids = [t.get("id") for t in tasks]
+
+    problems: list[str] = []
+    task_rows: list[dict] = []
+    ids: list[str] = []
+    for position, task in enumerate(tasks):
+        if not isinstance(task, dict):
+            problems.append(f"Invalid task entry at index {position}")
+            continue
+        task_rows.append(task)
+        task_id = task.get("id")
+        if not isinstance(task_id, str) or not task_id:
+            problems.append(f"Invalid task id: {task_id!r}")
+        else:
+            ids.append(task_id)
+
     counts = Counter(ids)
     for task_id, count in counts.items():
         if count != 1:
             problems.append(f"Duplicate task id: {task_id}")
+
     tasks_by_id = index(data)
-    for t in tasks:
-        task_id = t.get("id")
-        deps = t.get("depends_on")
-        locks = t.get("resource_locks")
+    validated_and_by_id: dict[str, list[str]] = {}
+    validated_or_by_id: dict[str, list[list[str]]] = {}
+
+    for task in task_rows:
+        task_id = task.get("id")
         if not isinstance(task_id, str) or not task_id:
-            problems.append(f"Invalid task id: {task_id!r}")
-        if t.get("kind") not in EXPECTED:
+            continue
+
+        kind = task.get("kind")
+        status = task.get("status")
+        phase = task.get("phase")
+        if not isinstance(kind, str) or kind not in EXPECTED:
             problems.append(f"{task_id}: invalid task kind")
-        if t.get("status") not in STATUSES:
+        if not isinstance(status, str) or status not in STATUSES:
             problems.append(f"{task_id}: invalid status")
-        if t.get("phase") not in PHASES:
+        if not isinstance(phase, str) or phase not in PHASES:
             problems.append(f"{task_id}: invalid phase")
-        if not isinstance(deps, list) or len(deps) != len(set(deps)):
-            problems.append(f"{task_id}: duplicated or invalid prerequisites")
-            deps = []
-        if not isinstance(locks, list) or not locks or not all(isinstance(x, str) and x for x in locks):
+
+        locks = task.get("resource_locks")
+        if not isinstance(locks, list) or not locks or not all(
+            isinstance(lock, str) and lock for lock in locks
+        ):
             problems.append(f"{task_id}: missing resource locks")
-        for dep in deps:
-            if dep not in tasks_by_id:
-                problems.append(f"{task_id}: dangling prerequisite {dep}")
-            if dep == task_id:
+
+        raw_dependencies = task.get("depends_on")
+        dependencies_valid = (
+            isinstance(raw_dependencies, list)
+            and all(isinstance(dep, str) and dep for dep in raw_dependencies)
+        )
+        if dependencies_valid:
+            dependencies_valid = len(raw_dependencies) == len(set(raw_dependencies))
+        if not dependencies_valid:
+            problems.append(f"{task_id}: duplicated or invalid prerequisites")
+
+        validated_dependencies: list[str] = []
+        for dependency in raw_dependencies if isinstance(raw_dependencies, list) else []:
+            if not isinstance(dependency, str) or not dependency:
+                continue
+            if dependency not in tasks_by_id:
+                problems.append(f"{task_id}: dangling prerequisite {dependency}")
+                dependencies_valid = False
+                continue
+            if dependency == task_id:
                 problems.append(f"{task_id}: self dependency")
-            if t.get("status") == "done" and not accepted(
-                tasks_by_id, dep, trusted_verifier=trusted_verifier
+                dependencies_valid = False
+                continue
+            validated_dependencies.append(dependency)
+            if status == "done" and not accepted(
+                tasks_by_id, dependency, trusted_verifier=trusted_verifier
             ):
-                problems.append(f"{task_id}: cannot be done before {dep}")
+                problems.append(f"{task_id}: cannot be done before {dependency}")
+        validated_and_by_id[task_id] = (
+            validated_dependencies if dependencies_valid else []
+        )
+
     # This OR group is intentional. Every other dependency remains mandatory.
     l3 = tasks_by_id.get("16L3", {})
-    if l3.get("depends_on") != ["16F", "16L1"] or l3.get("any_of") != [["16L2", "16LF-01"]]:
+    if (
+        l3.get("depends_on") != ["16F", "16L1"]
+        or l3.get("any_of") != [["16L2", "16LF-01"]]
+    ):
         problems.append("16L3: required 16F + 16L1 AND (16L2 OR 16LF-01) gate changed")
-    if tasks_by_id.get("16U1", {}).get("migration_consent") == "declined":
-        if tasks_by_id.get("16U1", {}).get("owner_decision") != "fresh_start":
+
+    owner_task = tasks_by_id.get("16U1", {})
+    private_task = tasks_by_id.get("16L2", {})
+    if owner_task.get("migration_consent") == "declined":
+        if owner_task.get("owner_decision") != "fresh_start":
             problems.append(
                 "16U1: declined private migration must preserve the explicit fresh_start owner decision"
             )
-        if tasks_by_id.get("16L2", {}).get("private_migration_status") != "NOT_RUN / NOT_AUTHORIZED":
+        if private_task.get("private_migration_status") != "NOT_RUN / NOT_AUTHORIZED":
             problems.append(
                 "16L2: owner-declined migration status must remain NOT_RUN / NOT_AUTHORIZED"
             )
-    if tasks_by_id.get("16L2", {}).get("status") in {"todo", "claimed", "done"}:
+
+    private_status = private_task.get("status")
+    if isinstance(private_status, str) and private_status in {"todo", "claimed", "done"}:
         if not private_migration_authorized(tasks_by_id):
             problems.append(
                 "16L2: cannot become ready, claimed, or accepted without explicit owner private-copy consent"
@@ -392,55 +543,68 @@ def validate(
         problems.append(
             "16L2: keep blocked until a trusted private-migration verifier is implemented and configured"
         )
+
     for protected in ("16L2", "16LF-01"):
-        if protected in tasks_by_id and tasks_by_id[protected]["status"] == "done":
+        protected_task = tasks_by_id.get(protected)
+        if isinstance(protected_task, dict) and protected_task.get("status") == "done":
             if not accepted(tasks_by_id, protected, trusted_verifier=trusted_verifier):
                 problems.append(f"{protected}: missing authorized, reviewed physical evidence")
-    for t in tasks:
-        groups = t.get("any_of", [])
-        if t["id"] != "16L3" and groups:
-            problems.append(f"{t['id']}: unexpected OR prerequisite")
-        if not isinstance(groups, list):
-            problems.append(f"{t['id']}: invalid OR prerequisites")
+
+    for task in task_rows:
+        task_id = task.get("id")
+        if not isinstance(task_id, str) or not task_id:
             continue
+        groups = task.get("any_of", [])
+        if task_id != "16L3" and groups:
+            problems.append(f"{task_id}: unexpected OR prerequisite")
+        if not isinstance(groups, list):
+            problems.append(f"{task_id}: invalid OR prerequisites")
+            validated_or_by_id[task_id] = []
+            continue
+
+        validated_groups: list[list[str]] = []
         for group in groups:
-            if not isinstance(group, list) or len(group) < 2 or len(group) != len(set(group)):
-                problems.append(f"{t['id']}: invalid OR group")
+            if not isinstance(group, list) or len(group) < 2:
+                problems.append(f"{task_id}: invalid OR group")
                 continue
-            for dep in group:
-                if dep not in tasks_by_id:
-                    problems.append(f"{t['id']}: dangling OR prerequisite {dep}")
-                elif dep == t["id"]:
-                    problems.append(f"{t['id']}: self OR dependency")
-        if t["status"] == "done" and missing_dependencies(
-            t, tasks_by_id, trusted_verifier=trusted_verifier
+            if any(not isinstance(dep, str) or not dep for dep in group):
+                problems.append(f"{task_id}: invalid OR group")
+                continue
+            if len(group) != len(set(group)):
+                problems.append(f"{task_id}: invalid OR group")
+                continue
+
+            group_valid = True
+            for dependency in group:
+                if dependency not in tasks_by_id:
+                    problems.append(
+                        f"{task_id}: dangling OR prerequisite {dependency}"
+                    )
+                    group_valid = False
+                elif dependency == task_id:
+                    problems.append(f"{task_id}: self OR dependency")
+                    group_valid = False
+            if group_valid:
+                validated_groups.append(list(group))
+
+        # Cycle traversal below receives only fully validated OR groups.
+        validated_or_by_id[task_id] = validated_groups
+        if task.get("status") == "done" and missing_dependencies(
+            task, tasks_by_id, trusted_verifier=trusted_verifier
         ):
-            problems.append(f"{t['id']}: cannot be done before all required release gates")
-    color: dict[str, int] = {}
-    def visit(name: str, chain: list[str]) -> None:
-        if color.get(name) == 2:
-            return
-        if color.get(name) == 1:
-            problems.append("Dependency cycle: " + " -> ".join([*chain, name]))
-            return
-        if name not in tasks_by_id:
-            return
-        color[name] = 1
-        edges = tasks_by_id[name].get("depends_on", []) + [
-            dep for group in tasks_by_id[name].get("any_of", []) for dep in group
-        ]
-        for dep in edges:
-            if dep in tasks_by_id:
-                visit(dep, [*chain, name])
-        color[name] = 2
-    for name in ids:
-        if isinstance(name, str):
-            visit(name, [])
-    if Counter(t.get("kind") for t in tasks) != Counter(EXPECTED):
-        problems.append(f"Unexpected task counts: {dict(Counter(t.get('kind') for t in tasks))}")
+            problems.append(f"{task_id}: cannot be done before all required release gates")
+
+    kind_counts = Counter(
+        task.get("kind")
+        for task in task_rows
+        if isinstance(task.get("kind"), str)
+    )
+    if kind_counts != Counter(EXPECTED):
+        problems.append(f"Unexpected task counts: {dict(kind_counts)}")
     for obsolete in ("7P-C", "8D", "8E", "8L2"):
         if obsolete in tasks_by_id:
             problems.append(f"Obsolete runtime task id: {obsolete}")
+
     expected_edges = {
         "7P-A": ["CL-L6"], "7P-B": ["7P-A"], "7P-L1": ["7P-B"],
         "7A": ["7P-B"], "7L1": ["7C", "7P-L1"], "8A": ["7E"], "8B": ["8A"], "8C": ["8B"],
@@ -459,13 +623,46 @@ def validate(
         "16U2": ["16L3"],
     }
     for task_id, expected in expected_edges.items():
-        if sorted(tasks_by_id.get(task_id, {}).get("depends_on", [])) != sorted(expected):
+        if sorted(validated_and_by_id.get(task_id, [])) != sorted(expected):
             problems.append(f"{task_id}: required phase ordering or gate changed")
-    for task in tasks:
-        if task["phase"] == "8" and task["id"].startswith("7P-"):
+
+    color: dict[str, int] = {}
+
+    def visit(name: str, chain: list[str]) -> None:
+        if color.get(name) == 2:
+            return
+        if color.get(name) == 1:
+            problems.append("Dependency cycle: " + " -> ".join([*chain, name]))
+            return
+        if name not in tasks_by_id:
+            return
+        color[name] = 1
+        edges = [
+            *validated_and_by_id.get(name, []),
+            *(
+                dependency
+                for group in validated_or_by_id.get(name, [])
+                for dependency in group
+            ),
+        ]
+        for dependency in edges:
+            if dependency in tasks_by_id:
+                visit(dependency, [*chain, name])
+        color[name] = 2
+
+    for name in ids:
+        if name in tasks_by_id:
+            visit(name, [])
+
+    for task in task_rows:
+        task_id = task.get("id")
+        if (
+            task.get("phase") == "8"
+            and isinstance(task_id, str)
+            and task_id.startswith("7P-")
+        ):
             problems.append("Phase 7 preflight cannot be counted as Phase 8")
     return problems
-
 
 def effective_locks(task: dict) -> set[str]:
     locks = set(task["resource_locks"])
@@ -481,16 +678,22 @@ def readiness(
     *,
     trusted_verifier: FreshEvidenceVerifier | None = None,
 ) -> tuple[list[dict], list[dict]]:
+    raw_tasks = data.get("tasks", []) if isinstance(data, dict) else []
+    if not isinstance(raw_tasks, list):
+        return [], []
     tasks = index(data)
-    ready, blocked = [], []
-    for task in data["tasks"]:
-        if task["status"] == "done":
+    ready: list[dict] = []
+    blocked: list[dict] = []
+    for task in raw_tasks:
+        if not isinstance(task, dict):
+            continue
+        if task.get("status") == "done":
             continue
         missing = missing_dependencies(
             task, tasks, trusted_verifier=trusted_verifier
         )
         item = {**task, "missing_prerequisites": missing}
-        if task["status"] == "todo" and not missing:
+        if task.get("status") == "todo" and not missing:
             ready.append(item)
         else:
             blocked.append(item)
@@ -509,14 +712,24 @@ def explain(
     task = tasks[task_id]
     visited: set[str] = set()
     def blockers(node: str) -> None:
-        current = tasks[node]
-        for dep in current["depends_on"]:
+        current = tasks.get(node)
+        if not isinstance(current, dict):
+            return
+        dependencies, dependencies_valid = _validated_and_dependencies(
+            current, tasks
+        )
+        if not dependencies_valid:
+            return
+        for dep in dependencies:
             if not accepted(tasks, dep, trusted_verifier=trusted_verifier) and dep not in visited:
                 visited.add(dep)
                 blockers(dep)
         # An OR group is a satisfied prerequisite when any alternative is
-        # accepted. Only expose every alternative as a blocker when none is.
-        for group in current.get("any_of", []):
+        # accepted. Malformed groups are not traversed or treated as gates.
+        groups, groups_valid = _validated_or_groups(current, tasks)
+        if not groups_valid:
+            return
+        for group in groups:
             if any(
                 accepted(tasks, dep, trusted_verifier=trusted_verifier)
                 for dep in group
@@ -556,10 +769,42 @@ def waves(
     trusted_verifier: FreshEvidenceVerifier | None = None,
 ) -> list[list[dict]]:
     """Potential independent implementation waves, ignoring live locks and time.
+
+    Malformed dependency graphs are never projected into executable waves.
     L and U actions are not performed by this script.
     """
-    pending = {t["id"]: t for t in data["tasks"] if t["status"] == "todo"}
+    raw_tasks = data.get("tasks", []) if isinstance(data, dict) else []
+    if not isinstance(raw_tasks, list):
+        return []
     tasks = index(data)
+    if len(tasks) != len(raw_tasks):
+        return []
+
+    normalized: dict[str, tuple[list[str], list[list[str]]]] = {}
+    for task in raw_tasks:
+        if not isinstance(task, dict):
+            return []
+        task_id = task.get("id")
+        if not isinstance(task_id, str) or not task_id:
+            return []
+        dependencies, dependencies_valid = _validated_and_dependencies(
+            task, tasks
+        )
+        groups, groups_valid = _validated_or_groups(task, tasks)
+        locks = task.get("resource_locks")
+        if (
+            not dependencies_valid
+            or not groups_valid
+            or not isinstance(locks, list)
+            or not locks
+            or not all(isinstance(lock, str) and lock for lock in locks)
+        ):
+            return []
+        normalized[task_id] = (dependencies, groups)
+
+    pending = {
+        task["id"]: task for task in raw_tasks if task.get("status") == "todo"
+    }
     # Only physically evidenced, accepted local branches may satisfy an OR.
     # Forecasted future work is never evidence for a 16L2 / 16LF-01 gate.
     externally_qualified = {
@@ -567,13 +812,20 @@ def waves(
         if accepted(tasks, task_id, trusted_verifier=trusted_verifier)
     }
     projected = set(externally_qualified)
-    result = []
+    result: list[list[dict]] = []
     while pending:
-        candidates = [t for t in pending.values() if
-                      all(d in projected for d in t["depends_on"]) and
-                      all(any(d in externally_qualified for d in group)
-                          for group in t.get("any_of", [])) and
-                      t["id"] != "16L2"]
+        candidates = [
+            task for task in pending.values()
+            if all(
+                dependency in projected
+                for dependency in normalized[task["id"]][0]
+            )
+            and all(
+                any(dependency in externally_qualified for dependency in group)
+                for group in normalized[task["id"]][1]
+            )
+            and task["id"] != "16L2"
+        ]
         if not candidates:
             break  # blocked/claimed/stale snapshot, never assume accepted
         # Each wave is a resource-conflict-free possible simultaneous set.
@@ -588,7 +840,6 @@ def waves(
             projected.add(task["id"])
             del pending[task["id"]]
     return result
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)

@@ -296,10 +296,10 @@ class TaskBoardTests(unittest.TestCase):
             "artifact_provenance_sha256": "f" * 64,
             "receipt_sha256": "c" * 64,
             "local_session_id": "synthetic-test-fixture-only",
-            "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-1",
-            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-1",
+            "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-100",
+            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-101",
             "review_report_sha256": "1" * 64,
-            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-2",
+            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-102",
             "owner_attestation_sha256": "2" * 64,
             "checks": {key: "PASS" for key in board.FRESH_CHECKS},
         }
@@ -315,6 +315,10 @@ class TaskBoardTests(unittest.TestCase):
             facts.update({
                 "verified_review_mode": receipt["review_mode"],
                 "verified_owner_login": receipt["owner_login"],
+                "verified_receipt_record_identity": "github:issue-comment:100",
+                "verified_review_report_record_identity": "github:issue-comment:101",
+                "verified_owner_attestation_record_identity": "github:issue-comment:102",
+                "verified_owner_attestation_author_login": receipt["owner_login"],
                 "verified_receipt_url": receipt["receipt_url"],
                 "verified_receipt_sha256": receipt["receipt_sha256"],
                 "verified_review_report_url": receipt["review_report_url"],
@@ -539,6 +543,7 @@ class TaskBoardTests(unittest.TestCase):
             ("verified_artifact_provenance_url", wrong_url),
             ("verified_artifact_provenance_sha256", "a" * 64),
             ("verified_owner_login", "unauthorized-owner"),
+            ("verified_owner_attestation_author_login", "unauthorized-owner"),
         ]:
             with self.subTest(field=field):
                 verifier = self._trusted_test_verifier(**{field: value})
@@ -777,6 +782,109 @@ class TaskBoardTests(unittest.TestCase):
         data = copy.deepcopy(self.data)
         board.index(data)["16LF-01"]["depends_on"].append("16L3")
         self.assertTrue(any("cycle" in e.lower() for e in board.validate(data)))
+
+
+    def test_review_report_and_owner_attestation_must_be_distinct_records(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(
+            verified_owner_attestation_record_identity="github:issue-comment:101"
+        )
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_receipt_and_owner_attestation_must_be_distinct_records(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(
+            verified_owner_attestation_record_identity="github:issue-comment:100"
+        )
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_different_url_forms_cannot_disguise_the_same_provider_record(self):
+        _, tasks = self._fresh_scenario()
+        receipt = tasks["16LF-01"]["evidence"]
+        base = "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids"
+        receipt["review_report_url"] = f"{base}/pull/138#issuecomment-4242"
+        receipt["owner_attestation_url"] = f"{base}/issues/137#issuecomment-4242"
+        self.assertNotEqual(
+            receipt["review_report_url"], receipt["owner_attestation_url"]
+        )
+        verifier = self._trusted_test_verifier(
+            verified_review_report_record_identity="github:issue-comment:4242",
+            verified_owner_attestation_record_identity="github:issue-comment:4242",
+        )
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_owner_attestation_author_must_be_verified_and_match_authorized_owner(self):
+        _, tasks = self._fresh_scenario()
+        for overrides in (
+            {"verified_owner_attestation_author_login": None},
+            {"verified_owner_attestation_author_login": ""},
+            {"owner_attestation_author_identity_verified": False},
+        ):
+            with self.subTest(overrides=overrides):
+                verifier = self._trusted_test_verifier(**overrides)
+                self.assertFalse(board.accepted(
+                    tasks, "16LF-01", trusted_verifier=verifier
+                ))
+
+    def test_valid_owner_attestation_uses_three_distinct_records_and_authorized_author(self):
+        _, tasks = self._fresh_scenario()
+        receipt = tasks["16LF-01"]["evidence"]
+        verification = self._trusted_test_verifier()(receipt)
+        identities = (
+            verification.verified_receipt_record_identity,
+            verification.verified_review_report_record_identity,
+            verification.verified_owner_attestation_record_identity,
+        )
+        self.assertEqual(len(set(identities)), 3)
+        self.assertEqual(
+            verification.verified_owner_attestation_author_login,
+            verification.verified_owner_login,
+        )
+        self.assertTrue(verification.authoritative_for(receipt))
+
+    def test_malformed_or_dependency_structures_are_exception_safe_and_never_ready(self):
+        malformed_groups = (
+            ("non-list any_of null", None),
+            ("non-list any_of scalar", "16L2"),
+            ("non-list OR group", ["16L2", "16LF-01"]),
+            ("null OR group", [None]),
+            ("tuple OR group", [("16L2", "16LF-01")]),
+            ("null dependency member", [[None, "16LF-01"]]),
+            ("non-iterable dependency member", [[42, "16LF-01"]]),
+            ("unhashable dependency member", [[["16L2"], "16LF-01"]]),
+            ("mapping dependency member", [[{"id": "16L2"}, "16LF-01"]]),
+            ("malformed nested structure", [[[["16L2"]], "16LF-01"]]),
+            ("duplicate dependencies", [["16L2", "16L2"]]),
+            ("unknown dependency", [["UNKNOWN-OR-GATE", "16LF-01"]]),
+        )
+        for label, malformed in malformed_groups:
+            with self.subTest(case=label):
+                data = copy.deepcopy(self.data)
+                tasks = board.index(data)
+                tasks["16L3"]["any_of"] = malformed
+
+                errors = board.validate(data)
+                self.assertTrue(errors, label)
+
+                ready, blocked = board.readiness(data)
+                ready_ids = {task["id"] for task in ready}
+                blocked_ids = {task["id"] for task in blocked}
+                self.assertNotIn("16L3", ready_ids, label)
+                self.assertIn("16L3", blocked_ids, label)
+                self.assertEqual(board.waves(data), [], label)
+
+    def test_cycle_through_a_valid_or_dependency_is_rejected(self):
+        data = copy.deepcopy(self.data)
+        tasks = board.index(data)
+        tasks["16LF-01"]["depends_on"].append("16L3")
+        errors = board.validate(data)
+        self.assertTrue(any("dependency cycle" in error.lower() for error in errors))
 
 if __name__ == "__main__":
     unittest.main()
