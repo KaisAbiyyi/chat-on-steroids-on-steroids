@@ -322,6 +322,14 @@ class TaskBoardTests(unittest.TestCase):
             board.missing_dependencies(tasks["16L3"], tasks),
         )
 
+    def test_fresh_receipt_rejects_boolean_or_float_schema_version(self):
+        _, tasks = self._fresh_scenario()
+        good = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        for invalid in (True, 1.0):
+            broken = copy.deepcopy(good)
+            broken["schema_version"] = invalid
+            self.assertFalse(board.fresh_receipt_structurally_valid(broken))
+
     def test_fabricated_github_review_url_cannot_establish_acceptance(self):
         _, tasks = self._fresh_scenario()
         receipt = tasks["16LF-01"]["evidence"]
@@ -502,6 +510,15 @@ class TaskBoardTests(unittest.TestCase):
         )
         eligible = {t["id"] for wave in board.waves(self.data) for t in wave}
         self.assertNotIn("16L3", eligible)
+
+    def test_declined_owner_decision_and_migration_status_cannot_drift(self):
+        data, tasks = self._fresh_scenario()
+        tasks["16U1"]["owner_decision"] = "approved_private_copy"
+        self.assertTrue(any("fresh_start owner decision" in e for e in board.validate(data)))
+
+        tasks["16U1"]["owner_decision"] = "fresh_start"
+        tasks["16L2"]["private_migration_status"] = "DONE"
+        self.assertTrue(any("NOT_RUN / NOT_AUTHORIZED" in e for e in board.validate(data)))
 
     def test_owner_declined_never_grants_private_profile_access_or_readiness(self):
         data, tasks = self._fresh_scenario()

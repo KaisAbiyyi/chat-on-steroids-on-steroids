@@ -4,13 +4,13 @@
 - [Notion 16FS-01](https://app.notion.com/p/408c4a6aaf73810e8404e9a06a1c0855)
 - Owner policy (16U1, 2026-10-29): initialize CoSoS from a **new empty profile**; **no authorization** to inspect, read, copy, export, back up or migrate any original/private CoS profile.
 - 16A–16F, 16PKG-01, 16L1, 16U1: accepted per live Notion/GitHub receipts; only these relevant Phase 16 statuses are selectively reconciled to Done, preserving all unrelated history. Fresh-start acceptance itself and later local gates remain unaccepted.
-- This PR is **not** physical Windows qualification, approval to execute private migration or permission to release. All statuses below are pending independent review.
+- This PR is **not** physical Windows qualification, approval to execute private migration or permission to release. All statuses below are pending GPT-6 technical review and explicit owner acceptance. No separate GitHub reviewer is available; no GitHub independent approval will be claimed.
 
 ## Old vs proposed phase 16 dependency
 
 Before: \`16L3 <- (16F AND 16L1 AND 16L2)\`, which would force optional private-profile migration even after owner denial.
 
-After independent review and merge ONLY: \`16L3 <- (16F AND 16L1 AND (16L2 OR 16LF-01))\`. The retained 16L2 branch is only eligible after **new, scoped, explicit owner migration approval**, plus privately authorized copy-only host receipt and independent reviewer acceptance. An owner decision recorded as "Done" is **not** affirmative consent. Current 16L2: \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
+After GPT-6 technical review, explicit owner acceptance and merge ONLY: \`16L3 <- (16F AND 16L1 AND (16L2 OR 16LF-01))\`. The retained 16L2 branch is **disabled in this phase**. Even if the owner later grants new scoped copy-only consent, it remains blocked until a dedicated trusted private-migration verifier exists; self-reported receipt/review fields cannot accept it. An owner decision recorded as "Done" is **not** affirmative consent. Current 16L2: \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
 
 16FS-01 is a cloud policy change only, never native qualification. New 16LF-01: separate \`L\` (local physical Windows) task under \`windows-freshstart\`; it depends on accepted 16FS-01, 16U1 owner decision and 16L1 native install. Current 16LF-01: \`BLOCKED / NOT_RUN\`. No "migration PASS" is manufactured.
 
@@ -28,14 +28,14 @@ After independent review and merge ONLY: \`16L3 <- (16F AND 16L1 AND (16L2 OR 16
 
 \`tools/task_board.py\` separates \`fresh_receipt_structurally_valid()\` from \`fresh_receipt_status()\` and authoritative \`accepted()\`. Structural validation is only schema/shape preflight. A correctly formatted receipt, SHA, GitHub issue URL, fabricated review URL, self-authored \`PASS\`, or task-registry status cannot establish acceptance.
 
-The offline resolver has **no production trust root or external verifier** for authentic receipt existence, reviewer identity/independence, actual review verdict and reviewed SHA, receipt-to-artifact digest consistency, artifact provenance/source binding, or the owner-local fresh-start checks. Accordingly, a missing receipt is reported as \`MISSING\`, malformed evidence as \`INVALID\`, and structurally valid evidence without a trusted verifier as \`PENDING_EXTERNAL_VERIFICATION\`. Failed external facts are rejected. None of these states can satisfy \`16LF-01\`, unlock \`16L3\`, or enter release waves. The optional verifier contract returns a typed \`FreshEvidenceVerification\` only after independently establishing every required fact; it is not loaded from task JSON. The production CLI deliberately injects no verifier and remains fail-closed.
+The offline resolver has **no production trust root or external verifier** for authentic receipt existence, owner-attested GPT-6 review identity/mode, actual review verdict and reviewed SHA, receipt-to-artifact digest consistency, artifact provenance/source binding, or the owner-local fresh-start checks. Accordingly, a missing receipt is reported as \`MISSING\`, malformed evidence as \`INVALID\`, and structurally valid evidence without a trusted verifier as \`PENDING_EXTERNAL_VERIFICATION\`. Failed external facts are rejected. None of these states can satisfy \`16LF-01\`, unlock \`16L3\`, or enter release waves. The optional verifier contract returns a typed \`FreshEvidenceVerification\` only after independently establishing every required fact; it is not loaded from task JSON. The production CLI deliberately injects no verifier and remains fail-closed.
 
 No reviewer allowlist, trust root, signature, provenance result, external review, or successful local proof is invented. A separately trusted verifier integration is a remaining prerequisite before any genuine \`16LF-01\` evidence can be accepted. No self-approval or merge is authorized for this PR.
 
 No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI exercises only source-level DAG and contract tests. Actual 16LF-01/16L3 are both NOT_RUN. Prior 16F and 16L1 acceptance is preserved; release is not activated.
 
 
-## Final corrections — 2026-10-30 (targeted candidate; independent review pending)
+## Final corrections — 2026-10-30 (targeted candidate; GPT-6 technical review and owner acceptance pending)
 
 ### P1 — authoritative fresh-start receipt acceptance
 
@@ -59,4 +59,11 @@ No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI ex
 - 16L2 remains \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
 - 16LF-01 remains \`BLOCKED / NOT_RUN\`; 16L3 remains \`BLOCKED / NOT_RUN\`; 16U2 remains \`NOT_RUN\`.
 - No owner-local Windows access, installer execution, private-profile access, migration implementation, or release authorization was performed.
-- Candidate acceptance remains pending exact-HEAD Windows/Ubuntu CI and a new independent review.
+- Candidate acceptance remains pending final exact-HEAD Windows/Ubuntu CI and GPT-6 technical review. Owner acceptance and merge remain separate.
+
+
+### Private migration remains disabled
+
+- 16L2 cannot become ready or enter wave forecasts in this phase, even if owner consent is later changed. A dedicated trusted private-migration verifier is not implemented.
+- Self-reported `physical_windows`, `independent_review_verdict`, or other task-registry receipt fields cannot establish 16L2 acceptance.
+- The 16L3 OR alternative is structurally preserved for future policy evolution, but only 16LF-01 is a viable path under the current fresh-start decision and verifier plan.

@@ -193,7 +193,7 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `PERF-05` | Native Windows product endurance and total process-tree RAM comparison | `PERF-01`, `PERF-02`, `PERF-03`, `PERF-04`, `8L1`, `15L3` | `windows-perf-endurance` | L (Windows) | BLOCKED |
 | `PERF-06` | Freeze measured resource budgets and CI/native regression policy | `PERF-05`, `16D` | `perf-release-gates` | C (cloud) | BLOCKED |
 
-> **16L3 conditional acceptance (16FS-01 proposal):** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. The table lists the unconditional `depends_on` only. 16L2 private migration remains `NOT_RUN / NOT_AUTHORIZED`; 16LF-01 is a distinct `NOT_RUN` physical Windows gate; neither is waived by an owner decision or cloud CI. Notion acceptance and exact-source external receipts govern promotion. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
+> **16L3 conditional acceptance (16FS-01 proposal):** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. The table lists the unconditional `depends_on` only. 16L2 private migration remains `NOT_RUN / NOT_AUTHORIZED` and unavailable until a dedicated trusted verifier exists; 16LF-01 is a distinct `NOT_RUN` physical Windows gate. Neither is waived by an owner decision or cloud CI. GPT-6 technical review plus explicit owner attestation, verified by the production verifier, governs review promotion; no GitHub independent approval is claimed. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
 
 ## Parallel execution lanes
 

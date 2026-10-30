@@ -100,8 +100,10 @@ def make_report(expected_head, actual_head, ancestors, sources):
             tasks["16LF-01"].get("evidence") is None,
             "16FS-01 / 16LF-01 independent fresh-start gate changed or is no longer NOT_RUN")
     require(tasks.get("16U1", {}).get("migration_consent") == "declined" and
-            tasks.get("16L2", {}).get("status") == "blocked",
-            "owner no-migration decision or private 16L2 block changed")
+            tasks.get("16U1", {}).get("owner_decision") == "fresh_start" and
+            tasks.get("16L2", {}).get("status") == "blocked" and
+            tasks.get("16L2", {}).get("private_migration_status") == "NOT_RUN / NOT_AUTHORIZED",
+            "owner fresh-start decision or private 16L2 NOT_AUTHORIZED state changed")
     require(tasks["16F"]["kind"] == "C" and tasks["16L3"]["kind"] == "L", "task environment gate changed")
     return {
         "schema": SCHEMA,
@@ -126,7 +128,7 @@ def make_report(expected_head, actual_head, ancestors, sources):
             "installer_transaction": "16E_SYNTHETIC_DISPOSABLE_ONLY",
             "startup_memory": "16D_HEADLESS_ROOT_PROCESS_ONLY_NO_GUI_BUDGET",
             "github_ci_verdict": "REQUIRES_EXTERNAL_EXACT_HEAD_CHECKS",
-            "independent_review": "REQUIRES_HUMAN_OR_SEPARATE_REVIEW_RECEIPT",
+            "independent_review": "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
         },
         "native_owner_gates": {gate: "NOT_RUN" for gate in GATES},
         "product_release_ready": False,

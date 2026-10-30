@@ -116,7 +116,8 @@ def fresh_receipt_structurally_valid(receipt: object) -> bool:
 
     source = receipt.get("source_sha")
     return (
-        receipt.get("schema_version") == 1
+        type(receipt.get("schema_version")) is int
+        and receipt["schema_version"] == 1
         and receipt.get("kind") == "owner-local-synthetic-fresh-start"
         and receipt.get("profile_scope") == "new-disposable-empty"
         and receipt.get("migration") == "none"
@@ -284,6 +285,15 @@ def validate(
     l3 = tasks_by_id.get("16L3", {})
     if l3.get("depends_on") != ["16F", "16L1"] or l3.get("any_of") != [["16L2", "16LF-01"]]:
         problems.append("16L3: required 16F + 16L1 AND (16L2 OR 16LF-01) gate changed")
+    if tasks_by_id.get("16U1", {}).get("migration_consent") == "declined":
+        if tasks_by_id.get("16U1", {}).get("owner_decision") != "fresh_start":
+            problems.append(
+                "16U1: declined private migration must preserve the explicit fresh_start owner decision"
+            )
+        if tasks_by_id.get("16L2", {}).get("private_migration_status") != "NOT_RUN / NOT_AUTHORIZED":
+            problems.append(
+                "16L2: owner-declined migration status must remain NOT_RUN / NOT_AUTHORIZED"
+            )
     if tasks_by_id.get("16L2", {}).get("status") in {"todo", "claimed", "done"}:
         if not private_migration_authorized(tasks_by_id):
             problems.append(
