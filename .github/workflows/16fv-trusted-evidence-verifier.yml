@@ -45,6 +45,7 @@ jobs:
           tools/fresh_evidence_verifier.py
           tools/test_task_board.py
           tools/test_fresh_evidence_verifier.py
+          tools/test_record_16fv_qualification.py
           tools/release_16f.py
           tools/test_release_16f.py
           tools/record_16fv_qualification.py
