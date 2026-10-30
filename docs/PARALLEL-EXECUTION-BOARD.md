@@ -1,5 +1,16 @@
 # CoSoS — full phase task dependency / parallel board
 
+## 2026-10-30 — 16FS-01 / 16FV-01 / 16LF-01 gate reconciliation
+
+- 16FS-01 / PR #138 is merged and the separate GPT-6 technical report plus owner acceptance comment are verified. Canonical task status is Done under GPT6_OWNER_ATTESTED; this is not GitHub independent approval.
+- 16FV-01 is claimed on the existing branch work/16fv-01-trusted-evidence-verifier-20261030 under exclusive resource lock freshstart-evidence-verifier. Scope: production verifier, production CLI, schema-v3 receipt/evidence bundle, 17-fact contract, adversarial tests, DAG, and exact-HEAD Windows/Ubuntu Actions.
+- 16LF-01 remains Blocked / NOT_RUN and requires accepted 16FV-01 as well as 16FS-01, 16U1 and 16L1.
+- 16L2 remains Blocked / NOT_RUN / NOT_AUTHORIZED.
+- Preserve 16L3 exactly: 16F AND 16L1 AND (16L2 OR 16LF-01).
+- Owner-controlled production trust root is NOT CONFIGURED. No local qualification, 16L1 rerun, physical 16LF PASS, downstream acceptance or merge is authorized.
+- Execution evidence and the complete 17-fact mapping are in docs/implementation-summary/2026-10-30-16fv01-trusted-evidence-verifier.md.
+
+
 ## Product strategy supersession — 2026-10-24
 
 **P0 OWNER DECISION — 2026-10-24:** CoSoS is a lean Codex-like ChatGPT coding workstation. Measured RAM/CPU/latency, reliability and fast startup are the highest product priority after non-negotiable security, permissions, durable state and tool/Send correctness. Mandatory full CoS feature/visual parity is superseded. Mind Place stays fully isolated; no memory, archive or knowledge-engine dependency. Keep coding-critical terminal, files, patch, Git, MCP, browser bridge, bounded workers and recovery. Optional chat grouping must be metadata-only and lazy. Pets, broad plugins, full built-in tab UI, 13-locale perfection, dictation, decorative effects and advanced Goal/Loop are optional/deferred, not secretly deleted. No unmeasured product memory claims. See [ADR](decisions/2026-10-24-performance-first-workstation.md) and [PERF workstream](implementation-plan/2026-10-24-performance-first-workstream.md).

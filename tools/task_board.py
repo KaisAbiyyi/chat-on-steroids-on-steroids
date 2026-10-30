@@ -10,14 +10,16 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import re
 import sys
+from datetime import datetime
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
 REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
-EXPECTED = {"C": 80, "L": 31, "U": 15}
+EXPECTED = {"C": 81, "L": 31, "U": 15}
 STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
 PHASES = {"1-6", *(str(n) for n in range(7, 17))}
 NOTICE = (
@@ -50,7 +52,7 @@ FRESH_CHECKS = (
     "failure_isolation", "owned_cleanup",
 )
 FRESH_REVIEW_MODE = "GPT6_OWNER_ATTESTED"
-FRESH_RECEIPT_SCHEMA_VERSION = 2
+FRESH_RECEIPT_SCHEMA_VERSION = 3
 
 FRESH_VERIFICATION_FIELDS = (
     "receipt_exists",
@@ -154,6 +156,22 @@ class FreshEvidenceVerification:
     verified_artifact_provenance_url: str
     verified_artifact_provenance_sha256: str
     verified_fresh_start_checks: tuple[str, ...]
+    verified_repository_full_name: str
+    verified_repository_id: int
+    verified_review_pr_number: int
+    verified_review_pr_head_sha: str
+    verified_review_pr_diff_sha256: str
+    verified_owner_user_id: int
+    verified_review_report_schema: str
+    verified_review_report_author_user_id: int
+    verified_receipt_author_user_id: int
+    verified_owner_attestation_author_user_id: int
+    verified_contract_source_sha: str
+    verified_contract_merge_commit_sha: str
+    verified_verifier_pr_number: int
+    verified_verifier_source_sha: str
+    verified_verifier_merge_commit_sha: str
+    verified_verifier_sha256: str
 
     def authoritative_for(self, receipt: dict) -> bool:
         record_identities = (
@@ -194,6 +212,23 @@ class FreshEvidenceVerification:
             and self.verified_artifact_provenance_url == receipt.get("artifact_provenance_url")
             and self.verified_artifact_provenance_sha256 == receipt.get("artifact_provenance_sha256")
             and self.verified_fresh_start_checks == FRESH_CHECKS
+            and self.verified_repository_full_name == receipt.get("repository")
+            and self.verified_repository_id == receipt.get("repository_id")
+            and self.verified_review_pr_number == receipt.get("review_pr_number")
+            and self.verified_review_pr_head_sha == receipt.get("source_sha")
+            and self.verified_review_pr_diff_sha256 == receipt.get("diff_sha256")
+            and self.verified_review_report_schema == "cosos.release.cloud-provenance.v2"
+            and type(self.verified_owner_user_id) is int
+            and self.verified_owner_user_id > 0
+            and self.verified_receipt_author_user_id == self.verified_owner_user_id
+            and self.verified_review_report_author_user_id == self.verified_owner_user_id
+            and self.verified_owner_attestation_author_user_id == self.verified_owner_user_id
+            and self.verified_contract_source_sha == receipt.get("contract_source_sha")
+            and self.verified_contract_merge_commit_sha == receipt.get("contract_merge_commit_sha")
+            and self.verified_verifier_pr_number == receipt.get("verifier_pr_number")
+            and self.verified_verifier_source_sha == receipt.get("verifier_source_sha")
+            and self.verified_verifier_merge_commit_sha == receipt.get("verifier_merge_commit_sha")
+            and self.verified_verifier_sha256 == receipt.get("verifier_sha256")
             and _is_hex_digest(self.verified_receipt_sha256, 64)
             and _is_hex_digest(self.verified_review_report_sha256, 64)
             and _is_hex_digest(self.verified_owner_attestation_sha256, 64)
@@ -216,35 +251,59 @@ FreshEvidenceVerifier = Callable[[dict], FreshEvidenceVerification]
 def fresh_receipt_structurally_valid(receipt: object) -> bool:
     """Validate receipt shape only; this is never an acceptance decision.
 
-    Receipt URLs, hashes, review mode, owner login and PASS checks are
-    self-reported claims. Only a separately trusted verifier can establish
-    actual receipt/report/attestation/artifact existence, identity, verdict,
-    exact source/diff/digest bindings, provenance and physical checks.
+    All URLs, hashes, checks and local results remain claims until the
+    separately trusted production verifier fetches and hashes their sources.
     """
     if not isinstance(receipt, dict):
         return False
 
+    def record_url(value: object) -> bool:
+        if not isinstance(value, str):
+            return False
+        return re.fullmatch(
+            r"https://github\.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-[1-9][0-9]*",
+            value,
+        ) is not None
+
     def repo_url(value: object) -> bool:
         return (
             isinstance(value, str)
-            and value.startswith(
-                "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/"
-            )
+            and value.startswith("https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/")
             and not any(char.isspace() for char in value)
+        )
+
+    def attachment_url(value: object) -> bool:
+        return isinstance(value, str) and (
+            re.fullmatch(r"https://github\.com/user-attachments/assets/[0-9a-fA-F-]{36}", value) is not None
+            or value.startswith("https://private-user-images.githubusercontent.com/")
         )
 
     source = receipt.get("source_sha")
     diff_digest = receipt.get("diff_sha256")
     owner_login = receipt.get("owner_login")
     artifact_id = receipt.get("artifact_id")
+    nonce = receipt.get("workspace_nonce")
+    started = receipt.get("started_at")
+    finished = receipt.get("finished_at")
+    try:
+        started_at = datetime.fromisoformat(started.replace("Z", "+00:00")) if isinstance(started, str) else None
+        finished_at = datetime.fromisoformat(finished.replace("Z", "+00:00")) if isinstance(finished, str) else None
+    except ValueError:
+        return False
+    commands = receipt.get("commands")
+    check_evidence = receipt.get("check_evidence")
+    workspace_path = receipt.get("workspace_path")
     return (
         type(receipt.get("schema_version")) is int
         and receipt["schema_version"] == FRESH_RECEIPT_SCHEMA_VERSION
         and receipt.get("kind") == "owner-local-synthetic-fresh-start"
         and receipt.get("review_mode") == FRESH_REVIEW_MODE
-        and isinstance(owner_login, str)
-        and 1 <= len(owner_login) <= 39
-        and not any(char.isspace() for char in owner_login)
+        and owner_login == "KaisAbiyyi"
+        and receipt.get("repository") == "KaisAbiyyi/chat-on-steroids-on-steroids"
+        and type(receipt.get("repository_id")) is int
+        and receipt["repository_id"] == 1424422098
+        and type(receipt.get("review_pr_number")) is int
+        and receipt["review_pr_number"] == 135
         and receipt.get("profile_scope") == "new-disposable-empty"
         and receipt.get("migration") == "none"
         and receipt.get("host") == "owner-local-windows"
@@ -252,25 +311,53 @@ def fresh_receipt_structurally_valid(receipt: object) -> bool:
         and receipt.get("reviewed_source_sha") == source
         and _is_hex_digest(diff_digest, 64)
         and receipt.get("reviewed_diff_sha256") == diff_digest
+        and _is_hex_digest(receipt.get("contract_source_sha"), 40)
+        and _is_hex_digest(receipt.get("contract_merge_commit_sha"), 40)
+        and type(receipt.get("verifier_pr_number")) is int
+        and receipt["verifier_pr_number"] == 139
+        and _is_hex_digest(receipt.get("verifier_source_sha"), 40)
+        and _is_hex_digest(receipt.get("verifier_merge_commit_sha"), 40)
+        and _is_hex_digest(receipt.get("verifier_sha256"), 64)
         and type(artifact_id) is int
-        and artifact_id > 0
+        and artifact_id == 12868909286
         and _is_hex_digest(receipt.get("artifact_sha256"), 64)
-        and _is_hex_digest(receipt.get("artifact_source_sha"), 40)
+        and receipt.get("artifact_source_sha") == source
         and repo_url(receipt.get("artifact_provenance_url"))
         and _is_hex_digest(receipt.get("artifact_provenance_sha256"), 64)
+        and attachment_url(receipt.get("evidence_bundle_url"))
+        and _is_hex_digest(receipt.get("evidence_bundle_sha256"), 64)
+        and isinstance(receipt.get("windows_build"), str)
+        and len(receipt["windows_build"]) >= 8
+        and isinstance(receipt.get("local_session_id"), str)
+        and len(receipt["local_session_id"]) >= 12
+        and isinstance(nonce, str)
+        and re.fullmatch(r"[0-9a-f]{16,32}", nonce) is not None
+        and workspace_path == "D:\\CoSoS-16LF-01-Qualification\\" + nonce
+        and started_at is not None and finished_at is not None
+        and started_at.tzinfo is not None and finished_at.tzinfo is not None
+        and started_at <= finished_at
+        and isinstance(commands, list) and bool(commands)
+        and all(isinstance(command, str) and command.strip() for command in commands)
+        and record_url(receipt.get("receipt_url"))
+        and record_url(receipt.get("review_report_url"))
+        and record_url(receipt.get("owner_attestation_url"))
         and _is_hex_digest(receipt.get("review_report_sha256"), 64)
         and _is_hex_digest(receipt.get("owner_attestation_sha256"), 64)
         and _is_hex_digest(receipt.get("receipt_sha256"), 64)
-        and isinstance(receipt.get("local_session_id"), str)
-        and len(receipt["local_session_id"]) >= 12
-        and repo_url(receipt.get("receipt_url"))
-        and repo_url(receipt.get("review_report_url"))
-        and repo_url(receipt.get("owner_attestation_url"))
         and "independent_review_verdict" not in receipt
         and "reviewer_independent" not in receipt
+        and "independent_review" not in receipt
         and isinstance(receipt.get("checks"), dict)
         and set(receipt["checks"]) == set(FRESH_CHECKS)
         and all(receipt["checks"][name] == "PASS" for name in FRESH_CHECKS)
+        and isinstance(check_evidence, dict)
+        and set(check_evidence) == set(FRESH_CHECKS)
+        and all(
+            isinstance(path, str) and path.startswith("checks/") and path.endswith(".json")
+            and not path.startswith("/") and "\\" not in path and ".." not in path.split("/")
+            for path in check_evidence.values()
+        )
+        and len(set(check_evidence.values())) == len(FRESH_CHECKS)
     )
 
 
@@ -279,24 +366,20 @@ def fresh_receipt_status(
     *,
     trusted_verifier: FreshEvidenceVerifier | None = None,
 ) -> str:
-    """Return MISSING, INVALID, PENDING_EXTERNAL_VERIFICATION,
-    REJECTED_EXTERNAL_VERIFICATION, VERIFICATION_ERROR, or ACCEPTED.
+    """Return MISSING, INVALID, TRUST_ROOT_UNCONFIGURED, REJECTED_EXTERNAL_VERIFICATION,
+    VERIFICATION_ERROR, or ACCEPTED.
 
-    The only accepted review mode in this contract is GPT6_OWNER_ATTESTED.
-    The future 16FV-01 verifier must use an owner-controlled trust root to
-    authenticate the owner identity and separate attestation, verify the
-    actual GPT-6 report's PASS verdict and exact source/diff bindings, and
-    check receipt/report/artifact digests plus 16L1 provenance. This offline
-    task-board module deliberately has no production trust root or verifier.
-    Its normal CLI supplies none, so it remains fail-closed. A test-only
-    verifier double is not production authority.
+    Only GPT6_OWNER_ATTESTED is accepted. Production verification is imported
+    by the CLI from fresh_evidence_verifier and requires the separately
+    owner-controlled environment trust root. A test-only verifier double is
+    never imported into production acceptance.
     """
     if receipt is None:
         return "MISSING"
     if not fresh_receipt_structurally_valid(receipt):
         return "INVALID"
     if trusted_verifier is None:
-        return "PENDING_EXTERNAL_VERIFICATION"
+        return "TRUST_ROOT_UNCONFIGURED"
     try:
         verification = trusted_verifier(copy.deepcopy(receipt))
     except Exception:
@@ -340,6 +423,11 @@ def accepted(
         # User-editable receipt fields cannot establish physical acceptance.
         # No trusted private-migration verifier is integrated in this phase.
         return False
+    if task_id == "16FV-01":
+        # A Done flag and PR URL are not acceptance. Verify the exact merged
+        # PR #139 head, merge ancestry and verifier source-file digest remotely.
+        verifier_acceptance = getattr(trusted_verifier, "verify_verifier_task", None)
+        return callable(verifier_acceptance) and verifier_acceptance(task) is True
     if task_id == "16LF-01":
         return fresh_receipt_status(
             task.get("evidence"), trusted_verifier=trusted_verifier
@@ -514,6 +602,31 @@ def validate(
             validated_dependencies if dependencies_valid else []
         )
 
+    verifier_task = tasks_by_id.get("16FV-01", {})
+    if (
+        verifier_task.get("kind") != "C"
+        or verifier_task.get("phase") != "16"
+        or verifier_task.get("depends_on") != ["16FS-01", "16U1", "16L1"]
+        or verifier_task.get("resource_locks") != ["freshstart-evidence-verifier"]
+    ):
+        problems.append("16FV-01: canonical production verifier node, prerequisites or resource lock changed")
+    if verifier_task.get("status") == "done" and not accepted(
+        tasks_by_id, "16FV-01", trusted_verifier=trusted_verifier
+    ):
+        problems.append("16FV-01: Done status requires verified merged PR #139 source and verifier-file SHA-256")
+    predecessor_task = tasks_by_id.get("16FS-01", {})
+    if (
+        predecessor_task.get("status") != "done"
+        or predecessor_task.get("accepted_evidence_url")
+        != "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
+    ):
+        problems.append("16FS-01: merged owner-attested predecessor must remain reconciled to Done")
+    fresh_task = tasks_by_id.get("16LF-01", {})
+    if fresh_task.get("status") != "blocked" and not accepted(
+        tasks_by_id, "16FV-01", trusted_verifier=trusted_verifier
+    ):
+        problems.append("16LF-01: cannot leave Blocked before accepted 16FV-01")
+
     # This OR group is intentional. Every other dependency remains mandatory.
     l3 = tasks_by_id.get("16L3", {})
     if (
@@ -619,7 +732,8 @@ def validate(
         "CL-10": ["CL-04B", "CL-04C", "CL-L2", "CL-L3", "CL-L4", "CL-L5"],
         "CL-L6": ["CL-10"],
         "16FS-01": ["16U1", "16L1", "16F"],
-        "16LF-01": ["16FS-01", "16U1", "16L1"],
+        "16FV-01": ["16FS-01", "16U1", "16L1"],
+        "16LF-01": ["16FS-01", "16FV-01", "16U1", "16L1"],
         "16U2": ["16L3"],
     }
     for task_id, expected in expected_edges.items():
@@ -848,17 +962,27 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", dest="as_json")
     args = parser.parse_args()
     data = load()
-    errors = validate(data)
+    try:
+        if __package__:
+            from .fresh_evidence_verifier import production_verifier_from_environment
+        else:
+            from fresh_evidence_verifier import production_verifier_from_environment
+        trusted_verifier, trust_root_status = production_verifier_from_environment()
+    except Exception:
+        trusted_verifier, trust_root_status = None, "VERIFIER_UNAVAILABLE"
+    errors = validate(data, trusted_verifier=trusted_verifier)
     if errors:
         for error in errors:
             print("ERROR " + error, file=sys.stderr)
         return 1
     if args.command == "check":
         print(f"VALID: {len(data['tasks'])} nodes; validated AND/OR gates and no dependency cycles")
+        print("Production trust root:", trust_root_status)
         return 0
     if args.command == "ready":
-        ready, blocked = readiness(data)
+        ready, blocked = readiness(data, trusted_verifier=trusted_verifier)
         payload = {
+            "trust_root_status": trust_root_status,
             "readiness": "CANDIDATE_NOT_CLAIMED",
             "ready_candidates": [
                 {"id": t["id"], "phase": t["phase"], "kind": t["kind"], "locks": sorted(effective_locks(t))}
@@ -872,14 +996,16 @@ def main() -> int:
         if not args.task_id:
             parser.error("task requires a task ID")
         try:
-            payload = explain(data, args.task_id)
+            payload = explain(data, args.task_id, trusted_verifier=trusted_verifier)
+            payload["trust_root_status"] = trust_root_status
         except KeyError:
             print("Unknown task ID: " + args.task_id, file=sys.stderr)
             return 2
         payload["notice"] = NOTICE
     else:
         payload = {
-            "potential_waves": [[t["id"] for t in wave] for wave in waves(data)],
+            "trust_root_status": trust_root_status,
+            "potential_waves": [[t["id"] for t in wave] for wave in waves(data, trusted_verifier=trusted_verifier)],
             "notice": NOTICE,
             "gate_warning": "Wave forecasts are NOT accepted work; L needs real Windows and U needs explicit owner consent.",
         }
@@ -897,6 +1023,7 @@ def main() -> int:
         print("Missing direct:", ", ".join(payload["missing_direct"]) or "NONE")
         print("Transitive blockers:", ", ".join(payload["missing_transitive"]) or "NONE")
         print("16LF-01 evidence verification:", payload["fresh_evidence_status"])
+        print("Production trust root:", payload["trust_root_status"])
         print("Effective locks:", ", ".join(payload["effective_locks"]))
         print(NOTICE)
     else:

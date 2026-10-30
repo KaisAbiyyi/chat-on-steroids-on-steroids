@@ -52,8 +52,8 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_all_work_units_preserved(self):
         kinds = {k: sum(t["kind"] == k for t in self.data["tasks"]) for k in "CLU"}
-        self.assertEqual(kinds, {"C": 80, "L": 31, "U": 15})
-        self.assertEqual(len(self.tasks), 126)
+        self.assertEqual(kinds, {"C": 81, "L": 31, "U": 15})
+        self.assertEqual(len(self.tasks), 127)
 
     def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
         ready, _ = board.readiness(self.data)
@@ -271,8 +271,14 @@ class TaskBoardTests(unittest.TestCase):
         data = copy.deepcopy(self.data)
         tasks = board.index(data)
         # Well-formed but intentionally fabricated fixture; never authoritative.
-        for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01"):
+        for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01", "16FV-01"):
             tasks[key]["status"] = "done"
+        tasks["16FV-01"].update({
+            "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/139",
+            "accepted_source_sha": "e" * 40,
+            "accepted_merge_commit_sha": "d" * 40,
+            "accepted_verifier_sha256": "f" * 64,
+        })
         tasks["16L3"]["status"] = "todo"
         tasks["16LF-01"]["status"] = "done"
         sha = "a" * 40
@@ -289,17 +295,35 @@ class TaskBoardTests(unittest.TestCase):
             "reviewed_source_sha": sha,
             "diff_sha256": diff,
             "reviewed_diff_sha256": diff,
-            "artifact_id": 123456789,
+            "artifact_id": 12868909286,
             "artifact_sha256": "b" * 64,
-            "artifact_source_sha": "e" * 40,
+            "artifact_source_sha": sha,
             "artifact_provenance_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/129#issuecomment-1",
             "artifact_provenance_sha256": "f" * 64,
             "receipt_sha256": "c" * 64,
             "local_session_id": "synthetic-test-fixture-only",
+            "repository": "KaisAbiyyi/chat-on-steroids-on-steroids",
+            "repository_id": 1424422098,
+            "review_pr_number": 135,
+            "contract_source_sha": "c392b076457ca5375e260bb2267950feac31de50",
+            "contract_merge_commit_sha": "cc180575498e9f45d13c05c86a0a3bb4e8e0c1be",
+            "verifier_pr_number": 139,
+            "verifier_merge_commit_sha": "d" * 40,
+            "evidence_bundle_url": "https://github.com/user-attachments/assets/12345678-1234-1234-1234-123456789abc",
+            "evidence_bundle_sha256": "3" * 64,
+            "windows_build": "Windows 11 10.0.26300 x64",
+            "workspace_nonce": "a" * 16,
+            "workspace_path": "D:\\CoSoS-16LF-01-Qualification\\" + "a" * 16,
+            "verifier_source_sha": "e" * 40,
+            "verifier_sha256": "f" * 64,
+            "started_at": "2026-10-30T12:00:00Z",
+            "finished_at": "2026-10-30T12:30:00Z",
+            "commands": ["pwsh -File qualification.ps1", "python -m unittest"],
+            "check_evidence": {key: "checks/" + key + ".json" for key in board.FRESH_CHECKS},
             "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-100",
-            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-101",
+            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-101",
             "review_report_sha256": "1" * 64,
-            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-102",
+            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-102",
             "owner_attestation_sha256": "2" * 64,
             "checks": {key: "PASS" for key in board.FRESH_CHECKS},
         }
@@ -341,11 +365,48 @@ class TaskBoardTests(unittest.TestCase):
                 "verified_artifact_provenance_url": receipt["artifact_provenance_url"],
                 "verified_artifact_provenance_sha256": receipt["artifact_provenance_sha256"],
                 "verified_fresh_start_checks": board.FRESH_CHECKS,
+                "verified_repository_full_name": receipt["repository"],
+                "verified_repository_id": receipt["repository_id"],
+                "verified_review_pr_number": receipt["review_pr_number"],
+                "verified_review_pr_head_sha": receipt["source_sha"],
+                "verified_review_pr_diff_sha256": receipt["diff_sha256"],
+                "verified_owner_user_id": 93252311,
+                "verified_review_report_schema": "cosos.release.cloud-provenance.v2",
+                "verified_review_report_author_user_id": 93252311,
+                "verified_receipt_author_user_id": 93252311,
+                "verified_owner_attestation_author_user_id": 93252311,
+                "verified_contract_source_sha": receipt["contract_source_sha"],
+                "verified_contract_merge_commit_sha": receipt["contract_merge_commit_sha"],
+                "verified_verifier_pr_number": receipt["verifier_pr_number"],
+                "verified_verifier_source_sha": receipt["verifier_source_sha"],
+                "verified_verifier_merge_commit_sha": receipt["verifier_merge_commit_sha"],
+                "verified_verifier_sha256": receipt["verifier_sha256"],
             })
             facts.update(overrides)
             return board.FreshEvidenceVerification(**facts)
 
+        def verify_verifier_task(task):
+            return (
+                task.get("accepted_evidence_url") == "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/139"
+                and task.get("accepted_source_sha") == "e" * 40
+                and task.get("accepted_merge_commit_sha") == "d" * 40
+                and task.get("accepted_verifier_sha256") == "f" * 64
+            )
+
+        verify.verify_verifier_task = verify_verifier_task
         return verify
+
+    def test_16fv_done_requires_remote_merged_pr_and_source_digest(self):
+        data, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier()
+        self.assertTrue(board.accepted(tasks, "16FV-01", trusted_verifier=verifier))
+        tasks["16FV-01"]["accepted_merge_commit_sha"] = "0" * 40
+        self.assertFalse(board.accepted(tasks, "16FV-01", trusted_verifier=verifier))
+        self.assertFalse(board.accepted(tasks, "16FV-01"))
+        self.assertTrue(any(
+            "16FV-01: Done status requires verified merged PR #139" in error
+            for error in board.validate(data)
+        ))
 
     def test_well_formed_fabricated_receipt_is_only_structural(self):
         _, tasks = self._fresh_scenario()
@@ -353,7 +414,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertEqual(
             board.fresh_receipt_status(receipt),
-            "PENDING_EXTERNAL_VERIFICATION",
+            "TRUST_ROOT_UNCONFIGURED",
         )
         self.assertFalse(board.accepted(tasks, "16LF-01"))
         self.assertIn(
@@ -387,7 +448,7 @@ class TaskBoardTests(unittest.TestCase):
         receipt = tasks["16LF-01"]["evidence"]
         self.assertEqual(
             board.fresh_receipt_status(receipt),
-            "PENDING_EXTERNAL_VERIFICATION",
+            "TRUST_ROOT_UNCONFIGURED",
         )
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 
@@ -500,7 +561,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertEqual(
             board.fresh_receipt_status(receipt),
-            "PENDING_EXTERNAL_VERIFICATION",
+            "TRUST_ROOT_UNCONFIGURED",
         )
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 

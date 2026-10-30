@@ -1,0 +1,859 @@
+"""Adversarial tests for the production 16FV-01 trusted evidence verifier."""
+import copy
+import hashlib
+import io
+import json
+import os
+import subprocess
+import unittest
+import zipfile
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+
+from tools import fresh_evidence_verifier as v
+from tools import task_board as board
+
+
+REPO = v.REPOSITORY
+OWNER_ID = v.OWNER_USER_ID
+CREATED = "2026-10-30T12:00:00Z"
+FENCE = chr(96) * 3
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def marked(marker, value):
+    return marker + "\n" + FENCE + "json\n" + json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n" + FENCE
+
+
+def comment(comment_id, body, issue=140, user_id=OWNER_ID, login=v.OWNER_LOGIN, updated=CREATED):
+    return {
+        "id": comment_id,
+        "user": {"id": user_id, "login": login},
+        "created_at": CREATED,
+        "updated_at": updated,
+        "issue_url": f"https://api.github.com/repos/{REPO}/issues/{issue}",
+        "body": body,
+    }
+
+
+def observations_for(check_name, receipt_fields):
+    values = {
+        "fresh_init": {"new_profile_created": True, "profile_was_empty": True, "profile_id": "fresh-profile-001"},
+        "isolated_storage": {"outside_existing_profile_roots": True, "profile_storage_root": receipt_fields["workspace_path"] + r"\fresh-profile", "canonical_path": receipt_fields["workspace_path"] + r"\fresh-profile\storage"},
+        "synthetic_only": {"artifact_signed": False, "native16L1Accepted": False, "synthetic_input_only": True},
+        "existing_profiles_untouched": {"snapshots_match": True, "before_snapshot_sha256": "a" * 64, "after_snapshot_sha256": "a" * 64},
+        "no_leakage": {"leakage_detected": False, "cross_profile_access_count": 0, "external_data_reads": 0},
+        "rollback": {"rollback_completed": True, "profile_removed": True, "rollback_target": "fresh-profile-001"},
+        "failure_isolation": {"injected_failure": True, "failure_contained": True, "existing_profiles_unchanged": True},
+        "owned_cleanup": {"workspace_removed": True, "temporary_files_removed": True, "cleanup_owner": v.OWNER_LOGIN},
+    }
+    return values[check_name]
+
+
+def make_bundle(receipt_fields, observation_overrides=None, status_overrides=None):
+    observation_overrides = observation_overrides or {}
+    status_overrides = status_overrides or {}
+    checks = {name: status_overrides.get(name, "PASS") for name in board.FRESH_CHECKS}
+    check_evidence = {name: "checks/" + name + ".json" for name in board.FRESH_CHECKS}
+    files = {"qualification.json": json.dumps({
+        "schema": v.QUALIFICATION_SCHEMA,
+        **{field: receipt_fields[field] for field in (
+            "repository", "source_sha", "artifact_id", "artifact_sha256",
+            "contract_source_sha", "contract_merge_commit_sha", "verifier_pr_number",
+            "verifier_source_sha", "verifier_merge_commit_sha", "verifier_sha256", "windows_build",
+            "local_session_id", "workspace_nonce", "workspace_path",
+            "started_at", "finished_at", "commands",
+        )},
+        "checks": checks,
+        "check_evidence": check_evidence,
+    }, sort_keys=True, separators=(",", ":")).encode()}
+    for name in board.FRESH_CHECKS:
+        observations = observations_for(name, receipt_fields)
+        observations.update(observation_overrides.get(name, {}))
+        record = {
+            "schema": v.CHECK_EVIDENCE_SCHEMA,
+            "check": name,
+            "status": status_overrides.get(name, "PASS"),
+            **{field: receipt_fields[field] for field in (
+                "repository", "source_sha", "contract_source_sha", "contract_merge_commit_sha",
+                "verifier_pr_number", "verifier_source_sha", "verifier_merge_commit_sha",
+                "verifier_sha256", "artifact_id", "artifact_sha256", "local_session_id",
+                "workspace_nonce", "workspace_path",
+            )},
+            "captured_at": "2026-10-30T12:15:00Z",
+            "observations": observations,
+        }
+        files[check_evidence[name]] = json.dumps(record, sort_keys=True, separators=(",", ":")).encode()
+    manifest = {
+        "schema": v.BUNDLE_SCHEMA,
+        "repository": receipt_fields["repository"],
+        "source_sha": receipt_fields["source_sha"],
+        "artifact_id": receipt_fields["artifact_id"],
+        "artifact_sha256": receipt_fields["artifact_sha256"],
+        "contract_source_sha": receipt_fields["contract_source_sha"],
+        "contract_merge_commit_sha": receipt_fields["contract_merge_commit_sha"],
+        "verifier_pr_number": receipt_fields["verifier_pr_number"],
+        "verifier_source_sha": receipt_fields["verifier_source_sha"],
+        "verifier_merge_commit_sha": receipt_fields["verifier_merge_commit_sha"],
+        "verifier_sha256": receipt_fields["verifier_sha256"],
+        "files": {name: digest(data) for name, data in files.items()},
+    }
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, data in files.items():
+            archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(manifest, sort_keys=True, separators=(",", ":")))
+    return output.getvalue(), checks, check_evidence
+
+
+class FakeAPI:
+    def __init__(self):
+        self.repository = REPO
+        self.objects = {}
+        self.diff = b"source PR 135 diff bytes"
+        self.predecessor_diff = (Path(__file__).parent / "fixtures" / "16fs01-pr138.diff").read_bytes()
+        self.verifier_file = b"trusted verifier source fixture"
+        self.bundle = b""
+        self.artifact_zip = b""
+
+    def get_json(self, path):
+        if path not in self.objects:
+            raise v.VerificationError("fake GitHub API record missing: " + path)
+        return copy.deepcopy(self.objects[path])
+
+    def get_file_bytes(self, path, ref):
+        if path != "tools/fresh_evidence_verifier.py" or ref != "e" * 40:
+            raise v.VerificationError("wrong verifier source reference")
+        return self.verifier_file
+
+    def get_diff(self, pr_number):
+        if pr_number == 138:
+            return self.predecessor_diff
+        if pr_number == 135:
+            return self.diff
+        raise v.VerificationError("unexpected source PR")
+
+    def get_external_bytes(self, url, limit=v.MAX_BUNDLE_BYTES):
+        if url != "https://github.com/user-attachments/assets/12345678-1234-1234-1234-123456789abc":
+            raise v.VerificationError("unknown attachment")
+        if len(self.bundle) > limit:
+            raise v.VerificationError("attachment too large")
+        return self.bundle
+
+    def download_artifact(self, artifact_id, destination):
+        if artifact_id != 12868909286 and artifact_id != 3:
+            raise v.VerificationError("unknown artifact id")
+        Path(destination).write_bytes(self.artifact_zip)
+
+
+def make_fixture():
+    root_mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+    root_mapping["authority"] = "test-only"
+    root = v.TrustRoot.from_mapping(root_mapping, production=False)
+    api = FakeAPI()
+    diff_sha = digest(api.diff)
+    nonce = "a" * 16
+    payload = {
+        "schema_version": board.FRESH_RECEIPT_SCHEMA_VERSION,
+        "kind": "owner-local-synthetic-fresh-start",
+        "host": "owner-local-windows",
+        "profile_scope": "new-disposable-empty",
+        "migration": "none",
+        "review_mode": v.REVIEW_MODE,
+        "owner_login": v.OWNER_LOGIN,
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "review_pr_number": 135,
+        "source_sha": root.artifact["source_sha"],
+        "reviewed_source_sha": root.artifact["source_sha"],
+        "diff_sha256": diff_sha,
+        "reviewed_diff_sha256": diff_sha,
+        "artifact_id": root.artifact["artifact_id"],
+        "artifact_sha256": root.artifact["installer_sha256"],
+        "artifact_source_sha": root.artifact["source_sha"],
+        "artifact_provenance_url": f"https://github.com/{REPO}/attestations/{root.artifact['attestations']['package_receipt']}",
+        "artifact_provenance_sha256": root.artifact["package_receipt_sha256"],
+        "evidence_bundle_url": "https://github.com/user-attachments/assets/12345678-1234-1234-1234-123456789abc",
+        "evidence_bundle_sha256": "",
+        "contract_source_sha": root.predecessor["source_sha"],
+        "contract_merge_commit_sha": root.predecessor["merge_commit_sha"],
+        "verifier_pr_number": 139,
+        "verifier_source_sha": "e" * 40,
+        "verifier_merge_commit_sha": "d" * 40,
+        "verifier_sha256": digest(api.verifier_file),
+        "windows_build": "Windows 11 10.0.26300 x64",
+        "local_session_id": "16LF-01-session-20261030-unique",
+        "workspace_nonce": nonce,
+        "workspace_path": "D:\\CoSoS-16LF-01-Qualification\\" + nonce,
+        "started_at": "2026-10-30T12:00:00Z",
+        "finished_at": "2026-10-30T12:30:00Z",
+        "commands": ["pwsh -File qualification.ps1", "python -m unittest"],
+        "checks": {name: "PASS" for name in board.FRESH_CHECKS},
+        "check_evidence": {name: "checks/" + name + ".json" for name in board.FRESH_CHECKS},
+    }
+    api.bundle, payload["checks"], payload["check_evidence"] = make_bundle(payload)
+    payload["evidence_bundle_sha256"] = digest(api.bundle)
+    receipt_sha = v.object_sha256(payload, "__absent__")
+    report = {
+        "schema": v.REVIEW_SCHEMA,
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "pr_number": 135,
+        "source_sha": root.artifact["source_sha"],
+        "diff_sha256": diff_sha,
+        "artifact_sha256": root.artifact["installer_sha256"],
+        "receipt_sha256": receipt_sha,
+        "verdict": "PASS",
+        "security_review": {
+            "review_policy": v.REVIEW_MODE,
+            "review_policy_semantics": "OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL",
+            "model_authorship": "OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED",
+        },
+        "review_report_sha256": "",
+    }
+    report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+    attestation = {
+        "schema": v.ATTESTATION_SCHEMA,
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "pr_number": 135,
+        "source_sha": root.artifact["source_sha"],
+        "diff_sha256": diff_sha,
+        "artifact_sha256": root.artifact["installer_sha256"],
+        "receipt_sha256": receipt_sha,
+        "review_report_sha256": report["review_report_sha256"],
+        "review_mode": v.REVIEW_MODE,
+        "owner_login": v.OWNER_LOGIN,
+        "accepted": True,
+        "owner_attestation_sha256": "",
+    }
+    attestation["owner_attestation_sha256"] = v.object_sha256(attestation, "owner_attestation_sha256")
+    receipt = {
+        **payload,
+        "receipt_sha256": receipt_sha,
+        "receipt_url": f"https://github.com/{REPO}/issues/140#issuecomment-200",
+        "review_report_url": f"https://github.com/{REPO}/issues/140#issuecomment-201",
+        "review_report_sha256": report["review_report_sha256"],
+        "owner_attestation_url": f"https://github.com/{REPO}/issues/140#issuecomment-202",
+        "owner_attestation_sha256": attestation["owner_attestation_sha256"],
+    }
+    api.objects.update({
+        "/users/" + v.OWNER_LOGIN: {"login": v.OWNER_LOGIN, "id": OWNER_ID},
+        f"/repos/{REPO}/pulls/139": {
+            "number": 139, "merged": True, "merged_at": CREATED,
+            "base": {"ref": "main"},
+            "head": {"sha": "e" * 40, "repo": {"full_name": REPO}},
+            "merge_commit_sha": "d" * 40,
+        },
+        "/repos/" + REPO + "/compare/" + "d" * 40 + "...main": {
+            "base_commit": {"sha": "d" * 40},
+            "merge_base_commit": {"sha": "d" * 40},
+            "behind_by": 0, "status": "ahead",
+        },
+        f"/repos/{REPO}/pulls/138": {
+            "number": 138, "merged": True, "merged_at": CREATED,
+            "base": {"ref": "main"},
+            "head": {"sha": root.predecessor["source_sha"]},
+            "merge_commit_sha": root.predecessor["merge_commit_sha"],
+        },
+        f"/repos/{REPO}/issues/comments/{root.predecessor['report_comment_id']}": comment(
+            root.predecessor["report_comment_id"],
+            """16FS-01 GPT-6 TECHNICAL REVIEW — PASS (SCOPED; NOT A GITHUB APPROVAL)
+
+Reviewed repository: KaisAbiyyi/chat-on-steroids-on-steroids
+PR: #138
+Exact source HEAD: c392b076457ca5375e260bb2267950feac31de50
+PR-recorded exact diff SHA-256: 9e750f2fbb52eda0bc15275ed5c274cbe3100a988ad628a885b4391143f4aa83
+
+Findings:
+- P1 from the prior review is corrected: fresh_receipt_structurally_valid() is shape-only; fresh_receipt_status() returns PENDING_EXTERNAL_VERIFICATION when no trusted verifier is supplied; the production CLI supplies none; accepted(16LF-01) therefore cannot accept a structurally fabricated receipt; 16L3 remains blocked.
+- P2 from the prior review is corrected: 16LF-01 is included in the 16F native-owner gate inventory, required to remain blocked with no evidence, and reported NOT_RUN; product_release_ready remains false.
+- Owner-attested review semantics are accurately represented as GPT6_OWNER_ATTESTED, not GitHub independent approval. Record identities are required to be canonical and pairwise distinct; the attestation author must match the verified owner.
+- AND/OR dependency parsing validates malformed groups before traversal; waves require externally accepted OR alternatives and keep 16L2 disabled.
+- The 16U1 fresh-start decision and no-private-profile boundary are preserved. 16L2 remains NOT_RUN / NOT_AUTHORIZED; 16LF-01 and 16L3 remain NOT_RUN; 16U2 remains NOT_RUN.
+- Exact-HEAD workflow runs associated with c392b076 are all completed SUCCESS (12 groups), including Task DAG Windows/Ubuntu and 16F provenance Windows/Ubuntu. Full Rust Windows/Linux workflow also completed SUCCESS.
+
+Disposition:
+PASS for the bounded 16FS-01 cloud policy/task-graph correction and merge eligibility, subject to separate owner acceptance of this exact report and source revision. This is a GPT-6 technical report, not a GitHub review/approval and not an independently authenticated reviewer identity. The report does not accept 16LF-01, 16L3, migration, installer execution, or product release. 16FV-01 remains a required next cloud task before 16LF-01 can be accepted; no production trust root is implemented by this PR.
+
+GPT-6 report SHA-256: ac0c1581f3c7e8bc32f8c5f109fc8a074069482bdf8b88a68a133fdb9b0ec2dd""",
+            issue=138,
+        ),
+        f"/repos/{REPO}/issues/comments/{root.predecessor['owner_attestation_comment_id']}": comment(
+            root.predecessor["owner_attestation_comment_id"],
+            "OWNER ACCEPTANCE — 16FS-01 / PR #138\n"
+            f"Accepted source HEAD: {root.predecessor['source_sha']}\n"
+            f"Accepted PR diff SHA-256: {root.predecessor['diff_sha256']}\n"
+            f"Accepted GPT-6 report SHA-256: {root.predecessor['report_sha256']}\n"
+            "This is the owner attestation required by GPT6_OWNER_ATTESTED.\n"
+            "does NOT claim GitHub independent approval",
+            issue=138,
+        ),
+        f"/repos/{REPO}/issues/comments/200": comment(200, marked(v.RECEIPT_MARKER, {
+            "schema": v.RECEIPT_SCHEMA,
+            "receipt": payload,
+            "receipt_sha256": receipt_sha,
+        })),
+        f"/repos/{REPO}/issues/comments/201": comment(201, marked(v.REVIEW_MARKER, report)),
+        f"/repos/{REPO}/issues/comments/202": comment(202, marked(v.ATTESTATION_MARKER, attestation)),
+        f"/repos/{REPO}/pulls/135": {
+            "number": 135, "merged": True, "merged_at": CREATED,
+            "base": {"ref": "main", "sha": root.artifact["source_base_sha"]},
+            "head": {"sha": root.artifact["source_sha"], "ref": root.artifact["branch"]},
+            "merge_commit_sha": root.artifact["source_merge_commit_sha"],
+        },
+    })
+    return root, api, receipt, report, attestation
+
+
+def good_artifact_result(root, _api):
+    artifact = root.artifact
+    return {
+        "artifact_exists": True,
+        "artifact_provenance_verified": True,
+        "artifact_source_binding_verified": True,
+        "verified_artifact_id": artifact["artifact_id"],
+        "verified_artifact_sha256": artifact["installer_sha256"],
+        "verified_artifact_source_sha": artifact["source_sha"],
+        "verified_artifact_provenance_url": f"https://github.com/{root.repository_full_name}/attestations/{artifact['attestations']['package_receipt']}",
+        "verified_artifact_provenance_sha256": artifact["package_receipt_sha256"],
+    }
+
+
+class ProductionTrustRootTests(unittest.TestCase):
+    def test_missing_root_is_explicitly_unconfigured_and_fails_closed(self):
+        verifier, status = v.production_verifier_from_environment({})
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_UNCONFIGURED")
+        _, _, receipt, _, _ = make_fixture()
+        self.assertEqual(board.fresh_receipt_status(receipt, trusted_verifier=verifier), "TRUST_ROOT_UNCONFIGURED")
+
+    def test_test_fixture_cannot_be_loaded_as_production_authority(self):
+        mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+        mapping["authority"] = "test-only"
+        verifier, status = v.production_verifier_from_environment({
+            v.TRUST_ROOT_ENV: json.dumps(mapping),
+            "GH_TOKEN": "test-token",
+        })
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+
+    def test_modified_owner_or_artifact_pin_invalidates_production_root(self):
+        mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+        mapping["owner_user_id"] = OWNER_ID + 1
+        verifier, status = v.production_verifier_from_environment({
+            v.TRUST_ROOT_ENV: json.dumps(mapping), "GH_TOKEN": "test-token",
+        })
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+        mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+        mapping["artifact"]["installer_sha256"] = "0" * 64
+        verifier, status = v.production_verifier_from_environment({
+            v.TRUST_ROOT_ENV: json.dumps(mapping), "GH_TOKEN": "test-token",
+        })
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+
+    def test_missing_github_token_does_not_construct_a_verifier(self):
+        verifier, status = v.production_verifier_from_environment({
+            v.TRUST_ROOT_ENV: json.dumps(v.PRODUCTION_TRUST_ROOT),
+        })
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "VERIFICATION_ERROR")
+
+
+class FreshEvidenceVerificationTests(unittest.TestCase):
+    def verify(self, fixture):
+        root, api, receipt, _, _ = fixture
+        return v.verify_evidence(receipt, root, api, artifact_verifier=good_artifact_result)
+
+    def test_complete_valid_evidence_produces_all_17_authoritative_facts(self):
+        fixture = make_fixture()
+        verification = self.verify(fixture)
+        self.assertTrue(verification.authoritative_for(fixture[2]))
+        self.assertTrue(all(getattr(verification, field) is True for field in board.FRESH_VERIFICATION_FIELDS))
+        self.assertEqual(len(board.FRESH_VERIFICATION_FIELDS), 17)
+        self.assertEqual(verification.verified_review_report_schema, v.REVIEW_SCHEMA)
+        self.assertEqual(verification.verified_owner_user_id, OWNER_ID)
+        self.assertEqual(
+            len({
+                verification.verified_receipt_record_identity,
+                verification.verified_review_report_record_identity,
+                verification.verified_owner_attestation_record_identity,
+            }),
+            3,
+        )
+
+    def test_missing_receipt_record_rejected(self):
+        fixture = make_fixture()
+        del fixture[1].objects[f"/repos/{REPO}/issues/comments/200"]
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_tampered_receipt_record_rejected(self):
+        fixture = make_fixture()
+        path = f"/repos/{REPO}/issues/comments/200"
+        record = v._record_payload(fixture[1].objects[path]["body"], v.RECEIPT_MARKER)
+        record["receipt"]["host"] = "owner-local-linux"
+        fixture[1].objects[path]["body"] = marked(v.RECEIPT_MARKER, record)
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_missing_review_report_rejected(self):
+        fixture = make_fixture()
+        del fixture[1].objects[f"/repos/{REPO}/issues/comments/201"]
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_non_pass_verdict_rejected(self):
+        fixture = make_fixture()
+        path = f"/repos/{REPO}/issues/comments/201"
+        report = v._record_payload(fixture[1].objects[path]["body"], v.REVIEW_MARKER)
+        report["verdict"] = "FAIL"
+        report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+        fixture[1].objects[path]["body"] = marked(v.REVIEW_MARKER, report)
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_legacy_or_wrong_review_schema_rejected(self):
+        for schema in ("cosos.release.cloud-provenance.v1", "cosos.legacy-review.v1"):
+            fixture = make_fixture()
+            path = f"/repos/{REPO}/issues/comments/201"
+            report = v._record_payload(fixture[1].objects[path]["body"], v.REVIEW_MARKER)
+            report["schema"] = schema
+            report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+            fixture[1].objects[path]["body"] = marked(v.REVIEW_MARKER, report)
+            with self.subTest(schema=schema), self.assertRaises(v.VerificationError):
+                self.verify(fixture)
+
+    def test_legacy_independent_review_field_is_rejected(self):
+        fixture = make_fixture()
+        path = f"/repos/{REPO}/issues/comments/201"
+        report = v._record_payload(fixture[1].objects[path]["body"], v.REVIEW_MARKER)
+        report["independent_review"] = {"verdict": "APPROVED"}
+        report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+        fixture[1].objects[path]["body"] = marked(v.REVIEW_MARKER, report)
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_wrong_review_mode_rejected(self):
+        fixture = make_fixture()
+        path = f"/repos/{REPO}/issues/comments/201"
+        report = v._record_payload(fixture[1].objects[path]["body"], v.REVIEW_MARKER)
+        report["security_review"]["review_policy"] = "GITHUB_INDEPENDENT_APPROVAL"
+        report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+        fixture[1].objects[path]["body"] = marked(v.REVIEW_MARKER, report)
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_wrong_review_governance_semantics_rejected(self):
+        fixture = make_fixture()
+        path = f"/repos/{REPO}/issues/comments/201"
+        report = v._record_payload(fixture[1].objects[path]["body"], v.REVIEW_MARKER)
+        report["security_review"]["review_policy_semantics"] = "GITHUB_INDEPENDENT_APPROVAL"
+        report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+        fixture[1].objects[path]["body"] = marked(v.REVIEW_MARKER, report)
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_missing_owner_attestation_rejected(self):
+        fixture = make_fixture()
+        del fixture[1].objects[f"/repos/{REPO}/issues/comments/202"]
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_unauthorized_owner_identity_rejected(self):
+        fixture = make_fixture()
+        fixture[1].objects["/users/" + v.OWNER_LOGIN]["id"] = OWNER_ID + 1
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_attestation_author_mismatch_rejected(self):
+        fixture = make_fixture()
+        fixture[1].objects[f"/repos/{REPO}/issues/comments/202"]["user"]["id"] = OWNER_ID + 1
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_modified_attestation_record_rejected(self):
+        fixture = make_fixture()
+        fixture[1].objects[f"/repos/{REPO}/issues/comments/202"]["updated_at"] = "2026-10-30T12:01:00Z"
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_wrong_source_sha_rejected(self):
+        fixture = make_fixture()
+        path = f"/repos/{REPO}/issues/comments/201"
+        report = v._record_payload(fixture[1].objects[path]["body"], v.REVIEW_MARKER)
+        report["source_sha"] = "0" * 40
+        report["review_report_sha256"] = v.object_sha256(report, "review_report_sha256")
+        fixture[1].objects[path]["body"] = marked(v.REVIEW_MARKER, report)
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_predecessor_diff_and_review_report_body_are_hashed_from_actual_sources(self):
+        fixture = make_fixture()
+        fixture[1].predecessor_diff += b"tampered"
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+        fixture = make_fixture()
+        report_path = f"/repos/{REPO}/issues/comments/{fixture[0].predecessor['report_comment_id']}"
+        fixture[1].objects[report_path]["body"] = fixture[1].objects[report_path]["body"].replace(
+            "P2 from the prior review is corrected", "P2 report text was altered"
+        )
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_receipt_must_bind_the_exact_merged_16fs_contract(self):
+        fixture = make_fixture()
+        fixture[2]["contract_source_sha"] = "0" * 40
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+        fixture = make_fixture()
+        fixture[2]["contract_merge_commit_sha"] = "0" * 40
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_predecessor_review_and_owner_attestation_records_are_required(self):
+        fixture = make_fixture()
+        root, api = fixture[0], fixture[1]
+        del api.objects[f"/repos/{REPO}/issues/comments/{root.predecessor['report_comment_id']}"]
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+        fixture = make_fixture()
+        root, api = fixture[0], fixture[1]
+        api.objects[f"/repos/{REPO}/issues/comments/{root.predecessor['owner_attestation_comment_id']}"]["updated_at"] = "2026-10-30T12:01:00Z"
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_wrong_verifier_source_or_file_digest_rejected(self):
+        fixture = make_fixture()
+        fixture[2]["verifier_source_sha"] = "0" * 40
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+        fixture = make_fixture()
+        fixture[1].verifier_file = b"changed verifier source"
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_unmerged_16fv_source_rejected(self):
+        fixture = make_fixture()
+        fixture[1].objects[f"/repos/{REPO}/pulls/139"]["merged"] = False
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_wrong_actual_pr_diff_digest_rejected(self):
+        fixture = make_fixture()
+        fixture[1].diff = b"tampered diff returned by provider"
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_duplicate_record_identities_rejected(self):
+        fixture = make_fixture()
+        fixture[2]["review_report_url"] = fixture[2]["receipt_url"]
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_forged_github_provenance_issue_identity_rejected(self):
+        fixture = make_fixture()
+        fixture[1].objects[f"/repos/{REPO}/issues/comments/200"]["issue_url"] = (
+            f"https://api.github.com/repos/{REPO}/issues/141"
+        )
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_artifact_missing_or_provenance_failure_rejected(self):
+        fixture = make_fixture()
+        def missing(_root, _api):
+            raise v.VerificationError("artifact not found")
+        with self.assertRaises(v.VerificationError):
+            v.verify_evidence(fixture[2], fixture[0], fixture[1], artifact_verifier=missing)
+        def untrusted(root, _api):
+            result = good_artifact_result(root, None)
+            result["artifact_provenance_verified"] = False
+            return result
+        with self.assertRaises(v.VerificationError):
+            v.verify_evidence(fixture[2], fixture[0], fixture[1], artifact_verifier=untrusted)
+
+    def test_artifact_digest_mismatch_rejected(self):
+        fixture = make_fixture()
+        fixture[2]["artifact_sha256"] = "0" * 64
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_missing_fresh_start_check_rejected(self):
+        fixture = make_fixture()
+        del fixture[2]["checks"][board.FRESH_CHECKS[0]]
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+    def test_incomplete_or_malformed_receipt_rejected(self):
+        for field, value in (
+            ("commands", []),
+            ("windows_build", ""),
+            ("started_at", "not-a-date"),
+            ("workspace_path", "D:\\untrusted"),
+            ("check_evidence", {"fresh_init": "checks/fresh_init.log"}),
+            ("evidence_bundle_sha256", "z" * 64),
+        ):
+            fixture = make_fixture()
+            fixture[2][field] = value
+            with self.subTest(field=field), self.assertRaises(v.VerificationError):
+                self.verify(fixture)
+
+    def test_api_failure_is_not_acceptance(self):
+        fixture = make_fixture()
+        def unavailable(_receipt):
+            raise v.VerificationError("GitHub API unavailable")
+        self.assertEqual(
+            board.fresh_receipt_status(fixture[2], trusted_verifier=unavailable),
+            "VERIFICATION_ERROR",
+        )
+
+    def test_raw_check_evidence_observations_must_prove_each_check(self):
+        fixture = make_fixture()
+        receipt = fixture[2]
+        fixture[1].bundle, _, _ = make_bundle(
+            receipt,
+            observation_overrides={"no_leakage": {"cross_profile_access_count": 1}},
+        )
+        receipt["evidence_bundle_sha256"] = digest(fixture[1].bundle)
+        with self.assertRaises(v.VerificationError):
+            v.verify_evidence_bundle(receipt, fixture[1])
+
+    def test_existing_profile_snapshot_mismatch_is_rejected(self):
+        fixture = make_fixture()
+        receipt = fixture[2]
+        fixture[1].bundle, _, _ = make_bundle(
+            receipt,
+            observation_overrides={"existing_profiles_untouched": {"after_snapshot_sha256": "b" * 64}},
+        )
+        receipt["evidence_bundle_sha256"] = digest(fixture[1].bundle)
+        with self.assertRaises(v.VerificationError):
+            v.verify_evidence_bundle(receipt, fixture[1])
+
+    def test_raw_check_evidence_status_and_paths_cannot_be_reused(self):
+        fixture = make_fixture()
+        receipt = fixture[2]
+        fixture[1].bundle, _, _ = make_bundle(receipt, status_overrides={"rollback": "FAIL"})
+        receipt["evidence_bundle_sha256"] = digest(fixture[1].bundle)
+        with self.assertRaises(v.VerificationError):
+            v.verify_evidence_bundle(receipt, fixture[1])
+        fixture = make_fixture()
+        receipt = fixture[2]
+        receipt["check_evidence"][board.FRESH_CHECKS[1]] = receipt["check_evidence"][board.FRESH_CHECKS[0]]
+        with self.assertRaises(v.VerificationError):
+            v.verify_evidence_bundle(receipt, fixture[1])
+
+    def test_bundle_digest_or_internal_file_tampering_rejected(self):
+        fixture = make_fixture()
+        fixture[1].bundle += b"tamper"
+        with self.assertRaises(v.VerificationError):
+            self.verify(fixture)
+
+
+def make_synthetic_artifact():
+    mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+    mapping["authority"] = "test-only"
+    artifact = mapping["artifact"]
+    artifact.update({
+        "pr_number": 135,
+        "source_sha": "a" * 40,
+        "source_base_sha": "b" * 40,
+        "source_merge_commit_sha": "c" * 40,
+        "branch": "fix/test-artifact",
+        "original_event_sha": "d" * 40,
+        "run_id": 1,
+        "run_attempt": 1,
+        "workflow_id": 2,
+        "artifact_id": 3,
+        "artifact_name": "cosos-16pkg-unsigned-candidate-" + "a" * 40,
+        "tooling_pr_number": 136,
+        "tooling_head_sha": "e" * 40,
+        "tooling_merge_commit_sha": "f" * 40,
+        "attestations": {"package_receipt": 9, "installer": 10, "candidate_zip": 11,
+                         "update02_installer": 12, "update03_installer": 13},
+    })
+    payload_files = {
+        "installer-package/CoSoSInstaller.exe": b"installer-binary-fixture",
+        "candidate.zip": b"candidate-payload-fixture",
+        "installer-unsigned-0.2.0/CoSoSInstaller.exe": b"updater-02-fixture",
+        "installer-unsigned-0.3.0/CoSoSInstaller.exe": b"updater-03-fixture",
+        "candidate-0.2.0.zip": b"updater-02-zip-fixture",
+        "candidate-0.3.0.zip": b"updater-03-zip-fixture",
+        "installer-release-manifest.json": b'{"release":"fixture"}',
+        "installer-renderer-integrity.json": b'{"renderer":"fixture"}',
+    }
+    artifact["installer_sha256"] = digest(payload_files["installer-package/CoSoSInstaller.exe"])
+    artifact["candidate_zip_sha256"] = digest(payload_files["candidate.zip"])
+    artifact["update02_setup_sha256"] = digest(payload_files["installer-unsigned-0.2.0/CoSoSInstaller.exe"])
+    artifact["update03_setup_sha256"] = digest(payload_files["installer-unsigned-0.3.0/CoSoSInstaller.exe"])
+    artifact["update02_zip_sha256"] = digest(payload_files["candidate-0.2.0.zip"])
+    artifact["update03_zip_sha256"] = digest(payload_files["candidate-0.3.0.zip"])
+    artifact["release_manifest_sha256"] = digest(payload_files["installer-release-manifest.json"])
+    artifact["renderer_manifest_sha256"] = digest(payload_files["installer-renderer-integrity.json"])
+    artifact["rust_sha256"] = digest(b"rust-fixture")
+    artifact["renderer_host_sha256"] = digest(b"renderer-host-fixture")
+    artifact["renderer_dll_sha256"] = digest(b"renderer-dll-fixture")
+    receipt = {
+        "sourceSha": artifact["source_sha"],
+        "signed": False,
+        "native16L1Accepted": False,
+        "setupSha256": artifact["installer_sha256"],
+        "zipSha256": artifact["candidate_zip_sha256"],
+        "update02SetupSha256": artifact["update02_setup_sha256"],
+        "update03SetupSha256": artifact["update03_setup_sha256"],
+        "update02ZipSha256": artifact["update02_zip_sha256"],
+        "update03ZipSha256": artifact["update03_zip_sha256"],
+        "releaseManifestSha256": artifact["release_manifest_sha256"],
+        "rendererManifestSha256": artifact["renderer_manifest_sha256"],
+        "rustSha256": artifact["rust_sha256"],
+        "rendererHostSha256": artifact["renderer_host_sha256"],
+        "rendererDllSha256": artifact["renderer_dll_sha256"],
+    }
+    payload_files["package-receipt.json"] = json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode()
+    artifact["package_receipt_sha256"] = digest(payload_files["package-receipt.json"])
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, data in payload_files.items():
+            archive.writestr(name, data)
+    archive_bytes = output.getvalue()
+    artifact["archive_sha256"] = digest(archive_bytes)
+    root = v.TrustRoot.from_mapping(mapping, production=False)
+    api = FakeAPI()
+    api.artifact_zip = archive_bytes
+    metadata = {
+        "id": artifact["artifact_id"], "name": artifact["artifact_name"],
+        "digest": "sha256:" + artifact["archive_sha256"], "expired": False,
+        "size_in_bytes": len(archive_bytes),
+        "workflow_run": {"id": artifact["run_id"], "repository_id": v.REPOSITORY_ID,
+                         "head_sha": artifact["source_sha"]},
+    }
+    run = {
+        "id": artifact["run_id"], "run_attempt": artifact["run_attempt"],
+        "status": "completed", "conclusion": "success", "event": "pull_request",
+        "path": artifact["workflow_path"], "workflow_id": artifact["workflow_id"],
+        "head_branch": artifact["branch"], "head_sha": artifact["source_sha"],
+        "head_commit": {"id": artifact["source_sha"]},
+        "repository": {"full_name": REPO, "id": v.REPOSITORY_ID},
+        "head_repository": {"full_name": REPO, "id": v.REPOSITORY_ID},
+    }
+    source_pr = {
+        "number": 135, "merged": True, "merged_at": CREATED,
+        "base": {"ref": "main", "sha": artifact["source_base_sha"]},
+        "head": {"sha": artifact["source_sha"], "ref": artifact["branch"]},
+        "merge_commit_sha": artifact["source_merge_commit_sha"],
+    }
+    tooling_pr = {
+        "number": 136, "merged": True, "merged_at": CREATED,
+        "base": {"ref": "main"},
+        "head": {"sha": artifact["tooling_head_sha"]},
+        "merge_commit_sha": artifact["tooling_merge_commit_sha"],
+    }
+    compare_source = {
+        "base_commit": {"sha": artifact["source_sha"]},
+        "merge_base_commit": {"sha": artifact["source_sha"]},
+        "behind_by": 0, "status": "ahead",
+    }
+    compare_tooling = {
+        "base_commit": {"sha": artifact["tooling_merge_commit_sha"]},
+        "merge_base_commit": {"sha": artifact["tooling_merge_commit_sha"]},
+        "behind_by": 0, "status": "ahead",
+    }
+    api.objects.update({
+        f"/repos/{REPO}/actions/artifacts/{artifact['artifact_id']}": metadata,
+        f"/repos/{REPO}/actions/runs/{artifact['run_id']}": run,
+        f"/repos/{REPO}/actions/runs/{artifact['run_id']}/artifacts?per_page=100": {
+            "artifacts": [{
+                "id": artifact["artifact_id"], "name": artifact["artifact_name"],
+                "digest": "sha256:" + artifact["archive_sha256"], "expired": False,
+                "workflow_run": {"id": artifact["run_id"], "head_sha": artifact["source_sha"]},
+            }]
+        },
+        f"/repos/{REPO}/pulls/135": source_pr,
+        f"/repos/{REPO}/pulls/136": tooling_pr,
+        f"/repos/{REPO}/commits/{artifact['source_merge_commit_sha']}": {
+            "sha": artifact["source_merge_commit_sha"],
+            "parents": [{"sha": artifact["source_sha"]}, {"sha": artifact["source_base_sha"]}],
+        },
+        f"/repos/{REPO}/compare/{artifact['source_sha']}...main": compare_source,
+        f"/repos/{REPO}/compare/{artifact['tooling_merge_commit_sha']}...main": compare_tooling,
+    })
+    invocation = f"https://github.com/{REPO}/actions/runs/{artifact['run_id']}/attempts/{artifact['run_attempt']}"
+    proof = [{
+        "verificationResult": {
+            "signature": {"certificate": {
+                "runInvocationURI": invocation,
+                "sourceRepositoryIdentifier": str(v.REPOSITORY_ID),
+                "sourceRepositoryRef": "refs/pull/135/merge",
+                "githubWorkflowTrigger": "pull_request",
+                "sourceRepositoryDigest": artifact["original_event_sha"],
+            }},
+            "statement": {
+                "predicateType": "https://slsa.dev/provenance/v1",
+                "predicate": {"runDetails": {"metadata": {"invocationId": invocation}}},
+            },
+        }
+    }]
+    runner = lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout=json.dumps(proof), stderr="")
+    return root, api, runner
+
+
+class HistoricalArtifactTests(unittest.TestCase):
+    def test_actual_archive_hashes_and_five_sigstore_proofs_are_required(self):
+        root, api, runner = make_synthetic_artifact()
+        result = v.verify_historical_16l1_artifact(root, api, runner=runner)
+        self.assertTrue(result["artifact_exists"])
+        self.assertTrue(result["artifact_provenance_verified"])
+        self.assertTrue(result["artifact_source_binding_verified"])
+        self.assertEqual(result["verified_artifact_id"], 3)
+
+    def test_missing_or_tampered_archive_rejected(self):
+        root, api, runner = make_synthetic_artifact()
+        api.artifact_zip = b"tampered archive"
+        with self.assertRaises(v.VerificationError):
+            v.verify_historical_16l1_artifact(root, api, runner=runner)
+
+    def test_wrong_signed_event_provenance_rejected(self):
+        root, api, runner = make_synthetic_artifact()
+        def bad_runner(*_args, **_kwargs):
+            result = runner(*_args, **_kwargs)
+            proof = json.loads(result.stdout)
+            proof[0]["verificationResult"]["signature"]["certificate"]["sourceRepositoryDigest"] = "0" * 40
+            return SimpleNamespace(returncode=0, stdout=json.dumps(proof), stderr="")
+        with self.assertRaises(v.VerificationError):
+            v.verify_historical_16l1_artifact(root, api, runner=bad_runner)
+
+    def test_expired_artifact_rejected(self):
+        root, api, runner = make_synthetic_artifact()
+        api.objects[f"/repos/{REPO}/actions/artifacts/3"]["expired"] = True
+        with self.assertRaises(v.VerificationError):
+            v.verify_historical_16l1_artifact(root, api, runner=runner)
+
+
+class ProductionCliFailClosedTests(unittest.TestCase):
+    def test_cli_cannot_accept_16lf_when_production_root_is_missing(self):
+        data = board.load()
+        tasks = board.index(data)
+        tasks["16FS-01"]["status"] = "done"
+        tasks["16FV-01"]["status"] = "done"
+        tasks["16FV-01"]["accepted_evidence_url"] = "https://github.com/" + REPO + "/pull/139"
+        _, _, receipt, _, _ = make_fixture()
+        tasks["16LF-01"]["status"] = "done"
+        tasks["16LF-01"]["evidence"] = receipt
+        with patch.object(board, "load", return_value=data), patch.dict(
+            os.environ, {v.TRUST_ROOT_ENV: ""}, clear=False
+        ), patch("sys.argv", ["task_board.py", "check"]):
+            result = board.main()
+        self.assertEqual(result, 1)
+
+    def test_production_status_command_reports_unconfigured_root(self):
+        _, status = v.production_verifier_from_environment({})
+        self.assertEqual(status, "TRUST_ROOT_UNCONFIGURED")
+
+
+if __name__ == "__main__":
+    unittest.main()
