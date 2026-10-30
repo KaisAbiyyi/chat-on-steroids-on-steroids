@@ -467,6 +467,23 @@ class TaskBoardTests(unittest.TestCase):
         ) for t in wave}
         self.assertIn("16L3", eligible)
 
+    def test_explain_respects_satisfied_or_dependency_group(self):
+        data, tasks = self._fresh_scenario()
+
+        unverified = board.explain(data, "16L3")
+        self.assertIn("16L2", unverified["missing_transitive"])
+        self.assertIn("16LF-01", unverified["missing_transitive"])
+
+        # This test-only verifier exercises the accepted alternative path. It
+        # does not authenticate a real GitHub review, artifact or Windows run.
+        verified = board.explain(
+            data, "16L3", trusted_verifier=self._trusted_test_verifier()
+        )
+        self.assertEqual(verified["state"], "READY_CANDIDATE")
+        self.assertEqual(verified["missing_direct"], [])
+        self.assertNotIn("16L2", verified["missing_transitive"])
+        self.assertNotIn("16LF-01", verified["missing_transitive"])
+
     def test_canonical_registry_remains_blocked_without_trusted_acceptance(self):
         self.assertEqual(self.tasks["16LF-01"]["status"], "blocked")
         self.assertFalse(board.accepted(self.tasks, "16LF-01"))
