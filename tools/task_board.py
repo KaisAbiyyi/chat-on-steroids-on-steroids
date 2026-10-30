@@ -47,6 +47,7 @@ FRESH_VERIFICATION_FIELDS = (
     "receipt_exists",
     "receipt_integrity_verified",
     "review_report_exists",
+    "artifact_exists",
     "review_mode_authorized",
     "owner_identity_verified",
     "owner_attestation_exists",
@@ -84,6 +85,7 @@ class FreshEvidenceVerification:
     receipt_exists: bool
     receipt_integrity_verified: bool
     review_report_exists: bool
+    artifact_exists: bool
     review_mode_authorized: bool
     owner_identity_verified: bool
     owner_attestation_exists: bool
