@@ -174,7 +174,7 @@ class FakeAPI:
 
 def make_fixture():
     root_mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
-        root = v.TrustRoot.from_mapping(root_mapping, production=False)
+    root = v.TrustRoot.from_mapping(root_mapping, production=False)
     api = FakeAPI()
     diff_sha = digest(api.diff)
     nonce = "a" * 16

@@ -243,20 +243,27 @@ class TaskBoardTests(unittest.TestCase):
         # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
+        # The real merged predecessor remains Done, while the future verifier
+        # and both alternatives remain blocked in the forecast fixture.
+        future_tasks["16FS-01"]["status"] = "done"
+        future_tasks["16FS-01"]["accepted_evidence_url"] = (
+            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
+        )
+        future_tasks["16LF-01"]["status"] = "blocked"
+        future_tasks["16L3"]["status"] = "blocked"
+
         # Validate recursive AND/OR prerequisite closure on a separate
-        # hypothetical fixture. It must not contaminate the forecast below.
+        # hypothetical fixture. It must not contaminate the wave forecast.
         closure = copy.deepcopy(future)
         closure_tasks = board.index(closure)
         _, receipt_tasks = self._fresh_scenario()
+        closure_tasks["16LF-01"]["status"] = "todo"
+        closure_tasks["16L3"]["status"] = "todo"
+        closure_tasks["16FV-01"]["status"] = "todo"
         closure_tasks["16LF-01"]["evidence"] = copy.deepcopy(
             receipt_tasks["16LF-01"]["evidence"]
         )
-        closure_tasks["16FS-01"]["status"] = "done"
-        closure_tasks["16FS-01"]["accepted_evidence_url"] = (
-            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
-        )
         closure_tasks["16FV-01"].update({
-            "status": "done",
             "accepted_evidence_url": (
                 "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/"
                 + str(board.VERIFIER_PR_NUMBER)
@@ -279,8 +286,7 @@ class TaskBoardTests(unittest.TestCase):
         ))
         self.assertEqual(board.validate(closure, trusted_verifier=verifier), [])
 
-        # Keep the actual forecast fixture open so downstream gate ordering
-        # remains observable; do not mark 15G/16A or their transitive gates done.
+        # The wave fixture retains its future tasks so dependency order is visible.
         self.assertEqual(board.validate(future), [])
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
