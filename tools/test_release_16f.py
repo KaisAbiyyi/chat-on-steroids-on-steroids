@@ -40,7 +40,7 @@ class SourceBoundReportTests(unittest.TestCase):
         self.assertTrue(all(g == "NOT_RUN" for g in r["native_owner_gates"].values()))
         self.assertEqual(set(r["native_owner_gates"]), set(f.GATES))
         self.assertEqual(
-            r["security_review"]["independent_review"],
+            r["security_review"]["review_policy"],
             "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
         )
         self.assertEqual(
@@ -123,7 +123,7 @@ class SourceBoundReportTests(unittest.TestCase):
             lambda r: r["native_owner_gates"].update({"16L1_native_installer": "PASS"}),
             lambda r: r["native_owner_gates"].pop("16U1_owner_consent"),
             lambda r: r["native_owner_gates"].update({"16LF-01_owner_local_fresh_start": "PASS"}),
-            lambda r: r["security_review"].update({"independent_review": "PASS"}),
+            lambda r: r["security_review"].update({"review_policy": "PASS"}),
             lambda r: r["merged_predecessors"]["16E"].update({"merged_commit_sha": "0" * 40}),
             lambda r: r["tracked_contracts"]["LICENSE"].update({"sha256": "0" * 64}),
             lambda r: r.update(source_sha="b" * 40),

@@ -128,7 +128,7 @@ def make_report(expected_head, actual_head, ancestors, sources):
             "installer_transaction": "16E_SYNTHETIC_DISPOSABLE_ONLY",
             "startup_memory": "16D_HEADLESS_ROOT_PROCESS_ONLY_NO_GUI_BUDGET",
             "github_ci_verdict": "REQUIRES_EXTERNAL_EXACT_HEAD_CHECKS",
-            "independent_review": "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
+            "review_policy": "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
         },
         "native_owner_gates": {gate: "NOT_RUN" for gate in GATES},
         "product_release_ready": False,
