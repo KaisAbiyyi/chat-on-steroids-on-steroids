@@ -14,7 +14,7 @@ import re
 import subprocess
 from pathlib import Path
 
-SCHEMA = "cosos.release.cloud-provenance.v1"
+SCHEMA = "cosos.release.cloud-provenance.v2"
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 MAX_RECEIPT_BYTES = 128 * 1024
 MAX_SOURCE_BYTES = 2 * 1024 * 1024

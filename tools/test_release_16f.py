@@ -34,6 +34,8 @@ def make(sources=None, ancestors=None, expected=SHA, head=SHA):
 class SourceBoundReportTests(unittest.TestCase):
     def test_valid_report_is_strictly_cloud_only(self):
         r = make()
+        self.assertEqual(r["schema"], f.SCHEMA)
+        self.assertEqual(f.SCHEMA, "cosos.release.cloud-provenance.v2")
         self.assertEqual(r["source_sha"], SHA)
         self.assertFalse(r["product_release_ready"])
         self.assertEqual(set(r["merged_predecessors"]), set(f.MERGED))
