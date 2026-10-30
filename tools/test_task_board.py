@@ -175,6 +175,16 @@ class TaskBoardTests(unittest.TestCase):
         for task in future["tasks"]:
             if task["id"] == "CL-L6" or task["phase"] in {str(n) for n in range(7, 17)}:
                 task["status"] = "todo"
+        # The hypothetical 16L2 route is runnable only when its owner has
+        # explicitly changed the fresh-start decision to scoped copy consent.
+        future_tasks = board.index(future)
+        future_tasks["16U1"]["migration_consent"] = "granted"
+        future_tasks["16U1"]["owner_decision"] = "approved_private_copy"
+        future_tasks["16U1"]["consent_receipt"] = {
+            "explicit_owner_approval": True,
+            "scope": "approved-copy-only",
+            "approval_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
+        }
         self.assertEqual(board.validate(future), [])
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
