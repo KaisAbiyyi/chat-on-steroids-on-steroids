@@ -18,7 +18,8 @@ def fixture():
         {"id": "16U1", "depends_on": ["16E"], "kind": "U", "migration_consent": "declined"},
         {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L", "status": "blocked"},
         {"id": "16FS-01", "depends_on": ["16U1", "16L1", "16F"], "kind": "C"},
-        {"id": "16LF-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "L"},
+        {"id": "16LF-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "L",
+         "status": "blocked", "evidence": None},
         {"id": "16L3", "depends_on": ["16F", "16L1"], "kind": "L",
          "any_of": [["16L2", "16LF-01"]]},
     ]}).encode("utf-8")
@@ -35,6 +36,20 @@ class SourceBoundReportTests(unittest.TestCase):
         self.assertFalse(r["product_release_ready"])
         self.assertEqual(set(r["merged_predecessors"]), set(f.MERGED))
         self.assertTrue(all(g == "NOT_RUN" for g in r["native_owner_gates"].values()))
+        self.assertEqual(set(r["native_owner_gates"]), set(f.GATES))
+        self.assertEqual(
+            r["native_owner_gates"]["16LF-01_owner_local_fresh_start"], "NOT_RUN"
+        )
+        self.assertEqual(set(f.GATES), {
+            "16L1_native_installer",
+            "16U1_owner_consent",
+            "16L2_owner_approved_copy_migration",
+            "16LF-01_owner_local_fresh_start",
+            "16L3_native_full_release_performance",
+            "16U2_owner_release_decision",
+            "PERF-05_native_product_comparison",
+            "PERF-06_product_performance_budget",
+        })
         self.assertEqual(r["tracked_contracts"]["LICENSE"]["sha256"],
                          hashlib.sha256(b"LICENSE:synthetic").hexdigest())
         self.assertTrue(f.validate_receipt(json.loads(json.dumps(r)), r))
@@ -88,6 +103,7 @@ class SourceBoundReportTests(unittest.TestCase):
             lambda r: r.update(product_release_ready=True),
             lambda r: r["native_owner_gates"].update({"16L1_native_installer": "PASS"}),
             lambda r: r["native_owner_gates"].pop("16U1_owner_consent"),
+            lambda r: r["native_owner_gates"].update({"16LF-01_owner_local_fresh_start": "PASS"}),
             lambda r: r["security_review"].update({"independent_review": "PASS"}),
             lambda r: r["merged_predecessors"]["16E"].update({"merged_commit_sha": "0" * 40}),
             lambda r: r["tracked_contracts"]["LICENSE"].update({"sha256": "0" * 64}),
@@ -98,6 +114,15 @@ class SourceBoundReportTests(unittest.TestCase):
             mutate(altered)
             with self.assertRaises(f.Refused):
                 f.validate_receipt(altered, expected)
+
+    def test_16lf_gate_must_remain_blocked_and_not_run_in_source_registry(self):
+        for field, value in [("status", "done"), ("evidence", {"independent_review_verdict": "PASS"})]:
+            sources = fixture()
+            registry = json.loads(sources["docs/task-registry.json"])
+            next(t for t in registry["tasks"] if t["id"] == "16LF-01")[field] = value
+            sources["docs/task-registry.json"] = json.dumps(registry).encode()
+            with self.subTest(field=field), self.assertRaises(f.Refused):
+                make(sources=sources)
 
     def test_bad_registry_and_oversize_file_denied(self):
         src = fixture()

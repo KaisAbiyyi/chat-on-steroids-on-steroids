@@ -26,6 +26,37 @@ After independent review and merge ONLY: \`16L3 <- (16F AND 16L1 AND (16L2 OR 16
 
 ## Validation boundaries
 
-\`tools/task_board.py\` models an AND/OR dependency and verifies structural evidence; tests simulate positive/negative records without private data or native execution. It **does not cryptographically prove** physical execution, reviewer identity, Sigstore trust, provenance, Windows ACL conditions or receipt truth. A well-formed invented JSON URL/digest may pass structural preflight, but MUST never count as authoritative qualification: external proof, source ancestry, authentic GitHub review and owner-local run receipts need independent validation before switching a blocked task to done. No self-approval or merge authorized for this PR.
+\`tools/task_board.py\` separates \`fresh_receipt_structurally_valid()\` from \`fresh_receipt_status()\` and authoritative \`accepted()\`. Structural validation is only schema/shape preflight. A correctly formatted receipt, SHA, GitHub issue URL, fabricated review URL, self-authored \`PASS\`, or task-registry status cannot establish acceptance.
+
+The offline resolver has **no production trust root or external verifier** for authentic receipt existence, reviewer identity/independence, actual review verdict and reviewed SHA, receipt-to-artifact digest consistency, artifact provenance/source binding, or the owner-local fresh-start checks. Accordingly, a missing receipt is reported as \`MISSING\`, malformed evidence as \`INVALID\`, and structurally valid evidence without a trusted verifier as \`PENDING_EXTERNAL_VERIFICATION\`. Failed external facts are rejected. None of these states can satisfy \`16LF-01\`, unlock \`16L3\`, or enter release waves. The optional verifier contract returns a typed \`FreshEvidenceVerification\` only after independently establishing every required fact; it is not loaded from task JSON. The production CLI deliberately injects no verifier and remains fail-closed.
+
+No reviewer allowlist, trust root, signature, provenance result, external review, or successful local proof is invented. A separately trusted verifier integration is a remaining prerequisite before any genuine \`16LF-01\` evidence can be accepted. No self-approval or merge is authorized for this PR.
 
 No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI exercises only source-level DAG and contract tests. Actual 16LF-01/16L3 are both NOT_RUN. Prior 16F and 16L1 acceptance is preserved; release is not activated.
+
+
+## Final corrections — 2026-10-30 (targeted candidate; independent review pending)
+
+### P1 — authoritative fresh-start receipt acceptance
+
+- Renamed the receipt check to \`fresh_receipt_structurally_valid()\`; it is explicitly structural-only.
+- Added \`fresh_receipt_status()\` with \`MISSING\`, \`INVALID\`, \`PENDING_EXTERNAL_VERIFICATION\`, \`REJECTED_EXTERNAL_VERIFICATION\`, \`VERIFICATION_ERROR\`, and \`ACCEPTED\` states.
+- Added a typed \`FreshEvidenceVerification\` trust-boundary contract covering actual receipt, review and artifact existence; reviewer identity and independence; actual PASS verdict; reviewed source SHA; exact receipt/review/source/artifact digest binding; receipt-to-artifact digest consistency; artifact provenance and source binding; fresh-start checks; and evidence completeness.
+- The offline CLI does not provide a verifier because no defensible repository trust root or implementation was found. Therefore structurally valid candidates remain pending external verification, while missing or malformed evidence is separately reported; none can satisfy \`accepted(16LF-01)\`, the 16L3 OR dependency, readiness, validation, or wave forecasting.
+- Tests use a clearly test-only verifier double to exercise the positive integration path; it is not evidence of a real GitHub review, artifact, or Windows physical run.
+
+### P2 — complete 16F native-gate inventory
+
+- Added \`16LF-01_owner_local_fresh_start\` to the canonical 16F \`GATES\` set.
+- Source-bound report generation now requires 16LF-01 to remain registry-\`blocked\` with no evidence and reports it as \`NOT_RUN\`.
+- Exact-set and no-promotion regression tests cover omission, forged PASS, and registry status/evidence drift.
+- \`product_release_ready=false\`, existing provenance disclaimers, 16L2 restrictions, and exact-source checks remain unchanged.
+
+### Corrective candidate boundaries
+
+- Existing Draft PR #138 and its branch are preserved; no merge or replacement PR.
+- 16U1 remains fresh-start with migration consent declined.
+- 16L2 remains \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
+- 16LF-01 remains \`BLOCKED / NOT_RUN\`; 16L3 remains \`BLOCKED / NOT_RUN\`; 16U2 remains \`NOT_RUN\`.
+- No owner-local Windows access, installer execution, private-profile access, migration implementation, or release authorization was performed.
+- Candidate acceptance remains pending exact-HEAD Windows/Ubuntu CI and a new independent review.

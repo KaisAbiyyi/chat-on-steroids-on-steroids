@@ -266,11 +266,9 @@ class TaskBoardTests(unittest.TestCase):
     def _fresh_scenario(self):
         data = copy.deepcopy(self.data)
         tasks = board.index(data)
-        # Purely hypothetical source-pinned fixture. Never a native acceptance.
+        # Well-formed but intentionally fabricated fixture; never authoritative.
         for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01"):
             tasks[key]["status"] = "done"
-        # This fixture is for conditional readiness only, not graph validator,
-        # because historical registry prerequisites still need reconciling.
         tasks["16L3"]["status"] = "todo"
         tasks["16LF-01"]["status"] = "done"
         sha = "a" * 40
@@ -287,13 +285,202 @@ class TaskBoardTests(unittest.TestCase):
         }
         return data, tasks
 
-    def test_fresh_start_positive_hypothetical_fixture_only(self):
+    def _trusted_test_verifier(self, **overrides):
+        # Test double for the explicit trusted-verifier boundary only. It does
+        # not authenticate a real GitHub review, artifact or physical run.
+        def verify(receipt):
+            self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
+            facts = {name: True for name in board.FRESH_VERIFICATION_FIELDS}
+            facts.update({
+                "verified_receipt_url": receipt["receipt_url"],
+                "verified_review_url": receipt["review_url"],
+                "verified_source_sha": receipt["source_sha"],
+                "verified_reviewed_source_sha": receipt["reviewed_source_sha"],
+                "verified_artifact_sha256": receipt["artifact_sha256"],
+                "verified_receipt_sha256": receipt["receipt_sha256"],
+            })
+            facts.update(overrides)
+            return board.FreshEvidenceVerification(**facts)
+
+        return verify
+
+    def test_well_formed_fabricated_receipt_is_only_structural(self):
+        _, tasks = self._fresh_scenario()
+        receipt = tasks["16LF-01"]["evidence"]
+        self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
+        self.assertEqual(
+            board.fresh_receipt_status(receipt),
+            "PENDING_EXTERNAL_VERIFICATION",
+        )
+        self.assertFalse(board.accepted(tasks, "16LF-01"))
+        self.assertIn(
+            "one_of(16L2|16LF-01)",
+            board.missing_dependencies(tasks["16L3"], tasks),
+        )
+
+    def test_fabricated_github_review_url_cannot_establish_acceptance(self):
+        _, tasks = self._fresh_scenario()
+        receipt = tasks["16LF-01"]["evidence"]
+        self.assertIn("/pull/999#", receipt["review_url"])
+        self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
+        self.assertFalse(board.accepted(tasks, "16LF-01"))
+
+    def test_nonexistent_receipt_or_review_cannot_establish_acceptance(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(receipt_exists=False)
+        self.assertEqual(
+            board.fresh_receipt_status(
+                tasks["16LF-01"]["evidence"], trusted_verifier=verifier
+            ),
+            "REJECTED_EXTERNAL_VERIFICATION",
+        )
+        verifier = self._trusted_test_verifier(review_exists=False)
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+        verifier = self._trusted_test_verifier(review_verdict_pass=False)
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_implementation_author_cannot_establish_independent_acceptance(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(reviewer_independent=False)
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_unverified_reviewer_identity_cannot_establish_acceptance(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(reviewer_identity_verified=False)
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_different_reviewed_source_sha_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
+        receipt["reviewed_source_sha"] = "d" * 40
+        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
+        self.assertEqual(board.fresh_receipt_status(receipt), "INVALID")
+        verifier = self._trusted_test_verifier(reviewed_source_matches=False)
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_artifact_digest_mismatch_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(
+            receipt_artifact_digest_matches=False
+        )
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_missing_artifact_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier(artifact_exists=False)
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+
+    def test_missing_provenance_or_source_binding_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        for field in ("artifact_provenance_verified", "artifact_source_binding_verified"):
+            with self.subTest(field=field):
+                verifier = self._trusted_test_verifier(**{field: False})
+                self.assertFalse(board.accepted(
+                    tasks, "16LF-01", trusted_verifier=verifier
+                ))
+
+    def test_unverified_pass_fields_never_establish_acceptance(self):
+        _, tasks = self._fresh_scenario()
+        receipt = tasks["16LF-01"]["evidence"]
+        self.assertEqual(receipt["independent_review_verdict"], "PASS")
+        self.assertTrue(all(value == "PASS" for value in receipt["checks"].values()))
+        self.assertFalse(board.accepted(tasks, "16LF-01"))
+        self.assertEqual(
+            board.fresh_receipt_status(receipt),
+            "PENDING_EXTERNAL_VERIFICATION",
+        )
+
+    def test_trusted_verifier_must_bind_review_and_artifact_to_receipt(self):
+        _, tasks = self._fresh_scenario()
+        for field, value in [
+            ("verified_review_url", "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/1000#pullrequestreview-2"),
+            ("verified_reviewed_source_sha", "d" * 40),
+            ("verified_artifact_sha256", "e" * 64),
+            ("verified_receipt_sha256", "f" * 64),
+        ]:
+            with self.subTest(field=field):
+                verifier = self._trusted_test_verifier(**{field: value})
+                self.assertFalse(board.accepted(
+                    tasks, "16LF-01", trusted_verifier=verifier
+                ))
+
+    def test_trusted_verifier_errors_fail_closed(self):
+        _, tasks = self._fresh_scenario()
+
+        def broken_verifier(_receipt):
+            raise RuntimeError("external evidence service unavailable")
+
+        self.assertEqual(
+            board.fresh_receipt_status(
+                tasks["16LF-01"]["evidence"], trusted_verifier=broken_verifier
+            ),
+            "VERIFICATION_ERROR",
+        )
+        self.assertFalse(board.accepted(
+            tasks, "16LF-01", trusted_verifier=broken_verifier
+        ))
+
+    def test_untrusted_boolean_verifier_result_is_rejected(self):
+        _, tasks = self._fresh_scenario()
+        self.assertEqual(
+            board.fresh_receipt_status(
+                tasks["16LF-01"]["evidence"], trusted_verifier=lambda _receipt: True
+            ),
+            "REJECTED_EXTERNAL_VERIFICATION",
+        )
+
+    def test_trusted_verifier_path_accepts_complete_independent_evidence(self):
         data, tasks = self._fresh_scenario()
-        self.assertTrue(board.fresh_receipt_valid(tasks["16LF-01"]["evidence"]))
-        self.assertFalse(board.accepted(tasks, "16L2"))
-        self.assertEqual(board.missing_dependencies(tasks["16L3"], tasks), [])
-        # Actual canonical release remains blocked and is never auto-promoted.
+        verifier = self._trusted_test_verifier()
+        self.assertEqual(
+            board.fresh_receipt_status(
+                tasks["16LF-01"]["evidence"], trusted_verifier=verifier
+            ),
+            "ACCEPTED",
+        )
+        self.assertTrue(board.accepted(
+            tasks, "16LF-01", trusted_verifier=verifier
+        ))
+        self.assertEqual(
+            board.missing_dependencies(
+                tasks["16L3"], tasks, trusted_verifier=verifier
+            ),
+            [],
+        )
+        self.assertEqual(board.validate(data, trusted_verifier=verifier), [])
+        eligible = {t["id"] for wave in board.waves(
+            data, trusted_verifier=verifier
+        ) for t in wave}
+        self.assertIn("16L3", eligible)
+
+    def test_canonical_registry_remains_blocked_without_trusted_acceptance(self):
+        self.assertEqual(self.tasks["16LF-01"]["status"], "blocked")
+        self.assertFalse(board.accepted(self.tasks, "16LF-01"))
         self.assertEqual(board.explain(self.data, "16L3")["state"], "BLOCKED")
+        self.assertEqual(
+            board.explain(self.data, "16L3")["fresh_evidence_status"],
+            "MISSING",
+        )
+        self.assertIn(
+            "one_of(16L2|16LF-01)",
+            board.missing_dependencies(self.tasks["16L3"], self.tasks),
+        )
+        eligible = {t["id"] for wave in board.waves(self.data) for t in wave}
+        self.assertNotIn("16L3", eligible)
 
     def test_owner_declined_never_grants_private_profile_access(self):
         data, tasks = self._fresh_scenario()
@@ -306,16 +493,17 @@ class TaskBoardTests(unittest.TestCase):
         self.assertFalse(board.accepted(tasks, "16L2"))
         self.assertTrue(any("16L2" in e for e in board.validate(data)))
 
-    def test_wave_forecast_requires_real_accepted_or_branch(self):
+    def test_wave_forecast_requires_trusted_accepted_or_branch(self):
         data, tasks = self._fresh_scenario()
-        eligible = {t["id"] for wave in board.waves(data) for t in wave}
-        self.assertIn("16L3", eligible)  # accepted local OR branch is sufficient
-        tasks["16LF-01"]["evidence"]["checks"]["rollback"] = "FAIL"
-        blocked = {t["id"] for wave in board.waves(data) for t in wave}
-        self.assertNotIn("16L3", blocked)
-        tasks["16LF-01"]["evidence"]["checks"]["rollback"] = "PASS"
-        tasks["16LF-01"]["status"] = "blocked"
-        blocked = {t["id"] for wave in board.waves(data) for t in wave}
+        verifier = self._trusted_test_verifier()
+        eligible = {t["id"] for wave in board.waves(
+            data, trusted_verifier=verifier
+        ) for t in wave}
+        self.assertIn("16L3", eligible)
+        untrusted = self._trusted_test_verifier(evidence_complete=False)
+        blocked = {t["id"] for wave in board.waves(
+            data, trusted_verifier=untrusted
+        ) for t in wave}
         self.assertNotIn("16L3", blocked)
 
     def test_missing_freshstart_evidence_and_dependency_bypass_rejected(self):
@@ -329,7 +517,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue(any("16L3:" in e for e in board.validate(data)))
 
     def test_incomplete_and_forged_freshstart_proofs_fail_closed(self):
-        data, tasks = self._fresh_scenario()
+        _, tasks = self._fresh_scenario()
         good = tasks["16LF-01"]["evidence"]
         for field, value in [
             ("source_sha", "fake"),
@@ -342,16 +530,16 @@ class TaskBoardTests(unittest.TestCase):
         ]:
             broken = copy.deepcopy(good)
             broken[field] = value
-            self.assertFalse(board.fresh_receipt_valid(broken), field)
+            self.assertFalse(board.fresh_receipt_structurally_valid(broken), field)
         broken = copy.deepcopy(good)
         broken["checks"]["rollback"] = "FAIL"
-        self.assertFalse(board.fresh_receipt_valid(broken))
+        self.assertFalse(board.fresh_receipt_structurally_valid(broken))
         broken = copy.deepcopy(good)
         del broken["checks"]["owned_cleanup"]
-        self.assertFalse(board.fresh_receipt_valid(broken))
+        self.assertFalse(board.fresh_receipt_structurally_valid(broken))
 
     def test_release_gate_preserves_16f_16l1_16u2_and_physical_gate(self):
-        data, tasks = self._fresh_scenario()
+        _, tasks = self._fresh_scenario()
         for prereq in ("16F", "16L1"):
             tasks[prereq]["status"] = "todo"
             self.assertIn(prereq, board.missing_dependencies(tasks["16L3"], tasks))

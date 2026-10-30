@@ -48,6 +48,7 @@ GATES = (
     "16L1_native_installer",
     "16U1_owner_consent",
     "16L2_owner_approved_copy_migration",
+    "16LF-01_owner_local_fresh_start",
     "16L3_native_full_release_performance",
     "16U2_owner_release_decision",
     "PERF-05_native_product_comparison",
@@ -88,8 +89,10 @@ def make_report(expected_head, actual_head, ancestors, sources):
     require(tasks.get("16FS-01", {}).get("kind") == "C" and
             tasks["16FS-01"].get("depends_on") == ["16U1", "16L1", "16F"] and
             tasks.get("16LF-01", {}).get("kind") == "L" and
-            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"],
-            "16FS-01 / 16LF-01 independent fresh-start gate changed")
+            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"] and
+            tasks["16LF-01"].get("status") == "blocked" and
+            tasks["16LF-01"].get("evidence") is None,
+            "16FS-01 / 16LF-01 independent fresh-start gate changed or is no longer NOT_RUN")
     require(tasks.get("16U1", {}).get("migration_consent") == "declined" and
             tasks.get("16L2", {}).get("status") == "blocked",
             "owner no-migration decision or private 16L2 block changed")

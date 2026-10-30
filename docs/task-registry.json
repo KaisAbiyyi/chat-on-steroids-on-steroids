@@ -1563,7 +1563,7 @@
       "kind": "C",
       "status": "claimed",
       "scope": "contract-only; no private-profile migration or physical test",
-      "claim_owner": "gpt6-cloud-16fs01-20261029-2020wib"
+      "claim_owner": "gpt6-cloud-16fs01-final-corrections-20261030-1314wib"
     },
     {
       "id": "16LF-01",
