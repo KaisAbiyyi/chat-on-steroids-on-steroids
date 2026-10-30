@@ -547,6 +547,13 @@ class TaskBoardTests(unittest.TestCase):
         }
         tasks["16L2"]["status"] = "todo"
 
+        tasks["16U1"]["consent_receipt"]["scope"] = "all-private-profiles"
+        self.assertFalse(board.private_migration_authorized(tasks))
+        self.assertIn(
+            "owner_private_migration_consent",
+            board.missing_dependencies(tasks["16L2"], tasks),
+        )
+        tasks["16U1"]["consent_receipt"]["scope"] = "approved-copy-only"
         self.assertTrue(board.private_migration_authorized(tasks))
         self.assertNotIn(
             "owner_private_migration_consent",
