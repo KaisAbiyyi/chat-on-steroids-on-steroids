@@ -158,7 +158,7 @@ For a cloud unit, return `UNIT`, `GITHUB (branch/PR/merged SHA)`, `IMPLEMENTED`,
 
 ### Execution and ordering
 
-16FS-01 / PR #138 is merged and owner-attested under GPT6_OWNER_ATTESTED. 16FV-01 is the next Cloud implementation task, claimed on the existing branch work/16fv-01-trusted-evidence-verifier-20261030 under resource lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier fetches merged PR #139, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance. 16LF-01 remains Blocked / NOT_RUN until 16FV-01 is accepted and the owner-controlled production trust root is configured.
+16FS-01 / PR #138 is merged and owner-attested under GPT6_OWNER_ATTESTED. 16FV-01 is the next Cloud implementation task, claimed on the existing branch work/16fv-01-trusted-evidence-verifier-20261030 under resource lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract and owner acceptance, then fetches merged PR #139, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance. 16LF-01 remains Blocked / NOT_RUN until 16FV-01 is accepted and the owner-controlled production trust root is configured.
 
 Canonical dependencies:
 
@@ -198,7 +198,7 @@ All eight paths must be distinct safe checks/*.json entries, each file must be c
 
 ### Owner trust-root configuration
 
-Production authority is not configured by the Cloud implementation. The only accepted production environment input is COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON, whose exact pinned value is exposed as PRODUCTION_TRUST_ROOT in tools/fresh_evidence_verifier.py. The owner must create the protected GitHub Environment fresh-evidence-production, add the exact JSON as an environment secret, and preserve read-only workflow permissions. The production CLI returns TRUST_ROOT_UNCONFIGURED if absent and TRUST_ROOT_INVALID if changed. A test-only authority value cannot be loaded by the production parser.
+Production authority is not configured by the Cloud implementation. The only accepted production environment input is COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON, whose exact pinned value is exposed as PRODUCTION_TRUST_ROOT in tools/fresh_evidence_verifier.py. The owner must create the protected GitHub Environment fresh-evidence-production, add the exact JSON as an environment secret, and preserve read-only workflow permissions. Then use a separate owner-controlled main-only protected workflow/job to run the production task-board CLI and confirm CONFIGURED; this PR's CI workflow intentionally does not reference the Environment or secret, so it cannot auto-create an unprotected Environment. The production CLI returns TRUST_ROOT_UNCONFIGURED if absent and TRUST_ROOT_INVALID if changed. A test-only authority value cannot be loaded by the production parser.
 
 The root pins repository ID 1424422098, owner KaisAbiyyi / user ID 93252311, the merged 16FS-01 PR/source/merge/report/attestation, and the actual 16L1 artifact/run/archive/file/provenance identities. No root secret, environment protection, owner-local access or physical qualification is created by this task.
 

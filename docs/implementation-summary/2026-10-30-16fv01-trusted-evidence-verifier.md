@@ -23,7 +23,8 @@ No production root is established by this implementation. Missing root returns T
 
 ## Production components
 
-- tools/fresh_evidence_verifier.py — read-only GitHub API client, pinned owner trust-root parser, merged 16FS-01 contract check, immutable comment-record parser, source PR/diff binding, merged 16FV-01 source-file SHA binding, 16L1 artifact byte/Sigstore verifier, evidence-bundle verifier and typed FreshEvidenceVerification constructor.
+- tools/fresh_evidence_verifier.py — read-only GitHub API client, pinned owner trust-root parser, merged 16FS-01 contract check, immutable comment-record parser, source PR/diff binding, merged 16FV-01 source-file SHA binding, 16L1 artifact byte/Sigstore verifier, structured evidence-bundle verifier and typed FreshEvidenceVerification constructor.
+- tools/fixtures/16fs01-pr138.diff — byte-exact golden diff from merged predecessor PR #138; the production verifier recomputes its SHA-256 against the pinned 16FS-01 contract.
 - tools/task_board.py — schema-v3 receipt validation, typed 17-fact binding, production verifier loading in the CLI, fail-closed acceptance path and canonical DAG constraints.
 - tools/test_fresh_evidence_verifier.py — positive and adversarial verifier tests, synthetic artifact archive tests, five mocked Sigstore proof checks, production root isolation and CLI fail-closed tests.
 - tools/test_task_board.py and tools/test_release_16f.py — canonical DAG, receipt and release-gate regression coverage.
@@ -39,16 +40,16 @@ The production verifier is imported by the normal task-board CLI. It is not a te
 | 1 | receipt_exists | Fetches the exact canonical issue-comment ID from the registry URL; checks actual API record and issue identity. | Missing receipt record. |
 | 2 | receipt_integrity_verified | SHA-256 over canonical receipt JSON; exact equality between immutable comment payload and registry payload. | Tampered receipt and digest mismatch. |
 | 3 | review_report_exists | Fetches the exact review-report issue comment; verifies canonical record identity and unchanged timestamps. | Missing report. |
-| 4 | review_mode_authorized | Pinned trust-root mode and report policy must equal GPT6_OWNER_ATTESTED. | Wrong mode, legacy schema and legacy independent-review field. |
-| 5 | owner_identity_verified | Fetches /users/KaisAbiyyi; numeric GitHub user ID must equal the owner-root ID. | Unauthorized owner ID. |
-| 6 | owner_attestation_exists | Fetches the separately referenced owner-attestation issue comment. | Missing attestation. |
-| 7 | owner_attestation_author_identity_verified | Actual receipt, report and attestation comment authors must match the pinned owner login and numeric ID. | Attestation author mismatch and forged issue provenance. |
+| 4 | artifact_exists | Fetches exact Actions artifact metadata and run artifact listing; checks ID, name, run, repository, head SHA, expiry and archive digest. | Missing, expired or modified artifact. |
+| 5 | review_mode_authorized | Pinned trust-root mode and report policy must equal GPT6_OWNER_ATTESTED. | Wrong mode, legacy schema and legacy independent-review field. |
+| 6 | owner_identity_verified | Fetches /users/KaisAbiyyi; numeric GitHub user ID must equal the owner-root ID. | Unauthorized owner ID. |
+| 7 | owner_attestation_exists | Fetches the separately referenced owner-attestation issue comment. | Missing attestation. |
 | 8 | owner_attestation_valid | Canonical attestation SHA-256; exact accepted report, receipt, source, diff, artifact and review-mode bindings. | Modified attestation, wrong source and wrong diff. |
-| 9 | gpt6_review_verdict_pass | Requires report schema cosos.release.cloud-provenance.v2, verdict PASS, and exact owner-attested policy. | Non-PASS, wrong schema and legacy policy. |
-| 10 | reviewed_source_sha_matches | Fetches source PR #135 and binds report, receipt and attestation to its exact merged head SHA. | Wrong source SHA. |
-| 11 | reviewed_diff_digest_matches | Fetches the actual PR #135 diff bytes from GitHub and recomputes SHA-256. | Wrong report digest and changed provider diff. |
-| 12 | receipt_review_artifact_digests_match | Cross-binds receipt, review report, owner attestation, artifact installer digest and package-receipt digest. | Tampered receipt and artifact digest mismatch. |
-| 13 | artifact_exists | Fetches exact Actions artifact metadata and run artifact listing; checks ID, name, run, repository, head SHA, expiry and archive digest. | Missing, expired or modified artifact. |
+| 9 | owner_attestation_author_identity_verified | Actual receipt, report and attestation comment authors must match the pinned owner login and numeric ID. | Attestation author mismatch and forged issue provenance. |
+| 10 | gpt6_review_verdict_pass | Requires report schema cosos.release.cloud-provenance.v2, verdict PASS, and exact owner-attested policy. | Non-PASS, wrong schema and legacy policy. |
+| 11 | reviewed_source_sha_matches | Fetches source PR #135 and binds report, receipt and attestation to its exact merged head SHA. | Wrong source SHA. |
+| 12 | reviewed_diff_digest_matches | Fetches the actual PR #135 diff bytes from GitHub and recomputes SHA-256. | Wrong report digest and changed provider diff. |
+| 13 | receipt_review_artifact_digests_match | Cross-binds receipt, review report, owner attestation, artifact installer digest and package-receipt digest. | Tampered receipt and artifact digest mismatch. |
 | 14 | artifact_provenance_verified | Downloads actual archive; checks payload files and package receipt; runs gh attestation verify on five separately attested files and validates SLSA certificate/run identity. | Missing/tampered archive and forged Sigstore provenance. |
 | 15 | artifact_source_binding_verified | Checks PR #135, PR #136, exact source/tooling commits, original pull-request event, run attempt, merge ancestry and main ancestry. | Wrong source/run/artifact identity. |
 | 16 | fresh_start_checks_verified | Downloads the owner-uploaded evidence bundle; checks ZIP safety, bundle SHA-256, complete manifest, every file hash, all eight exact PASS checks and one raw evidence file per check. | Missing check, missing file, modified file and bundle digest mismatch. |
@@ -66,7 +67,7 @@ The task registry stores the schema-v3 receipt plus three canonical immutable is
 
 The receipt JSON digest is calculated over the exact receipt payload object. The review report and owner attestation each carry their own canonical self-excluding digest. The receipt record is posted first; subsequent report/attestation links and hashes live in the task-registry envelope to avoid circular comment-ID references.
 
-The receipt points to an owner-uploaded ZIP attachment at a GitHub user-attachment URL. The ZIP must contain evidence-manifest.json, qualification.json, and raw evidence files for every required fresh-start check. The manifest carries SHA-256 for every other file. The qualification record binds repository, source SHA, artifact ID/hash, exact 16FS source/merge SHA, exact 16FV PR #139 head/merge SHA and verifier-file SHA-256, Windows build, unique session ID, workspace nonce/path, timestamps, commands, eight PASS checks and per-check evidence paths.
+The receipt points to an owner-uploaded ZIP attachment at a GitHub user-attachment URL. The ZIP must contain evidence-manifest.json, qualification.json, and one structured JSON evidence record for every required fresh-start check. The manifest carries SHA-256 for every other file. The qualification record binds repository, source SHA, artifact ID/hash, exact 16FS source/merge SHA, exact 16FV PR #139 head/merge SHA and verifier-file SHA-256, Windows build, unique session ID, workspace nonce/path, timestamps, commands, eight PASS checks and per-check evidence paths.
 
 All file paths are relative and ZIP traversal/symlink/duplicate entries are rejected. The evidence bundle's SHA-256 is checked against the receipt before its contents are used.
 
@@ -101,7 +102,7 @@ The verifier does not trust these strings merely because they appear in code or 
 ## Canonical DAG
 
 - 16FS-01 is reconciled to Done only because merged PR #138 and its separate owner acceptance are verified.
-- 16FV-01 is the canonical claimed Cloud task with dependencies on 16FS-01, 16U1 and 16L1 and exclusive lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier fetches merged PR #139, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance.
+- 16FV-01 is the canonical claimed Cloud task with dependencies on 16FS-01, 16U1 and 16L1 and exclusive lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract and owner acceptance, then fetches merged PR #139, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance.
 - 16LF-01 remains Blocked / NOT_RUN and now depends on accepted 16FV-01 in addition to 16FS-01, 16U1 and 16L1.
 - 16L2 remains Blocked / NOT_RUN / NOT_AUTHORIZED.
 - 16L3 remains exactly 16F AND 16L1 AND (16L2 OR 16LF-01).
@@ -126,7 +127,7 @@ After the verifier code is reviewed and accepted, the owner must:
 3. Generate the exact JSON value from PRODUCTION_TRUST_ROOT in tools/fresh_evidence_verifier.py (its authority is owner-controlled).
 4. Add that exact JSON as environment secret COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON.
 5. Keep the production workflow token read-only: contents, pull-requests, issues, actions and attestations.
-6. Run the main-only 16FV-01 Trusted Evidence Verifier workflow manually and confirm the CLI reports CONFIGURED before any 16LF-01 receipt is considered.
+6. After the protected Environment and secret exist, use a separate owner-controlled main-only protected workflow/job to run the production task-board CLI and confirm it reports CONFIGURED before any 16LF-01 receipt is considered. This PR's CI workflow intentionally does not reference the Environment or secret, so it cannot auto-create an unprotected Environment.
 
 Example owner-side JSON extraction command, to be run by the owner after inspecting the accepted code:
 
