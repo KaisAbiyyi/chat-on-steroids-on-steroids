@@ -5,7 +5,7 @@
 **Implementation PR:** https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/141 (Draft; not merged)  
 **Existing branch:** work/16fv-01-trusted-evidence-verifier-20261030  
 **Original base SHA:** cc180575498e9f45d13c05c86a0a3bb4e8e0c1be  
-**Reclaim starting HEAD:** 5b4b00b7e0e08504f7a91234e2150af2bdbf0081  
+**Reclaim starting HEAD:** 5e494b3dc76d97e56cffc9a7521e024a93b8b3c0  
 **Resource lock:** freshstart-evidence-verifier  
 **Execution:** GitHub integration and GitHub Actions only  
 **Owner production trust root:** NOT CONFIGURED
@@ -25,8 +25,8 @@ No production root is established by this implementation. Missing root returns T
 
 ## Production components
 
-- tools/fresh_evidence_contract.py — single canonical verifier implementation PR identity (#141), task issue identity (#139), repository/owner identity, predecessor/artifact PR identities and protected workflow path.
-- tools/fresh_evidence_verifier.py — read-only GitHub API client, protected-environment trust-root parser, merged 16FS-01 contract check, immutable comment-record parser, source PR/diff binding, merged 16FV-01 PR #141 source-file SHA binding, 16L1 artifact byte/Sigstore verifier, structured evidence-bundle verifier and typed FreshEvidenceVerification constructor.
+- tools/fresh_evidence_contract.py — canonical PR/issue/repository/owner identities, trust-root schema v2, verifier-review and owner-attestation schemas/markers, predecessor/artifact identities and protected workflow path.
+- tools/fresh_evidence_verifier.py — read-only GitHub API client, protected-environment trust-root v2 parser, merged 16FS-01 and PR #141 review/owner-acceptance checks, exact repository/comment identity, source/diff/merge ancestry binding, verifier-file SHA binding, five digest-scoped Sigstore proofs, Windows path containment/reparse-point evidence, structured evidence-bundle verifier and typed FreshEvidenceVerification constructor.
 - tools/fixtures/16fv-trust-root.test.json — explicitly test-only trust-root fixture; authority is test-only and the production environment loader rejects it.
 - tools/fixtures/16fs01-pr138.diff — byte-exact golden diff from merged predecessor PR #138; the production verifier recomputes its SHA-256 against the pinned 16FS-01 contract.
 - tools/task_board.py — schema-v3 receipt validation, typed 17-fact binding, production verifier loading in the CLI, fail-closed acceptance path and canonical DAG constraints.
@@ -37,7 +37,7 @@ No production root is established by this implementation. Missing root returns T
 - tools/record_16fv_qualification.py — verifies git rev-parse HEAD equals the workflow's claimed tested SHA before recording the verifier file SHA-256, runner OS, run ID/attempt, test outcomes and explicit non-acceptance of production authority.
 - tools/test_record_16fv_qualification.py — tests exact checkout binding, run URL identity and fail-closed qualification records.
 
-The production verifier is imported by the normal task-board CLI. It is not a test adapter and there is no unconditional success or legacy acceptance fallback. The merged 16FS-01 predecessor is revalidated by fetching PR #138's actual diff bytes, recomputing the pinned diff SHA-256, and hashing the immutable GPT-6 report body after excluding its final self-digest line; the separate owner acceptance record is fetched and checked independently. Historical artifact byte download and Sigstore verification use the GitHub CLI (gh) with a read-only token. The CLI does not read a trust root from task-registry JSON, receipt fields, PR comments or candidate-supplied booleans.
+The production verifier is imported by the normal task-board CLI. It is not a test adapter and there is no unconditional success or legacy acceptance fallback. The owner-controlled trust-root schema v2 contains a separate verifier_review object for PR #141. The verifier fetches the actual PR, recomputes the GitHub diff digest, verifies the exact source and merge SHAs, checks that the 16FS-01 merge is in PR #141 source ancestry, and validates two distinct immutable owner-authored comments: the GPT-6 PASS report and the separate owner acceptance. Both comments bind the exact repository, PR, source SHA, diff SHA and GPT6_OWNER_ATTESTED policy; each digest is canonical and self-excluding. The owner account is authenticated, but GPT-6 model authorship is explicitly owner-attested rather than cryptographically authenticated. trust-root-status now performs the remote checks instead of merely parsing the secret. The CLI does not read a trust root from task-registry JSON, receipt fields, PR comments or candidate-supplied booleans.
 
 ## 17-fact contract mapping
 
@@ -80,7 +80,7 @@ All file paths are relative and ZIP traversal/symlink/duplicate entries are reje
 Each check evidence file is a JSON record using schema cosos.16lf01.check-evidence.v1. It repeats the repository, source SHA, exact 16FS/16FV pins, artifact, session and workspace bindings and carries a timestamp within the recorded session. The verifier validates check-specific observations rather than trusting a PASS boolean alone:
 
 - fresh_init: new profile created, profile was empty, unique profile ID.
-- isolated_storage: storage root is beneath the disposable workspace, canonical storage path is beneath that root, and it is outside existing profile roots.
+- isolated_storage: Windows drive-absolute workspace/profile/canonical paths are validated with ntpath semantics; profile and canonical paths must be strict descendants on the same drive, traversal/UNC/device paths are rejected, and every path component from the drive root through canonical storage must have explicit GetFileAttributesW(FILE_ATTRIBUTE_REPARSE_POINT) evidence showing no reparse point or junction.
 - synthetic_only: artifact is unsigned, native16L1Accepted is false, and inputs are synthetic-only.
 - existing_profiles_untouched: before/after snapshot SHA-256 values match.
 - no_leakage: leakage_detected is false, cross-profile access count is zero, external data reads are zero.
@@ -101,14 +101,14 @@ The production root pins the investigation leads only after validating their act
 - Original pull-request event digest b903132e2c8a32cde5143d40696813fb3233d11d.
 - Actions run 40808144696, attempt 1, workflow ID 398496557.
 - Accepted verifier-tooling PR #136 head e526c2ed398b0b21dd10f659d2ab1f1ed7f85b07, merge bb3ca8daba5d467b9f097b7e84833da3ee129373.
-- Package receipt digest 9c473677c03cead075cfbf0bb6015962fdfc8f2e785e5c2334bb95282a56b308; its attestation locator is https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/attestations/61105602.
+- Package receipt digest 9c473677c03cead075cfbf0bb6015962fdfc8f2e785e5c2334bb95282a56b308; provenance lookup is digest-scoped at https://api.github.com/repos/KaisAbiyyi/chat-on-steroids-on-steroids/attestations/sha256:9c473677c03cead075cfbf0bb6015962fdfc8f2e785e5c2334bb95282a56b308.
 
-The verifier does not trust these strings merely because they appear in code or a receipt. It re-fetches artifact/run/PR/commit metadata, downloads the actual archive, recomputes archive and file hashes, validates the package receipt, and verifies the five Sigstore attestations against the exact original PR event/run attempt/workflow.
+The verifier does not trust these strings merely because they appear in code or a receipt. It re-fetches artifact/run/PR/commit metadata, downloads the actual archive, recomputes archive and file hashes, validates the package receipt, and verifies five distinct Sigstore proofs individually against the exact expected subject-file SHA-256, repository, signer workflow, original PR event digest, run ID and attempt. GitHub's supported gh attestation verify JSON and REST list-by-subject-digest interfaces do not expose a stable unique attestation ID; the unused UI-ID pins are removed. The narrower guarantee is cryptographic provenance for each exact subject digest, not identity of a particular GitHub attestation UI ID. Duplicate, missing, multi-subject, mismatched or unauthorized proof results fail closed. See the [GitHub CLI verification output contract](https://cli.github.com/manual/gh_attestation_verify) and [REST repository attestations API](https://docs.github.com/en/rest/repos/attestations#list-attestations).
 
 ## Canonical DAG
 
 - 16FS-01 is reconciled to Done only because merged PR #138 and its separate owner acceptance are verified.
-- 16FV-01 is the canonical claimed Cloud task for Issue #139, implemented by Draft PR #141, with dependencies on 16FS-01, 16U1 and 16L1 and exclusive lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract and owner acceptance, then fetches merged PR #141, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance.
+- 16FV-01 is the canonical claimed Cloud task for Issue #139, implemented by Draft PR #141, with dependencies on 16FS-01, 16U1 and 16L1 and exclusive lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract, the merged PR #141 identity/source/merge/file digest, the exact PR #141 diff, predecessor ancestry, the GPT-6 PASS report, and the separate immutable owner acceptance pinned by the owner-controlled verifier_review root; a registry Done flag or PR URL alone is never acceptance.
 - 16LF-01 remains Blocked / NOT_RUN and now depends on accepted 16FV-01 in addition to 16FS-01, 16U1 and 16L1.
 - 16L2 remains Blocked / NOT_RUN / NOT_AUTHORIZED.
 - 16L3 remains exactly 16F AND 16L1 AND (16L2 OR 16LF-01).
@@ -132,16 +132,49 @@ After PR #141 has been technically reviewed, separately owner-attested and merge
 
 1. Create the GitHub Environment `fresh-evidence-production`.
 2. Configure its required reviewers / deployment protection and restrict which branches may deploy to `main`.
-3. Independently construct the JSON payload with `authority: "owner-controlled"`, repository `KaisAbiyyi/chat-on-steroids-on-steroids` / ID `1424422098`, owner `KaisAbiyyi` / user ID `93252311`, review mode `GPT6_OWNER_ATTESTED`, receipt issue #140, predecessor PR #138 contract pins, and historical 16L1 PR #135 / tooling PR #136 / artifact / run / five attestation pins. Obtain those values from the owner-controlled accepted records and actual GitHub metadata; do not copy authority from candidate source, the registry, a receipt or the test fixture.
+3. Independently construct the JSON payload using trust-root schema v2 with `authority: "owner-controlled"`, repository `KaisAbiyyi/chat-on-steroids-on-steroids` / ID `1424422098`, owner `KaisAbiyyi` / user ID `93252311`, review mode `GPT6_OWNER_ATTESTED`, receipt issue #140, predecessor PR #138 pins, verifier_review PR #141 source/merge/diff/report-comment/report-digest/owner-attestation-comment/attestation-digest pins, and historical 16L1 PR #135 / tooling PR #136 / artifact / run / five subject-file digest pins. Obtain every value from actual GitHub metadata and owner-controlled accepted records; do not copy authority from candidate source, the registry, a receipt or the test fixture.
 4. Store that independently assembled JSON as the Environment secret `COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON`.
 5. Keep the production workflow token read-only: contents, pull-requests, issues, actions and attestations.
-6. Manually dispatch `.github/workflows/16fv-production-verify.yml` with the selected ref set to `main`. The job checks out the exact dispatched main SHA, enters the protected Environment, verifies repository/owner identity, the merged 16FS-01 predecessor contract, and the actual historical 16L1 artifact bytes plus all five Sigstore provenance checks. It runs `python tools/task_board.py trust-root-status` and fails closed unless all remote pins verify.
+6. Manually dispatch `.github/workflows/16fv-production-verify.yml` with the selected ref set to `main`. The job checks out the exact dispatched main SHA, enters the protected Environment, and runs `python tools/task_board.py trust-root-status`. That command now performs the actual repository/owner, predecessor PR/report/attestation, PR #141 verifier-review/owner-acceptance, diff/source ancestry, historical artifact byte and five Sigstore proof checks; it fails closed unless every remote pin verifies.
 
 The production workflow is `workflow_dispatch` only, has a job-level main-ref guard, uses a protected GitHub Environment and read-only permissions, and reads the secret only in that protected job. The PR-triggered Windows/Ubuntu qualification workflow has no reference to the Environment or secret. No `pull_request_target` job executes candidate code with owner secrets.
 
 The verifier rejects a test-only authority, a wrong repository/owner/review policy, malformed predecessor or artifact pins, or any secret presented outside the exact main-only production workflow context. Missing configuration returns `TRUST_ROOT_UNCONFIGURED`; malformed or out-of-context configuration returns `TRUST_ROOT_INVALID`; remote/API/provenance failures return `VERIFICATION_ERROR`.
 
 No owner trust-root setup is performed by this implementation. Until the owner completes the protected configuration and verification, production trust remains unconfigured and 16LF-01 / 16L3 remain blocked.
+
+
+## PR #141 verifier-review contract
+
+The owner-controlled trust-root schema is now `cosos.fresh-evidence-trust-root.v2`. Its required `verifier_review` object contains:
+
+- `pr_number` = 141 and `review_mode` = `GPT6_OWNER_ATTESTED`.
+- Exact PR head/source SHA and merge commit SHA.
+- SHA-256 recomputed from the actual GitHub PR #141 diff bytes.
+- Separate immutable report and owner-attestation comment IDs.
+- Canonical self-excluding SHA-256 for each record.
+
+The report uses schema `cosos.16fv.verifier-review.v1`, verdict exactly `PASS`, exact repository/PR/source/diff bindings, the owner login/numeric ID, and explicit semantics `OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL` plus `OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED` for model authorship. The separate attestation uses schema `cosos.16fv.owner-attestation.v1`, requires explicit `accepted: true`, and binds the exact report digest, source SHA, diff digest, repository, PR, owner and review mode. Both GitHub comments must be authored by the pinned owner, belong to the exact canonical repository/PR #141 issue URL, have unchanged timestamps, and be distinct. Missing, changed, wrong-author, wrong-repository or mismatched records fail closed.
+
+The production trust-root workflow does not merely parse schema: `trust-root-status` performs the same remote verifier-review checks, in addition to predecessor and historical artifact checks. The production secret remains unconfigured by this PR.
+
+## Windows path and reparse-point evidence
+
+For `isolated_storage`, `profile_storage_root` must be a strict descendant of the disposable workspace and `canonical_path` a strict descendant of the profile storage root. All three must be absolute local Windows paths on the same drive. The verifier rejects traversal components before normalization, mixed-separator traversal, UNC/device paths, drive changes and sibling-prefix escapes. It uses `ntpath` and case-insensitive Windows containment semantics on both CI platforms.
+
+The evidence must include `reparse_point_check_method: GetFileAttributesW(FILE_ATTRIBUTE_REPARSE_POINT)` and one `reparse_point_checks` entry for every path component from the drive root through the workspace, profile root and canonical path. Each entry must bind the exact component path and report `is_reparse_point: false`. Missing, incomplete, duplicated, mismatched or positive reparse-point evidence is rejected. This is an evidence contract only; no owner-local Windows physical qualification is performed by this cloud implementation.
+
+## Historical Sigstore proof guarantee and limitation
+
+The trust root no longer carries the five UI attestation IDs because the supported GitHub interfaces do not expose a stable unique ID for the exact verified proof object. Each proof is instead looked up/verified by its exact subject file digest and must return exactly one verified attestation whose subject digest matches the pinned file. The CLI certificate and SLSA statement must bind the repository ID, workflow, PR merge ref, original event digest, run ID and attempt. The five mappings are package receipt, installer, candidate ZIP, update-02 installer and update-03 installer. The verifier does not claim that a particular GitHub UI attestation ID was pinned.
+
+## Trust-root rotation, replacement and revocation
+
+- **Initial setup:** after PR #141 has its exact-SHA GPT-6 technical PASS report and separate owner acceptance, the owner independently pins the actual comment IDs and self-excluding digests in `verifier_review`, then stores the completed v2 root only in the protected main-only Environment secret.
+- **Review replacement:** never edit a pinned comment. Publish a new report and a separate new owner-acceptance comment, then replace both IDs and digests in the protected secret after checking the exact new PR head and actual diff.
+- **Owner-attestation revocation:** remove or invalidate the owner-controlled secret to make the trust root unconfigured/invalid, or publish a replacement attestation and atomically update the pinned comment ID/digest. An edited comment fails the unchanged-timestamp check.
+- **Trust-root rotation:** rotate the Environment secret as one complete v2 payload. Keep the old root out of candidate files, task-registry JSON, PR text and receipts. Dispatch the main-only verification workflow after rotation and require all remote checks to pass.
+- **Failure/revocation:** absent configuration returns `TRUST_ROOT_UNCONFIGURED`; malformed root returns `TRUST_ROOT_INVALID`; missing or mismatched remote records return `VERIFICATION_ERROR`. No task status is promoted automatically.
 
 ## Explicit non-deliverables
 

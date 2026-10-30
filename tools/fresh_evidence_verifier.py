@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import ntpath
 from datetime import datetime
 import io
 import json
@@ -32,14 +33,18 @@ try:
         HISTORICAL_16L1_PR_NUMBER, HISTORICAL_TOOLING_PR_NUMBER,
         OWNER_LOGIN, OWNER_USER_ID, PREDECESSOR_PR_NUMBER,
         PRODUCTION_WORKFLOW_PATH, RECEIPT_ISSUE_NUMBER, REPOSITORY,
-        REPOSITORY_ID, REVIEW_MODE, TRUST_ROOT_ENV, VERIFIER_PR_NUMBER,
+        REPOSITORY_ID, REVIEW_MODE, TRUST_ROOT_ENV, TRUST_ROOT_SCHEMA,
+        VERIFIER_ATTESTATION_MARKER, VERIFIER_ATTESTATION_SCHEMA,
+        VERIFIER_REVIEW_MARKER, VERIFIER_REVIEW_SCHEMA, VERIFIER_PR_NUMBER,
     )
 except ImportError:
     from fresh_evidence_contract import (
         HISTORICAL_16L1_PR_NUMBER, HISTORICAL_TOOLING_PR_NUMBER,
         OWNER_LOGIN, OWNER_USER_ID, PREDECESSOR_PR_NUMBER,
         PRODUCTION_WORKFLOW_PATH, RECEIPT_ISSUE_NUMBER, REPOSITORY,
-        REPOSITORY_ID, REVIEW_MODE, TRUST_ROOT_ENV, VERIFIER_PR_NUMBER,
+        REPOSITORY_ID, REVIEW_MODE, TRUST_ROOT_ENV, TRUST_ROOT_SCHEMA,
+        VERIFIER_ATTESTATION_MARKER, VERIFIER_ATTESTATION_SCHEMA,
+        VERIFIER_REVIEW_MARKER, VERIFIER_REVIEW_SCHEMA, VERIFIER_PR_NUMBER,
     )
 RECEIPT_MARKER = "<!-- COSOS-16LF01-RECEIPT-V1 -->"
 REVIEW_MARKER = "<!-- COSOS-GPT6-REVIEW-V2 -->"
@@ -54,7 +59,6 @@ MAX_ARTIFACT_BYTES = 200 * 1024 * 1024
 MAX_BUNDLE_BYTES = 100 * 1024 * 1024
 MAX_UNPACKED_BYTES = 500 * 1024 * 1024
 
-TRUST_ROOT_SCHEMA = "cosos.fresh-evidence-trust-root.v1"
 PREDECESSOR_TRUST_ROOT_FIELDS = frozenset({
     "pr_number", "source_sha", "merge_commit_sha", "diff_sha256",
     "report_comment_id", "owner_attestation_comment_id", "report_sha256",
@@ -68,7 +72,6 @@ ARTIFACT_TRUST_ROOT_FIELDS = frozenset({
     "update03_zip_sha256", "release_manifest_sha256", "renderer_manifest_sha256",
     "rust_sha256", "renderer_host_sha256", "renderer_dll_sha256",
     "tooling_pr_number", "tooling_head_sha", "tooling_merge_commit_sha",
-    "attestations",
 })
 ARTIFACT_COMMIT_FIELDS = (
     "source_sha", "source_base_sha", "source_merge_commit_sha",
@@ -85,12 +88,6 @@ ARTIFACT_INTEGER_FIELDS = (
     "pr_number", "run_id", "run_attempt", "workflow_id", "artifact_id",
     "tooling_pr_number",
 )
-ARTIFACT_ATTESTATION_FIELDS = frozenset({
-    "package_receipt", "installer", "candidate_zip",
-    "update02_installer", "update03_installer",
-})
-
-
 RECEIPT_PAYLOAD_FIELDS = (
     "schema_version", "kind", "host", "profile_scope", "migration",
     "review_mode", "owner_login", "repository", "repository_id",
@@ -123,6 +120,7 @@ class TrustRoot:
     review_mode: str
     receipt_issue_number: int
     predecessor: dict[str, Any]
+    verifier_review: dict[str, Any]
     artifact: dict[str, Any]
 
     @classmethod
@@ -132,7 +130,7 @@ class TrustRoot:
         expected_keys = {
             "schema", "authority", "repository_full_name", "repository_id",
             "owner_login", "owner_user_id", "review_mode",
-            "receipt_issue_number", "predecessor", "artifact",
+            "receipt_issue_number", "predecessor", "verifier_review", "artifact",
         }
         if set(value) != expected_keys or value.get("schema") != TRUST_ROOT_SCHEMA:
             raise TrustRootError("TRUST_ROOT_INVALID: schema or fields mismatch")
@@ -176,6 +174,35 @@ class TrustRoot:
         ):
             raise TrustRootError("TRUST_ROOT_INVALID: predecessor contract pins are malformed")
 
+
+        verifier_review = value.get("verifier_review")
+        if (
+            not isinstance(verifier_review, dict)
+            or set(verifier_review) != {
+                "pr_number", "source_sha", "merge_commit_sha", "diff_sha256",
+                "report_comment_id", "report_sha256", "owner_attestation_comment_id",
+                "owner_attestation_sha256", "review_mode",
+            }
+            or type(verifier_review.get("pr_number")) is not int
+            or verifier_review.get("pr_number") != VERIFIER_PR_NUMBER
+            or type(verifier_review.get("report_comment_id")) is not int
+            or verifier_review.get("report_comment_id") <= 0
+            or type(verifier_review.get("owner_attestation_comment_id")) is not int
+            or verifier_review.get("owner_attestation_comment_id") <= 0
+            or verifier_review.get("report_comment_id") == verifier_review.get("owner_attestation_comment_id")
+            or verifier_review.get("review_mode") != REVIEW_MODE
+            or any(
+                not isinstance(verifier_review.get(field), str)
+                or re.fullmatch(rf"[0-9a-f]{{{length}}}", verifier_review[field]) is None
+                for field, length in (
+                    ("source_sha", 40), ("merge_commit_sha", 40),
+                    ("diff_sha256", 64), ("report_sha256", 64),
+                    ("owner_attestation_sha256", 64),
+                )
+            )
+        ):
+            raise TrustRootError("TRUST_ROOT_INVALID: verifier-review contract pins are malformed")
+
         artifact = value.get("artifact")
         if (
             not isinstance(artifact, dict)
@@ -198,9 +225,6 @@ class TrustRoot:
                 not isinstance(artifact.get(field), str) or not artifact[field].strip()
                 for field in ("branch", "workflow_path", "artifact_name")
             )
-            or not isinstance(artifact.get("attestations"), dict)
-            or set(artifact["attestations"]) != ARTIFACT_ATTESTATION_FIELDS
-            or any(type(item) is not int or item <= 0 for item in artifact["attestations"].values())
         ):
             raise TrustRootError("TRUST_ROOT_INVALID: historical 16L1 artifact/provenance pins are malformed")
 
@@ -213,6 +237,7 @@ class TrustRoot:
             review_mode=value["review_mode"],
             receipt_issue_number=value["receipt_issue_number"],
             predecessor=dict(predecessor),
+            verifier_review=dict(verifier_review),
             artifact=dict(artifact),
         )
 
@@ -333,9 +358,11 @@ def _check_unchanged_comment(comment: dict[str, Any], expected_id: int, issue_nu
         or not isinstance(comment.get("body"), str)
     ):
         raise VerificationError("GitHub record identity, owner authorship or unchanged-record check failed")
-    issue_url = comment.get("issue_url", "")
-    if not isinstance(issue_url, str) or not issue_url.endswith(f"/issues/{issue_number}"):
-        raise VerificationError("GitHub comment belongs to the wrong issue or repository")
+    expected_issue_url = (
+        f"https://api.github.com/repos/{root.repository_full_name}/issues/{issue_number}"
+    )
+    if comment.get("issue_url") != expected_issue_url:
+        raise VerificationError("GitHub comment belongs to the wrong canonical repository or issue")
     return "github:issue-comment:" + str(expected_id)
 
 
@@ -372,6 +399,86 @@ def _safe_zip_members(archive: zipfile.ZipFile, max_unpacked: int) -> dict[str, 
         members[name] = info
     return members
 
+
+
+
+def _canonical_windows_path(value: object, field: str, expected_drive: str | None = None) -> tuple[str, list[str]]:
+    """Return a case-normalized absolute Windows path and every component path."""
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise VerificationError("Windows storage path is missing or malformed: " + field)
+    raw = value.replace("/", "\\")
+    if raw.startswith("\\\\") or raw.startswith("\\??\\"):
+        raise VerificationError("UNC and device paths are forbidden for isolated storage: " + field)
+    drive, tail = ntpath.splitdrive(raw)
+    if re.fullmatch(r"[A-Za-z]:", drive) is None or not tail.startswith("\\"):
+        raise VerificationError("Windows storage path must be absolute on a local drive: " + field)
+    if expected_drive is not None and ntpath.normcase(drive) != ntpath.normcase(expected_drive):
+        raise VerificationError("Windows storage path changed drives: " + field)
+    segments = tail[1:].split("\\")
+    if segments and segments[-1] == "":
+        segments.pop()
+    if any(part in {"", ".", ".."} for part in segments):
+        raise VerificationError("Windows storage path contains an unsafe component: " + field)
+    normalized = ntpath.normpath(raw)
+    if (
+        not ntpath.isabs(normalized)
+        or ntpath.splitdrive(normalized)[0] == ""
+        or ntpath.normcase(ntpath.splitdrive(normalized)[0]) != ntpath.normcase(drive)
+    ):
+        raise VerificationError("Windows storage path normalization changed its drive: " + field)
+    canonical = ntpath.normcase(normalized)
+    components = [ntpath.normcase(drive + "\\")]
+    current = drive + "\\"
+    for part in segments:
+        current = ntpath.join(current, part)
+        components.append(ntpath.normcase(ntpath.normpath(current)))
+    return canonical, components
+
+
+def _require_strict_windows_descendant(
+    candidate: object, parent: object, field: str, expected_drive: str
+) -> tuple[str, list[str]]:
+    parent_path, _ = _canonical_windows_path(parent, field + " parent", expected_drive)
+    candidate_path, candidate_components = _canonical_windows_path(candidate, field, expected_drive)
+    try:
+        common = ntpath.commonpath([parent_path, candidate_path])
+    except ValueError as exc:
+        raise VerificationError("Windows storage paths are not comparable: " + field) from exc
+    if candidate_path == parent_path or common != parent_path:
+        raise VerificationError("Windows storage path is not a strict descendant: " + field)
+    return candidate_path, candidate_components
+
+
+def _verify_reparse_point_evidence(
+    observations: dict[str, Any], workspace: str, profile_root: str, canonical_path: str
+) -> None:
+    if observations.get("reparse_point_check_method") != "GetFileAttributesW(FILE_ATTRIBUTE_REPARSE_POINT)":
+        raise VerificationError("Isolated storage lacks an accepted Windows reparse-point check method")
+    checks = observations.get("reparse_point_checks")
+    if not isinstance(checks, list):
+        raise VerificationError("Isolated storage lacks explicit reparse-point path evidence")
+    expected_paths: list[str] = []
+    seen: set[str] = set()
+    for value in (workspace, profile_root, canonical_path):
+        _, components = _canonical_windows_path(value, "reparse-point path")
+        for component in components:
+            if component not in seen:
+                seen.add(component)
+                expected_paths.append(component)
+    actual_paths: list[str] = []
+    for check in checks:
+        if (
+            not isinstance(check, dict)
+            or set(check) != {"path", "is_reparse_point"}
+            or type(check.get("is_reparse_point")) is not bool
+        ):
+            raise VerificationError("Windows reparse-point check record is malformed")
+        checked_path, _ = _canonical_windows_path(check.get("path"), "reparse-point checked path")
+        if check["is_reparse_point"] is not False:
+            raise VerificationError("A Windows storage ancestor is a reparse point or junction")
+        actual_paths.append(checked_path)
+    if actual_paths != expected_paths:
+        raise VerificationError("Windows reparse-point evidence does not cover the exact storage path chain")
 
 
 def _validate_check_evidence(name: str, record: dict[str, Any], receipt: dict[str, Any]) -> None:
@@ -430,7 +537,10 @@ def _validate_check_evidence(name: str, record: dict[str, Any], receipt: dict[st
     }
     required_keys = {
         "fresh_init": {"new_profile_created", "profile_was_empty", "profile_id"},
-        "isolated_storage": {"outside_existing_profile_roots", "profile_storage_root", "canonical_path"},
+        "isolated_storage": {
+            "outside_existing_profile_roots", "profile_storage_root", "canonical_path",
+            "reparse_point_check_method", "reparse_point_checks",
+        },
         "synthetic_only": {"artifact_signed", "native16L1Accepted", "synthetic_input_only"},
         "existing_profiles_untouched": {"snapshots_match", "before_snapshot_sha256", "after_snapshot_sha256"},
         "no_leakage": {"leakage_detected", "cross_profile_access_count", "external_data_reads"},
@@ -449,13 +559,19 @@ def _validate_check_evidence(name: str, record: dict[str, Any], receipt: dict[st
         if not isinstance(observations.get("profile_id"), str) or len(observations["profile_id"]) < 8:
             raise VerificationError("Fresh profile identity is missing")
     elif name == "isolated_storage":
-        if (
-            not isinstance(observations.get("profile_storage_root"), str)
-            or not observations["profile_storage_root"].startswith(receipt["workspace_path"].rstrip("\\") + "\\")
-            or not isinstance(observations.get("canonical_path"), str)
-            or not observations["canonical_path"].startswith(observations["profile_storage_root"].rstrip("\\") + "\\")
-        ):
-            raise VerificationError("Isolated storage path evidence is malformed")
+        workspace_path, _ = _canonical_windows_path(receipt.get("workspace_path"), "workspace_path")
+        workspace_drive = ntpath.splitdrive(workspace_path)[0]
+        if workspace_path == ntpath.normcase(workspace_drive + "\\"):
+            raise VerificationError("Disposable workspace must be below a Windows drive root")
+        profile_storage_root, _ = _require_strict_windows_descendant(
+            observations.get("profile_storage_root"), workspace_path,
+            "profile_storage_root", workspace_drive,
+        )
+        canonical_path, _ = _require_strict_windows_descendant(
+            observations.get("canonical_path"), profile_storage_root,
+            "canonical_path", workspace_drive,
+        )
+        _verify_reparse_point_evidence(observations, workspace_path, profile_storage_root, canonical_path)
     elif name == "existing_profiles_untouched":
         before = observations.get("before_snapshot_sha256")
         after = observations.get("after_snapshot_sha256")
@@ -568,13 +684,28 @@ def _verify_predecessor(root: TrustRoot, api: Any) -> None:
     predecessor = root.predecessor
     repo = root.repository_full_name
     pr = api.get_json(f"/repos/{repo}/pulls/{predecessor['pr_number']}")
+    base_repo = pr.get("base", {}).get("repo", {})
+    head_repo = pr.get("head", {}).get("repo", {})
     if (
-        pr.get("merged") is not True or not pr.get("merged_at")
+        pr.get("number") != predecessor["pr_number"]
+        or pr.get("merged") is not True or not pr.get("merged_at")
         or pr.get("base", {}).get("ref") != "main"
+        or base_repo.get("full_name") != repo or base_repo.get("id") != root.repository_id
         or pr.get("head", {}).get("sha") != predecessor["source_sha"]
+        or head_repo.get("full_name") != repo or head_repo.get("id") != root.repository_id
         or pr.get("merge_commit_sha") != predecessor["merge_commit_sha"]
     ):
         raise VerificationError("Merged 16FS-01 predecessor identity does not match the trusted contract")
+
+    predecessor_main = api.get_json(f"/repos/{repo}/compare/{predecessor['merge_commit_sha']}...main")
+    if (
+        predecessor_main.get("base_commit", {}).get("sha") != predecessor["merge_commit_sha"]
+        or predecessor_main.get("merge_base_commit", {}).get("sha") != predecessor["merge_commit_sha"]
+        or predecessor_main.get("behind_by") != 0
+        or predecessor_main.get("status") not in {"ahead", "identical"}
+    ):
+        raise VerificationError("Merged 16FS-01 merge commit is not an ancestor of main")
+
     report = api.get_json(f"/repos/{repo}/issues/comments/{predecessor['report_comment_id']}")
     attestation = api.get_json(f"/repos/{repo}/issues/comments/{predecessor['owner_attestation_comment_id']}")
     report_id = _check_unchanged_comment(report, predecessor["report_comment_id"], predecessor["pr_number"], root)
@@ -632,9 +763,12 @@ def verify_16fv_source(receipt: dict[str, Any], api: Any) -> dict[str, Any]:
         pr.get("number") != VERIFIER_PR_NUMBER
         or pr.get("merged") is not True or not pr.get("merged_at")
         or pr.get("base", {}).get("ref") != "main"
+        or pr.get("base", {}).get("repo", {}).get("full_name") != repo
+        or pr.get("base", {}).get("repo", {}).get("id") != REPOSITORY_ID
         or pr.get("head", {}).get("sha") != source_sha
         or pr.get("merge_commit_sha") != merge_sha
         or pr.get("head", {}).get("repo", {}).get("full_name") != repo
+        or pr.get("head", {}).get("repo", {}).get("id") != REPOSITORY_ID
     ):
         raise VerificationError("16FV-01 PR/source/merge identity is not the merged accepted verifier")
     compare = api.get_json(f"/repos/{repo}/compare/{merge_sha}...main")
@@ -657,7 +791,114 @@ def verify_16fv_source(receipt: dict[str, Any], api: Any) -> dict[str, Any]:
     }
 
 
-def _verify_gh_attestation(path: Path, root: TrustRoot, runner: Callable[..., Any]) -> None:
+def _verify_verifier_review_contract(root: TrustRoot, api: Any) -> dict[str, Any]:
+    """Verify the GPT6_OWNER_ATTESTED report and separate owner acceptance for PR #141."""
+    review = root.verifier_review
+    repo = root.repository_full_name
+    pr_number = VERIFIER_PR_NUMBER
+    candidate_file = api.get_file_bytes("tools/fresh_evidence_verifier.py", review["source_sha"])
+    candidate_file_sha = hashlib.sha256(candidate_file).hexdigest()
+    source_result = verify_16fv_source({
+        "verifier_pr_number": pr_number,
+        "verifier_source_sha": review["source_sha"],
+        "verifier_merge_commit_sha": review["merge_commit_sha"],
+        "verifier_sha256": candidate_file_sha,
+    }, api)
+    actual_diff_sha = hashlib.sha256(api.get_diff(pr_number)).hexdigest()
+    if actual_diff_sha != review["diff_sha256"]:
+        raise VerificationError("PR #141 actual diff bytes do not match the owner-controlled verifier-review pin")
+    source_ancestry = api.get_json(
+        f"/repos/{repo}/compare/{root.predecessor['merge_commit_sha']}...{review['source_sha']}"
+    )
+    if (
+        source_ancestry.get("base_commit", {}).get("sha") != root.predecessor["merge_commit_sha"]
+        or source_ancestry.get("merge_base_commit", {}).get("sha") != root.predecessor["merge_commit_sha"]
+        or source_ancestry.get("behind_by") != 0
+        or source_ancestry.get("status") not in {"ahead", "identical"}
+    ):
+        raise VerificationError("Merged 16FS-01 predecessor is not included in PR #141 source ancestry")
+
+    report_comment = api.get_json(f"/repos/{repo}/issues/comments/{review['report_comment_id']}")
+    attestation_comment = api.get_json(f"/repos/{repo}/issues/comments/{review['owner_attestation_comment_id']}")
+    report_identity = _check_unchanged_comment(report_comment, review["report_comment_id"], pr_number, root)
+    attestation_identity = _check_unchanged_comment(attestation_comment, review["owner_attestation_comment_id"], pr_number, root)
+    if report_identity == attestation_identity:
+        raise VerificationError("PR #141 technical review and owner acceptance must be distinct GitHub comments")
+
+    report = _record_payload(report_comment["body"], VERIFIER_REVIEW_MARKER)
+    attestation = _record_payload(attestation_comment["body"], VERIFIER_ATTESTATION_MARKER)
+    if set(report) != {
+        "schema", "repository", "repository_id", "pr_number", "source_sha", "diff_sha256",
+        "review_mode", "review_policy_semantics", "model_authorship", "verdict",
+        "owner_login", "owner_user_id", "review_report_sha256",
+    }:
+        raise VerificationError("PR #141 GPT-6 review report has an unexpected schema or field set")
+    if (
+        report.get("schema") != VERIFIER_REVIEW_SCHEMA
+        or report.get("verdict") != "PASS"
+        or report.get("repository") != repo
+        or report.get("repository_id") != root.repository_id
+        or report.get("pr_number") != pr_number
+        or report.get("source_sha") != review["source_sha"]
+        or report.get("diff_sha256") != actual_diff_sha
+        or report.get("review_mode") != REVIEW_MODE
+        or report.get("review_policy_semantics") != "OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL"
+        or report.get("model_authorship") != "OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED"
+        or report.get("owner_login") != root.owner_login
+        or type(report.get("owner_user_id")) is not int
+        or report.get("owner_user_id") != root.owner_user_id
+        or report.get("review_report_sha256") != review["report_sha256"]
+        or report.get("review_report_sha256") != object_sha256(report, "review_report_sha256")
+    ):
+        raise VerificationError("PR #141 GPT-6 report verdict, owner identity or exact source/diff digest binding failed")
+    if set(attestation) != {
+        "schema", "repository", "repository_id", "pr_number", "source_sha", "diff_sha256",
+        "review_report_sha256", "review_mode", "owner_login", "owner_user_id",
+        "accepted", "owner_attestation_sha256",
+    }:
+        raise VerificationError("PR #141 owner attestation has an unexpected schema or field set")
+    if (
+        attestation.get("schema") != VERIFIER_ATTESTATION_SCHEMA
+        or attestation.get("repository") != repo
+        or attestation.get("repository_id") != root.repository_id
+        or attestation.get("pr_number") != pr_number
+        or attestation.get("source_sha") != review["source_sha"]
+        or attestation.get("diff_sha256") != actual_diff_sha
+        or attestation.get("review_report_sha256") != review["report_sha256"]
+        or attestation.get("review_mode") != REVIEW_MODE
+        or attestation.get("owner_login") != root.owner_login
+        or type(attestation.get("owner_user_id")) is not int
+        or attestation.get("owner_user_id") != root.owner_user_id
+        or attestation.get("accepted") is not True
+        or attestation.get("owner_attestation_sha256") != review["owner_attestation_sha256"]
+        or attestation.get("owner_attestation_sha256") != object_sha256(attestation, "owner_attestation_sha256")
+    ):
+        raise VerificationError("PR #141 separate owner acceptance does not bind the exact PASS report, source and diff")
+    return {
+        **source_result,
+        "verified_verifier_review_report_sha256": review["report_sha256"],
+        "verified_verifier_owner_attestation_sha256": review["owner_attestation_sha256"],
+        "verified_verifier_review_report_identity": report_identity,
+        "verified_verifier_owner_attestation_identity": attestation_identity,
+    }
+
+
+
+def _verify_gh_attestation(
+    path: Path,
+    root: TrustRoot,
+    expected_digest: str,
+    runner: Callable[..., Any],
+) -> None:
+    """Require one cryptographically verified proof for this exact subject digest.
+
+    GitHub's supported verification output does not expose a stable attestation
+    ID. The production guarantee is therefore digest-scoped, not UI-ID-pinned.
+    """
+    if not _hex(expected_digest, 64) or not path.is_file():
+        raise VerificationError("Sigstore subject file or expected SHA-256 is missing")
+    if hashlib.sha256(path.read_bytes()).hexdigest() != expected_digest:
+        raise VerificationError("Sigstore subject file does not match its independently pinned digest")
     artifact = root.artifact
     workflow = root.repository_full_name + "/" + artifact["workflow_path"]
     invocation = f"https://github.com/{root.repository_full_name}/actions/runs/{artifact['run_id']}/attempts/{artifact['run_attempt']}"
@@ -678,29 +919,34 @@ def _verify_gh_attestation(path: Path, root: TrustRoot, runner: Callable[..., An
         raise VerificationError("GitHub Sigstore verifier returned malformed JSON") from exc
     if isinstance(verified, dict):
         verified = [verified]
-    if not isinstance(verified, list):
-        raise VerificationError("GitHub Sigstore verifier returned no proof list")
-    valid = False
-    for item in verified:
-        vr = item.get("verificationResult", {}) if isinstance(item, dict) else {}
-        signature = vr.get("signature", {})
-        certificate = signature.get("certificate", {}) if isinstance(signature, dict) else {}
-        statement = vr.get("statement", {})
-        predicate = statement.get("predicate", {}) if isinstance(statement, dict) else {}
-        invocation_id = predicate.get("runDetails", {}).get("metadata", {}).get("invocationId")
-        if (
-            certificate.get("runInvocationURI") == invocation
-            and str(certificate.get("sourceRepositoryIdentifier")) == str(root.repository_id)
-            and certificate.get("sourceRepositoryRef") == "refs/pull/135/merge"
-            and certificate.get("githubWorkflowTrigger") == "pull_request"
-            and certificate.get("sourceRepositoryDigest") == artifact["original_event_sha"]
-            and statement.get("predicateType") == "https://slsa.dev/provenance/v1"
-            and invocation_id == invocation
-        ):
-            valid = True
-            break
-    if not valid:
-        raise VerificationError("Sigstore certificate/provenance is not bound to the pinned original PR run and attempt")
+    if not isinstance(verified, list) or len(verified) != 1:
+        raise VerificationError("Expected exactly one verified Sigstore proof for the pinned subject digest")
+    item = verified[0]
+    attestation = item.get("attestation") if isinstance(item, dict) else None
+    vr = item.get("verificationResult", {}) if isinstance(item, dict) else {}
+    signature = vr.get("signature", {})
+    certificate = signature.get("certificate", {}) if isinstance(signature, dict) else {}
+    statement = vr.get("statement", {})
+    predicate = statement.get("predicate", {}) if isinstance(statement, dict) else {}
+    subjects = statement.get("subject") if isinstance(statement, dict) else None
+    invocation_id = predicate.get("runDetails", {}).get("metadata", {}).get("invocationId")
+    if (
+        not isinstance(attestation, dict)
+        or not isinstance(subjects, list) or len(subjects) != 1
+        or not isinstance(subjects[0], dict)
+        or not isinstance(subjects[0].get("name"), str) or not subjects[0]["name"]
+        or not isinstance(subjects[0].get("digest"), dict)
+        or subjects[0]["digest"].get("sha256") != expected_digest
+        or certificate.get("runInvocationURI") != invocation
+        or str(certificate.get("sourceRepositoryIdentifier")) != str(root.repository_id)
+        or certificate.get("sourceRepositoryRef") != "refs/pull/135/merge"
+        or certificate.get("githubWorkflowTrigger") != "pull_request"
+        or certificate.get("sourceRepositoryDigest") != artifact["original_event_sha"]
+        or statement.get("predicateType") != "https://slsa.dev/provenance/v1"
+        or invocation_id != invocation
+    ):
+        raise VerificationError("Sigstore proof is missing, duplicated, unauthorized or not bound to the exact subject/run/workflow")
+
 
 
 def verify_historical_16l1_artifact(
@@ -837,18 +1083,18 @@ def verify_historical_16l1_artifact(
                 }
                 if any(package_receipt.get(key) != value for key, value in expected_receipt.items()):
                     raise VerificationError("Historical 16L1 package receipt does not bind all pinned payload digests")
-                proof_files = (
-                    "package-receipt.json",
-                    "installer-package/CoSoSInstaller.exe",
-                    "candidate.zip",
-                    "installer-unsigned-0.2.0/CoSoSInstaller.exe",
-                    "installer-unsigned-0.3.0/CoSoSInstaller.exe",
-                )
-                for name in proof_files:
+                proof_files = {
+                    "package-receipt.json": artifact["package_receipt_sha256"],
+                    "installer-package/CoSoSInstaller.exe": artifact["installer_sha256"],
+                    "candidate.zip": artifact["candidate_zip_sha256"],
+                    "installer-unsigned-0.2.0/CoSoSInstaller.exe": artifact["update02_setup_sha256"],
+                    "installer-unsigned-0.3.0/CoSoSInstaller.exe": artifact["update03_setup_sha256"],
+                }
+                for name, expected_digest in proof_files.items():
                     target = Path(directory) / name
                     target.parent.mkdir(parents=True, exist_ok=True)
                     target.write_bytes(archive.read(name))
-                    _verify_gh_attestation(target, root, runner)
+                    _verify_gh_attestation(target, root, expected_digest, runner)
         except (zipfile.BadZipFile, KeyError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise VerificationError("Historical 16L1 artifact archive is malformed") from exc
 
@@ -859,7 +1105,7 @@ def verify_historical_16l1_artifact(
         "verified_artifact_id": artifact["artifact_id"],
         "verified_artifact_sha256": artifact["installer_sha256"],
         "verified_artifact_source_sha": artifact["source_sha"],
-        "verified_artifact_provenance_url": f"https://github.com/{repo}/attestations/{artifact['attestations']['package_receipt']}",
+        "verified_artifact_provenance_url": f"https://api.github.com/repos/{repo}/attestations/sha256:{artifact['package_receipt_sha256']}",
         "verified_artifact_provenance_sha256": artifact["package_receipt_sha256"],
     }
 
@@ -879,6 +1125,7 @@ def verify_evidence(
     verify_repository_identity(root, api)
 
     _verify_predecessor(root, api)
+    _verify_verifier_review_contract(root, api)
     if (
         receipt.get("contract_source_sha") != root.predecessor["source_sha"]
         or receipt.get("contract_merge_commit_sha") != root.predecessor["merge_commit_sha"]
@@ -1084,6 +1331,7 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
     def verify_trust_root() -> bool:
         verify_repository_identity(root, api)
         _verify_predecessor(root, api)
+        _verify_verifier_review_contract(root, api)
         verify_historical_16l1_artifact(root, api)
         return True
 
@@ -1100,6 +1348,11 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
             "verifier_merge_commit_sha": task.get("accepted_merge_commit_sha"),
             "verifier_sha256": task.get("accepted_verifier_sha256"),
         }
+        if (
+            candidate["verifier_source_sha"] != root.verifier_review["source_sha"]
+            or candidate["verifier_merge_commit_sha"] != root.verifier_review["merge_commit_sha"]
+        ):
+            return False
         try:
             verify_trust_root()
             verify_16fv_source(candidate, api)
@@ -1113,8 +1366,15 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
 
 
 def trust_root_status() -> str:
-    _, status = production_verifier_from_environment()
-    return status
+    verifier, status = production_verifier_from_environment()
+    if verifier is None:
+        return status
+    try:
+        if verifier.verify_trust_root() is not True:
+            return "VERIFICATION_ERROR"
+    except Exception:
+        return "VERIFICATION_ERROR"
+    return "CONFIGURED"
 
 
 if __name__ == "__main__":

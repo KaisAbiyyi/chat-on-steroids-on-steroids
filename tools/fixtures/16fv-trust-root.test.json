@@ -1,5 +1,5 @@
 {
-  "schema": "cosos.fresh-evidence-trust-root.v1",
+  "schema": "cosos.fresh-evidence-trust-root.v2",
   "authority": "test-only",
   "repository_full_name": "KaisAbiyyi/chat-on-steroids-on-steroids",
   "repository_id": 1424422098,
@@ -44,13 +44,17 @@
     "renderer_dll_sha256": "e007030cbf41a457c4bf730465239e766128c4e2f58bf5bee74eaed734ace8c2",
     "tooling_pr_number": 136,
     "tooling_head_sha": "e526c2ed398b0b21dd10f659d2ab1f1ed7f85b07",
-    "tooling_merge_commit_sha": "bb3ca8daba5d467b9f097b7e84833da3ee129373",
-    "attestations": {
-      "package_receipt": 61105602,
-      "installer": 61105644,
-      "candidate_zip": 61105669,
-      "update02_installer": 61105729,
-      "update03_installer": 61105729
-    }
+    "tooling_merge_commit_sha": "bb3ca8daba5d467b9f097b7e84833da3ee129373"
+  },
+  "verifier_review": {
+    "pr_number": 141,
+    "source_sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "merge_commit_sha": "dddddddddddddddddddddddddddddddddddddddd",
+    "diff_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "report_comment_id": 301,
+    "report_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "owner_attestation_comment_id": 302,
+    "owner_attestation_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "review_mode": "GPT6_OWNER_ATTESTED"
   }
 }

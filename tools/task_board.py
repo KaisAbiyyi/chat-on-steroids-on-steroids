@@ -430,7 +430,8 @@ def accepted(
         return False
     if task_id == "16FV-01":
         # A Done flag and PR URL are not acceptance. Verify the exact merged
-        # PR #141 head, merge ancestry and verifier source-file digest remotely.
+        # PR #141 head/diff, predecessor ancestry, GPT6_OWNER_ATTESTED report,
+        # separate immutable owner acceptance and verifier source-file digest.
         verifier_acceptance = getattr(trusted_verifier, "verify_verifier_task", None)
         return callable(verifier_acceptance) and verifier_acceptance(task) is True
     if task_id == "16LF-01":

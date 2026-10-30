@@ -64,7 +64,17 @@ def comment(comment_id, body, issue=140, user_id=OWNER_ID, login=v.OWNER_LOGIN, 
 def observations_for(check_name, receipt_fields):
     values = {
         "fresh_init": {"new_profile_created": True, "profile_was_empty": True, "profile_id": "fresh-profile-001"},
-        "isolated_storage": {"outside_existing_profile_roots": True, "profile_storage_root": receipt_fields["workspace_path"] + r"\fresh-profile", "canonical_path": receipt_fields["workspace_path"] + r"\fresh-profile\storage"},
+        "isolated_storage": {
+            "outside_existing_profile_roots": True,
+            "profile_storage_root": receipt_fields["workspace_path"] + r"\fresh-profile",
+            "canonical_path": receipt_fields["workspace_path"] + r"\fresh-profile\storage",
+            "reparse_point_check_method": "GetFileAttributesW(FILE_ATTRIBUTE_REPARSE_POINT)",
+            "reparse_point_checks": _test_reparse_checks(
+                receipt_fields["workspace_path"],
+                receipt_fields["workspace_path"] + r"\fresh-profile",
+                receipt_fields["workspace_path"] + r"\fresh-profile\storage",
+            ),
+        },
         "synthetic_only": {"artifact_signed": False, "native16L1Accepted": False, "synthetic_input_only": True},
         "existing_profiles_untouched": {"snapshots_match": True, "before_snapshot_sha256": "a" * 64, "after_snapshot_sha256": "a" * 64},
         "no_leakage": {"leakage_detected": False, "cross_profile_access_count": 0, "external_data_reads": 0},
@@ -138,6 +148,7 @@ class FakeAPI:
         self.requested_paths = []
         self.diff = b"source PR 135 diff bytes"
         self.predecessor_diff = (Path(__file__).parent / "fixtures" / "16fs01-pr138.diff").read_bytes()
+        self.verifier_diff = b"verifier PR #141 diff bytes"
         self.verifier_file = b"trusted verifier source fixture"
         self.bundle = b""
         self.artifact_zip = b""
@@ -156,6 +167,8 @@ class FakeAPI:
     def get_diff(self, pr_number):
         if pr_number == 138:
             return self.predecessor_diff
+        if pr_number == 141:
+            return self.verifier_diff
         if pr_number == 135:
             return self.diff
         raise v.VerificationError("unexpected source PR")
@@ -175,9 +188,51 @@ class FakeAPI:
 
 def make_fixture():
     root_mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
-    root = v.TrustRoot.from_mapping(root_mapping, production=False)
     api = FakeAPI()
     diff_sha = digest(api.diff)
+    verifier_report = {
+        "schema": "cosos.16fv.verifier-review.v1",
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "pr_number": v.VERIFIER_PR_NUMBER,
+        "source_sha": "e" * 40,
+        "diff_sha256": digest(api.verifier_diff),
+        "review_mode": v.REVIEW_MODE,
+        "review_policy_semantics": "OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL",
+        "model_authorship": "OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED",
+        "verdict": "PASS",
+        "owner_login": v.OWNER_LOGIN,
+        "owner_user_id": OWNER_ID,
+        "review_report_sha256": "",
+    }
+    verifier_report["review_report_sha256"] = _test_canonical_digest(
+        verifier_report, "review_report_sha256"
+    )
+    verifier_attestation = {
+        "schema": "cosos.16fv.owner-attestation.v1",
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "pr_number": v.VERIFIER_PR_NUMBER,
+        "source_sha": "e" * 40,
+        "diff_sha256": digest(api.verifier_diff),
+        "review_report_sha256": verifier_report["review_report_sha256"],
+        "review_mode": v.REVIEW_MODE,
+        "owner_login": v.OWNER_LOGIN,
+        "owner_user_id": OWNER_ID,
+        "accepted": True,
+        "owner_attestation_sha256": "",
+    }
+    verifier_attestation["owner_attestation_sha256"] = _test_canonical_digest(
+        verifier_attestation, "owner_attestation_sha256"
+    )
+    root_mapping["verifier_review"].update({
+        "source_sha": "e" * 40,
+        "merge_commit_sha": "d" * 40,
+        "diff_sha256": digest(api.verifier_diff),
+        "report_sha256": verifier_report["review_report_sha256"],
+        "owner_attestation_sha256": verifier_attestation["owner_attestation_sha256"],
+    })
+    root = v.TrustRoot.from_mapping(root_mapping, production=False)
     nonce = "a" * 16
     payload = {
         "schema_version": board.FRESH_RECEIPT_SCHEMA_VERSION,
@@ -197,7 +252,7 @@ def make_fixture():
         "artifact_id": root.artifact["artifact_id"],
         "artifact_sha256": root.artifact["installer_sha256"],
         "artifact_source_sha": root.artifact["source_sha"],
-        "artifact_provenance_url": f"https://github.com/{REPO}/attestations/{root.artifact['attestations']['package_receipt']}",
+        "artifact_provenance_url": f"https://api.github.com/repos/{REPO}/attestations/sha256:{root.artifact['package_receipt_sha256']}",
         "artifact_provenance_sha256": root.artifact["package_receipt_sha256"],
         "evidence_bundle_url": "https://github.com/user-attachments/assets/12345678-1234-1234-1234-123456789abc",
         "evidence_bundle_sha256": "",
@@ -272,8 +327,9 @@ def make_fixture():
         "/users/" + v.OWNER_LOGIN: {"login": v.OWNER_LOGIN, "id": OWNER_ID},
         f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}": {
             "number": v.VERIFIER_PR_NUMBER, "merged": True, "merged_at": CREATED,
-            "base": {"ref": "main"},
-            "head": {"sha": "e" * 40, "repo": {"full_name": REPO}},
+            "base": {"ref": "main", "repo": {"full_name": REPO, "id": v.REPOSITORY_ID}},
+            "head": {"sha": "e" * 40, "ref": "work/16fv-01-trusted-evidence-verifier-20261030",
+                     "repo": {"full_name": REPO, "id": v.REPOSITORY_ID}},
             "merge_commit_sha": "d" * 40,
         },
         "/repos/" + REPO + "/compare/" + "d" * 40 + "...main": {
@@ -281,10 +337,21 @@ def make_fixture():
             "merge_base_commit": {"sha": "d" * 40},
             "behind_by": 0, "status": "ahead",
         },
+        "/repos/" + REPO + "/compare/" + root.predecessor["merge_commit_sha"] + "...main": {
+            "base_commit": {"sha": root.predecessor["merge_commit_sha"]},
+            "merge_base_commit": {"sha": root.predecessor["merge_commit_sha"]},
+            "behind_by": 0, "status": "identical",
+        },
+        "/repos/" + REPO + "/compare/" + root.predecessor["merge_commit_sha"] + "..." + "e" * 40: {
+            "base_commit": {"sha": root.predecessor["merge_commit_sha"]},
+            "merge_base_commit": {"sha": root.predecessor["merge_commit_sha"]},
+            "behind_by": 0, "status": "ahead",
+        },
         f"/repos/{REPO}/pulls/138": {
             "number": 138, "merged": True, "merged_at": CREATED,
-            "base": {"ref": "main"},
-            "head": {"sha": root.predecessor["source_sha"]},
+            "base": {"ref": "main", "repo": {"full_name": REPO, "id": v.REPOSITORY_ID}},
+            "head": {"sha": root.predecessor["source_sha"], "ref": "work/16fs-01-freshstart-contract-20261029",
+                     "repo": {"full_name": REPO, "id": v.REPOSITORY_ID}},
             "merge_commit_sha": root.predecessor["merge_commit_sha"],
         },
         f"/repos/{REPO}/issues/comments/{root.predecessor['report_comment_id']}": comment(
@@ -327,6 +394,13 @@ GPT-6 report SHA-256: ac0c1581f3c7e8bc32f8c5f109fc8a074069482bdf8b88a68a133fdb9b
         })),
         f"/repos/{REPO}/issues/comments/201": comment(201, marked(v.REVIEW_MARKER, report)),
         f"/repos/{REPO}/issues/comments/202": comment(202, marked(v.ATTESTATION_MARKER, attestation)),
+        f"/repos/{REPO}/issues/comments/301": comment(
+            301, marked("<!-- COSOS-16FV-REVIEW-V1 -->", verifier_report), issue=v.VERIFIER_PR_NUMBER
+        ),
+        f"/repos/{REPO}/issues/comments/302": comment(
+            302, marked("<!-- COSOS-16FV-OWNER-ATTESTATION-V1 -->", verifier_attestation),
+            issue=v.VERIFIER_PR_NUMBER,
+        ),
         f"/repos/{REPO}/pulls/135": {
             "number": 135, "merged": True, "merged_at": CREATED,
             "base": {"ref": "main", "sha": root.artifact["source_base_sha"]},
@@ -346,7 +420,7 @@ def good_artifact_result(root, _api):
         "verified_artifact_id": artifact["artifact_id"],
         "verified_artifact_sha256": artifact["installer_sha256"],
         "verified_artifact_source_sha": artifact["source_sha"],
-        "verified_artifact_provenance_url": f"https://github.com/{root.repository_full_name}/attestations/{artifact['attestations']['package_receipt']}",
+        "verified_artifact_provenance_url": f"https://api.github.com/repos/{root.repository_full_name}/attestations/sha256:{artifact['package_receipt_sha256']}",
         "verified_artifact_provenance_sha256": artifact["package_receipt_sha256"],
     }
 
@@ -797,8 +871,6 @@ def make_synthetic_artifact():
         "tooling_pr_number": 136,
         "tooling_head_sha": "e" * 40,
         "tooling_merge_commit_sha": "f" * 40,
-        "attestations": {"package_receipt": 9, "installer": 10, "candidate_zip": 11,
-                         "update02_installer": 12, "update03_installer": 13},
     })
     payload_files = {
         "installer-package/CoSoSInstaller.exe": b"installer-binary-fixture",
@@ -921,7 +993,15 @@ def make_synthetic_artifact():
             },
         }
     }]
-    runner = lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout=json.dumps(proof), stderr="")
+    def runner(command, *_args, **_kwargs):
+        subject_path = Path(command[3])
+        signed_proof = copy.deepcopy(proof[0])
+        signed_proof["attestation"] = {"bundle": {"dsseEnvelope": {}}}
+        signed_proof["verificationResult"]["statement"]["subject"] = [{
+            "name": subject_path.name,
+            "digest": {"sha256": digest(subject_path.read_bytes())},
+        }]
+        return SimpleNamespace(returncode=0, stdout=json.dumps([signed_proof]), stderr="")
     return root, api, runner
 
 
@@ -1039,7 +1119,7 @@ def make_verifier_review_test_fixture():
 
     def get_diff(pr_number):
         if pr_number == v.VERIFIER_PR_NUMBER:
-            return verifier_diff
+            return api.verifier_diff
         return original_get_diff(pr_number)
 
     api.get_diff = get_diff
@@ -1257,6 +1337,8 @@ class FinalSecurityCorrectionRedTests(unittest.TestCase):
     def test_windows_storage_requires_explicit_reparse_point_evidence(self):
         _root, _api, receipt, _, _ = make_fixture()
         observations = observations_for("isolated_storage", receipt)
+        observations.pop("reparse_point_check_method")
+        observations.pop("reparse_point_checks")
         with self.assertRaises(v.VerificationError):
             v._validate_check_evidence(
                 "isolated_storage", _test_isolated_record(receipt, observations), receipt
