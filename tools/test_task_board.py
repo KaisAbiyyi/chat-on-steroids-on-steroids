@@ -499,7 +499,7 @@ class TaskBoardTests(unittest.TestCase):
         eligible = {t["id"] for wave in board.waves(self.data) for t in wave}
         self.assertNotIn("16L3", eligible)
 
-    def test_owner_declined_never_grants_private_profile_access(self):
+    def test_owner_declined_never_grants_private_profile_access_or_readiness(self):
         data, tasks = self._fresh_scenario()
         self.assertEqual(tasks["16U1"]["migration_consent"], "declined")
         tasks["16L2"]["status"] = "done"
@@ -509,6 +509,45 @@ class TaskBoardTests(unittest.TestCase):
         }
         self.assertFalse(board.accepted(tasks, "16L2"))
         self.assertTrue(any("16L2" in e for e in board.validate(data)))
+
+        # A task-state edit must not turn the declined private migration into
+        # a ready/forecastable local operation.
+        tasks["16L2"]["status"] = "todo"
+        self.assertIn(
+            "owner_private_migration_consent",
+            board.missing_dependencies(tasks["16L2"], tasks),
+        )
+        ready, blocked = board.readiness(data)
+        self.assertNotIn("16L2", {task["id"] for task in ready})
+        self.assertIn("16L2", {task["id"] for task in blocked})
+        eligible = {
+            task["id"] for wave in board.waves(data) for task in wave
+        }
+        self.assertNotIn("16L2", eligible)
+        self.assertTrue(any("16L2:" in e for e in board.validate(data)))
+
+    def test_explicit_private_migration_consent_unblocks_only_the_16l2_task(self):
+        data, tasks = self._fresh_scenario()
+        tasks["16U1"]["migration_consent"] = "granted"
+        tasks["16U1"]["owner_decision"] = "approved_private_copy"
+        tasks["16U1"]["consent_receipt"] = {
+            "explicit_owner_approval": True,
+            "scope": "approved-copy-only",
+            "approval_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
+        }
+        tasks["16L2"]["status"] = "todo"
+
+        self.assertTrue(board.private_migration_authorized(tasks))
+        self.assertNotIn(
+            "owner_private_migration_consent",
+            board.missing_dependencies(tasks["16L2"], tasks),
+        )
+        ready, _ = board.readiness(data)
+        self.assertIn("16L2", {task["id"] for task in ready})
+        eligible = {
+            task["id"] for wave in board.waves(data) for task in wave
+        }
+        self.assertIn("16L2", eligible)
 
     def test_wave_forecast_requires_trusted_accepted_or_branch(self):
         data, tasks = self._fresh_scenario()
