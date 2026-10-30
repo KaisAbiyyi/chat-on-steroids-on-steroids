@@ -170,17 +170,19 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `15U1` | Owner daily navigation/editor approval | `15L1` | `human-ui` | U (owner) | BLOCKED |
 | `15U2` | Owner keyboard/i18n/accessibility approval | `15L2` | `human-ui` | U (owner) | BLOCKED |
 | `15U3` | Owner feature-completeness acceptance | `15L3` | `human-ui` | U (owner) | BLOCKED |
-| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | **READY · PARALLEL** |
-| `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | BLOCKED |
-| `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | BLOCKED |
-| `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | BLOCKED |
-| `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | BLOCKED |
-| `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | BLOCKED |
-| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | CLAIMED |
-| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | BLOCKED |
-| `16L2` | Only owner-approved profile copy migration | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
-| `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | BLOCKED |
-| `16L3` | Full Windows release/startup/size proof | `16F`, `16L1`, `16L2` | `windows-release` | L (Windows) | BLOCKED |
+| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | DONE |
+| `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | DONE |
+| `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | DONE |
+| `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | DONE |
+| `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | DONE |
+| `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | DONE |
+| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | DONE |
+| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | DONE |
+| `16L2` | Only owner-approved profile copy migration (not authorized) | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
+| `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | DONE |
+| `16FS-01` | Fresh-start acceptance policy / dependency amendment | `16U1`, `16L1`, `16F` | `release-freshstart-contract` | C (cloud) | CLAIMED |
+| `16LF-01` | Disposable first-run native isolation + rollback qualification | `16FS-01`, `16U1`, `16L1` | `windows-freshstart` | L (Windows) | BLOCKED |
+| `16L3` | Full Windows release/startup/size proof; plus accepted migration OR fresh-start local evidence | `16F`, `16L1` | `windows-release` | L (Windows) | BLOCKED |
 | `16U2` | Owner guided final release decision | `16L3` | `human-release` | U (owner) | BLOCKED |
 
 | `PERF-00` | Cloud performance measurement harness, workload matrix and process-tree accounting | `15G` | `perf-methodology` | C (cloud) | **READY · PARALLEL** |
@@ -190,6 +192,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `PERF-04` | Tab/worker lifecycle and terminal/process buffer resource limits | `PERF-00` | `perf-worker-lifecycle` | C (cloud) | BLOCKED |
 | `PERF-05` | Native Windows product endurance and total process-tree RAM comparison | `PERF-01`, `PERF-02`, `PERF-03`, `PERF-04`, `8L1`, `15L3` | `windows-perf-endurance` | L (Windows) | BLOCKED |
 | `PERF-06` | Freeze measured resource budgets and CI/native regression policy | `PERF-05`, `16D` | `perf-release-gates` | C (cloud) | BLOCKED |
+
+> **16L3 conditional acceptance (16FS-01 proposal):** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. The table lists the unconditional `depends_on` only. 16L2 private migration remains `NOT_RUN / NOT_AUTHORIZED` and unavailable until a dedicated trusted verifier exists; 16LF-01 is a distinct `NOT_RUN` physical Windows gate. Neither is waived by an owner decision or cloud CI. GPT-6 technical review plus explicit owner attestation, verified by the production verifier, governs review promotion; no GitHub independent approval is claimed. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
 
 ## Parallel execution lanes
 

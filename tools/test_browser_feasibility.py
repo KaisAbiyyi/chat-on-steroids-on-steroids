@@ -151,7 +151,7 @@ class BrowserFeasibilityContractTests(unittest.TestCase):
         self.assertIn("PERF-00", ready_ids)  # P0 methodology first
         self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
-        self.assertEqual(tasks["16L3"]["status"], "todo")
+        self.assertEqual(tasks["16L3"]["status"], "blocked")
         # Scoped 7P-L1 physical feasibility and 7L1 integrated Rust/MV3
         # acceptance are separately proven; full product release is pending.
 

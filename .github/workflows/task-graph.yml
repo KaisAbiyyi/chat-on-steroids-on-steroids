@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Validate canonical task graph
         run: python tools/task_board.py check
+      - name: Compile task-board policy and regression tests
+        run: python -m py_compile tools/task_board.py tools/test_task_board.py
       - name: Validate readiness and phase sequencing regressions
         run: python -m unittest discover -s tools -p test_task_board.py -v
       - name: Check browser architecture fail-closed preflight

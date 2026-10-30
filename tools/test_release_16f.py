@@ -15,8 +15,15 @@ def fixture():
         {"id": "16E", "depends_on": [], "kind": "C"},
         {"id": "16F", "depends_on": ["16D", "16E"], "kind": "C"},
         {"id": "16L1", "depends_on": ["16E"], "kind": "L"},
-        {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L"},
-        {"id": "16L3", "depends_on": ["16F", "16L1", "16L2"], "kind": "L"},
+        {"id": "16U1", "depends_on": ["16E"], "kind": "U",
+         "migration_consent": "declined", "owner_decision": "fresh_start"},
+        {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L",
+         "status": "blocked", "private_migration_status": "NOT_RUN / NOT_AUTHORIZED"},
+        {"id": "16FS-01", "depends_on": ["16U1", "16L1", "16F"], "kind": "C"},
+        {"id": "16LF-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "L",
+         "status": "blocked", "evidence": None},
+        {"id": "16L3", "depends_on": ["16F", "16L1"], "kind": "L",
+         "any_of": [["16L2", "16LF-01"]]},
     ]}).encode("utf-8")
     return sources
 
@@ -27,10 +34,40 @@ def make(sources=None, ancestors=None, expected=SHA, head=SHA):
 class SourceBoundReportTests(unittest.TestCase):
     def test_valid_report_is_strictly_cloud_only(self):
         r = make()
+        self.assertEqual(r["schema"], f.SCHEMA)
+        self.assertEqual(f.SCHEMA, "cosos.release.cloud-provenance.v2")
         self.assertEqual(r["source_sha"], SHA)
         self.assertFalse(r["product_release_ready"])
         self.assertEqual(set(r["merged_predecessors"]), set(f.MERGED))
         self.assertTrue(all(g == "NOT_RUN" for g in r["native_owner_gates"].values()))
+        self.assertEqual(set(r["native_owner_gates"]), set(f.GATES))
+        self.assertEqual(
+            r["security_review"]["review_policy"],
+            "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
+        )
+        self.assertEqual(
+            r["native_owner_gates"]["16LF-01_owner_local_fresh_start"], "NOT_RUN"
+        )
+        dag_contract_sources = {
+            "tools/task_board.py",
+            "tools/test_task_board.py",
+            ".github/workflows/task-graph.yml",
+            "docs/PARALLEL-EXECUTION-BOARD.md",
+            "docs/implementation-plan/2026-10-18-cloud-first-units.md",
+            "docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md",
+        }
+        self.assertTrue(dag_contract_sources.issubset(set(f.TRACKED)))
+        self.assertTrue(dag_contract_sources.issubset(set(r["tracked_contracts"])))
+        self.assertEqual(set(f.GATES), {
+            "16L1_native_installer",
+            "16U1_owner_consent",
+            "16L2_owner_approved_copy_migration",
+            "16LF-01_owner_local_fresh_start",
+            "16L3_native_full_release_performance",
+            "16U2_owner_release_decision",
+            "PERF-05_native_product_comparison",
+            "PERF-06_product_performance_budget",
+        })
         self.assertEqual(r["tracked_contracts"]["LICENSE"]["sha256"],
                          hashlib.sha256(b"LICENSE:synthetic").hexdigest())
         self.assertTrue(f.validate_receipt(json.loads(json.dumps(r)), r))
@@ -66,7 +103,13 @@ class SourceBoundReportTests(unittest.TestCase):
     def test_dependency_or_kind_drift_denied(self):
         for task, key, value in [
             ("16F", "depends_on", ["16D"]), ("16L3", "depends_on", ["16F"]),
-            ("16F", "kind", "L"), ("16L3", "kind", "C")
+            ("16F", "kind", "L"), ("16L3", "kind", "C"),
+            ("16L3", "any_of", []), ("16L3", "any_of", [["16L2", "16L1"]]),
+            ("16LF-01", "depends_on", ["16U1"]), ("16FS-01", "kind", "L"),
+            ("16U1", "migration_consent", "granted"),
+            ("16U1", "owner_decision", "approved_private_copy"),
+            ("16L2", "status", "done"),
+            ("16L2", "private_migration_status", "DONE")
         ]:
             sources = fixture()
             registry = json.loads(sources["docs/task-registry.json"])
@@ -81,7 +124,8 @@ class SourceBoundReportTests(unittest.TestCase):
             lambda r: r.update(product_release_ready=True),
             lambda r: r["native_owner_gates"].update({"16L1_native_installer": "PASS"}),
             lambda r: r["native_owner_gates"].pop("16U1_owner_consent"),
-            lambda r: r["security_review"].update({"independent_review": "PASS"}),
+            lambda r: r["native_owner_gates"].update({"16LF-01_owner_local_fresh_start": "PASS"}),
+            lambda r: r["security_review"].update({"review_policy": "PASS"}),
             lambda r: r["merged_predecessors"]["16E"].update({"merged_commit_sha": "0" * 40}),
             lambda r: r["tracked_contracts"]["LICENSE"].update({"sha256": "0" * 64}),
             lambda r: r.update(source_sha="b" * 40),
@@ -91,6 +135,15 @@ class SourceBoundReportTests(unittest.TestCase):
             mutate(altered)
             with self.assertRaises(f.Refused):
                 f.validate_receipt(altered, expected)
+
+    def test_16lf_gate_must_remain_blocked_and_not_run_in_source_registry(self):
+        for field, value in [("status", "done"), ("evidence", {"independent_review_verdict": "PASS"})]:
+            sources = fixture()
+            registry = json.loads(sources["docs/task-registry.json"])
+            next(t for t in registry["tasks"] if t["id"] == "16LF-01")[field] = value
+            sources["docs/task-registry.json"] = json.dumps(registry).encode()
+            with self.subTest(field=field), self.assertRaises(f.Refused):
+                make(sources=sources)
 
     def test_bad_registry_and_oversize_file_denied(self):
         src = fixture()

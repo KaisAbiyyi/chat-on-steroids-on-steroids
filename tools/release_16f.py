@@ -14,7 +14,7 @@ import re
 import subprocess
 from pathlib import Path
 
-SCHEMA = "cosos.release.cloud-provenance.v1"
+SCHEMA = "cosos.release.cloud-provenance.v2"
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 MAX_RECEIPT_BYTES = 128 * 1024
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
@@ -29,6 +29,12 @@ TRACKED = (
     "LICENSE",
     "Cargo.lock",
     "docs/task-registry.json",
+    "tools/task_board.py",
+    "tools/test_task_board.py",
+    ".github/workflows/task-graph.yml",
+    "docs/PARALLEL-EXECUTION-BOARD.md",
+    "docs/implementation-plan/2026-10-18-cloud-first-units.md",
+    "docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md",
     "tools/release_16b.py",
     "tools/release_16c.py",
     "tools/release_16d.py",
@@ -48,6 +54,7 @@ GATES = (
     "16L1_native_installer",
     "16U1_owner_consent",
     "16L2_owner_approved_copy_migration",
+    "16LF-01_owner_local_fresh_start",
     "16L3_native_full_release_performance",
     "16U2_owner_release_decision",
     "PERF-05_native_product_comparison",
@@ -82,7 +89,21 @@ def make_report(expected_head, actual_head, ancestors, sources):
     tasks = {item["id"]: item for item in registry["tasks"] if isinstance(item, dict) and isinstance(item.get("id"), str)}
     require(len(tasks) == len(registry["tasks"]), "invalid or duplicate task IDs")
     require(set(tasks["16F"]["depends_on"]) == {"16D", "16E"}, "16F dependency contract changed")
-    require(set(tasks["16L3"]["depends_on"]) == {"16F", "16L1", "16L2"}, "16L3 native gate dependencies changed")
+    require(set(tasks["16L3"]["depends_on"]) == {"16F", "16L1"} and
+            tasks["16L3"].get("any_of") == [["16L2", "16LF-01"]],
+            "16L3 required AND/OR native gate dependencies changed")
+    require(tasks.get("16FS-01", {}).get("kind") == "C" and
+            tasks["16FS-01"].get("depends_on") == ["16U1", "16L1", "16F"] and
+            tasks.get("16LF-01", {}).get("kind") == "L" and
+            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"] and
+            tasks["16LF-01"].get("status") == "blocked" and
+            tasks["16LF-01"].get("evidence") is None,
+            "16FS-01 / 16LF-01 independent fresh-start gate changed or is no longer NOT_RUN")
+    require(tasks.get("16U1", {}).get("migration_consent") == "declined" and
+            tasks.get("16U1", {}).get("owner_decision") == "fresh_start" and
+            tasks.get("16L2", {}).get("status") == "blocked" and
+            tasks.get("16L2", {}).get("private_migration_status") == "NOT_RUN / NOT_AUTHORIZED",
+            "owner fresh-start decision or private 16L2 NOT_AUTHORIZED state changed")
     require(tasks["16F"]["kind"] == "C" and tasks["16L3"]["kind"] == "L", "task environment gate changed")
     return {
         "schema": SCHEMA,
@@ -107,7 +128,7 @@ def make_report(expected_head, actual_head, ancestors, sources):
             "installer_transaction": "16E_SYNTHETIC_DISPOSABLE_ONLY",
             "startup_memory": "16D_HEADLESS_ROOT_PROCESS_ONLY_NO_GUI_BUDGET",
             "github_ci_verdict": "REQUIRES_EXTERNAL_EXACT_HEAD_CHECKS",
-            "independent_review": "REQUIRES_HUMAN_OR_SEPARATE_REVIEW_RECEIPT",
+            "review_policy": "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
         },
         "native_owner_gates": {gate: "NOT_RUN" for gate in GATES},
         "product_release_ready": False,
