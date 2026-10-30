@@ -185,7 +185,7 @@ class TaskBoardTests(unittest.TestCase):
         future_tasks["16L2"]["status"] = "blocked"
         # Restore accepted prerequisites that are outside the hypothetical
         # reopened downstream branch.
-        for prerequisite in ("16D", "16E", "16PKG-01", "16F", "16L1", "16U1"):
+        for prerequisite in ("15G", "16B", "16C", "16D", "16E", "16PKG-01", "16F", "16L1", "16U1"):
             future_tasks[prerequisite]["status"] = "done"
         # The predecessor contract remains merged; the hypothetical future
         # verifier is accepted only through the explicit remote-verification
