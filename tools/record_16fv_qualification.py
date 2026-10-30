@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -24,6 +25,19 @@ def main() -> int:
 
     if re.fullmatch(r"[0-9a-f]{40}", args.source_sha) is None:
         parser.error("source SHA must be a full lowercase Git commit SHA")
+    if args.workflow_run_id <= 0 or args.run_attempt <= 0:
+        parser.error("workflow run ID and attempt must be positive")
+    expected_run_url = f"https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/actions/runs/{args.workflow_run_id}"
+    if args.run_url != expected_run_url:
+        parser.error("run URL must identify the exact GitHub Actions run ID")
+    try:
+        actual_head = subprocess.run(
+            ["git", "rev-parse", "HEAD"], check=True, text=True, capture_output=True
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        parser.error(f"cannot establish checked-out Git HEAD: {exc}")
+    if actual_head != args.source_sha:
+        parser.error("reported source SHA does not match the actual checked-out Git HEAD")
     verifier_path = Path("tools/fresh_evidence_verifier.py")
     if not verifier_path.is_file():
         parser.error("production verifier source is missing from the tested checkout")

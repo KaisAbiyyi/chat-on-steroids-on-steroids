@@ -35,6 +35,7 @@ TRACKED = (
     "tools/fixtures/16fs01-pr138.diff",
     "tools/test_fresh_evidence_verifier.py",
     "tools/record_16fv_qualification.py",
+    "tools/test_record_16fv_qualification.py",
     ".github/workflows/16fv-trusted-evidence-verifier.yml",
     ".github/workflows/task-graph.yml",
     "docs/PARALLEL-EXECUTION-BOARD.md",

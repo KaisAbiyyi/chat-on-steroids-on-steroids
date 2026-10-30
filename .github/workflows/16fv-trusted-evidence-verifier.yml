@@ -50,7 +50,7 @@ jobs:
 
       - name: Run focused production verifier adversarial tests
         id: unit
-        run: python -m unittest tools.test_fresh_evidence_verifier -v
+        run: python -m unittest tools.test_fresh_evidence_verifier tools.test_record_16fv_qualification -v
 
       - name: Run task board, DAG and release-gate regression tests
         id: dag

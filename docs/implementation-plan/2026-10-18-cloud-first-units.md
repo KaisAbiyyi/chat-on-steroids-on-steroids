@@ -204,6 +204,6 @@ The root pins repository ID 1424422098, owner KaisAbiyyi / user ID 93252311, the
 
 ### CI and handoff
 
-The dedicated 16FV-01 workflow runs the focused verifier tests and task-board/DAG/release-gate tests on windows-latest and ubuntu-latest, checking out the exact PR head or pushed source SHA. Each platform uploads machine-readable evidence with tested SHA, OS, run ID/attempt, test outcomes and verifier-file SHA-256. A separate Windows job revalidates the immutable historical 16L1 artifact; it does not rerun 16L1 qualification.
+The dedicated 16FV-01 workflow runs the focused verifier tests and task-board/DAG/release-gate tests on windows-latest and ubuntu-latest, checking out the exact PR head or pushed source SHA. Each platform uploads machine-readable evidence with tested SHA, OS, run ID/attempt, test outcomes and verifier-file SHA-256. The recorder independently runs git rev-parse HEAD and rejects any mismatch with the workflow-supplied source SHA; its own tests cover this binding and failure behavior. A separate Windows job revalidates the immutable historical 16L1 artifact; it does not rerun 16L1 qualification.
 
 16FV-01 is not promoted to Done until the final exact-HEAD Windows and Ubuntu runs pass, the Draft PR and changed-file set are verified, and the GPT-6 technical review plus separate owner acceptance bind the exact final source SHA and diff. The owner trust root remains a separate handoff. No 16LF physical PASS, 16L3 acceptance, release activation or merge is authorized here.

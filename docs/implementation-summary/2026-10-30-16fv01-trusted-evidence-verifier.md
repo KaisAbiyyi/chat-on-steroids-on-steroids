@@ -29,7 +29,8 @@ No production root is established by this implementation. Missing root returns T
 - tools/test_fresh_evidence_verifier.py — positive and adversarial verifier tests, synthetic artifact archive tests, five mocked Sigstore proof checks, production root isolation and CLI fail-closed tests.
 - tools/test_task_board.py and tools/test_release_16f.py — canonical DAG, receipt and release-gate regression coverage.
 - .github/workflows/16fv-trusted-evidence-verifier.yml — Windows/Ubuntu exact-HEAD matrix, machine-readable qualification artifact, historical 16L1 artifact revalidation and an explicit owner trust-root handoff; no workflow job configures or activates production authority.
-- tools/record_16fv_qualification.py — records tested source SHA, verifier file SHA-256, runner OS, run ID/attempt, test outcomes and explicit non-acceptance of production authority.
+- tools/record_16fv_qualification.py — verifies git rev-parse HEAD equals the workflow's claimed tested SHA before recording the verifier file SHA-256, runner OS, run ID/attempt, test outcomes and explicit non-acceptance of production authority.
+- tools/test_record_16fv_qualification.py — tests exact checkout binding, run URL identity and fail-closed qualification records.
 
 The production verifier is imported by the normal task-board CLI. It is not a test adapter and there is no unconditional success or legacy acceptance fallback. The merged 16FS-01 predecessor is revalidated by fetching PR #138's actual diff bytes, recomputing the pinned diff SHA-256, and hashing the immutable GPT-6 report body after excluding its final self-digest line; the separate owner acceptance record is fetched and checked independently. Historical artifact byte download and Sigstore verification use the GitHub CLI (gh) with a read-only token. The CLI does not read a trust root from task-registry JSON, receipt fields, PR comments or candidate-supplied booleans.
 
