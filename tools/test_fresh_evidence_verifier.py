@@ -361,9 +361,9 @@ class ProductionWorkflowBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("workflow_dispatch:", production)
-        self.assertNotIn("\\n  pull_request:", production)
-        self.assertNotIn("\\n  pull_request_target:", production)
-        self.assertNotIn("\\n  push:", production)
+        self.assertNotIn("\n  pull_request:", production)
+        self.assertNotIn("\n  pull_request_target:", production)
+        self.assertNotIn("\n  push:", production)
         self.assertIn(
             "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
             production,
@@ -374,7 +374,7 @@ class ProductionWorkflowBoundaryTests(unittest.TestCase):
             "actions: read", "attestations: read",
         ):
             self.assertIn(permission, production)
-        self.assertNotRegex(production, r":\\s*write\\b")
+        self.assertNotRegex(production, r":\s*write\b")
         self.assertEqual(
             production.count("secrets.COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON"), 1
         )
