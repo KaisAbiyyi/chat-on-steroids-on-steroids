@@ -202,12 +202,10 @@ def accepted(
     if task is None or task.get("status") != "done":
         return False
     if task_id == "16L2":
-        evidence = task.get("private_migration_receipt")
-        return private_migration_authorized(tasks) and isinstance(evidence, dict) and (
-            evidence.get("scope") == "approved-copy-only"
-            and evidence.get("independent_review_verdict") == "PASS"
-            and evidence.get("physical_windows") is True
-        )
+        # Consent can authorize starting the copy-only operation, but a
+        # user-editable receipt cannot establish physical/reviewer acceptance.
+        # No trusted private-migration verifier is integrated in this phase.
+        return False
     if task_id == "16LF-01":
         return fresh_receipt_status(
             task.get("evidence"), trusted_verifier=trusted_verifier
@@ -288,6 +286,10 @@ def validate(
             problems.append(
                 "16L2: cannot become ready, claimed, or accepted without explicit owner private-copy consent"
             )
+    if tasks_by_id.get("16L2", {}).get("status") == "done":
+        problems.append(
+            "16L2: self-reported migration receipt cannot be accepted without a trusted private-migration verifier"
+        )
     for protected in ("16L2", "16LF-01"):
         if protected in tasks_by_id and tasks_by_id[protected]["status"] == "done":
             if not accepted(tasks_by_id, protected, trusted_verifier=trusted_verifier):
