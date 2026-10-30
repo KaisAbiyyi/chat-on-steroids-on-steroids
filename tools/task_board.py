@@ -18,6 +18,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+try:
+    from .fresh_evidence_contract import VERIFIER_PR_NUMBER
+except ImportError:
+    from fresh_evidence_contract import VERIFIER_PR_NUMBER
+
 REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
 EXPECTED = {"C": 81, "L": 31, "U": 15}
 STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
@@ -314,7 +319,7 @@ def fresh_receipt_structurally_valid(receipt: object) -> bool:
         and _is_hex_digest(receipt.get("contract_source_sha"), 40)
         and _is_hex_digest(receipt.get("contract_merge_commit_sha"), 40)
         and type(receipt.get("verifier_pr_number")) is int
-        and receipt["verifier_pr_number"] == 139
+        and receipt["verifier_pr_number"] == VERIFIER_PR_NUMBER
         and _is_hex_digest(receipt.get("verifier_source_sha"), 40)
         and _is_hex_digest(receipt.get("verifier_merge_commit_sha"), 40)
         and _is_hex_digest(receipt.get("verifier_sha256"), 64)
@@ -425,7 +430,7 @@ def accepted(
         return False
     if task_id == "16FV-01":
         # A Done flag and PR URL are not acceptance. Verify the exact merged
-        # PR #139 head, merge ancestry and verifier source-file digest remotely.
+        # PR #141 head, merge ancestry and verifier source-file digest remotely.
         verifier_acceptance = getattr(trusted_verifier, "verify_verifier_task", None)
         return callable(verifier_acceptance) and verifier_acceptance(task) is True
     if task_id == "16LF-01":
@@ -613,7 +618,7 @@ def validate(
     if verifier_task.get("status") == "done" and not accepted(
         tasks_by_id, "16FV-01", trusted_verifier=trusted_verifier
     ):
-        problems.append("16FV-01: Done status requires verified merged PR #139 source and verifier-file SHA-256")
+        problems.append("16FV-01: Done status requires verified merged PR #141 source and verifier-file SHA-256")
     predecessor_task = tasks_by_id.get("16FS-01", {})
     if (
         predecessor_task.get("status") != "done"
@@ -957,7 +962,7 @@ def waves(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["check", "ready", "task", "waves"])
+    parser.add_argument("command", choices=["check", "ready", "task", "waves", "trust-root-status"])
     parser.add_argument("task_id", nargs="?")
     parser.add_argument("--json", action="store_true", dest="as_json")
     args = parser.parse_args()
@@ -975,6 +980,24 @@ def main() -> int:
         for error in errors:
             print("ERROR " + error, file=sys.stderr)
         return 1
+    if args.command == "trust-root-status":
+        if trust_root_status != "CONFIGURED" or trusted_verifier is None:
+            print("Production trust root:", trust_root_status, file=sys.stderr)
+            return 1
+        verify_trust_root = getattr(trusted_verifier, "verify_trust_root", None)
+        if not callable(verify_trust_root):
+            print("Production trust root: VERIFICATION_ERROR", file=sys.stderr)
+            return 1
+        try:
+            verify_trust_root()
+        except Exception:
+            print("Production trust root: VERIFICATION_ERROR", file=sys.stderr)
+            return 1
+        print(
+            "CONFIGURED: owner-controlled root, repository/owner identity, "
+            "16FS-01 predecessor and historical 16L1 artifact pins verified"
+        )
+        return 0
     if args.command == "check":
         print(f"VALID: {len(data['tasks'])} nodes; validated AND/OR gates and no dependency cycles")
         print("Production trust root:", trust_root_status)

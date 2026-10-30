@@ -8,6 +8,11 @@ import re
 import subprocess
 from pathlib import Path
 
+try:
+    from .fresh_evidence_contract import VERIFIER_PR_NUMBER
+except ImportError:
+    from fresh_evidence_contract import VERIFIER_PR_NUMBER
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -52,7 +57,7 @@ def main() -> int:
         "schema": "cosos.16fv01.github-actions-qualification.v1",
         "task": "16FV-01",
         "tested_source_sha": args.source_sha,
-        "verifier_pr_number": 139,
+        "verifier_pr_number": VERIFIER_PR_NUMBER,
         "verifier_source_sha": args.source_sha,
         "verifier_sha256": verifier_sha256,
         "platform": args.platform,

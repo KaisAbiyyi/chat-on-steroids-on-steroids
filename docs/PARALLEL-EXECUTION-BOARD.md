@@ -3,7 +3,7 @@
 ## 2026-10-30 — 16FS-01 / 16FV-01 / 16LF-01 gate reconciliation
 
 - 16FS-01 / PR #138 is merged and the separate GPT-6 technical report plus owner acceptance comment are verified. Canonical task status is Done under GPT6_OWNER_ATTESTED; this is not GitHub independent approval.
-- 16FV-01 is claimed on the existing branch work/16fv-01-trusted-evidence-verifier-20261030 under exclusive resource lock freshstart-evidence-verifier. Scope: production verifier, production CLI, schema-v3 receipt/evidence bundle, 17-fact contract, adversarial tests, DAG, and exact-HEAD Windows/Ubuntu Actions.
+- 16FV-01 Issue #139 is implemented on Draft PR #141 and the existing branch work/16fv-01-trusted-evidence-verifier-20261030 under exclusive resource lock freshstart-evidence-verifier. Scope: production verifier, production CLI, schema-v3 receipt/evidence bundle, 17-fact contract, adversarial tests, DAG, and exact-HEAD Windows/Ubuntu Actions.
 - 16LF-01 remains Blocked / NOT_RUN and requires accepted 16FV-01 as well as 16FS-01, 16U1 and 16L1.
 - 16L2 remains Blocked / NOT_RUN / NOT_AUTHORIZED.
 - Preserve 16L3 exactly: 16F AND 16L1 AND (16L2 OR 16LF-01).

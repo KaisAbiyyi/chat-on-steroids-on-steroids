@@ -11,6 +11,66 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import task_board as board
 
 
+def complete_prerequisite_closure(
+    data,
+    task_id,
+    *,
+    trusted_verifier=None,
+    preserve_blocked=frozenset(),
+    complete_target=True,
+):
+    """Build a hypothetical completed fixture from the canonical AND/OR DAG."""
+    tasks = board.index(data)
+    visiting = set()
+    completed = set()
+
+    def visit(current, mark_done=True):
+        if current in visiting:
+            raise AssertionError("cycle while building fixture closure: " + current)
+        if current in completed:
+            return
+        task = tasks.get(current)
+        if not isinstance(task, dict):
+            raise AssertionError("unknown prerequisite in fixture closure: " + current)
+        if current in preserve_blocked:
+            raise AssertionError("fixture closure attempted to complete preserved blocked task: " + current)
+        if task.get("status") not in {"todo", "done"} and mark_done:
+            raise AssertionError("fixture closure cannot override non-completable status: " + current)
+
+        visiting.add(current)
+        for dependency in task.get("depends_on", []):
+            visit(dependency)
+
+        for group in task.get("any_of", []):
+            satisfied = next(
+                (
+                    dependency for dependency in group
+                    if board.accepted(tasks, dependency, trusted_verifier=trusted_verifier)
+                ),
+                None,
+            )
+            if satisfied is None:
+                choices = [
+                    dependency for dependency in group
+                    if dependency not in preserve_blocked
+                    and tasks[dependency].get("status") in {"todo", "done"}
+                ]
+                if not choices:
+                    raise AssertionError("no eligible OR branch in fixture closure for " + current)
+                selected = choices[0]
+                visit(selected)
+                if not board.accepted(tasks, selected, trusted_verifier=trusted_verifier):
+                    raise AssertionError("selected OR branch is not accepted: " + selected)
+
+        if mark_done:
+            task["status"] = "done"
+        visiting.remove(current)
+        completed.add(current)
+
+    visit(task_id, mark_done=complete_target)
+    return completed
+
+
 class TaskBoardTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -183,23 +243,39 @@ class TaskBoardTests(unittest.TestCase):
         # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
-        # Restore accepted prerequisites that are outside the hypothetical
-        # reopened downstream branch.
-        for prerequisite in ("15F", "15G", "16A", "16B", "16C", "16D", "16E", "16PKG-01", "16F", "16L1", "16U1"):
-            future_tasks[prerequisite]["status"] = "done"
-        # The predecessor contract remains merged; the hypothetical future
-        # verifier is accepted only through the explicit remote-verification
-        # test double, never by a task-registry Done flag alone.
+        # Use a test-only typed receipt for the future 16LF-01 OR branch.
+        _, receipt_tasks = self._fresh_scenario()
+        future_tasks["16LF-01"]["evidence"] = copy.deepcopy(
+            receipt_tasks["16LF-01"]["evidence"]
+        )
+        # The predecessor contract and verifier are hypothetical accepted tasks,
+        # but their PR identity remains implementation PR #141, not issue #139.
         future_tasks["16FS-01"]["status"] = "done"
-        future_tasks["16FS-01"]["accepted_evidence_url"] = "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
+        future_tasks["16FS-01"]["accepted_evidence_url"] = (
+            "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
+        )
         future_tasks["16FV-01"].update({
             "status": "done",
-            "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/139",
+            "accepted_evidence_url": (
+                "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/"
+                + str(board.VERIFIER_PR_NUMBER)
+            ),
             "accepted_source_sha": "e" * 40,
             "accepted_merge_commit_sha": "d" * 40,
             "accepted_verifier_sha256": "f" * 64,
         })
         verifier = self._trusted_test_verifier()
+
+        # Recursive closure follows every canonical AND edge and selects an
+        # actually satisfiable OR branch; it does not edit production dependencies.
+        complete_prerequisite_closure(future, "15G", trusted_verifier=verifier)
+        complete_prerequisite_closure(
+            future, "16L3", trusted_verifier=verifier,
+            preserve_blocked={"16L2"}, complete_target=False,
+        )
+        self.assertEqual(future_tasks["16L2"]["status"], "blocked")
+        self.assertEqual(future_tasks["16LF-01"]["status"], "done")
+        self.assertTrue(board.accepted(future_tasks, "16LF-01", trusted_verifier=verifier))
         self.assertEqual(board.validate(future, trusted_verifier=verifier), [])
         waves = board.waves(future, trusted_verifier=verifier)
         flat = [t["id"] for wave in waves for t in wave]
@@ -295,7 +371,7 @@ class TaskBoardTests(unittest.TestCase):
         for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01", "16FV-01"):
             tasks[key]["status"] = "done"
         tasks["16FV-01"].update({
-            "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/139",
+            "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/" + str(board.VERIFIER_PR_NUMBER),
             "accepted_source_sha": "e" * 40,
             "accepted_merge_commit_sha": "d" * 40,
             "accepted_verifier_sha256": "f" * 64,
@@ -328,7 +404,7 @@ class TaskBoardTests(unittest.TestCase):
             "review_pr_number": 135,
             "contract_source_sha": "c392b076457ca5375e260bb2267950feac31de50",
             "contract_merge_commit_sha": "cc180575498e9f45d13c05c86a0a3bb4e8e0c1be",
-            "verifier_pr_number": 139,
+            "verifier_pr_number": board.VERIFIER_PR_NUMBER,
             "verifier_merge_commit_sha": "d" * 40,
             "evidence_bundle_url": "https://github.com/user-attachments/assets/12345678-1234-1234-1234-123456789abc",
             "evidence_bundle_sha256": "3" * 64,
@@ -408,7 +484,7 @@ class TaskBoardTests(unittest.TestCase):
 
         def verify_verifier_task(task):
             return (
-                task.get("accepted_evidence_url") == "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/139"
+                task.get("accepted_evidence_url") == "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/" + str(board.VERIFIER_PR_NUMBER)
                 and task.get("accepted_source_sha") == "e" * 40
                 and task.get("accepted_merge_commit_sha") == "d" * 40
                 and task.get("accepted_verifier_sha256") == "f" * 64
@@ -425,7 +501,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertFalse(board.accepted(tasks, "16FV-01", trusted_verifier=verifier))
         self.assertFalse(board.accepted(tasks, "16FV-01"))
         self.assertTrue(any(
-            "16FV-01: Done status requires verified merged PR #139" in error
+            "16FV-01: Done status requires verified merged PR #141" in error
             for error in board.validate(data)
         ))
 

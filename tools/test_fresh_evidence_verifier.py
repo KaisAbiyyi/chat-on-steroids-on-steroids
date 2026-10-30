@@ -19,6 +19,26 @@ REPO = v.REPOSITORY
 OWNER_ID = v.OWNER_USER_ID
 CREATED = "2026-10-30T12:00:00Z"
 FENCE = chr(96) * 3
+TEST_ONLY_TRUST_ROOT = json.loads(
+    (Path(__file__).parent / "fixtures" / "16fv-trust-root.test.json").read_text(encoding="utf-8")
+)
+
+
+def production_environment(mapping=None, *, owner_controlled=True, include_token=True):
+    value = copy.deepcopy(TEST_ONLY_TRUST_ROOT if mapping is None else mapping)
+    if owner_controlled:
+        value["authority"] = "owner-controlled"
+    env = {
+        v.TRUST_ROOT_ENV: json.dumps(value),
+        "GITHUB_ACTIONS": "true",
+        "GITHUB_EVENT_NAME": "workflow_dispatch",
+        "GITHUB_REF": "refs/heads/main",
+        "GITHUB_REPOSITORY": REPO,
+        "GITHUB_WORKFLOW_REF": f"{REPO}/{v.PRODUCTION_WORKFLOW_PATH}@refs/heads/main",
+    }
+    if include_token:
+        env["GH_TOKEN"] = "test-token"
+    return env
 
 
 def digest(data):
@@ -114,6 +134,7 @@ class FakeAPI:
     def __init__(self):
         self.repository = REPO
         self.objects = {}
+        self.requested_paths = []
         self.diff = b"source PR 135 diff bytes"
         self.predecessor_diff = (Path(__file__).parent / "fixtures" / "16fs01-pr138.diff").read_bytes()
         self.verifier_file = b"trusted verifier source fixture"
@@ -121,6 +142,7 @@ class FakeAPI:
         self.artifact_zip = b""
 
     def get_json(self, path):
+        self.requested_paths.append(path)
         if path not in self.objects:
             raise v.VerificationError("fake GitHub API record missing: " + path)
         return copy.deepcopy(self.objects[path])
@@ -151,9 +173,8 @@ class FakeAPI:
 
 
 def make_fixture():
-    root_mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
-    root_mapping["authority"] = "test-only"
-    root = v.TrustRoot.from_mapping(root_mapping, production=False)
+    root_mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
+        root = v.TrustRoot.from_mapping(root_mapping, production=False)
     api = FakeAPI()
     diff_sha = digest(api.diff)
     nonce = "a" * 16
@@ -181,7 +202,7 @@ def make_fixture():
         "evidence_bundle_sha256": "",
         "contract_source_sha": root.predecessor["source_sha"],
         "contract_merge_commit_sha": root.predecessor["merge_commit_sha"],
-        "verifier_pr_number": 139,
+        "verifier_pr_number": v.VERIFIER_PR_NUMBER,
         "verifier_source_sha": "e" * 40,
         "verifier_merge_commit_sha": "d" * 40,
         "verifier_sha256": digest(api.verifier_file),
@@ -242,9 +263,14 @@ def make_fixture():
         "owner_attestation_sha256": attestation["owner_attestation_sha256"],
     }
     api.objects.update({
+        f"/repos/{REPO}": {
+            "id": v.REPOSITORY_ID,
+            "full_name": REPO,
+            "owner": {"login": v.OWNER_LOGIN},
+        },
         "/users/" + v.OWNER_LOGIN: {"login": v.OWNER_LOGIN, "id": OWNER_ID},
-        f"/repos/{REPO}/pulls/139": {
-            "number": 139, "merged": True, "merged_at": CREATED,
+        f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}": {
+            "number": v.VERIFIER_PR_NUMBER, "merged": True, "merged_at": CREATED,
             "base": {"ref": "main"},
             "head": {"sha": "e" * 40, "repo": {"full_name": REPO}},
             "merge_commit_sha": "d" * 40,
@@ -332,59 +358,73 @@ class ProductionTrustRootTests(unittest.TestCase):
         _, _, receipt, _, _ = make_fixture()
         self.assertEqual(board.fresh_receipt_status(receipt, trusted_verifier=verifier), "TRUST_ROOT_UNCONFIGURED")
 
-    def test_test_fixture_cannot_be_loaded_as_production_authority(self):
-        mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
-        mapping["authority"] = "test-only"
-        verifier, status = v.production_verifier_from_environment({
-            v.TRUST_ROOT_ENV: json.dumps(mapping),
-            "GH_TOKEN": "test-token",
-        })
+    def test_test_only_fixture_cannot_be_loaded_as_production_authority(self):
+        verifier, status = v.production_verifier_from_environment(
+            production_environment(owner_controlled=False)
+        )
         self.assertIsNone(verifier)
         self.assertEqual(status, "TRUST_ROOT_INVALID")
 
-    def test_modified_owner_or_artifact_pin_invalidates_production_root(self):
-        mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+    def test_modified_owner_or_malformed_historical_pin_invalidates_root(self):
+        mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
+        mapping["authority"] = "owner-controlled"
         mapping["owner_user_id"] = OWNER_ID + 1
-        verifier, status = v.production_verifier_from_environment({
-            v.TRUST_ROOT_ENV: json.dumps(mapping), "GH_TOKEN": "test-token",
-        })
-        self.assertIsNone(verifier)
-        self.assertEqual(status, "TRUST_ROOT_INVALID")
-        mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
-        mapping["artifact"]["installer_sha256"] = "0" * 64
-        verifier, status = v.production_verifier_from_environment({
-            v.TRUST_ROOT_ENV: json.dumps(mapping), "GH_TOKEN": "test-token",
-        })
+        verifier, status = v.production_verifier_from_environment(production_environment(mapping))
         self.assertIsNone(verifier)
         self.assertEqual(status, "TRUST_ROOT_INVALID")
 
-    def test_16fv_task_acceptance_rechecks_merged_16fs_and_pr139_source(self):
+        mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
+        mapping["authority"] = "owner-controlled"
+        mapping["artifact"]["installer_sha256"] = "0" * 63
+        verifier, status = v.production_verifier_from_environment(production_environment(mapping))
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+
+        mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
+        mapping["authority"] = "owner-controlled"
+        mapping["predecessor"]["source_sha"] = "not-a-source-sha"
+        verifier, status = v.production_verifier_from_environment(production_environment(mapping))
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+
+    def test_secret_is_rejected_outside_protected_main_dispatch_context(self):
+        env = production_environment()
+        env["GITHUB_EVENT_NAME"] = "pull_request"
+        verifier, status = v.production_verifier_from_environment(env)
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+
+        env = production_environment()
+        env["GITHUB_REF"] = "refs/heads/work/16fv-01-trusted-evidence-verifier-20261030"
+        verifier, status = v.production_verifier_from_environment(env)
+        self.assertIsNone(verifier)
+        self.assertEqual(status, "TRUST_ROOT_INVALID")
+
+    def test_16fv_task_acceptance_rechecks_merged_16fs_and_pr141_source(self):
         _, api, receipt, _, _ = make_fixture()
         task = {
             "status": "done",
-            "accepted_evidence_url": f"https://github.com/{REPO}/pull/139",
+            "accepted_evidence_url": f"https://github.com/{REPO}/pull/{v.VERIFIER_PR_NUMBER}",
             "accepted_source_sha": receipt["verifier_source_sha"],
             "accepted_merge_commit_sha": receipt["verifier_merge_commit_sha"],
             "accepted_verifier_sha256": receipt["verifier_sha256"],
         }
-        with patch.dict(os.environ, {
-            v.TRUST_ROOT_ENV: json.dumps(v.PRODUCTION_TRUST_ROOT),
-            "GH_TOKEN": "test-token",
-        }, clear=True):
+        with patch.dict(os.environ, production_environment(), clear=True):
             with patch("tools.fresh_evidence_verifier.GitHubAPI", return_value=api):
-                verifier, status = v.production_verifier_from_environment()
-        self.assertEqual(status, "CONFIGURED")
-        self.assertTrue(verifier.verify_verifier_task(task))
-        task["accepted_source_sha"] = "0" * 40
-        self.assertFalse(verifier.verify_verifier_task(task))
-        task["accepted_source_sha"] = receipt["verifier_source_sha"]
-        task["status"] = "claimed"
-        self.assertFalse(verifier.verify_verifier_task(task))
+                with patch("tools.fresh_evidence_verifier.verify_historical_16l1_artifact", return_value={}):
+                    verifier, status = v.production_verifier_from_environment()
+                    self.assertEqual(status, "CONFIGURED")
+                    self.assertTrue(verifier.verify_verifier_task(task))
+                    task["accepted_source_sha"] = "0" * 40
+                    self.assertFalse(verifier.verify_verifier_task(task))
+                    task["accepted_source_sha"] = receipt["verifier_source_sha"]
+                    task["status"] = "claimed"
+                    self.assertFalse(verifier.verify_verifier_task(task))
 
     def test_missing_github_token_does_not_construct_a_verifier(self):
-        verifier, status = v.production_verifier_from_environment({
-            v.TRUST_ROOT_ENV: json.dumps(v.PRODUCTION_TRUST_ROOT),
-        })
+        verifier, status = v.production_verifier_from_environment(
+            production_environment(include_token=False)
+        )
         self.assertIsNone(verifier)
         self.assertEqual(status, "VERIFICATION_ERROR")
 
@@ -562,9 +602,36 @@ class FreshEvidenceVerificationTests(unittest.TestCase):
         with self.assertRaises(v.VerificationError):
             self.verify(fixture)
 
+    def test_issue_139_cannot_be_mistaken_for_verifier_pr_141(self):
+        fixture = make_fixture()
+        api, receipt = fixture[1], fixture[2]
+        canonical_path = f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}"
+        issue_number_path = f"/repos/{REPO}/pulls/139"
+        self.assertEqual(v.VERIFIER_PR_NUMBER, 141)
+        self.assertEqual(receipt["verifier_pr_number"], 141)
+        self.assertIn(canonical_path, api.objects)
+        self.assertNotIn(issue_number_path, api.objects)
+
+        v.verify_16fv_source(receipt, api)
+        self.assertIn(canonical_path, api.requested_paths)
+        self.assertNotIn(issue_number_path, api.requested_paths)
+
+        forged = copy.deepcopy(receipt)
+        forged["verifier_pr_number"] = 139
+        before = len(api.requested_paths)
+        with self.assertRaises(v.VerificationError):
+            v.verify_16fv_source(forged, api)
+        self.assertEqual(len(api.requested_paths), before)
+
+    def test_canonical_pr_141_route_rejects_wrong_actual_pr_number(self):
+        fixture = make_fixture()
+        fixture[1].objects[f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}"]["number"] = 139
+        with self.assertRaises(v.VerificationError):
+            v.verify_16fv_source(fixture[2], fixture[1])
+
     def test_unmerged_16fv_source_rejected(self):
         fixture = make_fixture()
-        fixture[1].objects[f"/repos/{REPO}/pulls/139"]["merged"] = False
+        fixture[1].objects[f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}"]["merged"] = False
         with self.assertRaises(v.VerificationError):
             self.verify(fixture)
 
@@ -679,7 +746,7 @@ class FreshEvidenceVerificationTests(unittest.TestCase):
 
 
 def make_synthetic_artifact():
-    mapping = copy.deepcopy(v.PRODUCTION_TRUST_ROOT)
+    mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
     mapping["authority"] = "test-only"
     artifact = mapping["artifact"]
     artifact.update({
@@ -863,7 +930,7 @@ class ProductionCliFailClosedTests(unittest.TestCase):
         tasks = board.index(data)
         tasks["16FS-01"]["status"] = "done"
         tasks["16FV-01"]["status"] = "done"
-        tasks["16FV-01"]["accepted_evidence_url"] = "https://github.com/" + REPO + "/pull/139"
+        tasks["16FV-01"]["accepted_evidence_url"] = "https://github.com/" + REPO + "/pull/" + str(v.VERIFIER_PR_NUMBER)
         _, _, receipt, _, _ = make_fixture()
         tasks["16LF-01"]["status"] = "done"
         tasks["16LF-01"]["evidence"] = receipt

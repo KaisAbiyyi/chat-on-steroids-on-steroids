@@ -55,6 +55,8 @@ class QualificationRecorderTests(unittest.TestCase):
         self.assertEqual(evidence["tested_source_sha"], sha)
         self.assertEqual(evidence["verifier_source_sha"], sha)
         self.assertEqual(evidence["verifier_sha256"], verifier_sha)
+        self.assertEqual(evidence["verifier_pr_number"], recorder.VERIFIER_PR_NUMBER)
+        self.assertEqual(evidence["verifier_pr_number"], 141)
         self.assertEqual(evidence["status"], "PASS")
         self.assertEqual(evidence["production_trust_root"], "NOT_CONFIGURED_IN_CI")
         self.assertEqual(evidence["production_acceptance"], "NOT_AUTHORIZED_BY_CI")

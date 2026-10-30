@@ -41,6 +41,7 @@ jobs:
         run: >-
           python -m py_compile
           tools/task_board.py
+          tools/fresh_evidence_contract.py
           tools/fresh_evidence_verifier.py
           tools/test_task_board.py
           tools/test_fresh_evidence_verifier.py

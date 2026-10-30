@@ -27,73 +27,61 @@ try:
 except ImportError:
     import task_board as board
 
-
-REPOSITORY = "KaisAbiyyi/chat-on-steroids-on-steroids"
-REPOSITORY_ID = 1424422098
-OWNER_LOGIN = "KaisAbiyyi"
-OWNER_USER_ID = 93252311
-REVIEW_MODE = "GPT6_OWNER_ATTESTED"
-VERIFIER_PR_NUMBER = 139
-TRUST_ROOT_ENV = "COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON"
+try:
+    from .fresh_evidence_contract import (
+        HISTORICAL_16L1_PR_NUMBER, HISTORICAL_TOOLING_PR_NUMBER,
+        OWNER_LOGIN, OWNER_USER_ID, PREDECESSOR_PR_NUMBER,
+        PRODUCTION_WORKFLOW_PATH, RECEIPT_ISSUE_NUMBER, REPOSITORY,
+        REPOSITORY_ID, REVIEW_MODE, TRUST_ROOT_ENV, VERIFIER_PR_NUMBER,
+    )
+except ImportError:
+    from fresh_evidence_contract import (
+        HISTORICAL_16L1_PR_NUMBER, HISTORICAL_TOOLING_PR_NUMBER,
+        OWNER_LOGIN, OWNER_USER_ID, PREDECESSOR_PR_NUMBER,
+        PRODUCTION_WORKFLOW_PATH, RECEIPT_ISSUE_NUMBER, REPOSITORY,
+        REPOSITORY_ID, REVIEW_MODE, TRUST_ROOT_ENV, VERIFIER_PR_NUMBER,
+    )
 RECEIPT_MARKER = "<!-- COSOS-16LF01-RECEIPT-V1 -->"
 REVIEW_MARKER = "<!-- COSOS-GPT6-REVIEW-V2 -->"
 ATTESTATION_MARKER = "<!-- COSOS-OWNER-ATTESTATION-V1 -->"
-REVIEW_SCHEMA = "cosos.release.cloud-provenance.v2"
-RECEIPT_SCHEMA = "cosos.freshstart.receipt.v1"
-ATTESTATION_SCHEMA = "cosos.freshstart.owner-attestation.v1"
-BUNDLE_SCHEMA = "cosos.16lf01.evidence-bundle.v1"
-QUALIFICATION_SCHEMA = "cosos.16lf01.qualification.v1"
-CHECK_EVIDENCE_SCHEMA = "cosos.16lf01.check-evidence.v1"
-MAX_ARTIFACT_BYTES = 200 * 1024 * 1024
-MAX_BUNDLE_BYTES = 100 * 1024 * 1024
-MAX_UNPACKED_BYTES = 500 * 1024 * 1024
+REVIEW_SCHEMA = "cosos.release.cloud-proTRUST_ROOT_SCHEMA = "cosos.fresh-evidence-trust-root.v1"
+PREDECESSOR_TRUST_ROOT_FIELDS = frozenset({
+    "pr_number", "source_sha", "merge_commit_sha", "diff_sha256",
+    "report_comment_id", "owner_attestation_comment_id", "report_sha256",
+})
+ARTIFACT_TRUST_ROOT_FIELDS = frozenset({
+    "pr_number", "source_sha", "source_base_sha", "source_merge_commit_sha",
+    "branch", "original_event_sha", "run_id", "run_attempt", "workflow_id",
+    "workflow_path", "artifact_id", "artifact_name", "archive_sha256",
+    "installer_sha256", "package_receipt_sha256", "candidate_zip_sha256",
+    "update02_setup_sha256", "update03_setup_sha256", "update02_zip_sha256",
+    "update03_zip_sha256", "release_manifest_sha256", "renderer_manifest_sha256",
+    "rust_sha256", "renderer_host_sha256", "renderer_dll_sha256",
+    "tooling_pr_number", "tooling_head_sha", "tooling_merge_commit_sha",
+    "attestations",
+})
+ARTIFACT_COMMIT_FIELDS = (
+    "source_sha", "source_base_sha", "source_merge_commit_sha",
+    "original_event_sha", "tooling_head_sha", "tooling_merge_commit_sha",
+)
+ARTIFACT_DIGEST_FIELDS = (
+    "archive_sha256", "installer_sha256", "package_receipt_sha256",
+    "candidate_zip_sha256", "update02_setup_sha256", "update03_setup_sha256",
+    "update02_zip_sha256", "update03_zip_sha256", "release_manifest_sha256",
+    "renderer_manifest_sha256", "rust_sha256", "renderer_host_sha256",
+    "renderer_dll_sha256",
+)
+ARTIFACT_INTEGER_FIELDS = (
+    "pr_number", "run_id", "run_attempt", "workflow_id", "artifact_id",
+    "tooling_pr_number",
+)
+ARTIFACT_ATTESTATION_FIELDS = frozenset({
+    "package_receipt", "installer", "candidate_zip",
+    "update02_installer", "update03_installer",
+})
 
-PRODUCTION_TRUST_ROOT = {
-    "schema": "cosos.fresh-evidence-trust-root.v1",
-    "authority": "owner-controlled",
-    "repository_full_name": REPOSITORY,
-    "repository_id": REPOSITORY_ID,
-    "owner_login": OWNER_LOGIN,
-    "owner_user_id": OWNER_USER_ID,
-    "review_mode": REVIEW_MODE,
-    "receipt_issue_number": 140,
-    "predecessor": {
-        "pr_number": 138,
-        "source_sha": "c392b076457ca5375e260bb2267950feac31de50",
-        "merge_commit_sha": "cc180575498e9f45d13c05c86a0a3bb4e8e0c1be",
-        "diff_sha256": "9e750f2fbb52eda0bc15275ed5c274cbe3100a988ad628a885b4391143f4aa83",
-        "report_comment_id": 6521782671,
-        "owner_attestation_comment_id": 6521838581,
-        "report_sha256": "ac0c1581f3c7e8bc32f8c5f109fc8a074069482bdf8b88a68a133fdb9b0ec2dd",
-    },
-    "artifact": {
-        "pr_number": 135,
-        "source_sha": "fb1d97a040a28abe74ccbcf5f92e2d33064b85ad",
-        "source_base_sha": "2d22c83d210e3e6bebaeef9956af33f8dfd1a8db",
-        "source_merge_commit_sha": "0685f218e4d4c2b3e6031aad290ea6a4848c7f6e",
-        "branch": "fix/16l1-native-stage-publish-20261029",
-        "original_event_sha": "b903132e2c8a32cde5143d40696813fb3233d11d",
-        "run_id": 40808144696,
-        "run_attempt": 1,
-        "workflow_id": 398496557,
-        "workflow_path": ".github/workflows/16pkg-native-installer.yml",
-        "artifact_id": 12868909286,
-        "artifact_name": "cosos-16pkg-unsigned-candidate-fb1d97a040a28abe74ccbcf5f92e2d33064b85ad",
-        "archive_sha256": "07d68ffbd6eb30d444f153c51a6a0430d7019f9c919c141181e267de19e99cd0",
-        "installer_sha256": "66adbc6160f99730b029d6f8866aba0291ec98f55a48fa08458954faa29cc76b",
-        "package_receipt_sha256": "9c473677c03cead075cfbf0bb6015962fdfc8f2e785e5c2334bb95282a56b308",
-        "candidate_zip_sha256": "2a5187faa62a8c296124c4bb81b1d5078485e4cbec4cf845ed8832279bebd17f",
-        "update02_setup_sha256": "93b68e7322a86a7acb556aaa9b705de16725cc09ea29276be0422644970989a4",
-        "update03_setup_sha256": "27a98bf1c0ec90ed420b75012a681671e8886cb87f9b4cf36ed56f04d8cd5ede",
-        "update02_zip_sha256": "eb18b1a5963d85440b88bacb542425d40074e9e5108a8a94a2e0281d7c470aff",
-        "update03_zip_sha256": "e02acf99a856b28a9547147cc4f22286e849efb779aee94cc707d9cf1a2132d2",
-        "release_manifest_sha256": "24b9ddff3cca496aa3708706e4ad9326eb2520d4ce130ab6f4d77a8754aa53ae",
-        "renderer_manifest_sha256": "c3bf83730594f7ece72bf224d7552c433e711ca510ae320e9b14d2ca6b4c4e95",
-        "rust_sha256": "c8ead7675c13457dd3b57304f2dd0fc86d0cbf6e00d71f75af33576df8f1a5e8",
-        "renderer_host_sha256": "bddec59bc5fc7af92605462c59bf660a3e2cd5d03c2f550254bb3392fa15093e",
-        "renderer_dll_sha256": "e007030cbf41a457c4bf730465239e766128c4e2f58bf5bee74eaed734ace8c2",
-        "tooling_pr_number": 136,
-        "tooling_head_sha": "e526c2ed398b0b21dd10f659d2ab1f1ed7f85b07",
+
+    "tooling_head_sha": "e526c2ed398b0b21dd10f659d2ab1f1ed7f85b07",
         "tooling_merge_commit_sha": "bb3ca8daba5d467b9f097b7e84833da3ee129373",
         "attestations": {
             "package_receipt": 61105602,
@@ -148,24 +136,76 @@ class TrustRoot:
             "owner_login", "owner_user_id", "review_mode",
             "receipt_issue_number", "predecessor", "artifact",
         }
-        if set(value) != expected_keys or value.get("schema") != "cosos.fresh-evidence-trust-root.v1":
+        if set(value) != expected_keys or value.get("schema") != TRUST_ROOT_SCHEMA:
             raise TrustRootError("TRUST_ROOT_INVALID: schema or fields mismatch")
-        if production:
-            if value.get("authority") != "owner-controlled" or value != PRODUCTION_TRUST_ROOT:
-                raise TrustRootError("TRUST_ROOT_INVALID: root is not the pinned owner-controlled production root")
-        elif value.get("authority") != "test-only":
-            raise TrustRootError("TRUST_ROOT_INVALID: automated fixtures must use the test-only authority")
+        expected_authority = "owner-controlled" if production else "test-only"
+        if value.get("authority") != expected_authority:
+            raise TrustRootError("TRUST_ROOT_INVALID: trust-root authority does not match the execution mode")
+
+        # Identity anchors are fixed; historical pins are supplied independently
+        # by the owner-controlled payload and verified against actual GitHub data.
         if (
-            not isinstance(value.get("repository_full_name"), str)
+            value.get("repository_full_name") != REPOSITORY
             or type(value.get("repository_id")) is not int
-            or not isinstance(value.get("owner_login"), str)
+            or value.get("repository_id") != REPOSITORY_ID
+            or value.get("owner_login") != OWNER_LOGIN
             or type(value.get("owner_user_id")) is not int
+            or value.get("owner_user_id") != OWNER_USER_ID
             or value.get("review_mode") != REVIEW_MODE
             or type(value.get("receipt_issue_number")) is not int
-            or not isinstance(value.get("predecessor"), dict)
-            or not isinstance(value.get("artifact"), dict)
+            or value.get("receipt_issue_number") != RECEIPT_ISSUE_NUMBER
         ):
-            raise TrustRootError("TRUST_ROOT_INVALID: malformed trust-root identity")
+            raise TrustRootError("TRUST_ROOT_INVALID: repository, owner, receipt or review-policy identity mismatch")
+
+        predecessor = value.get("predecessor")
+        if (
+            not isinstance(predecessor, dict)
+            or set(predecessor) != PREDECESSOR_TRUST_ROOT_FIELDS
+            or type(predecessor.get("pr_number")) is not int
+            or predecessor.get("pr_number") != PREDECESSOR_PR_NUMBER
+            or type(predecessor.get("report_comment_id")) is not int
+            or predecessor.get("report_comment_id") <= 0
+            or type(predecessor.get("owner_attestation_comment_id")) is not int
+            or predecessor.get("owner_attestation_comment_id") <= 0
+            or any(
+                not isinstance(predecessor.get(field), str)
+                or re.fullmatch(rf"[0-9a-f]{{{length}}}", predecessor[field]) is None
+                for field, length in (
+                    ("source_sha", 40), ("merge_commit_sha", 40),
+                    ("diff_sha256", 64), ("report_sha256", 64),
+                )
+            )
+        ):
+            raise TrustRootError("TRUST_ROOT_INVALID: predecessor contract pins are malformed")
+
+        artifact = value.get("artifact")
+        if (
+            not isinstance(artifact, dict)
+            or set(artifact) != ARTIFACT_TRUST_ROOT_FIELDS
+            or any(type(artifact.get(field)) is not int or artifact[field] <= 0 for field in ARTIFACT_INTEGER_FIELDS)
+            or artifact.get("pr_number") != HISTORICAL_16L1_PR_NUMBER
+            or artifact.get("tooling_pr_number") != HISTORICAL_TOOLING_PR_NUMBER
+            or artifact.get("workflow_path") != ".github/workflows/16pkg-native-installer.yml"
+            or any(
+                not isinstance(artifact.get(field), str)
+                or re.fullmatch(r"[0-9a-f]{40}", artifact[field]) is None
+                for field in ARTIFACT_COMMIT_FIELDS
+            )
+            or any(
+                not isinstance(artifact.get(field), str)
+                or re.fullmatch(r"[0-9a-f]{64}", artifact[field]) is None
+                for field in ARTIFACT_DIGEST_FIELDS
+            )
+            or any(
+                not isinstance(artifact.get(field), str) or not artifact[field].strip()
+                for field in ("branch", "workflow_path", "artifact_name")
+            )
+            or not isinstance(artifact.get("attestations"), dict)
+            or set(artifact["attestations"]) != ARTIFACT_ATTESTATION_FIELDS
+            or any(type(item) is not int or item <= 0 for item in artifact["attestations"].values())
+        ):
+            raise TrustRootError("TRUST_ROOT_INVALID: historical 16L1 artifact/provenance pins are malformed")
+
         return cls(
             authority=value["authority"],
             repository_full_name=value["repository_full_name"],
@@ -174,8 +214,8 @@ class TrustRoot:
             owner_user_id=value["owner_user_id"],
             review_mode=value["review_mode"],
             receipt_issue_number=value["receipt_issue_number"],
-            predecessor=dict(value["predecessor"]),
-            artifact=dict(value["artifact"]),
+            predecessor=dict(predecessor),
+            artifact=dict(artifact),
         )
 
 
@@ -508,6 +548,24 @@ def verify_evidence_bundle(receipt: dict[str, Any], api: Any) -> dict[str, Any]:
     return {"sha256": bundle_sha, "manifest": manifest, "qualification": qualification, "verified_checks": verified_checks}
 
 
+def verify_repository_identity(root: TrustRoot, api: Any) -> None:
+    repository = api.get_json(f"/repos/{root.repository_full_name}")
+    owner = api.get_json("/users/" + root.owner_login)
+    if (
+        repository.get("full_name") != root.repository_full_name
+        or repository.get("id") != root.repository_id
+        or repository.get("owner", {}).get("login") != root.owner_login
+    ):
+        raise VerificationError("GitHub repository identity does not match the owner-controlled trust root")
+    if (
+        owner.get("login", "").casefold() != root.owner_login.casefold()
+        or owner.get("id") != root.owner_user_id
+    ):
+        raise VerificationError("GitHub owner identity does not match the owner-controlled trust root")
+    if root.review_mode != REVIEW_MODE:
+        raise VerificationError("Trust root does not authorize GPT6_OWNER_ATTESTED review policy")
+
+
 def _verify_predecessor(root: TrustRoot, api: Any) -> None:
     predecessor = root.predecessor
     repo = root.repository_full_name
@@ -569,6 +627,8 @@ def verify_16fv_source(receipt: dict[str, Any], api: Any) -> dict[str, Any]:
     if not _hex(source_sha, 40) or not _hex(merge_sha, 40) or not _hex(expected_file_sha, 64):
         raise VerificationError("16FV-01 source/merge/file digests are malformed")
     repo = api.repository
+    if repo != REPOSITORY:
+        raise VerificationError("Verifier API client is bound to the wrong repository")
     pr = api.get_json(f"/repos/{repo}/pulls/{VERIFIER_PR_NUMBER}")
     if (
         pr.get("number") != VERIFIER_PR_NUMBER
@@ -818,9 +878,7 @@ def verify_evidence(
     if root.review_mode != REVIEW_MODE:
         raise VerificationError("Only GPT6_OWNER_ATTESTED review governance is authorized")
     repo = root.repository_full_name
-    owner = api.get_json("/users/" + root.owner_login)
-    if owner.get("login", "").casefold() != root.owner_login.casefold() or owner.get("id") != root.owner_user_id:
-        raise VerificationError("Owner identity does not match the owner-controlled trust root")
+    verify_repository_identity(root, api)
 
     _verify_predecessor(root, api)
     if (
@@ -993,12 +1051,25 @@ def verify_evidence(
     return verification
 
 
+def _trusted_production_environment(env: dict[str, str]) -> bool:
+    expected_workflow_ref = f"{REPOSITORY}/{PRODUCTION_WORKFLOW_PATH}@refs/heads/main"
+    return (
+        env.get("GITHUB_ACTIONS") == "true"
+        and env.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+        and env.get("GITHUB_REF") == "refs/heads/main"
+        and env.get("GITHUB_REPOSITORY") == REPOSITORY
+        and env.get("GITHUB_WORKFLOW_REF") == expected_workflow_ref
+    )
+
+
 def production_verifier_from_environment(environ: dict[str, str] | None = None):
-    """Return (verifier, status); only the pinned owner-controlled environment root is accepted."""
+    """Load owner authority only inside the protected main-only production workflow."""
     env = os.environ if environ is None else environ
     raw = env.get(TRUST_ROOT_ENV)
     if not raw:
         return None, "TRUST_ROOT_UNCONFIGURED"
+    if not _trusted_production_environment(env):
+        return None, "TRUST_ROOT_INVALID"
     try:
         mapping = json.loads(raw)
         root = TrustRoot.from_mapping(mapping, production=True)
@@ -1011,6 +1082,12 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
 
     def verify(receipt: dict[str, Any]) -> board.FreshEvidenceVerification:
         return verify_evidence(receipt, root, api)
+
+    def verify_trust_root() -> bool:
+        verify_repository_identity(root, api)
+        _verify_predecessor(root, api)
+        verify_historical_16l1_artifact(root, api)
+        return True
 
     def verify_verifier_task(task: dict[str, Any]) -> bool:
         if (
@@ -1026,13 +1103,14 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
             "verifier_sha256": task.get("accepted_verifier_sha256"),
         }
         try:
-            _verify_predecessor(root, api)
+            verify_trust_root()
             verify_16fv_source(candidate, api)
         except Exception:
             return False
         return True
 
     setattr(verify, "verify_verifier_task", verify_verifier_task)
+    setattr(verify, "verify_trust_root", verify_trust_root)
     return verify, "CONFIGURED"
 
 

@@ -2,8 +2,10 @@
 
 **Task:** 16FV-01  
 **Issue:** https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/139  
+**Implementation PR:** https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/141 (Draft; not merged)  
 **Existing branch:** work/16fv-01-trusted-evidence-verifier-20261030  
-**Starting HEAD:** cc180575498e9f45d13c05c86a0a3bb4e8e0c1be  
+**Original base SHA:** cc180575498e9f45d13c05c86a0a3bb4e8e0c1be  
+**Reclaim starting HEAD:** 5b4b00b7e0e08504f7a91234e2150af2bdbf0081  
 **Resource lock:** freshstart-evidence-verifier  
 **Execution:** GitHub integration and GitHub Actions only  
 **Owner production trust root:** NOT CONFIGURED
@@ -23,12 +25,15 @@ No production root is established by this implementation. Missing root returns T
 
 ## Production components
 
-- tools/fresh_evidence_verifier.py — read-only GitHub API client, pinned owner trust-root parser, merged 16FS-01 contract check, immutable comment-record parser, source PR/diff binding, merged 16FV-01 source-file SHA binding, 16L1 artifact byte/Sigstore verifier, structured evidence-bundle verifier and typed FreshEvidenceVerification constructor.
+- tools/fresh_evidence_contract.py — single canonical verifier implementation PR identity (#141), task issue identity (#139), repository/owner identity, predecessor/artifact PR identities and protected workflow path.
+- tools/fresh_evidence_verifier.py — read-only GitHub API client, protected-environment trust-root parser, merged 16FS-01 contract check, immutable comment-record parser, source PR/diff binding, merged 16FV-01 PR #141 source-file SHA binding, 16L1 artifact byte/Sigstore verifier, structured evidence-bundle verifier and typed FreshEvidenceVerification constructor.
+- tools/fixtures/16fv-trust-root.test.json — explicitly test-only trust-root fixture; authority is test-only and the production environment loader rejects it.
 - tools/fixtures/16fs01-pr138.diff — byte-exact golden diff from merged predecessor PR #138; the production verifier recomputes its SHA-256 against the pinned 16FS-01 contract.
 - tools/task_board.py — schema-v3 receipt validation, typed 17-fact binding, production verifier loading in the CLI, fail-closed acceptance path and canonical DAG constraints.
 - tools/test_fresh_evidence_verifier.py — positive and adversarial verifier tests, synthetic artifact archive tests, five mocked Sigstore proof checks, production root isolation and CLI fail-closed tests.
 - tools/test_task_board.py and tools/test_release_16f.py — canonical DAG, receipt and release-gate regression coverage.
-- .github/workflows/16fv-trusted-evidence-verifier.yml — Windows/Ubuntu exact-HEAD matrix, machine-readable qualification artifact, historical 16L1 artifact revalidation and an explicit owner trust-root handoff; no workflow job configures or activates production authority.
+- .github/workflows/16fv-trusted-evidence-verifier.yml — Windows/Ubuntu exact-HEAD matrix, machine-readable qualification artifact and historical 16L1 artifact revalidation; it receives no production trust-root secret.
+- .github/workflows/16fv-production-verify.yml — manual workflow restricted to workflow_dispatch on main, exact main checkout, protected fresh-evidence-production Environment, read-only permissions and secret access only inside the protected job.
 - tools/record_16fv_qualification.py — verifies git rev-parse HEAD equals the workflow's claimed tested SHA before recording the verifier file SHA-256, runner OS, run ID/attempt, test outcomes and explicit non-acceptance of production authority.
 - tools/test_record_16fv_qualification.py — tests exact checkout binding, run URL identity and fail-closed qualification records.
 
@@ -68,7 +73,7 @@ The task registry stores the schema-v3 receipt plus three canonical immutable is
 
 The receipt JSON digest is calculated over the exact receipt payload object. The review report and owner attestation each carry their own canonical self-excluding digest. The receipt record is posted first; subsequent report/attestation links and hashes live in the task-registry envelope to avoid circular comment-ID references.
 
-The receipt points to an owner-uploaded ZIP attachment at a GitHub user-attachment URL. The ZIP must contain evidence-manifest.json, qualification.json, and one structured JSON evidence record for every required fresh-start check. The manifest carries SHA-256 for every other file. The qualification record binds repository, source SHA, artifact ID/hash, exact 16FS source/merge SHA, exact 16FV PR #139 head/merge SHA and verifier-file SHA-256, Windows build, unique session ID, workspace nonce/path, timestamps, commands, eight PASS checks and per-check evidence paths.
+The receipt points to an owner-uploaded ZIP attachment at a GitHub user-attachment URL. The ZIP must contain evidence-manifest.json, qualification.json, and one structured JSON evidence record for every required fresh-start check. The manifest carries SHA-256 for every other file. The qualification record binds repository, source SHA, artifact ID/hash, exact 16FS source/merge SHA, exact 16FV PR #141 head/merge SHA and verifier-file SHA-256, Windows build, unique session ID, workspace nonce/path, timestamps, commands, eight PASS checks and per-check evidence paths.
 
 All file paths are relative and ZIP traversal/symlink/duplicate entries are rejected. The evidence bundle's SHA-256 is checked against the receipt before its contents are used.
 
@@ -103,7 +108,7 @@ The verifier does not trust these strings merely because they appear in code or 
 ## Canonical DAG
 
 - 16FS-01 is reconciled to Done only because merged PR #138 and its separate owner acceptance are verified.
-- 16FV-01 is the canonical claimed Cloud task with dependencies on 16FS-01, 16U1 and 16L1 and exclusive lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract and owner acceptance, then fetches merged PR #139, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance.
+- 16FV-01 is the canonical claimed Cloud task for Issue #139, implemented by Draft PR #141, with dependencies on 16FS-01, 16U1 and 16L1 and exclusive lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract and owner acceptance, then fetches merged PR #141, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance.
 - 16LF-01 remains Blocked / NOT_RUN and now depends on accepted 16FV-01 in addition to 16FS-01, 16U1 and 16L1.
 - 16L2 remains Blocked / NOT_RUN / NOT_AUTHORIZED.
 - 16L3 remains exactly 16F AND 16L1 AND (16L2 OR 16LF-01).
@@ -119,22 +124,24 @@ A platform is qualified only when its uploaded evidence identifies the same fina
 
 ## Owner-controlled production trust-root handoff — NOT ESTABLISHED
 
-No production trust-root secret or GitHub Environment protection is created by this PR.
+No production trust-root secret or GitHub Environment protection is created or configured by this PR.
 
-After the verifier code is reviewed and accepted, the owner must:
+The production payload is not embedded in verifier source, the task registry, receipts, PR content or the test fixture. The only production authority source is the owner-controlled secret `COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON`, exposed only to the protected main-only workflow.
 
-1. Create GitHub Environment fresh-evidence-production.
-2. Configure the environment's approval/protection policy under owner control.
-3. Generate the exact JSON value from PRODUCTION_TRUST_ROOT in tools/fresh_evidence_verifier.py (its authority is owner-controlled).
-4. Add that exact JSON as environment secret COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON.
+After PR #141 has been technically reviewed, separately owner-attested and merged, the owner must:
+
+1. Create the GitHub Environment `fresh-evidence-production`.
+2. Configure its required reviewers / deployment protection and restrict which branches may deploy to `main`.
+3. Independently construct the JSON payload with `authority: "owner-controlled"`, repository `KaisAbiyyi/chat-on-steroids-on-steroids` / ID `1424422098`, owner `KaisAbiyyi` / user ID `93252311`, review mode `GPT6_OWNER_ATTESTED`, receipt issue #140, predecessor PR #138 contract pins, and historical 16L1 PR #135 / tooling PR #136 / artifact / run / five attestation pins. Obtain those values from the owner-controlled accepted records and actual GitHub metadata; do not copy authority from candidate source, the registry, a receipt or the test fixture.
+4. Store that independently assembled JSON as the Environment secret `COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON`.
 5. Keep the production workflow token read-only: contents, pull-requests, issues, actions and attestations.
-6. After the protected Environment and secret exist, use a separate owner-controlled main-only protected workflow/job to run the production task-board CLI and confirm it reports CONFIGURED before any 16LF-01 receipt is considered. This PR's CI workflow intentionally does not reference the Environment or secret, so it cannot auto-create an unprotected Environment.
+6. Manually dispatch `.github/workflows/16fv-production-verify.yml` with the selected ref set to `main`. The job checks out the exact dispatched main SHA, enters the protected Environment, verifies repository/owner identity, the merged 16FS-01 predecessor contract, and the actual historical 16L1 artifact bytes plus all five Sigstore provenance checks. It runs `python tools/task_board.py trust-root-status` and fails closed unless all remote pins verify.
 
-Example owner-side JSON extraction command, to be run by the owner after inspecting the accepted code:
+The production workflow is `workflow_dispatch` only, has a job-level main-ref guard, uses a protected GitHub Environment and read-only permissions, and reads the secret only in that protected job. The PR-triggered Windows/Ubuntu qualification workflow has no reference to the Environment or secret. No `pull_request_target` job executes candidate code with owner secrets.
 
-    python -c "import json; from tools.fresh_evidence_verifier import PRODUCTION_TRUST_ROOT; print(json.dumps(PRODUCTION_TRUST_ROOT, separators=(',', ':')))"
+The verifier rejects a test-only authority, a wrong repository/owner/review policy, malformed predecessor or artifact pins, or any secret presented outside the exact main-only production workflow context. Missing configuration returns `TRUST_ROOT_UNCONFIGURED`; malformed or out-of-context configuration returns `TRUST_ROOT_INVALID`; remote/API/provenance failures return `VERIFICATION_ERROR`.
 
-The secret is not placed in the task registry, source receipt or candidate-controlled workflow inputs. No developer fallback exists. If the secret is absent, production acceptance remains TRUST_ROOT_UNCONFIGURED. If it differs from the pinned repository/owner/predecessor/artifact values, it is TRUST_ROOT_INVALID.
+No owner trust-root setup is performed by this implementation. Until the owner completes the protected configuration and verification, production trust remains unconfigured and 16LF-01 / 16L3 remain blocked.
 
 ## Explicit non-deliverables
 
