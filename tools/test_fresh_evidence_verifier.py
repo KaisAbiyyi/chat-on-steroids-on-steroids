@@ -1215,7 +1215,7 @@ def make_verifier_review_test_fixture():
     return mapping, api, task
 
 
-class FinalSecurityCorrectionRedTests(unittest.TestCase):
+class FinalSecurityCorrectionTests(unittest.TestCase):
     def _load_verifier(self, mapping, api):
         with patch.dict(os.environ, production_environment(mapping), clear=True):
             with patch("tools.fresh_evidence_verifier.GitHubAPI", return_value=api):
@@ -1419,6 +1419,102 @@ class FinalSecurityCorrectionRedTests(unittest.TestCase):
     def test_historical_trust_root_does_not_pin_unverifiable_attestation_ids(self):
         self.assertNotIn("attestations", TEST_ONLY_TRUST_ROOT["artifact"])
 
+
+
+
+    def test_verifier_review_rejects_non_pass_even_when_both_digests_are_recomputed(self):
+        mapping, api, task = make_verifier_review_test_fixture()
+        report_path = f"/repos/{REPO}/issues/comments/301"
+        attestation_path = f"/repos/{REPO}/issues/comments/302"
+        report = v._record_payload(api.objects[report_path]["body"], "<!-- COSOS-16FV-REVIEW-V1 -->")
+        attestation = v._record_payload(
+            api.objects[attestation_path]["body"], "<!-- COSOS-16FV-OWNER-ATTESTATION-V1 -->"
+        )
+        report["verdict"] = "NO_GO"
+        report["review_report_sha256"] = _test_canonical_digest(report, "review_report_sha256")
+        mapping["verifier_review"]["report_sha256"] = report["review_report_sha256"]
+        attestation["review_report_sha256"] = report["review_report_sha256"]
+        attestation["owner_attestation_sha256"] = _test_canonical_digest(
+            attestation, "owner_attestation_sha256"
+        )
+        mapping["verifier_review"]["owner_attestation_sha256"] = attestation["owner_attestation_sha256"]
+        api.objects[report_path]["body"] = marked("<!-- COSOS-16FV-REVIEW-V1 -->", report)
+        api.objects[attestation_path]["body"] = marked(
+            "<!-- COSOS-16FV-OWNER-ATTESTATION-V1 -->", attestation
+        )
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_verifier_review_rejects_self_digest_tampering(self):
+        mapping, api, task = make_verifier_review_test_fixture()
+        report_path = f"/repos/{REPO}/issues/comments/301"
+        report = v._record_payload(api.objects[report_path]["body"], "<!-- COSOS-16FV-REVIEW-V1 -->")
+        report["review_report_sha256"] = "0" * 64
+        api.objects[report_path]["body"] = marked("<!-- COSOS-16FV-REVIEW-V1 -->", report)
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_verifier_review_requires_explicit_true_owner_acceptance(self):
+        mapping, api, task = make_verifier_review_test_fixture()
+        attestation_path = f"/repos/{REPO}/issues/comments/302"
+        attestation = v._record_payload(
+            api.objects[attestation_path]["body"], "<!-- COSOS-16FV-OWNER-ATTESTATION-V1 -->"
+        )
+        attestation["accepted"] = False
+        attestation["owner_attestation_sha256"] = _test_canonical_digest(
+            attestation, "owner_attestation_sha256"
+        )
+        mapping["verifier_review"]["owner_attestation_sha256"] = attestation["owner_attestation_sha256"]
+        api.objects[attestation_path]["body"] = marked(
+            "<!-- COSOS-16FV-OWNER-ATTESTATION-V1 -->", attestation
+        )
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_verifier_review_rejects_wrong_owner_comment_identity(self):
+        mapping, api, task = make_verifier_review_test_fixture()
+        api.objects[f"/repos/{REPO}/issues/comments/301"]["user"] = {
+            "login": "not-the-owner", "id": OWNER_ID + 1
+        }
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_verifier_review_rejects_changed_comment_timestamp(self):
+        mapping, api, task = make_verifier_review_test_fixture()
+        api.objects[f"/repos/{REPO}/issues/comments/302"]["updated_at"] = "2026-10-30T12:16:00Z"
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_trust_root_rejects_shared_review_and_attestation_comment_id(self):
+        mapping, _api, _task = make_verifier_review_test_fixture()
+        mapping["verifier_review"]["owner_attestation_comment_id"] = (
+            mapping["verifier_review"]["report_comment_id"]
+        )
+        with self.assertRaises(v.TrustRootError):
+            v.TrustRoot.from_mapping(mapping, production=False)
+
+    def test_windows_storage_rejects_a_reparse_point_or_junction(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        observations = observations_for("isolated_storage", receipt)
+        observations["reparse_point_checks"][1]["is_reparse_point"] = True
+        with self.assertRaises(v.VerificationError):
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
+
+    def test_windows_storage_rejects_an_unrecognized_reparse_check_method(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        observations = observations_for("isolated_storage", receipt)
+        observations["reparse_point_check_method"] = "Get-Item"
+        with self.assertRaises(v.VerificationError):
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
 
 
 if __name__ == "__main__":
