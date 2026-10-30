@@ -28,6 +28,9 @@ TEST_ONLY_TRUST_ROOT = json.loads(
 def production_environment(mapping=None, *, owner_controlled=True, include_token=True):
     value = copy.deepcopy(TEST_ONLY_TRUST_ROOT if mapping is None else mapping)
     if owner_controlled:
+        if mapping is None:
+            dynamic_root, *_ = make_fixture()
+            value["verifier_review"] = copy.deepcopy(dynamic_root.verifier_review)
         value["authority"] = "owner-controlled"
     env = {
         v.TRUST_ROOT_ENV: json.dumps(value),

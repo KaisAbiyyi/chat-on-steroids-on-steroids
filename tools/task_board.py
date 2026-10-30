@@ -277,6 +277,15 @@ def fresh_receipt_structurally_valid(receipt: object) -> bool:
             and not any(char.isspace() for char in value)
         )
 
+    def artifact_provenance_url(value: object) -> bool:
+        return isinstance(value, str) and (
+            re.fullmatch(
+                r"https://api\.github\.com/repos/KaisAbiyyi/chat-on-steroids-on-steroids/attestations/sha256:[0-9a-f]{64}",
+                value,
+            ) is not None
+            or repo_url(value)
+        )
+
     def attachment_url(value: object) -> bool:
         return isinstance(value, str) and (
             re.fullmatch(r"https://github\.com/user-attachments/assets/[0-9a-fA-F-]{36}", value) is not None
@@ -327,7 +336,7 @@ def fresh_receipt_structurally_valid(receipt: object) -> bool:
         and artifact_id == 12868909286
         and _is_hex_digest(receipt.get("artifact_sha256"), 64)
         and receipt.get("artifact_source_sha") == source
-        and repo_url(receipt.get("artifact_provenance_url"))
+        and artifact_provenance_url(receipt.get("artifact_provenance_url"))
         and _is_hex_digest(receipt.get("artifact_provenance_sha256"), 64)
         and attachment_url(receipt.get("evidence_bundle_url"))
         and _is_hex_digest(receipt.get("evidence_bundle_sha256"), 64)
