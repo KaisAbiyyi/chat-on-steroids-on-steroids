@@ -55,12 +55,39 @@ def complete_prerequisite_closure(
                     if dependency not in preserve_blocked
                     and tasks[dependency].get("status") in {"todo", "done"}
                 ]
-                if not choices:
-                    raise AssertionError("no eligible OR branch in fixture closure for " + current)
-                selected = choices[0]
-                visit(selected)
-                if not board.accepted(tasks, selected, trusted_verifier=trusted_verifier):
-                    raise AssertionError("selected OR branch is not accepted: " + selected)
+                selected = None
+                last_error = None
+                for candidate in choices:
+                    status_snapshot = {
+                        task_id: task.get("status") for task_id, task in tasks.items()
+                    }
+                    completed_snapshot = set(completed)
+                    visiting_snapshot = set(visiting)
+                    try:
+                        visit(candidate)
+                        if not board.accepted(
+                            tasks, candidate, trusted_verifier=trusted_verifier
+                        ):
+                            raise AssertionError(
+                                "OR candidate is not accepted after closure: " + candidate
+                            )
+                        selected = candidate
+                        break
+                    except AssertionError as error:
+                        # A candidate may have a blocked transitive prerequisite.
+                        # Roll back its hypothetical status changes and try the
+                        # next OR alternative rather than failing prematurely.
+                        for task_id, status in status_snapshot.items():
+                            tasks[task_id]["status"] = status
+                        completed.clear()
+                        completed.update(completed_snapshot)
+                        visiting.clear()
+                        visiting.update(visiting_snapshot)
+                        last_error = error
+                if selected is None:
+                    raise AssertionError(
+                        "no satisfiable OR branch in fixture closure for " + current
+                    ) from last_error
 
         if mark_done:
             task["status"] = "done"
@@ -215,6 +242,22 @@ class TaskBoardTests(unittest.TestCase):
         self.assertIn("physical-windows-host", board.effective_locks(self.tasks["CL-L2"]))
         self.assertIn("human-owner", board.effective_locks(self.tasks["8U1"]))
         self.assertNotIn("physical-windows-host", board.effective_locks(self.tasks["CL-05A"]))
+
+    def test_fixture_closure_backtracks_to_a_satisfiable_or_branch(self):
+        fixture = {
+            "tasks": [
+                {"id": "blocked", "status": "blocked", "depends_on": [], "any_of": []},
+                {"id": "bad-branch", "status": "todo", "depends_on": ["blocked"], "any_of": []},
+                {"id": "good-branch", "status": "todo", "depends_on": [], "any_of": []},
+                {"id": "target", "status": "todo", "depends_on": [], "any_of": [["bad-branch", "good-branch"]]},
+            ]
+        }
+        complete_prerequisite_closure(fixture, "target")
+        tasks = board.index(fixture)
+        self.assertEqual(tasks["blocked"]["status"], "blocked")
+        self.assertEqual(tasks["bad-branch"]["status"], "todo")
+        self.assertEqual(tasks["good-branch"]["status"], "done")
+        self.assertEqual(tasks["target"]["status"], "done")
 
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
