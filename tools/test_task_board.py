@@ -298,7 +298,9 @@ class TaskBoardTests(unittest.TestCase):
             "local_session_id": "synthetic-test-fixture-only",
             "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-1",
             "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-1",
+            "review_report_sha256": "1" * 64,
             "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-2",
+            "owner_attestation_sha256": "2" * 64,
             "checks": {key: "PASS" for key in board.FRESH_CHECKS},
         }
         return data, tasks
@@ -320,7 +322,6 @@ class TaskBoardTests(unittest.TestCase):
                 "verified_review_report_verdict": "PASS",
                 "verified_review_report_source_sha": receipt["source_sha"],
                 "verified_review_report_diff_sha256": receipt["diff_sha256"],
-                "verified_review_report_receipt_sha256": receipt["receipt_sha256"],
                 "verified_review_report_artifact_sha256": receipt["artifact_sha256"],
                 "verified_owner_attestation_url": receipt["owner_attestation_url"],
                 "verified_owner_attestation_sha256": "2" * 64,
@@ -367,7 +368,6 @@ class TaskBoardTests(unittest.TestCase):
     def test_legacy_independent_review_contract_is_rejected(self):
         _, tasks = self._fresh_scenario()
         receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
-        receipt["schema_version"] = 1
         receipt["independent_review_verdict"] = "PASS"
         self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
 
@@ -522,10 +522,10 @@ class TaskBoardTests(unittest.TestCase):
         for field, value in [
             ("verified_review_report_url", wrong_url),
             ("verified_review_report_sha256", "3" * 64),
+            ("verified_owner_attestation_sha256", "4" * 64),
             ("verified_review_report_verdict", "FAIL"),
             ("verified_review_report_source_sha", "d" * 40),
             ("verified_review_report_diff_sha256", "e" * 64),
-            ("verified_review_report_receipt_sha256", "f" * 64),
             ("verified_review_report_artifact_sha256", "a" * 64),
             ("verified_owner_attestation_url", wrong_url),
             ("verified_owner_attested_review_report_sha256", "2" * 64),

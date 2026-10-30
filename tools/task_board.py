@@ -105,7 +105,6 @@ class FreshEvidenceVerification:
     verified_review_report_verdict: str
     verified_review_report_source_sha: str
     verified_review_report_diff_sha256: str
-    verified_review_report_receipt_sha256: str
     verified_review_report_artifact_sha256: str
     verified_owner_attestation_url: str
     verified_owner_attestation_sha256: str
@@ -131,10 +130,11 @@ class FreshEvidenceVerification:
             and self.verified_receipt_url == receipt.get("receipt_url")
             and self.verified_receipt_sha256 == receipt.get("receipt_sha256")
             and self.verified_review_report_url == receipt.get("review_report_url")
+            and self.verified_review_report_sha256 == receipt.get("review_report_sha256")
+            and self.verified_owner_attestation_sha256 == receipt.get("owner_attestation_sha256")
             and self.verified_review_report_verdict == "PASS"
             and self.verified_review_report_source_sha == receipt.get("source_sha")
             and self.verified_review_report_diff_sha256 == receipt.get("diff_sha256")
-            and self.verified_review_report_receipt_sha256 == self.verified_receipt_sha256
             and self.verified_review_report_artifact_sha256 == self.verified_artifact_sha256
             and self.verified_owner_attestation_url == receipt.get("owner_attestation_url")
             and self.verified_owner_attested_review_report_sha256 == self.verified_review_report_sha256
@@ -213,6 +213,8 @@ def fresh_receipt_structurally_valid(receipt: object) -> bool:
         and _is_hex_digest(receipt.get("artifact_source_sha"), 40)
         and repo_url(receipt.get("artifact_provenance_url"))
         and _is_hex_digest(receipt.get("artifact_provenance_sha256"), 64)
+        and _is_hex_digest(receipt.get("review_report_sha256"), 64)
+        and _is_hex_digest(receipt.get("owner_attestation_sha256"), 64)
         and _is_hex_digest(receipt.get("receipt_sha256"), 64)
         and isinstance(receipt.get("local_session_id"), str)
         and len(receipt["local_session_id"]) >= 12
