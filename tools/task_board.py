@@ -175,7 +175,9 @@ def fresh_receipt_status(
 
 
 def private_migration_authorized(tasks: dict[str, dict]) -> bool:
-    owner = tasks["16U1"]
+    owner = tasks.get("16U1")
+    if not isinstance(owner, dict):
+        return False
     consent = owner.get("consent_receipt")
     return (
         owner.get("migration_consent") == "granted"
@@ -222,6 +224,10 @@ def missing_dependencies(
         dep for dep in task["depends_on"]
         if not accepted(tasks, dep, trusted_verifier=trusted_verifier)
     ]
+    # 16L2 is a private-data operation, not an ordinary task that becomes
+    # runnable merely because its predecessor decision is marked Done.
+    if task.get("id") == "16L2" and not private_migration_authorized(tasks):
+        missing.append("owner_private_migration_consent")
     for group in task.get("any_of", []):
         if not any(
             accepted(tasks, dep, trusted_verifier=trusted_verifier)
@@ -276,9 +282,11 @@ def validate(
     l3 = tasks_by_id.get("16L3", {})
     if l3.get("depends_on") != ["16F", "16L1"] or l3.get("any_of") != [["16L2", "16LF-01"]]:
         problems.append("16L3: required 16F + 16L1 AND (16L2 OR 16LF-01) gate changed")
-    if tasks_by_id.get("16U1", {}).get("migration_consent") == "declined":
-        if tasks_by_id.get("16L2", {}).get("status") == "done":
-            problems.append("16L2: owner declined private migration; cannot accept")
+    if not private_migration_authorized(tasks_by_id):
+        if tasks_by_id.get("16L2", {}).get("status") in {"todo", "claimed", "done"}:
+            problems.append(
+                "16L2: cannot become ready, claimed, or accepted without explicit owner private-copy consent"
+            )
     for protected in ("16L2", "16LF-01"):
         if protected in tasks_by_id and tasks_by_id[protected]["status"] == "done":
             if not accepted(tasks_by_id, protected, trusted_verifier=trusted_verifier):
@@ -459,7 +467,8 @@ def waves(
         candidates = [t for t in pending.values() if
                       all(d in projected for d in t["depends_on"]) and
                       all(any(d in externally_qualified for d in group)
-                          for group in t.get("any_of", []))]
+                          for group in t.get("any_of", [])) and
+                      (t["id"] != "16L2" or private_migration_authorized(tasks))]
         if not candidates:
             break  # blocked/claimed/stale snapshot, never assume accepted
         # Each wave is a resource-conflict-free possible simultaneous set.
