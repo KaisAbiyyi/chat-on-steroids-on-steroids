@@ -189,10 +189,11 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | DONE |
 | `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | DONE |
 | `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | DONE |
-| `16L2` | Only owner-approved profile copy migration (not authorized) | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
+| `16L2` | Only owner-approved profile copy migration (not authorized) | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED / NOT_RUN / NOT_AUTHORIZED |
 | `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | DONE |
-| `16FS-01` | Fresh-start acceptance policy / dependency amendment | `16U1`, `16L1`, `16F` | `release-freshstart-contract` | C (cloud) | CLAIMED |
-| `16LF-01` | Disposable first-run native isolation + rollback qualification | `16FS-01`, `16U1`, `16L1` | `windows-freshstart` | L (Windows) | BLOCKED |
+| `16FS-01` | Fresh-start acceptance policy / dependency amendment | `16U1`, `16L1`, `16F` | `release-freshstart-contract` | C (cloud) | DONE |
+| `16FV-01` | Production trusted evidence verifier | `16FS-01`, `16U1`, `16L1` | `freshstart-evidence-verifier` | C (cloud) | CLAIMED |
+| `16LF-01` | Disposable first-run native isolation + rollback qualification | `16FS-01`, `16FV-01`, `16U1`, `16L1` | `windows-freshstart` | L (Windows) | BLOCKED |
 | `16L3` | Full Windows release/startup/size proof; plus accepted migration OR fresh-start local evidence | `16F`, `16L1` | `windows-release` | L (Windows) | BLOCKED |
 | `16U2` | Owner guided final release decision | `16L3` | `human-release` | U (owner) | BLOCKED |
 
@@ -204,7 +205,7 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
 | `PERF-05` | Native Windows product endurance and total process-tree RAM comparison | `PERF-01`, `PERF-02`, `PERF-03`, `PERF-04`, `8L1`, `15L3` | `windows-perf-endurance` | L (Windows) | BLOCKED |
 | `PERF-06` | Freeze measured resource budgets and CI/native regression policy | `PERF-05`, `16D` | `perf-release-gates` | C (cloud) | BLOCKED |
 
-> **16L3 conditional acceptance (16FS-01 proposal):** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. The table lists the unconditional `depends_on` only. 16L2 private migration remains `NOT_RUN / NOT_AUTHORIZED` and unavailable until a dedicated trusted verifier exists; 16LF-01 is a distinct `NOT_RUN` physical Windows gate. Neither is waived by an owner decision or cloud CI. GPT-6 technical review plus explicit owner attestation, verified by the production verifier, governs review promotion; no GitHub independent approval is claimed. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
+> **16L3 conditional acceptance:** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. 16LF-01 additionally requires accepted 16FS-01 and accepted 16FV-01 before any owner-local physical run; the canonical `depends_on` includes both. 16L2 remains `BLOCKED / NOT_RUN / NOT_AUTHORIZED`. Neither alternative is waived by owner decision or cloud CI. GPT6_OWNER_ATTESTED means a GPT-6 technical report plus separate owner acceptance, not GitHub independent approval. The owner-controlled production trust root is not configured. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md) and [16FV-01 verifier summary](implementation-summary/2026-10-30-16fv01-trusted-evidence-verifier.md).
 
 ## Parallel execution lanes
 

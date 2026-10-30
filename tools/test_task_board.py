@@ -179,8 +179,21 @@ class TaskBoardTests(unittest.TestCase):
         # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
-        self.assertEqual(board.validate(future), [])
-        waves = board.waves(future)
+        # The predecessor contract remains merged; the hypothetical future
+        # verifier is accepted only through the explicit remote-verification
+        # test double, never by a task-registry Done flag alone.
+        future_tasks["16FS-01"]["status"] = "done"
+        future_tasks["16FS-01"]["accepted_evidence_url"] = "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
+        future_tasks["16FV-01"].update({
+            "status": "done",
+            "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/139",
+            "accepted_source_sha": "e" * 40,
+            "accepted_merge_commit_sha": "d" * 40,
+            "accepted_verifier_sha256": "f" * 64,
+        })
+        verifier = self._trusted_test_verifier()
+        self.assertEqual(board.validate(future, trusted_verifier=verifier), [])
+        waves = board.waves(future, trusted_verifier=verifier)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
         self.assertLess(flat.index("7P-B"), flat.index("7A"))
@@ -439,7 +452,7 @@ class TaskBoardTests(unittest.TestCase):
     def test_fabricated_github_review_url_cannot_establish_acceptance(self):
         _, tasks = self._fresh_scenario()
         receipt = tasks["16LF-01"]["evidence"]
-        self.assertIn("/pull/138#", receipt["review_report_url"])
+        self.assertIn("/issues/140#issuecomment-", receipt["review_report_url"])
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 
