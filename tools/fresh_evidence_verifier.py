@@ -1015,6 +1015,7 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
     def verify_verifier_task(task: dict[str, Any]) -> bool:
         if (
             not isinstance(task, dict)
+            or task.get("status") != "done"
             or task.get("accepted_evidence_url") != f"https://github.com/{root.repository_full_name}/pull/{VERIFIER_PR_NUMBER}"
         ):
             return False
@@ -1025,6 +1026,7 @@ def production_verifier_from_environment(environ: dict[str, str] | None = None):
             "verifier_sha256": task.get("accepted_verifier_sha256"),
         }
         try:
+            _verify_predecessor(root, api)
             verify_16fv_source(candidate, api)
         except Exception:
             return False

@@ -358,6 +358,29 @@ class ProductionTrustRootTests(unittest.TestCase):
         self.assertIsNone(verifier)
         self.assertEqual(status, "TRUST_ROOT_INVALID")
 
+    def test_16fv_task_acceptance_rechecks_merged_16fs_and_pr139_source(self):
+        _, api, receipt, _, _ = make_fixture()
+        task = {
+            "status": "done",
+            "accepted_evidence_url": f"https://github.com/{REPO}/pull/139",
+            "accepted_source_sha": receipt["verifier_source_sha"],
+            "accepted_merge_commit_sha": receipt["verifier_merge_commit_sha"],
+            "accepted_verifier_sha256": receipt["verifier_sha256"],
+        }
+        with patch.dict(os.environ, {
+            v.TRUST_ROOT_ENV: json.dumps(v.PRODUCTION_TRUST_ROOT),
+            "GH_TOKEN": "test-token",
+        }, clear=True):
+            with patch("tools.fresh_evidence_verifier.GitHubAPI", return_value=api):
+                verifier, status = v.production_verifier_from_environment()
+        self.assertEqual(status, "CONFIGURED")
+        self.assertTrue(verifier.verify_verifier_task(task))
+        task["accepted_source_sha"] = "0" * 40
+        self.assertFalse(verifier.verify_verifier_task(task))
+        task["accepted_source_sha"] = receipt["verifier_source_sha"]
+        task["status"] = "claimed"
+        self.assertFalse(verifier.verify_verifier_task(task))
+
     def test_missing_github_token_does_not_construct_a_verifier(self):
         verifier, status = v.production_verifier_from_environment({
             v.TRUST_ROOT_ENV: json.dumps(v.PRODUCTION_TRUST_ROOT),
