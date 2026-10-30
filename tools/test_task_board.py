@@ -39,7 +39,11 @@ class TaskBoardTests(unittest.TestCase):
                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
                 ) and task["status"] == "todo" and not task.get("any_of") else "BLOCKED"
             )))
-            self.assertEqual(cols[5], desired, task_id)
+            reported_status = cols[5]
+            if task_id == "16L2":
+                self.assertEqual(reported_status, "BLOCKED / NOT_RUN / NOT_AUTHORIZED")
+                reported_status = "BLOCKED"
+            self.assertEqual(reported_status, desired, task_id)
 
     def test_historical_aliases_are_explicit_and_never_reused_as_current_preflight(self):
         aliases = self.data["legacy_pre_2026_10_20_ids"]
@@ -179,6 +183,10 @@ class TaskBoardTests(unittest.TestCase):
         # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
+        # Restore accepted prerequisites that are outside the hypothetical
+        # reopened downstream branch.
+        for prerequisite in ("16F", "16L1", "16U1"):
+            future_tasks[prerequisite]["status"] = "done"
         # The predecessor contract remains merged; the hypothetical future
         # verifier is accepted only through the explicit remote-verification
         # test double, never by a task-registry Done flag alone.
