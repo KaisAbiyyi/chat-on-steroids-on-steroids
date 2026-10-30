@@ -536,6 +536,26 @@ class TaskBoardTests(unittest.TestCase):
         self.assertNotIn("16L2", eligible)
         self.assertTrue(any("16L2:" in e for e in board.validate(data)))
 
+    def test_self_reported_private_migration_receipt_never_establishes_acceptance(self):
+        data, tasks = self._fresh_scenario()
+        tasks["16U1"]["migration_consent"] = "granted"
+        tasks["16U1"]["owner_decision"] = "approved_private_copy"
+        tasks["16U1"]["consent_receipt"] = {
+            "explicit_owner_approval": True,
+            "scope": "approved-copy-only",
+            "approval_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
+        }
+        tasks["16L2"]["status"] = "done"
+        tasks["16L2"]["private_migration_receipt"] = {
+            "scope": "approved-copy-only",
+            "physical_windows": True,
+            "independent_review_verdict": "PASS",
+        }
+
+        self.assertTrue(board.private_migration_authorized(tasks))
+        self.assertFalse(board.accepted(tasks, "16L2"))
+        self.assertTrue(any("trusted private-migration verifier" in e for e in board.validate(data)))
+
     def test_explicit_private_migration_consent_unblocks_only_the_16l2_task(self):
         data, tasks = self._fresh_scenario()
         tasks["16U1"]["migration_consent"] = "granted"
