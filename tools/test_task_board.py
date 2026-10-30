@@ -243,18 +243,19 @@ class TaskBoardTests(unittest.TestCase):
         # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
-        # Use a test-only typed receipt for the future 16LF-01 OR branch.
+        # Validate recursive AND/OR prerequisite closure on a separate
+        # hypothetical fixture. It must not contaminate the forecast below.
+        closure = copy.deepcopy(future)
+        closure_tasks = board.index(closure)
         _, receipt_tasks = self._fresh_scenario()
-        future_tasks["16LF-01"]["evidence"] = copy.deepcopy(
+        closure_tasks["16LF-01"]["evidence"] = copy.deepcopy(
             receipt_tasks["16LF-01"]["evidence"]
         )
-        # The predecessor contract and verifier are hypothetical accepted tasks,
-        # but their PR identity remains implementation PR #141, not issue #139.
-        future_tasks["16FS-01"]["status"] = "done"
-        future_tasks["16FS-01"]["accepted_evidence_url"] = (
+        closure_tasks["16FS-01"]["status"] = "done"
+        closure_tasks["16FS-01"]["accepted_evidence_url"] = (
             "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"
         )
-        future_tasks["16FV-01"].update({
+        closure_tasks["16FV-01"].update({
             "status": "done",
             "accepted_evidence_url": (
                 "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/"
@@ -265,19 +266,23 @@ class TaskBoardTests(unittest.TestCase):
             "accepted_verifier_sha256": "f" * 64,
         })
         verifier = self._trusted_test_verifier()
-
-        # Recursive closure follows every canonical AND edge and selects an
-        # actually satisfiable OR branch; it does not edit production dependencies.
-        complete_prerequisite_closure(future, "15G", trusted_verifier=verifier)
         complete_prerequisite_closure(
-            future, "16L3", trusted_verifier=verifier,
+            closure, "16L3", trusted_verifier=verifier,
             preserve_blocked={"16L2"}, complete_target=False,
         )
-        self.assertEqual(future_tasks["16L2"]["status"], "blocked")
-        self.assertEqual(future_tasks["16LF-01"]["status"], "done")
-        self.assertTrue(board.accepted(future_tasks, "16LF-01", trusted_verifier=verifier))
-        self.assertEqual(board.validate(future, trusted_verifier=verifier), [])
-        waves = board.waves(future, trusted_verifier=verifier)
+        self.assertEqual(closure_tasks["16L2"]["status"], "blocked")
+        self.assertEqual(closure_tasks["16LF-01"]["status"], "done")
+        self.assertTrue(board.accepted(closure_tasks, "16LF-01", trusted_verifier=verifier))
+        self.assertTrue(all(
+            closure_tasks[task_id]["status"] == "done"
+            for task_id in ("15B", "15C", "15D", "15E", "15F")
+        ))
+        self.assertEqual(board.validate(closure, trusted_verifier=verifier), [])
+
+        # Keep the actual forecast fixture open so downstream gate ordering
+        # remains observable; do not mark 15G/16A or their transitive gates done.
+        self.assertEqual(board.validate(future), [])
+        waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
         self.assertLess(flat.index("7P-B"), flat.index("7A"))
