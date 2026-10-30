@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import io
+import ntpath
 import json
 import os
 import subprocess
@@ -975,6 +976,364 @@ class ProductionCliFailClosedTests(unittest.TestCase):
     def test_production_status_command_reports_unconfigured_root(self):
         _, status = v.production_verifier_from_environment({})
         self.assertEqual(status, "TRUST_ROOT_UNCONFIGURED")
+
+
+
+
+def _test_canonical_digest(value, omitted):
+    encoded = json.dumps(
+        {key: item for key, item in value.items() if key != omitted},
+        ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _test_windows_path_chain(path):
+    normalized = ntpath.normpath(path.replace("/", "\\"))
+    drive, tail = ntpath.splitdrive(normalized)
+    current = drive + "\\"
+    result = [current]
+    for part in tail.strip("\\").split("\\"):
+        if part:
+            current = ntpath.join(current, part)
+            result.append(current)
+    return result
+
+
+def _test_reparse_checks(*paths):
+    checks = []
+    seen = set()
+    for path in paths:
+        for component in _test_windows_path_chain(path):
+            key = ntpath.normcase(component)
+            if key not in seen:
+                seen.add(key)
+                checks.append({"path": component, "is_reparse_point": False})
+    return checks
+
+
+def _test_isolated_record(receipt, observations):
+    binding_fields = (
+        "repository", "source_sha", "contract_source_sha", "contract_merge_commit_sha",
+        "verifier_pr_number", "verifier_source_sha", "verifier_merge_commit_sha",
+        "verifier_sha256", "artifact_id", "artifact_sha256", "local_session_id",
+        "workspace_nonce", "workspace_path",
+    )
+    return {
+        "schema": v.CHECK_EVIDENCE_SCHEMA,
+        "check": "isolated_storage",
+        "status": "PASS",
+        **{field: receipt[field] for field in binding_fields},
+        "captured_at": "2026-10-30T12:15:00Z",
+        "observations": observations,
+    }
+
+
+def make_verifier_review_test_fixture():
+    mapping = copy.deepcopy(TEST_ONLY_TRUST_ROOT)
+    mapping["schema"] = "cosos.fresh-evidence-trust-root.v2"
+    mapping["artifact"].pop("attestations", None)
+    _, api, _receipt, _, _ = make_fixture()
+    verifier_diff = b"exact PR #141 diff bytes for the owner-attested verifier review"
+    original_get_diff = api.get_diff
+
+    def get_diff(pr_number):
+        if pr_number == v.VERIFIER_PR_NUMBER:
+            return verifier_diff
+        return original_get_diff(pr_number)
+
+    api.get_diff = get_diff
+    source_sha = "e" * 40
+    merge_sha = "d" * 40
+    diff_sha = digest(verifier_diff)
+    report = {
+        "schema": "cosos.16fv.verifier-review.v1",
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "pr_number": v.VERIFIER_PR_NUMBER,
+        "source_sha": source_sha,
+        "diff_sha256": diff_sha,
+        "review_mode": v.REVIEW_MODE,
+        "review_policy_semantics": "OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL",
+        "model_authorship": "OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED",
+        "verdict": "PASS",
+        "owner_login": v.OWNER_LOGIN,
+        "owner_user_id": OWNER_ID,
+        "review_report_sha256": "",
+    }
+    report["review_report_sha256"] = _test_canonical_digest(report, "review_report_sha256")
+    attestation = {
+        "schema": "cosos.16fv.owner-attestation.v1",
+        "repository": REPO,
+        "repository_id": v.REPOSITORY_ID,
+        "pr_number": v.VERIFIER_PR_NUMBER,
+        "source_sha": source_sha,
+        "diff_sha256": diff_sha,
+        "review_report_sha256": report["review_report_sha256"],
+        "review_mode": v.REVIEW_MODE,
+        "owner_login": v.OWNER_LOGIN,
+        "owner_user_id": OWNER_ID,
+        "accepted": True,
+        "owner_attestation_sha256": "",
+    }
+    attestation["owner_attestation_sha256"] = _test_canonical_digest(
+        attestation, "owner_attestation_sha256"
+    )
+    mapping["verifier_review"] = {
+        "pr_number": v.VERIFIER_PR_NUMBER,
+        "source_sha": source_sha,
+        "merge_commit_sha": merge_sha,
+        "diff_sha256": diff_sha,
+        "report_comment_id": 301,
+        "report_sha256": report["review_report_sha256"],
+        "owner_attestation_comment_id": 302,
+        "owner_attestation_sha256": attestation["owner_attestation_sha256"],
+        "review_mode": v.REVIEW_MODE,
+    }
+    api.objects[f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}"] = {
+        "number": v.VERIFIER_PR_NUMBER,
+        "merged": True,
+        "merged_at": CREATED,
+        "base": {"ref": "main", "repo": {"full_name": REPO, "id": v.REPOSITORY_ID}},
+        "head": {"sha": source_sha, "ref": "work/16fv-01-trusted-evidence-verifier-20261030",
+                 "repo": {"full_name": REPO, "id": v.REPOSITORY_ID}},
+        "merge_commit_sha": merge_sha,
+    }
+    predecessor_merge = mapping["predecessor"]["merge_commit_sha"]
+    api.objects[f"/repos/{REPO}/compare/{predecessor_merge}...main"] = {
+        "base_commit": {"sha": predecessor_merge},
+        "merge_base_commit": {"sha": predecessor_merge},
+        "behind_by": 0,
+        "status": "identical",
+    }
+    api.objects[f"/repos/{REPO}/compare/{predecessor_merge}...{source_sha}"] = {
+        "base_commit": {"sha": predecessor_merge},
+        "merge_base_commit": {"sha": predecessor_merge},
+        "behind_by": 0,
+        "status": "ahead",
+    }
+    api.objects[f"/repos/{REPO}/issues/comments/301"] = comment(
+        301,
+        marked("<!-- COSOS-16FV-REVIEW-V1 -->", report),
+        issue=v.VERIFIER_PR_NUMBER,
+    )
+    api.objects[f"/repos/{REPO}/issues/comments/302"] = comment(
+        302,
+        marked("<!-- COSOS-16FV-OWNER-ATTESTATION-V1 -->", attestation),
+        issue=v.VERIFIER_PR_NUMBER,
+    )
+    task = {
+        "status": "done",
+        "accepted_evidence_url": f"https://github.com/{REPO}/pull/{v.VERIFIER_PR_NUMBER}",
+        "accepted_source_sha": source_sha,
+        "accepted_merge_commit_sha": merge_sha,
+        "accepted_verifier_sha256": digest(api.verifier_file),
+    }
+    return mapping, api, task
+
+
+class FinalSecurityCorrectionRedTests(unittest.TestCase):
+    def _load_verifier(self, mapping, api):
+        with patch.dict(os.environ, production_environment(mapping), clear=True):
+            with patch("tools.fresh_evidence_verifier.GitHubAPI", return_value=api):
+                with patch(
+                    "tools.fresh_evidence_verifier.verify_historical_16l1_artifact",
+                    return_value={},
+                ):
+                    return v.production_verifier_from_environment()
+
+    def test_trust_root_v2_accepts_a_separate_verifier_review_contract(self):
+        mapping, _api, _task = make_verifier_review_test_fixture()
+        try:
+            root = v.TrustRoot.from_mapping(mapping, production=False)
+        except Exception as exc:
+            self.fail(f"v2 trust root with a complete verifier-review contract was rejected: {exc}")
+        self.assertEqual(root.verifier_review["pr_number"], 141)
+        self.assertEqual(root.verifier_review["review_mode"], "GPT6_OWNER_ATTESTED")
+
+    def test_merged_verifier_task_rejects_missing_review_or_owner_acceptance(self):
+        for missing_comment_id in (301, 302):
+            with self.subTest(missing_comment_id=missing_comment_id):
+                mapping, api, task = make_verifier_review_test_fixture()
+                del api.objects[f"/repos/{REPO}/issues/comments/{missing_comment_id}"]
+                verifier, status = self._load_verifier(mapping, api)
+                self.assertEqual(status, "CONFIGURED")
+                self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_verifier_review_is_bound_to_actual_diff_bytes_and_predecessor_ancestry(self):
+        mapping, api, task = make_verifier_review_test_fixture()
+        api.verifier_diff += b"changed after the owner-attested review"
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+        mapping, api, task = make_verifier_review_test_fixture()
+        predecessor_merge = mapping["predecessor"]["merge_commit_sha"]
+        source_sha = mapping["verifier_review"]["source_sha"]
+        api.objects[f"/repos/{REPO}/compare/{predecessor_merge}...{source_sha}"][
+            "merge_base_commit"
+        ]["sha"] = "0" * 40
+        verifier, status = self._load_verifier(mapping, api)
+        self.assertEqual(status, "CONFIGURED")
+        self.assertFalse(verifier.verify_verifier_task(task))
+
+    def test_trust_root_status_checks_remote_verifier_review_records(self):
+        mapping, api, _task = make_verifier_review_test_fixture()
+        del api.objects[f"/repos/{REPO}/issues/comments/301"]
+        with patch.dict(os.environ, production_environment(mapping), clear=True):
+            with patch("tools.fresh_evidence_verifier.GitHubAPI", return_value=api):
+                with patch(
+                    "tools.fresh_evidence_verifier.verify_historical_16l1_artifact",
+                    return_value={},
+                ):
+                    self.assertEqual(v.trust_root_status(), "VERIFICATION_ERROR")
+
+    def test_same_issue_number_from_another_repository_is_rejected(self):
+        root, _api, _receipt, _, _ = make_fixture()
+        foreign = comment(777, "foreign comment", issue=138)
+        foreign["issue_url"] = "https://api.github.com/repos/another-owner/another-repo/issues/138"
+        with self.assertRaises(v.VerificationError):
+            v._check_unchanged_comment(foreign, 777, 138, root)
+
+    def test_predecessor_merge_commit_must_be_an_ancestor_of_main(self):
+        root, api, _receipt, _, _ = make_fixture()
+        merge_sha = root.predecessor["merge_commit_sha"]
+        api.objects[f"/repos/{REPO}/compare/{merge_sha}...main"] = {
+            "base_commit": {"sha": merge_sha},
+            "merge_base_commit": {"sha": "0" * 40},
+            "behind_by": 1,
+            "status": "diverged",
+        }
+        with self.assertRaises(v.VerificationError):
+            v._verify_predecessor(root, api)
+
+    def test_pr141_base_and_head_must_belong_to_the_canonical_repository(self):
+        _root, api, receipt, _, _ = make_fixture()
+        pr_path = f"/repos/{REPO}/pulls/{v.VERIFIER_PR_NUMBER}"
+        api.objects[pr_path]["base"]["repo"] = {"full_name": "another-owner/another-repo", "id": 99}
+        with self.assertRaises(v.VerificationError):
+            v.verify_16fv_source(receipt, api)
+
+        _root, api, receipt, _, _ = make_fixture()
+        api.objects[pr_path]["head"]["repo"]["id"] = 99
+        with self.assertRaises(v.VerificationError):
+            v.verify_16fv_source(receipt, api)
+
+    def test_windows_storage_rejects_dotdot_traversal_before_normalization(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        observations = observations_for("isolated_storage", receipt)
+        observations["profile_storage_root"] = (
+            receipt["workspace_path"] + r"\fresh-profile\..\..\Users\ExistingProfile"
+        )
+        observations["canonical_path"] = observations["profile_storage_root"] + r"\storage"
+        with self.assertRaises(v.VerificationError):
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
+
+    def test_windows_storage_rejects_mixed_separator_nested_traversal(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        observations = observations_for("isolated_storage", receipt)
+        observations["profile_storage_root"] = (
+            receipt["workspace_path"] + r"\fresh-profile/../../Users/ExistingProfile"
+        )
+        observations["canonical_path"] = observations["profile_storage_root"] + r"\storage"
+        with self.assertRaises(v.VerificationError):
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
+
+    def test_windows_storage_rejects_nested_escape_after_normalization(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        observations = observations_for("isolated_storage", receipt)
+        observations["canonical_path"] = (
+            observations["profile_storage_root"] + r"\storage\..\..\outside"
+        )
+        with self.assertRaises(v.VerificationError):
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
+
+    def test_windows_storage_requires_explicit_reparse_point_evidence(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        observations = observations_for("isolated_storage", receipt)
+        with self.assertRaises(v.VerificationError):
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
+
+    def test_windows_storage_case_variations_are_valid_under_windows_semantics(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        workspace = receipt["workspace_path"]
+        profile = workspace.swapcase() + r"\Fresh-Profile"
+        canonical = profile + r"\Storage"
+        observations = observations_for("isolated_storage", receipt)
+        observations["profile_storage_root"] = profile
+        observations["canonical_path"] = canonical
+        observations["reparse_point_check_method"] = "GetFileAttributesW(FILE_ATTRIBUTE_REPARSE_POINT)"
+        observations["reparse_point_checks"] = _test_reparse_checks(workspace, profile, canonical)
+        try:
+            v._validate_check_evidence(
+                "isolated_storage", _test_isolated_record(receipt, observations), receipt
+            )
+        except Exception as exc:
+            self.fail(f"case-insensitive Windows containment rejected a valid path: {exc}")
+
+    def test_windows_storage_rejects_unc_different_drive_and_sibling_prefix_paths(self):
+        _root, _api, receipt, _, _ = make_fixture()
+        workspace = receipt["workspace_path"]
+        invalid_roots = (
+            r"\\server\share\fresh-profile",
+            r"\\?\D:\CoSoS-16LF-01-Qualification\fresh-profile",
+            r"\\.\D:\CoSoS-16LF-01-Qualification\fresh-profile",
+            r"C:\CoSoS-16LF-01-Qualification\fresh-profile",
+            workspace + r"-sibling\fresh-profile",
+        )
+        for invalid_root in invalid_roots:
+            with self.subTest(invalid_root=invalid_root):
+                observations = observations_for("isolated_storage", receipt)
+                observations["profile_storage_root"] = invalid_root
+                observations["canonical_path"] = invalid_root + r"\storage"
+                with self.assertRaises(v.VerificationError):
+                    v._validate_check_evidence(
+                        "isolated_storage", _test_isolated_record(receipt, observations), receipt
+                    )
+
+    def test_sigstore_proof_must_bind_the_exact_subject_file_digest(self):
+        root, api, runner = make_synthetic_artifact()
+
+        def mismatched_subject(command, **kwargs):
+            result = runner(command, **kwargs)
+            proof = json.loads(result.stdout)
+            proof[0]["verificationResult"]["statement"]["subject"] = [{
+                "name": "unrelated.bin",
+                "digest": {"sha256": "0" * 64},
+            }]
+            proof[0]["attestation"] = {"bundle": {"dsseEnvelope": {}}}
+            return SimpleNamespace(returncode=0, stdout=json.dumps(proof), stderr="")
+
+        with self.assertRaises(v.VerificationError):
+            v.verify_historical_16l1_artifact(root, api, runner=mismatched_subject)
+
+    def test_duplicate_sigstore_proof_records_are_rejected(self):
+        root, api, runner = make_synthetic_artifact()
+
+        def duplicate_proofs(command, **kwargs):
+            result = runner(command, **kwargs)
+            proof = json.loads(result.stdout)[0]
+            proof["verificationResult"]["statement"]["subject"] = [{
+                "name": Path(command[3]).name,
+                "digest": {"sha256": digest(Path(command[3]).read_bytes())},
+            }]
+            proof["attestation"] = {"bundle": {"dsseEnvelope": {}}}
+            return SimpleNamespace(returncode=0, stdout=json.dumps([proof, copy.deepcopy(proof)]), stderr="")
+
+        with self.assertRaises(v.VerificationError):
+            v.verify_historical_16l1_artifact(root, api, runner=duplicate_proofs)
+
+    def test_historical_trust_root_does_not_pin_unverifiable_attestation_ids(self):
+        self.assertNotIn("attestations", TEST_ONLY_TRUST_ROOT["artifact"])
+
 
 
 if __name__ == "__main__":
