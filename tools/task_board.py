@@ -223,10 +223,13 @@ def missing_dependencies(
         dep for dep in task["depends_on"]
         if not accepted(tasks, dep, trusted_verifier=trusted_verifier)
     ]
-    # 16L2 is a private-data operation, not an ordinary task that becomes
-    # runnable merely because its predecessor decision is marked Done.
-    if task.get("id") == "16L2" and not private_migration_authorized(tasks):
-        missing.append("owner_private_migration_consent")
+    # The private-migration path stays disabled in this phase. Owner consent
+    # is necessary but insufficient: no trusted private-migration verifier is
+    # integrated, so the task must not become ready or satisfy the release OR.
+    if task.get("id") == "16L2":
+        if not private_migration_authorized(tasks):
+            missing.append("owner_private_migration_consent")
+        missing.append("trusted_private_migration_verifier")
     for group in task.get("any_of", []):
         if not any(
             accepted(tasks, dep, trusted_verifier=trusted_verifier)
@@ -281,14 +284,13 @@ def validate(
     l3 = tasks_by_id.get("16L3", {})
     if l3.get("depends_on") != ["16F", "16L1"] or l3.get("any_of") != [["16L2", "16LF-01"]]:
         problems.append("16L3: required 16F + 16L1 AND (16L2 OR 16LF-01) gate changed")
-    if not private_migration_authorized(tasks_by_id):
-        if tasks_by_id.get("16L2", {}).get("status") in {"todo", "claimed", "done"}:
+    if tasks_by_id.get("16L2", {}).get("status") in {"todo", "claimed", "done"}:
+        if not private_migration_authorized(tasks_by_id):
             problems.append(
                 "16L2: cannot become ready, claimed, or accepted without explicit owner private-copy consent"
             )
-    if tasks_by_id.get("16L2", {}).get("status") == "done":
         problems.append(
-            "16L2: self-reported migration receipt cannot be accepted without a trusted private-migration verifier"
+            "16L2: keep blocked until a trusted private-migration verifier is implemented and configured"
         )
     for protected in ("16L2", "16LF-01"):
         if protected in tasks_by_id and tasks_by_id[protected]["status"] == "done":
@@ -471,7 +473,7 @@ def waves(
                       all(d in projected for d in t["depends_on"]) and
                       all(any(d in externally_qualified for d in group)
                           for group in t.get("any_of", [])) and
-                      (t["id"] != "16L2" or private_migration_authorized(tasks))]
+                      t["id"] != "16L2"]
         if not candidates:
             break  # blocked/claimed/stale snapshot, never assume accepted
         # Each wave is a resource-conflict-free possible simultaneous set.

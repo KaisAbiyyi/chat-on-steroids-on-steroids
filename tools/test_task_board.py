@@ -175,16 +175,10 @@ class TaskBoardTests(unittest.TestCase):
         for task in future["tasks"]:
             if task["id"] == "CL-L6" or task["phase"] in {str(n) for n in range(7, 17)}:
                 task["status"] = "todo"
-        # The hypothetical 16L2 route is runnable only when its owner has
-        # explicitly changed the fresh-start decision to scoped copy consent.
+        # The private-migration alternative stays blocked until a dedicated
+        # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
-        future_tasks["16U1"]["migration_consent"] = "granted"
-        future_tasks["16U1"]["owner_decision"] = "approved_private_copy"
-        future_tasks["16U1"]["consent_receipt"] = {
-            "explicit_owner_approval": True,
-            "scope": "approved-copy-only",
-            "approval_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
-        }
+        future_tasks["16L2"]["status"] = "blocked"
         self.assertEqual(board.validate(future), [])
         waves = board.waves(future)
         flat = [t["id"] for wave in waves for t in wave]
@@ -556,7 +550,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertFalse(board.accepted(tasks, "16L2"))
         self.assertTrue(any("trusted private-migration verifier" in e for e in board.validate(data)))
 
-    def test_explicit_private_migration_consent_unblocks_only_the_16l2_task(self):
+    def test_private_migration_remains_blocked_until_trusted_verifier_exists(self):
         data, tasks = self._fresh_scenario()
         tasks["16U1"]["migration_consent"] = "granted"
         tasks["16U1"]["owner_decision"] = "approved_private_copy"
@@ -575,16 +569,18 @@ class TaskBoardTests(unittest.TestCase):
         )
         tasks["16U1"]["consent_receipt"]["scope"] = "approved-copy-only"
         self.assertTrue(board.private_migration_authorized(tasks))
-        self.assertNotIn(
-            "owner_private_migration_consent",
+        self.assertIn(
+            "trusted_private_migration_verifier",
             board.missing_dependencies(tasks["16L2"], tasks),
         )
-        ready, _ = board.readiness(data)
-        self.assertIn("16L2", {task["id"] for task in ready})
+        ready, blocked = board.readiness(data)
+        self.assertNotIn("16L2", {task["id"] for task in ready})
+        self.assertIn("16L2", {task["id"] for task in blocked})
         eligible = {
             task["id"] for wave in board.waves(data) for task in wave
         }
-        self.assertIn("16L2", eligible)
+        self.assertNotIn("16L2", eligible)
+        self.assertTrue(any("trusted private-migration verifier" in e for e in board.validate(data)))
 
     def test_wave_forecast_requires_trusted_accepted_or_branch(self):
         data, tasks = self._fresh_scenario()
