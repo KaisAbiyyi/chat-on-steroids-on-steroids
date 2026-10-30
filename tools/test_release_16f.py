@@ -40,6 +40,16 @@ class SourceBoundReportTests(unittest.TestCase):
         self.assertEqual(
             r["native_owner_gates"]["16LF-01_owner_local_fresh_start"], "NOT_RUN"
         )
+        dag_contract_sources = {
+            "tools/task_board.py",
+            "tools/test_task_board.py",
+            ".github/workflows/task-graph.yml",
+            "docs/PARALLEL-EXECUTION-BOARD.md",
+            "docs/implementation-plan/2026-10-18-cloud-first-units.md",
+            "docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md",
+        }
+        self.assertTrue(dag_contract_sources.issubset(set(f.TRACKED)))
+        self.assertTrue(dag_contract_sources.issubset(set(r["tracked_contracts"])))
         self.assertEqual(set(f.GATES), {
             "16L1_native_installer",
             "16U1_owner_consent",
