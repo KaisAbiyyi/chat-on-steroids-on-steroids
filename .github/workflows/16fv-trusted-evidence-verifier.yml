@@ -104,6 +104,7 @@ jobs:
           artifact-ids: 12868909286
           github-token: ${{ github.token }}
           path: historical-16l1
+          merge-multiple: true
 
       - name: Verify artifact bytes, five Sigstore attestations and source ancestry
         shell: pwsh
