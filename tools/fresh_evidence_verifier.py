@@ -44,7 +44,17 @@ except ImportError:
 RECEIPT_MARKER = "<!-- COSOS-16LF01-RECEIPT-V1 -->"
 REVIEW_MARKER = "<!-- COSOS-GPT6-REVIEW-V2 -->"
 ATTESTATION_MARKER = "<!-- COSOS-OWNER-ATTESTATION-V1 -->"
-REVIEW_SCHEMA = "cosos.release.cloud-proTRUST_ROOT_SCHEMA = "cosos.fresh-evidence-trust-root.v1"
+REVIEW_SCHEMA = "cosos.release.cloud-provenance.v2"
+RECEIPT_SCHEMA = "cosos.freshstart.receipt.v1"
+ATTESTATION_SCHEMA = "cosos.freshstart.owner-attestation.v1"
+BUNDLE_SCHEMA = "cosos.16lf01.evidence-bundle.v1"
+QUALIFICATION_SCHEMA = "cosos.16lf01.qualification.v1"
+CHECK_EVIDENCE_SCHEMA = "cosos.16lf01.check-evidence.v1"
+MAX_ARTIFACT_BYTES = 200 * 1024 * 1024
+MAX_BUNDLE_BYTES = 100 * 1024 * 1024
+MAX_UNPACKED_BYTES = 500 * 1024 * 1024
+
+TRUST_ROOT_SCHEMA = "cosos.fresh-evidence-trust-root.v1"
 PREDECESSOR_TRUST_ROOT_FIELDS = frozenset({
     "pr_number", "source_sha", "merge_commit_sha", "diff_sha256",
     "report_comment_id", "owner_attestation_comment_id", "report_sha256",
@@ -80,18 +90,6 @@ ARTIFACT_ATTESTATION_FIELDS = frozenset({
     "update02_installer", "update03_installer",
 })
 
-
-    "tooling_head_sha": "e526c2ed398b0b21dd10f659d2ab1f1ed7f85b07",
-        "tooling_merge_commit_sha": "bb3ca8daba5d467b9f097b7e84833da3ee129373",
-        "attestations": {
-            "package_receipt": 61105602,
-            "installer": 61105644,
-            "candidate_zip": 61105669,
-            "update02_installer": 61105729,
-            "update03_installer": 61105729,
-        },
-    },
-}
 
 RECEIPT_PAYLOAD_FIELDS = (
     "schema_version", "kind", "host", "profile_scope", "migration",
