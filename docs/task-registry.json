@@ -1580,7 +1580,7 @@
       "kind": "L",
       "status": "blocked",
       "evidence": null,
-      "acceptance": "NOT_RUN; owner-local Windows synthetic-only; external independent review required"
+      "acceptance": "NOT_RUN; owner-local Windows synthetic-only; GPT-6 technical-review report and separate owner attestation required; no GitHub independent approval is claimed"
     },
     {
       "id": "16L3",
