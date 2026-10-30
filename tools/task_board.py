@@ -184,8 +184,9 @@ def private_migration_authorized(tasks: dict[str, dict]) -> bool:
         and owner.get("owner_decision") == "approved_private_copy"
         and isinstance(consent, dict)
         and consent.get("explicit_owner_approval") is True
-        and isinstance(consent.get("scope"), str)
-        and bool(consent["scope"].strip())
+        # 16L2 is strictly copy-only; a nonempty but broader scope must
+        # never authorize this task.
+        and consent.get("scope") == "approved-copy-only"
         and isinstance(consent.get("approval_url"), str)
         and consent["approval_url"].startswith("https://")
     )
