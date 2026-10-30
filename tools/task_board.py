@@ -396,13 +396,23 @@ def explain(
     task = tasks[task_id]
     visited: set[str] = set()
     def blockers(node: str) -> None:
-        edges = tasks[node]["depends_on"] + [
-            dep for group in tasks[node].get("any_of", []) for dep in group
-        ]
-        for dep in edges:
+        current = tasks[node]
+        for dep in current["depends_on"]:
             if not accepted(tasks, dep, trusted_verifier=trusted_verifier) and dep not in visited:
                 visited.add(dep)
                 blockers(dep)
+        # An OR group is a satisfied prerequisite when any alternative is
+        # accepted. Only expose every alternative as a blocker when none is.
+        for group in current.get("any_of", []):
+            if any(
+                accepted(tasks, dep, trusted_verifier=trusted_verifier)
+                for dep in group
+            ):
+                continue
+            for dep in group:
+                if dep not in visited:
+                    visited.add(dep)
+                    blockers(dep)
     blockers(task_id)
     missing_direct = missing_dependencies(
         task, tasks, trusted_verifier=trusted_verifier
