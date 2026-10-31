@@ -152,3 +152,58 @@ macOS/other cross-target builds remain `HOLD`, with separate target-specific gat
 ## Handoff rule
 
 For a cloud unit, return `UNIT`, `GITHUB (branch/PR/merged SHA)`, `IMPLEMENTED`, `CLOUD CHECKS`, `PERFORMANCE`, `LOCAL REQUIRED (none or exact L-ID)`, `YOU REQUIRED (NO/YES and exact action, BEFORE or AFTER which gate)`, `LIMITATIONS`, `NEXT`. For an L session, return `SHA UNDER TEST`, `MACHINE/OS`, `PASS/FAIL/BLOCKED`, `RECEIPTS`, `MANUAL REQUIRED (NO/YES)`, and `NEXT`. For a U session, provide a brief executable checklist; never ask the user to debug an unqualified implementation. **Never touch live private data/accounts or OS input/capture before scoped permission**, even if the ordinary subjective-U workflow happens after native qualification. A failed L gate generates a cloud fix unit, then repeats the L gate against the new SHA.
+
+
+## 16FV-01 — Production trusted evidence verifier (2026-10-30)
+
+### Execution and ordering
+
+16FS-01 / PR #138 is merged and owner-attested under GPT6_OWNER_ATTESTED. 16FV-01 is the next Cloud implementation task, claimed on the existing branch work/16fv-01-trusted-evidence-verifier-20261030 under resource lock freshstart-evidence-verifier. A future Done status is accepted only after the production verifier revalidates the merged 16FS-01 contract and owner acceptance, then fetches merged PR #141, verifies its main ancestry and hashes the verifier source file at the exact PR head; a registry Done flag alone is not acceptance. 16LF-01 remains Blocked / NOT_RUN until 16FV-01 is accepted and the owner-controlled production trust root is configured.
+
+Canonical dependencies:
+
+- 16FS-01 depends on 16U1, 16L1 and 16F.
+- 16FV-01 depends on 16FS-01, 16U1 and 16L1.
+- 16LF-01 depends on 16FS-01, 16FV-01, 16U1 and 16L1.
+- 16L2 remains Blocked / NOT_RUN / NOT_AUTHORIZED.
+- 16L3 remains 16F AND 16L1 AND (16L2 OR 16LF-01).
+
+### Evidence record contract
+
+A genuine 16LF-01 receipt uses schema version 3 and is a claim until the production verifier fetches its actual GitHub records and evidence bytes. The task-registry envelope links three separate immutable comments on issue #140:
+
+1. Receipt record with canonical receipt JSON and SHA-256.
+2. GPT-6 technical-review report with schema cosos.release.cloud-provenance.v2, verdict PASS, exact PR source SHA and exact GitHub diff SHA-256.
+3. Separate owner-attestation record accepting that exact receipt/report/source/diff/artifact tuple.
+
+The accepted mode is GPT6_OWNER_ATTESTED. The two review records may be authored by the same owner. No GitHub independent approval is claimed or required; owner attestation is not cryptographic proof of model authorship. Legacy independent_review fields are rejected.
+
+The receipt and evidence bundle bind both merged implementation contracts: the exact 16FS-01 source SHA and merge commit, and the exact 16FV-01 PR #141 head SHA, merge commit and verifier-file SHA-256. The verifier also re-fetches the actual PR #138 diff, recomputes its SHA-256, and recomputes the immutable predecessor GPT-6 report comment's body hash excluding its final self-digest line. Artifact download and Sigstore verification require GitHub CLI (gh) and a read-only token. The verifier fetches actual merged PR #141 metadata, checks its merge commit is an ancestor of main, retrieves tools/fresh_evidence_verifier.py at the exact PR head, and recomputes its SHA-256.
+
+The evidence bundle is a GitHub user attachment containing qualification.json, evidence-manifest.json and structured JSON raw per-check evidence. Its archive SHA-256, every member digest, safe relative paths, all eight fresh-start PASS checks, and exact source/artifact/verifier/session/workspace/timestamp/command bindings are checked.
+
+Each check evidence file is a JSON record using schema cosos.16lf01.check-evidence.v1. It repeats the repository, source SHA, exact 16FS/16FV pins, artifact, session and workspace bindings and carries a timestamp within the recorded session. The verifier validates check-specific observations rather than trusting a PASS boolean alone:
+
+- fresh_init: new profile created, profile was empty, unique profile ID.
+- isolated_storage: storage root is beneath the disposable workspace, canonical storage path is beneath that root, and it is outside existing profile roots.
+- synthetic_only: artifact is unsigned, native16L1Accepted is false, and inputs are synthetic-only.
+- existing_profiles_untouched: before/after snapshot SHA-256 values match.
+- no_leakage: leakage_detected is false, cross-profile access count is zero, external data reads are zero.
+- rollback: rollback completed, test profile removed, rollback target recorded.
+- failure_isolation: injected failure occurred, remained contained, and existing profiles remained unchanged.
+- owned_cleanup: workspace and temporary files were removed by the owner.
+
+All eight paths must be distinct safe checks/*.json entries, each file must be covered by the bundle manifest, and its observations must pass the exact check-specific contract. The qualification.json PASS map must equal the statuses derived from these validated records.
+ The actual historical 16L1 artifact ID 12868909286 is downloaded and rehashed; its pinned package payloads and five Sigstore attestations are checked against the exact original PR135 event, workflow and run attempt.
+
+### Owner trust-root configuration
+
+Production authority is not configured by the Cloud implementation. The authoritative COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON payload must originate from independently owner-controlled protected Environment configuration; no production root object is embedded in candidate source, registry JSON, receipts, PR content or test fixtures. The production parser validates repository ID/name, owner login/user ID, GPT6_OWNER_ATTESTED policy, predecessor PR #138 contract pins, and historical 16L1 PR #135 / tooling PR #136 / artifact / run / five Sigstore attestation pins against actual GitHub metadata and bytes. The owner must create and protect the fresh-evidence-production Environment, independently assemble and add the secret, then manually dispatch the separate .github/workflows/16fv-production-verify.yml workflow on main. That workflow checks out exact main, uses read-only permissions, and exposes the secret only inside the protected job. The PR-triggered test workflow never receives the secret. Missing configuration returns TRUST_ROOT_UNCONFIGURED; malformed or out-of-context configuration returns TRUST_ROOT_INVALID; API/provenance failures return VERIFICATION_ERROR. Test-only fixtures are rejected by the production loader.
+
+The root pins repository ID 1424422098, owner KaisAbiyyi / user ID 93252311, the merged 16FS-01 PR/source/merge/report/attestation, and the actual 16L1 artifact/run/archive/file/provenance identities. No root secret, environment protection, owner-local access or physical qualification is created by this task.
+
+### CI and handoff
+
+The dedicated 16FV-01 workflow runs the focused verifier tests and task-board/DAG/release-gate tests on windows-latest and ubuntu-latest, checking out the exact PR head or pushed source SHA. Each platform uploads machine-readable evidence with tested SHA, OS, run ID/attempt, test outcomes and verifier-file SHA-256. The recorder independently runs git rev-parse HEAD and rejects any mismatch with the workflow-supplied source SHA; its own tests cover this binding and failure behavior. A separate Windows job revalidates the immutable historical 16L1 artifact; it does not rerun 16L1 qualification.
+
+16FV-01 is not promoted to Done until the final exact-HEAD Windows and Ubuntu runs pass, the Draft PR and changed-file set are verified, and the GPT-6 technical review plus separate owner acceptance bind the exact final source SHA and diff. The owner trust root remains a separate handoff. No 16LF physical PASS, 16L3 acceptance, release activation or merge is authorized here.

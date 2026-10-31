@@ -1,0 +1,46 @@
+name: 16FV-01 Production Trust Root Verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify-owner-controlled-trust-root:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    name: Verify owner-controlled production trust root
+    runs-on: ubuntu-latest
+    environment: fresh-evidence-production
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      actions: read
+      attestations: read
+    steps:
+      - name: Checkout exact trusted main HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify checkout is the dispatched main HEAD
+        env:
+          EXPECTED_MAIN_SHA: ${{ github.sha }}
+        run: |
+          python -c "import os, subprocess; actual=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(); expected=os.environ['EXPECTED_MAIN_SHA']; raise SystemExit(0 if actual == expected else 'checked-out SHA differs from dispatched main SHA')"
+
+      - name: Verify owner-controlled trust root and historical pins
+        env:
+          COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON: ${{ secrets.COSOS_FRESH_EVIDENCE_TRUST_ROOT_JSON }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+        run: |
+          python -m py_compile tools/fresh_evidence_contract.py tools/fresh_evidence_verifier.py tools/task_board.py
+          python tools/task_board.py trust-root-status

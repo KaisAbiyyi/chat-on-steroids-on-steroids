@@ -31,10 +31,20 @@ TRACKED = (
     "docs/task-registry.json",
     "tools/task_board.py",
     "tools/test_task_board.py",
+    "tools/fresh_evidence_contract.py",
+    "tools/fresh_evidence_verifier.py",
+    "tools/fixtures/16fs01-pr138.diff",
+    "tools/fixtures/16fv-trust-root.test.json",
+    "tools/test_fresh_evidence_verifier.py",
+    "tools/record_16fv_qualification.py",
+    "tools/test_record_16fv_qualification.py",
+    ".github/workflows/16fv-trusted-evidence-verifier.yml",
+    ".github/workflows/16fv-production-verify.yml",
     ".github/workflows/task-graph.yml",
     "docs/PARALLEL-EXECUTION-BOARD.md",
     "docs/implementation-plan/2026-10-18-cloud-first-units.md",
     "docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md",
+    "docs/implementation-summary/2026-10-30-16fv01-trusted-evidence-verifier.md",
     "tools/release_16b.py",
     "tools/release_16c.py",
     "tools/release_16d.py",
@@ -94,11 +104,16 @@ def make_report(expected_head, actual_head, ancestors, sources):
             "16L3 required AND/OR native gate dependencies changed")
     require(tasks.get("16FS-01", {}).get("kind") == "C" and
             tasks["16FS-01"].get("depends_on") == ["16U1", "16L1", "16F"] and
+            tasks["16FS-01"].get("status") == "done" and
+            tasks["16FS-01"].get("accepted_evidence_url") == "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138" and
+            tasks.get("16FV-01", {}).get("kind") == "C" and
+            tasks["16FV-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"] and
+            tasks["16FV-01"].get("resource_locks") == ["freshstart-evidence-verifier"] and
             tasks.get("16LF-01", {}).get("kind") == "L" and
-            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"] and
+            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16FV-01", "16U1", "16L1"] and
             tasks["16LF-01"].get("status") == "blocked" and
             tasks["16LF-01"].get("evidence") is None,
-            "16FS-01 / 16LF-01 independent fresh-start gate changed or is no longer NOT_RUN")
+            "16FS-01 / 16FV-01 / 16LF-01 fresh-start verifier dependency contract changed")
     require(tasks.get("16U1", {}).get("migration_consent") == "declined" and
             tasks.get("16U1", {}).get("owner_decision") == "fresh_start" and
             tasks.get("16L2", {}).get("status") == "blocked" and
@@ -128,7 +143,9 @@ def make_report(expected_head, actual_head, ancestors, sources):
             "installer_transaction": "16E_SYNTHETIC_DISPOSABLE_ONLY",
             "startup_memory": "16D_HEADLESS_ROOT_PROCESS_ONLY_NO_GUI_BUDGET",
             "github_ci_verdict": "REQUIRES_EXTERNAL_EXACT_HEAD_CHECKS",
-            "review_policy": "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
+            "review_policy": "GPT6_OWNER_ATTESTED",
+            "review_policy_semantics": "OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL",
+            "model_authorship": "OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED",
         },
         "native_owner_gates": {gate: "NOT_RUN" for gate in GATES},
         "product_release_ready": False,

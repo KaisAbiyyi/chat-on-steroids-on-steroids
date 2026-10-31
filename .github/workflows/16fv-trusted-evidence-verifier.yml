@@ -1,0 +1,116 @@
+name: 16FV-01 Trusted Evidence Verifier
+
+on:
+  push:
+    branches:
+      - "work/16fv-*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  actions: read
+  attestations: read
+
+jobs:
+  verifier-tests:
+    name: Verifier and DAG tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    env:
+      TESTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact tested source HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TESTED_SHA }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile verifier, task board and tests
+        id: compile
+        run: >-
+          python -m py_compile
+          tools/task_board.py
+          tools/fresh_evidence_contract.py
+          tools/fresh_evidence_verifier.py
+          tools/test_task_board.py
+          tools/test_fresh_evidence_verifier.py
+          tools/test_record_16fv_qualification.py
+          tools/release_16f.py
+          tools/test_release_16f.py
+          tools/record_16fv_qualification.py
+
+      - name: Run focused production verifier adversarial tests
+        id: unit
+        run: python -m unittest tools.test_fresh_evidence_verifier tools.test_record_16fv_qualification -v
+
+      - name: Run task board, DAG and release-gate regression tests
+        id: dag
+        shell: pwsh
+        run: |
+          python -m unittest tools.test_task_board tools.test_release_16f -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/task_board.py check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Record exact-HEAD platform qualification
+        if: always()
+        shell: bash
+        run: |
+          python tools/record_16fv_qualification.py \
+            --source-sha "$TESTED_SHA" \
+            --platform "${{ runner.os }}" \
+            --status "${{ job.status }}" \
+            --compile-outcome "${{ steps.compile.outcome }}" \
+            --unit-outcome "${{ steps.unit.outcome }}" \
+            --dag-outcome "${{ steps.dag.outcome }}" \
+            --workflow-run-id "${{ github.run_id }}" \
+            --run-attempt "${{ github.run_attempt }}" \
+            --run-url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --event "${{ github.event_name }}"
+
+      - name: Upload machine-readable qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 16fv-${{ runner.os }}-${{ env.TESTED_SHA }}
+          path: 16fv-qualification.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  historical-16l1-artifact:
+    name: Revalidate immutable historical 16L1 artifact
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout exact tested source HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Download the exact historical Actions artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40808144696
+          artifact-ids: 12868909286
+          github-token: ${{ github.token }}
+          path: historical-16l1
+          merge-multiple: true
+
+      - name: Verify artifact bytes, five Sigstore attestations and source ancestry
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          .github/scripts/16pkg-16l1-135-artifact-provenance.ps1 -RunId 40808144696 -SourceSha fb1d97a040a28abe74ccbcf5f92e2d33064b85ad -ArtifactRoot historical-16l1

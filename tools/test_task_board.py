@@ -11,6 +11,93 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import task_board as board
 
 
+def complete_prerequisite_closure(
+    data,
+    task_id,
+    *,
+    trusted_verifier=None,
+    preserve_blocked=frozenset(),
+    complete_target=True,
+):
+    """Build a hypothetical completed fixture from the canonical AND/OR DAG."""
+    tasks = board.index(data)
+    visiting = set()
+    completed = set()
+
+    def visit(current, mark_done=True):
+        if current in visiting:
+            raise AssertionError("cycle while building fixture closure: " + current)
+        if current in completed:
+            return
+        task = tasks.get(current)
+        if not isinstance(task, dict):
+            raise AssertionError("unknown prerequisite in fixture closure: " + current)
+        if current in preserve_blocked:
+            raise AssertionError("fixture closure attempted to complete preserved blocked task: " + current)
+        if task.get("status") not in {"todo", "done"} and mark_done:
+            raise AssertionError("fixture closure cannot override non-completable status: " + current)
+
+        visiting.add(current)
+        for dependency in task.get("depends_on", []):
+            visit(dependency)
+
+        for group in task.get("any_of", []):
+            satisfied = next(
+                (
+                    dependency for dependency in group
+                    if board.accepted(tasks, dependency, trusted_verifier=trusted_verifier)
+                ),
+                None,
+            )
+            if satisfied is None:
+                choices = [
+                    dependency for dependency in group
+                    if dependency not in preserve_blocked
+                    and tasks[dependency].get("status") in {"todo", "done"}
+                ]
+                selected = None
+                last_error = None
+                for candidate in choices:
+                    status_snapshot = {
+                        task_id: task.get("status") for task_id, task in tasks.items()
+                    }
+                    completed_snapshot = set(completed)
+                    visiting_snapshot = set(visiting)
+                    try:
+                        visit(candidate)
+                        if not board.accepted(
+                            tasks, candidate, trusted_verifier=trusted_verifier
+                        ):
+                            raise AssertionError(
+                                "OR candidate is not accepted after closure: " + candidate
+                            )
+                        selected = candidate
+                        break
+                    except AssertionError as error:
+                        # A candidate may have a blocked transitive prerequisite.
+                        # Roll back its hypothetical status changes and try the
+                        # next OR alternative rather than failing prematurely.
+                        for task_id, status in status_snapshot.items():
+                            tasks[task_id]["status"] = status
+                        completed.clear()
+                        completed.update(completed_snapshot)
+                        visiting.clear()
+                        visiting.update(visiting_snapshot)
+                        last_error = error
+                if selected is None:
+                    raise AssertionError(
+                        "no satisfiable OR branch in fixture closure for " + current
+                    ) from last_error
+
+        if mark_done:
+            task["status"] = "done"
+        visiting.remove(current)
+        completed.add(current)
+
+    visit(task_id, mark_done=complete_target)
+    return completed
+
+
 class TaskBoardTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -39,7 +126,11 @@ class TaskBoardTests(unittest.TestCase):
                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
                 ) and task["status"] == "todo" and not task.get("any_of") else "BLOCKED"
             )))
-            self.assertEqual(cols[5], desired, task_id)
+            reported_status = cols[5]
+            if task_id == "16L2":
+                self.assertEqual(reported_status, "BLOCKED / NOT_RUN / NOT_AUTHORIZED")
+                reported_status = "BLOCKED"
+            self.assertEqual(reported_status, desired, task_id)
 
     def test_historical_aliases_are_explicit_and_never_reused_as_current_preflight(self):
         aliases = self.data["legacy_pre_2026_10_20_ids"]
@@ -52,8 +143,8 @@ class TaskBoardTests(unittest.TestCase):
 
     def test_all_work_units_preserved(self):
         kinds = {k: sum(t["kind"] == k for t in self.data["tasks"]) for k in "CLU"}
-        self.assertEqual(kinds, {"C": 80, "L": 31, "U": 15})
-        self.assertEqual(len(self.tasks), 126)
+        self.assertEqual(kinds, {"C": 81, "L": 31, "U": 15})
+        self.assertEqual(len(self.tasks), 127)
 
     def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
         ready, _ = board.readiness(self.data)
@@ -152,6 +243,22 @@ class TaskBoardTests(unittest.TestCase):
         self.assertIn("human-owner", board.effective_locks(self.tasks["8U1"]))
         self.assertNotIn("physical-windows-host", board.effective_locks(self.tasks["CL-05A"]))
 
+    def test_fixture_closure_backtracks_to_a_satisfiable_or_branch(self):
+        fixture = {
+            "tasks": [
+                {"id": "blocked", "status": "blocked", "depends_on": [], "any_of": []},
+                {"id": "bad-branch", "status": "todo", "depends_on": ["blocked"], "any_of": []},
+                {"id": "good-branch", "status": "todo", "depends_on": [], "any_of": []},
+                {"id": "target", "status": "todo", "depends_on": [], "any_of": [["bad-branch", "good-branch"]]},
+            ]
+        }
+        complete_prerequisite_closure(fixture, "target")
+        tasks = board.index(fixture)
+        self.assertEqual(tasks["blocked"]["status"], "blocked")
+        self.assertEqual(tasks["bad-branch"]["status"], "todo")
+        self.assertEqual(tasks["good-branch"]["status"], "done")
+        self.assertEqual(tasks["target"]["status"], "done")
+
     def test_waves_do_not_skip_local_or_user_gates(self):
         waves = board.waves(self.data)
         ready, _ = board.readiness(self.data)
@@ -166,27 +273,69 @@ class TaskBoardTests(unittest.TestCase):
                     self.assertFalse(
                         set(board.effective_locks(first)) & set(board.effective_locks(second))
                     )
-        # A completed gate is excluded from forecasts. In a hypothetical
-        # reopened native gate, every downstream phase must retain its order.
+        # This is a deliberately hypothetical full-replay forecast, not a
+        # proposed production registry state. Reopen the phase-7..16 tasks so
+        # the wave algorithm must expose every local/user gate in order.
         future = copy.deepcopy(self.data)
-        # Reopen the complete future browser/UI branch, including blocked
-        # native gates, for this hypothetical successful forecast only.
-        # Live 8L1 remains blocked and is tested separately below.
         for task in future["tasks"]:
             if task["id"] == "CL-L6" or task["phase"] in {str(n) for n in range(7, 17)}:
                 task["status"] = "todo"
-        # The private-migration alternative stays blocked until a dedicated
-        # trusted verifier is implemented; the future forecast uses 16LF-01.
         future_tasks = board.index(future)
         future_tasks["16L2"]["status"] = "blocked"
-        self.assertEqual(board.validate(future), [])
+        future_tasks["16LF-01"]["status"] = "blocked"
+        future_tasks["16L3"]["status"] = "blocked"
         waves = board.waves(future)
-        flat = [t["id"] for wave in waves for t in wave]
+        flat = [task["id"] for wave in waves for task in wave]
         self.assertLess(flat.index("CL-L6"), flat.index("7P-A"))
+        self.assertLess(flat.index("7P-A"), flat.index("7P-B"))
         self.assertLess(flat.index("7P-B"), flat.index("7A"))
         self.assertLess(flat.index("7P-L1"), flat.index("7L1"))
         self.assertLess(flat.index("7E"), flat.index("8A"))
         self.assertLess(flat.index("8U1"), flat.index("9A"))
+
+        # Separately prove recursive transitive AND closure plus a valid OR
+        # branch for 16L3. Completed tasks in this fixture must satisfy the
+        # canonical DAG; 16L2 remains blocked and cannot satisfy the OR gate.
+        closure = copy.deepcopy(self.data)
+        closure_tasks = board.index(closure)
+        for task_id in (
+            "7D", "7E", "8A", "8B", "8C", "15A",
+            "15B", "15C", "15D", "15E", "15F", "15G",
+        ):
+            closure_tasks[task_id]["status"] = "todo"
+        closure_tasks["16FV-01"]["status"] = "todo"
+        closure_tasks["16LF-01"]["status"] = "todo"
+        closure_tasks["16L3"]["status"] = "todo"
+        closure_tasks["16L2"]["status"] = "blocked"
+        _, receipt_tasks = self._fresh_scenario()
+        closure_tasks["16LF-01"]["evidence"] = copy.deepcopy(
+            receipt_tasks["16LF-01"]["evidence"]
+        )
+        closure_tasks["16FV-01"].update({
+            "accepted_evidence_url": (
+                "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/"
+                + str(board.VERIFIER_PR_NUMBER)
+            ),
+            "accepted_source_sha": "e" * 40,
+            "accepted_merge_commit_sha": "d" * 40,
+            "accepted_verifier_sha256": "f" * 64,
+        })
+        verifier = self._trusted_test_verifier()
+        complete_prerequisite_closure(
+            closure, "16L3", trusted_verifier=verifier,
+            preserve_blocked={"16L2"}, complete_target=False,
+        )
+        self.assertEqual(closure_tasks["16L2"]["status"], "blocked")
+        self.assertEqual(closure_tasks["16LF-01"]["status"], "done")
+        self.assertTrue(board.accepted(closure_tasks, "16LF-01", trusted_verifier=verifier))
+        self.assertTrue(all(
+            closure_tasks[task_id]["status"] == "done"
+            for task_id in (
+                "7D", "7E", "8A", "8B", "8C", "15A",
+                "15B", "15C", "15D", "15E", "15F", "15G",
+            )
+        ))
+        self.assertEqual(board.validate(closure, trusted_verifier=verifier), [])
 
     def test_blocked_native_gate_never_enters_forecast(self):
         self.assertEqual(self.tasks["8C"]["status"], "done")
@@ -271,8 +420,14 @@ class TaskBoardTests(unittest.TestCase):
         data = copy.deepcopy(self.data)
         tasks = board.index(data)
         # Well-formed but intentionally fabricated fixture; never authoritative.
-        for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01"):
+        for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01", "16FV-01"):
             tasks[key]["status"] = "done"
+        tasks["16FV-01"].update({
+            "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/" + str(board.VERIFIER_PR_NUMBER),
+            "accepted_source_sha": "e" * 40,
+            "accepted_merge_commit_sha": "d" * 40,
+            "accepted_verifier_sha256": "f" * 64,
+        })
         tasks["16L3"]["status"] = "todo"
         tasks["16LF-01"]["status"] = "done"
         sha = "a" * 40
@@ -289,17 +444,35 @@ class TaskBoardTests(unittest.TestCase):
             "reviewed_source_sha": sha,
             "diff_sha256": diff,
             "reviewed_diff_sha256": diff,
-            "artifact_id": 123456789,
+            "artifact_id": 12868909286,
             "artifact_sha256": "b" * 64,
-            "artifact_source_sha": "e" * 40,
+            "artifact_source_sha": sha,
             "artifact_provenance_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/129#issuecomment-1",
             "artifact_provenance_sha256": "f" * 64,
             "receipt_sha256": "c" * 64,
             "local_session_id": "synthetic-test-fixture-only",
+            "repository": "KaisAbiyyi/chat-on-steroids-on-steroids",
+            "repository_id": 1424422098,
+            "review_pr_number": 135,
+            "contract_source_sha": "c392b076457ca5375e260bb2267950feac31de50",
+            "contract_merge_commit_sha": "cc180575498e9f45d13c05c86a0a3bb4e8e0c1be",
+            "verifier_pr_number": board.VERIFIER_PR_NUMBER,
+            "verifier_merge_commit_sha": "d" * 40,
+            "evidence_bundle_url": "https://github.com/user-attachments/assets/12345678-1234-1234-1234-123456789abc",
+            "evidence_bundle_sha256": "3" * 64,
+            "windows_build": "Windows 11 10.0.26300 x64",
+            "workspace_nonce": "a" * 16,
+            "workspace_path": "D:\\CoSoS-16LF-01-Qualification\\" + "a" * 16,
+            "verifier_source_sha": "e" * 40,
+            "verifier_sha256": "f" * 64,
+            "started_at": "2026-10-30T12:00:00Z",
+            "finished_at": "2026-10-30T12:30:00Z",
+            "commands": ["pwsh -File qualification.ps1", "python -m unittest"],
+            "check_evidence": {key: "checks/" + key + ".json" for key in board.FRESH_CHECKS},
             "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-100",
-            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-101",
+            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-101",
             "review_report_sha256": "1" * 64,
-            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-102",
+            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-102",
             "owner_attestation_sha256": "2" * 64,
             "checks": {key: "PASS" for key in board.FRESH_CHECKS},
         }
@@ -341,11 +514,48 @@ class TaskBoardTests(unittest.TestCase):
                 "verified_artifact_provenance_url": receipt["artifact_provenance_url"],
                 "verified_artifact_provenance_sha256": receipt["artifact_provenance_sha256"],
                 "verified_fresh_start_checks": board.FRESH_CHECKS,
+                "verified_repository_full_name": receipt["repository"],
+                "verified_repository_id": receipt["repository_id"],
+                "verified_review_pr_number": receipt["review_pr_number"],
+                "verified_review_pr_head_sha": receipt["source_sha"],
+                "verified_review_pr_diff_sha256": receipt["diff_sha256"],
+                "verified_owner_user_id": 93252311,
+                "verified_review_report_schema": "cosos.release.cloud-provenance.v2",
+                "verified_review_report_author_user_id": 93252311,
+                "verified_receipt_author_user_id": 93252311,
+                "verified_owner_attestation_author_user_id": 93252311,
+                "verified_contract_source_sha": receipt["contract_source_sha"],
+                "verified_contract_merge_commit_sha": receipt["contract_merge_commit_sha"],
+                "verified_verifier_pr_number": receipt["verifier_pr_number"],
+                "verified_verifier_source_sha": receipt["verifier_source_sha"],
+                "verified_verifier_merge_commit_sha": receipt["verifier_merge_commit_sha"],
+                "verified_verifier_sha256": receipt["verifier_sha256"],
             })
             facts.update(overrides)
             return board.FreshEvidenceVerification(**facts)
 
+        def verify_verifier_task(task):
+            return (
+                task.get("accepted_evidence_url") == "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/" + str(board.VERIFIER_PR_NUMBER)
+                and task.get("accepted_source_sha") == "e" * 40
+                and task.get("accepted_merge_commit_sha") == "d" * 40
+                and task.get("accepted_verifier_sha256") == "f" * 64
+            )
+
+        verify.verify_verifier_task = verify_verifier_task
         return verify
+
+    def test_16fv_done_requires_remote_merged_pr_and_source_digest(self):
+        data, tasks = self._fresh_scenario()
+        verifier = self._trusted_test_verifier()
+        self.assertTrue(board.accepted(tasks, "16FV-01", trusted_verifier=verifier))
+        tasks["16FV-01"]["accepted_merge_commit_sha"] = "0" * 40
+        self.assertFalse(board.accepted(tasks, "16FV-01", trusted_verifier=verifier))
+        self.assertFalse(board.accepted(tasks, "16FV-01"))
+        self.assertTrue(any(
+            "16FV-01: Done status requires verified merged PR #141" in error
+            for error in board.validate(data)
+        ))
 
     def test_well_formed_fabricated_receipt_is_only_structural(self):
         _, tasks = self._fresh_scenario()
@@ -353,7 +563,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertEqual(
             board.fresh_receipt_status(receipt),
-            "PENDING_EXTERNAL_VERIFICATION",
+            "TRUST_ROOT_UNCONFIGURED",
         )
         self.assertFalse(board.accepted(tasks, "16LF-01"))
         self.assertIn(
@@ -378,7 +588,7 @@ class TaskBoardTests(unittest.TestCase):
     def test_fabricated_github_review_url_cannot_establish_acceptance(self):
         _, tasks = self._fresh_scenario()
         receipt = tasks["16LF-01"]["evidence"]
-        self.assertIn("/pull/138#", receipt["review_report_url"])
+        self.assertIn("/issues/140#issuecomment-", receipt["review_report_url"])
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 
@@ -387,7 +597,7 @@ class TaskBoardTests(unittest.TestCase):
         receipt = tasks["16LF-01"]["evidence"]
         self.assertEqual(
             board.fresh_receipt_status(receipt),
-            "PENDING_EXTERNAL_VERIFICATION",
+            "TRUST_ROOT_UNCONFIGURED",
         )
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 
@@ -500,7 +710,7 @@ class TaskBoardTests(unittest.TestCase):
         self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
         self.assertEqual(
             board.fresh_receipt_status(receipt),
-            "PENDING_EXTERNAL_VERIFICATION",
+            "TRUST_ROOT_UNCONFIGURED",
         )
         self.assertFalse(board.accepted(tasks, "16LF-01"))
 

@@ -19,8 +19,11 @@ def fixture():
          "migration_consent": "declined", "owner_decision": "fresh_start"},
         {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L",
          "status": "blocked", "private_migration_status": "NOT_RUN / NOT_AUTHORIZED"},
-        {"id": "16FS-01", "depends_on": ["16U1", "16L1", "16F"], "kind": "C"},
-        {"id": "16LF-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "L",
+        {"id": "16FS-01", "depends_on": ["16U1", "16L1", "16F"], "kind": "C",
+         "status": "done", "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138"},
+        {"id": "16FV-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "C",
+         "status": "claimed", "resource_locks": ["freshstart-evidence-verifier"]},
+        {"id": "16LF-01", "depends_on": ["16FS-01", "16FV-01", "16U1", "16L1"], "kind": "L",
          "status": "blocked", "evidence": None},
         {"id": "16L3", "depends_on": ["16F", "16L1"], "kind": "L",
          "any_of": [["16L2", "16LF-01"]]},
@@ -43,7 +46,15 @@ class SourceBoundReportTests(unittest.TestCase):
         self.assertEqual(set(r["native_owner_gates"]), set(f.GATES))
         self.assertEqual(
             r["security_review"]["review_policy"],
-            "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
+            "GPT6_OWNER_ATTESTED",
+        )
+        self.assertEqual(
+            r["security_review"]["review_policy_semantics"],
+            "OWNER_ATTESTED_NOT_GITHUB_INDEPENDENT_APPROVAL",
+        )
+        self.assertEqual(
+            r["security_review"]["model_authorship"],
+            "OWNER_ATTESTED_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED",
         )
         self.assertEqual(
             r["native_owner_gates"]["16LF-01_owner_local_fresh_start"], "NOT_RUN"
@@ -51,6 +62,15 @@ class SourceBoundReportTests(unittest.TestCase):
         dag_contract_sources = {
             "tools/task_board.py",
             "tools/test_task_board.py",
+            "tools/fresh_evidence_contract.py",
+            "tools/fresh_evidence_verifier.py",
+            "tools/fixtures/16fs01-pr138.diff",
+            "tools/fixtures/16fv-trust-root.test.json",
+            "tools/test_fresh_evidence_verifier.py",
+            "tools/record_16fv_qualification.py",
+            "tools/test_record_16fv_qualification.py",
+            ".github/workflows/16fv-trusted-evidence-verifier.yml",
+            ".github/workflows/16fv-production-verify.yml",
             ".github/workflows/task-graph.yml",
             "docs/PARALLEL-EXECUTION-BOARD.md",
             "docs/implementation-plan/2026-10-18-cloud-first-units.md",
@@ -106,6 +126,8 @@ class SourceBoundReportTests(unittest.TestCase):
             ("16F", "kind", "L"), ("16L3", "kind", "C"),
             ("16L3", "any_of", []), ("16L3", "any_of", [["16L2", "16L1"]]),
             ("16LF-01", "depends_on", ["16U1"]), ("16FS-01", "kind", "L"),
+            ("16FV-01", "depends_on", ["16FS-01"]), ("16FV-01", "kind", "L"),
+            ("16FV-01", "resource_locks", []),
             ("16U1", "migration_consent", "granted"),
             ("16U1", "owner_decision", "approved_private_copy"),
             ("16L2", "status", "done"),

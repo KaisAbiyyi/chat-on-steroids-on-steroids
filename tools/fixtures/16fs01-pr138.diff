@@ -1,0 +1,2146 @@
+diff --git a/.github/workflows/task-graph.yml b/.github/workflows/task-graph.yml
+index c190da38..e3730b3c 100644
+--- a/.github/workflows/task-graph.yml
++++ b/.github/workflows/task-graph.yml
+@@ -15,6 +15,8 @@ jobs:
+       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+       - name: Validate canonical task graph
+         run: python tools/task_board.py check
++      - name: Compile task-board policy and regression tests
++        run: python -m py_compile tools/task_board.py tools/test_task_board.py
+       - name: Validate readiness and phase sequencing regressions
+         run: python -m unittest discover -s tools -p test_task_board.py -v
+       - name: Check browser architecture fail-closed preflight
+diff --git a/docs/CURRENT-PHASE.md b/docs/CURRENT-PHASE.md
+index 03616343..9ec102ea 100644
+--- a/docs/CURRENT-PHASE.md
++++ b/docs/CURRENT-PHASE.md
+@@ -1,3 +1,7 @@
++## 16FS-01 fresh-start contract — owner-attested review-contract correction (2026-10-30)
++
++Claim session: `gpt6-cloud-16fs01-owner-attested-20261030-1738wib` · [Notion](https://app.notion.com/p/408c4a6aaf73810e8404e9a06a1c0855) · [GitHub issue #137](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137) · [PR #138](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138). STRICT CLOUD-ONLY. The bounded correction replaces the obsolete mandatory GitHub-independent-review assumption with `GPT6_OWNER_ATTESTED`: GPT-6 publishes a PASS technical-review report bound to the exact source SHA and diff digest; the owner separately attests acceptance of that exact report digest and source revision. This is not GitHub independent approval. The current task-board CLI remains fail-closed because no production trust root or verifier is implemented here; that belongs to 16FV-01 (#139), which must wait for accepted/merged 16FS-01. The existing 16L3 dependency remains 16F + 16L1 + one of (trusted-verifier-accepted 16L2, trusted-verifier-accepted 16LF-01). 16L2 remains BLOCKED / NOT_RUN / NOT_AUTHORIZED; 16LF-01 and 16L3 remain BLOCKED / NOT_RUN; 16U2 remains NOT_RUN. No local Windows execution, installer launch, private-profile access, migration, merge or release activation.
++
+ # CoS-Rust current backend checkpoint
+ 
+ ## Independent security review #5684556516 — scoped cloud correction (2026-10-28)
+diff --git a/docs/PARALLEL-EXECUTION-BOARD.md b/docs/PARALLEL-EXECUTION-BOARD.md
+index 14c4fed3..f0f41546 100644
+--- a/docs/PARALLEL-EXECUTION-BOARD.md
++++ b/docs/PARALLEL-EXECUTION-BOARD.md
+@@ -170,17 +170,19 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
+ | `15U1` | Owner daily navigation/editor approval | `15L1` | `human-ui` | U (owner) | BLOCKED |
+ | `15U2` | Owner keyboard/i18n/accessibility approval | `15L2` | `human-ui` | U (owner) | BLOCKED |
+ | `15U3` | Owner feature-completeness acceptance | `15L3` | `human-ui` | U (owner) | BLOCKED |
+-| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | **READY · PARALLEL** |
+-| `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | BLOCKED |
+-| `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | BLOCKED |
+-| `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | BLOCKED |
+-| `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | BLOCKED |
+-| `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | BLOCKED |
+-| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | CLAIMED |
+-| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | BLOCKED |
+-| `16L2` | Only owner-approved profile copy migration | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
+-| `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | BLOCKED |
+-| `16L3` | Full Windows release/startup/size proof | `16F`, `16L1`, `16L2` | `windows-release` | L (Windows) | BLOCKED |
++| `16A` | Versioned reversible migration/backup contract | `15G` | `release-migration` | C (cloud) | DONE |
++| `16B` | Updater/signing/installer interface | `16A` | `release-updater` | C (cloud) | DONE |
++| `16C` | Bundling/runtime dependencies and licenses | `16A` | `release-bundle` | C (cloud) | DONE |
++| `16D` | Startup/RAM/size performance gates | `16C` | `release-perf` | C (cloud) | DONE |
++| `16E` | Install/upgrade/rollback automated matrix | `16B`, `16C` | `release-installer-test` | C (cloud) | DONE |
++| `16U1` | Owner private profile migration consent | `16E` | `human-migration` | U (owner) | DONE |
++| `16PKG-01` | Source-pinned native Windows installer and signed release candidate | `16B`, `16C`, `16E`, `15G` | `release-native-installer` | C (cloud) | DONE |
++| `16L1` | Native clean install/uninstall/updater | `16E`, `16PKG-01` | `windows-installer` | L (Windows) | DONE |
++| `16L2` | Only owner-approved profile copy migration (not authorized) | `16U1`, `16E` | `windows-migration` | L (Windows) | BLOCKED |
++| `16F` | Security/provenance final release report | `16D`, `16E` | `release-closure` | C (cloud) | DONE |
++| `16FS-01` | Fresh-start acceptance policy / dependency amendment | `16U1`, `16L1`, `16F` | `release-freshstart-contract` | C (cloud) | CLAIMED |
++| `16LF-01` | Disposable first-run native isolation + rollback qualification | `16FS-01`, `16U1`, `16L1` | `windows-freshstart` | L (Windows) | BLOCKED |
++| `16L3` | Full Windows release/startup/size proof; plus accepted migration OR fresh-start local evidence | `16F`, `16L1` | `windows-release` | L (Windows) | BLOCKED |
+ | `16U2` | Owner guided final release decision | `16L3` | `human-release` | U (owner) | BLOCKED |
+ 
+ | `PERF-00` | Cloud performance measurement harness, workload matrix and process-tree accounting | `15G` | `perf-methodology` | C (cloud) | **READY · PARALLEL** |
+@@ -191,6 +193,8 @@ Cloud B-unit merges accepted 21 Oct 2026: `CL-05B` PR #26, `CL-06B` PR #27, `CL-
+ | `PERF-05` | Native Windows product endurance and total process-tree RAM comparison | `PERF-01`, `PERF-02`, `PERF-03`, `PERF-04`, `8L1`, `15L3` | `windows-perf-endurance` | L (Windows) | BLOCKED |
+ | `PERF-06` | Freeze measured resource budgets and CI/native regression policy | `PERF-05`, `16D` | `perf-release-gates` | C (cloud) | BLOCKED |
+ 
++> **16L3 conditional acceptance (16FS-01 proposal):** 16F AND 16L1 AND **(16L2 OR 16LF-01)**, with separate consent/evidence validation for each alternative. The table lists the unconditional `depends_on` only. 16L2 private migration remains `NOT_RUN / NOT_AUTHORIZED` and unavailable until a dedicated trusted verifier exists; 16LF-01 is a distinct `NOT_RUN` physical Windows gate. Neither is waived by an owner decision or cloud CI. GPT-6 technical review plus explicit owner attestation, verified by the production verifier, governs review promotion; no GitHub independent approval is claimed. See [fresh-start contract](implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
++
+ ## Parallel execution lanes
+ 
+ - **READY · PARALLEL cloud candidates today:** `CL-05A` (process custody), `CL-06A` (Git/files), `CL-07A` (search/patch), `CL-08A` (startup/secret), and `CL-09A` (MCP protocol). `CL-04A/B/C` and `CL-L1` are already accepted. This is a *possible independent wave*, conditional on live claim/PR screening and disjoint file/interface/contract ownership.
+diff --git a/docs/implementation-plan/2026-10-18-cloud-first-units.md b/docs/implementation-plan/2026-10-18-cloud-first-units.md
+index 9259b74e..dc9e8e7f 100644
+--- a/docs/implementation-plan/2026-10-18-cloud-first-units.md
++++ b/docs/implementation-plan/2026-10-18-cloud-first-units.md
+@@ -139,6 +139,14 @@ These numbers are a safe initial breakdown, **not** an elapsed-time estimate or
+ 
+ `16L1` after accepted `16E` and accepted/merged `16PKG-01`: actual Windows native **unsigned**, externally hash/provenance-verified install/uninstall/update/rollback/recover using disposable D:-isolated profiles; no publisher certificate, TEST root or private profile consent is required for this isolated gate. The unsigned implementation and prior-SHA source-bound artifact exist on Draft PR #131, but corrected exact-SHA CI, independent re-review, acceptance, merge and artifact verification are mandatory before 16L1 begins. `16U1` **after cloud `16E` synthetic migration tests and backup-plan review, BEFORE copying, reading or migrating any private user profile**: user approves exact source, copy, backup and reversible migration scope. `16L2` after `16U1` approval: migrate only the approved *copy*, test fault rollback and no leakage; otherwise local agent runs synthetic-only qualification and marks private-profile path BLOCKED. `16L3` after `16F`: actual final desktop/installer size, cold startup, RSS, battery/interaction benchmarks on isolated data. `16U2`: final guided real-product acceptance on their machine after required L gates.
+ 
++### 2026-10-29 — 16FS-01 fresh-start alternative (proposed; requires GPT-6 technical review, owner acceptance and merge)
++
++Owner's 16U1 decision is **fresh start**, **not** authorization to read, copy, inspect, export or migrate any private CoS profile. Private 16L2 remains **BLOCKED / NOT_RUN / NOT_AUTHORIZED**. Its old approval requirement is not silently waived.
++
++Proposed contract: \`16L3 = 16F AND 16L1 AND (16L2 OR 16LF-01)\`. 16FS-01 is a cloud policy/task-graph amendment only. New 16LF-01 is a distinct **owner-local physical Windows** first-run gate requiring accepted 16FS-01 policy, accepted 16L1 artifact and 16U1 owner fresh-start decision, plus source-pinned evidence of disposable empty-profile initialization, isolation from all prior CoS/CoSoS profiles, synthetic fixtures only, failure/rollback, no leakage, and safe task-owned cleanup. 16L2 remains disabled until a dedicated trusted private-migration verifier exists, even if the owner later changes consent. For 16LF-01, evidence must include exact source/artifact hashes, a GPT-6 technical-review report bound to the exact source/diff, and a separate explicit owner-attestation record. The accepted review mode is GPT6_OWNER_ATTESTED: the owner identity and separate attestation must be verified, and the attestation must bind the exact GPT-6 report digest and source revision. This is not GitHub independent approval; model authorship is owner-attested, not cryptographically authenticated. Structural task-board checks cannot authenticate self-reported JSON; the production verifier and owner-controlled trust root remain mandatory before marking the local gate done. No hosted CI is a substitute for 16LF-01 or 16L3 native evidence.
++
++16U2 stays downstream of real accepted 16L3 and a separate owner release decision. This branch changes no private profile, installer, or accepted 16L1 receipt. See [version-controlled contract](../implementation-summary/2026-10-29-16fs01-freshstart-contract.md).
++
+ macOS/other cross-target builds remain `HOLD`, with separate target-specific gates when unpaused; an unavailable platform is never counted PASS for the full multi-platform roadmap.
+ 
+ ## Handoff rule
+diff --git a/docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md b/docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md
+new file mode 100644
+index 00000000..f8f0059d
+--- /dev/null
++++ b/docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md
+@@ -0,0 +1,90 @@
++# 16FS-01 — Fresh-start release contract (cloud candidate)
++
++- [Claim and source tracking #137](https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137)
++- [Notion 16FS-01](https://app.notion.com/p/408c4a6aaf73810e8404e9a06a1c0855)
++- Owner policy (16U1, 2026-10-29): initialize CoSoS from a **new empty profile**; **no authorization** to inspect, read, copy, export, back up or migrate any original/private CoS profile.
++- 16A–16F, 16PKG-01, 16L1, 16U1: accepted per live Notion/GitHub receipts; only these relevant Phase 16 statuses are selectively reconciled to Done, preserving all unrelated history. Fresh-start acceptance itself and later local gates remain unaccepted.
++- This PR is **not** physical Windows qualification, approval to execute private migration or permission to release. All statuses below are pending GPT-6 technical review and explicit owner acceptance. No separate GitHub reviewer is available; no GitHub independent approval will be claimed.
++
++## Old vs proposed phase 16 dependency
++
++Before: \`16L3 <- (16F AND 16L1 AND 16L2)\`, which would force optional private-profile migration even after owner denial.
++
++After GPT-6 technical review, explicit owner acceptance and merge ONLY: \`16L3 <- (16F AND 16L1 AND (16L2 OR 16LF-01))\`. The retained 16L2 branch is **disabled in this phase**. Even if the owner later grants new scoped copy-only consent, it remains blocked until a dedicated trusted private-migration verifier exists; self-reported receipt/review fields cannot accept it. An owner decision recorded as "Done" is **not** affirmative consent. Current 16L2: \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
++
++16FS-01 is a cloud policy change only, never native qualification. New 16LF-01: separate \`L\` (local physical Windows) task under \`windows-freshstart\`; it depends on accepted 16FS-01, 16U1 owner decision and 16L1 native install. Current 16LF-01: \`BLOCKED / NOT_RUN\`. No "migration PASS" is manufactured.
++
++## Local synthetic-only 16LF-01 runbook (NOT EXECUTED)
++
++1. Complete the GPT-6 technical review of 16FS-01 and publish a PASS report bound to the exact source SHA and diff digest. The owner must separately attest acceptance of that exact report digest and source revision. This is GPT6_OWNER_ATTESTED, not GitHub independent approval. Merge only after owner acceptance. Pin the approved source commit SHA, immutable 16L1 verified artifact plus SHA-256 and original provenance/attestation, and local session ID. Reject unreviewed/changed bytes.
++2. Obtain separate owner authorization to use **only a new task-owned disposable Windows workspace**. Establish protected isolation boundaries against all existing CoS/CoSoS profiles before launching. Do **not** enumerate, open, inspect, back up, copy, modify or remove private profiles; no private-path presence checks using private contents. Use a fresh nonce-owned path; fail closed on ACL/ownership/reparse hazards.
++3. Initialize a genuinely **empty** application-owned profile; verify first-run creation and no re-use of prior profile markers or environment defaults. Use synthetic fixture identities/content only; deny network account logins, private credentials and leakage to logs/temp/artifacts.
++4. Induce bounded synthetic failures and rollback; verify preserved unrelated directories and unchanged prior data boundaries without reading their contents; verify recovery and no alias/overlap/cross-profile import.
++5. Clean only task-created disposable files after a validated owned-path check, and preserve protected evidence / failure artifacts until reviewed. Reject broad or recursive cleanup of unknown paths and symlinks.
++6. Produce redacted, source-bound receipt: exact 40-char commit SHA, verified artifact and receipt SHA-256, unique local session ID, GH issue-attached receipt link, native OS/build and checks (\`fresh_init\`, \`isolated_storage\`, \`synthetic_only\`, \`existing_profiles_untouched\`, \`no_leakage\`, \`rollback\`, \`failure_isolation\`, \`owned_cleanup\`), each PASS/FAIL/NOT_RUN. Require review mode `GPT6_OWNER_ATTESTED`, an actual GPT-6 review report with PASS bound to the exact source SHA and diff digest, and a separate owner attestation bound to the exact report digest and source revision before proposing `16LF-01=done`. Missing/forged/incomplete evidence is rejection; GPT-6 is not represented as a GitHub independent reviewer.
++7. 16L3 remains its own real native startup, size, RSS, battery/interaction release gate, separately accepted; 16U2 stays a separate owner decision. 16L1's previous 8/8 and 5/5 receipts are immutable historical evidence and are not rerun.
++
++## Validation boundaries
++
++\`tools/task_board.py\` separates \`fresh_receipt_structurally_valid()\` from \`fresh_receipt_status()\` and authoritative \`accepted()\`. Structural validation is only schema/shape preflight. A correctly formatted receipt, SHA, GitHub issue URL, fabricated review URL, self-authored \`PASS\`, or task-registry status cannot establish acceptance.
++
++The offline resolver has **no production trust root or external verifier** for actual receipt existence/integrity, review-report and 16L1 artifact existence, actual PASS verdict, authorized GPT6_OWNER_ATTESTED mode, owner identity, separate owner-attestation existence/validity, exact report/source/diff bindings, receipt/report/attestation/artifact digest consistency, 16L1 artifact provenance/source binding, all eight fresh-start checks, or evidence completeness. Accordingly, a missing receipt is reported as \\`MISSING\\`, malformed evidence as \\`INVALID\\`, and structurally valid evidence without a trusted verifier as \\`PENDING_EXTERNAL_VERIFICATION\\`. Failed external facts are rejected. None of these states can satisfy \\`16LF-01\\`, unlock \\`16L3\\`, or enter release waves. The typed verifier contract requires each fact and exact binding; it is not loaded from task JSON or receipt fields. The production CLI deliberately injects no verifier and remains fail-closed.
++
++No production trust root, signature, provenance result, external review, or successful local proof is invented. The GPT-6 report digest and separate owner-attestation digest are pinned in the receipt; the owner attestation must reference the exact report digest and source SHA. Model authorship is owner-attested, not cryptographically authenticated. A separately trusted verifier integration is a remaining prerequisite before any genuine \\`16LF-01\\` evidence can be accepted. No GitHub independent approval is claimed; owner acceptance and merge remain separate.
++
++No owner-local or synthetic Windows runtime is executed in 16FS-01; hosted CI exercises only source-level DAG and contract tests. Actual 16LF-01/16L3 are both NOT_RUN. Prior 16F and 16L1 acceptance is preserved; release is not activated.
++
++
++## Final corrections — 2026-10-30 (targeted candidate; GPT-6 technical review and owner acceptance pending)
++
++### P1 — authoritative fresh-start receipt acceptance
++
++- Renamed the receipt check to \`fresh_receipt_structurally_valid()\`; it is explicitly structural-only.
++- Added \`fresh_receipt_status()\` with \`MISSING\`, \`INVALID\`, \`PENDING_EXTERNAL_VERIFICATION\`, \`REJECTED_EXTERNAL_VERIFICATION\`, \`VERIFICATION_ERROR\`, and \`ACCEPTED\` states.
++- Added a typed \`FreshEvidenceVerification\` trust-boundary contract covering actual receipt, review and artifact existence; authorized GPT6_OWNER_ATTESTED mode; verified owner identity; separate owner-attestation existence/validity; actual GPT-6 PASS verdict; exact reviewed source SHA and diff digest; receipt/report/artifact digest consistency; artifact provenance and source binding; fresh-start checks; and evidence completeness.
++- The offline CLI does not provide a verifier because no defensible repository trust root or implementation was found. Therefore structurally valid candidates remain pending external verification, while missing or malformed evidence is separately reported; none can satisfy \`accepted(16LF-01)\`, the 16L3 OR dependency, readiness, validation, or wave forecasting.
++- Tests use a clearly test-only verifier double to exercise the positive typed-contract path; it is not imported by the production CLI and is not evidence of a real review, artifact, or Windows physical run.
++
++### P2 — complete 16F native-gate inventory
++
++- Added \`16LF-01_owner_local_fresh_start\` to the canonical 16F \`GATES\` set.
++- Source-bound report generation now requires 16LF-01 to remain registry-\`blocked\` with no evidence and reports it as \`NOT_RUN\`.
++- Exact-set and no-promotion regression tests cover omission, forged PASS, and registry status/evidence drift.
++- \`product_release_ready=false\`, existing provenance disclaimers, 16L2 restrictions, and exact-source checks remain unchanged.
++
++### Corrective candidate boundaries
++
++- Existing Draft PR #138 and its branch are preserved; no merge or replacement PR.
++- 16U1 remains fresh-start with migration consent declined.
++- 16L2 remains \`BLOCKED / NOT_RUN / NOT_AUTHORIZED\`.
++- 16LF-01 remains \`BLOCKED / NOT_RUN\`; 16L3 remains \`BLOCKED / NOT_RUN\`; 16U2 remains \`NOT_RUN\`.
++- No owner-local Windows access, installer execution, private-profile access, migration implementation, or release authorization was performed.
++- Candidate acceptance remains pending final exact-HEAD Windows/Ubuntu CI, GPT-6 technical review report, and the owner's separate acceptance of that exact report/source revision. Owner acceptance and merge remain separate.
++
++
++### Private migration remains disabled
++
++- 16L2 cannot become ready or enter wave forecasts in this phase, even if owner consent is later changed. A dedicated trusted private-migration verifier is not implemented.
++- Self-reported physical, verdict, consent, or other task-registry receipt fields cannot establish 16L2 acceptance.
++- The 16L3 OR alternative is structurally preserved for future policy evolution, but only 16LF-01 is a viable path under the current fresh-start decision and verifier plan.
++
++
++## Owner-attested review contract correction — 2026-10-30
++
++- Replaced the mandatory GitHub-independent-review contract with the single accepted review mode `GPT6_OWNER_ATTESTED`. No GitHub independent approval is required or claimed, and GPT-6 is never represented as a GitHub reviewer.
++- `FreshEvidenceVerification` now requires actual receipt existence/integrity, review-report and artifact existence, authorized review mode, verified owner identity, separate owner-attestation existence/validity, actual GPT-6 PASS verdict, exact reviewed source SHA and diff digest, receipt/report/artifact digest consistency, 16L1 provenance and source binding, all eight fresh-start checks, and evidence completeness.
++- The typed result binds the report URL/digest/verdict/source/diff and artifact digest; it verifies the receipt, report and owner-attestation digests independently, and binds the owner attestation to the exact report digest and source revision. It also binds the actual 16L1 artifact ID, digest, source SHA and provenance digest.
++- Structural receipt validation is schema v2 and shape-only. A self-reported review mode, owner login, URL, digest, PASS check or verification boolean cannot establish acceptance. The production CLI supplies no verifier.
++- The owner-controlled trust root and production verifier remain explicitly out of scope; 16FV-01 (#139) owns that later implementation after 16FS-01 is accepted and merged. Missing trust root, missing/mismatched owner attestation, unsupported mode, source/diff/report/receipt/artifact mismatch, missing provenance, or verifier failure remains pending/rejected.
++- The positive verifier is a test-only double and does not establish production authority. Model authorship is owner-attested, not cryptographically authenticated.
++- Preserved: 16L2 `BLOCKED / NOT_RUN / NOT_AUTHORIZED`; 16LF-01 `BLOCKED / NOT_RUN`; 16L3 `BLOCKED / NOT_RUN`; 16U2 `NOT_RUN`; no private-profile access, installer execution, local Windows qualification, merge or release activation.
++
++**Expected handoff:** READY FOR GPT-6 TECHNICAL REVIEW — NOT MERGED — OWNER ACCEPTANCE PENDING.
++
++
++### GPT-6 final review corrections — 2026-10-30
++
++- The typed verifier now requires canonical provider-native identities for the receipt, GPT-6 review report and owner attestation. The three immutable record identities must be present and pairwise distinct; URL paths and anchors are locations, not proof of record distinctness. Alternate GitHub URL forms for the same comment/review must normalize to the same provider identity and be rejected when reused.
++- The verifier separately records the authorized owner identity and the actual owner-attestation author identity. The latter must be verified and match the authorized owner login. The model-review report and owner acceptance may still be authored under the same owner account; they must be separate immutable records. This does not claim GitHub independent approval or cryptographic proof of model authorship.
++- OR dependency structures are validated before graph traversal. Cycle detection consumes only validated AND edges and validated OR groups. Malformed groups or members produce controlled validation errors; readiness remains blocked and wave forecasting returns no waves for malformed dependency graphs.
++- The production CLI still supplies no verifier or trust root. 16LF-01 remains pending external verification; 16L2 remains BLOCKED / NOT_RUN / NOT_AUTHORIZED; 16L3 remains BLOCKED / NOT_RUN; 16U2 remains NOT_RUN. No private-profile access, migration, physical qualification, merge or release activation is authorized.
+diff --git a/docs/task-registry.json b/docs/task-registry.json
+index 02df99d6..80cfee72 100644
+--- a/docs/task-registry.json
++++ b/docs/task-registry.json
+@@ -3,7 +3,7 @@
+   "description": "CoSoS 16-phase historical DAG plus cross-cutting P0 performance-first tasks; feature parity is not the mandatory product goal; statuses are snapshots.",
+   "ordering": "Phase 1–6 backend closure (CL), then Phase 7 preflight (7P-*), Phase 7, Phase 8 through Phase 16; PERF-00..06 cross-cutting Phase 16 identifiers scheduled early by AND dependencies.",
+   "readiness_policy": "Performance-first, ChatGPT coding-focused product scope supersedes mandatory full CoS parity. Security, ownership, durability and native/owner gates cannot be waived. An unclaimed todo node is only a READY_CANDIDATE when all dependencies are done; agents MUST recheck live GitHub main SHA, CI, open PRs, claims, overlapping file/contract locks and human/OS consent before taking it. No atomic lock controller is installed. Owner resumed physical 7P-L1 on 2026-10-23: the real Windows embedded browser feasibility gate can be accepted through the separate SHA-bound native qualifier after all required synthetic browser/ownership, installed-package, candidate distribution and resource measurements pass. Real product release acceptance remains at 16L3, signed-in accounts at 7U1/8U1 and OS IME is separately owner-deferred. Native 7L1 still requires both accepted 7C and accepted 7P-L1; it must independently qualify real extension bridge integration.",
+-  "task_status_source": "2026-10-28: owner explicitly approved unsigned Windows installers with independently verified GitHub provenance; Authenticode publisher signing is optional. 16PKG-01 remains claimed/Review until real unsigned product cloud lifecycle, security self-review, exact-head checks, and approved merge. 16L1 remains blocked/NOT_RUN until accepted artifact and physical Windows session. Previous TEST-signed receipts remain historical only. 2026-10-24: Phase 15B/15C/15D/15E/15F/15G cloud merge receipts reconciled to Done (Notion exact-head PRs #77/#72/#73/#74/#79/#84 respectively); 15L1 and 15L2 retain native Blocked at issue #85. 15L3 is Local Gate without real product-RAM PASS; PERF-00 can now be a candidate. 2026-10-24 7L2 native accepted on 74d4460 owner run03; 7U1-PREP read-only product runner outstanding; native 8L1 and 15L1/2 unaccepted; PERF tasks added NOT_RUN; historical status follows. 2026-10-24: reconciled accepted cloud 8B PR #61, 8C PR #65 and 15A PR #67 from live merged SHAs/checks. 8L1 physical Windows claim #71 found missing native integration and is BLOCKED, never Done; 8U1 remains blocked. 15B/15C/15D/15E are prerequisite-ready cloud candidates only, subject to live claims/locks. Earlier history follows. 2026-10-23: 8A merged PR #59 at eb91712d3c92c74f8714ef5f573939ad4fb19575 with reported 12 exact-head CI checks and same-implementor review; 8B claimed by ChatGPT GPT-6 Cloud generation 1 under browser-profiles lock, issue #60, branch work/8b-isolated-profiles-session-20261023, not accepted until own CI and self-review. Earlier history follows. 2026-10-23: 7E source-wire differential PR #57 merged at f5b27921d54c005cd027f3afdb8af9e11d736557 after 13 exact-head CI checks and direct implementor self-review; 8A Cloud eligible (claimed generation 1, 2026-10-23) and remains todo until accepted. Prior record follows. 2026-10-23: 7L1 integrated Rust-WebView2-MV3 synthetic native gate accepted after PR #51 at exact physical source 2590decb7c618ace066795c2aeb6b4e5e2612405 (21 PASS, 0 FAIL, real worker forced restart PASS after 65-second idle observation, optional natural idle NOT_RUN). Source, Rust exit, companion claim/ACK/recovery, physical tab/profile/navigation fencing and provenance all verified. 7A/7B/7C and scoped 7P-L1 prerequisites were already Done. 7L1 Done unlocks 7D as a Cloud READY_CANDIDATE (unclaimed), with 7E still waiting on 7D. Real provider OAuth and full production release remain later separate gates. See docs/implementation-summary/2026-10-23-7l1-integrated-native-acceptance.md and PR #51 merge receipt.",
++  "task_status_source": "2026-10-28: owner explicitly approved unsigned Windows installers with independently verified GitHub provenance; Authenticode publisher signing is optional. 16PKG-01 remains claimed/Review until real unsigned product cloud lifecycle, security self-review, exact-head checks, and approved merge. 16L1 remains blocked/NOT_RUN until accepted artifact and physical Windows session. Previous TEST-signed receipts remain historical only. 2026-10-24: Phase 15B/15C/15D/15E/15F/15G cloud merge receipts reconciled to Done (Notion exact-head PRs #77/#72/#73/#74/#79/#84 respectively); 15L1 and 15L2 retain native Blocked at issue #85. 15L3 is Local Gate without real product-RAM PASS; PERF-00 can now be a candidate. 2026-10-24 7L2 native accepted on 74d4460 owner run03; 7U1-PREP read-only product runner outstanding; native 8L1 and 15L1/2 unaccepted; PERF tasks added NOT_RUN; historical status follows. 2026-10-24: reconciled accepted cloud 8B PR #61, 8C PR #65 and 15A PR #67 from live merged SHAs/checks. 8L1 physical Windows claim #71 found missing native integration and is BLOCKED, never Done; 8U1 remains blocked. 15B/15C/15D/15E are prerequisite-ready cloud candidates only, subject to live claims/locks. Earlier history follows. 2026-10-23: 8A merged PR #59 at eb91712d3c92c74f8714ef5f573939ad4fb19575 with reported 12 exact-head CI checks and same-implementor review; 8B claimed by ChatGPT GPT-6 Cloud generation 1 under browser-profiles lock, issue #60, branch work/8b-isolated-profiles-session-20261023, not accepted until own CI and self-review. Earlier history follows. 2026-10-23: 7E source-wire differential PR #57 merged at f5b27921d54c005cd027f3afdb8af9e11d736557 after 13 exact-head CI checks and direct implementor self-review; 8A Cloud eligible (claimed generation 1, 2026-10-23) and remains todo until accepted. Prior record follows. 2026-10-23: 7L1 integrated Rust-WebView2-MV3 synthetic native gate accepted after PR #51 at exact physical source 2590decb7c618ace066795c2aeb6b4e5e2612405 (21 PASS, 0 FAIL, real worker forced restart PASS after 65-second idle observation, optional natural idle NOT_RUN). Source, Rust exit, companion claim/ACK/recovery, physical tab/profile/navigation fencing and provenance all verified. 7A/7B/7C and scoped 7P-L1 prerequisites were already Done. 7L1 Done unlocks 7D as a Cloud READY_CANDIDATE (unclaimed), with 7E still waiting on 7D. Real provider OAuth and full production release remain later separate gates. See docs/implementation-summary/2026-10-23-7l1-integrated-native-acceptance.md and PR #51 merge receipt. 2026-10-29 (16FS-01 proposed): live Notion 16U1 decision Done (fresh start; private consent declined), 16L1/16E/16F accepted; the registry retains older historical status snapshots for unrelated tasks. 16L2 remains blocked/not authorized. 16LF-01 is a new blocked physical synthetic gate, NOT_RUN. 16L3 requires 16F+16L1 AND (authorized 16L2 OR reviewed 16LF-01); no gate is accepted by this branch alone. 2026-10-29 scoped Phase 16 alignment: 16A/B/C/D/E/F,16PKG-01,16L1,16U1 reconciled to Done ONLY after confirming Notion Done/PASS and linked GitHub evidence; 16U1 migration_consent=declined. 16L2,16LF-01,16L3,16U2 remain Blocked/NOT_RUN. Other historical and unrelated tasks untouched.",
+   "tasks": [
+     {
+       "id": "CL-01",
+@@ -1410,7 +1410,8 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "todo"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/103"
+     },
+     {
+       "id": "16B",
+@@ -1423,7 +1424,8 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "todo"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/110"
+     },
+     {
+       "id": "16C",
+@@ -1436,7 +1438,8 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "todo"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/111"
+     },
+     {
+       "id": "16D",
+@@ -1449,7 +1452,8 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "todo"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/119"
+     },
+     {
+       "id": "16E",
+@@ -1463,7 +1467,8 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "todo"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/118"
+     },
+     {
+       "id": "16U1",
+@@ -1476,7 +1481,10 @@
+       ],
+       "phase": "16",
+       "kind": "U",
+-      "status": "todo"
++      "status": "done",
++      "migration_consent": "declined",
++      "owner_decision": "fresh_start",
++      "accepted_evidence_url": "https://app.notion.com/p/400c4a6aaf738162bca6e622895656df"
+     },
+     {
+       "id": "16PKG-01",
+@@ -1492,7 +1500,8 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "claimed"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/130"
+     },
+     {
+       "id": "16L1",
+@@ -1506,7 +1515,8 @@
+       ],
+       "phase": "16",
+       "kind": "L",
+-      "status": "blocked"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/129#issuecomment-6489920288"
+     },
+     {
+       "id": "16L2",
+@@ -1520,7 +1530,8 @@
+       ],
+       "phase": "16",
+       "kind": "L",
+-      "status": "todo"
++      "status": "blocked",
++      "private_migration_status": "NOT_RUN / NOT_AUTHORIZED"
+     },
+     {
+       "id": "16F",
+@@ -1534,22 +1545,62 @@
+       ],
+       "phase": "16",
+       "kind": "C",
+-      "status": "todo"
++      "status": "done",
++      "accepted_evidence_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/122"
++    },
++    {
++      "id": "16FS-01",
++      "title": "Fresh-start release acceptance and alternate 16L2 dependency contract",
++      "depends_on": [
++        "16U1",
++        "16L1",
++        "16F"
++      ],
++      "resource_locks": [
++        "release-freshstart-contract"
++      ],
++      "phase": "16",
++      "kind": "C",
++      "status": "claimed",
++      "scope": "contract-only; no private-profile migration or physical test",
++      "claim_owner": "gpt6-cloud-16fs01-owner-attested-20261030-1738wib"
++    },
++    {
++      "id": "16LF-01",
++      "title": "Owner-local fresh disposable profile initialization, isolation and rollback proof",
++      "depends_on": [
++        "16FS-01",
++        "16U1",
++        "16L1"
++      ],
++      "resource_locks": [
++        "windows-freshstart"
++      ],
++      "phase": "16",
++      "kind": "L",
++      "status": "blocked",
++      "evidence": null,
++      "acceptance": "NOT_RUN; owner-local Windows synthetic-only; GPT-6 technical-review report and separate owner attestation required; no GitHub independent approval is claimed"
+     },
+     {
+       "id": "16L3",
+       "title": "Full Windows release/startup/size proof",
+       "depends_on": [
+         "16F",
+-        "16L1",
+-        "16L2"
++        "16L1"
+       ],
+       "resource_locks": [
+         "windows-release"
+       ],
+       "phase": "16",
+       "kind": "L",
+-      "status": "todo"
++      "status": "blocked",
++      "any_of": [
++        [
++          "16L2",
++          "16LF-01"
++        ]
++      ]
+     },
+     {
+       "id": "16U2",
+@@ -1562,7 +1613,7 @@
+       ],
+       "phase": "16",
+       "kind": "U",
+-      "status": "todo"
++      "status": "blocked"
+     },
+     {
+       "id": "PERF-00",
+diff --git a/tools/release_16f.py b/tools/release_16f.py
+index 188a7c30..9567bd33 100644
+--- a/tools/release_16f.py
++++ b/tools/release_16f.py
+@@ -14,7 +14,7 @@
+ import subprocess
+ from pathlib import Path
+ 
+-SCHEMA = "cosos.release.cloud-provenance.v1"
++SCHEMA = "cosos.release.cloud-provenance.v2"
+ SHA40 = re.compile(r"[0-9a-f]{40}\Z")
+ MAX_RECEIPT_BYTES = 128 * 1024
+ MAX_SOURCE_BYTES = 2 * 1024 * 1024
+@@ -29,6 +29,12 @@
+     "LICENSE",
+     "Cargo.lock",
+     "docs/task-registry.json",
++    "tools/task_board.py",
++    "tools/test_task_board.py",
++    ".github/workflows/task-graph.yml",
++    "docs/PARALLEL-EXECUTION-BOARD.md",
++    "docs/implementation-plan/2026-10-18-cloud-first-units.md",
++    "docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md",
+     "tools/release_16b.py",
+     "tools/release_16c.py",
+     "tools/release_16d.py",
+@@ -48,6 +54,7 @@
+     "16L1_native_installer",
+     "16U1_owner_consent",
+     "16L2_owner_approved_copy_migration",
++    "16LF-01_owner_local_fresh_start",
+     "16L3_native_full_release_performance",
+     "16U2_owner_release_decision",
+     "PERF-05_native_product_comparison",
+@@ -82,7 +89,21 @@ def make_report(expected_head, actual_head, ancestors, sources):
+     tasks = {item["id"]: item for item in registry["tasks"] if isinstance(item, dict) and isinstance(item.get("id"), str)}
+     require(len(tasks) == len(registry["tasks"]), "invalid or duplicate task IDs")
+     require(set(tasks["16F"]["depends_on"]) == {"16D", "16E"}, "16F dependency contract changed")
+-    require(set(tasks["16L3"]["depends_on"]) == {"16F", "16L1", "16L2"}, "16L3 native gate dependencies changed")
++    require(set(tasks["16L3"]["depends_on"]) == {"16F", "16L1"} and
++            tasks["16L3"].get("any_of") == [["16L2", "16LF-01"]],
++            "16L3 required AND/OR native gate dependencies changed")
++    require(tasks.get("16FS-01", {}).get("kind") == "C" and
++            tasks["16FS-01"].get("depends_on") == ["16U1", "16L1", "16F"] and
++            tasks.get("16LF-01", {}).get("kind") == "L" and
++            tasks["16LF-01"].get("depends_on") == ["16FS-01", "16U1", "16L1"] and
++            tasks["16LF-01"].get("status") == "blocked" and
++            tasks["16LF-01"].get("evidence") is None,
++            "16FS-01 / 16LF-01 independent fresh-start gate changed or is no longer NOT_RUN")
++    require(tasks.get("16U1", {}).get("migration_consent") == "declined" and
++            tasks.get("16U1", {}).get("owner_decision") == "fresh_start" and
++            tasks.get("16L2", {}).get("status") == "blocked" and
++            tasks.get("16L2", {}).get("private_migration_status") == "NOT_RUN / NOT_AUTHORIZED",
++            "owner fresh-start decision or private 16L2 NOT_AUTHORIZED state changed")
+     require(tasks["16F"]["kind"] == "C" and tasks["16L3"]["kind"] == "L", "task environment gate changed")
+     return {
+         "schema": SCHEMA,
+@@ -107,7 +128,7 @@ def make_report(expected_head, actual_head, ancestors, sources):
+             "installer_transaction": "16E_SYNTHETIC_DISPOSABLE_ONLY",
+             "startup_memory": "16D_HEADLESS_ROOT_PROCESS_ONLY_NO_GUI_BUDGET",
+             "github_ci_verdict": "REQUIRES_EXTERNAL_EXACT_HEAD_CHECKS",
+-            "independent_review": "REQUIRES_HUMAN_OR_SEPARATE_REVIEW_RECEIPT",
++            "review_policy": "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
+         },
+         "native_owner_gates": {gate: "NOT_RUN" for gate in GATES},
+         "product_release_ready": False,
+diff --git a/tools/task_board.py b/tools/task_board.py
+index 0ad022b2..0b854a18 100644
+--- a/tools/task_board.py
++++ b/tools/task_board.py
+@@ -8,13 +8,16 @@
+ from __future__ import annotations
+ 
+ import argparse
++import copy
+ import json
+ import sys
+ from collections import Counter
++from dataclasses import dataclass
+ from pathlib import Path
++from typing import Callable
+ 
+ REGISTRY = Path(__file__).resolve().parents[1] / "docs" / "task-registry.json"
+-EXPECTED = {"C": 79, "L": 30, "U": 15}
++EXPECTED = {"C": 80, "L": 31, "U": 15}
+ STATUSES = {"done", "todo", "claimed", "blocked", "hold"}
+ PHASES = {"1-6", *(str(n) for n in range(7, 17))}
+ NOTICE = (
+@@ -28,66 +31,580 @@ def load(path: Path = REGISTRY) -> dict:
+ 
+ 
+ def index(data: dict) -> dict[str, dict]:
+-    return {task["id"]: task for task in data["tasks"]}
++    raw_tasks = data.get("tasks", []) if isinstance(data, dict) else []
++    if not isinstance(raw_tasks, list):
++        return {}
++    return {
++        task["id"]: task
++        for task in raw_tasks
++        if isinstance(task, dict)
++        and isinstance(task.get("id"), str)
++        and task["id"]
++    }
+ 
+ 
+-def validate(data: dict) -> list[str]:
+-    problems: list[str] = []
++
++FRESH_CHECKS = (
++    "fresh_init", "isolated_storage", "synthetic_only",
++    "existing_profiles_untouched", "no_leakage", "rollback",
++    "failure_isolation", "owned_cleanup",
++)
++FRESH_REVIEW_MODE = "GPT6_OWNER_ATTESTED"
++FRESH_RECEIPT_SCHEMA_VERSION = 2
++
++FRESH_VERIFICATION_FIELDS = (
++    "receipt_exists",
++    "receipt_integrity_verified",
++    "review_report_exists",
++    "artifact_exists",
++    "review_mode_authorized",
++    "owner_identity_verified",
++    "owner_attestation_exists",
++    "owner_attestation_valid",
++    "owner_attestation_author_identity_verified",
++    "gpt6_review_verdict_pass",
++    "reviewed_source_sha_matches",
++    "reviewed_diff_digest_matches",
++    "receipt_review_artifact_digests_match",
++    "artifact_provenance_verified",
++    "artifact_source_binding_verified",
++    "fresh_start_checks_verified",
++    "evidence_complete",
++)
++
++
++def _is_hex_digest(value: object, length: int) -> bool:
++    return isinstance(value, str) and len(value) == length and all(
++        char in "0123456789abcdef" for char in value
++    )
++
++
++def _is_provider_record_identity(value: object) -> bool:
++    """Accept only canonical, provider-native identities supplied by a verifier.
++
++    URLs are locations, not record identities. For GitHub-backed evidence the
++    verifier must normalize alternate URL paths/anchors to the same immutable
++    provider record identity (for example, github:issue-comment:123).
++    """
++    return (
++        isinstance(value, str)
++        and value.startswith("github:")
++        and value.count(":") >= 2
++        and 1 <= len(value) <= 256
++        and value == value.strip()
++        and not any(char.isspace() for char in value)
++    )
++
++
++@dataclass(frozen=True)
++class FreshEvidenceVerification:
++    """Facts established by a separately trusted external evidence verifier.
++
++    GPT6_OWNER_ATTESTED is an owner-attested model-review mode, not a GitHub
++    independent reviewer. The verifier must authenticate the owner identity
++    and separate owner attestation, and bind that attestation to the exact
++    GPT-6 report digest and source revision. Model authorship itself is
++    owner-attested, not cryptographically authenticated.
++
++    This value must be produced by trusted verifier code, never deserialized
++    from task-registry.json or from the owner-local receipt itself.
++    """
++    receipt_exists: bool
++    receipt_integrity_verified: bool
++    review_report_exists: bool
++    artifact_exists: bool
++    review_mode_authorized: bool
++    owner_identity_verified: bool
++    owner_attestation_exists: bool
++    owner_attestation_valid: bool
++    owner_attestation_author_identity_verified: bool
++    gpt6_review_verdict_pass: bool
++    reviewed_source_sha_matches: bool
++    reviewed_diff_digest_matches: bool
++    receipt_review_artifact_digests_match: bool
++    artifact_provenance_verified: bool
++    artifact_source_binding_verified: bool
++    fresh_start_checks_verified: bool
++    evidence_complete: bool
++    verified_review_mode: str
++    verified_owner_login: str
++    verified_receipt_url: str
++    verified_receipt_sha256: str
++    verified_review_report_url: str
++    verified_review_report_sha256: str
++    verified_review_report_verdict: str
++    verified_review_report_source_sha: str
++    verified_review_report_diff_sha256: str
++    verified_review_report_artifact_sha256: str
++    verified_owner_attestation_url: str
++    verified_receipt_record_identity: str
++    verified_review_report_record_identity: str
++    verified_owner_attestation_record_identity: str
++    verified_owner_attestation_author_login: str
++    verified_owner_attestation_sha256: str
++    verified_owner_attested_review_report_sha256: str
++    verified_owner_attested_source_sha: str
++    verified_source_sha: str
++    verified_reviewed_source_sha: str
++    verified_diff_sha256: str
++    verified_reviewed_diff_sha256: str
++    verified_artifact_id: int
++    verified_artifact_sha256: str
++    verified_artifact_source_sha: str
++    verified_artifact_provenance_url: str
++    verified_artifact_provenance_sha256: str
++    verified_fresh_start_checks: tuple[str, ...]
++
++    def authoritative_for(self, receipt: dict) -> bool:
++        record_identities = (
++            self.verified_receipt_record_identity,
++            self.verified_review_report_record_identity,
++            self.verified_owner_attestation_record_identity,
++        )
++        return (
++            all(getattr(self, name) is True for name in FRESH_VERIFICATION_FIELDS)
++            and self.verified_review_mode == FRESH_REVIEW_MODE
++            and self.verified_review_mode == receipt.get("review_mode")
++            and self.verified_owner_login == receipt.get("owner_login")
++            and isinstance(self.verified_owner_login, str)
++            and isinstance(self.verified_owner_attestation_author_login, str)
++            and self.verified_owner_attestation_author_login.casefold()
++            == self.verified_owner_login.casefold()
++            and self.verified_receipt_url == receipt.get("receipt_url")
++            and self.verified_receipt_sha256 == receipt.get("receipt_sha256")
++            and self.verified_review_report_url == receipt.get("review_report_url")
++            and self.verified_review_report_sha256 == receipt.get("review_report_sha256")
++            and self.verified_owner_attestation_sha256 == receipt.get("owner_attestation_sha256")
++            and self.verified_review_report_verdict == "PASS"
++            and self.verified_review_report_source_sha == receipt.get("source_sha")
++            and self.verified_review_report_diff_sha256 == receipt.get("diff_sha256")
++            and self.verified_review_report_artifact_sha256 == self.verified_artifact_sha256
++            and self.verified_owner_attestation_url == receipt.get("owner_attestation_url")
++            and all(_is_provider_record_identity(identity) for identity in record_identities)
++            and len(set(record_identities)) == 3
++            and self.verified_owner_attested_review_report_sha256 == self.verified_review_report_sha256
++            and self.verified_owner_attested_source_sha == receipt.get("source_sha")
++            and self.verified_source_sha == receipt.get("source_sha")
++            and self.verified_reviewed_source_sha == receipt.get("reviewed_source_sha")
++            and self.verified_diff_sha256 == receipt.get("diff_sha256")
++            and self.verified_reviewed_diff_sha256 == receipt.get("reviewed_diff_sha256")
++            and self.verified_artifact_id == receipt.get("artifact_id")
++            and self.verified_artifact_sha256 == receipt.get("artifact_sha256")
++            and self.verified_artifact_source_sha == receipt.get("artifact_source_sha")
++            and self.verified_artifact_provenance_url == receipt.get("artifact_provenance_url")
++            and self.verified_artifact_provenance_sha256 == receipt.get("artifact_provenance_sha256")
++            and self.verified_fresh_start_checks == FRESH_CHECKS
++            and _is_hex_digest(self.verified_receipt_sha256, 64)
++            and _is_hex_digest(self.verified_review_report_sha256, 64)
++            and _is_hex_digest(self.verified_owner_attestation_sha256, 64)
++            and _is_hex_digest(self.verified_artifact_sha256, 64)
++            and _is_hex_digest(self.verified_artifact_provenance_sha256, 64)
++            and _is_hex_digest(self.verified_source_sha, 40)
++            and _is_hex_digest(self.verified_reviewed_source_sha, 40)
++            and _is_hex_digest(self.verified_owner_attested_source_sha, 40)
++            and _is_hex_digest(self.verified_artifact_source_sha, 40)
++            and _is_hex_digest(self.verified_diff_sha256, 64)
++            and _is_hex_digest(self.verified_reviewed_diff_sha256, 64)
++            and type(self.verified_artifact_id) is int
++            and self.verified_artifact_id > 0
++        )
++
++
++FreshEvidenceVerifier = Callable[[dict], FreshEvidenceVerification]
++
++
++def fresh_receipt_structurally_valid(receipt: object) -> bool:
++    """Validate receipt shape only; this is never an acceptance decision.
++
++    Receipt URLs, hashes, review mode, owner login and PASS checks are
++    self-reported claims. Only a separately trusted verifier can establish
++    actual receipt/report/attestation/artifact existence, identity, verdict,
++    exact source/diff/digest bindings, provenance and physical checks.
++    """
++    if not isinstance(receipt, dict):
++        return False
++
++    def repo_url(value: object) -> bool:
++        return (
++            isinstance(value, str)
++            and value.startswith(
++                "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/"
++            )
++            and not any(char.isspace() for char in value)
++        )
++
++    source = receipt.get("source_sha")
++    diff_digest = receipt.get("diff_sha256")
++    owner_login = receipt.get("owner_login")
++    artifact_id = receipt.get("artifact_id")
++    return (
++        type(receipt.get("schema_version")) is int
++        and receipt["schema_version"] == FRESH_RECEIPT_SCHEMA_VERSION
++        and receipt.get("kind") == "owner-local-synthetic-fresh-start"
++        and receipt.get("review_mode") == FRESH_REVIEW_MODE
++        and isinstance(owner_login, str)
++        and 1 <= len(owner_login) <= 39
++        and not any(char.isspace() for char in owner_login)
++        and receipt.get("profile_scope") == "new-disposable-empty"
++        and receipt.get("migration") == "none"
++        and receipt.get("host") == "owner-local-windows"
++        and _is_hex_digest(source, 40)
++        and receipt.get("reviewed_source_sha") == source
++        and _is_hex_digest(diff_digest, 64)
++        and receipt.get("reviewed_diff_sha256") == diff_digest
++        and type(artifact_id) is int
++        and artifact_id > 0
++        and _is_hex_digest(receipt.get("artifact_sha256"), 64)
++        and _is_hex_digest(receipt.get("artifact_source_sha"), 40)
++        and repo_url(receipt.get("artifact_provenance_url"))
++        and _is_hex_digest(receipt.get("artifact_provenance_sha256"), 64)
++        and _is_hex_digest(receipt.get("review_report_sha256"), 64)
++        and _is_hex_digest(receipt.get("owner_attestation_sha256"), 64)
++        and _is_hex_digest(receipt.get("receipt_sha256"), 64)
++        and isinstance(receipt.get("local_session_id"), str)
++        and len(receipt["local_session_id"]) >= 12
++        and repo_url(receipt.get("receipt_url"))
++        and repo_url(receipt.get("review_report_url"))
++        and repo_url(receipt.get("owner_attestation_url"))
++        and "independent_review_verdict" not in receipt
++        and "reviewer_independent" not in receipt
++        and isinstance(receipt.get("checks"), dict)
++        and set(receipt["checks"]) == set(FRESH_CHECKS)
++        and all(receipt["checks"][name] == "PASS" for name in FRESH_CHECKS)
++    )
++
++
++def fresh_receipt_status(
++    receipt: object,
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> str:
++    """Return MISSING, INVALID, PENDING_EXTERNAL_VERIFICATION,
++    REJECTED_EXTERNAL_VERIFICATION, VERIFICATION_ERROR, or ACCEPTED.
++
++    The only accepted review mode in this contract is GPT6_OWNER_ATTESTED.
++    The future 16FV-01 verifier must use an owner-controlled trust root to
++    authenticate the owner identity and separate attestation, verify the
++    actual GPT-6 report's PASS verdict and exact source/diff bindings, and
++    check receipt/report/artifact digests plus 16L1 provenance. This offline
++    task-board module deliberately has no production trust root or verifier.
++    Its normal CLI supplies none, so it remains fail-closed. A test-only
++    verifier double is not production authority.
++    """
++    if receipt is None:
++        return "MISSING"
++    if not fresh_receipt_structurally_valid(receipt):
++        return "INVALID"
++    if trusted_verifier is None:
++        return "PENDING_EXTERNAL_VERIFICATION"
++    try:
++        verification = trusted_verifier(copy.deepcopy(receipt))
++    except Exception:
++        return "VERIFICATION_ERROR"
++    if type(verification) is not FreshEvidenceVerification:
++        return "REJECTED_EXTERNAL_VERIFICATION"
++    if not verification.authoritative_for(receipt):
++        return "REJECTED_EXTERNAL_VERIFICATION"
++    return "ACCEPTED"
++
++
++def private_migration_authorized(tasks: dict[str, dict]) -> bool:
++    owner = tasks.get("16U1")
++    if not isinstance(owner, dict):
++        return False
++    consent = owner.get("consent_receipt")
++    return (
++        owner.get("migration_consent") == "granted"
++        and owner.get("owner_decision") == "approved_private_copy"
++        and isinstance(consent, dict)
++        and consent.get("explicit_owner_approval") is True
++        # 16L2 is strictly copy-only; a nonempty but broader scope must
++        # never authorize this task.
++        and consent.get("scope") == "approved-copy-only"
++        and isinstance(consent.get("approval_url"), str)
++        and consent["approval_url"].startswith("https://")
++    )
++
++
++def accepted(
++    tasks: dict[str, dict],
++    task_id: str,
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> bool:
++    task = tasks.get(task_id)
++    if task is None or task.get("status") != "done":
++        return False
++    if task_id == "16L2":
++        # Consent can authorize starting the copy-only operation, but a
++        # User-editable receipt fields cannot establish physical acceptance.
++        # No trusted private-migration verifier is integrated in this phase.
++        return False
++    if task_id == "16LF-01":
++        return fresh_receipt_status(
++            task.get("evidence"), trusted_verifier=trusted_verifier
++        ) == "ACCEPTED"
++    return True
++
++
++def _validated_and_dependencies(
++    task: dict,
++    tasks: dict[str, dict],
++) -> tuple[list[str], bool]:
++    raw = task.get("depends_on")
++    if not isinstance(raw, list):
++        return [], False
++    if any(not isinstance(dep, str) or not dep for dep in raw):
++        return [], False
++    if len(raw) != len(set(raw)):
++        return [], False
++    if any(dep not in tasks or dep == task.get("id") for dep in raw):
++        return [], False
++    return list(raw), True
++
++
++def _validated_or_groups(
++    task: dict,
++    tasks: dict[str, dict],
++) -> tuple[list[list[str]], bool]:
++    raw_groups = task.get("any_of", [])
++    if not isinstance(raw_groups, list):
++        return [], False
++
++    validated: list[list[str]] = []
++    all_valid = True
++    for group in raw_groups:
++        if not isinstance(group, list) or len(group) < 2:
++            all_valid = False
++            continue
++        # Check types before set()/membership operations: malformed JSON may
++        # contain nulls, nested arrays or objects that are not hashable IDs.
++        if any(not isinstance(dep, str) or not dep for dep in group):
++            all_valid = False
++            continue
++        if len(group) != len(set(group)):
++            all_valid = False
++            continue
++        if any(dep not in tasks or dep == task.get("id") for dep in group):
++            all_valid = False
++            continue
++        validated.append(list(group))
++    return validated, all_valid
++
++
++def missing_dependencies(
++    task: dict,
++    tasks: dict[str, dict],
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> list[str]:
++    missing: list[str] = []
++    dependencies, dependencies_valid = _validated_and_dependencies(task, tasks)
++    if not dependencies_valid:
++        missing.append("invalid_prerequisites")
++    else:
++        missing.extend(
++            dep for dep in dependencies
++            if not accepted(tasks, dep, trusted_verifier=trusted_verifier)
++        )
++
++    # The private-migration path stays disabled in this phase. Owner consent
++    # is necessary but insufficient: no trusted private-migration verifier is
++    # integrated, so the task must not become ready or satisfy the release OR.
++    if task.get("id") == "16L2":
++        if not private_migration_authorized(tasks):
++            missing.append("owner_private_migration_consent")
++        missing.append("trusted_private_migration_verifier")
++
++    groups, groups_valid = _validated_or_groups(task, tasks)
++    if not groups_valid:
++        missing.append("invalid_or_prerequisites")
++    for group in groups:
++        if not any(
++            accepted(tasks, dep, trusted_verifier=trusted_verifier)
++            for dep in group
++        ):
++            missing.append("one_of(" + "|".join(group) + ")")
++    return missing
++
++
++def validate(
++    data: dict,
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> list[str]:
++    if not isinstance(data, dict):
++        return ["Invalid schema/version or tasks array"]
+     tasks = data.get("tasks", [])
+     if data.get("schema_version") != 1 or not isinstance(tasks, list):
+         return ["Invalid schema/version or tasks array"]
+-    ids = [t.get("id") for t in tasks]
++
++    problems: list[str] = []
++    task_rows: list[dict] = []
++    ids: list[str] = []
++    for position, task in enumerate(tasks):
++        if not isinstance(task, dict):
++            problems.append(f"Invalid task entry at index {position}")
++            continue
++        task_rows.append(task)
++        task_id = task.get("id")
++        if not isinstance(task_id, str) or not task_id:
++            problems.append(f"Invalid task id: {task_id!r}")
++        else:
++            ids.append(task_id)
++
+     counts = Counter(ids)
+     for task_id, count in counts.items():
+         if count != 1:
+             problems.append(f"Duplicate task id: {task_id}")
++
+     tasks_by_id = index(data)
+-    for t in tasks:
+-        task_id = t.get("id")
+-        deps = t.get("depends_on")
+-        locks = t.get("resource_locks")
++    validated_and_by_id: dict[str, list[str]] = {}
++    validated_or_by_id: dict[str, list[list[str]]] = {}
++
++    for task in task_rows:
++        task_id = task.get("id")
+         if not isinstance(task_id, str) or not task_id:
+-            problems.append(f"Invalid task id: {task_id!r}")
+-        if t.get("kind") not in EXPECTED:
++            continue
++
++        kind = task.get("kind")
++        status = task.get("status")
++        phase = task.get("phase")
++        if not isinstance(kind, str) or kind not in EXPECTED:
+             problems.append(f"{task_id}: invalid task kind")
+-        if t.get("status") not in STATUSES:
++        if not isinstance(status, str) or status not in STATUSES:
+             problems.append(f"{task_id}: invalid status")
+-        if t.get("phase") not in PHASES:
++        if not isinstance(phase, str) or phase not in PHASES:
+             problems.append(f"{task_id}: invalid phase")
+-        if not isinstance(deps, list) or len(deps) != len(set(deps)):
+-            problems.append(f"{task_id}: duplicated or invalid prerequisites")
+-            deps = []
+-        if not isinstance(locks, list) or not locks or not all(isinstance(x, str) and x for x in locks):
++
++        locks = task.get("resource_locks")
++        if not isinstance(locks, list) or not locks or not all(
++            isinstance(lock, str) and lock for lock in locks
++        ):
+             problems.append(f"{task_id}: missing resource locks")
+-        for dep in deps:
+-            if dep not in tasks_by_id:
+-                problems.append(f"{task_id}: dangling prerequisite {dep}")
+-            if dep == task_id:
++
++        raw_dependencies = task.get("depends_on")
++        dependencies_valid = (
++            isinstance(raw_dependencies, list)
++            and all(isinstance(dep, str) and dep for dep in raw_dependencies)
++        )
++        if dependencies_valid:
++            dependencies_valid = len(raw_dependencies) == len(set(raw_dependencies))
++        if not dependencies_valid:
++            problems.append(f"{task_id}: duplicated or invalid prerequisites")
++
++        validated_dependencies: list[str] = []
++        for dependency in raw_dependencies if isinstance(raw_dependencies, list) else []:
++            if not isinstance(dependency, str) or not dependency:
++                continue
++            if dependency not in tasks_by_id:
++                problems.append(f"{task_id}: dangling prerequisite {dependency}")
++                dependencies_valid = False
++                continue
++            if dependency == task_id:
+                 problems.append(f"{task_id}: self dependency")
+-            if t.get("status") == "done" and tasks_by_id.get(dep, {}).get("status") != "done":
+-                problems.append(f"{task_id}: cannot be done before {dep}")
+-    color: dict[str, int] = {}
+-    def visit(name: str, chain: list[str]) -> None:
+-        if color.get(name) == 2:
+-            return
+-        if color.get(name) == 1:
+-            problems.append("Dependency cycle: " + " -> ".join([*chain, name]))
+-            return
+-        if name not in tasks_by_id:
+-            return
+-        color[name] = 1
+-        for dep in tasks_by_id[name].get("depends_on", []):
+-            if dep in tasks_by_id:
+-                visit(dep, [*chain, name])
+-        color[name] = 2
+-    for name in ids:
+-        if isinstance(name, str):
+-            visit(name, [])
+-    if Counter(t.get("kind") for t in tasks) != Counter(EXPECTED):
+-        problems.append(f"Unexpected task counts: {dict(Counter(t.get('kind') for t in tasks))}")
++                dependencies_valid = False
++                continue
++            validated_dependencies.append(dependency)
++            if status == "done" and not accepted(
++                tasks_by_id, dependency, trusted_verifier=trusted_verifier
++            ):
++                problems.append(f"{task_id}: cannot be done before {dependency}")
++        validated_and_by_id[task_id] = (
++            validated_dependencies if dependencies_valid else []
++        )
++
++    # This OR group is intentional. Every other dependency remains mandatory.
++    l3 = tasks_by_id.get("16L3", {})
++    if (
++        l3.get("depends_on") != ["16F", "16L1"]
++        or l3.get("any_of") != [["16L2", "16LF-01"]]
++    ):
++        problems.append("16L3: required 16F + 16L1 AND (16L2 OR 16LF-01) gate changed")
++
++    owner_task = tasks_by_id.get("16U1", {})
++    private_task = tasks_by_id.get("16L2", {})
++    if owner_task.get("migration_consent") == "declined":
++        if owner_task.get("owner_decision") != "fresh_start":
++            problems.append(
++                "16U1: declined private migration must preserve the explicit fresh_start owner decision"
++            )
++        if private_task.get("private_migration_status") != "NOT_RUN / NOT_AUTHORIZED":
++            problems.append(
++                "16L2: owner-declined migration status must remain NOT_RUN / NOT_AUTHORIZED"
++            )
++
++    private_status = private_task.get("status")
++    if isinstance(private_status, str) and private_status in {"todo", "claimed", "done"}:
++        if not private_migration_authorized(tasks_by_id):
++            problems.append(
++                "16L2: cannot become ready, claimed, or accepted without explicit owner private-copy consent"
++            )
++        problems.append(
++            "16L2: keep blocked until a trusted private-migration verifier is implemented and configured"
++        )
++
++    for protected in ("16L2", "16LF-01"):
++        protected_task = tasks_by_id.get(protected)
++        if isinstance(protected_task, dict) and protected_task.get("status") == "done":
++            if not accepted(tasks_by_id, protected, trusted_verifier=trusted_verifier):
++                problems.append(f"{protected}: missing authorized, reviewed physical evidence")
++
++    for task in task_rows:
++        task_id = task.get("id")
++        if not isinstance(task_id, str) or not task_id:
++            continue
++        groups = task.get("any_of", [])
++        if task_id != "16L3" and groups:
++            problems.append(f"{task_id}: unexpected OR prerequisite")
++        if not isinstance(groups, list):
++            problems.append(f"{task_id}: invalid OR prerequisites")
++            validated_or_by_id[task_id] = []
++            continue
++
++        validated_groups: list[list[str]] = []
++        for group in groups:
++            if not isinstance(group, list) or len(group) < 2:
++                problems.append(f"{task_id}: invalid OR group")
++                continue
++            if any(not isinstance(dep, str) or not dep for dep in group):
++                problems.append(f"{task_id}: invalid OR group")
++                continue
++            if len(group) != len(set(group)):
++                problems.append(f"{task_id}: invalid OR group")
++                continue
++
++            group_valid = True
++            for dependency in group:
++                if dependency not in tasks_by_id:
++                    problems.append(
++                        f"{task_id}: dangling OR prerequisite {dependency}"
++                    )
++                    group_valid = False
++                elif dependency == task_id:
++                    problems.append(f"{task_id}: self OR dependency")
++                    group_valid = False
++            if group_valid:
++                validated_groups.append(list(group))
++
++        # Cycle traversal below receives only fully validated OR groups.
++        validated_or_by_id[task_id] = validated_groups
++        if task.get("status") == "done" and missing_dependencies(
++            task, tasks_by_id, trusted_verifier=trusted_verifier
++        ):
++            problems.append(f"{task_id}: cannot be done before all required release gates")
++
++    kind_counts = Counter(
++        task.get("kind")
++        for task in task_rows
++        if isinstance(task.get("kind"), str)
++    )
++    if kind_counts != Counter(EXPECTED):
++        problems.append(f"Unexpected task counts: {dict(kind_counts)}")
+     for obsolete in ("7P-C", "8D", "8E", "8L2"):
+         if obsolete in tasks_by_id:
+             problems.append(f"Obsolete runtime task id: {obsolete}")
++
+     expected_edges = {
+         "7P-A": ["CL-L6"], "7P-B": ["7P-A"], "7P-L1": ["7P-B"],
+         "7A": ["7P-B"], "7L1": ["7C", "7P-L1"], "8A": ["7E"], "8B": ["8A"], "8C": ["8B"],
+@@ -101,16 +618,52 @@ def visit(name: str, chain: list[str]) -> None:
+         "CL-L3": ["CL-06B", "CL-07B"],
+         "CL-10": ["CL-04B", "CL-04C", "CL-L2", "CL-L3", "CL-L4", "CL-L5"],
+         "CL-L6": ["CL-10"],
++        "16FS-01": ["16U1", "16L1", "16F"],
++        "16LF-01": ["16FS-01", "16U1", "16L1"],
++        "16U2": ["16L3"],
+     }
+     for task_id, expected in expected_edges.items():
+-        if sorted(tasks_by_id.get(task_id, {}).get("depends_on", [])) != sorted(expected):
++        if sorted(validated_and_by_id.get(task_id, [])) != sorted(expected):
+             problems.append(f"{task_id}: required phase ordering or gate changed")
+-    for task in tasks:
+-        if task["phase"] == "8" and task["id"].startswith("7P-"):
++
++    color: dict[str, int] = {}
++
++    def visit(name: str, chain: list[str]) -> None:
++        if color.get(name) == 2:
++            return
++        if color.get(name) == 1:
++            problems.append("Dependency cycle: " + " -> ".join([*chain, name]))
++            return
++        if name not in tasks_by_id:
++            return
++        color[name] = 1
++        edges = [
++            *validated_and_by_id.get(name, []),
++            *(
++                dependency
++                for group in validated_or_by_id.get(name, [])
++                for dependency in group
++            ),
++        ]
++        for dependency in edges:
++            if dependency in tasks_by_id:
++                visit(dependency, [*chain, name])
++        color[name] = 2
++
++    for name in ids:
++        if name in tasks_by_id:
++            visit(name, [])
++
++    for task in task_rows:
++        task_id = task.get("id")
++        if (
++            task.get("phase") == "8"
++            and isinstance(task_id, str)
++            and task_id.startswith("7P-")
++        ):
+             problems.append("Phase 7 preflight cannot be counted as Phase 8")
+     return problems
+ 
+-
+ def effective_locks(task: dict) -> set[str]:
+     locks = set(task["resource_locks"])
+     if task["kind"] == "L":
+@@ -120,57 +673,159 @@ def effective_locks(task: dict) -> set[str]:
+     return locks
+ 
+ 
+-def readiness(data: dict) -> tuple[list[dict], list[dict]]:
++def readiness(
++    data: dict,
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> tuple[list[dict], list[dict]]:
++    raw_tasks = data.get("tasks", []) if isinstance(data, dict) else []
++    if not isinstance(raw_tasks, list):
++        return [], []
+     tasks = index(data)
+-    ready, blocked = [], []
+-    for task in data["tasks"]:
+-        if task["status"] == "done":
++    ready: list[dict] = []
++    blocked: list[dict] = []
++    for task in raw_tasks:
++        if not isinstance(task, dict):
++            continue
++        if task.get("status") == "done":
+             continue
+-        missing = [dep for dep in task["depends_on"] if tasks[dep]["status"] != "done"]
++        missing = missing_dependencies(
++            task, tasks, trusted_verifier=trusted_verifier
++        )
+         item = {**task, "missing_prerequisites": missing}
+-        if task["status"] == "todo" and not missing:
++        if task.get("status") == "todo" and not missing:
+             ready.append(item)
+         else:
+             blocked.append(item)
+     return ready, blocked
+ 
+ 
+-def explain(data: dict, task_id: str) -> dict:
++def explain(
++    data: dict,
++    task_id: str,
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> dict:
+     tasks = index(data)
+     if task_id not in tasks:
+         raise KeyError(task_id)
+     task = tasks[task_id]
+     visited: set[str] = set()
+     def blockers(node: str) -> None:
+-        for dep in tasks[node]["depends_on"]:
+-            if tasks[dep]["status"] != "done" and dep not in visited:
++        current = tasks.get(node)
++        if not isinstance(current, dict):
++            return
++        dependencies, dependencies_valid = _validated_and_dependencies(
++            current, tasks
++        )
++        if not dependencies_valid:
++            return
++        for dep in dependencies:
++            if not accepted(tasks, dep, trusted_verifier=trusted_verifier) and dep not in visited:
+                 visited.add(dep)
+                 blockers(dep)
++        # An OR group is a satisfied prerequisite when any alternative is
++        # accepted. Malformed groups are not traversed or treated as gates.
++        groups, groups_valid = _validated_or_groups(current, tasks)
++        if not groups_valid:
++            return
++        for group in groups:
++            if any(
++                accepted(tasks, dep, trusted_verifier=trusted_verifier)
++                for dep in group
++            ):
++                continue
++            for dep in group:
++                if dep not in visited:
++                    visited.add(dep)
++                    blockers(dep)
+     blockers(task_id)
+-    missing_direct = [d for d in task["depends_on"] if tasks[d]["status"] != "done"]
++    missing_direct = missing_dependencies(
++        task, tasks, trusted_verifier=trusted_verifier
++    )
+     return {
+         **task,
+-        "state": "DONE" if task["status"] == "done" else
++        "state": "DONE" if accepted(
++            tasks, task_id, trusted_verifier=trusted_verifier
++        ) else
+                  "HOLD" if task["status"] == "hold" else
+                  "CLAIMED" if task["status"] == "claimed" else
+                  "READY_CANDIDATE" if task["status"] == "todo" and not missing_direct else
+                  "BLOCKED",
+         "missing_direct": missing_direct,
+         "missing_transitive": sorted(visited),
++        "fresh_evidence_status": fresh_receipt_status(
++            tasks.get("16LF-01", {}).get("evidence"),
++            trusted_verifier=trusted_verifier,
++        ),
+         "effective_locks": sorted(effective_locks(task)),
+         "live_claim_check_required": True,
+     }
+ 
+ 
+-def waves(data: dict) -> list[list[dict]]:
++def waves(
++    data: dict,
++    *,
++    trusted_verifier: FreshEvidenceVerifier | None = None,
++) -> list[list[dict]]:
+     """Potential independent implementation waves, ignoring live locks and time.
++
++    Malformed dependency graphs are never projected into executable waves.
+     L and U actions are not performed by this script.
+     """
+-    pending = {t["id"]: t for t in data["tasks"] if t["status"] == "todo"}
+-    accepted = {t["id"] for t in data["tasks"] if t["status"] == "done"}
+-    result = []
++    raw_tasks = data.get("tasks", []) if isinstance(data, dict) else []
++    if not isinstance(raw_tasks, list):
++        return []
++    tasks = index(data)
++    if len(tasks) != len(raw_tasks):
++        return []
++
++    normalized: dict[str, tuple[list[str], list[list[str]]]] = {}
++    for task in raw_tasks:
++        if not isinstance(task, dict):
++            return []
++        task_id = task.get("id")
++        if not isinstance(task_id, str) or not task_id:
++            return []
++        dependencies, dependencies_valid = _validated_and_dependencies(
++            task, tasks
++        )
++        groups, groups_valid = _validated_or_groups(task, tasks)
++        locks = task.get("resource_locks")
++        if (
++            not dependencies_valid
++            or not groups_valid
++            or not isinstance(locks, list)
++            or not locks
++            or not all(isinstance(lock, str) and lock for lock in locks)
++        ):
++            return []
++        normalized[task_id] = (dependencies, groups)
++
++    pending = {
++        task["id"]: task for task in raw_tasks if task.get("status") == "todo"
++    }
++    # Only physically evidenced, accepted local branches may satisfy an OR.
++    # Forecasted future work is never evidence for a 16L2 / 16LF-01 gate.
++    externally_qualified = {
++        task_id for task_id in tasks
++        if accepted(tasks, task_id, trusted_verifier=trusted_verifier)
++    }
++    projected = set(externally_qualified)
++    result: list[list[dict]] = []
+     while pending:
+-        candidates = [t for t in pending.values() if all(d in accepted for d in t["depends_on"])]
++        candidates = [
++            task for task in pending.values()
++            if all(
++                dependency in projected
++                for dependency in normalized[task["id"]][0]
++            )
++            and all(
++                any(dependency in externally_qualified for dependency in group)
++                for group in normalized[task["id"]][1]
++            )
++            and task["id"] != "16L2"
++        ]
+         if not candidates:
+             break  # blocked/claimed/stale snapshot, never assume accepted
+         # Each wave is a resource-conflict-free possible simultaneous set.
+@@ -182,11 +837,10 @@ def waves(data: dict) -> list[list[dict]]:
+                 held.update(locks)
+         result.append(chosen)
+         for task in chosen:
+-            accepted.add(task["id"])
++            projected.add(task["id"])
+             del pending[task["id"]]
+     return result
+ 
+-
+ def main() -> int:
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("command", choices=["check", "ready", "task", "waves"])
+@@ -200,7 +854,7 @@ def main() -> int:
+             print("ERROR " + error, file=sys.stderr)
+         return 1
+     if args.command == "check":
+-        print(f"VALID: {len(data['tasks'])} nodes; 72 cloud, 28 local, 15 human; no dangling/cyclic edges")
++        print(f"VALID: {len(data['tasks'])} nodes; validated AND/OR gates and no dependency cycles")
+         return 0
+     if args.command == "ready":
+         ready, blocked = readiness(data)
+@@ -242,6 +896,7 @@ def main() -> int:
+         print("Direct prerequisites:", ", ".join(payload["depends_on"]) or "NONE")
+         print("Missing direct:", ", ".join(payload["missing_direct"]) or "NONE")
+         print("Transitive blockers:", ", ".join(payload["missing_transitive"]) or "NONE")
++        print("16LF-01 evidence verification:", payload["fresh_evidence_status"])
+         print("Effective locks:", ", ".join(payload["effective_locks"]))
+         print(NOTICE)
+     else:
+diff --git a/tools/test_browser_feasibility.py b/tools/test_browser_feasibility.py
+index 69a1d3a2..885df3cb 100644
+--- a/tools/test_browser_feasibility.py
++++ b/tools/test_browser_feasibility.py
+@@ -151,7 +151,7 @@ def test_completed_preflight_retains_distinct_native_bridge_gate(self):
+         self.assertIn("PERF-00", ready_ids)  # P0 methodology first
+         self.assertEqual(tasks["7E"]["depends_on"], ["7D"])
+         self.assertEqual(tasks["7D"]["depends_on"], ["7C", "7L1"])
+-        self.assertEqual(tasks["16L3"]["status"], "todo")
++        self.assertEqual(tasks["16L3"]["status"], "blocked")
+         # Scoped 7P-L1 physical feasibility and 7L1 integrated Rust/MV3
+         # acceptance are separately proven; full product release is pending.
+ 
+diff --git a/tools/test_release_16f.py b/tools/test_release_16f.py
+index 777216c6..bfa82b9d 100644
+--- a/tools/test_release_16f.py
++++ b/tools/test_release_16f.py
+@@ -15,8 +15,15 @@ def fixture():
+         {"id": "16E", "depends_on": [], "kind": "C"},
+         {"id": "16F", "depends_on": ["16D", "16E"], "kind": "C"},
+         {"id": "16L1", "depends_on": ["16E"], "kind": "L"},
+-        {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L"},
+-        {"id": "16L3", "depends_on": ["16F", "16L1", "16L2"], "kind": "L"},
++        {"id": "16U1", "depends_on": ["16E"], "kind": "U",
++         "migration_consent": "declined", "owner_decision": "fresh_start"},
++        {"id": "16L2", "depends_on": ["16U1", "16E"], "kind": "L",
++         "status": "blocked", "private_migration_status": "NOT_RUN / NOT_AUTHORIZED"},
++        {"id": "16FS-01", "depends_on": ["16U1", "16L1", "16F"], "kind": "C"},
++        {"id": "16LF-01", "depends_on": ["16FS-01", "16U1", "16L1"], "kind": "L",
++         "status": "blocked", "evidence": None},
++        {"id": "16L3", "depends_on": ["16F", "16L1"], "kind": "L",
++         "any_of": [["16L2", "16LF-01"]]},
+     ]}).encode("utf-8")
+     return sources
+ 
+@@ -27,10 +34,40 @@ def make(sources=None, ancestors=None, expected=SHA, head=SHA):
+ class SourceBoundReportTests(unittest.TestCase):
+     def test_valid_report_is_strictly_cloud_only(self):
+         r = make()
++        self.assertEqual(r["schema"], f.SCHEMA)
++        self.assertEqual(f.SCHEMA, "cosos.release.cloud-provenance.v2")
+         self.assertEqual(r["source_sha"], SHA)
+         self.assertFalse(r["product_release_ready"])
+         self.assertEqual(set(r["merged_predecessors"]), set(f.MERGED))
+         self.assertTrue(all(g == "NOT_RUN" for g in r["native_owner_gates"].values()))
++        self.assertEqual(set(r["native_owner_gates"]), set(f.GATES))
++        self.assertEqual(
++            r["security_review"]["review_policy"],
++            "REQUIRES_OWNER_ATTESTED_GPT6_TECHNICAL_REVIEW_RECEIPT_NOT_GITHUB_APPROVAL",
++        )
++        self.assertEqual(
++            r["native_owner_gates"]["16LF-01_owner_local_fresh_start"], "NOT_RUN"
++        )
++        dag_contract_sources = {
++            "tools/task_board.py",
++            "tools/test_task_board.py",
++            ".github/workflows/task-graph.yml",
++            "docs/PARALLEL-EXECUTION-BOARD.md",
++            "docs/implementation-plan/2026-10-18-cloud-first-units.md",
++            "docs/implementation-summary/2026-10-29-16fs01-freshstart-contract.md",
++        }
++        self.assertTrue(dag_contract_sources.issubset(set(f.TRACKED)))
++        self.assertTrue(dag_contract_sources.issubset(set(r["tracked_contracts"])))
++        self.assertEqual(set(f.GATES), {
++            "16L1_native_installer",
++            "16U1_owner_consent",
++            "16L2_owner_approved_copy_migration",
++            "16LF-01_owner_local_fresh_start",
++            "16L3_native_full_release_performance",
++            "16U2_owner_release_decision",
++            "PERF-05_native_product_comparison",
++            "PERF-06_product_performance_budget",
++        })
+         self.assertEqual(r["tracked_contracts"]["LICENSE"]["sha256"],
+                          hashlib.sha256(b"LICENSE:synthetic").hexdigest())
+         self.assertTrue(f.validate_receipt(json.loads(json.dumps(r)), r))
+@@ -66,7 +103,13 @@ def test_malformed_and_missing_sources_denied(self):
+     def test_dependency_or_kind_drift_denied(self):
+         for task, key, value in [
+             ("16F", "depends_on", ["16D"]), ("16L3", "depends_on", ["16F"]),
+-            ("16F", "kind", "L"), ("16L3", "kind", "C")
++            ("16F", "kind", "L"), ("16L3", "kind", "C"),
++            ("16L3", "any_of", []), ("16L3", "any_of", [["16L2", "16L1"]]),
++            ("16LF-01", "depends_on", ["16U1"]), ("16FS-01", "kind", "L"),
++            ("16U1", "migration_consent", "granted"),
++            ("16U1", "owner_decision", "approved_private_copy"),
++            ("16L2", "status", "done"),
++            ("16L2", "private_migration_status", "DONE")
+         ]:
+             sources = fixture()
+             registry = json.loads(sources["docs/task-registry.json"])
+@@ -81,7 +124,8 @@ def test_forged_product_release_native_pass_or_review_denied(self):
+             lambda r: r.update(product_release_ready=True),
+             lambda r: r["native_owner_gates"].update({"16L1_native_installer": "PASS"}),
+             lambda r: r["native_owner_gates"].pop("16U1_owner_consent"),
+-            lambda r: r["security_review"].update({"independent_review": "PASS"}),
++            lambda r: r["native_owner_gates"].update({"16LF-01_owner_local_fresh_start": "PASS"}),
++            lambda r: r["security_review"].update({"review_policy": "PASS"}),
+             lambda r: r["merged_predecessors"]["16E"].update({"merged_commit_sha": "0" * 40}),
+             lambda r: r["tracked_contracts"]["LICENSE"].update({"sha256": "0" * 64}),
+             lambda r: r.update(source_sha="b" * 40),
+@@ -92,6 +136,15 @@ def test_forged_product_release_native_pass_or_review_denied(self):
+             with self.assertRaises(f.Refused):
+                 f.validate_receipt(altered, expected)
+ 
++    def test_16lf_gate_must_remain_blocked_and_not_run_in_source_registry(self):
++        for field, value in [("status", "done"), ("evidence", {"independent_review_verdict": "PASS"})]:
++            sources = fixture()
++            registry = json.loads(sources["docs/task-registry.json"])
++            next(t for t in registry["tasks"] if t["id"] == "16LF-01")[field] = value
++            sources["docs/task-registry.json"] = json.dumps(registry).encode()
++            with self.subTest(field=field), self.assertRaises(f.Refused):
++                make(sources=sources)
++
+     def test_bad_registry_and_oversize_file_denied(self):
+         src = fixture()
+         src["docs/task-registry.json"] = b"not-json"
+diff --git a/tools/test_task_board.py b/tools/test_task_board.py
+index 43aeb403..939b40c3 100644
+--- a/tools/test_task_board.py
++++ b/tools/test_task_board.py
+@@ -37,7 +37,7 @@ def test_markdown_board_matches_machine_graph_and_candidate_status(self):
+             desired = "DONE" if task["status"] == "done" else ("HOLD" if task["status"] == "hold" else ("CLAIMED" if task["status"] == "claimed" else (
+                 "**READY · PARALLEL**" if not any(
+                     self.tasks[dep]["status"] != "done" for dep in task["depends_on"]
+-                ) and task["status"] == "todo" else "BLOCKED"
++                ) and task["status"] == "todo" and not task.get("any_of") else "BLOCKED"
+             )))
+             self.assertEqual(cols[5], desired, task_id)
+ 
+@@ -52,8 +52,8 @@ def test_registry_is_valid_and_acyclic(self):
+ 
+     def test_all_work_units_preserved(self):
+         kinds = {k: sum(t["kind"] == k for t in self.data["tasks"]) for k in "CLU"}
+-        self.assertEqual(kinds, {"C": 79, "L": 30, "U": 15})
+-        self.assertEqual(len(self.tasks), 124)
++        self.assertEqual(kinds, {"C": 80, "L": 31, "U": 15})
++        self.assertEqual(len(self.tasks), 126)
+ 
+     def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(self):
+         ready, _ = board.readiness(self.data)
+@@ -113,7 +113,7 @@ def test_completed_native_feasibility_unblocks_7l1_without_waiving_future_gates(
+         self.assertNotIn("8U1", ready_ids)
+         self.assertNotIn("15B", ready_ids)
+         self.assertEqual(board.explain(self.data, "15B")["state"], "DONE")
+-        self.assertEqual(self.tasks["16L3"]["status"], "todo")
++        self.assertEqual(self.tasks["16L3"]["status"], "blocked")
+         # Reopening architecture must also reopen downstream browser probe;
+         # the local gate can never be offered before both are accepted.
+         hypothetical = copy.deepcopy(self.data)
+@@ -175,6 +175,10 @@ def test_waves_do_not_skip_local_or_user_gates(self):
+         for task in future["tasks"]:
+             if task["id"] == "CL-L6" or task["phase"] in {str(n) for n in range(7, 17)}:
+                 task["status"] = "todo"
++        # The private-migration alternative stays blocked until a dedicated
++        # trusted verifier is implemented; the future forecast uses 16LF-01.
++        future_tasks = board.index(future)
++        future_tasks["16L2"]["status"] = "blocked"
+         self.assertEqual(board.validate(future), [])
+         waves = board.waves(future)
+         flat = [t["id"] for wave in waves for t in wave]
+@@ -195,7 +199,7 @@ def test_blocked_native_gate_never_enters_forecast(self):
+         self.assertTrue({"8L1", "8U1", "9A"}.isdisjoint(forecast))
+         self.assertNotIn("15B", forecast)  # 15B cloud scope accepted on merged PR #77
+         self.assertIn("PERF-00", forecast)  # 15G cloud scope is now accepted
+-        self.assertIn("16A", forecast)  # 16A independent release track remains unclaimed
++        self.assertNotIn("16A", forecast)  # 16A source/Notion acceptance is merged
+ 
+     def test_native_8l1_acceptance_requires_both_physical_round_receipts(self):
+         root = Path(__file__).resolve().parents[1] / "audit/2026-10-26/8l1-native-repair"
+@@ -233,6 +237,11 @@ def test_dangling_dependency_is_rejected(self):
+         next(t for t in data["tasks"] if t["id"] == "CL-05A")["depends_on"].append("NEVER-EXISTED")
+         self.assertTrue(any("dangling" in e for e in board.validate(data)))
+ 
++    def test_dangling_or_dependency_is_rejected(self):
++        data = copy.deepcopy(self.data)
++        board.index(data)["16L3"]["any_of"] = [["16L2", "UNKNOWN-OR-GATE"]]
++        self.assertTrue(any("dangling OR" in e for e in board.validate(data)))
++
+     def test_cycle_is_rejected(self):
+         data = copy.deepcopy(self.data)
+         next(t for t in data["tasks"] if t["id"] == "CL-09A")["depends_on"].append("CL-09C")
+@@ -257,5 +266,625 @@ def test_completed_units_are_not_reoffered_as_ready(self):
+         self.assertTrue({"CL-04A", "CL-04B", "CL-04C", "CL-L1", "CL-05A", "CL-06A", "CL-07A", "CL-08A", "CL-09A", "CL-05B", "CL-06B", "CL-09B", "CL-09C", "CL-07B", "CL-08B"}.isdisjoint(offered))
+ 
+ 
++
++    def _fresh_scenario(self):
++        data = copy.deepcopy(self.data)
++        tasks = board.index(data)
++        # Well-formed but intentionally fabricated fixture; never authoritative.
++        for key in ("16E", "16F", "16PKG-01", "16L1", "16U1", "16FS-01"):
++            tasks[key]["status"] = "done"
++        tasks["16L3"]["status"] = "todo"
++        tasks["16LF-01"]["status"] = "done"
++        sha = "a" * 40
++        diff = "d" * 64
++        tasks["16LF-01"]["evidence"] = {
++            "schema_version": board.FRESH_RECEIPT_SCHEMA_VERSION,
++            "kind": "owner-local-synthetic-fresh-start",
++            "host": "owner-local-windows",
++            "profile_scope": "new-disposable-empty",
++            "migration": "none",
++            "review_mode": board.FRESH_REVIEW_MODE,
++            "owner_login": "KaisAbiyyi",
++            "source_sha": sha,
++            "reviewed_source_sha": sha,
++            "diff_sha256": diff,
++            "reviewed_diff_sha256": diff,
++            "artifact_id": 123456789,
++            "artifact_sha256": "b" * 64,
++            "artifact_source_sha": "e" * 40,
++            "artifact_provenance_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/129#issuecomment-1",
++            "artifact_provenance_sha256": "f" * 64,
++            "receipt_sha256": "c" * 64,
++            "local_session_id": "synthetic-test-fixture-only",
++            "receipt_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/140#issuecomment-100",
++            "review_report_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/pull/138#issuecomment-101",
++            "review_report_sha256": "1" * 64,
++            "owner_attestation_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-102",
++            "owner_attestation_sha256": "2" * 64,
++            "checks": {key: "PASS" for key in board.FRESH_CHECKS},
++        }
++        return data, tasks
++
++    def _trusted_test_verifier(self, **overrides):
++        # Test-only double for the explicit typed boundary. It cannot be
++        # imported by the production CLI and authenticates no real evidence.
++        def verify(receipt):
++            self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
++            report_sha = "1" * 64
++            facts = {name: True for name in board.FRESH_VERIFICATION_FIELDS}
++            facts.update({
++                "verified_review_mode": receipt["review_mode"],
++                "verified_owner_login": receipt["owner_login"],
++                "verified_receipt_record_identity": "github:issue-comment:100",
++                "verified_review_report_record_identity": "github:issue-comment:101",
++                "verified_owner_attestation_record_identity": "github:issue-comment:102",
++                "verified_owner_attestation_author_login": receipt["owner_login"],
++                "verified_receipt_url": receipt["receipt_url"],
++                "verified_receipt_sha256": receipt["receipt_sha256"],
++                "verified_review_report_url": receipt["review_report_url"],
++                "verified_review_report_sha256": report_sha,
++                "verified_review_report_verdict": "PASS",
++                "verified_review_report_source_sha": receipt["source_sha"],
++                "verified_review_report_diff_sha256": receipt["diff_sha256"],
++                "verified_review_report_artifact_sha256": receipt["artifact_sha256"],
++                "verified_owner_attestation_url": receipt["owner_attestation_url"],
++                "verified_owner_attestation_sha256": "2" * 64,
++                "verified_owner_attested_review_report_sha256": report_sha,
++                "verified_owner_attested_source_sha": receipt["source_sha"],
++                "verified_source_sha": receipt["source_sha"],
++                "verified_reviewed_source_sha": receipt["reviewed_source_sha"],
++                "verified_diff_sha256": receipt["diff_sha256"],
++                "verified_reviewed_diff_sha256": receipt["reviewed_diff_sha256"],
++                "verified_artifact_id": receipt["artifact_id"],
++                "verified_artifact_sha256": receipt["artifact_sha256"],
++                "verified_artifact_source_sha": receipt["artifact_source_sha"],
++                "verified_artifact_provenance_url": receipt["artifact_provenance_url"],
++                "verified_artifact_provenance_sha256": receipt["artifact_provenance_sha256"],
++                "verified_fresh_start_checks": board.FRESH_CHECKS,
++            })
++            facts.update(overrides)
++            return board.FreshEvidenceVerification(**facts)
++
++        return verify
++
++    def test_well_formed_fabricated_receipt_is_only_structural(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
++        self.assertEqual(
++            board.fresh_receipt_status(receipt),
++            "PENDING_EXTERNAL_VERIFICATION",
++        )
++        self.assertFalse(board.accepted(tasks, "16LF-01"))
++        self.assertIn(
++            "one_of(16L2|16LF-01)",
++            board.missing_dependencies(tasks["16L3"], tasks),
++        )
++
++    def test_fresh_receipt_rejects_boolean_or_float_schema_version(self):
++        _, tasks = self._fresh_scenario()
++        good = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        for invalid in (True, 2.0):
++            broken = copy.deepcopy(good)
++            broken["schema_version"] = invalid
++            self.assertFalse(board.fresh_receipt_structurally_valid(broken))
++
++    def test_legacy_independent_review_contract_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        receipt["independent_review_verdict"] = "PASS"
++        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
++
++    def test_fabricated_github_review_url_cannot_establish_acceptance(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        self.assertIn("/pull/138#", receipt["review_report_url"])
++        self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
++        self.assertFalse(board.accepted(tasks, "16LF-01"))
++
++    def test_missing_trust_root_fails_closed(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        self.assertEqual(
++            board.fresh_receipt_status(receipt),
++            "PENDING_EXTERNAL_VERIFICATION",
++        )
++        self.assertFalse(board.accepted(tasks, "16LF-01"))
++
++    def test_missing_review_report_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        del receipt["review_report_url"]
++        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
++        verifier = self._trusted_test_verifier(review_report_exists=False)
++        self.assertFalse(board.accepted(tasks, "16LF-01", trusted_verifier=verifier))
++
++    def test_missing_owner_attestation_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        del receipt["owner_attestation_url"]
++        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
++        for overrides in (
++            {"owner_attestation_exists": False},
++            {"owner_attestation_valid": False},
++        ):
++            verifier = self._trusted_test_verifier(**overrides)
++            self.assertFalse(board.accepted(
++                tasks, "16LF-01", trusted_verifier=verifier
++            ))
++
++    def test_wrong_owner_identity_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        for overrides in (
++            {"owner_identity_verified": False},
++            {"verified_owner_login": "unauthorized-owner"},
++        ):
++            verifier = self._trusted_test_verifier(**overrides)
++            self.assertFalse(board.accepted(
++                tasks, "16LF-01", trusted_verifier=verifier
++            ))
++
++    def test_unsupported_review_mode_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        receipt["review_mode"] = "GITHUB_INDEPENDENT"
++        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
++        verifier = self._trusted_test_verifier(
++            review_mode_authorized=False,
++            verified_review_mode="GITHUB_INDEPENDENT",
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_different_reviewed_source_sha_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        receipt["reviewed_source_sha"] = "d" * 40
++        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
++        verifier = self._trusted_test_verifier(
++            reviewed_source_sha_matches=False,
++            verified_reviewed_source_sha="d" * 40,
++            verified_review_report_source_sha="d" * 40,
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_wrong_reviewed_diff_digest_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        receipt = copy.deepcopy(tasks["16LF-01"]["evidence"])
++        receipt["reviewed_diff_sha256"] = "e" * 64
++        self.assertFalse(board.fresh_receipt_structurally_valid(receipt))
++        verifier = self._trusted_test_verifier(
++            reviewed_diff_digest_matches=False,
++            verified_reviewed_diff_sha256="e" * 64,
++            verified_review_report_diff_sha256="e" * 64,
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_artifact_digest_mismatch_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        for overrides in (
++            {"receipt_review_artifact_digests_match": False},
++            {"verified_review_report_artifact_sha256": "e" * 64},
++        ):
++            verifier = self._trusted_test_verifier(**overrides)
++            self.assertFalse(board.accepted(
++                tasks, "16LF-01", trusted_verifier=verifier
++            ))
++
++    def test_missing_artifact_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        verifier = self._trusted_test_verifier(artifact_exists=False)
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_missing_provenance_or_source_binding_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        for field in ("artifact_provenance_verified", "artifact_source_binding_verified"):
++            with self.subTest(field=field):
++                verifier = self._trusted_test_verifier(**{field: False})
++                self.assertFalse(board.accepted(
++                    tasks, "16LF-01", trusted_verifier=verifier
++                ))
++
++    def test_self_reported_receipt_fields_never_establish_acceptance(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        for name in board.FRESH_VERIFICATION_FIELDS:
++            receipt[name] = True
++        self.assertTrue(board.fresh_receipt_structurally_valid(receipt))
++        self.assertEqual(
++            board.fresh_receipt_status(receipt),
++            "PENDING_EXTERNAL_VERIFICATION",
++        )
++        self.assertFalse(board.accepted(tasks, "16LF-01"))
++
++    def test_gpt6_owner_attested_mode_is_not_github_independent_review(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        self.assertEqual(receipt["review_mode"], "GPT6_OWNER_ATTESTED")
++        self.assertNotIn("reviewer_independent", board.FRESH_VERIFICATION_FIELDS)
++        self.assertNotIn("independent_review_verdict", receipt)
++
++    def test_every_trusted_verification_fact_is_mandatory(self):
++        _, tasks = self._fresh_scenario()
++        for field in board.FRESH_VERIFICATION_FIELDS:
++            with self.subTest(field=field):
++                verifier = self._trusted_test_verifier(**{field: False})
++                self.assertFalse(board.accepted(
++                    tasks, "16LF-01", trusted_verifier=verifier
++                ))
++
++    def test_trusted_verifier_must_bind_report_owner_attestation_and_artifact(self):
++        _, tasks = self._fresh_scenario()
++        wrong_url = "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/999#issuecomment-9"
++        for field, value in [
++            ("verified_review_report_url", wrong_url),
++            ("verified_review_report_sha256", "3" * 64),
++            ("verified_owner_attestation_sha256", "4" * 64),
++            ("verified_review_report_verdict", "FAIL"),
++            ("verified_review_report_source_sha", "d" * 40),
++            ("verified_review_report_diff_sha256", "e" * 64),
++            ("verified_review_report_artifact_sha256", "a" * 64),
++            ("verified_owner_attestation_url", wrong_url),
++            ("verified_owner_attested_review_report_sha256", "2" * 64),
++            ("verified_owner_attested_source_sha", "d" * 40),
++            ("verified_receipt_sha256", "f" * 64),
++            ("verified_reviewed_source_sha", "d" * 40),
++            ("verified_reviewed_diff_sha256", "e" * 64),
++            ("verified_artifact_id", 42),
++            ("verified_artifact_sha256", "e" * 64),
++            ("verified_artifact_source_sha", "d" * 40),
++            ("verified_artifact_provenance_url", wrong_url),
++            ("verified_artifact_provenance_sha256", "a" * 64),
++            ("verified_owner_login", "unauthorized-owner"),
++            ("verified_owner_attestation_author_login", "unauthorized-owner"),
++        ]:
++            with self.subTest(field=field):
++                verifier = self._trusted_test_verifier(**{field: value})
++                self.assertFalse(board.accepted(
++                    tasks, "16LF-01", trusted_verifier=verifier
++                ))
++
++    def test_trusted_verifier_errors_fail_closed(self):
++        _, tasks = self._fresh_scenario()
++
++        def broken_verifier(_receipt):
++            raise RuntimeError("external evidence service unavailable")
++
++        self.assertEqual(
++            board.fresh_receipt_status(
++                tasks["16LF-01"]["evidence"], trusted_verifier=broken_verifier
++            ),
++            "VERIFICATION_ERROR",
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=broken_verifier
++        ))
++
++    def test_untrusted_boolean_verifier_result_is_rejected(self):
++        _, tasks = self._fresh_scenario()
++        self.assertEqual(
++            board.fresh_receipt_status(
++                tasks["16LF-01"]["evidence"], trusted_verifier=lambda _receipt: True
++            ),
++            "REJECTED_EXTERNAL_VERIFICATION",
++        )
++
++    def test_trusted_verifier_path_accepts_complete_gpt6_owner_attested_evidence(self):
++        data, tasks = self._fresh_scenario()
++        verifier = self._trusted_test_verifier()
++        self.assertEqual(
++            board.fresh_receipt_status(
++                tasks["16LF-01"]["evidence"], trusted_verifier=verifier
++            ),
++            "ACCEPTED",
++        )
++        self.assertTrue(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++        self.assertEqual(
++            board.missing_dependencies(
++                tasks["16L3"], tasks, trusted_verifier=verifier
++            ),
++            [],
++        )
++        self.assertEqual(board.validate(data, trusted_verifier=verifier), [])
++        eligible = {t["id"] for wave in board.waves(
++            data, trusted_verifier=verifier
++        ) for t in wave}
++        self.assertIn("16L3", eligible)
++
++    def test_explain_respects_satisfied_or_dependency_group(self):
++        data, tasks = self._fresh_scenario()
++
++        unverified = board.explain(data, "16L3")
++        self.assertIn("16L2", unverified["missing_transitive"])
++        self.assertIn("16LF-01", unverified["missing_transitive"])
++
++        # This test-only verifier exercises the accepted alternative path. It
++        # does not authenticate a real GitHub review, artifact or Windows run.
++        verified = board.explain(
++            data, "16L3", trusted_verifier=self._trusted_test_verifier()
++        )
++        self.assertEqual(verified["state"], "READY_CANDIDATE")
++        self.assertEqual(verified["missing_direct"], [])
++        self.assertNotIn("16L2", verified["missing_transitive"])
++        self.assertNotIn("16LF-01", verified["missing_transitive"])
++
++    def test_canonical_registry_remains_blocked_without_trusted_acceptance(self):
++        self.assertEqual(self.tasks["16LF-01"]["status"], "blocked")
++        self.assertFalse(board.accepted(self.tasks, "16LF-01"))
++        self.assertEqual(board.explain(self.data, "16L3")["state"], "BLOCKED")
++        self.assertEqual(
++            board.explain(self.data, "16L3")["fresh_evidence_status"],
++            "MISSING",
++        )
++        self.assertIn(
++            "one_of(16L2|16LF-01)",
++            board.missing_dependencies(self.tasks["16L3"], self.tasks),
++        )
++        eligible = {t["id"] for wave in board.waves(self.data) for t in wave}
++        self.assertNotIn("16L3", eligible)
++
++    def test_declined_owner_decision_and_migration_status_cannot_drift(self):
++        data, tasks = self._fresh_scenario()
++        tasks["16U1"]["owner_decision"] = "approved_private_copy"
++        self.assertTrue(any("fresh_start owner decision" in e for e in board.validate(data)))
++
++        tasks["16U1"]["owner_decision"] = "fresh_start"
++        tasks["16L2"]["private_migration_status"] = "DONE"
++        self.assertTrue(any("NOT_RUN / NOT_AUTHORIZED" in e for e in board.validate(data)))
++
++    def test_owner_declined_never_grants_private_profile_access_or_readiness(self):
++        data, tasks = self._fresh_scenario()
++        self.assertEqual(tasks["16U1"]["migration_consent"], "declined")
++        tasks["16L2"]["status"] = "done"
++        tasks["16L2"]["private_migration_receipt"] = {
++            "scope": "approved-copy-only", "physical_windows": True,
++            "independent_review_verdict": "PASS",
++        }
++        self.assertFalse(board.accepted(tasks, "16L2"))
++        self.assertTrue(any("16L2" in e for e in board.validate(data)))
++
++        # A task-state edit must not turn the declined private migration into
++        # a ready/forecastable local operation.
++        tasks["16L2"]["status"] = "todo"
++        self.assertIn(
++            "owner_private_migration_consent",
++            board.missing_dependencies(tasks["16L2"], tasks),
++        )
++        ready, blocked = board.readiness(data)
++        self.assertNotIn("16L2", {task["id"] for task in ready})
++        self.assertIn("16L2", {task["id"] for task in blocked})
++        eligible = {
++            task["id"] for wave in board.waves(data) for task in wave
++        }
++        self.assertNotIn("16L2", eligible)
++        self.assertTrue(any("16L2:" in e for e in board.validate(data)))
++
++    def test_self_reported_private_migration_receipt_never_establishes_acceptance(self):
++        data, tasks = self._fresh_scenario()
++        tasks["16U1"]["migration_consent"] = "granted"
++        tasks["16U1"]["owner_decision"] = "approved_private_copy"
++        tasks["16U1"]["consent_receipt"] = {
++            "explicit_owner_approval": True,
++            "scope": "approved-copy-only",
++            "approval_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
++        }
++        tasks["16L2"]["status"] = "done"
++        tasks["16L2"]["private_migration_receipt"] = {
++            "scope": "approved-copy-only",
++            "physical_windows": True,
++            "independent_review_verdict": "PASS",
++        }
++
++        self.assertTrue(board.private_migration_authorized(tasks))
++        self.assertFalse(board.accepted(tasks, "16L2"))
++        self.assertTrue(any("trusted private-migration verifier" in e for e in board.validate(data)))
++
++    def test_private_migration_remains_blocked_until_trusted_verifier_exists(self):
++        data, tasks = self._fresh_scenario()
++        tasks["16U1"]["migration_consent"] = "granted"
++        tasks["16U1"]["owner_decision"] = "approved_private_copy"
++        tasks["16U1"]["consent_receipt"] = {
++            "explicit_owner_approval": True,
++            "scope": "approved-copy-only",
++            "approval_url": "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids/issues/137#issuecomment-1",
++        }
++        tasks["16L2"]["status"] = "todo"
++
++        tasks["16U1"]["consent_receipt"]["scope"] = "all-private-profiles"
++        self.assertFalse(board.private_migration_authorized(tasks))
++        self.assertIn(
++            "owner_private_migration_consent",
++            board.missing_dependencies(tasks["16L2"], tasks),
++        )
++        tasks["16U1"]["consent_receipt"]["scope"] = "approved-copy-only"
++        self.assertTrue(board.private_migration_authorized(tasks))
++        self.assertIn(
++            "trusted_private_migration_verifier",
++            board.missing_dependencies(tasks["16L2"], tasks),
++        )
++        ready, blocked = board.readiness(data)
++        self.assertNotIn("16L2", {task["id"] for task in ready})
++        self.assertIn("16L2", {task["id"] for task in blocked})
++        eligible = {
++            task["id"] for wave in board.waves(data) for task in wave
++        }
++        self.assertNotIn("16L2", eligible)
++        self.assertTrue(any("trusted private-migration verifier" in e for e in board.validate(data)))
++
++    def test_wave_forecast_requires_trusted_accepted_or_branch(self):
++        data, tasks = self._fresh_scenario()
++        verifier = self._trusted_test_verifier()
++        eligible = {t["id"] for wave in board.waves(
++            data, trusted_verifier=verifier
++        ) for t in wave}
++        self.assertIn("16L3", eligible)
++        untrusted = self._trusted_test_verifier(evidence_complete=False)
++        blocked = {t["id"] for wave in board.waves(
++            data, trusted_verifier=untrusted
++        ) for t in wave}
++        self.assertNotIn("16L3", blocked)
++
++    def test_missing_freshstart_evidence_and_dependency_bypass_rejected(self):
++        data, tasks = self._fresh_scenario()
++        tasks["16LF-01"]["evidence"] = None
++        self.assertIn("one_of(16L2|16LF-01)", board.missing_dependencies(tasks["16L3"], tasks))
++        self.assertTrue(any("16LF-01" in e for e in board.validate(data)))
++        tasks["16L3"]["any_of"] = []
++        self.assertTrue(any("16L3:" in e for e in board.validate(data)))
++        tasks["16L3"]["any_of"] = [["16LF-01", "16L2"]]
++        self.assertTrue(any("16L3:" in e for e in board.validate(data)))
++
++    def test_incomplete_and_forged_freshstart_proofs_fail_closed(self):
++        _, tasks = self._fresh_scenario()
++        good = tasks["16LF-01"]["evidence"]
++        for field, value in [
++            ("source_sha", "fake"),
++            ("reviewed_source_sha", "d" * 40),
++            ("artifact_sha256", "broken"),
++            ("review_mode", "GITHUB_INDEPENDENT"),
++            ("review_report_url", "https://evil.invalid/review"),
++            ("host", "github-hosted-windows"),
++            ("migration", "private-copy"),
++        ]:
++            broken = copy.deepcopy(good)
++            broken[field] = value
++            self.assertFalse(board.fresh_receipt_structurally_valid(broken), field)
++        broken = copy.deepcopy(good)
++        broken["checks"]["rollback"] = "FAIL"
++        self.assertFalse(board.fresh_receipt_structurally_valid(broken))
++        broken = copy.deepcopy(good)
++        del broken["checks"]["owned_cleanup"]
++        self.assertFalse(board.fresh_receipt_structurally_valid(broken))
++
++    def test_release_gate_preserves_16f_16l1_16u2_and_physical_gate(self):
++        _, tasks = self._fresh_scenario()
++        for prereq in ("16F", "16L1"):
++            tasks[prereq]["status"] = "todo"
++            self.assertIn(prereq, board.missing_dependencies(tasks["16L3"], tasks))
++            tasks[prereq]["status"] = "done"
++        tasks["16LF-01"]["status"] = "blocked"
++        self.assertIn("one_of(16L2|16LF-01)", board.missing_dependencies(tasks["16L3"], tasks))
++        self.assertFalse(board.accepted(tasks, "16LF-01"))
++        self.assertEqual(tasks["16U2"]["depends_on"], ["16L3"])
++        self.assertEqual(tasks["16L3"]["status"], "todo")
++        self.assertEqual(board.explain(self.data, "16U2")["state"], "BLOCKED")
++
++    def test_freshstart_or_edge_cycles_are_rejected(self):
++        data = copy.deepcopy(self.data)
++        board.index(data)["16LF-01"]["depends_on"].append("16L3")
++        self.assertTrue(any("cycle" in e.lower() for e in board.validate(data)))
++
++
++    def test_review_report_and_owner_attestation_must_be_distinct_records(self):
++        _, tasks = self._fresh_scenario()
++        verifier = self._trusted_test_verifier(
++            verified_owner_attestation_record_identity="github:issue-comment:101"
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_receipt_and_owner_attestation_must_be_distinct_records(self):
++        _, tasks = self._fresh_scenario()
++        verifier = self._trusted_test_verifier(
++            verified_owner_attestation_record_identity="github:issue-comment:100"
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_different_url_forms_cannot_disguise_the_same_provider_record(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        base = "https://github.com/KaisAbiyyi/chat-on-steroids-on-steroids"
++        receipt["review_report_url"] = f"{base}/pull/138#issuecomment-4242"
++        receipt["owner_attestation_url"] = f"{base}/issues/137#issuecomment-4242"
++        self.assertNotEqual(
++            receipt["review_report_url"], receipt["owner_attestation_url"]
++        )
++        verifier = self._trusted_test_verifier(
++            verified_review_report_record_identity="github:issue-comment:4242",
++            verified_owner_attestation_record_identity="github:issue-comment:4242",
++        )
++        self.assertFalse(board.accepted(
++            tasks, "16LF-01", trusted_verifier=verifier
++        ))
++
++    def test_owner_attestation_author_must_be_verified_and_match_authorized_owner(self):
++        _, tasks = self._fresh_scenario()
++        for overrides in (
++            {"verified_owner_attestation_author_login": None},
++            {"verified_owner_attestation_author_login": ""},
++            {"owner_attestation_author_identity_verified": False},
++        ):
++            with self.subTest(overrides=overrides):
++                verifier = self._trusted_test_verifier(**overrides)
++                self.assertFalse(board.accepted(
++                    tasks, "16LF-01", trusted_verifier=verifier
++                ))
++
++    def test_valid_owner_attestation_uses_three_distinct_records_and_authorized_author(self):
++        _, tasks = self._fresh_scenario()
++        receipt = tasks["16LF-01"]["evidence"]
++        verification = self._trusted_test_verifier()(receipt)
++        identities = (
++            verification.verified_receipt_record_identity,
++            verification.verified_review_report_record_identity,
++            verification.verified_owner_attestation_record_identity,
++        )
++        self.assertEqual(len(set(identities)), 3)
++        self.assertEqual(
++            verification.verified_owner_attestation_author_login,
++            verification.verified_owner_login,
++        )
++        self.assertTrue(verification.authoritative_for(receipt))
++
++    def test_malformed_or_dependency_structures_are_exception_safe_and_never_ready(self):
++        malformed_groups = (
++            ("non-list any_of null", None),
++            ("non-list any_of scalar", "16L2"),
++            ("non-list OR group", ["16L2", "16LF-01"]),
++            ("null OR group", [None]),
++            ("tuple OR group", [("16L2", "16LF-01")]),
++            ("null dependency member", [[None, "16LF-01"]]),
++            ("non-iterable dependency member", [[42, "16LF-01"]]),
++            ("unhashable dependency member", [[["16L2"], "16LF-01"]]),
++            ("mapping dependency member", [[{"id": "16L2"}, "16LF-01"]]),
++            ("malformed nested structure", [[[["16L2"]], "16LF-01"]]),
++            ("duplicate dependencies", [["16L2", "16L2"]]),
++            ("unknown dependency", [["UNKNOWN-OR-GATE", "16LF-01"]]),
++        )
++        for label, malformed in malformed_groups:
++            with self.subTest(case=label):
++                data = copy.deepcopy(self.data)
++                tasks = board.index(data)
++                tasks["16L3"]["any_of"] = malformed
++
++                errors = board.validate(data)
++                self.assertTrue(errors, label)
++
++                ready, blocked = board.readiness(data)
++                ready_ids = {task["id"] for task in ready}
++                blocked_ids = {task["id"] for task in blocked}
++                self.assertNotIn("16L3", ready_ids, label)
++                self.assertIn("16L3", blocked_ids, label)
++                self.assertEqual(board.waves(data), [], label)
++
++    def test_cycle_through_a_valid_or_dependency_is_rejected(self):
++        data = copy.deepcopy(self.data)
++        tasks = board.index(data)
++        tasks["16LF-01"]["depends_on"].append("16L3")
++        errors = board.validate(data)
++        self.assertTrue(any("dependency cycle" in error.lower() for error in errors))
++
+ if __name__ == "__main__":
+     unittest.main()
